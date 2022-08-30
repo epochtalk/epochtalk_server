@@ -7,12 +7,11 @@ output = json_file
 |> File.read!()
 |> Jason.decode! # convert from json
 |> Enum.reduce([], fn { _role, permissions }, all_permissions ->
-  perms = permissions
+  all_permissions ++ (permissions
   |> Iteraptor.to_flatmap
   |> Enum.reduce([], fn { permission, _value }, role_permissions ->
     role_permissions ++ [permission]
-  end)
-  all_permissions ++ perms
+  end))
 end)
 |> Enum.uniq
 |> Enum.sort

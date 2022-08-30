@@ -59,10 +59,9 @@ defmodule EpochtalkServer.MixProject do
      "ecto.reset": ["ecto.drop", "ecto.setup"],
      "db.migrate": ["ecto.migrate", "ecto.dump"],
      "db.rollback": ["ecto.rollback", "ecto.dump"],
-     "seed.all": ["seed.permissions", "seed.roles", "seed.prs", "seed.rp"],
+     "seed.all": ["seed.permissions", "seed.roles", "seed.rp"],
      "seed.permissions": ["run priv/repo/seed_permissions.exs"],
      "seed.roles": ["run priv/repo/seed_roles.exs"],
-     "seed.prs": ["run priv/repo/seed_priority_restrictions.exs"],
      "seed.rp": ["run priv/repo/seed_roles_permissions.exs"],
      test: ["ecto.create --quiet", "ecto.migrate", "test"]
     ]

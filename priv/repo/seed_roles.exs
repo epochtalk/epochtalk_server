@@ -81,7 +81,7 @@ roles = [
     lookup: "banned",
     description: "Read only access with content creation disabled",
     priority: 7,
-    # priority_restrictions: [0, 1, 2, 3],
+    priority_restrictions: [0, 1, 2, 3],
     permissions: %{},
     created_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second),
     updated_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)

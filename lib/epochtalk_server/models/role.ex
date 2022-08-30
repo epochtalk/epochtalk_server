@@ -30,12 +30,6 @@ defmodule EpochtalkServer.Models.Role do
   def insert(%Role{} = role), do: Repo.insert(role)
   def insert([%{}|_] = roles), do: Repo.insert_all(Role, roles)
 
-  def set_priority_restrictions_by_lookup({lookup, priority_restrictions}) do
-    # only insert priority restrictions if they have not been set already
-    from(r in Role, where: r.lookup == ^lookup and is_nil(r.priority_restrictions))
-    |> Repo.update_all(set: [priority_restrictions: priority_restrictions])
-  end
-
   def set_permissions(id, permissions) do
     Role
     |> Repo.get(id)

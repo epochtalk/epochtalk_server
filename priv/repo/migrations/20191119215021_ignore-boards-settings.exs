@@ -1,4 +1,4 @@
-defmodule :"Elixir.Epoch.Repo.Migrations.Ignore-boards-settings" do
+defmodule :"Elixir.EpochtalkServer.Repo.Migrations.Ignore-boards-settings" do
   use Ecto.Migration
   @schema_prefix "users"
 

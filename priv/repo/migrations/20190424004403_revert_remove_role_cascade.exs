@@ -1,4 +1,4 @@
-defmodule Epoch.Repo.Migrations.RevertRemoveRoleCascade do
+defmodule EpochtalkServer.Repo.Migrations.RevertRemoveRoleCascade do
   use Ecto.Migration
 
   def up do

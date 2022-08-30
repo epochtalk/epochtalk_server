@@ -1,4 +1,4 @@
-defmodule Epoch.Repo.Migrations.CreateRolesPermissions do
+defmodule EpochtalkServer.Repo.Migrations.CreateRolesPermissions do
   use Ecto.Migration
 
   def change do

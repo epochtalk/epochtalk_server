@@ -1,4 +1,4 @@
-defmodule Epoch.Repo.Migrations.UserTimezoneOffset do
+defmodule EpochtalkServer.Repo.Migrations.UserTimezoneOffset do
   use Ecto.Migration
   @schema_prefix "users"
 

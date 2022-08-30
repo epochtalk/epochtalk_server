@@ -1,4 +1,4 @@
-defmodule Epoch.Repo.Migrations.Categories do
+defmodule EpochtalkServer.Repo.Migrations.Categories do
   use Ecto.Migration
 
   def change do

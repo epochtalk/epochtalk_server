@@ -1,4 +1,4 @@
-defmodule Epoch.Repo.Migrations.AddPrivateMessageSubject do
+defmodule EpochtalkServer.Repo.Migrations.AddPrivateMessageSubject do
   use Ecto.Migration
 
   def change do

@@ -1,4 +1,4 @@
-defmodule Epoch.Repo.Migrations.MessagesSchema do
+defmodule EpochtalkServer.Repo.Migrations.MessagesSchema do
   use Ecto.Migration
 
   def up do

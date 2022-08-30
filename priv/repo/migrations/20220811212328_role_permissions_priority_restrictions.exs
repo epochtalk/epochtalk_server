@@ -1,4 +1,4 @@
-defmodule Epoch.Repo.Migrations.RolePermissionsPriorityRestrictions do
+defmodule EpochtalkServer.Repo.Migrations.RolePermissionsPriorityRestrictions do
   use Ecto.Migration
 
   def change do

@@ -1,4 +1,4 @@
-defmodule Epoch.Repo.Migrations.PostMetadata do
+defmodule EpochtalkServer.Repo.Migrations.PostMetadata do
   use Ecto.Migration
 
   def change do

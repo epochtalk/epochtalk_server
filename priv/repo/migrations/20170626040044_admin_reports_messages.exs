@@ -1,4 +1,4 @@
-defmodule Epoch.Repo.Migrations.AdminReportsMessages do
+defmodule EpochtalkServer.Repo.Migrations.AdminReportsMessages do
   use Ecto.Migration
 
   @schema_prefix "administration"

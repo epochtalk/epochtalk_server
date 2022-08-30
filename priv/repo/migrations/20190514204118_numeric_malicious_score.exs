@@ -1,4 +1,4 @@
-defmodule Epoch.Repo.Migrations.NumericMaliciousScore do
+defmodule EpochtalkServer.Repo.Migrations.NumericMaliciousScore do
   use Ecto.Migration
 
   def change do

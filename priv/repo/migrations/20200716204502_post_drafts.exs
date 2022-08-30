@@ -1,4 +1,4 @@
-defmodule Epoch.Repo.Migrations.PostDrafts do
+defmodule EpochtalkServer.Repo.Migrations.PostDrafts do
   use Ecto.Migration
   @schema_prefix "posts"
 

@@ -1,4 +1,4 @@
-defmodule Epoch.Repo.Migrations.ImageExpirations do
+defmodule EpochtalkServer.Repo.Migrations.ImageExpirations do
   use Ecto.Migration
 
   def change do

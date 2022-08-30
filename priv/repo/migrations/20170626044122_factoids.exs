@@ -1,4 +1,4 @@
-defmodule Epoch.Repo.Migrations.Factoids do
+defmodule EpochtalkServer.Repo.Migrations.Factoids do
   use Ecto.Migration
 
   # move to after admin

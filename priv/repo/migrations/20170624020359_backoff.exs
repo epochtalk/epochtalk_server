@@ -1,4 +1,4 @@
-defmodule Epoch.Repo.Migrations.Backoff do
+defmodule EpochtalkServer.Repo.Migrations.Backoff do
   use Ecto.Migration
 
   def change do

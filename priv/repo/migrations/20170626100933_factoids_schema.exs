@@ -1,4 +1,4 @@
-defmodule Epoch.Repo.Migrations.FactoidsSchema do
+defmodule EpochtalkServer.Repo.Migrations.FactoidsSchema do
   use Ecto.Migration
   @schema_prefix "factoids"
 

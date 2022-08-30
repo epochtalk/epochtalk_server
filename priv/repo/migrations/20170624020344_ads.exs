@@ -1,4 +1,4 @@
-defmodule Epoch.Repo.Migrations.CreateAds do
+defmodule EpochtalkServer.Repo.Migrations.CreateAds do
   use Ecto.Migration
 
   def change do

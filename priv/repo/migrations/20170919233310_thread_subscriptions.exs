@@ -1,4 +1,4 @@
-defmodule Epoch.Repo.Migrations.ThreadSubscriptions do
+defmodule EpochtalkServer.Repo.Migrations.ThreadSubscriptions do
   use Ecto.Migration
   @schema_prefix "users"
 

@@ -1,4 +1,4 @@
-defmodule Epoch.Repo.Migrations.ThreadSlugs do
+defmodule EpochtalkServer.Repo.Migrations.ThreadSlugs do
   use Ecto.Migration
   import Ecto.Query
 
@@ -18,7 +18,7 @@ defmodule Epoch.Repo.Migrations.ThreadSlugs do
     from(t in "threads",
       update: [set: [slug: t.id]],
       where: true)
-    |> Epoch.Repo.update_all([])
+    |> EpochtalkServer.Repo.update_all([])
 
     # modify threads after slug update, don't allow null
     alter table(:threads) do

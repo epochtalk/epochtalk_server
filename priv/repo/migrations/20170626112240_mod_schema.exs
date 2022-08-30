@@ -1,4 +1,4 @@
-defmodule Epoch.Repo.Migrations.ModSchema do
+defmodule EpochtalkServer.Repo.Migrations.ModSchema do
   use Ecto.Migration
   @schema_prefix "mod"
 

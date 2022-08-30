@@ -1,4 +1,4 @@
-defmodule Epoch.Repo.Migrations.PmIgnored do
+defmodule EpochtalkServer.Repo.Migrations.PmIgnored do
   use Ecto.Migration
   @schema_prefix "messages"
   def change do

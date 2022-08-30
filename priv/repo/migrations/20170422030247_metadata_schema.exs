@@ -1,4 +1,4 @@
-defmodule Epoch.Repo.Migrations.MetadataSchema do
+defmodule EpochtalkServer.Repo.Migrations.MetadataSchema do
   use Ecto.Migration
   @schema_prefix "metadata"
 

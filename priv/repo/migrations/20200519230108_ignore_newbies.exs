@@ -1,4 +1,4 @@
-defmodule Epoch.Repo.Migrations.IgnoreNewbies do
+defmodule EpochtalkServer.Repo.Migrations.IgnoreNewbies do
   use Ecto.Migration
   @schema_prefix "users"
   def change do

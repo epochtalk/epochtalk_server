@@ -1,4 +1,4 @@
-defmodule :"Elixir.Epoch.Repo.Migrations.Polls-fk-fix" do
+defmodule :"Elixir.EpochtalkServer.Repo.Migrations.Polls-fk-fix" do
   use Ecto.Migration
 
   def up do

@@ -1,4 +1,4 @@
-defmodule Epoch.Repo.Migrations.AutoModeration do
+defmodule EpochtalkServer.Repo.Migrations.AutoModeration do
   use Ecto.Migration
 
   def change do

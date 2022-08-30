@@ -1,4 +1,4 @@
-defmodule Epoch.Repo.Migrations.PostgresConfig do
+defmodule EpochtalkServer.Repo.Migrations.PostgresConfig do
   use Ecto.Migration
 
   def change do

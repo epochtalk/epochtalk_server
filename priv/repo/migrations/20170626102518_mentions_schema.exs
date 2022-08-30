@@ -1,4 +1,4 @@
-defmodule Epoch.Repo.Migrations.MentionsSchema do
+defmodule EpochtalkServer.Repo.Migrations.MentionsSchema do
   use Ecto.Migration
   @schema_prefix "mentions"
 

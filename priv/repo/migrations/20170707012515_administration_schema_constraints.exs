@@ -1,4 +1,4 @@
-defmodule Epoch.Repo.Migrations.AdministrationSchemaConstraints do
+defmodule EpochtalkServer.Repo.Migrations.AdministrationSchemaConstraints do
   use Ecto.Migration
 
   @schema_prefix "administration"

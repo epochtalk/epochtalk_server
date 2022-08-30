@@ -1,4 +1,4 @@
-defmodule Epoch.Repo.Migrations.PreferenceConstraint do
+defmodule EpochtalkServer.Repo.Migrations.PreferenceConstraint do
   use Ecto.Migration
   @schema_prefix "users"
 

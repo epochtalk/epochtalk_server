@@ -1,4 +1,4 @@
-defmodule Epoch.Repo.Migrations.PrivateMessagesMultipleReceiverIds do
+defmodule EpochtalkServer.Repo.Migrations.PrivateMessagesMultipleReceiverIds do
   use Ecto.Migration
 
   def change do

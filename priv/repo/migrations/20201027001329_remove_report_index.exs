@@ -1,4 +1,4 @@
-defmodule Epoch.Repo.Migrations.RemoveReportIndex do
+defmodule EpochtalkServer.Repo.Migrations.RemoveReportIndex do
   use Ecto.Migration
   @schema_prefix "administration"
 

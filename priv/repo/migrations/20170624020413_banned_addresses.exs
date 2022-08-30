@@ -1,4 +1,4 @@
-defmodule Epoch.Repo.Migrations.BannedAddresses do
+defmodule EpochtalkServer.Repo.Migrations.BannedAddresses do
   use Ecto.Migration
 
   def change do

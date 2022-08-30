@@ -1,4 +1,4 @@
-defmodule Epoch.Repo.Migrations.Polls do
+defmodule EpochtalkServer.Repo.Migrations.Polls do
   use Ecto.Migration
 
   def change do

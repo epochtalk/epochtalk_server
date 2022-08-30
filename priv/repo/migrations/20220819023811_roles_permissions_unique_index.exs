@@ -1,4 +1,4 @@
-defmodule Epoch.Repo.Migrations.RolesPermissionsUniqueIndex do
+defmodule EpochtalkServer.Repo.Migrations.RolesPermissionsUniqueIndex do
   use Ecto.Migration
 
   def change do

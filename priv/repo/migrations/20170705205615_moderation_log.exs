@@ -1,4 +1,4 @@
-defmodule Epoch.Repo.Migrations.ModerationLog do
+defmodule EpochtalkServer.Repo.Migrations.ModerationLog do
   use Ecto.Migration
 
   def change do

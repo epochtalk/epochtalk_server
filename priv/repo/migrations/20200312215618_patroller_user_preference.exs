@@ -1,4 +1,4 @@
-defmodule Epoch.Repo.Migrations.PatrollerUserPreference do
+defmodule EpochtalkServer.Repo.Migrations.PatrollerUserPreference do
   use Ecto.Migration
   @schema_prefix "users"
 

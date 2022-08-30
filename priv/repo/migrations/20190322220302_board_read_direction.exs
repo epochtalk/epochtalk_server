@@ -1,4 +1,4 @@
-defmodule Epoch.Repo.Migrations.BoardReadDirection do
+defmodule EpochtalkServer.Repo.Migrations.BoardReadDirection do
   use Ecto.Migration
 
   def change do

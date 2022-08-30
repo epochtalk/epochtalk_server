@@ -1,4 +1,4 @@
-defmodule Epoch.Repo.Migrations.MentionEmailPrefs do
+defmodule EpochtalkServer.Repo.Migrations.MentionEmailPrefs do
   use Ecto.Migration
   @schema_prefix "users"
 

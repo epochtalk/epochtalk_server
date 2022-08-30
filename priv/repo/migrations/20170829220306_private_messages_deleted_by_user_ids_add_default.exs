@@ -1,4 +1,4 @@
-defmodule Epoch.Repo.Migrations.PrivateMessagesDeletedByUserIdsAddDefault do
+defmodule EpochtalkServer.Repo.Migrations.PrivateMessagesDeletedByUserIdsAddDefault do
   use Ecto.Migration
 
   def change do

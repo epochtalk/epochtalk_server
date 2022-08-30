@@ -1,4 +1,4 @@
-defmodule Epoch.Repo.Migrations.AdsUniqueIp do
+defmodule EpochtalkServer.Repo.Migrations.AdsUniqueIp do
   use Ecto.Migration
   @schema_prefix "ads"
 

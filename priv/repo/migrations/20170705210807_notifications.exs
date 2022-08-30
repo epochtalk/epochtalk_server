@@ -1,4 +1,4 @@
-defmodule Epoch.Repo.Migrations.Notifications do
+defmodule EpochtalkServer.Repo.Migrations.Notifications do
   use Ecto.Migration
 
   def change do

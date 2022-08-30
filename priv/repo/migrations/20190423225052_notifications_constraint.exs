@@ -1,4 +1,4 @@
-defmodule Epoch.Repo.Migrations.NotificationsConstraint do
+defmodule EpochtalkServer.Repo.Migrations.NotificationsConstraint do
   use Ecto.Migration
 
   def up do

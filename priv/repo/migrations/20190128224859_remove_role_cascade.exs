@@ -1,4 +1,4 @@
-defmodule Elixir.Epoch.Repo.Migrations.RemoveRoleCascade do
+defmodule Elixir.EpochtalkServer.Repo.Migrations.RemoveRoleCascade do
   use Ecto.Migration
 
   def up do

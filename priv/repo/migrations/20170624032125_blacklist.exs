@@ -1,4 +1,4 @@
-defmodule Epoch.Repo.Migrations.Blacklist do
+defmodule EpochtalkServer.Repo.Migrations.Blacklist do
   use Ecto.Migration
 
   def change do

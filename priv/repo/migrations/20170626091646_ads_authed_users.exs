@@ -1,4 +1,4 @@
-defmodule Epoch.Repo.Migrations.AdsAuthedUsers do
+defmodule EpochtalkServer.Repo.Migrations.AdsAuthedUsers do
   use Ecto.Migration
   @schema_prefix "ads"
 

@@ -1,4 +1,4 @@
-defmodule Epoch.Repo.Migrations.AdsRounds do
+defmodule EpochtalkServer.Repo.Migrations.AdsRounds do
   use Ecto.Migration
   @schema_prefix "ads"
 

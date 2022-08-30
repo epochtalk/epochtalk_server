@@ -1,4 +1,4 @@
-defmodule Epoch.Repo.Migrations.MessagesJsonb do
+defmodule EpochtalkServer.Repo.Migrations.MessagesJsonb do
   use Ecto.Migration
   @schema_prefix "messages"
 

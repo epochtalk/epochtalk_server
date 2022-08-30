@@ -1,4 +1,4 @@
-defmodule Epoch.Repo.Migrations.UnreadPms do
+defmodule EpochtalkServer.Repo.Migrations.UnreadPms do
   use Ecto.Migration
   @schema_prefix "messages"
   def change do

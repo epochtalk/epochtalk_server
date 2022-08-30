@@ -1,4 +1,4 @@
-defmodule Epoch.Repo.Migrations.BoardMapping do
+defmodule EpochtalkServer.Repo.Migrations.BoardMapping do
   use Ecto.Migration
 
   def change do

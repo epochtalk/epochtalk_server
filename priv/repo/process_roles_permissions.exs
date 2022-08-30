@@ -1,10 +1,6 @@
 json_file = "#{__DIR__}/seeds/roles_permissions.json"
 
-case File.rm("#{__DIR__}/seeds/permissions.json") do
-  :ok -> IO.puts("Deleted old permissions.json")
-  {:error, _} -> IO.puts("No permissions.json")
-end
-
+File.rm("#{__DIR__}/seeds/permissions.json")
 output_file = File.open!("#{__DIR__}/seeds/permissions.json", [:write])
 
 output = json_file

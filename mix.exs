@@ -55,9 +55,16 @@ defmodule EpochtalkServer.MixProject do
   defp aliases do
     [
       setup: ["deps.get", "ecto.setup"],
-      "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
-      "ecto.reset": ["ecto.drop", "ecto.setup"],
-      test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"]
+     "ecto.setup": ["ecto.create", "ecto.migrate", "seed.all"],
+     "ecto.reset": ["ecto.drop", "ecto.setup"],
+     "db.migrate": ["ecto.migrate", "ecto.dump"],
+     "db.rollback": ["ecto.rollback", "ecto.dump"],
+     "seed.all": ["seed.permissions", "seed.roles", "seed.prs", "seed.rp"],
+     "seed.permissions": ["run priv/repo/seed_permissions.exs"],
+     "seed.roles": ["run priv/repo/seed_roles.exs"],
+     "seed.prs": ["run priv/repo/seed_priority_restrictions.exs"],
+     "seed.rp": ["run priv/repo/seed_roles_permissions.exs"],
+     test: ["ecto.create --quiet", "ecto.migrate", "test"]
     ]
   end
 end

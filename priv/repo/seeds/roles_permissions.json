@@ -1,0 +1,3040 @@
+{
+  "superAdministrator": {
+    "adminAccess": {
+      "management": {
+        "bannedAddresses": true,
+        "boards": true,
+        "invitations": true,
+        "roles": true,
+        "users": true
+      },
+      "settings": {
+        "advanced": true,
+        "general": true,
+        "legal": true,
+        "theme": true
+      }
+    },
+    "adminBoards": {
+      "moveBoards": true,
+      "updateCategories": true
+    },
+    "adminSettings": {
+      "find": true,
+      "getTheme": true,
+      "previewTheme": true,
+      "resetTheme": true,
+      "setTheme": true,
+      "update": true
+    },
+    "ads": {
+      "analyticsView": {
+        "allow": true
+      },
+      "create": {
+        "allow": true
+      },
+      "duplicate": {
+        "allow": true
+      },
+      "edit": {
+        "allow": true
+      },
+      "factoidCreate": {
+        "allow": true
+      },
+      "factoidDisable": {
+        "allow": true
+      },
+      "factoidEdit": {
+        "allow": true
+      },
+      "factoidEnable": {
+        "allow": true
+      },
+      "factoidRemove": {
+        "allow": true
+      },
+      "remove": {
+        "allow": true
+      },
+      "roundCreate": {
+        "allow": true
+      },
+      "roundInfo": {
+        "allow": true
+      },
+      "roundRotate": {
+        "allow": true
+      },
+      "roundView": {
+        "allow": true
+      },
+      "textSave": {
+        "allow": true
+      },
+      "view": {
+        "allow": true
+      }
+    },
+    "autoModeration": {
+      "addRule": {
+        "allow": true
+      },
+      "editRule": {
+        "allow": true
+      },
+      "removeRule": {
+        "allow": true
+      },
+      "rules": {
+        "allow": true
+      }
+    },
+    "bans": {
+      "addAddresses": {
+        "allow": true
+      },
+      "ban": {
+        "allow": true,
+        "bypass": {
+          "priority": {
+            "same": true
+          }
+        }
+      },
+      "banFromBoards": {
+        "allow": true,
+        "bypass": {
+          "priority": {
+            "same": true
+          },
+          "type": {
+            "admin": true
+          }
+        }
+      },
+      "byBannedBoards": {
+        "allow": true
+      },
+      "deleteAddress": {
+        "allow": true
+      },
+      "editAddress": {
+        "allow": true
+      },
+      "pageBannedAddresses": {
+        "allow": true
+      }
+    },
+    "blacklist": {
+      "addRule": {
+        "allow": true
+      },
+      "all": {
+        "allow": true
+      },
+      "deleteRule": {
+        "allow": true
+      },
+      "updateRule": {
+        "allow": true
+      }
+    },
+    "boards": {
+      "allCategories": {
+        "allow": true
+      },
+      "allUncategorized": {
+        "allow": true
+      },
+      "allUnfiltered": {
+        "allow": true
+      },
+      "create": {
+        "allow": true
+      },
+      "delete": {
+        "allow": true
+      },
+      "find": {
+        "allow": true
+      },
+      "moveList": {
+        "allow": true
+      },
+      "update": {
+        "allow": true
+      },
+      "updateAll": {
+        "allow": true
+      }
+    },
+    "categories": {
+      "create": {
+        "allow": true
+      },
+      "delete": {
+        "allow": true
+      }
+    },
+    "configurations": {
+      "get": {
+        "allow": true
+      },
+      "update": {
+        "allow": true
+      }
+    },
+    "conversations": {
+      "create": {
+        "allow": true
+      },
+      "delete": {
+        "allow": true
+      },
+      "messages": {
+        "allow": true
+      }
+    },
+    "invitations": {
+      "all": {
+        "allow": true
+      },
+      "invite": {
+        "allow": true
+      },
+      "remove": {
+        "allow": true
+      },
+      "resend": {
+        "allow": true
+      }
+    },
+    "legal": {
+      "reset": {
+        "allow": true
+      },
+      "text": {
+        "allow": true
+      },
+      "update": {
+        "allow": true
+      }
+    },
+    "mentions": {
+      "create": {
+        "allow": true
+      },
+      "delete": {
+        "allow": true
+      },
+      "page": {
+        "allow": true
+      }
+    },
+    "messages": {
+      "create": {
+        "allow": true
+      },
+      "delete": {
+        "allow": true,
+        "bypass": {
+          "owner": true
+        }
+      },
+      "latest": {
+        "allow": true
+      }
+    },
+    "modAccess": {
+      "boardBans": true,
+      "logs": true,
+      "messages": true,
+      "posts": true,
+      "users": true
+    },
+    "moderationLogs": {
+      "page": {
+        "allow": true
+      }
+    },
+    "moderators": {
+      "add": {
+        "allow": true
+      },
+      "remove": {
+        "allow": true
+      }
+    },
+    "motd": {
+      "get": {
+        "allow": true
+      },
+      "save": {
+        "allow": true
+      }
+    },
+    "notifications": {
+      "counts": {
+        "allow": true
+      },
+      "dismiss": {
+        "allow": true
+      }
+    },
+    "portal": {
+      "view": {
+        "allow": true
+      }
+    },
+    "posts": {
+      "byThread": {
+        "allow": true,
+        "bypass": {
+          "viewDeletedPosts": {
+            "admin": true
+          }
+        }
+      },
+      "create": {
+        "allow": true,
+        "bypass": {
+          "locked": {
+            "admin": true
+          }
+        }
+      },
+      "delete": {
+        "allow": true,
+        "bypass": {
+          "locked": {
+            "admin": true
+          },
+          "owner": {
+            "admin": true
+          }
+        }
+      },
+      "find": {
+        "allow": true,
+        "bypass": {
+          "viewDeletedPosts": {
+            "admin": true
+          }
+        }
+      },
+      "lock": {
+        "allow": true,
+        "bypass": {
+          "lock": {
+            "admin": true
+          }
+        }
+      },
+      "pageByUser": {
+        "allow": true,
+        "bypass": {
+          "viewDeletedPosts": {
+            "admin": true
+          },
+          "viewDeletedUsers": true
+        }
+      },
+      "purge": {
+        "allow": true,
+        "bypass": {
+          "purge": {
+            "admin": true
+          }
+        }
+      },
+      "search": {
+        "allow": true
+      },
+      "update": {
+        "allow": true,
+        "bypass": {
+          "deleted": {
+            "admin": true
+          },
+          "locked": {
+            "admin": true
+          },
+          "owner": {
+            "admin": true
+          }
+        }
+      }
+    },
+    "rank": {
+      "get": {
+        "allow": true
+      },
+      "upsert": {
+        "allow": true
+      }
+    },
+    "reports": {
+      "createMessageReport": {
+        "allow": true
+      },
+      "createMessageReportNote": {
+        "allow": true
+      },
+      "createPostReport": {
+        "allow": true
+      },
+      "createPostReportNote": {
+        "allow": true
+      },
+      "createUserReport": {
+        "allow": true
+      },
+      "createUserReportNote": {
+        "allow": true
+      },
+      "pageMessageReportNotes": {
+        "allow": true
+      },
+      "pageMessageReports": {
+        "allow": true
+      },
+      "pagePostReportNotes": {
+        "allow": true
+      },
+      "pagePostReports": {
+        "allow": true
+      },
+      "pageUserReportNotes": {
+        "allow": true
+      },
+      "pageUserReports": {
+        "allow": true
+      },
+      "updateMessageReport": {
+        "allow": true
+      },
+      "updateMessageReportNote": {
+        "allow": true
+      },
+      "updatePostReport": {
+        "allow": true
+      },
+      "updatePostReportNote": {
+        "allow": true
+      },
+      "updateUserReport": {
+        "allow": true
+      },
+      "updateUserReportNote": {
+        "allow": true
+      }
+    },
+    "roles": {
+      "add": {
+        "allow": true
+      },
+      "all": {
+        "allow": true
+      },
+      "remove": {
+        "allow": true
+      },
+      "reprioritize": {
+        "allow": true
+      },
+      "update": {
+        "allow": true
+      },
+      "users": {
+        "allow": true
+      }
+    },
+    "themes": {
+      "getTheme": {
+        "allow": true
+      },
+      "previewTheme": {
+        "allow": true
+      },
+      "resetTheme": {
+        "allow": true
+      },
+      "setTheme": {
+        "allow": true
+      }
+    },
+    "threads": {
+      "byBoard": {
+        "allow": true
+      },
+      "create": {
+        "allow": true
+      },
+      "createPoll": {
+        "allow": true,
+        "bypass": {
+          "owner": {
+            "admin": true
+          }
+        }
+      },
+      "editPoll": {
+        "allow": true,
+        "bypass": {
+          "owner": {
+            "admin": true
+          }
+        }
+      },
+      "lock": {
+        "allow": true,
+        "bypass": {
+          "owner": {
+            "admin": true
+          }
+        }
+      },
+      "lockPoll": {
+        "allow": true,
+        "bypass": {
+          "owner": {
+            "admin": true
+          }
+        }
+      },
+      "moderated": {
+        "allow": true
+      },
+      "move": {
+        "allow": true,
+        "bypass": {
+          "owner": {
+            "admin": true
+          }
+        }
+      },
+      "posted": {
+        "allow": true
+      },
+      "purge": {
+        "allow": true,
+        "bypass": {
+          "owner": {
+            "admin": true
+          }
+        }
+      },
+      "removeVote": {
+        "allow": true
+      },
+      "sticky": {
+        "allow": true,
+        "bypass": {
+          "owner": {
+            "admin": true
+          }
+        }
+      },
+      "title": {
+        "allow": true,
+        "bypass": {
+          "owner": {
+            "admin": true
+          }
+        }
+      },
+      "viewed": {
+        "allow": true
+      },
+      "vote": {
+        "allow": true
+      }
+    },
+    "userNotes": {
+      "create": {
+        "allow": true
+      },
+      "delete": {
+        "allow": true
+      },
+      "page": {
+        "allow": true
+      },
+      "update": {
+        "allow": true
+      }
+    },
+    "userTrust": {
+      "addTrustBoard": {
+        "allow": true
+      },
+      "addTrustFeedback": {
+        "allow": true
+      },
+      "deleteTrustBoard": {
+        "allow": true
+      },
+      "editDefaultTrustList": {
+        "allow": true
+      },
+      "getDefaultTrustList": {
+        "allow": true
+      }
+    },
+    "users": {
+      "addRoles": {
+        "allow": true,
+        "bypass": {
+          "priority": {
+            "same": true
+          }
+        }
+      },
+      "adminPage": {
+        "allow": true
+      },
+      "adminRecover": {
+        "allow": true
+      },
+      "changeUsername": {
+        "allow": true
+      },
+      "deactivate": {
+        "allow": true
+      },
+      "delete": {
+        "allow": true,
+        "bypass": {
+          "priority": {
+            "admin": true
+          }
+        }
+      },
+      "find": {
+        "allow": true,
+        "bypass": {
+          "viewDeleted": true,
+          "viewMoreInfo": true
+        }
+      },
+      "lookup": {
+        "allow": true
+      },
+      "pagePublic": {
+        "allow": true
+      },
+      "reactivate": {
+        "allow": true
+      },
+      "removeRole": {
+        "allow": true,
+        "bypass": {
+          "priority": {
+            "same": true
+          }
+        }
+      },
+      "searchUsernames": {
+        "allow": true
+      },
+      "update": {
+        "allow": true,
+        "bypass": {
+          "priority": {
+            "admin": true
+          }
+        }
+      }
+    },
+    "watchlist": {
+      "edit": {
+        "allow": true
+      },
+      "pageBoards": {
+        "allow": true
+      },
+      "pageThreads": {
+        "allow": true
+      },
+      "unread": {
+        "allow": true
+      },
+      "unwatchBoard": {
+        "allow": true
+      },
+      "unwatchThread": {
+        "allow": true
+      },
+      "watchBoard": {
+        "allow": true
+      },
+      "watchThread": {
+        "allow": true
+      }
+    }
+  },
+  "administrator": {
+    "adminAccess": {
+      "management": {
+        "bannedAddresses": true,
+        "boards": true,
+        "invitations": true,
+        "roles": true,
+        "users": true
+      }
+    },
+    "adminBoards": {
+      "moveBoards": true,
+      "updateCategories": true
+    },
+    "ads": {
+      "analyticsView": {
+        "allow": true
+      },
+      "create": {
+        "allow": true
+      },
+      "duplicate": {
+        "allow": true
+      },
+      "edit": {
+        "allow": true
+      },
+      "factoidCreate": {
+        "allow": true
+      },
+      "factoidDisable": {
+        "allow": true
+      },
+      "factoidEdit": {
+        "allow": true
+      },
+      "factoidEnable": {
+        "allow": true
+      },
+      "factoidRemove": {
+        "allow": true
+      },
+      "remove": {
+        "allow": true
+      },
+      "roundCreate": {
+        "allow": true
+      },
+      "roundInfo": {
+        "allow": true
+      },
+      "roundRotate": {
+        "allow": true
+      },
+      "roundView": {
+        "allow": true
+      },
+      "textSave": {
+        "allow": true
+      },
+      "view": {
+        "allow": true
+      }
+    },
+    "autoModeration": {
+      "addRule": {
+        "allow": true
+      },
+      "editRule": {
+        "allow": true
+      },
+      "removeRule": {
+        "allow": true
+      },
+      "rules": {
+        "allow": true
+      }
+    },
+    "bans": {
+      "addAddresses": {
+        "allow": true
+      },
+      "ban": {
+        "allow": true,
+        "bypass": {
+          "priority": {
+            "less": true
+          }
+        }
+      },
+      "banFromBoards": {
+        "allow": true,
+        "bypass": {
+          "priority": {
+            "less": true
+          },
+          "type": {
+            "admin": true
+          }
+        }
+      },
+      "byBannedBoards": {
+        "allow": true
+      },
+      "deleteAddress": {
+        "allow": true
+      },
+      "editAddress": {
+        "allow": true
+      },
+      "pageBannedAddresses": {
+        "allow": true
+      }
+    },
+    "blacklist": {},
+    "boards": {
+      "allCategories": {
+        "allow": true
+      },
+      "allUncategorized": {
+        "allow": true
+      },
+      "allUnfiltered": {
+        "allow": true
+      },
+      "create": {
+        "allow": true
+      },
+      "delete": {
+        "allow": true
+      },
+      "find": {
+        "allow": true
+      },
+      "moveList": {
+        "allow": true
+      },
+      "update": {
+        "allow": true
+      },
+      "updateAll": {
+        "allow": true
+      }
+    },
+    "categories": {
+      "create": {
+        "allow": true
+      },
+      "delete": {
+        "allow": true
+      }
+    },
+    "configurations": {},
+    "conversations": {
+      "create": {
+        "allow": true
+      },
+      "delete": {
+        "allow": true
+      },
+      "messages": {
+        "allow": true
+      }
+    },
+    "invitations": {
+      "all": {
+        "allow": true
+      },
+      "invite": {
+        "allow": true
+      },
+      "remove": {
+        "allow": true
+      },
+      "resend": {
+        "allow": true
+      }
+    },
+    "legal": {},
+    "mentions": {
+      "create": {
+        "allow": true
+      },
+      "delete": {
+        "allow": true
+      },
+      "page": {
+        "allow": true
+      }
+    },
+    "messages": {
+      "create": {
+        "allow": true
+      },
+      "delete": {
+        "allow": true,
+        "bypass": {
+          "owner": true
+        }
+      },
+      "latest": {
+        "allow": true
+      }
+    },
+    "modAccess": {
+      "boardBans": true,
+      "logs": true,
+      "messages": true,
+      "posts": true,
+      "users": true
+    },
+    "moderationLogs": {
+      "page": {
+        "allow": true
+      }
+    },
+    "moderators": {
+      "add": {
+        "allow": true
+      },
+      "remove": {
+        "allow": true
+      }
+    },
+    "motd": {
+      "get": {
+        "allow": true
+      },
+      "save": {
+        "allow": true
+      }
+    },
+    "notifications": {
+      "counts": {
+        "allow": true
+      },
+      "dismiss": {
+        "allow": true
+      }
+    },
+    "portal": {
+      "view": {
+        "allow": true
+      }
+    },
+    "posts": {
+      "byThread": {
+        "allow": true,
+        "bypass": {
+          "viewDeletedPosts": {
+            "admin": true
+          }
+        }
+      },
+      "create": {
+        "allow": true,
+        "bypass": {
+          "locked": {
+            "admin": true
+          }
+        }
+      },
+      "delete": {
+        "allow": true,
+        "bypass": {
+          "locked": {
+            "admin": true
+          },
+          "owner": {
+            "admin": true
+          }
+        }
+      },
+      "find": {
+        "allow": true,
+        "bypass": {
+          "viewDeletedPosts": {
+            "admin": true
+          }
+        }
+      },
+      "lock": {
+        "allow": true,
+        "bypass": {
+          "lock": {
+            "admin": true
+          }
+        }
+      },
+      "pageByUser": {
+        "allow": true,
+        "bypass": {
+          "viewDeletedPosts": {
+            "admin": true
+          },
+          "viewDeletedUsers": true
+        }
+      },
+      "purge": {
+        "allow": true,
+        "bypass": {
+          "purge": {
+            "admin": true
+          }
+        }
+      },
+      "search": {
+        "allow": true
+      },
+      "update": {
+        "allow": true,
+        "bypass": {
+          "deleted": {
+            "admin": true
+          },
+          "locked": {
+            "admin": true
+          },
+          "owner": {
+            "admin": true
+          }
+        }
+      }
+    },
+    "rank": {
+      "get": {
+        "allow": true
+      },
+      "upsert": {
+        "allow": true
+      }
+    },
+    "reports": {
+      "createMessageReport": {
+        "allow": true
+      },
+      "createMessageReportNote": {
+        "allow": true
+      },
+      "createPostReport": {
+        "allow": true
+      },
+      "createPostReportNote": {
+        "allow": true
+      },
+      "createUserReport": {
+        "allow": true
+      },
+      "createUserReportNote": {
+        "allow": true
+      },
+      "pageMessageReportNotes": {
+        "allow": true
+      },
+      "pageMessageReports": {
+        "allow": true
+      },
+      "pagePostReportNotes": {
+        "allow": true
+      },
+      "pagePostReports": {
+        "allow": true
+      },
+      "pageUserReportNotes": {
+        "allow": true
+      },
+      "pageUserReports": {
+        "allow": true
+      },
+      "updateMessageReport": {
+        "allow": true
+      },
+      "updateMessageReportNote": {
+        "allow": true
+      },
+      "updatePostReport": {
+        "allow": true
+      },
+      "updatePostReportNote": {
+        "allow": true
+      },
+      "updateUserReport": {
+        "allow": true
+      },
+      "updateUserReportNote": {
+        "allow": true
+      }
+    },
+    "roles": {
+      "all": {
+        "allow": true
+      },
+      "users": {
+        "allow": true
+      }
+    },
+    "themes": {},
+    "threads": {
+      "byBoard": {
+        "allow": true
+      },
+      "create": {
+        "allow": true
+      },
+      "createPoll": {
+        "allow": true,
+        "bypass": {
+          "owner": {
+            "admin": true
+          }
+        }
+      },
+      "editPoll": {
+        "allow": true,
+        "bypass": {
+          "owner": {
+            "admin": true
+          }
+        }
+      },
+      "lock": {
+        "allow": true,
+        "bypass": {
+          "owner": {
+            "admin": true
+          }
+        }
+      },
+      "lockPoll": {
+        "allow": true,
+        "bypass": {
+          "owner": {
+            "admin": true
+          }
+        }
+      },
+      "moderated": {
+        "allow": true
+      },
+      "move": {
+        "allow": true,
+        "bypass": {
+          "owner": {
+            "admin": true
+          }
+        }
+      },
+      "posted": {
+        "allow": true
+      },
+      "purge": {
+        "allow": true,
+        "bypass": {
+          "owner": {
+            "admin": true
+          }
+        }
+      },
+      "removeVote": {
+        "allow": true
+      },
+      "sticky": {
+        "allow": true,
+        "bypass": {
+          "owner": {
+            "admin": true
+          }
+        }
+      },
+      "title": {
+        "allow": true,
+        "bypass": {
+          "owner": {
+            "admin": true
+          }
+        }
+      },
+      "viewed": {
+        "allow": true
+      },
+      "vote": {
+        "allow": true
+      }
+    },
+    "userNotes": {
+      "create": {
+        "allow": true
+      },
+      "delete": {
+        "allow": true
+      },
+      "page": {
+        "allow": true
+      },
+      "update": {
+        "allow": true
+      }
+    },
+    "userTrust": {
+      "addTrustFeedback": {
+        "allow": true
+      }
+    },
+    "users": {
+      "addRoles": {
+        "allow": true,
+        "bypass": {
+          "priority": {
+            "less": true
+          }
+        }
+      },
+      "adminPage": {
+        "allow": true
+      },
+      "adminRecover": {
+        "allow": true
+      },
+      "changeUsername": {
+        "allow": true
+      },
+      "deactivate": {
+        "allow": true
+      },
+      "delete": {
+        "allow": true,
+        "bypass": {
+          "priority": {
+            "admin": true
+          }
+        }
+      },
+      "find": {
+        "allow": true,
+        "bypass": {
+          "viewDeleted": true,
+          "viewMoreInfo": true
+        }
+      },
+      "lookup": {
+        "allow": true
+      },
+      "pagePublic": {
+        "allow": true
+      },
+      "reactivate": {
+        "allow": true
+      },
+      "removeRole": {
+        "allow": true,
+        "bypass": {
+          "priority": {
+            "less": true
+          }
+        }
+      },
+      "searchUsernames": {
+        "allow": true
+      },
+      "update": {
+        "allow": true,
+        "bypass": {
+          "priority": {
+            "admin": true
+          }
+        }
+      }
+    },
+    "watchlist": {
+      "edit": {
+        "allow": true
+      },
+      "pageBoards": {
+        "allow": true
+      },
+      "pageThreads": {
+        "allow": true
+      },
+      "unread": {
+        "allow": true
+      },
+      "unwatchBoard": {
+        "allow": true
+      },
+      "unwatchThread": {
+        "allow": true
+      },
+      "watchBoard": {
+        "allow": true
+      },
+      "watchThread": {
+        "allow": true
+      }
+    }
+  },
+  "globalModerator": {
+    "adminBoards": {
+      "moveBoards": true
+    },
+    "ads": {
+      "analyticsView": {
+        "allow": true
+      },
+      "roundInfo": {
+        "allow": true
+      },
+      "view": {
+        "allow": true
+      }
+    },
+    "autoModeration": {},
+    "bans": {
+      "ban": {
+        "allow": true,
+        "bypass": {
+          "priority": {
+            "less": true
+          }
+        }
+      },
+      "banFromBoards": {
+        "allow": true,
+        "bypass": {
+          "priority": {
+            "less": true
+          },
+          "type": {
+            "admin": true
+          }
+        }
+      }
+    },
+    "blacklist": {},
+    "boards": {
+      "allCategories": {
+        "allow": true
+      },
+      "find": {
+        "allow": true
+      },
+      "moveList": {
+        "allow": true
+      }
+    },
+    "categories": {},
+    "configurations": {},
+    "conversations": {
+      "create": {
+        "allow": true
+      },
+      "delete": {
+        "allow": true
+      },
+      "messages": {
+        "allow": true
+      }
+    },
+    "invitations": {
+      "invite": {
+        "allow": true
+      }
+    },
+    "legal": {},
+    "mentions": {
+      "create": {
+        "allow": true
+      },
+      "delete": {
+        "allow": true
+      },
+      "page": {
+        "allow": true
+      }
+    },
+    "messages": {
+      "create": {
+        "allow": true
+      },
+      "delete": {
+        "allow": true,
+        "bypass": {
+          "owner": true
+        }
+      },
+      "latest": {
+        "allow": true
+      }
+    },
+    "modAccess": {
+      "boardBans": true,
+      "messages": true,
+      "posts": true,
+      "users": true
+    },
+    "moderationLogs": {},
+    "moderators": {},
+    "motd": {
+      "get": {
+        "allow": true
+      }
+    },
+    "notifications": {
+      "counts": {
+        "allow": true
+      },
+      "dismiss": {
+        "allow": true
+      }
+    },
+    "portal": {
+      "view": {
+        "allow": true
+      }
+    },
+    "posts": {
+      "byThread": {
+        "allow": true,
+        "bypass": {
+          "viewDeletedPosts": {
+            "admin": true
+          }
+        }
+      },
+      "create": {
+        "allow": true,
+        "bypass": {
+          "locked": {
+            "admin": true
+          }
+        }
+      },
+      "delete": {
+        "allow": true,
+        "bypass": {
+          "locked": {
+            "priority": true
+          },
+          "owner": {
+            "priority": true
+          }
+        }
+      },
+      "find": {
+        "allow": true,
+        "bypass": {
+          "viewDeletedPosts": {
+            "admin": true
+          }
+        }
+      },
+      "lock": {
+        "allow": true,
+        "bypass": {
+          "lock": {
+            "priority": true
+          }
+        }
+      },
+      "pageByUser": {
+        "allow": true,
+        "bypass": {
+          "viewDeletedPosts": {
+            "admin": true
+          },
+          "viewDeletedUsers": true
+        }
+      },
+      "search": {
+        "allow": true
+      },
+      "update": {
+        "allow": true,
+        "bypass": {
+          "deleted": {
+            "priority": true
+          },
+          "locked": {
+            "priority": true
+          },
+          "owner": {
+            "priority": true
+          }
+        }
+      }
+    },
+    "rank": {},
+    "reports": {
+      "createMessageReport": {
+        "allow": true
+      },
+      "createMessageReportNote": {
+        "allow": true
+      },
+      "createPostReport": {
+        "allow": true
+      },
+      "createPostReportNote": {
+        "allow": true
+      },
+      "createUserReport": {
+        "allow": true
+      },
+      "createUserReportNote": {
+        "allow": true
+      },
+      "pageMessageReportNotes": {
+        "allow": true
+      },
+      "pageMessageReports": {
+        "allow": true
+      },
+      "pagePostReportNotes": {
+        "allow": true
+      },
+      "pagePostReports": {
+        "allow": true
+      },
+      "pageUserReportNotes": {
+        "allow": true
+      },
+      "pageUserReports": {
+        "allow": true
+      },
+      "updateMessageReport": {
+        "allow": true
+      },
+      "updateMessageReportNote": {
+        "allow": true
+      },
+      "updatePostReport": {
+        "allow": true
+      },
+      "updatePostReportNote": {
+        "allow": true
+      },
+      "updateUserReport": {
+        "allow": true
+      },
+      "updateUserReportNote": {
+        "allow": true
+      }
+    },
+    "roles": {},
+    "themes": {},
+    "threads": {
+      "byBoard": {
+        "allow": true
+      },
+      "create": {
+        "allow": true
+      },
+      "createPoll": {
+        "allow": true,
+        "bypass": {
+          "owner": {
+            "priority": true
+          }
+        }
+      },
+      "editPoll": {
+        "allow": true,
+        "bypass": {
+          "owner": {
+            "priority": true
+          }
+        }
+      },
+      "lock": {
+        "allow": true,
+        "bypass": {
+          "owner": {
+            "priority": true
+          }
+        }
+      },
+      "lockPoll": {
+        "allow": true,
+        "bypass": {
+          "owner": {
+            "priority": true
+          }
+        }
+      },
+      "moderated": {
+        "allow": true
+      },
+      "move": {
+        "allow": true,
+        "bypass": {
+          "owner": {
+            "admin": true
+          }
+        }
+      },
+      "posted": {
+        "allow": true
+      },
+      "purge": {
+        "allow": true,
+        "bypass": {
+          "owner": {
+            "priority": true
+          }
+        }
+      },
+      "removeVote": {
+        "allow": true
+      },
+      "sticky": {
+        "allow": true,
+        "bypass": {
+          "owner": {
+            "priority": true
+          }
+        }
+      },
+      "title": {
+        "allow": true,
+        "bypass": {
+          "owner": {
+            "priority": true
+          }
+        }
+      },
+      "viewed": {
+        "allow": true
+      },
+      "vote": {
+        "allow": true
+      }
+    },
+    "userNotes": {
+      "create": {
+        "allow": true
+      },
+      "delete": {
+        "allow": true
+      },
+      "page": {
+        "allow": true
+      },
+      "update": {
+        "allow": true
+      }
+    },
+    "userTrust": {
+      "addTrustFeedback": {
+        "allow": true
+      }
+    },
+    "users": {
+      "changeUsername": {
+        "allow": true
+      },
+      "deactivate": {
+        "allow": true
+      },
+      "delete": {
+        "allow": true,
+        "bypass": {
+          "priority": {
+            "mod": true
+          }
+        }
+      },
+      "find": {
+        "allow": true,
+        "bypass": {
+          "viewDeleted": true,
+          "viewMoreInfo": true
+        }
+      },
+      "lookup": {
+        "allow": true
+      },
+      "pagePublic": {
+        "allow": true
+      },
+      "reactivate": {
+        "allow": true
+      },
+      "searchUsernames": {
+        "allow": true
+      },
+      "update": {
+        "allow": true,
+        "bypass": {
+          "priority": {
+            "mod": true
+          }
+        }
+      }
+    },
+    "watchlist": {
+      "edit": {
+        "allow": true
+      },
+      "pageBoards": {
+        "allow": true
+      },
+      "pageThreads": {
+        "allow": true
+      },
+      "unread": {
+        "allow": true
+      },
+      "unwatchBoard": {
+        "allow": true
+      },
+      "unwatchThread": {
+        "allow": true
+      },
+      "watchBoard": {
+        "allow": true
+      },
+      "watchThread": {
+        "allow": true
+      }
+    }
+  },
+  "moderator": {
+    "adminBoards": {
+      "moveBoards": true
+    },
+    "ads": {
+      "analyticsView": {
+        "allow": true
+      },
+      "roundInfo": {
+        "allow": true
+      },
+      "view": {
+        "allow": true
+      }
+    },
+    "autoModeration": {},
+    "bans": {
+      "banFromBoards": {
+        "allow": true,
+        "bypass": {
+          "priority": {
+            "less": true
+          },
+          "type": {
+            "mod": true
+          }
+        }
+      }
+    },
+    "blacklist": {},
+    "boards": {
+      "allCategories": {
+        "allow": true
+      },
+      "find": {
+        "allow": true
+      },
+      "moveList": {
+        "allow": true
+      }
+    },
+    "categories": {},
+    "configurations": {},
+    "conversations": {
+      "create": {
+        "allow": true
+      },
+      "delete": {
+        "allow": true
+      },
+      "messages": {
+        "allow": true
+      }
+    },
+    "invitations": {
+      "invite": {
+        "allow": true
+      }
+    },
+    "legal": {},
+    "mentions": {
+      "create": {
+        "allow": true
+      },
+      "delete": {
+        "allow": true
+      },
+      "page": {
+        "allow": true
+      }
+    },
+    "messages": {
+      "create": {
+        "allow": true
+      },
+      "delete": {
+        "allow": true,
+        "bypass": {
+          "owner": true
+        }
+      },
+      "latest": {
+        "allow": true
+      }
+    },
+    "modAccess": {
+      "boardBans": true,
+      "messages": true,
+      "posts": true,
+      "users": true
+    },
+    "moderationLogs": {},
+    "moderators": {},
+    "motd": {
+      "get": {
+        "allow": true
+      }
+    },
+    "notifications": {
+      "counts": {
+        "allow": true
+      },
+      "dismiss": {
+        "allow": true
+      }
+    },
+    "portal": {
+      "view": {
+        "allow": true
+      }
+    },
+    "posts": {
+      "byThread": {
+        "allow": true,
+        "bypass": {
+          "viewDeletedPosts": {
+            "mod": true
+          }
+        }
+      },
+      "create": {
+        "allow": true,
+        "bypass": {
+          "locked": {
+            "mod": true
+          }
+        }
+      },
+      "delete": {
+        "allow": true,
+        "bypass": {
+          "locked": {
+            "mod": true
+          },
+          "owner": {
+            "mod": true
+          }
+        }
+      },
+      "find": {
+        "allow": true,
+        "bypass": {
+          "viewDeletedPosts": {
+            "mod": true
+          }
+        }
+      },
+      "lock": {
+        "allow": true,
+        "bypass": {
+          "lock": {
+            "mod": true
+          }
+        }
+      },
+      "pageByUser": {
+        "allow": true,
+        "bypass": {
+          "viewDeletedPosts": {
+            "mod": true
+          },
+          "viewDeletedUsers": true
+        }
+      },
+      "search": {
+        "allow": true
+      },
+      "update": {
+        "allow": true,
+        "bypass": {
+          "deleted": {
+            "mod": true
+          },
+          "locked": {
+            "mod": true
+          },
+          "owner": {
+            "mod": true
+          }
+        }
+      }
+    },
+    "rank": {},
+    "reports": {
+      "createMessageReport": {
+        "allow": true
+      },
+      "createMessageReportNote": {
+        "allow": true
+      },
+      "createPostReport": {
+        "allow": true
+      },
+      "createPostReportNote": {
+        "allow": true
+      },
+      "createUserReport": {
+        "allow": true
+      },
+      "createUserReportNote": {
+        "allow": true
+      },
+      "pageMessageReportNotes": {
+        "allow": true
+      },
+      "pageMessageReports": {
+        "allow": true
+      },
+      "pagePostReportNotes": {
+        "allow": true
+      },
+      "pagePostReports": {
+        "allow": true
+      },
+      "pageUserReportNotes": {
+        "allow": true
+      },
+      "pageUserReports": {
+        "allow": true
+      },
+      "updateMessageReport": {
+        "allow": true
+      },
+      "updateMessageReportNote": {
+        "allow": true
+      },
+      "updatePostReport": {
+        "allow": true
+      },
+      "updatePostReportNote": {
+        "allow": true
+      },
+      "updateUserReport": {
+        "allow": true
+      },
+      "updateUserReportNote": {
+        "allow": true
+      }
+    },
+    "roles": {},
+    "themes": {},
+    "threads": {
+      "byBoard": {
+        "allow": true
+      },
+      "create": {
+        "allow": true
+      },
+      "createPoll": {
+        "allow": true,
+        "bypass": {
+          "owner": {
+            "mod": true
+          }
+        }
+      },
+      "editPoll": {
+        "allow": true,
+        "bypass": {
+          "owner": {
+            "mod": true
+          }
+        }
+      },
+      "lock": {
+        "allow": true,
+        "bypass": {
+          "owner": {
+            "mod": true
+          }
+        }
+      },
+      "lockPoll": {
+        "allow": true,
+        "bypass": {
+          "owner": {
+            "mod": true
+          }
+        }
+      },
+      "moderated": {
+        "allow": true
+      },
+      "move": {
+        "allow": true,
+        "bypass": {
+          "owner": {
+            "mod": true
+          }
+        }
+      },
+      "posted": {
+        "allow": true
+      },
+      "purge": {
+        "allow": true,
+        "bypass": {
+          "owner": {
+            "mod": true
+          }
+        }
+      },
+      "removeVote": {
+        "allow": true
+      },
+      "sticky": {
+        "allow": true,
+        "bypass": {
+          "owner": {
+            "mod": true
+          }
+        }
+      },
+      "title": {
+        "allow": true,
+        "bypass": {
+          "owner": {
+            "mod": true
+          }
+        }
+      },
+      "viewed": {
+        "allow": true
+      },
+      "vote": {
+        "allow": true
+      }
+    },
+    "userNotes": {
+      "create": {
+        "allow": true
+      },
+      "delete": {
+        "allow": true
+      },
+      "page": {
+        "allow": true
+      },
+      "update": {
+        "allow": true
+      }
+    },
+    "userTrust": {
+      "addTrustFeedback": {
+        "allow": true
+      }
+    },
+    "users": {
+      "changeUsername": {
+        "allow": true
+      },
+      "deactivate": {
+        "allow": true
+      },
+      "delete": {
+        "allow": true,
+        "bypass": {
+          "priority": {
+            "mod": true
+          }
+        }
+      },
+      "find": {
+        "allow": true,
+        "bypass": {
+          "viewDeleted": true,
+          "viewMoreInfo": true
+        }
+      },
+      "lookup": {
+        "allow": true
+      },
+      "pagePublic": {
+        "allow": true
+      },
+      "reactivate": {
+        "allow": true
+      },
+      "searchUsernames": {
+        "allow": true
+      },
+      "update": {
+        "allow": true,
+        "bypass": {
+          "priority": {
+            "mod": true
+          }
+        }
+      }
+    },
+    "watchlist": {
+      "edit": {
+        "allow": true
+      },
+      "pageBoards": {
+        "allow": true
+      },
+      "pageThreads": {
+        "allow": true
+      },
+      "unread": {
+        "allow": true
+      },
+      "unwatchBoard": {
+        "allow": true
+      },
+      "unwatchThread": {
+        "allow": true
+      },
+      "watchBoard": {
+        "allow": true
+      },
+      "watchThread": {
+        "allow": true
+      }
+    }
+  },
+  "user": {
+    "ads": {
+      "analyticsView": {
+        "allow": true
+      },
+      "roundInfo": {
+        "allow": true
+      },
+      "view": {
+        "allow": true
+      }
+    },
+    "autoModeration": {},
+    "bans": {},
+    "blacklist": {},
+    "boards": {
+      "allCategories": {
+        "allow": true
+      },
+      "find": {
+        "allow": true
+      }
+    },
+    "categories": {},
+    "configurations": {},
+    "conversations": {
+      "create": {
+        "allow": true
+      },
+      "delete": {
+        "allow": true
+      },
+      "messages": {
+        "allow": true
+      }
+    },
+    "invitations": {
+      "invite": {
+        "allow": true
+      }
+    },
+    "legal": {},
+    "mentions": {
+      "create": {
+        "allow": true
+      },
+      "delete": {
+        "allow": true
+      },
+      "page": {
+        "allow": true
+      }
+    },
+    "messages": {
+      "create": {
+        "allow": true
+      },
+      "delete": {
+        "allow": true,
+        "bypass": {
+          "owner": true
+        }
+      },
+      "latest": {
+        "allow": true
+      }
+    },
+    "moderationLogs": {},
+    "moderators": {},
+    "motd": {
+      "get": {
+        "allow": true
+      }
+    },
+    "notifications": {
+      "counts": {
+        "allow": true
+      },
+      "dismiss": {
+        "allow": true
+      }
+    },
+    "portal": {
+      "view": {
+        "allow": true
+      }
+    },
+    "posts": {
+      "byThread": {
+        "allow": true,
+        "bypass": {
+          "viewDeletedPosts": {
+            "selfMod": true
+          }
+        }
+      },
+      "create": {
+        "allow": true
+      },
+      "delete": {
+        "allow": true,
+        "bypass": {
+          "locked": {
+            "selfMod": true
+          },
+          "owner": {
+            "selfMod": true
+          }
+        }
+      },
+      "find": {
+        "allow": true
+      },
+      "lock": {
+        "allow": true,
+        "bypass": {
+          "lock": {
+            "selfMod": true
+          }
+        }
+      },
+      "pageByUser": {
+        "allow": true
+      },
+      "search": {
+        "allow": true
+      },
+      "update": {
+        "allow": true
+      }
+    },
+    "rank": {},
+    "reports": {
+      "createMessageReport": {
+        "allow": true
+      },
+      "createPostReport": {
+        "allow": true
+      },
+      "createUserReport": {
+        "allow": true
+      }
+    },
+    "roles": {},
+    "themes": {},
+    "threads": {
+      "byBoard": {
+        "allow": true
+      },
+      "create": {
+        "allow": true
+      },
+      "createPoll": {
+        "allow": true
+      },
+      "editPoll": {
+        "allow": true
+      },
+      "lockPoll": {
+        "allow": true
+      },
+      "moderated": {
+        "allow": true
+      },
+      "posted": {
+        "allow": true
+      },
+      "removeVote": {
+        "allow": true
+      },
+      "title": {
+        "allow": true
+      },
+      "viewed": {
+        "allow": true
+      },
+      "vote": {
+        "allow": true
+      }
+    },
+    "userNotes": {},
+    "userTrust": {
+      "addTrustFeedback": {
+        "allow": true
+      }
+    },
+    "users": {
+      "deactivate": {
+        "allow": true
+      },
+      "find": {
+        "allow": true
+      },
+      "lookup": {
+        "allow": true
+      },
+      "pagePublic": {
+        "allow": true
+      },
+      "reactivate": {
+        "allow": true
+      },
+      "update": {
+        "allow": true
+      }
+    },
+    "watchlist": {
+      "edit": {
+        "allow": true
+      },
+      "pageBoards": {
+        "allow": true
+      },
+      "pageThreads": {
+        "allow": true
+      },
+      "unread": {
+        "allow": true
+      },
+      "unwatchBoard": {
+        "allow": true
+      },
+      "unwatchThread": {
+        "allow": true
+      },
+      "watchBoard": {
+        "allow": true
+      },
+      "watchThread": {
+        "allow": true
+      }
+    }
+  },
+  "patroller": {
+    "ads": {
+      "analyticsView": {
+        "allow": true
+      },
+      "roundInfo": {
+        "allow": true
+      },
+      "view": {
+        "allow": true
+      }
+    },
+    "autoModeration": {},
+    "bans": {},
+    "blacklist": {},
+    "boards": {
+      "allCategories": {
+        "allow": true
+      },
+      "find": {
+        "allow": true
+      }
+    },
+    "categories": {},
+    "configurations": {},
+    "conversations": {
+      "create": {
+        "allow": true
+      },
+      "delete": {
+        "allow": true
+      },
+      "messages": {
+        "allow": true
+      }
+    },
+    "invitations": {
+      "invite": {
+        "allow": true
+      }
+    },
+    "legal": {},
+    "mentions": {
+      "create": {
+        "allow": true
+      },
+      "delete": {
+        "allow": true
+      },
+      "page": {
+        "allow": true
+      }
+    },
+    "messages": {
+      "create": {
+        "allow": true
+      },
+      "delete": {
+        "allow": true,
+        "bypass": {
+          "owner": true
+        }
+      },
+      "latest": {
+        "allow": true
+      }
+    },
+    "moderationLogs": {},
+    "moderators": {},
+    "motd": {
+      "get": {
+        "allow": true
+      }
+    },
+    "notifications": {
+      "counts": {
+        "allow": true
+      },
+      "dismiss": {
+        "allow": true
+      }
+    },
+    "portal": {
+      "view": {
+        "allow": true
+      }
+    },
+    "posts": {
+      "byThread": {
+        "allow": true,
+        "bypass": {
+          "viewDeletedPosts": {
+            "priority": true
+          }
+        }
+      },
+      "create": {
+        "allow": true
+      },
+      "delete": {
+        "allow": true,
+        "bypass": {
+          "locked": {
+            "priority": true
+          },
+          "owner": {
+            "priority": true
+          }
+        }
+      },
+      "find": {
+        "allow": true
+      },
+      "lock": {
+        "allow": true,
+        "bypass": {
+          "lock": {
+            "priority": true
+          }
+        }
+      },
+      "pageByUser": {
+        "allow": true
+      },
+      "search": {
+        "allow": true
+      },
+      "update": {
+        "allow": true
+      }
+    },
+    "rank": {},
+    "reports": {
+      "createMessageReport": {
+        "allow": true
+      },
+      "createPostReport": {
+        "allow": true
+      },
+      "createUserReport": {
+        "allow": true
+      }
+    },
+    "roles": {},
+    "themes": {},
+    "threads": {
+      "byBoard": {
+        "allow": true
+      },
+      "create": {
+        "allow": true
+      },
+      "createPoll": {
+        "allow": true
+      },
+      "editPoll": {
+        "allow": true
+      },
+      "lockPoll": {
+        "allow": true
+      },
+      "moderated": {
+        "allow": true
+      },
+      "posted": {
+        "allow": true
+      },
+      "removeVote": {
+        "allow": true
+      },
+      "title": {
+        "allow": true
+      },
+      "viewed": {
+        "allow": true
+      },
+      "vote": {
+        "allow": true
+      }
+    },
+    "userNotes": {},
+    "userTrust": {
+      "addTrustFeedback": {
+        "allow": true
+      }
+    },
+    "users": {
+      "deactivate": {
+        "allow": true
+      },
+      "find": {
+        "allow": true
+      },
+      "lookup": {
+        "allow": true
+      },
+      "pagePublic": {
+        "allow": true
+      },
+      "reactivate": {
+        "allow": true
+      },
+      "update": {
+        "allow": true
+      }
+    },
+    "watchlist": {
+      "edit": {
+        "allow": true
+      },
+      "pageBoards": {
+        "allow": true
+      },
+      "pageThreads": {
+        "allow": true
+      },
+      "unread": {
+        "allow": true
+      },
+      "unwatchBoard": {
+        "allow": true
+      },
+      "unwatchThread": {
+        "allow": true
+      },
+      "watchBoard": {
+        "allow": true
+      },
+      "watchThread": {
+        "allow": true
+      }
+    }
+  },
+  "newbie": {
+    "ads": {
+      "analyticsView": {
+        "allow": true
+      },
+      "roundInfo": {
+        "allow": true
+      },
+      "view": {
+        "allow": true
+      }
+    },
+    "autoModeration": {},
+    "bans": {},
+    "blacklist": {},
+    "boards": {
+      "allCategories": {
+        "allow": true
+      },
+      "find": {
+        "allow": true
+      }
+    },
+    "categories": {},
+    "configurations": {},
+    "conversations": {
+      "create": {
+        "allow": true
+      },
+      "delete": {
+        "allow": true
+      },
+      "messages": {
+        "allow": true
+      }
+    },
+    "invitations": {},
+    "legal": {},
+    "mentions": {
+      "create": {
+        "allow": true
+      },
+      "delete": {
+        "allow": true
+      },
+      "page": {
+        "allow": true
+      }
+    },
+    "messages": {
+      "create": {
+        "allow": true
+      },
+      "delete": {
+        "allow": true,
+        "bypass": {
+          "owner": true
+        }
+      },
+      "latest": {
+        "allow": true
+      }
+    },
+    "moderationLogs": {},
+    "moderators": {},
+    "motd": {
+      "get": {
+        "allow": true
+      }
+    },
+    "notifications": {
+      "counts": {
+        "allow": true
+      },
+      "dismiss": {
+        "allow": true
+      }
+    },
+    "portal": {
+      "view": {
+        "allow": true
+      }
+    },
+    "posts": {
+      "byThread": {
+        "allow": true
+      },
+      "create": {
+        "allow": true
+      },
+      "delete": {
+        "allow": true
+      },
+      "find": {
+        "allow": true
+      },
+      "pageByUser": {
+        "allow": true
+      },
+      "search": {
+        "allow": true
+      },
+      "update": {
+        "allow": true
+      }
+    },
+    "rank": {},
+    "reports": {
+      "createMessageReport": {
+        "allow": true
+      },
+      "createPostReport": {
+        "allow": true
+      },
+      "createUserReport": {
+        "allow": true
+      }
+    },
+    "roles": {},
+    "themes": {},
+    "threads": {
+      "byBoard": {
+        "allow": true
+      },
+      "create": {
+        "allow": true
+      },
+      "createPoll": {
+        "allow": true
+      },
+      "editPoll": {
+        "allow": true
+      },
+      "lockPoll": {
+        "allow": true
+      },
+      "posted": {
+        "allow": true
+      },
+      "removeVote": {
+        "allow": true
+      },
+      "title": {
+        "allow": true
+      },
+      "viewed": {
+        "allow": true
+      },
+      "vote": {
+        "allow": true
+      }
+    },
+    "userNotes": {},
+    "userTrust": {
+      "addTrustFeedback": {
+        "allow": true
+      }
+    },
+    "users": {
+      "deactivate": {
+        "allow": true
+      },
+      "find": {
+        "allow": true
+      },
+      "lookup": {
+        "allow": true
+      },
+      "pagePublic": {
+        "allow": true
+      },
+      "reactivate": {
+        "allow": true
+      },
+      "update": {
+        "allow": true
+      }
+    },
+    "watchlist": {
+      "edit": {
+        "allow": true
+      },
+      "pageBoards": {
+        "allow": true
+      },
+      "pageThreads": {
+        "allow": true
+      },
+      "unread": {
+        "allow": true
+      },
+      "unwatchBoard": {
+        "allow": true
+      },
+      "unwatchThread": {
+        "allow": true
+      },
+      "watchBoard": {
+        "allow": true
+      },
+      "watchThread": {
+        "allow": true
+      }
+    }
+  },
+  "banned": {
+    "ads": {
+      "analyticsView": {
+        "allow": true
+      },
+      "roundInfo": {
+        "allow": true
+      },
+      "view": {
+        "allow": true
+      }
+    },
+    "autoModeration": {},
+    "bans": {},
+    "blacklist": {},
+    "boards": {
+      "allCategories": {
+        "allow": true
+      },
+      "find": {
+        "allow": true
+      }
+    },
+    "categories": {},
+    "configurations": {},
+    "conversations": {
+      "create": {
+        "allow": true
+      },
+      "delete": {
+        "allow": true
+      },
+      "messages": {
+        "allow": true
+      }
+    },
+    "invitations": {},
+    "legal": {},
+    "mentions": {
+      "delete": {
+        "allow": true
+      },
+      "page": {
+        "allow": true
+      }
+    },
+    "messages": {
+      "create": {
+        "allow": true
+      },
+      "delete": {
+        "allow": true,
+        "bypass": {
+          "owner": true
+        }
+      },
+      "latest": {
+        "allow": true
+      }
+    },
+    "moderationLogs": {},
+    "moderators": {},
+    "motd": {
+      "get": {
+        "allow": true
+      }
+    },
+    "notifications": {
+      "counts": {
+        "allow": true
+      },
+      "dismiss": {
+        "allow": true
+      }
+    },
+    "portal": {
+      "view": {
+        "allow": true
+      }
+    },
+    "posts": {
+      "byThread": {
+        "allow": true
+      },
+      "find": {
+        "allow": true
+      },
+      "pageByUser": {
+        "allow": true
+      }
+    },
+    "rank": {},
+    "reports": {},
+    "roles": {},
+    "themes": {},
+    "threads": {
+      "byBoard": {
+        "allow": true
+      },
+      "posted": {
+        "allow": true
+      },
+      "viewed": {
+        "allow": true
+      }
+    },
+    "userNotes": {},
+    "userTrust": {},
+    "users": {
+      "find": {
+        "allow": true
+      },
+      "lookup": {
+        "allow": true
+      }
+    },
+    "watchlist": {
+      "edit": {
+        "allow": true
+      },
+      "pageBoards": {
+        "allow": true
+      },
+      "pageThreads": {
+        "allow": true
+      },
+      "unread": {
+        "allow": true
+      },
+      "unwatchBoard": {
+        "allow": true
+      },
+      "unwatchThread": {
+        "allow": true
+      },
+      "watchBoard": {
+        "allow": true
+      },
+      "watchThread": {
+        "allow": true
+      }
+    }
+  },
+  "anonymous": {
+    "ads": {
+      "analyticsView": {
+        "allow": true
+      },
+      "roundInfo": {
+        "allow": true
+      },
+      "view": {
+        "allow": true
+      }
+    },
+    "autoModeration": {},
+    "bans": {},
+    "blacklist": {},
+    "boards": {
+      "allCategories": {
+        "allow": true
+      },
+      "find": {
+        "allow": true
+      }
+    },
+    "categories": {},
+    "configurations": {},
+    "conversations": {},
+    "invitations": {},
+    "legal": {},
+    "mentions": {},
+    "messages": {},
+    "moderationLogs": {},
+    "moderators": {},
+    "motd": {
+      "get": {
+        "allow": true
+      }
+    },
+    "notifications": {},
+    "portal": {
+      "view": {
+        "allow": true
+      }
+    },
+    "posts": {
+      "byThread": {
+        "allow": true
+      },
+      "find": {
+        "allow": true
+      },
+      "pageByUser": {
+        "allow": true
+      }
+    },
+    "rank": {},
+    "reports": {},
+    "roles": {},
+    "themes": {},
+    "threads": {
+      "byBoard": {
+        "allow": true
+      },
+      "viewed": {
+        "allow": true
+      }
+    },
+    "userNotes": {},
+    "userTrust": {},
+    "users": {
+      "find": {
+        "allow": true
+      },
+      "lookup": {
+        "allow": true
+      }
+    },
+    "watchlist": {}
+  },
+  "private": {
+    "ads": {},
+    "autoModeration": {},
+    "bans": {},
+    "blacklist": {},
+    "boards": {},
+    "categories": {},
+    "configurations": {},
+    "conversations": {},
+    "invitations": {},
+    "legal": {},
+    "mentions": {},
+    "messages": {},
+    "moderationLogs": {},
+    "moderators": {},
+    "motd": {
+      "get": {
+        "allow": true
+      }
+    },
+    "notifications": {},
+    "portal": {},
+    "posts": {},
+    "rank": {},
+    "reports": {},
+    "roles": {},
+    "themes": {},
+    "threads": {},
+    "userNotes": {},
+    "userTrust": {},
+    "users": {},
+    "watchlist": {}
+  }
+}

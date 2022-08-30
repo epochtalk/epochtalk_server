@@ -1,8 +1,8 @@
-json_file = "#{__DIR__}/../../roles_permissions.json"
+json_file = "#{__DIR__}/seeds/roles_permissions.json"
 
-alias Epoch.RolePermission
-alias Epoch.Role
-alias Epoch.Repo
+alias EpochtalkServer.Models.RolePermission
+alias EpochtalkServer.Models.Role
+alias EpochtalkServer.Repo
 
 # helper function to create role permissions changeset beore upsert
 create_role_permission_changeset = fn({role_lookup, permissions}) ->

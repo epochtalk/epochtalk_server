@@ -1,4 +1,4 @@
-alias Epoch.Role
+alias EpochtalkServer.Models.Role
 
 roles = [
   %{

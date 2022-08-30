@@ -1,6 +1,6 @@
-json_file = "#{__DIR__}/../../priority_restrictions.json"
+json_file = "#{__DIR__}/seeds/priority_restrictions.json"
 
-alias Epoch.Role
+alias EpochtalkServer.Models.Role
 
 json_file
 |> File.read!()

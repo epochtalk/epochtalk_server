@@ -1,7 +1,7 @@
 json_file = "#{__DIR__}/seeds/permissions.json"
 
-alias Epoch.Permission
-alias Epoch.Repo
+alias EpochtalkServer.Models.Permission
+alias EpochtalkServer.Repo
 alias Ecto.Multi
 
 create_permission_changeset = fn(data) ->

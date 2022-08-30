@@ -3,7 +3,7 @@ json_file = "#{__DIR__}/seeds/roles_permissions.json"
 File.rm("#{__DIR__}/seeds/permissions.json")
 output_file = File.open!("#{__DIR__}/seeds/permissions.json", [:write])
 
-output = json_file
+output_list = json_file
 |> File.read!()
 |> Jason.decode! # convert from json
 |> Enum.reduce([], fn { _role, permissions }, all_permissions ->
@@ -16,4 +16,9 @@ end)
 |> Enum.uniq
 |> Enum.sort
 
-IO.write(output_file, Jason.Formatter.pretty_print(Jason.encode!(output)))
+output_json = output_list
+|> Jason.encode!
+|> Jason.Formatter.pretty_print
+
+output_file
+|> IO.write(output_json)

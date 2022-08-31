@@ -33,19 +33,19 @@ defmodule EpochtalkServer.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
-      {:phoenix, "~> 1.6.11"},
-      {:phoenix_ecto, "~> 4.4"},
       {:ecto_sql, "~> 3.6"},
       {:guardian, "~> 2.2.4"},
       {:guardian_db, "~> 2.1.0"},
       {:guardian_redis, "~> 0.1.0"},
       {:iteraptor, git: "https://github.com/epochtalk/elixir-iteraptor.git", tag: "1.13.1"},
+      {:jason, "~> 1.2"},
+      {:phoenix, "~> 1.6.11"},
+      {:phoenix_ecto, "~> 4.4"},
+      {:plug_cowboy, "~> 2.5"},
       {:postgrex, ">= 0.0.0"},
       {:swoosh, "~> 1.3"},
       {:telemetry_metrics, "~> 0.6"},
-      {:telemetry_poller, "~> 1.0"},
-      {:jason, "~> 1.2"},
-      {:plug_cowboy, "~> 2.5"}
+      {:telemetry_poller, "~> 1.0"}
     ]
   end
 

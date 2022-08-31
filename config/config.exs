@@ -32,7 +32,12 @@ config :guardian_redis, :redis,
 # Configures the endpoint
 config :epochtalk_server, EpochtalkServerWeb.Endpoint,
   url: [host: "localhost"],
-  render_errors: [view: EpochtalkServerWeb.ErrorView, accepts: ~w(json), layout: false],
+  render_errors: [
+    view: EpochtalkServerWeb.ErrorView,
+    format: "json",
+    accepts: ~w(json),
+    layout: false
+  ],
   pubsub_server: EpochtalkServer.PubSub,
   live_view: [signing_salt: "2Ay27BWv"]
 

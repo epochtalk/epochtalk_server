@@ -8,6 +8,8 @@ defmodule EpochtalkServer.Application do
   @impl true
   def start(_type, _args) do
     children = [
+      # Start Guardian Redis Redix connection
+      GuardianRedis.Redix,
       # Start the Ecto repository
       EpochtalkServer.Repo,
       # Start the Telemetry supervisor

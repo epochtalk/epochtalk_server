@@ -10,6 +10,25 @@ import Config
 config :epochtalk_server,
   ecto_repos: [EpochtalkServer.Repo]
 
+# Configure Guardian
+config :epochtalk_server, EpochtalkServer.Guardian,
+       issuer: "EpochtalkServer",
+       # TODO: configure this at runtime through env
+       secret_key: "Secret key. You can use `mix guardian.gen.secret` to get one"
+
+# Configure Guardian.DB
+config :guardian, Guardian.DB,
+  repo: GuardianRedis.Repo
+  # schema_name: "guardian_tokens" # default
+  # token_types: ["refresh_token"] # store all token types if not set
+
+# Configure GuardianRedis
+# (implementation of Guardian.DB storage in redis)
+config :guardian_redis, :redis,
+  host: "127.0.0.1",
+  port: 6379,
+  pool_size: 10
+
 # Configures the endpoint
 config :epochtalk_server, EpochtalkServerWeb.Endpoint,
   url: [host: "localhost"],

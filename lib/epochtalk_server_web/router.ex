@@ -18,7 +18,7 @@ defmodule EpochtalkServerWeb.Router do
     plug Guardian.Plug.EnsureNotAuthenticated
   end
 
-  scope "/api", EpochWeb do
+  scope "/api", EpochtalkServerWeb do
     pipe_through [:api, :maybe_auth, :enforce_auth]
     get "/authenticate", AuthController, :authenticate
   end

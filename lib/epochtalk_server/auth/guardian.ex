@@ -1,5 +1,6 @@
 defmodule EpochtalkServer.Auth.Guardian do
   use Guardian, otp_app: :epochtalk_server
+  alias EpochtalkServer.Model.User
 
   def subject_for_token(%{user_id: user_id}, _claims) do
     # You can use any value for the subject of your token but
@@ -18,7 +19,9 @@ defmodule EpochtalkServer.Auth.Guardian do
     # Here we'll look up our resource from the claims, the subject can be
     # found in the `"sub"` key. In above `subject_for_token/2` we returned
     # the resource id so here we'll rely on that to look it up.
-    resource = EpochtalkServer.User.by_id(user_id)
+    resource = user_id
+    |> String.to_integer
+    |> User.by_id
     {:ok,  resource}
   end
   def resource_from_claims(_claims) do

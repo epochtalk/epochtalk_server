@@ -2,7 +2,7 @@ defmodule EpochtalkServerWeb.AuthController do
   use EpochtalkServerWeb, :controller
   alias EpochtalkServer.Model.User
   alias EpochtalkServer.Repo
-  alias EpochtalkServer.Guardian
+  alias EpochtalkServer.Auth.Guardian
 
   alias EpochtalkServerWeb.CustomErrors.{InvalidCredentials, NotLoggedIn}
   alias EpochtalkServerWeb.ErrorView

@@ -11,7 +11,7 @@ config :epochtalk_server,
   ecto_repos: [EpochtalkServer.Repo]
 
 # Configure Guardian
-config :epochtalk_server, EpochtalkServer.Guardian,
+config :epochtalk_server, EpochtalkServer.Auth.Guardian,
        issuer: "EpochtalkServer",
        # TODO: configure this at runtime through env
        secret_key: "Secret key. You can use `mix guardian.gen.secret` to get one"

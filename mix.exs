@@ -33,6 +33,7 @@ defmodule EpochtalkServer.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
+      {:argon2_elixir, "~> 3.0.0"},
       {:ecto_sql, "~> 3.6"},
       {:guardian, "~> 2.2.4"},
       {:guardian_db, "~> 2.1.0"},

@@ -14,4 +14,4 @@ COPY config/docker.secret.exs config/prod.secret.exs
 ENV MIX_ENV=prod
 RUN mix compile
 
-CMD until mix do ecto.create, ecto.migrate; do sleep 1; done
+CMD until mix ecto.setup; do sleep 1; done

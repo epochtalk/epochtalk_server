@@ -39,7 +39,7 @@ defmodule EpochtalkServer.MixProject do
       {:guardian_db, "~> 2.1.0"},
       {:guardian_redis, "~> 0.1.0"},
       {:iteraptor, git: "https://github.com/epochtalk/elixir-iteraptor.git", tag: "1.13.1"},
-      {:jason, "~> 1.2"},
+      {:jason, "~> 1.3.0"},
       {:phoenix, "~> 1.6.11"},
       {:phoenix_ecto, "~> 4.4"},
       {:plug_cowboy, "~> 2.5"},

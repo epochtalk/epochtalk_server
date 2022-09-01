@@ -47,7 +47,7 @@ defmodule EpochtalkServer.Model.User do
   end
   def by_id(id)
       when is_integer(id) do
-    user = Repo.get_by(User, id: id)
+    Repo.get_by(User, id: id)
   end
   def by_username_and_password(username, password)
       when is_binary(username) and is_binary(password) do

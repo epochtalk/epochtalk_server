@@ -33,12 +33,7 @@ defmodule EpochtalkServer.Model.User do
     |> validate_password()
   end
 
-  def with_username_exists?(username) do
-    query = from u in User,
-      where: u.username == ^username
-
-    Repo.exists?(query)
-  end
+  def with_username_exists?(username), do: Repo.exists?(from u in User, where: u.username == ^username)
   def with_email_exists?(email) do
     query = from u in User,
       where: u.email == ^email

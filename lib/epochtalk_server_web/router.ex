@@ -6,7 +6,7 @@ defmodule EpochtalkServerWeb.Router do
   end
   pipeline :maybe_auth do
     plug Guardian.Plug.Pipeline, module: EpochtalkServer.Auth.Guardian,
-                               error_handler: EpochtalkServerWeb.AuthErrorHandler
+                               error_handler: EpochtalkServerWeb.GuardianErrorHandler
 
     plug Guardian.Plug.VerifyHeader, claims: %{"typ" => "access"}
     plug Guardian.Plug.LoadResource, allow_blank: true

@@ -18,6 +18,10 @@ defmodule EpochtalkServerWeb.Router do
     plug Guardian.Plug.EnsureNotAuthenticated
   end
 
+  scope "/api", EpochWeb do
+    pipe_through [:api, :maybe_auth, :enforce_auth]
+    get "/authenticate", AuthController, :authenticate
+  end
   scope "/api", EpochtalkServerWeb do
     pipe_through [:api, :maybe_auth, :enforce_not_auth]
     post "/login", AuthController, :login
@@ -27,6 +31,7 @@ defmodule EpochtalkServerWeb.Router do
     get "/register/username/:username", AuthController, :username
     get "/register/email/:email", AuthController, :email
     post "/register", AuthController, :register
+    delete "/logout", AuthController, :logout
   end
 
   # Enables the Swoosh mailbox preview in development.

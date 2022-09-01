@@ -35,10 +35,7 @@ defmodule EpochtalkServer.Model.User do
 
   def with_username_exists?(username), do: Repo.exists?(from u in User, where: u.username == ^username)
   def with_email_exists?(email), do: Repo.exists?(from u in User, where: u.email == ^email)
-  def by_id(id)
-      when is_integer(id) do
-    Repo.get_by(User, id: id)
-  end
+  def by_id(id) when is_integer(id), do: Repo.get_by(User, id: id)
   def by_username_and_password(username, password)
       when is_binary(username) and is_binary(password) do
     user = Repo.get_by(User, username: username)

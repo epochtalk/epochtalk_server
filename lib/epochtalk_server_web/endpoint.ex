@@ -1,6 +1,9 @@
 defmodule EpochtalkServerWeb.Endpoint do
   use Phoenix.Endpoint, otp_app: :epochtalk_server
 
+  # cors configuration
+  plug Corsica, origins: "*", allow_headers: :all
+
   # socket "/live", Phoenix.LiveView.Socket, websocket: [connect_info: [session: @session_options]]
 
   # Serve at "/" the static files from "priv/static" directory.

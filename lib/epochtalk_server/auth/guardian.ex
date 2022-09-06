@@ -21,6 +21,7 @@ defmodule EpochtalkServer.Auth.Guardian do
     # the resource id so here we'll rely on that to look it up.
     resource = user_id
     |> String.to_integer
+    # TODO: redis call here instead
     |> User.by_id
     {:ok,  resource}
   end

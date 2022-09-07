@@ -3,6 +3,7 @@ defmodule EpochtalkServer.Session do
     # replace db_user role with role lookups
     # |> Map.put(:role, Enum.map(db_user.roles, &(&1.lookup))
     # actually, just assume role lookups are there
+    # TODO: return role lookups from db instead of entire roles
 
     # set default role if necessary
     roles = db_user.roles
@@ -43,6 +44,15 @@ defmodule EpochtalkServer.Session do
     unless db_user.moderating == nil or db_user.moderating == [] do
       Redix.command(:redix, ["SADD", moderating_key, db_user.moderating])
     end
+
+    # TODO: do this outside of here, need guardian token
+    # -- or don't do it if we don't need this functionality
+    # // save user-session to redis set under "user:{userId}:sessions"
+    # .then(function() {
+    #   var userSessionKey = 'user:' + dbUser.id + ':sessions';
+    #   return redis.saddAsync(userSessionKey, decodedToken.sessionId);
+    # })
+    # .then(function() { return formatUserReply(token, dbUser); });
   end
   def update_roles do
 

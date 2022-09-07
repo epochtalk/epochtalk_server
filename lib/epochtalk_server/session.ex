@@ -29,7 +29,7 @@ defmodule EpochtalkServer.Session do
     # save/replace ban_expiration to redis under "user:{userId}:baninfo"
     ban_key = "user:#{db_user.id}:baninfo"
     ban_info = %{}
-    if db_user.ban_expiration != nil do Map.add(ban_info, :expiration, db_user.ban_expiration) end
+    unless db_user.ban_expiration == nil do Map.add(ban_info, :expiration, db_user.ban_expiration) end
     if db_user.malicious_score >= 1 do Map.add(ban_info, :malicious_score, db_user.malicious_score) end
     Redix.command(:redix, ["DEL", ban_key])
     key_count = ban_info

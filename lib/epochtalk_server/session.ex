@@ -25,6 +25,17 @@ defmodule EpochtalkServer.Session do
     role_key = "user:#{db_user.id}:roles"
     Redix.command(:redix, ["DEL", role_key])
     Redix.command(:redix, ["SADD", role_key, db_user.roles])
+
+    # save/replace ban_expiration to redis under "user:{userId}:baninfo"
+    ban_key = "user:#{db_user.id}:baninfo"
+    ban_info = %{}
+    if db_user.ban_expiration != nil do Map.add(ban_info, :expiration, db_user.ban_expiration) end
+    if db_user.malicious_score >= 1 do Map.add(ban_info, :malicious_score, db_user.malicious_score) end
+    Redix.command(:redix, ["DEL", ban_key])
+    key_count = ban_info
+    |> Map.keys
+    |> List.length
+    unless key_count == 0 do Redix.command(:redix, ["HSET", ban_key, "baninfo", ban_info]) end
   end
   def update_roles do
 

@@ -20,6 +20,11 @@ defmodule EpochtalkServer.Session do
       # set avatar if it's available
       _ -> Redix.command(:redix, ["HSET", user_key, "username", db_user.username, "avatar", db_user.avatar])
     end
+
+    # save/replace roles to redis under "user:{userId}:roles"
+    role_key = "user:#{db_user.id}:roles"
+    Redix.command(:redix, ["DEL", role_key])
+    Redix.command(:redix, ["SADD", role_key, db_user.roles])
   end
   def update_roles do
 

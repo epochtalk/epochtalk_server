@@ -1,9 +1,9 @@
-defmodule EpochtalkServer.Model.User do
+defmodule EpochtalkServer.Models.User do
   use Ecto.Schema
   import Ecto.Changeset
   import Ecto.Query
   alias EpochtalkServer.Repo
-  alias EpochtalkServer.Model.User
+  alias EpochtalkServer.Models.User
 
   schema "users" do
     field :email, :string

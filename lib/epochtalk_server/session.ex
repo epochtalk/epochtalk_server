@@ -12,6 +12,14 @@ defmodule EpochtalkServer.Session do
       _ -> db_user.roles
     end
     db_user = Map.put(db_user, :roles, roles)
+
+    # save username, avatar to redis hash under "user:{userId}"
+    user_key = "user:#{db_user.id}"
+    case db_user.avatar do
+      "" -> Redix.command(:redix, ["HSET", user_key, "username", db_user.username])
+      # set avatar if it's available
+      _ -> Redix.command(:redix, ["HSET", user_key, "username", db_user.username, "avatar", db_user.avatar])
+    end
   end
   def update_roles do
 

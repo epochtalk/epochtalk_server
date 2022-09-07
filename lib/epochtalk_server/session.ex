@@ -36,6 +36,13 @@ defmodule EpochtalkServer.Session do
     |> Map.keys
     |> List.length
     unless key_count == 0 do Redix.command(:redix, ["HSET", ban_key, "baninfo", ban_info]) end
+
+    # save/replace moderating boards to redis under "user:{userId}:moderating"
+    moderating_key = "user:#{db_user.id}:moderating"
+    Redix.command(:redix, ["DEL", moderating_key])
+    unless db_user.moderating == nil or db_user.moderating == [] do
+      Redix.command(:redix, ["SADD", moderating_key, db_user.moderating])
+    end
   end
   def update_roles do
 

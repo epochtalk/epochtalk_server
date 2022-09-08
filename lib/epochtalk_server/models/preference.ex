@@ -1,12 +1,11 @@
 defmodule EpochtalkServer.Models.Preference do
   use Ecto.Schema
   import Ecto.Changeset
-  alias EpochtalkServer.Repo
-  alias EpochtalkServer.Models.Profile
+  alias EpochtalkServer.Models.User
 
   @primary_key false
   @schema_prefix "users"
-  schema "preference" do
+  schema "preferences" do
     belongs_to :user_id, User, foreign_key: :id, type: :integer
     field :posts_per_page, :integer
     field :threads_per_page, :integer

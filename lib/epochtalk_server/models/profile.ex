@@ -1,8 +1,7 @@
 defmodule EpochtalkServer.Models.Profile do
   use Ecto.Schema
   import Ecto.Changeset
-  alias EpochtalkServer.Repo
-  alias EpochtalkServer.Models.Profile
+  alias EpochtalkServer.Models.User
 
   @schema_prefix "users"
   schema "profiles" do

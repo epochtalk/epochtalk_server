@@ -49,6 +49,7 @@ defmodule EpochtalkServer.Session do
     # })
     # .then(function() { return formatUserReply(token, dbUser); });
   end
+  # use default role
   def update_roles(user_id, roles) when roles == nil or roles == [] do
     update_roles(user_id, [%{lookup: ['user']}])
   end

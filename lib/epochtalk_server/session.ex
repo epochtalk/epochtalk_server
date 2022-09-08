@@ -48,7 +48,7 @@ defmodule EpochtalkServer.Session do
   def update_roles(user_id, role_lookups) when role_lookups == nil or role_lookups == [] do
     update_roles(user_id, ['user'])
   end
-  def update_roles(user_id, [role_lookups]) do
+  def update_roles(user_id, role_lookups) when is_list(role_lookups) do
     save_roles(user_id, role_lookups)
   end
   def update_moderating do

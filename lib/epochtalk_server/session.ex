@@ -1,4 +1,5 @@
 defmodule EpochtalkServer.Session do
+  @role_key "user:#{user_id}:roles"
   # use default role
   def save(db_user) when db_user.roles == nil or db_user.roles == [] do
     db_user |> Map.put(:roles, ['user']) |> save()
@@ -61,5 +62,10 @@ defmodule EpochtalkServer.Session do
   end
   def update_ban_info do
 
+  end
+  # save/replace roles to redis under "user:{userId}:roles"
+  defp save_roles(user_id, roles) do
+    Redix.command(:redix, ["DEL", @role_key])
+    Redix.command(:redix, ["SADD", @role_key, roles])
   end
 end

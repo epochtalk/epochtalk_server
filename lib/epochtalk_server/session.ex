@@ -1,18 +1,13 @@
 defmodule EpochtalkServer.Session do
+  # use default role
+  def save(db_user) when db_user.roles == nil or db_user.roles == [] do
+    db_user |> Map.put(:roles, ['user']) |> save()
+  end
   def save(db_user) do
     # replace db_user role with role lookups
     # |> Map.put(:role, Enum.map(db_user.roles, &(&1.lookup))
     # actually, just assume role lookups are there
     # TODO: return role lookups from db instead of entire roles
-
-    # set default role if necessary
-    roles = db_user.roles
-    |> List.length
-    |> case do
-      0 -> ['user']
-      _ -> db_user.roles
-    end
-    db_user = Map.put(db_user, :roles, roles)
 
     # save username, avatar to redis hash under "user:{userId}"
     user_key = "user:#{db_user.id}"

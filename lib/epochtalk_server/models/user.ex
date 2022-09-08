@@ -41,47 +41,48 @@ defmodule EpochtalkServer.Models.User do
   def by_username(username) when is_binary(username) do
     query = from u in User,
     left_join: p in Profile,
-      where: u.id == p.user_id,
+      on: u.id == p.user_id,
     left_join: pr in Preference,
-      where: u.id == pr.user_id,
-    select: {u.id,
-      u.username,
-      u.email,
-      u.passhash,
-      u.confirmation_token,
-      u.reset_token,
-      u.reset_expiration,
-      u.deleted,
-      u.malicious_score,
-      u.created_at,
-      u.updated_at,
-      u.imported_at,
-      p.avatar,
-      p.position,
-      p.signature,
-      p.raw_signature,
-      p.fields,
-      p.post_count,
-      p.last_active,
-      pr.posts_per_page,
-      pr.threads_per_page,
-      pr.collapsed_categories,
-      pr.ignored_boards,
-      fragment(
-       """
-       CASE WHEN EXISTS (
-         SELECT user_id
-         FROM roles_users
-         WHERE role_id = (SELECT id FROM roles WHERE lookup = \'banned\') and user_id = u.id
-       )
-       THEN (
-         SELECT expiration
-         FROM users.bans
-         WHERE user_id = u.id
-       )
-       ELSE NULL END AS ban_expiration,
-       """)}
-      Repo.one(query)
+      on: u.id == pr.user_id,
+    select: %{
+      id: u.id,
+      username: u.username,
+      email: u.email,
+      passhash: u.passhash,
+      confirmation_token: u.confirmation_token,
+      reset_token: u.reset_token,
+      reset_expiration: u.reset_expiration,
+      deleted: u.deleted,
+      malicious_score: u.malicious_score,
+      created_at: u.created_at,
+      updated_at: u.updated_at,
+      imported_at: u.imported_at,
+      avatar: p.avatar,
+      position: p.position,
+      signature: p.signature,
+      raw_signature: p.raw_signature,
+      fields: p.fields,
+      post_count: p.post_count,
+      last_active: p.last_active,
+      posts_per_page: pr.posts_per_page,
+      threads_per_page: pr.threads_per_page,
+      collapsed_categories: pr.collapsed_categories,
+      ignored_boards: pr.ignored_boards,
+      ban_expiration: fragment("""
+        CASE WHEN EXISTS (
+          SELECT user_id
+          FROM roles_users
+          WHERE role_id = (SELECT id FROM roles WHERE lookup = \'banned\') and user_id = ?
+        )
+        THEN (
+          SELECT expiration
+          FROM users.bans
+          WHERE user_id = ?
+        )
+        ELSE NULL END
+      """, u.id, u.id)},
+    where: u.username == ^username
+    Repo.one(query)
   end
   def by_username_and_password(username, password)
       when is_binary(username) and is_binary(password) do

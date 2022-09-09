@@ -23,13 +23,7 @@ defmodule EpochtalkServer.Session do
     |> List.length
     unless key_count == 0 do Redix.command(:redix, ["HSET", ban_key, "baninfo", ban_info]) end
 
-    # save/replace moderating boards to redis under "user:{userId}:moderating"
-    moderating_key = generate_key(db_user.id, "moderating")
-    Redix.command(:redix, ["DEL", moderating_key])
-    unless db_user.moderating == nil or db_user.moderating == [] do
-      Redix.command(:redix, ["SADD", moderating_key, db_user.moderating])
-    end
-
+    update_moderating(db_user.id, db_user.moderating)
     # TODO: do this outside of here, need guardian token
     # -- or don't do it if we don't need this functionality
     # // save user-session to redis set under "user:{userId}:sessions"
@@ -48,8 +42,13 @@ defmodule EpochtalkServer.Session do
     Redix.command(:redix, ["DEL", role_key])
     Redix.command(:redix, ["SADD", role_key, role_lookups])
   end
-  def update_moderating do
-
+  def update_moderating(user_id, moderating) do
+    # save/replace moderating boards to redis under "user:{userId}:moderating"
+    moderating_key = generate_key(user_id, "moderating")
+    Redix.command(:redix, ["DEL", moderating_key])
+    unless moderating == nil or moderating == [] do
+      Redix.command(:redix, ["SADD", moderating_key, moderating])
+    end
   end
   def update_user_info do
 

@@ -41,6 +41,7 @@ defmodule EpochtalkServer.Session do
   end
   # use default role
   def update_roles(user_id, roles) when is_list(roles) do
+    # save/replace roles to redis under "user:{userId}:roles"
     role_lookups = roles
     |> Enum.map(&(&1.lookup))
     role_key = generate_key(user_id, "roles")
@@ -56,7 +57,6 @@ defmodule EpochtalkServer.Session do
   def update_ban_info do
 
   end
-  # save/replace roles to redis under "user:{userId}:roles"
   defp generate_key(user_id, "user"), do: "user:#{user_id}"
   defp generate_key(user_id, type), do: "user:#{user_id}:#{type}"
 end

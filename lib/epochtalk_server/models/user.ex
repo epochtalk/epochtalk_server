@@ -6,6 +6,7 @@ defmodule EpochtalkServer.Models.User do
   alias EpochtalkServer.Models.User
   alias EpochtalkServer.Models.Profile
   alias EpochtalkServer.Models.Preference
+  alias EpochtalkServer.Models.Role
 
   schema "users" do
     field :email, :string
@@ -82,7 +83,20 @@ defmodule EpochtalkServer.Models.User do
         ELSE NULL END
       """, u.id, u.id)},
     where: u.username == ^username
-    Repo.one(query)
+
+    if user = Repo.one(query) do
+      # set all user's roles, if the have none set default role
+      user = case length(all_users_roles = Role.by_user_id(user.id)) > 0 do
+        true -> Map.put(user, :roles, all_users_roles)
+        false -> Map.put(user, :roles, [Role.get_default()])
+      end
+      # set primary role info
+      primary_role = List.first(user[:roles])
+      hc = primary_role.highlight_color
+      Map.put(user, :role_name, primary_role.name)
+      |> Map.put(:role_highlight_color, (if hc, do: hc, else: ""))
+      |> formatUser
+    end
   end
   def by_username_and_password(username, password)
       when is_binary(username) and is_binary(password) do
@@ -129,5 +143,13 @@ defmodule EpochtalkServer.Models.User do
     else
       changeset
     end
+  end
+  defp formatUser(user) do
+    user = Map.filter(user, fn {_, v} -> v end) # remove nil
+    user = if f = Map.get(user, :fields), do: Map.merge(user, f), else: user # merge fields onto user
+    user = if cc = Map.get(user, :collapsed_categories), do: Map.put(user, :collapsed_categories, Map.get(cc, "cats")), else: user # unnest cats
+    user = if ib = Map.get(user, :ignored_boards), do: Map.put(user, :ignored_boards, Map.get(ib, "boards")), else: user #unnest boards
+    Map.delete(user, :fields) # strip fields from user
+    |> Map.put(:avatar, Map.get(user, :avatar)) # sets avatar back to nil if not set
   end
 end

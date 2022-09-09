@@ -1,15 +1,7 @@
 defmodule EpochtalkServer.Session do
   def save(db_user) do
     # TODO: return role lookups from db instead of entire roles
-
-    # save username, avatar to redis hash under "user:{userId}"
-    user_key = generate_key(db_user.id, "user")
-    case db_user.avatar do
-      "" -> Redix.command(:redix, ["HSET", user_key, "username", db_user.username])
-      # set avatar if it's available
-      _ -> Redix.command(:redix, ["HSET", user_key, "username", db_user.username, "avatar", db_user.avatar])
-    end
-
+    update_user_info(db_user.id, db_user.username, db_user.avatar)
     update_roles(db_user.id, db_user.roles)
 
     # save/replace ban_expiration to redis under "user:{user_id}:baninfo"
@@ -43,15 +35,27 @@ defmodule EpochtalkServer.Session do
     Redix.command(:redix, ["SADD", role_key, role_lookups])
   end
   def update_moderating(user_id, moderating) do
-    # save/replace moderating boards to redis under "user:{userId}:moderating"
+    # save/replace moderating boards to redis under "user:{user_id}:moderating"
     moderating_key = generate_key(user_id, "moderating")
     Redix.command(:redix, ["DEL", moderating_key])
     unless moderating == nil or moderating == [] do
       Redix.command(:redix, ["SADD", moderating_key, moderating])
     end
   end
-  def update_user_info do
-
+  def update_user_info(user_id, username) do
+    user_key = generate_key(db_user.id, "user")
+    # delete avatar from redis hash under "user:{user_id}"
+    Redis.command(:redis, ["HDEL", user_key, "avatar"])
+    # save username to redis hash under "user:{user_id}"
+    Redix.command(:redix, ["HSET", user_key, "username", db_user.username])
+  end
+  def update_user_info(user_id, username, avatar) when is_nil(avatar) or avatar == "" do
+    update_user_info(user_id, username)
+  end
+  def update_user_info(user_id, username, avatar) do
+    # save username, avatar to redis hash under "user:{user_id}"
+    user_key = generate_key(db_user.id, "user")
+    Redix.command(:redix, ["HSET", user_key, "username", db_user.username, "avatar", db_user.avatar])
   end
   def update_ban_info do
 

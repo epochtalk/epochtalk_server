@@ -12,7 +12,7 @@ defmodule EpochtalkServer.Session do
 
     update_roles(db_user.id, db_user.roles)
 
-    # save/replace ban_expiration to redis under "user:{userId}:baninfo"
+    # save/replace ban_expiration to redis under "user:{user_id}:baninfo"
     ban_key = generate_key(db_user.id, "baninfo")
     ban_info = %{}
     unless db_user.ban_expiration == nil do Map.add(ban_info, :expiration, db_user.ban_expiration) end
@@ -26,7 +26,7 @@ defmodule EpochtalkServer.Session do
     update_moderating(db_user.id, db_user.moderating)
     # TODO: do this outside of here, need guardian token
     # -- or don't do it if we don't need this functionality
-    # // save user-session to redis set under "user:{userId}:sessions"
+    # // save user-session to redis set under "user:{user_id}:sessions"
     # .then(function() {
     #   var userSessionKey = 'user:' + dbUser.id + ':sessions';
     #   return redis.saddAsync(userSessionKey, decodedToken.sessionId);
@@ -35,7 +35,7 @@ defmodule EpochtalkServer.Session do
   end
   # use default role
   def update_roles(user_id, roles) when is_list(roles) do
-    # save/replace roles to redis under "user:{userId}:roles"
+    # save/replace roles to redis under "user:{user_id}:roles"
     role_lookups = roles
     |> Enum.map(&(&1.lookup))
     role_key = generate_key(user_id, "roles")

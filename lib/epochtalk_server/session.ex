@@ -1,9 +1,4 @@
 defmodule EpochtalkServer.Session do
-  @role_key "user:#{user_id}:roles"
-  # use default role
-  def save(db_user) when db_user.roles == nil or db_user.roles == [] do
-    db_user |> Map.put(:roles, ['user']) |> save()
-  end
   def save(db_user) do
     # TODO: return role lookups from db instead of entire roles
 
@@ -15,7 +10,7 @@ defmodule EpochtalkServer.Session do
       _ -> Redix.command(:redix, ["HSET", user_key, "username", db_user.username, "avatar", db_user.avatar])
     end
 
-    save_roles(db_user.id, db_user.roles)
+    update_roles(db_user.id, db_user.roles)
 
     # save/replace ban_expiration to redis under "user:{userId}:baninfo"
     ban_key = "user:#{db_user.id}:baninfo"
@@ -45,11 +40,12 @@ defmodule EpochtalkServer.Session do
     # .then(function() { return formatUserReply(token, dbUser); });
   end
   # use default role
-  def update_roles(user_id, role_lookups) when role_lookups == nil or role_lookups == [] do
-    update_roles(user_id, ['user'])
-  end
-  def update_roles(user_id, role_lookups) when is_list(role_lookups) do
-    save_roles(user_id, role_lookups)
+  def update_roles(user_id, roles) when is_list(roles) do
+    role_lookups = roles
+    |> Enum.map(&(&1.lookup))
+    key = role_key(user_id)
+    Redix.command(:redix, ["DEL", key])
+    Redix.command(:redix, ["SADD", key, role_lookups])
   end
   def update_moderating do
 
@@ -61,8 +57,5 @@ defmodule EpochtalkServer.Session do
 
   end
   # save/replace roles to redis under "user:{userId}:roles"
-  defp save_roles(user_id, roles) do
-    Redix.command(:redix, ["DEL", @role_key])
-    Redix.command(:redix, ["SADD", @role_key, roles])
-  end
+  defp role_key(user_id), do: "user:#{user_id}:roles"
 end

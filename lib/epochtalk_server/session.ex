@@ -3,18 +3,9 @@ defmodule EpochtalkServer.Session do
     # TODO: return role lookups from db instead of entire roles
     update_user_info(db_user.id, db_user.username, db_user.avatar)
     update_roles(db_user.id, db_user.roles)
-
-    # save/replace ban_expiration to redis under "user:{user_id}:baninfo"
-    ban_key = generate_key(db_user.id, "baninfo")
-    ban_info = %{}
-    unless db_user.ban_expiration == nil do Map.add(ban_info, :expiration, db_user.ban_expiration) end
-    if db_user.malicious_score >= 1 do Map.add(ban_info, :malicious_score, db_user.malicious_score) end
-    Redix.command(:redix, ["DEL", ban_key])
-    key_count = ban_info
-    |> Map.keys
-    |> List.length
-    unless key_count == 0 do Redix.command(:redix, ["HSET", ban_key, "baninfo", ban_info]) end
-
+    ban_info = if Map.has_key?(db_user, :ban_expiration), do: %{ ban_expiration: db_user.ban_expiration }, else: %{}
+    ban_info = if Map.has_key?(db_user, :malicious_score), do: Map.put(ban_info, :malicious_score, db_user.malicious_score)
+    update_ban_info(db_user.id, ban_info)
     update_moderating(db_user.id, db_user.moderating)
     # TODO: do this outside of here, need guardian token
     # -- or don't do it if we don't need this functionality
@@ -57,8 +48,11 @@ defmodule EpochtalkServer.Session do
     user_key = generate_key(user_id, "user")
     Redix.command(:redix, ["HSET", user_key, "username", db_user.username, "avatar", db_user.avatar])
   end
-  def update_ban_info do
-
+  def update_ban_info(user_id, ban_info) do
+    # save/replace ban_expiration to redis under "user:{user_id}:baninfo"
+    ban_key = generate_key(user_id, "baninfo")
+    Redix.command(:redix, ["HDEL", ban_key, "ban_expiration", "malicious_score"])
+    Redix.command(:redix, ["HSET", ban_key, ban_info)
   end
   defp generate_key(user_id, "user"), do: "user:#{user_id}"
   defp generate_key(user_id, type), do: "user:#{user_id}:#{type}"

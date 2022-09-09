@@ -3,7 +3,7 @@ defmodule EpochtalkServer.Session do
     # TODO: return role lookups from db instead of entire roles
 
     # save username, avatar to redis hash under "user:{userId}"
-    user_key = "user:#{db_user.id}"
+    user_key = generate_key(db_user.id, "user")
     case db_user.avatar do
       "" -> Redix.command(:redix, ["HSET", user_key, "username", db_user.username])
       # set avatar if it's available
@@ -13,7 +13,7 @@ defmodule EpochtalkServer.Session do
     update_roles(db_user.id, db_user.roles)
 
     # save/replace ban_expiration to redis under "user:{userId}:baninfo"
-    ban_key = "user:#{db_user.id}:baninfo"
+    ban_key = generate_key(db_user.id, "baninfo")
     ban_info = %{}
     unless db_user.ban_expiration == nil do Map.add(ban_info, :expiration, db_user.ban_expiration) end
     if db_user.malicious_score >= 1 do Map.add(ban_info, :malicious_score, db_user.malicious_score) end
@@ -24,7 +24,7 @@ defmodule EpochtalkServer.Session do
     unless key_count == 0 do Redix.command(:redix, ["HSET", ban_key, "baninfo", ban_info]) end
 
     # save/replace moderating boards to redis under "user:{userId}:moderating"
-    moderating_key = "user:#{db_user.id}:moderating"
+    moderating_key = generate_key(db_user.id, "moderating")
     Redix.command(:redix, ["DEL", moderating_key])
     unless db_user.moderating == nil or db_user.moderating == [] do
       Redix.command(:redix, ["SADD", moderating_key, db_user.moderating])
@@ -43,9 +43,9 @@ defmodule EpochtalkServer.Session do
   def update_roles(user_id, roles) when is_list(roles) do
     role_lookups = roles
     |> Enum.map(&(&1.lookup))
-    key = role_key(user_id)
-    Redix.command(:redix, ["DEL", key])
-    Redix.command(:redix, ["SADD", key, role_lookups])
+    role_key = generate_key(user_id, "roles")
+    Redix.command(:redix, ["DEL", role_key])
+    Redix.command(:redix, ["SADD", role_key, role_lookups])
   end
   def update_moderating do
 
@@ -57,5 +57,6 @@ defmodule EpochtalkServer.Session do
 
   end
   # save/replace roles to redis under "user:{userId}:roles"
-  defp role_key(user_id), do: "user:#{user_id}:roles"
+  defp generate_key(user_id, "user"), do: "user:#{user_id}"
+  defp generate_key(user_id, type), do: "user:#{user_id}:#{type}"
 end

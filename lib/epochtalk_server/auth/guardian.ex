@@ -1,6 +1,6 @@
 defmodule EpochtalkServer.Auth.Guardian do
   use Guardian, otp_app: :epochtalk_server
-  alias EpochtalkServer.Model.User
+  alias EpochtalkServer.Models.User
 
   def subject_for_token(%{user_id: user_id}, _claims) do
     # You can use any value for the subject of your token but

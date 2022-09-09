@@ -1,6 +1,6 @@
 defmodule EpochtalkServerWeb.AuthController do
   use EpochtalkServerWeb, :controller
-  alias EpochtalkServer.Model.User
+  alias EpochtalkServer.Models.User
   alias EpochtalkServer.Repo
   alias EpochtalkServer.Auth.Guardian
 

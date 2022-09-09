@@ -4,6 +4,7 @@ defmodule EpochtalkServer.Models.Role do
   import Ecto.Query, only: [from: 2]
   alias EpochtalkServer.Repo
   alias EpochtalkServer.Models.Role
+  alias EpochtalkServer.Models.RoleUser
 
   schema "roles" do
     field :name, :string
@@ -35,5 +36,15 @@ defmodule EpochtalkServer.Models.Role do
     |> Repo.get(id)
     |> change(%{ permissions: permissions })
     |> Repo.update
+  end
+
+  def get_default(), do: by_lookup("user")
+  def by_user_id(user_id) do
+    query = from ru in RoleUser,
+      join: r in Role,
+      where: ru.user_id == ^user_id and r.id == ru.role_id,
+      select: r,
+      order_by: [asc: r.priority]
+    Repo.all(query)
   end
 end

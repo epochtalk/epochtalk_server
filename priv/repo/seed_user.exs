@@ -3,9 +3,9 @@ System.argv()
 |> case do
   [username, email, password, "admin" = _admin] ->
     admin = true
-    User.seed_user(username, email, password, admin)
+    User.create_user(%{username: username, email: email, password: password}, admin)
   [username, email, password] ->
-    User.seed_user(username, email, password)
+    User.create_user(%{username: username, email: email, password: password})
 end
 |> case do
   {:ok, _} -> IO.puts("Successfully seeded user")

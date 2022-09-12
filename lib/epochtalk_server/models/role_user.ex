@@ -3,6 +3,7 @@ defmodule EpochtalkServer.Models.RoleUser do
   import Ecto.Changeset
   alias EpochtalkServer.Models.User
   alias EpochtalkServer.Models.Role
+  alias EpochtalkServer.Models.RoleUser
   @admin_role_id 1
 
   @primary_key false

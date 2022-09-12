@@ -10,8 +10,8 @@ defmodule EpochtalkServer.Models.RoleUser do
     belongs_to :role, Role
   end
 
-  def changeset(permission, attrs \\ %{}) do
-    permission
+  def changeset(role_user, attrs \\ %{}) do
+    role_user
     |> cast(attrs, [:user_id, :role_id])
     |> validate_required([:user_id, :role_id])
   end

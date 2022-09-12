@@ -1,6 +1,7 @@
 defmodule EpochtalkServer.Models.RoleUser do
   use Ecto.Schema
   import Ecto.Changeset
+  alias EpochtalkServer.Repo
   alias EpochtalkServer.Models.User
   alias EpochtalkServer.Models.Role
   alias EpochtalkServer.Models.RoleUser

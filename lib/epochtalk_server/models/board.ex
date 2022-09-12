@@ -2,6 +2,7 @@ defmodule EpochtalkServer.Models.Board do
   use Ecto.Schema
   import Ecto.Changeset
   alias EpochtalkServer.Models.Category
+  alias EpochtalkServer.Models.BoardMapping
 
   schema "boards" do
     field :name, :string
@@ -15,7 +16,7 @@ defmodule EpochtalkServer.Models.Board do
     field :imported_at, :naive_datetime
     field :updated_at, :naive_datetime
     field :meta, :map
-    many_to_many :categories, Category, join_through: "board_mapping"
+    many_to_many :categories, Category, join_through: BoardMapping
   end
 
   def changeset(board, attrs) do
@@ -25,4 +26,5 @@ defmodule EpochtalkServer.Models.Board do
     |> unique_constraint(:id, name: :boards_pkey)
     |> unique_constraint(:slug, name: :boards_slug_index)
   end
+  def insert(%Board{} = board), do: Repo.insert(board)
 end

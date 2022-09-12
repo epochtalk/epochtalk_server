@@ -7,6 +7,7 @@ defmodule EpochtalkServer.Models.User do
   alias EpochtalkServer.Models.Profile
   alias EpochtalkServer.Models.Preference
   alias EpochtalkServer.Models.Role
+  alias EpochtalkServer.Models.RoleUser
 
   schema "users" do
     field :email, :string
@@ -34,6 +35,23 @@ defmodule EpochtalkServer.Models.User do
     |> validate_username()
     |> validate_email()
     |> validate_password()
+  end
+  # create admin, for seeding
+  def create_user(user_atrs, true = _admin) do
+    Repo.transaction(fn ->
+      create_user(user_atrs)
+      |> case do
+        {:ok, user} ->
+          user
+          |> RoleUser.set_admin
+      end
+    end)
+  end
+  # create user, for seeding
+  def create_user(user_atrs) do
+    %User{}
+    |> User.registration_changeset(user_attrs)
+    |> Repo.insert
   end
 
   def with_username_exists?(username), do: Repo.exists?(from u in User, where: u.username == ^username)

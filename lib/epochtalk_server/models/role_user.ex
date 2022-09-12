@@ -4,6 +4,7 @@ defmodule EpochtalkServer.Models.RoleUser do
   alias EpochtalkServer.Models.User
   alias EpochtalkServer.Models.Role
 
+  @primary_key false
   schema "roles_users" do
     belongs_to :user, User
     belongs_to :role, Role

@@ -3,6 +3,7 @@ defmodule EpochtalkServer.Models.Board do
   import Ecto.Changeset
   alias EpochtalkServer.Models.Category
   alias EpochtalkServer.Models.BoardMapping
+  alias EpochtalkServer.Models.Board
 
   schema "boards" do
     field :name, :string

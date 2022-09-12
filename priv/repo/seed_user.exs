@@ -10,3 +10,4 @@ end
 |> case do
   {:ok, _} -> IO.puts("Successfully seeded user")
   {:error, _} -> IO.puts("Error seeding user")
+end

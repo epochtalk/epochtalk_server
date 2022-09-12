@@ -3,6 +3,7 @@ defmodule EpochtalkServer.Models.RoleUser do
   import Ecto.Changeset
   alias EpochtalkServer.Models.User
   alias EpochtalkServer.Models.Role
+  @admin_role_id 1
 
   @primary_key false
   schema "roles_users" do
@@ -14,5 +15,11 @@ defmodule EpochtalkServer.Models.RoleUser do
     role_user
     |> cast(attrs, [:user_id, :role_id])
     |> validate_required([:user_id, :role_id])
+  end
+  def set_admin(%User{} = user), do: set_role(user, @admin_role_id)
+  def set_role(%User{} = user, role_id) do
+    %RoleUser{}
+    |> RoleUser.changeset(%{user_id: user.id, role_id: role_id})
+    |> Repo.insert
   end
 end

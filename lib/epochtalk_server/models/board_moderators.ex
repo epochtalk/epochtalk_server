@@ -17,4 +17,8 @@ defmodule EpochtalkServer.Models.BoardModerators do
     |> cast(attrs, [:user_id, :board_id])
     |> validate_required([:user_id, :board_id])
   end
+
+  def get_boards(user_id) when is_integer(user_id) do
+    Repo.get_by(BoardModerators, user_id: user_id)
+  end
 end

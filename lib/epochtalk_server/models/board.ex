@@ -1,6 +1,7 @@
 defmodule EpochtalkServer.Models.Board do
   use Ecto.Schema
   import Ecto.Changeset
+  alias EpochtalkServer.Repo
   alias EpochtalkServer.Models.Category
   alias EpochtalkServer.Models.BoardMapping
   alias EpochtalkServer.Models.Board

@@ -8,9 +8,11 @@ category = %Category{
 
 board_name = "General Discussion"
 board_description = "Every forum's got one; talk about anything here"
+board_slug = "general-discussion"
 board = %Board{
   name: board_name,
-  description: board_description
+  description: board_description,
+  slug: board_slug
 }
 
 seeded_category = Category.insert(category)

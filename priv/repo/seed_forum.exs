@@ -1,6 +1,7 @@
 alias EpochtalkServer.Models.Category
 alias EpochtalkServer.Models.Board
 alias EpochtalkServer.Models.BoardMapping
+alias EpochtalkServer.Repo
 
 category_name = "General"
 category = %{
@@ -16,31 +17,35 @@ board = %{
   slug: board_slug
 }
 
-category_id = Category.create(category).id
+Repo.transaction(fn ->
+  category_id = Category.create(category).id
 
-board_id = Board.create(board)
+  board_id = Board.create(board)
+  |> case do
+    b -> b.id
+  end
+
+  board_mapping = [
+    %{
+      id: category_id,
+      name: category_name,
+      type: "category",
+      view_order: 0
+    },
+    %{
+      id: board_id,
+      name: board_name,
+      type: "board",
+      category_id: category_id,
+      view_order: 1
+    }
+  ]
+
+  BoardMapping.update(board_mapping)
+end)
 |> case do
-  {:error, m} ->
-    IO.puts("Seed failed")
-    IO.inspect(m)
-    Process.exit(self, :normal)
-  b -> b.id
+  {:ok, _} -> IO.puts("Success")
+  {:error, error} ->
+    IO.puts("Error during seed")
+    IO.inspect(error)
 end
-
-board_mapping = [
-  %{
-    id: category_id,
-    name: category_name,
-    type: "category",
-    view_order: 0
-  },
-  %{
-    id: board_id,
-    name: board_name,
-    type: "board",
-    category_id: category_id,
-    view_order: 1
-  }
-]
-
-BoardMapping.update(board_mapping)

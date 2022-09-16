@@ -6,6 +6,8 @@ System.argv()
     User.create_user(%{username: username, email: email, password: password}, admin)
   [username, email, password] ->
     User.create_user(%{username: username, email: email, password: password})
+  _ ->
+    IO.puts("Usage: mix seed.user <username> <email> <password> [admin]")
 end
 |> case do
   {:ok, _} -> IO.puts("Successfully seeded user")

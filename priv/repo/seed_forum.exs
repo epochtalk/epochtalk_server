@@ -13,7 +13,7 @@ board = %Board{
   description: board_description
 }
 
-seeded_category = Category.insert(category_seed)
+seeded_category = Category.insert(category)
 |> case do
   {:ok, c} -> c
   _ ->
@@ -21,7 +21,7 @@ seeded_category = Category.insert(category_seed)
     Process.exit(self, :normal)
 end
 
-seeded_board = Board.insert(board_seed)
+seeded_board = Board.insert(board)
 |> case do
   {:ok, b} -> b
   _ ->

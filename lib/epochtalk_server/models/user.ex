@@ -8,6 +8,7 @@ defmodule EpochtalkServer.Models.User do
   alias EpochtalkServer.Models.Preference
   alias EpochtalkServer.Models.Role
   alias EpochtalkServer.Models.RoleUser
+  alias EpochtalkServer.Models.BannedAddress
 
   schema "users" do
     field :email, :string
@@ -23,7 +24,7 @@ defmodule EpochtalkServer.Models.User do
     field :imported_at, :naive_datetime
     field :updated_at, :naive_datetime
     field :deleted, :boolean, default: false
-    field :malicious_score, :integer
+    field :malicious_score, :decimal
 
     field :smf_member, :map, virtual: true
   end
@@ -53,9 +54,15 @@ defmodule EpochtalkServer.Models.User do
   def with_username_exists?(username), do: Repo.exists?(from u in User, where: u.username == ^username)
   def with_email_exists?(email), do: Repo.exists?(from u in User, where: u.email == ^email)
   def by_id(id) when is_integer(id), do: Repo.get_by(User, id: id)
-  def clear_malicious_score(id) when is_integer(id) do
-    from(u in User, where: u.id == ^id)
-    |> Repo.update_all(set: [malicious_score: nil])
+  defp set_malicious_score(id, value) do
+      from(u in User, where: u.id == ^id)
+      |> Repo.update_all(set: [malicious_score: value])
+  end
+  def clear_malicious_score(id) when is_integer(id), do: set_malicious_score(id, nil)
+  def get_and_set_malicious_score(id, ip) when is_integer(id) and is_binary(ip) do
+    malicious_score = BannedAddress.calculate_malicious_score_from_ip(ip)
+    set_malicious_score(id, malicious_score)
+    malicious_score
   end
   def by_username(username) when is_binary(username) do
     query = from u in User,

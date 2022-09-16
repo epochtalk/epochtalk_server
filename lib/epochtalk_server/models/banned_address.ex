@@ -104,6 +104,52 @@ defmodule EpochtalkServer.Models.BannedAddress do
     end
   end
 
+  def calculate_malicious_score_from_ip(ip) do
+    case :inet.parse_address(to_charlist(ip)) do
+      {:ok, ip} ->
+        hostname_score = case :inet_res.gethostbyaddr(ip) do
+          {:ok, host} -> hostname_from_host(host) |> calculate_hostname_score
+          {:error, _} -> 0 # no hostname found, return 0 for hostname score
+        end
+        ip32_score = calculate_ip32_score(ip)
+        ip24_score = calculate_ip24_score(ip)
+        ip16_score = calculate_ip16_score(ip)
+        # calculate malicious score using all scores
+        hostname_score + ip32_score + 0.04 + ip24_score + 0.0016 + ip16_score
+      {:error, _} -> 0 # invalid ip address, return 0 for malicious score
+    end
+  end
+
+  defp hostname_from_host({ _, name, _, _, _, _ }), do: List.to_string(name)
+  defp calculate_hostname_score(hostname) do
+    (from ba in BannedAddress,
+      where: like(ba.hostname, ^hostname),
+      select: %{weight: ba.weight, decay: ba.decay, created_at: ba.created_at, updates: ba.updates})
+    |> Repo.one
+    |> calculate_score_decay
+  end
+  defp calculate_ip32_score({ ip1, ip2, ip3, ip4 }) do
+    (from ba in BannedAddress,
+      where: ba.ip1 == ^ip1 and ba.ip2 == ^ip2 and ba.ip3 == ^ip3 and ba.ip4 == ^ip4,
+      select: %{weight: ba.weight, decay: ba.decay, created_at: ba.created_at, updates: ba.updates})
+    |> Repo.one
+    |> calculate_score_decay
+  end
+  defp calculate_ip24_score({ ip1, ip2, ip3, _ }) do
+    (from ba in BannedAddress,
+      where: ba.ip1 == ^ip1 and ba.ip2 == ^ip2 and ba.ip3 == ^ip3,
+      select: %{weight: ba.weight, decay: ba.decay, created_at: ba.created_at, updates: ba.updates})
+    |> Repo.one
+    |> calculate_score_decay
+  end
+  defp calculate_ip16_score({ ip1, ip2, _, _ }) do
+    (from ba in BannedAddress,
+      where: ba.ip1 == ^ip1 and ba.ip2 == ^ip2,
+      select: %{weight: ba.weight, decay: ba.decay, created_at: ba.created_at, updates: ba.updates})
+    |> Repo.one
+    |> calculate_score_decay
+  end
+
   # Calculates decay given MS and a weight
   # Decay algorithm is 0.8897*curWeight^0.9644 run weekly
   # This will calculate decay given the amount of time that has passed
@@ -129,5 +175,5 @@ defmodule EpochtalkServer.Models.BannedAddress do
     decay_for_time(diff_ms, weight)
   end
   # banned address data found, but does not decay
-  def calculate_score_decay(banned_address), do: banned_address.weight
+  def calculate_score_decay(banned_address), do: Decimal.to_float(banned_address.weight)
 end

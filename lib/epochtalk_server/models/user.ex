@@ -40,11 +40,7 @@ defmodule EpochtalkServer.Models.User do
   def create_user(user_attrs, true = _admin) do
     Repo.transaction(fn ->
       create_user(user_attrs)
-      |> case do
-        {:ok, user} ->
-          user
-          |> RoleUser.set_admin
-      end
+      |> case do {:ok, %{ id: id } = _user} -> RoleUser.set_admin(id) end
     end)
   end
   # create user, for seeding

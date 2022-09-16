@@ -19,13 +19,14 @@ defmodule EpochtalkServer.Models.RoleUser do
     |> cast(attrs, [:user_id, :role_id])
     |> validate_required([:user_id, :role_id])
   end
-  def set_admin(%User{} = user), do: set_role(user, @admin_role_id)
-  def set_role(%User{} = user, role_id) do
-    %RoleUser{}
-    |> RoleUser.changeset(%{user_id: user.id, role_id: role_id})
-    |> Repo.insert
-  end
 
+  def set_admin(user_id), do: set_user_role(@admin_role_id, user_id)
+  def set_user_role(role_id, user_id) do
+    case Repo.one(from(ru in RoleUser, where: ru.role_id == ^role_id and ru.user_id == ^user_id)) do
+      nil -> Repo.insert(changeset(%RoleUser{}, %{role_id: role_id, user_id: user_id}))
+      roleuser_cs -> {:ok, roleuser_cs}
+    end
+  end
   def delete_user_role(role_id, user_id) do
     query = from ru in RoleUser,
       where: ru.role_id == ^role_id and ru.user_id == ^user_id

@@ -38,13 +38,18 @@ defmodule EpochtalkServer.Models.Role do
     |> Repo.update
   end
 
-  def get_default(), do: by_lookup("user")
+  def get_banned_role_id(), do: Repo.one(from(r in Role, select: r.id, where: r.lookup == "banned"))
+  def get_newbie_role_id(), do: Repo.one(from(r in Role, select: r.id, where: r.lookup == "newbie"))
   def by_user_id(user_id) do
     query = from ru in RoleUser,
       join: r in Role,
       where: ru.user_id == ^user_id and r.id == ru.role_id,
       select: r,
       order_by: [asc: r.priority]
-    Repo.all(query)
+    case Repo.all(query) do
+      [] -> [get_default()]
+      result -> result
+    end
   end
+  defp get_default(), do: by_lookup("user")
 end

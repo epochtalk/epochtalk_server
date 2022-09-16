@@ -23,11 +23,29 @@ defmodule EpochtalkServer.Models.Category do
     |> cast(attrs, [:id, :name, :view_order, :viewable_by, :postable_by, :created_at, :imported_at, :updated_at, :meta])
     |> unique_constraint(:id, name: :categories_pkey)
   end
-  def insert(%Category{} = cat), do: Repo.insert(cat)
+  def insert(%Category{} = category), do: Repo.insert(category)
+
+  def create_changeset(category, attrs) do
+    now = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
+    attrs = attrs
+    |> Map.put(:created_at, now)
+    |> Map.put(:updated_at, now)
+    category
+    |> cast(attrs, [:name, :viewable_by, :created_at, :updated_at])
+  end
+  def create(category) do
+    category_cs = create_changeset(%Category{}, category)
+    db_cat = Repo.insert!(category_cs)
+    %{
+      id: db_cat.id,
+      name: db_cat.name,
+      viewable_by: db_cat.viewable_by
+    }
+  end
 
   def changeset_for_board_mapping(category, attrs) do
     category
-    |> cast(attrs, [:id, :name, :view_order, :viewable_by, :postable_by])
+    |> cast(attrs, [:id, :name, :view_order, :viewable_by])
     |> unique_constraint(:id, name: :categories_pkey)
   end
 

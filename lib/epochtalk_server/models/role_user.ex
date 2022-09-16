@@ -1,6 +1,7 @@
 defmodule EpochtalkServer.Models.RoleUser do
   use Ecto.Schema
   import Ecto.Changeset
+  import Ecto.Query, only: [from: 2]
   alias EpochtalkServer.Repo
   alias EpochtalkServer.Models.User
   alias EpochtalkServer.Models.Role
@@ -23,5 +24,11 @@ defmodule EpochtalkServer.Models.RoleUser do
     %RoleUser{}
     |> RoleUser.changeset(%{user_id: user.id, role_id: role_id})
     |> Repo.insert
+  end
+
+  def delete(role_id, user_id) do
+    query = from ru in RoleUser,
+      where: ru.role_id == ^role_id and ru.user_id == ^user_id
+    Repo.delete_all(query)
   end
 end

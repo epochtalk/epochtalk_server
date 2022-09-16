@@ -57,6 +57,10 @@ defmodule EpochtalkServer.Models.User do
   def with_username_exists?(username), do: Repo.exists?(from u in User, where: u.username == ^username)
   def with_email_exists?(email), do: Repo.exists?(from u in User, where: u.email == ^email)
   def by_id(id) when is_integer(id), do: Repo.get_by(User, id: id)
+  def clear_malicious_score(id) when is_integer(id) do
+    from(u in User, where: u.id == ^id)
+    |> Repo.update_all(set: [malicious_score: nil])
+  end
   def by_username(username) when is_binary(username) do
     query = from u in User,
     left_join: p in Profile,
@@ -103,11 +107,8 @@ defmodule EpochtalkServer.Models.User do
     where: u.username == ^username
 
     if user = Repo.one(query) do
-      # set all user's roles, if the have none set default role
-      user = case length(all_users_roles = Role.by_user_id(user.id)) > 0 do
-        true -> Map.put(user, :roles, all_users_roles)
-        false -> Map.put(user, :roles, [Role.get_default()])
-      end
+      # set all user's roles
+      user = Map.put(user, :roles, Role.by_user_id(user.id))
       # set primary role info
       primary_role = List.first(user[:roles])
       hc = primary_role.highlight_color

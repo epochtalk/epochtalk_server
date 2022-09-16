@@ -1,4 +1,6 @@
 alias EpochtalkServer.Models.Category
+alias EpochtalkServer.Models.Board
+
 category_name = "General"
 category = %Category{
   name: category_name

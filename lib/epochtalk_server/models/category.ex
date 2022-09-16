@@ -5,7 +5,7 @@ defmodule EpochtalkServer.Models.Category do
   alias EpochtalkServer.Models.Board
   alias EpochtalkServer.Models.Category
   alias EpochtalkServer.Models.BoardMapping
-  
+
   schema "categories" do
     field :name, :string
     field :view_order, :integer

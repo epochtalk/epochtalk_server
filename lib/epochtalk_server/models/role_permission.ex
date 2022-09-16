@@ -63,9 +63,9 @@ defmodule EpochtalkServer.Models.RolePermission do
       where: rp.role_id == ^role_id)
     |> Repo.all
     # filter for true permissions
-    |> Enum.filter(fn %{:value => value, :modified => modified} -> (value || modified) && !(value && modified) end)
+    |> Enum.filter(fn %{value: value, modified: modified} -> (value || modified) && !(value && modified) end)
     # convert results to map; keyed by permissions_path
-    |> Enum.reduce(%{}, fn %{:permission_path => permission_path, :value => value}, acc -> Map.put(acc, permission_path, value) end)
+    |> Enum.reduce(%{}, fn %{permission_path: permission_path, value: value}, acc -> Map.put(acc, permission_path, value) end)
     |> Iteraptor.from_flatmap
   end
   # for server-side role-loading use, only runs if roles permissions table is currently empty

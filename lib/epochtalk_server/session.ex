@@ -39,7 +39,7 @@ defmodule EpochtalkServer.Session do
     # delete avatar from redis hash under "user:{user_id}"
     Redix.command(:redix, ["HDEL", user_key, "avatar"])
     # save username to redis hash under "user:{user_id}"
-    Redix.command(:redix, ["HSET", user_key, "username", db_user.username])
+    Redix.command(:redix, ["HSET", user_key, "username", username])
   end
   def update_user_info(user_id, username, avatar) when is_nil(avatar) or avatar == "" do
     update_user_info(user_id, username)
@@ -47,7 +47,7 @@ defmodule EpochtalkServer.Session do
   def update_user_info(user_id, username, avatar) do
     # save username, avatar to redis hash under "user:{user_id}"
     user_key = generate_key(user_id, "user")
-    Redix.command(:redix, ["HSET", user_key, "username", db_user.username, "avatar", db_user.avatar])
+    Redix.command(:redix, ["HSET", user_key, "username", username, "avatar", avatar])
   end
   def update_ban_info(user_id, ban_info) do
     # save/replace ban_expiration to redis under "user:{user_id}:baninfo"

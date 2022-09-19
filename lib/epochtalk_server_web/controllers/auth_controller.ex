@@ -43,10 +43,6 @@ defmodule EpochtalkServerWeb.AuthController do
 
     user = Map.put(user, :token, token)
 
-    # TODO: check for empty roles first
-    # add default role
-    user = Map.put(user, :roles, ["user"])
-
     conn
     |> render("credentials.json", user: user)
   end

@@ -23,7 +23,8 @@ defmodule EpochtalkServer.Session do
     |> Enum.map(&(&1.lookup))
     role_key = generate_key(user_id, "roles")
     Redix.command(:redix, ["DEL", role_key])
-    Redix.command(:redix, ["SADD", role_key, role_lookups])
+    role_lookups
+    |> Enum.each(&Redix.command(:redix, ["SADD", role_key, &1]))
   end
   def update_moderating(user_id, moderating) do
     # save/replace moderating boards to redis under "user:{user_id}:moderating"

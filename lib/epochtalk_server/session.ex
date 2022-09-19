@@ -37,7 +37,7 @@ defmodule EpochtalkServer.Session do
   def update_user_info(user_id, username) do
     user_key = generate_key(user_id, "user")
     # delete avatar from redis hash under "user:{user_id}"
-    Redis.command(:redis, ["HDEL", user_key, "avatar"])
+    Redix.command(:redix, ["HDEL", user_key, "avatar"])
     # save username to redis hash under "user:{user_id}"
     Redix.command(:redix, ["HSET", user_key, "username", db_user.username])
   end

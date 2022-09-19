@@ -52,7 +52,7 @@ defmodule EpochtalkServer.Session do
     # save/replace ban_expiration to redis under "user:{user_id}:baninfo"
     ban_key = generate_key(user_id, "baninfo")
     Redix.command(:redix, ["HDEL", ban_key, "ban_expiration", "malicious_score"])
-    Redix.command(:redix, ["HSET", ban_key, ban_info)
+    Redix.command(:redix, ["HSET", ban_key, ban_info])
   end
   defp generate_key(user_id, "user"), do: "user:#{user_id}"
   defp generate_key(user_id, type), do: "user:#{user_id}:#{type}"

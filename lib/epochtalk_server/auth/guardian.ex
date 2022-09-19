@@ -19,10 +19,14 @@ defmodule EpochtalkServer.Auth.Guardian do
     # Here we'll look up our resource from the claims, the subject can be
     # found in the `"sub"` key. In above `subject_for_token/2` we returned
     # the resource id so here we'll rely on that to look it up.
-    resource = user_id
-    |> String.to_integer
-    # TODO: redis call here instead
-    |> User.by_id
+    resource = %{
+      id: user_id,
+      # session_id: ?,
+      username: Redix.command(:redix, ["HGET", "user:#{user_id}", "username"]),
+      avatar: Redix.command(:redix, ["HGET", "user:#{user_id}", "avatar"]),
+      roles: Redix.command(:redix, ["GET", "user:#{user_id}:roles"]),
+      moderating: Redix.command(:redix, ["GET", "user:#{user_id}:moderating"])
+    }
     {:ok,  resource}
   end
   def resource_from_claims(_claims) do

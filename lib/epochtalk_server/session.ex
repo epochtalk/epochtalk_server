@@ -6,7 +6,7 @@ defmodule EpochtalkServer.Session do
     ban_info = if Map.has_key?(db_user, :ban_expiration), do: %{ ban_expiration: db_user.ban_expiration }, else: %{}
     ban_info = if Map.has_key?(db_user, :malicious_score), do: Map.put(ban_info, :malicious_score, db_user.malicious_score)
     update_ban_info(db_user.id, ban_info)
-    update_moderating(db_user.id, db_user.moderating)
+    update_moderating(db_user.id, Map.get(db_user, :moderating))
     # TODO: do this outside of here, need guardian token
     # -- or don't do it if we don't need this functionality
     # // save user-session to redis set under "user:{user_id}:sessions"

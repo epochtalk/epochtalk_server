@@ -6,6 +6,7 @@ defmodule EpochtalkServer.Models.Role do
   alias EpochtalkServer.Models.Role
   alias EpochtalkServer.Models.RoleUser
 
+  @derive {Jason.Encoder, only: [:name, :description, :lookup, :priority, :highlight_color, :permissions, :priority_restrictions, :created_at, :updated_at]}
   schema "roles" do
     field :name, :string
     field :description, :string

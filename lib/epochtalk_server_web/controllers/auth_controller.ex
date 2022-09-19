@@ -63,7 +63,7 @@ defmodule EpochtalkServerWeb.AuthController do
     login(conn, Map.put(user_params, "rememberMe", false))
   end
   def login(conn, %{"username" => username, "password" => password} = user_params) do
-    if user = User.by_username_and_password(username, password) do
+    if user = User.by_username(username) do
       # TODO: check confirmation token
       # TODO: check ban expiration
       # TODO: get moderated boards

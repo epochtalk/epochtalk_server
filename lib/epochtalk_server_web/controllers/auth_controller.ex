@@ -3,6 +3,7 @@ defmodule EpochtalkServerWeb.AuthController do
   alias EpochtalkServer.Models.User
   alias EpochtalkServer.Repo
   alias EpochtalkServer.Auth.Guardian
+  alias EpochtalkServer.Session
 
   alias EpochtalkServerWeb.CustomErrors.{InvalidCredentials, NotLoggedIn}
   alias EpochtalkServerWeb.ErrorView
@@ -90,10 +91,7 @@ defmodule EpochtalkServerWeb.AuthController do
     |> Guardian.Plug.current_token
 
     user = Map.put(user, :token, token)
-
-    # TODO: check for empty roles first
-    # add default role
-    user = Map.put(user, :roles, ["user"])
+    Session.save(user)
 
     conn
     |> render("credentials.json", user: user)

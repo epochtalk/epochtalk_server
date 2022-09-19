@@ -22,10 +22,10 @@ defmodule EpochtalkServer.Auth.Guardian do
     resource = %{
       id: user_id,
       # session_id: ?,
-      username: Redix.command(:redix, ["HGET", "user:#{user_id}", "username"]),
-      avatar: Redix.command(:redix, ["HGET", "user:#{user_id}", "avatar"]),
-      roles: Redix.command(:redix, ["GET", "user:#{user_id}:roles"]),
-      moderating: Redix.command(:redix, ["GET", "user:#{user_id}:moderating"])
+      username: Redix.command!(:redix, ["HGET", "user:#{user_id}", "username"]),
+      avatar: Redix.command!(:redix, ["HGET", "user:#{user_id}", "avatar"]),
+      roles: Redix.command!(:redix, ["SMEMBERS", "user:#{user_id}:roles"]),
+      moderating: Redix.command!(:redix, ["GET", "user:#{user_id}:moderating"])
     }
     {:ok,  resource}
   end

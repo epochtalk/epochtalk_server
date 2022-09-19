@@ -27,10 +27,12 @@ defmodule EpochtalkServerWeb.AuthView do
       id: user.id,
       username: user.username,
       # TODO: fill in these fields
-      avatar: "", # user.avatar
+      avatar: Map.get(user, :avatar), # user.avatar
       permissions: %{}, # user.permissions
-      moderating: %{}, # user.moderating
-      roles: user.roles
+      moderating: Map.get(user, :moderating), # user.moderating
+      roles: user.roles,
+      ban_expiration: Map.get(user, :ban_expiration),
+      malicious_score: Map.get(user, :malicious_score)
     }
   end
 end

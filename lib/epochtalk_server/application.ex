@@ -10,6 +10,8 @@ defmodule EpochtalkServer.Application do
     children = [
       # Start Guardian Redis Redix connection
       GuardianRedis.Redix,
+      # Start the server Redis connection
+      {Redix, host: "localhost", name: :redix},
       # Start the Ecto repository
       EpochtalkServer.Repo,
       # Start the Telemetry supervisor

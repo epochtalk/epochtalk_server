@@ -117,15 +117,10 @@ defmodule EpochtalkServer.Models.User do
       hc = primary_role.highlight_color
       Map.put(user, :role_name, primary_role.name)
       |> Map.put(:role_highlight_color, (if hc, do: hc, else: ""))
-      |> formatUser
+      |> format_user
     end
   end
-  def by_username_and_password(username, password)
-      when is_binary(username) and is_binary(password) do
-    user = Repo.get_by(User, username: username)
-    if User.valid_password?(user, password), do: user
-  end
-  def valid_password?(%User{passhash: hashed_password}, password)
+  def valid_password?(%{passhash: hashed_password} = _user, password)
       when is_binary(hashed_password) and byte_size(password) > 0 do
     Argon2.verify_pass(password, hashed_password)
   end
@@ -166,7 +161,7 @@ defmodule EpochtalkServer.Models.User do
       changeset
     end
   end
-  defp formatUser(user) do
+  defp format_user(user) do
     user = Map.filter(user, fn {_, v} -> v end) # remove nil
     user = if f = Map.get(user, :fields), do: Map.merge(user, f), else: user # merge fields onto user
     user = if cc = Map.get(user, :collapsed_categories), do: Map.put(user, :collapsed_categories, Map.get(cc, "cats")), else: user # unnest cats

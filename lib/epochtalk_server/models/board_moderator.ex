@@ -19,6 +19,7 @@ defmodule EpochtalkServer.Models.BoardModerator do
   end
 
   def get_boards(user_id) when is_integer(user_id) do
-    Repo.get_by(BoardModerator, user_id: user_id)
+    Repo.all(BoardModerator, user_id: user_id)
+    |> Enum.map(&(&1.board_id))
   end
 end

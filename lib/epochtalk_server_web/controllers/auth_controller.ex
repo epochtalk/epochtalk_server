@@ -1,10 +1,18 @@
 defmodule EpochtalkServerWeb.AuthController do
   use EpochtalkServerWeb, :controller
   alias EpochtalkServer.Models.User
+  alias EpochtalkServer.Models.Ban
+  alias EpochtalkServer.Models.BoardModerator
   alias EpochtalkServer.Repo
   alias EpochtalkServer.Auth.Guardian
+  alias EpochtalkServer.Session
 
-  alias EpochtalkServerWeb.CustomErrors.{InvalidCredentials, NotLoggedIn}
+  alias EpochtalkServerWeb.CustomErrors.{
+    InvalidCredentials,
+    NotLoggedIn,
+    AccountNotConfirmed,
+    AccountMigrationNotComplete
+  }
   alias EpochtalkServerWeb.ErrorView
 
   def username(conn, %{"username" => username}) do
@@ -42,10 +50,6 @@ defmodule EpochtalkServerWeb.AuthController do
 
     user = Map.put(user, :token, token)
 
-    # TODO: check for empty roles first
-    # add default role
-    user = Map.put(user, :roles, ["user"])
-
     conn
     |> render("credentials.json", user: user)
   end
@@ -63,38 +67,52 @@ defmodule EpochtalkServerWeb.AuthController do
     login(conn, Map.put(user_params, "rememberMe", false))
   end
   def login(conn, %{"username" => username, "password" => password} = user_params) do
-    if user = User.by_username_and_password(username, password) do
-      # TODO: check confirmation token
-      # TODO: check ban expiration
-      # TODO: get moderated boards
-      log_in_user(conn, user, user_params)
-    else
-      raise(InvalidCredentials)
-    end
-  end
-  defp log_in_user(conn, user, %{"rememberMe" => remember_me}) do
+    user = User.by_username(username)
+
+    # check that user exists
+    if !user, do: raise(InvalidCredentials)
+
+    # check confirmation token
+    if Map.get(user, :confirmation_token), do: raise(AccountNotConfirmed)
+
+    # check user migration
+    # if passhash doesn't exist, account hasn't been fully migrated
+    if !Map.get(user, :passhash), do: raise(AccountMigrationNotComplete)
+
+    # check password
+    if !User.valid_password?(user, password), do: raise(InvalidCredentials)
+
+    # unban if ban is expired and update roles
+    user = Map.put(user, :roles, Ban.unban_if_expired(user))
+
+    # get user's moderated boards
+    user = Map.put(user, :moderating, BoardModerator.get_boards(user.id))
+
+    # build decoded token
     datetime = NaiveDateTime.utc_now
     session_id = UUID.uuid1()
     decoded_token = %{ user_id: user.id, session_id: session_id, timestamp: datetime }
 
-    # token expiration based on remember_me
-    ttl = case remember_me do
+    # set token expiration based on rememberMe
+    ttl = case Map.get(user, "rememberMe") do
       # set longer expiration
       "true" -> {4, :weeks}
       # set default expiration
       _ -> {1, :day}
     end
 
-    token = conn
+    # sign user in and get encoded token
+    encoded_token = conn
     |> Guardian.Plug.sign_in(decoded_token, %{}, ttl: ttl)
     |> Guardian.Plug.current_token
 
-    user = Map.put(user, :token, token)
+    # add token to user
+    user = Map.put(user, :token, encoded_token)
 
-    # TODO: check for empty roles first
-    # add default role
-    user = Map.put(user, :roles, ["user"])
+    # save session
+    Session.save(user)
 
+    # reply with user data
     conn
     |> render("credentials.json", user: user)
   end

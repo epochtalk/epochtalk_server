@@ -72,7 +72,7 @@ defmodule EpochtalkServerWeb.AuthController do
     if !user, do: raise(InvalidCredentials)
 
     # check confirmation token
-    if Map.get(user, :confirmation_token) != nil, do: raise(AccountNotConfirmed)
+    if Map.get(user, :confirmation_token), do: raise(AccountNotConfirmed)
 
     # check user migration
     # if passhash doesn't exist, account hasn't been fully migrated

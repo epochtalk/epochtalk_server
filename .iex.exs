@@ -16,22 +16,4 @@ alias EpochtalkServer.Models.RolePermission
 alias EpochtalkServer.Models.RoleUser
 alias EpochtalkServer.Models.User
 
-reload = fn() ->
-  r [
-    Ban,
-    BannedAddress,
-    Board,
-    BoardMapping,
-    BoardModerator,
-    Category,
-    Invitation,
-    MetadataBoard,
-    Permission,
-    Preference,
-    Profile,
-    Role,
-    RolePermission,
-    RoleUser,
-    User
-  ]
-end
+reload = fn() -> r Enum.map(__ENV__.aliases, fn {_, module} -> module end) end

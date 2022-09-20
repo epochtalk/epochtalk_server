@@ -120,12 +120,7 @@ defmodule EpochtalkServer.Models.User do
       |> format_user
     end
   end
-  def by_username_and_password(username, password)
-      when is_binary(username) and is_binary(password) do
-    user = Repo.get_by(User, username: username)
-    if User.valid_password?(user, password), do: user
-  end
-  def valid_password?(%User{passhash: hashed_password}, password)
+  def valid_password?(%{passhash: hashed_password} = _user, password)
       when is_binary(hashed_password) and byte_size(password) > 0 do
     Argon2.verify_pass(password, hashed_password)
   end

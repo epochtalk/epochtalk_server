@@ -1,3 +1,6 @@
+IEx.configure(inspect: [charlists: :as_lists])
+IEx.configure(inspect: [limit: :infinity])
+
 alias EpochtalkServer.Repo
 
 alias EpochtalkServer.Models.Ban

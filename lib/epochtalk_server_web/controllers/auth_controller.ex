@@ -72,7 +72,8 @@ defmodule EpochtalkServerWeb.AuthController do
       nil -> raise(InvalidCredentials)
       user ->
         # check confirmation token
-        Map.get(user, :confirmation_token)
+        user
+        |> Map.get(:confirmation_token)
         |> case do
           nil -> user
           confirmation_token -> raise(AccountNotConfirmed)

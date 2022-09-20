@@ -5,7 +5,7 @@ defmodule EpochtalkServer.Models.Board do
   alias EpochtalkServer.Models.Category
   alias EpochtalkServer.Models.BoardMapping
   alias EpochtalkServer.Models.Board
-  alias EpochtalkServer.Models.MetadataBoards
+  alias EpochtalkServer.Models.MetadataBoard
 
   schema "boards" do
     field :name, :string
@@ -44,7 +44,7 @@ defmodule EpochtalkServer.Models.Board do
   def create(board) do
     board_cs = create_changeset(%Board{}, board)
     case Repo.insert(board_cs) do
-      {:ok, db_board} -> case MetadataBoards.insert(%MetadataBoards{ board_id: db_board.id}) do
+      {:ok, db_board} -> case MetadataBoard.insert(%MetadataBoard{ board_id: db_board.id}) do
           {:ok, _} -> db_board
           {:error, cs} -> {:error, cs}
         end

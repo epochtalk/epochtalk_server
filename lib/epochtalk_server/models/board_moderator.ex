@@ -1,10 +1,10 @@
-defmodule EpochtalkServer.Models.BoardModerators do
+defmodule EpochtalkServer.Models.BoardModerator do
   use Ecto.Schema
   import Ecto.Changeset
   alias EpochtalkServer.Repo
   alias EpochtalkServer.Models.User
   alias EpochtalkServer.Models.Board
-  alias EpochtalkServer.Models.BoardModerators
+  alias EpochtalkServer.Models.BoardModerator
 
   @primary_key false
   schema "board_moderators" do
@@ -19,6 +19,6 @@ defmodule EpochtalkServer.Models.BoardModerators do
   end
 
   def get_boards(user_id) when is_integer(user_id) do
-    Repo.get_by(BoardModerators, user_id: user_id)
+    Repo.get_by(BoardModerator, user_id: user_id)
   end
 end

@@ -88,7 +88,6 @@ defmodule EpochtalkServerWeb.AuthController do
     end
 
     if user = User.by_username(username) do
-      # TODO: check confirmation token
       # TODO: check ban expiration
       # TODO: get moderated boards
       log_in_user(conn, user, user_params)

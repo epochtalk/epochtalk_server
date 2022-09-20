@@ -1,9 +1,9 @@
-defmodule EpochtalkServer.Models.MetadataBoards do
+defmodule EpochtalkServer.Models.MetadataBoard do
   use Ecto.Schema
   import Ecto.Changeset
   alias EpochtalkServer.Repo
   alias EpochtalkServer.Models.Board
-  alias EpochtalkServer.Models.MetadataBoards
+  alias EpochtalkServer.Models.MetadataBoard
 
   @schema_prefix "metadata"
   schema "boards" do
@@ -27,5 +27,5 @@ defmodule EpochtalkServer.Models.MetadataBoards do
       :last_post_position])
     |> validate_required([:board_id])
   end
-  def insert(%MetadataBoards{} = metadata_boards), do: Repo.insert(metadata_boards)
+  def insert(%MetadataBoard{} = metadata_boards), do: Repo.insert(metadata_boards)
 end

@@ -48,9 +48,15 @@ defmodule EpochtalkServer.Models.Role do
       select: r,
       order_by: [asc: r.priority]
     case Repo.all(query) do
-      [] -> [get_default()]
-      result -> result
+      [] -> [get_default()] # user has no roles, return default role
+      users_roles -> users_roles # user has roles, return them
     end
+    |> handle_banned_user_role # if banned, only [ banned ] is returned for roles
   end
   defp get_default(), do: by_lookup("user")
+
+  defp handle_banned_user_role(roles), do: if ban_role = reduce_ban_role(roles), do: [ban_role], else: roles
+  defp reduce_ban_role([]), do: nil
+  defp reduce_ban_role([role | _]) when role.lookup === "banned", do: role
+  defp reduce_ban_role([_ | roles]), do: reduce_ban_role(roles)
 end

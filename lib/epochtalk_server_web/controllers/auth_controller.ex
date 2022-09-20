@@ -93,8 +93,8 @@ defmodule EpochtalkServerWeb.AuthController do
     session_id = UUID.uuid1()
     decoded_token = %{ user_id: user.id, session_id: session_id, timestamp: datetime }
 
-    # set token expiration based on remember_me
-    ttl = case user.remember_me do
+    # set token expiration based on rememberMe
+    ttl = case Map.get(user, "rememberMe") do
       # set longer expiration
       "true" -> {4, :weeks}
       # set default expiration

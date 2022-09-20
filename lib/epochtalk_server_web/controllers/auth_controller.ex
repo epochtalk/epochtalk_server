@@ -64,6 +64,20 @@ defmodule EpochtalkServerWeb.AuthController do
     login(conn, Map.put(user_params, "rememberMe", false))
   end
   def login(conn, %{"username" => username, "password" => password} = user_params) do
+    user = username
+    |> User.by_username
+    # check that user exists
+    |> case do
+      nil -> raise(InvalidCredentials)
+      user ->
+        # check confirmation token
+        Map.get(user, :confirmation_token)
+        |> case do
+          nil -> user
+          confirmation_token -> raise(AccountNotConfirmed)
+        end
+    end
+
     if user = User.by_username(username) do
       # TODO: check confirmation token
       # TODO: check ban expiration

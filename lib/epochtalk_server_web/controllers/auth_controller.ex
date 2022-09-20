@@ -9,7 +9,7 @@ defmodule EpochtalkServerWeb.AuthController do
     InvalidCredentials,
     NotLoggedIn,
     AccountNotConfirmed,
-    AcccountMigrationNotComplete
+    AccountMigrationNotComplete
   }
   alias EpochtalkServerWeb.ErrorView
 
@@ -86,7 +86,7 @@ defmodule EpochtalkServerWeb.AuthController do
     user
     |> Map.get(:passhash)
     |> case do
-      nil -> raise(AcccountMigrationNotComplete)
+      nil -> raise(AccountMigrationNotComplete)
       _passhash -> user
     end
 

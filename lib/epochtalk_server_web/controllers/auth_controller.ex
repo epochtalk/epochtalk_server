@@ -66,8 +66,7 @@ defmodule EpochtalkServerWeb.AuthController do
     login(conn, Map.put(user_params, "rememberMe", false))
   end
   def login(conn, %{"username" => username, "password" => password} = user_params) do
-    user = username
-    |> User.by_username
+    user = User.by_username(username)
 
     # check that user exists
     if !user, do: raise(InvalidCredentials)

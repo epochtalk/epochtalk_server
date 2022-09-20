@@ -114,7 +114,7 @@ defmodule EpochtalkServer.Models.User do
       user = Map.put(user, :roles, Role.by_user_id(user.id))
       # set primary role info
       primary_role = List.first(user[:roles])
-      hc = primary_role.highlight_color
+      hc = Map.get(primary_role, :highlight_color)
       Map.put(user, :role_name, primary_role.name)
       |> Map.put(:role_highlight_color, (if hc, do: hc, else: ""))
       |> format_user

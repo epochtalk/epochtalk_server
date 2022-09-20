@@ -67,11 +67,9 @@ defmodule EpochtalkServerWeb.AuthController do
   def login(conn, %{"username" => username, "password" => password} = user_params) do
     user = username
     |> User.by_username
+
     # check that user exists
-    |> case do
-      nil -> raise(InvalidCredentials)
-      user -> user
-    end
+    if !user, do: raise(InvalidCredentials)
 
     # check confirmation token
     if Map.get(user, :confirmation_token) != nil, do: raise(AccountNotConfirmed)

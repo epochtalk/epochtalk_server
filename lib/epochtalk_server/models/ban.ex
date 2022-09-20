@@ -73,8 +73,9 @@ defmodule EpochtalkServer.Models.Ban do
     end)
   end
 
+  # unban if ban is expired, return user's roles
   def unban_if_expired(%{ban_expiration: expiration, id: user_id} = _user) do
-   if NaiveDateTime.compare(expiration, NaiveDateTime.utc_now) == :lt, do: unban(user_id)
+    if NaiveDateTime.compare(expiration, NaiveDateTime.utc_now) == :lt, do: unban(user_id) |> Map.get(:roles)
   end
-  def unban_if_expired(user), do: user
+  def unban_if_expired(user), do: user.roles
 end

@@ -1,6 +1,7 @@
 defmodule EpochtalkServerWeb.AuthController do
   use EpochtalkServerWeb, :controller
   alias EpochtalkServer.Models.User
+  alias EpochtalkServer.Models.Ban
   alias EpochtalkServer.Repo
   alias EpochtalkServer.Auth.Guardian
   alias EpochtalkServer.Session
@@ -80,6 +81,9 @@ defmodule EpochtalkServerWeb.AuthController do
 
     # check password
     if !User.valid_password?(user, password), do: raise(InvalidCredentials)
+
+    # unban if ban is expired and update roles
+    user = Map.put(user, :roles, Ban.unban_if_expired(user))
 
     if user = User.by_username(username) do
       # TODO: check ban expiration

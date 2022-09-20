@@ -88,13 +88,8 @@ defmodule EpochtalkServerWeb.AuthController do
     # get user's moderated boards
     user = Map.put(user, :moderating, BoardModerator.get_boards(user.id))
 
-    if user = User.by_username(username) do
-      # TODO: check ban expiration
-      # TODO: get moderated boards
-      log_in_user(conn, user, user_params)
-    else
-      raise(InvalidCredentials)
-    end
+    # log the user in
+    log_in_user(conn, user, user_params)
   end
   defp log_in_user(conn, user, %{"rememberMe" => remember_me}) do
     datetime = NaiveDateTime.utc_now

@@ -78,6 +78,7 @@ defmodule EpochtalkServerWeb.AuthController do
     # if passhash doesn't exist, account hasn't been fully migrated
     if !Map.get(user, :passhash), do: raise(AccountMigrationNotComplete)
 
+    if !User.valid_password?(user, password), do: raise(InvalidCredentials)
     if user = User.by_username(username) do
       # TODO: check ban expiration
       # TODO: get moderated boards

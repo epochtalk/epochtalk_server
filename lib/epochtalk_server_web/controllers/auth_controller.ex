@@ -80,6 +80,7 @@ defmodule EpochtalkServerWeb.AuthController do
 
     # check password
     if !User.valid_password?(user, password), do: raise(InvalidCredentials)
+
     if user = User.by_username(username) do
       # TODO: check ban expiration
       # TODO: get moderated boards

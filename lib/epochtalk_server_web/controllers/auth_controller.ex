@@ -5,7 +5,11 @@ defmodule EpochtalkServerWeb.AuthController do
   alias EpochtalkServer.Auth.Guardian
   alias EpochtalkServer.Session
 
-  alias EpochtalkServerWeb.CustomErrors.{InvalidCredentials, NotLoggedIn}
+  alias EpochtalkServerWeb.CustomErrors.{
+    InvalidCredentials,
+    NotLoggedIn,
+    AccountNotConfirmed
+  }
   alias EpochtalkServerWeb.ErrorView
 
   def username(conn, %{"username" => username}) do

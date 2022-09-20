@@ -65,26 +65,29 @@ defmodule EpochtalkServerWeb.AuthController do
     login(conn, Map.put(user_params, "rememberMe", false))
   end
   def login(conn, %{"username" => username, "password" => password} = user_params) do
-    username
+    user = username
     |> User.by_username
     # check that user exists
     |> case do
       nil -> raise(InvalidCredentials)
-      user ->
-        # check confirmation token
-        user
-        |> Map.get(:confirmation_token)
-        |> case do
-          nil -> user
-          _confirmation_token -> raise(AccountNotConfirmed)
-        end
-        # check user migration
-        # if passhash doesn't exist, account hasn't been fully migrated
-        |> Map.get(:passhash)
-        |> case do
-          nil -> raise(AcccountMigrationNotComplete)
-          _passhash -> user
-        end
+      user -> user
+    end
+
+    # check confirmation token
+    user
+    |> Map.get(:confirmation_token)
+    |> case do
+      nil -> user
+      _confirmation_token -> raise(AccountNotConfirmed)
+    end
+
+    # check user migration
+    # if passhash doesn't exist, account hasn't been fully migrated
+    user
+    |> Map.get(:passhash)
+    |> case do
+      nil -> raise(AcccountMigrationNotComplete)
+      _passhash -> user
     end
 
     if user = User.by_username(username) do

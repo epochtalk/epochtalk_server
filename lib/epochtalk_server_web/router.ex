@@ -14,23 +14,17 @@ defmodule EpochtalkServerWeb.Router do
   pipeline :enforce_auth do
     plug Guardian.Plug.EnsureAuthenticated
   end
-  pipeline :enforce_not_auth do
-    plug Guardian.Plug.EnsureNotAuthenticated
-  end
 
   scope "/api", EpochtalkServerWeb do
     pipe_through [:api, :maybe_auth, :enforce_auth]
     get "/authenticate", AuthController, :authenticate
   end
   scope "/api", EpochtalkServerWeb do
-    pipe_through [:api, :maybe_auth, :enforce_not_auth]
-    post "/login", AuthController, :login
-  end
-  scope "/api", EpochtalkServerWeb do
     pipe_through [:api, :maybe_auth]
     get "/register/username/:username", AuthController, :username
     get "/register/email/:email", AuthController, :email
     post "/register", AuthController, :register
+    post "/login", AuthController, :login
     delete "/logout", AuthController, :logout
   end
 

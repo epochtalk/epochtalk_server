@@ -1,6 +1,7 @@
 defmodule EpochtalkServer.Models.BoardModerator do
   use Ecto.Schema
   import Ecto.Changeset
+  import Ecto.Query, only: [from: 2]
   alias EpochtalkServer.Repo
   alias EpochtalkServer.Models.User
   alias EpochtalkServer.Models.Board
@@ -19,7 +20,8 @@ defmodule EpochtalkServer.Models.BoardModerator do
   end
 
   def get_boards(user_id) when is_integer(user_id) do
-    Repo.all(BoardModerator, user_id: user_id)
+    from(bm in BoardModerator, where: bm.user_id == ^user_id)
+    |> Repo.all()
     |> Enum.map(&(&1.board_id))
   end
 end

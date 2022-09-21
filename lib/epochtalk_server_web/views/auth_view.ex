@@ -1,5 +1,6 @@
 defmodule EpochtalkServerWeb.AuthView do
   use EpochtalkServerWeb, :view
+  alias EpochtalkServer.Models.Role
 
   def render("search.json", %{found: found}) do
     %{found: found}
@@ -9,7 +10,7 @@ defmodule EpochtalkServerWeb.AuthView do
     user |> user_json()
   end
   def render("credentials.json", %{user: user}) do
-    user |> credentials_json()
+    user |> format_user_reply()
   end
   def user_json(user) do
     %{
@@ -21,18 +22,22 @@ defmodule EpochtalkServerWeb.AuthView do
       roles: %{} # user.roles
     }
   end
-  defp credentials_json(user) do
-    %{
+  defp format_user_reply(user) do
+    reply = %{
       token: user.token,
       id: user.id,
       username: user.username,
-      # TODO: fill in these fields
       avatar: Map.get(user, :avatar), # user.avatar
-      permissions: %{}, # user.permissions
+      permissions: Role.get_masked_permissions(user.roles), # user.permissions
       moderating: Map.get(user, :moderating), # user.moderating
-      roles: user.roles,
-      ban_expiration: Map.get(user, :ban_expiration),
-      malicious_score: Map.get(user, :malicious_score)
+      roles: Enum.map(user.roles, &(&1.lookup))
     }
+    # only append ban_expiration and malicious_score if present
+    if exp = Map.get(user, :ban_expiration),
+      do: Map.put(reply, :ban_expiration, exp),
+      else: reply
+    if ms = Map.get(user, :malicious_score),
+      do: Map.put(reply, :malicious_score, ms),
+      else: reply
   end
 end

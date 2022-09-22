@@ -5,7 +5,7 @@ defmodule EpochtalkServer.Session do
   # log user in with Guardian to get token
   # save user session info to redis
   # return user with token
-  def login(user, conn) do
+  def create(user, conn) do
     datetime = NaiveDateTime.utc_now
     session_id = UUID.uuid1()
     decoded_token = %{ user_id: user.id, session_id: session_id, timestamp: datetime }

@@ -89,7 +89,7 @@ defmodule EpochtalkServerWeb.AuthController do
     user = Map.put(user, :moderating, BoardModerator.get_boards(user.id))
 
     # create session
-    Session.login(user, conn)
+    Session.create(user, conn)
 
     # reply with user data
     conn

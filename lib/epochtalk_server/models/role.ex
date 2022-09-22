@@ -61,7 +61,7 @@ defmodule EpochtalkServer.Models.Role do
   defp reduce_ban_role([_ | roles]), do: reduce_ban_role(roles)
 
   def get_masked_permissions(roles) when is_list(roles), do: Enum.reduce(roles, %{}, &get_masked_permissions(&2, &1))
-  def get_masked_permissions(target, source) do
+  defp get_masked_permissions(target, source) do
     merge_keys = [:highlight_color, :permissions, :priority, :priority_restrictions]
     filtered_source_keys = Map.keys(source) |> Enum.filter(&Enum.member?(merge_keys, &1))
     target_is_lesser_role = !Map.get(target, :priority) or target.priority > source.priority
@@ -81,7 +81,7 @@ defmodule EpochtalkServer.Models.Role do
     end)
   end
 
-  def deep_merge(left, right), do: Map.merge(left, right, &deep_resolve/3)
+  defp deep_merge(left, right), do: Map.merge(left, right, &deep_resolve/3)
   # Key exists in both maps, and both values are maps as well.
   # These can be merged recursively.
   defp deep_resolve(_key, left = %{}, right = %{}), do: deep_merge(left, right)

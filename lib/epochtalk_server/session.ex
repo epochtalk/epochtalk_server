@@ -88,6 +88,28 @@ defmodule EpochtalkServer.Session do
     Redix.command(:redix, ["HDEL", ban_key, "ban_expiration", "malicious_score"])
     Redix.command(:redix, ["HSET", ban_key, ban_info])
   end
+  defp set_session(user_id, session_id) do
+    # save session id to redis under "user:{user_id}:sessions"
+    session_key = generate_key(user_id, "sessions")
+    Redix.command(:redix, ["SADD", session_key, session_id])
+  end
+  defp get_sessions(user_id) do
+    # get session id's from redis under "user:{user_id}:sessions"
+    session_key = generate_key(user_id, "sessions")
+    Redix.command(:redix, ["SMEMBERS", session_key])
+  end
+  defp delete_session(user_id, session_id) do
+    # delete session id from redis under "user:{user_id}:sessions"
+    session_key = generate_key(user_id, "sessions")
+    Redix.command(:redix, ["SREM", session_key, session_id])
+  end
+  defp delete_sessions(user_id, session_id) do
+    # delete session id from redis under "user:{user_id}:sessions"
+    session_key = generate_key(user_id, "sessions")
+    Redix.command(:redix, ["SPOP", session_key, session_id])
+    # repeat until redix returns nil
+    |> unless do delete_sessions(user_id, session_id) end
+  end
   defp generate_key(user_id, "user"), do: "user:#{user_id}"
   defp generate_key(user_id, type), do: "user:#{user_id}:#{type}"
 end

@@ -32,7 +32,7 @@ defmodule EpochtalkServer.Session do
     # return user with token
     user
   end
-  def save(db_user) do
+  defp save(db_user, session_id) do
     # TODO: return role lookups from db instead of entire roles
     update_user_info(db_user.id, db_user.username, db_user.avatar)
     update_roles(db_user.id, db_user.roles)
@@ -40,14 +40,7 @@ defmodule EpochtalkServer.Session do
     ban_info = if Map.has_key?(db_user, :malicious_score), do: Map.put(ban_info, :malicious_score, db_user.malicious_score)
     update_ban_info(db_user.id, ban_info)
     update_moderating(db_user.id, Map.get(db_user, :moderating))
-    # TODO: do this outside of here, need guardian token
-    # -- or don't do it if we don't need this functionality
-    # // save user-session to redis set under "user:{user_id}:sessions"
-    # .then(function() {
-    #   var userSessionKey = 'user:' + dbUser.id + ':sessions';
-    #   return redis.saddAsync(userSessionKey, decodedToken.sessionId);
-    # })
-    # .then(function() { return formatUserReply(token, dbUser); });
+    set_session(db_user.id, session_id)
   end
   # use default role
   def update_roles(user_id, roles) when is_list(roles) do

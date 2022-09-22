@@ -88,29 +88,8 @@ defmodule EpochtalkServerWeb.AuthController do
     # get user's moderated boards
     user = Map.put(user, :moderating, BoardModerator.get_boards(user.id))
 
-    # build decoded token
-    datetime = NaiveDateTime.utc_now
-    session_id = UUID.uuid1()
-    decoded_token = %{ user_id: user.id, session_id: session_id, timestamp: datetime }
-
-    # set token expiration based on rememberMe
-    ttl = case Map.get(user, "rememberMe") do
-      # set longer expiration
-      "true" -> {4, :weeks}
-      # set default expiration
-      _ -> {1, :day}
-    end
-
-    # sign user in and get encoded token
-    encoded_token = conn
-    |> Guardian.Plug.sign_in(decoded_token, %{}, ttl: ttl)
-    |> Guardian.Plug.current_token
-
-    # add token to user
-    user = Map.put(user, :token, encoded_token)
-
-    # save session
-    Session.save(user)
+    # create session
+    Session.login(user, conn)
 
     # reply with user data
     conn

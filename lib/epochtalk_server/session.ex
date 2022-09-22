@@ -1,4 +1,37 @@
 defmodule EpochtalkServer.Session do
+  alias Guardian
+
+  # set user session id, timestamp, ttl
+  # log user in with Guardian to get token
+  # save user session info to redis
+  # return user with token
+  def login(user, conn) do
+    datetime = NaiveDateTime.utc_now
+    session_id = UUID.uuid1()
+    decoded_token = %{ user_id: user.id, session_id: session_id, timestamp: datetime }
+
+    # set token expiration based on rememberMe
+    ttl = case Map.get(user, "rememberMe") do
+      # set longer expiration
+      "true" -> {4, :weeks}
+      # set default expiration
+      _ -> {1, :day}
+    end
+
+    # sign user in and get encoded token
+    encoded_token = conn
+    |> Guardian.Plug.sign_in(decoded_token, %{}, ttl: ttl)
+    |> Guardian.Plug.current_token
+
+    # add token to user
+    user = Map.put(user, :token, encoded_token)
+
+    # save session
+    save(user, session_id)
+
+    # return user with token
+    user
+  end
   def save(db_user) do
     # TODO: return role lookups from db instead of entire roles
     update_user_info(db_user.id, db_user.username, db_user.avatar)

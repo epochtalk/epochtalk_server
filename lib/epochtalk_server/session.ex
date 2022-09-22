@@ -91,6 +91,7 @@ defmodule EpochtalkServer.Session do
     session_key = generate_key(user_id, "sessions")
     Redix.command(:redix, ["SMEMBERS", session_key])
   end
+  # TODO: invalidate token
   defp delete_session(user_id, session_id) do
     # delete session id from redis under "user:{user_id}:sessions"
     session_key = generate_key(user_id, "sessions")

@@ -27,6 +27,9 @@ defmodule EpochtalkServer.Models.Role do
     |> validate_required([:name, :description, :lookup, :priority, :permissions])
   end
   def all, do: from(r in Role, order_by: r.id) |> Repo.all
+  def by_lookup(lookups) when is_list(lookups) do
+    from(r in Role, where: r.lookup in ^lookups) |> Repo.all
+  end
   def by_lookup(lookup), do: Repo.get_by(Role, lookup: lookup)
   def insert([]), do: {:error, "Role list is empty"}
   def insert(%Role{} = role), do: Repo.insert(role)

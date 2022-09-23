@@ -19,9 +19,8 @@ defmodule EpochtalkServer.Session do
     end
 
     # sign user in and get encoded token
-    encoded_token = conn
-    |> Guardian.Plug.sign_in(decoded_token, %{}, ttl: ttl)
-    |> Guardian.Plug.current_token
+    conn = Guardian.Plug.sign_in(conn, decoded_token, %{}, ttl: ttl)
+    encoded_token = Guardian.Plug.current_token(conn)
 
     # add token to user
     user = Map.put(user, :token, encoded_token)
@@ -30,7 +29,7 @@ defmodule EpochtalkServer.Session do
     save(user, session_id)
 
     # return user with token
-    user
+    {user, conn}
   end
   defp save(db_user, session_id) do
     # TODO: return role lookups from db instead of entire roles

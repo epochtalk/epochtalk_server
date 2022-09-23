@@ -41,6 +41,7 @@ defmodule EpochtalkServerWeb.AuthController do
         |> render("400.json", %{message: inspect(changeset.errors)})
     end
   end
+  def authenticate(conn), do: authenticate(conn, %{})
   def authenticate(conn, _attrs) do
     user = conn
     |> Guardian.Plug.current_resource
@@ -67,32 +68,36 @@ defmodule EpochtalkServerWeb.AuthController do
     login(conn, Map.put(user_params, "rememberMe", false))
   end
   def login(conn, %{"username" => username, "password" => password} = _user_params) do
-    user = User.by_username(username)
+    if Guardian.Plug.authenticated?(conn) do
+      authenticate(conn)
+    else
+      user = User.by_username(username)
 
-    # check that user exists
-    if !user, do: raise(InvalidCredentials)
+      # check that user exists
+      if !user, do: raise(InvalidCredentials)
 
-    # check confirmation token
-    if Map.get(user, :confirmation_token), do: raise(AccountNotConfirmed)
+      # check confirmation token
+      if Map.get(user, :confirmation_token), do: raise(AccountNotConfirmed)
 
-    # check user migration
-    # if passhash doesn't exist, account hasn't been fully migrated
-    if !Map.get(user, :passhash), do: raise(AccountMigrationNotComplete)
+      # check user migration
+      # if passhash doesn't exist, account hasn't been fully migrated
+      if !Map.get(user, :passhash), do: raise(AccountMigrationNotComplete)
 
-    # check password
-    if !User.valid_password?(user, password), do: raise(InvalidCredentials)
+      # check password
+      if !User.valid_password?(user, password), do: raise(InvalidCredentials)
 
-    # unban if ban is expired and update roles
-    user = Map.put(user, :roles, Ban.unban_if_expired(user))
+      # unban if ban is expired and update roles
+      user = Map.put(user, :roles, Ban.unban_if_expired(user))
 
-    # get user's moderated boards
-    user = Map.put(user, :moderating, BoardModerator.get_boards(user.id))
+      # get user's moderated boards
+      user = Map.put(user, :moderating, BoardModerator.get_boards(user.id))
 
-    # create session
-    {user, conn} = Session.create(user, conn)
+      # create session
+      {user, conn} = Session.create(user, conn)
 
-    # reply with user data
-    conn
-    |> render("credentials.json", user: user)
+      # reply with user data
+      conn
+      |> render("credentials.json", user: user)
+    end
   end
 end

@@ -1,5 +1,5 @@
 defmodule EpochtalkServer.Session do
-  alias Guardian
+  alias EpochtalkServer.Auth.Guardian
 
   # set user session id, timestamp, ttl
   # log user in with Guardian to get token

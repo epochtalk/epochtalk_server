@@ -66,7 +66,7 @@ defmodule EpochtalkServerWeb.AuthController do
   def login(conn, user_params) when not is_map_key(user_params, "rememberMe") do
     login(conn, Map.put(user_params, "rememberMe", false))
   end
-  def login(conn, %{"username" => username, "password" => password} = user_params) do
+  def login(conn, %{"username" => username, "password" => password} = _user_params) do
     user = User.by_username(username)
 
     # check that user exists

@@ -1,6 +1,7 @@
 defmodule EpochtalkServer.Auth.Guardian do
   use Guardian, otp_app: :epochtalk_server
   alias EpochtalkServer.Models.User
+  alias EpochtalkServer.Models.Role
 
   def subject_for_token(%{user_id: user_id, session_id: session_id}, _claims) do
     # You can use any value for the subject of your token but
@@ -36,7 +37,7 @@ defmodule EpochtalkServer.Auth.Guardian do
           session_id: session_id,
           username: Redix.command!(:redix, ["HGET", "user:#{user_id}", "username"]),
           avatar: Redix.command!(:redix, ["HGET", "user:#{user_id}", "avatar"]),
-          roles: Redix.command!(:redix, ["SMEMBERS", "user:#{user_id}:roles"]),
+          roles: Redix.command!(:redix, ["SMEMBERS", "user:#{user_id}:roles"]) |> Role.by_lookup,
           moderating: Redix.command!(:redix, ["SMEMBERS", "user:#{user_id}:moderating"]),
           ban_expiration: Redix.command!(:redix, ["HEXISTS", "user:#{user_id}:ban_info", "ban_expiration"]),
           malicious_score: Redix.command!(:redix, ["HEXISTS", "user:#{user_id}:ban_info", "malicious_score"])

@@ -11,4 +11,13 @@ defmodule EpochtalkServerWeb.ErrorView do
       error: Phoenix.Controller.status_message_from_template(template)
     }
   end
+
+  # Handles auth errors coming from guardian
+  def render("Guardian401.json", assigns) do
+    %{
+      status: assigns.conn.status,
+      message: assigns.message,
+      error: Phoenix.Controller.status_message_from_template(to_string(assigns.conn.status))
+    }
+  end
 end

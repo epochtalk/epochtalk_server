@@ -29,10 +29,12 @@ defmodule EpochtalkServerWeb.AuthView do
       username: user.username,
       avatar: Map.get(user, :avatar), # user.avatar
       permissions: Role.get_masked_permissions(user.roles), # user.permissions
-      moderating: Map.get(user, :moderating), # user.moderating
       roles: Enum.map(user.roles, &(&1.lookup))
     }
-    # only append ban_expiration and malicious_score if present
+    # only append moderating, ban_expiration and malicious_score if present
+    reply = if length(moderating = Map.get(user, :moderating)) != 0,
+      do: Map.put(reply, :moderating, moderating),
+      else: reply
     reply = if exp = Map.get(user, :ban_expiration),
       do: Map.put(reply, :ban_expiration, exp),
       else: reply

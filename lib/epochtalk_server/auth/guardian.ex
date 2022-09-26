@@ -1,6 +1,5 @@
 defmodule EpochtalkServer.Auth.Guardian do
   use Guardian, otp_app: :epochtalk_server
-  alias EpochtalkServer.Models.User
   alias EpochtalkServer.Models.Role
 
   def subject_for_token(%{user_id: user_id, session_id: session_id}, _claims) do
@@ -12,9 +11,7 @@ defmodule EpochtalkServer.Auth.Guardian do
     sub = to_string(user_id) <> ":" <> session_id
     {:ok, sub}
   end
-  def subject_for_token(_, _) do
-    {:error, :reason_for_error}
-  end
+  def subject_for_token(_, _), do: {:error, :reason_for_error}
 
   def resource_from_claims(%{"sub" => sub}) do
     # Here we'll look up our resource from the claims, the subject can be
@@ -37,17 +34,19 @@ defmodule EpochtalkServer.Auth.Guardian do
           session_id: session_id,
           username: Redix.command!(:redix, ["HGET", "user:#{user_id}", "username"]),
           avatar: Redix.command!(:redix, ["HGET", "user:#{user_id}", "avatar"]),
-          roles: Redix.command!(:redix, ["SMEMBERS", "user:#{user_id}:roles"]) |> Role.by_lookup,
-          moderating: Redix.command!(:redix, ["SMEMBERS", "user:#{user_id}:moderating"]),
-          ban_expiration: Redix.command!(:redix, ["HEXISTS", "user:#{user_id}:ban_info", "ban_expiration"]),
-          malicious_score: Redix.command!(:redix, ["HEXISTS", "user:#{user_id}:ban_info", "malicious_score"])
+          roles: Redix.command!(:redix, ["SMEMBERS", "user:#{user_id}:roles"]) |> Role.by_lookup
         }
+        # only append moderating, ban_expiration and malicious_score if present
+        resource = if length(moderating = Redix.command!(:redix, ["SMEMBERS", "user:#{user_id}:moderating"])) != 0,
+          do: Map.put(resource, :moderating, moderating), else: resource
+        resource = if (ban_expiration = Redix.command!(:redix, ["HEXISTS", "user:#{user_id}:ban_info", "ban_expiration"])) != 0,
+          do: Map.put(resource, :ban_expiration, ban_expiration), else: resource
+        resource = if (malicious_score = Redix.command!(:redix, ["HEXISTS", "user:#{user_id}:ban_info", "malicious_score"])) != 0,
+          do: Map.put(resource, :malicious_score, malicious_score), else: resource
         {:ok,  resource}
     end
   end
-  def resource_from_claims(_claims) do
-    {:error, :reason_for_error}
-  end
+  def resource_from_claims(_claims), do: {:error, :reason_for_error}
 
   def after_encode_and_sign(resource, claims, token, _options) do
     with {:ok, _} <- Guardian.DB.after_encode_and_sign(resource, claims["typ"], claims, token) do

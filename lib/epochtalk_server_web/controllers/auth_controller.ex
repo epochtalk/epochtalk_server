@@ -52,8 +52,9 @@ defmodule EpochtalkServerWeb.AuthController do
     user = Map.put(user, :token, token)
 
     conn
-    |> render("credentials.json", user: user)
+    |> render("user.json", user: user)
   end
+
   def logout(conn, _attrs) do
     if Guardian.Plug.authenticated?(conn) do
       # TODO: check if user is on page that requires auth
@@ -64,6 +65,7 @@ defmodule EpochtalkServerWeb.AuthController do
       raise(NotLoggedIn)
     end
   end
+
   def login(conn, user_params) when not is_map_key(user_params, "rememberMe") do
     login(conn, Map.put(user_params, "rememberMe", false))
   end
@@ -97,7 +99,7 @@ defmodule EpochtalkServerWeb.AuthController do
 
       # reply with user data
       conn
-      |> render("credentials.json", user: user)
+      |> render("user.json", user: user)
     end
   end
 end

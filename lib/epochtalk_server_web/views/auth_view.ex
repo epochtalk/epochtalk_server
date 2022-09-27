@@ -2,26 +2,10 @@ defmodule EpochtalkServerWeb.AuthView do
   use EpochtalkServerWeb, :view
   alias EpochtalkServer.Models.Role
 
-  def render("search.json", %{found: found}) do
-    %{found: found}
-  end
+  def render("search.json", %{found: found}), do: %{found: found}
   def render("logout.json", _data), do: true
-  def render("show.json", %{user: user}) do
-    user |> user_json()
-  end
-  def render("credentials.json", %{user: user}) do
-    user |> format_user_reply()
-  end
-  def user_json(user) do
-    %{
-      id: user.id,
-      username: user.username,
-          # TODO(boka): fill in these fields
-      avatar: "", # user.avatar
-      permissions: %{}, # user.permissions
-      roles: %{} # user.roles
-    }
-  end
+  def render("user.json", %{user: user}), do: format_user_reply(user)
+
   defp format_user_reply(user) do
     reply = %{
       token: user.token,

@@ -33,7 +33,7 @@ defmodule EpochtalkServer.Session do
   end
   defp save(db_user, session_id) do
     # TODO: return role lookups from db instead of entire roles
-    update_user_info(db_user.id, db_user.username, db_user.avatar)
+    update_user_info(db_user.id, db_user.username, Map.get(db_user,:avatar))
     update_roles(db_user.id, db_user.roles)
     ban_info = if Map.has_key?(db_user, :ban_expiration), do: %{ ban_expiration: db_user.ban_expiration }, else: %{}
     ban_info = if Map.has_key?(db_user, :malicious_score), do: Map.put(ban_info, :malicious_score, db_user.malicious_score)

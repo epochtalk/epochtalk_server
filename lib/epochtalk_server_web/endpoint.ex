@@ -1,5 +1,7 @@
 defmodule EpochtalkServerWeb.Endpoint do
   use Phoenix.Endpoint, otp_app: :epochtalk_server
+  # get x-forwarded ip
+  plug RemoteIp
 
   # cors configuration
   plug Corsica, origins: "*", allow_headers: :all

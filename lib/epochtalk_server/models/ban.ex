@@ -49,6 +49,7 @@ defmodule EpochtalkServer.Models.Ban do
   end
   def by_user_id(user_id) when is_integer(user_id), do: Repo.get_by(Ban, user_id: user_id)
 
+  def ban(user_id), do: ban(user_id, nil)
   def ban(user_id, expiration) do
     Repo.transaction(fn ->
       RoleUser.set_user_role(Role.get_banned_role_id, user_id)

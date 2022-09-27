@@ -127,6 +127,7 @@ defmodule EpochtalkServer.Models.User do
   defp validate_username(changeset) do
     changeset
     |> validate_required(:username)
+    |> validate_length(:username, min: 3, max: 255)
     |> unique_constraint(:username)
   end
   defp validate_email(changeset) do

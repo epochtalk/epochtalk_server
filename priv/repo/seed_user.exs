@@ -3,9 +3,9 @@ System.argv()
 |> case do
   [username, email, password, "admin" = _admin] ->
     admin = true
-    User.create_user(%{username: username, email: email, password: password}, admin)
+    User.create(%{username: username, email: email, password: password}, admin)
   [username, email, password] ->
-    User.create_user(%{username: username, email: email, password: password})
+    User.create(%{username: username, email: email, password: password})
   _ ->
     IO.puts("Usage: mix seed.user <username> <email> <password> [admin]")
     {:error, "Invalid arguments"}

@@ -38,14 +38,14 @@ defmodule EpochtalkServer.Models.User do
     |> validate_password()
   end
   # create admin, for seeding
-  def create_user(user_attrs, true = _admin) do
+  def create(user_attrs, true = _admin) do
     Repo.transaction(fn ->
-      create_user(user_attrs)
+      create(user_attrs)
       |> case do {:ok, %{ id: id } = _user} -> RoleUser.set_admin(id) end
     end)
   end
   # create user, for seeding
-  def create_user(user_attrs) do
+  def create(user_attrs) do
     %User{}
     |> User.registration_changeset(user_attrs)
     |> Repo.insert

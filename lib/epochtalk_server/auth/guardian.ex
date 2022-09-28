@@ -37,7 +37,8 @@ defmodule EpochtalkServer.Auth.Guardian do
           roles: Redix.command!(:redix, ["SMEMBERS", "user:#{user_id}:roles"]) |> Role.by_lookup
         }
         # only append moderating, ban_expiration and malicious_score if present
-        resource = if length(moderating = Redix.command!(:redix, ["SMEMBERS", "user:#{user_id}:moderating"])) != 0,
+        moderating = Redix.command!(:redix, ["SMEMBERS", "user:#{user_id}:moderating"])
+        resource = if moderating && length(moderating) != 0,
           do: Map.put(resource, :moderating, moderating), else: resource
         resource = if (ban_expiration = Redix.command!(:redix, ["HEXISTS", "user:#{user_id}:ban_info", "ban_expiration"])) != 0,
           do: Map.put(resource, :ban_expiration, ban_expiration), else: resource

@@ -33,10 +33,10 @@ defmodule EpochtalkServer.Session do
   end
   defp save(db_user, session_id) do
     # TODO: return role lookups from db instead of entire roles
-    update_user_info(db_user.id, db_user.username, Map.get(db_user,:avatar))
+    update_user_info(db_user.id, db_user.username, Map.get(db_user, :avatar))
     update_roles(db_user.id, db_user.roles)
     ban_info = if Map.has_key?(db_user, :ban_expiration), do: %{ ban_expiration: db_user.ban_expiration }, else: %{}
-    ban_info = if Map.has_key?(db_user, :malicious_score), do: Map.put(ban_info, :malicious_score, db_user.malicious_score)
+    ban_info = if Map.has_key?(db_user, :malicious_score), do: Map.put(ban_info, :malicious_score, db_user.malicious_score), else: ban_info
     update_ban_info(db_user.id, ban_info)
     update_moderating(db_user.id, Map.get(db_user, :moderating))
     set_session(db_user.id, session_id)
@@ -48,16 +48,15 @@ defmodule EpochtalkServer.Session do
     |> Enum.map(&(&1.lookup))
     role_key = generate_key(user_id, "roles")
     Redix.command(:redix, ["DEL", role_key])
-    role_lookups
-    |> Enum.each(&Redix.command(:redix, ["SADD", role_key, &1]))
+    unless role_lookups == nil or role_lookups == [], do:
+      Enum.each(role_lookups, &Redix.command(:redix, ["SADD", role_key, &1]))
   end
   def update_moderating(user_id, moderating) do
     # save/replace moderating boards to redis under "user:{user_id}:moderating"
     moderating_key = generate_key(user_id, "moderating")
     Redix.command(:redix, ["DEL", moderating_key])
-    unless moderating == nil or moderating == [] do
-      Redix.command(:redix, ["SADD", moderating_key, moderating])
-    end
+    unless moderating == nil or moderating == [], do:
+      Enum.each(moderating, &Redix.command(:redix, ["SADD", moderating_key, &1]))
   end
   def update_user_info(user_id, username) do
     user_key = generate_key(user_id, "user")
@@ -78,7 +77,8 @@ defmodule EpochtalkServer.Session do
     # save/replace ban_expiration to redis under "user:{user_id}:baninfo"
     ban_key = generate_key(user_id, "baninfo")
     Redix.command(:redix, ["HDEL", ban_key, "ban_expiration", "malicious_score"])
-    Redix.command(:redix, ["HSET", ban_key, ban_info])
+    if ban_exp = Map.get(ban_info, :ban_expiration), do: Redix.command(:redix, ["HSET", ban_key, "ban_expiration", ban_exp])
+    if malicious_score = Map.get(ban_info, :malicious_score), do: Redix.command(:redix, ["HSET", ban_key, "malicious_score", malicious_score])
   end
   defp set_session(user_id, session_id) do
     # save session id to redis under "user:{user_id}:sessions"

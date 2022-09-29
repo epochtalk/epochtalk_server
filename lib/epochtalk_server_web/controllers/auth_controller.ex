@@ -15,6 +15,7 @@ defmodule EpochtalkServerWeb.AuthController do
     InvalidPayload
   }
   alias EpochtalkServerWeb.ErrorView
+  alias EpochtalkServerWeb.ErrorHelpers
 
   def username(conn, %{"username" => username}) do
     username_found = username

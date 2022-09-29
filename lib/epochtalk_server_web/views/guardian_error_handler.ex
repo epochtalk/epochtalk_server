@@ -11,6 +11,6 @@ defmodule EpochtalkServerWeb.GuardianErrorHandler do
     conn
     |> put_status(401)
     |> put_view(ErrorView)
-    |> render("Guardian401.json", message: message)
+    |> render("401.json", message: message)
   end
 end

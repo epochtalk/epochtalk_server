@@ -11,7 +11,8 @@ defmodule EpochtalkServerWeb.AuthController do
     InvalidCredentials,
     NotLoggedIn,
     AccountNotConfirmed,
-    AccountMigrationNotComplete
+    AccountMigrationNotComplete,
+    InvalidPayload
   }
   alias EpochtalkServerWeb.ErrorView
 
@@ -41,13 +42,7 @@ defmodule EpochtalkServerWeb.AuthController do
         |> render("400.json", %{message: inspect(changeset.errors)})
     end
   end
-  def authenticate(conn), do: authenticate(conn, %{})
-  def authenticate(conn, _attrs) do
-    user = conn
-    |> Guardian.Plug.current_resource
-
-    token = conn
-    |> Guardian.Plug.current_token
+  def register(_conn, _attrs), do: raise(InvalidPayload)
 
     user = Map.put(user, :token, token)
 
@@ -102,4 +97,5 @@ defmodule EpochtalkServerWeb.AuthController do
       |> render("user.json", user: user)
     end
   end
+  def login(_conn, _attrs), do: raise(InvalidPayload)
 end

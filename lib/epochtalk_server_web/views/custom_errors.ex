@@ -25,4 +25,12 @@ defmodule EpochtalkServerWeb.CustomErrors do
     """
     defexception plug_status: 403, message: "User account migration not complete, please reset password", conn: nil, router: nil
   end
+
+  # API parameter mismatch handling
+  defmodule InvalidPayload do
+    @moduledoc """
+    Exception raised when api request payload is incorrect
+    """
+    defexception plug_status: 400, message: "Invalid payload, check that the request payload is correct", conn: nil, router: nil
+  end
 end

@@ -6,7 +6,7 @@ defmodule EpochtalkServer.Models.Preference do
   @primary_key false
   @schema_prefix "users"
   schema "preferences" do
-    belongs_to :user_id, User, foreign_key: :id, type: :integer
+    belongs_to :user, User
     field :posts_per_page, :integer
     field :threads_per_page, :integer
     field :collapsed_categories, :map

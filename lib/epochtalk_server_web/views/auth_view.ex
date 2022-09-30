@@ -16,7 +16,8 @@ defmodule EpochtalkServerWeb.AuthView do
       roles: Enum.map(user.roles, &(&1.lookup))
     }
     # only append moderating, ban_expiration and malicious_score if present
-    reply = if length(moderating = Map.get(user, :moderating)) != 0,
+    moderating = Map.get(user, :moderating)
+    reply = if !is_nil(moderating) && length(moderating) != 0,
       do: Map.put(reply, :moderating, moderating),
       else: reply
     reply = if exp = Map.get(user, :ban_expiration),

@@ -109,14 +109,15 @@ defmodule EpochtalkServer.Models.BannedAddress do
       {:ok, ip} ->
         hostname_score = case :inet_res.gethostbyaddr(ip) do
           {:ok, host} -> hostname_from_host(host) |> calculate_hostname_score
-          {:error, _} -> 0 # no hostname found, return 0 for hostname score
+          {:error, _} -> nil # no hostname found, return nil for hostname score
         end
         ip32_score = calculate_ip32_score(ip)
         ip24_score = calculate_ip24_score(ip)
         ip16_score = calculate_ip16_score(ip)
         # calculate malicious score using all scores
-        hostname_score + ip32_score + 0.04 + ip24_score + 0.0016 + ip16_score
-      {:error, _} -> 0 # invalid ip address, return 0 for malicious score
+        malicious_score = hostname_score + ip32_score + 0.04 + ip24_score + 0.0016 + ip16_score
+        if malicious_score < 1, do: nil, else: malicious_score
+      {:error, _} -> nil # invalid ip address, return nil for malicious score
     end
   end
 

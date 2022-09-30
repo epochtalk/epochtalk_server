@@ -5,7 +5,7 @@ defmodule EpochtalkServer.Models.Profile do
 
   @schema_prefix "users"
   schema "profiles" do
-    belongs_to :user_id, User
+    belongs_to :user, User
     field :avatar, :string
     field :position, :string
     field :signature, :string

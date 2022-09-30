@@ -1,7 +1,21 @@
 defmodule EpochtalkServerWeb.ErrorHelpers do
+  use Phoenix.Controller
+  alias EpochtalkServerWeb.ErrorView
   @moduledoc """
   Conveniences for translating and building error messages.
   """
+
+  @doc """
+  Renders error json from error data which could be a message or changeset errors.
+  """
+  def render_json_error(conn, status, %Ecto.Changeset{} = changeset), do:
+    render_json_error(conn, status, changeset_error_to_string(changeset))
+  def render_json_error(conn, status, message) do
+    conn
+    |> put_status(status)
+    |> put_view(ErrorView)
+    |> render("#{status}.json", message: message)
+  end
 
   @doc """
   Translates changeset errors to string message.

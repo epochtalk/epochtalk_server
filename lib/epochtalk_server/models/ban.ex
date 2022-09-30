@@ -49,8 +49,20 @@ defmodule EpochtalkServer.Models.Ban do
   end
   def by_user_id(user_id) when is_integer(user_id), do: Repo.get_by(Ban, user_id: user_id)
 
-  def ban(user_id), do: ban(user_id, nil)
-  def ban(user_id, expiration) do
+  def ban(%User{} = user), do: ban(user, nil)
+  def ban(%User{ id: id} = user, expiration) do
+    case ban_by_user_id(id, expiration) do
+      {:ok, ban_info} -> # successful ban, update roles/ban info on user
+        user = user
+        |> Map.put(:roles, Role.by_user_id(id))
+        |> Map.put(:ban_expiration, ban_info.expiration)
+        {:ok, user}
+      {:error, err} -> # print error, return human readable message
+        IO.inspect err
+        {:error, "There was an issue banning user"}
+    end
+  end
+  defp ban_by_user_id(user_id, expiration) do
     Repo.transaction(fn ->
       RoleUser.set_user_role(Role.get_banned_role_id, user_id)
       case Repo.get_by(Ban, user_id: user_id) do
@@ -58,7 +70,6 @@ defmodule EpochtalkServer.Models.Ban do
         ban -> ban_changeset(ban, %{user_id: user_id, expiration: expiration})
       end
       |> Repo.insert_or_update!
-      |> Map.put(:roles, Role.by_user_id(user_id))
     end)
   end
 

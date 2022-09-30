@@ -52,14 +52,12 @@ defmodule EpochtalkServer.Models.Ban do
   def ban(%User{} = user), do: ban(user, nil)
   def ban(%User{ id: id} = user, expiration) do
     case ban_by_user_id(id, expiration) do
-      {:ok, ban_info} -> # successful ban, update roles/ban info on user
-        user = user
-        |> Map.put(:roles, Role.by_user_id(id))
-        |> Map.put(:ban_expiration, ban_info.expiration)
+      {:ok, _ban_info} -> # successful ban, update roles/ban info on user
+        user = user |> Repo.preload([:ban_info, roles: [:role]], force: true)
         {:ok, user}
       {:error, err} -> # print error, return human readable message
         IO.inspect err
-        {:error, "There was an issue banning user"}
+        {:error, :ban_error}
     end
   end
   defp ban_by_user_id(user_id, expiration) do
@@ -73,23 +71,51 @@ defmodule EpochtalkServer.Models.Ban do
     end)
   end
 
-  def unban(user_id) when is_integer(user_id) do
+  defp unban_by_user_id(user_id) when is_integer(user_id) do
     Repo.transaction(fn ->
       RoleUser.delete_user_role(Role.get_banned_role_id, user_id) # delete ban role from user
-      User.clear_malicious_score(user_id) # clear user malicious score
+      User.clear_malicious_score_by_id(user_id) # clear user malicious score
       case Repo.get_by(Ban, user_id: user_id) do
-        nil -> %{ user_id: user_id }
+        nil -> {:ok, nil}
         cs -> Repo.update!(unban_changeset(cs, %{ user_id: user_id }))
       end # unban the user
-      |> Map.put(:roles, Role.by_user_id(user_id)) # append user roles
     end)
   end
 
   # unban if ban is expired, return user's roles
-  def unban_if_expired(%{ban_expiration: expiration, id: user_id} = user) do
-    if NaiveDateTime.compare(expiration, NaiveDateTime.utc_now) == :lt,
-      do: unban(user_id) |> Map.get(:roles),
-      else: user.roles
+  def unban_fixed(%User{ban_info: %Ban{expiration: expiration}, id: user_id} = user) do
+    if NaiveDateTime.compare(expiration, NaiveDateTime.utc_now) == :lt do
+      case unban_by_user_id(user_id) do
+        {:ok, _result} -> #successful unban, update user roles and ban_info
+          user = user |> Repo.preload([:ban_info, roles: [:role]], force: true)
+          {:ok, user}
+        {:error, err} -> # print error, return human readable message
+          IO.inspect err
+          {:error, :unban_error}
+      end
+    else
+     {:ok, user}
+    end
   end
-  def unban_if_expired(user), do: user.roles
+  # unban with not ban_expiration, just return user do nothing
+  def unban_fixed(%User{id: _user_id} = user), do: {:ok, user}
+
+  def unban(%{ban_expiration: expiration, id: user_id} = user) do
+    if NaiveDateTime.compare(expiration, NaiveDateTime.utc_now) == :lt do
+      case unban_by_user_id(user_id) do
+        {:ok, _result} -> #successful unban, append updated user roles
+          user = user
+          |> Map.put(:roles, Role.by_user_id(user_id))
+          |> Map.delete(:ban_expiration)
+          {:ok, user}
+        {:error, err} -> # print error, return human readable message
+          IO.inspect err
+          {:error, :unban_error}
+      end
+    else
+     {:ok, user}
+    end
+  end
+  # unban with not ban_expiration, just return user do nothing
+  def unban(%{id: _user_id} = user), do: {:ok, user}
 end

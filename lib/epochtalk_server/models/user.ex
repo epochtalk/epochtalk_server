@@ -136,15 +136,19 @@ defmodule EpochtalkServer.Models.User do
       """, u.id, u.id)},
     where: u.username == ^username
 
-    if user = Repo.one(query) do
-      # set all user's roles
-      user = Map.put(user, :roles, Role.by_user_id(user.id))
-      # set primary role info
-      primary_role = List.first(user[:roles])
-      hc = Map.get(primary_role, :highlight_color)
-      Map.put(user, :role_name, primary_role.name)
-      |> Map.put(:role_highlight_color, (if hc, do: hc, else: ""))
-      |> format_user
+    case Repo.one(query) do
+      nil -> {:error, :user_not_found}
+      user ->
+         # set all user's roles
+        user = Map.put(user, :roles, Role.by_user_id(user.id))
+        # set primary role info
+        primary_role = List.first(user[:roles])
+        hc = Map.get(primary_role, :highlight_color)
+        user = user
+        |> Map.put(:role_name, primary_role.name)
+        |> Map.put(:role_highlight_color, (if hc, do: hc, else: ""))
+        |> format_user
+        {:ok, user}
     end
   end
   def valid_password?(%{passhash: hashed_password} = _user, password)

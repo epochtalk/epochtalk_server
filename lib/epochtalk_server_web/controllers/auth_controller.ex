@@ -45,8 +45,6 @@ defmodule EpochtalkServerWeb.AuthController do
   end
   def register(_conn, _attrs), do: raise(InvalidPayload)
 
-    user = Map.put(user, :token, token)
-
   def authenticate(conn), do: authenticate(conn, nil)
   def authenticate(conn, _attrs) do
     token = Guardian.Plug.current_token(conn)

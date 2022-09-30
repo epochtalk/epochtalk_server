@@ -9,6 +9,7 @@ defmodule EpochtalkServer.Models.User do
   alias EpochtalkServer.Models.Role
   alias EpochtalkServer.Models.RoleUser
   alias EpochtalkServer.Models.BannedAddress
+  alias EpochtalkServer.Models.Ban
 
   schema "users" do
     field :email, :string
@@ -38,32 +39,52 @@ defmodule EpochtalkServer.Models.User do
     |> validate_password()
   end
   # create admin, for seeding
-  def create(user_attrs, true = _admin) do
+  def create(attrs, true = _admin) do
     Repo.transaction(fn ->
-      create(user_attrs)
+      create(attrs)
       |> case do {:ok, %{ id: id } = _user} -> RoleUser.set_admin(id) end
     end)
   end
-  # create user, for seeding
-  def create(user_attrs) do
-    %User{}
-    |> User.registration_changeset(user_attrs)
-    |> Repo.insert
+  def create(attrs) do
+    user_cs = User.registration_changeset(%User{}, attrs)
+    case Repo.insert(user_cs) do
+      {:ok, user} -> {:ok, user |> Map.put(:roles, Role.by_user_id(user.id))} # append roles
+      {:error, err} -> {:error, err}
+    end
   end
 
   def with_username_exists?(username), do: Repo.exists?(from u in User, where: u.username == ^username)
+
   def with_email_exists?(email), do: Repo.exists?(from u in User, where: u.email == ^email)
+
   def by_id(id) when is_integer(id), do: Repo.get_by(User, id: id)
-  defp set_malicious_score(id, value) do
-      from(u in User, where: u.id == ^id)
-      |> Repo.update_all(set: [malicious_score: value])
+
+  defp set_malicious_score(%User{ id: id } = user, malicious_score) do
+    from(u in User, where: u.id == ^id)
+    |> Repo.update_all(set: [malicious_score: malicious_score])
+    if malicious_score != nil && malicious_score >= 1,
+      do: user |> Map.put(:malicious_score, malicious_score),
+      else: user
   end
-  def clear_malicious_score(id) when is_integer(id), do: set_malicious_score(id, nil)
-  def get_and_set_malicious_score(id, ip) when is_integer(id) and is_binary(ip) do
-    malicious_score = BannedAddress.calculate_malicious_score_from_ip(ip)
-    set_malicious_score(id, malicious_score)
-    malicious_score
+
+  def clear_malicious_score(%User{} = user), do: set_malicious_score(user, nil)
+
+  def handle_malicious_user(%User{} = user, ip) do
+    # convert ip tuple into string
+    ip_str = ip |> :inet_parse.ntoa |> to_string
+    # calculate user's malicious score from ip
+    malicious_score = BannedAddress.calculate_malicious_score_from_ip(ip_str)
+    # set user's malicious score
+    user = set_malicious_score(user, malicious_score)
+    # if user's malicious score is 1 or more ban the user, update roles and ban info
+    user = ban_if_malicious(user)
+    user
   end
+
+  defp ban_if_malicious(%User{ malicious_score: nil } = user), do: {:ok, user}
+  defp ban_if_malicious(%User{ malicious_score: score } = user) when score < 1, do: {:ok, user}
+  defp ban_if_malicious(%User{ malicious_score: score } = user) when score >= 1, do: Ban.ban(user)
+
   def by_username(username) when is_binary(username) do
     query = from u in User,
     left_join: p in Profile,

@@ -9,6 +9,7 @@ defmodule EpochtalkServer.Models.User do
   alias EpochtalkServer.Models.Role
   alias EpochtalkServer.Models.RoleUser
   alias EpochtalkServer.Models.BannedAddress
+  alias EpochtalkServer.Models.BoardModerator
   alias EpochtalkServer.Models.Ban
 
   schema "users" do
@@ -20,14 +21,19 @@ defmodule EpochtalkServer.Models.User do
     field :confirmation_token, :string
     field :reset_token, :string
     field :reset_expiration, :string
-
     field :created_at, :naive_datetime
     field :imported_at, :naive_datetime
     field :updated_at, :naive_datetime
     field :deleted, :boolean, default: false
     field :malicious_score, :decimal
-
     field :smf_member, :map, virtual: true
+
+    # relation fields
+    has_one :preferences, Preference
+    has_one :profile, Profile
+    has_one :ban_info, Ban
+    has_many :roles, RoleUser
+    has_many :moderating, BoardModerator
   end
 
   def registration_changeset(user, attrs) do

@@ -4,9 +4,7 @@ defmodule EpochtalkServerWeb.ErrorView do
   # By default, Phoenix returns the status message from
   # the template name. For example, "404.json" becomes
   # "Not Found".
-  def template_not_found(_template, assigns) do
-    format_error(assigns)
-  end
+  def template_not_found(_template, assigns), do: format_error(assigns)
 
   # match assigns.reason.message and assigns.conn.status
   defp format_error(%{reason: %{message: message}, conn: %{status: status}}), do: format_error(status, message)
@@ -17,10 +15,11 @@ defmodule EpochtalkServerWeb.ErrorView do
   # match assigns.message and assigns.status
   defp format_error(%{message: message, status: status}), do: format_error(status, message)
   # match stack and status (Ex: function error from redis in session)
-  defp format_error(%{stack: stack, status: status}) do
+  defp format_error(%{stack: _, status: status}) do
     format_error(status, "Something went wrong")
   end
 
+  # format errors with readable message
   defp format_error(status, message) when is_binary(message) do
     %{
       status: status,
@@ -28,4 +27,6 @@ defmodule EpochtalkServerWeb.ErrorView do
       error: Phoenix.Controller.status_message_from_template(to_string(status))
     }
   end
+  # format errors with unknown error
+  defp format_error(status, data), do: format_error(status, "Something went wrong")
 end

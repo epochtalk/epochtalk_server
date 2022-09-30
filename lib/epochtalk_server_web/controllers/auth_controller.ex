@@ -47,8 +47,11 @@ defmodule EpochtalkServerWeb.AuthController do
 
     user = Map.put(user, :token, token)
 
-    conn
-    |> render("user.json", user: user)
+  def authenticate(conn), do: authenticate(conn, nil)
+  def authenticate(conn, _attrs) do
+    token = Guardian.Plug.current_token(conn)
+    user = Guardian.Plug.current_resource(conn) |> Map.put(:token, token)
+    render(conn, "user.json", user: user)
   end
 
   def logout(conn, _attrs) do
@@ -62,10 +65,10 @@ defmodule EpochtalkServerWeb.AuthController do
     end
   end
 
-  def login(conn, user_params) when not is_map_key(user_params, "rememberMe") do
-    login(conn, Map.put(user_params, "rememberMe", false))
+  def login(conn, attrs) when not is_map_key(attrs, "rememberMe") do
+    login(conn, Map.put(attrs, "rememberMe", false))
   end
-  def login(conn, %{"username" => username, "password" => password} = _user_params) do
+  def login(conn, %{"username" => username, "password" => password} = _attrs) do
     if Guardian.Plug.authenticated?(conn) do
       authenticate(conn)
     else

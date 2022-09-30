@@ -1,57 +1,52 @@
 defmodule EpochtalkServer.Session do
   alias EpochtalkServer.Auth.Guardian
+  alias EpochtalkServer.Models.User
 
   # set user session id, timestamp, ttl
   # log user in with Guardian to get token
   # save user session info to redis
-  # return user with token
-  def create(user, conn) do
+  # returns {:ok, user, token and conn}
+  def create(%User{} = user, remember_me, conn) do
     datetime = NaiveDateTime.utc_now
     session_id = UUID.uuid1()
     decoded_token = %{ user_id: user.id, session_id: session_id, timestamp: datetime }
 
     # set token expiration based on rememberMe
-    ttl = case Map.get(user, "rememberMe") do
-      # set longer expiration
-      "true" -> {4, :weeks}
-      # set default expiration
-      _ -> {1, :day}
-    end
+    ttl = if remember_me, do: {4, :weeks}, else: {1, :day}
 
     # sign user in and get encoded token
     conn = Guardian.Plug.sign_in(conn, decoded_token, %{}, ttl: ttl)
     encoded_token = Guardian.Plug.current_token(conn)
 
-    # add token to user
-    user = Map.put(user, :token, encoded_token)
-
     # save session
     save(user, session_id)
-
+    #TODO(akinsey): error handling
     # return user with token
-    {user, conn}
+    {:ok, user, encoded_token, conn}
   end
-  defp save(db_user, session_id) do
+  defp save(user, session_id) do
     # TODO: return role lookups from db instead of entire roles
-    update_user_info(db_user.id, db_user.username, Map.get(db_user, :avatar))
-    update_roles(db_user.id, db_user.roles)
-    ban_info = if Map.has_key?(db_user, :ban_expiration), do: %{ ban_expiration: db_user.ban_expiration }, else: %{}
-    ban_info = if Map.has_key?(db_user, :malicious_score), do: Map.put(ban_info, :malicious_score, db_user.malicious_score), else: ban_info
-    update_ban_info(db_user.id, ban_info)
-    update_moderating(db_user.id, Map.get(db_user, :moderating))
-    set_session(db_user.id, session_id)
+    avatar = if is_nil(user.profile), do: nil, else: user.profile.avatar
+    update_user_info(user.id, user.username, avatar)
+    update_roles(user.id, user.roles)
+    ban_info = if is_nil(user.ban_info), do: %{}, else: %{ ban_expiration: user.ban_info.expiration }
+    ban_info = if !is_nil(user.malicious_score) && user.malicious_score >= 1, do: Map.put(ban_info, :malicious_score, user.malicious_score), else: ban_info
+    update_ban_info(user.id, ban_info)
+    update_moderating(user.id, user.moderating)
+    set_session(user.id, session_id)
   end
   # use default role
   def update_roles(user_id, roles) when is_list(roles) do
     # save/replace roles to redis under "user:{user_id}:roles"
-    role_lookups = roles
-    |> Enum.map(&(&1.lookup))
+    role_lookups = roles |> Enum.map(&(&1.role.lookup))
     role_key = generate_key(user_id, "roles")
     Redix.command(:redix, ["DEL", role_key])
     unless role_lookups == nil or role_lookups == [], do:
       Enum.each(role_lookups, &Redix.command(:redix, ["SADD", role_key, &1]))
   end
   def update_moderating(user_id, moderating) do
+    # get list of board ids from user.moderating
+    moderating = moderating |> Enum.map(&(&1.board_id))
     # save/replace moderating boards to redis under "user:{user_id}:moderating"
     moderating_key = generate_key(user_id, "moderating")
     Redix.command(:redix, ["DEL", moderating_key])

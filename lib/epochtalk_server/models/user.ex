@@ -58,6 +58,17 @@ defmodule EpochtalkServer.Models.User do
       {:error, err} -> {:error, err}
     end
   end
+  def create_fixed(attrs) do
+    user_cs = User.registration_changeset(%User{}, attrs)
+    case Repo.insert(user_cs) do
+      {:ok, user} ->
+        user = user
+          |> Repo.preload([:preferences, :profile, :ban_info, :moderating]) # load associations
+          |> Map.put(:roles, [%RoleUser{role: Role.get_default()}]) # default to user role
+        {:ok, user} # load associations
+      {:error, err} -> {:error, err}
+    end
+  end
 
   def with_username_exists?(username), do: Repo.exists?(from u in User, where: u.username == ^username)
 
@@ -66,30 +77,46 @@ defmodule EpochtalkServer.Models.User do
   def by_id(id) when is_integer(id), do: Repo.get_by(User, id: id)
 
   defp set_malicious_score(%User{ id: id } = user, malicious_score) do
-    from(u in User, where: u.id == ^id)
-    |> Repo.update_all(set: [malicious_score: malicious_score])
-    if malicious_score != nil && malicious_score >= 1,
+    set_malicious_score_by_id(id, malicious_score)
+    if malicious_score != nil,
       do: user |> Map.put(:malicious_score, malicious_score),
       else: user
   end
 
-  def clear_malicious_score(%User{} = user), do: set_malicious_score(user, nil)
+  defp set_malicious_score_by_id(id, malicious_score) do
+    from(u in User, where: u.id == ^id)
+    |> Repo.update_all(set: [malicious_score: malicious_score])
+  end
+
+  def clear_malicious_score_by_id(id), do: set_malicious_score_by_id(id, nil)
 
   def handle_malicious_user(%User{} = user, ip) do
     # convert ip tuple into string
     ip_str = ip |> :inet_parse.ntoa |> to_string
-    # calculate user's malicious score from ip
+    # calculate user's malicious score from ip, nil if less than 1
     malicious_score = BannedAddress.calculate_malicious_score_from_ip(ip_str)
     # set user's malicious score
     user = set_malicious_score(user, malicious_score)
     # if user's malicious score is 1 or more ban the user, update roles and ban info
-    user = ban_if_malicious(user)
-    user
+    if is_nil(user.malicious_score) || user.malicious_score < 1,
+      do: {:ok, user},
+      else: Ban.ban(user)
   end
 
-  defp ban_if_malicious(%User{ malicious_score: nil } = user), do: {:ok, user}
-  defp ban_if_malicious(%User{ malicious_score: score } = user) when score < 1, do: {:ok, user}
-  defp ban_if_malicious(%User{ malicious_score: score } = user) when score >= 1, do: Ban.ban(user)
+  def by_username_fixed(username) when is_binary(username) do
+    query = from u in User,
+      where: u.username == ^username,
+      preload: [:preferences, :profile, :ban_info, :moderating, roles: [:role]]
+    user = Repo.one(query)
+    if user do
+      case length(user.roles) do
+        0 -> {:ok, Map.put(user, :roles, [%RoleUser{role: Role.get_default()}])}
+        _ -> {:ok, user}
+      end
+    else
+      {:error, :user_not_found}
+    end
+  end
 
   def by_username(username) when is_binary(username) do
     query = from u in User,

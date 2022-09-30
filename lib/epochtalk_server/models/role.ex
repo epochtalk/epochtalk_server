@@ -56,7 +56,7 @@ defmodule EpochtalkServer.Models.Role do
     end
     |> handle_banned_user_role # if banned, only [ banned ] is returned for roles
   end
-  defp get_default(), do: by_lookup("user")
+  def get_default(), do: by_lookup("user")
 
   defp handle_banned_user_role(roles), do: if ban_role = reduce_ban_role(roles), do: [ban_role], else: roles
   defp reduce_ban_role([]), do: nil

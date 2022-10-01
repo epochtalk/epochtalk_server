@@ -38,7 +38,7 @@ defmodule EpochtalkServer.Session do
   # use default role
   def update_roles(user_id, roles) when is_list(roles) do
     # save/replace roles to redis under "user:{user_id}:roles"
-    role_lookups = roles |> Enum.map(&(&1.role.lookup))
+    role_lookups = roles |> Enum.map(&(&1.lookup))
     role_key = generate_key(user_id, "roles")
     Redix.command(:redix, ["DEL", role_key])
     unless role_lookups == nil or role_lookups == [], do:

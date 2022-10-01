@@ -19,6 +19,8 @@ defmodule EpochtalkServer.Models.Preference do
     field :email_messages, :boolean
   end
 
+  ## === Changesets Functions ===
+
   def changeset(permission, attrs \\ %{}) do
     permission
     |> cast(attrs, [:user_id, :posts_per_page, :threads_per_page,

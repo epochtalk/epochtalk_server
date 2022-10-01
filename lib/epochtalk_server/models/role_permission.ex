@@ -18,11 +18,16 @@ defmodule EpochtalkServer.Models.RolePermission do
     field :modified, :boolean
   end
 
+  ## === Changesets Functions ===
+
   def changeset(role_permission, attrs \\ %{}) do
     role_permission
     |> cast(attrs, [:role_id, :permission_path, :value, :modified])
     |> validate_required([:role_id, :permission_path, :value, :modified])
   end
+
+  ## === Database Functions ===
+
   def insert([]), do: {:error, "Role permission list is empty"}
   def insert(%RolePermission{} = role_permission), do: Repo.insert(role_permission)
   def insert([%{}|_] = roles_permissions), do: Repo.insert_all(RolePermission, roles_permissions)
@@ -57,6 +62,7 @@ defmodule EpochtalkServer.Models.RolePermission do
       conflict_target: [:role_id, :permission_path] # check conflicts on unique index keys
     )
   end
+
   # derives a single nested map of all permissions for a role
   def permissions_map_by_role_id(role_id) do
     from(rp in RolePermission,
@@ -68,6 +74,7 @@ defmodule EpochtalkServer.Models.RolePermission do
     |> Enum.reduce(%{}, fn %{permission_path: permission_path, value: value}, acc -> Map.put(acc, permission_path, value) end)
     |> Iteraptor.from_flatmap
   end
+
   # for server-side role-loading use, only runs if roles permissions table is currently empty
   # sets all roles permissions to value: false, modified: false
   def maybe_init! do

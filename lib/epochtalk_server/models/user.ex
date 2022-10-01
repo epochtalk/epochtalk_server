@@ -32,9 +32,11 @@ defmodule EpochtalkServer.Models.User do
     has_one :preferences, Preference
     has_one :profile, Profile
     has_one :ban_info, Ban
-    has_many :roles, RoleUser
+    many_to_many :roles, Role, join_through: RoleUser
     has_many :moderating, BoardModerator
   end
+
+  ## === Changesets Functions ===
 
   def registration_changeset(user, attrs) do
     user
@@ -44,29 +46,25 @@ defmodule EpochtalkServer.Models.User do
     |> validate_email()
     |> validate_password()
   end
+
+  ## === Database Functions ===
+
   # create admin, for seeding
   def create(attrs, true = _admin) do
     Repo.transaction(fn ->
-      create(attrs)
-      |> case do {:ok, %{ id: id } = _user} -> RoleUser.set_admin(id) end
+      {:ok, user} = create(attrs)
+      RoleUser.set_admin(user.id)
     end)
   end
   def create(attrs) do
     user_cs = User.registration_changeset(%User{}, attrs)
     case Repo.insert(user_cs) do
-      {:ok, user} -> {:ok, user |> Map.put(:roles, Role.by_user_id(user.id))} # append roles
-      {:error, err} -> {:error, err}
-    end
-  end
-  def create_fixed(attrs) do
-    user_cs = User.registration_changeset(%User{}, attrs)
-    case Repo.insert(user_cs) do
       {:ok, user} ->
         user = user
           |> Repo.preload([:preferences, :profile, :ban_info, :moderating]) # load associations
-          |> Map.put(:roles, [%RoleUser{role: Role.get_default()}]) # default to user role
-        {:ok, user} # load associations
-      {:error, err} -> {:error, err}
+          |> Role.handle_empty_user_roles() # appends default role
+        {:ok, user}
+      {:error, err} -> {:error, err} # changeset error
     end
   end
 
@@ -76,19 +74,16 @@ defmodule EpochtalkServer.Models.User do
 
   def by_id(id) when is_integer(id), do: Repo.get_by(User, id: id)
 
-  defp set_malicious_score(%User{ id: id } = user, malicious_score) do
-    set_malicious_score_by_id(id, malicious_score)
-    if malicious_score != nil,
-      do: user |> Map.put(:malicious_score, malicious_score),
-      else: user
-  end
-
-  defp set_malicious_score_by_id(id, malicious_score) do
-    from(u in User, where: u.id == ^id)
-    |> Repo.update_all(set: [malicious_score: malicious_score])
-  end
-
   def clear_malicious_score_by_id(id), do: set_malicious_score_by_id(id, nil)
+
+  def by_username(username) when is_binary(username) do
+    query = from u in User,
+      where: u.username == ^username,
+      preload: [:preferences, :profile, :ban_info, :moderating, :roles]
+    if user = Repo.one(query),
+      do: {:ok, user |> Role.handle_empty_user_roles() |> Role.handle_banned_user_role()},
+      else: {:error, :user_not_found}
+  end
 
   def handle_malicious_user(%User{} = user, ip) do
     # convert ip tuple into string
@@ -103,91 +98,33 @@ defmodule EpochtalkServer.Models.User do
       else: Ban.ban(user)
   end
 
-  def by_username_fixed(username) when is_binary(username) do
-    query = from u in User,
-      where: u.username == ^username,
-      preload: [:preferences, :profile, :ban_info, :moderating, roles: [:role]]
-    user = Repo.one(query)
-    if user do
-      case length(user.roles) do
-        0 -> {:ok, Map.put(user, :roles, [%RoleUser{role: Role.get_default()}])}
-        _ -> {:ok, user}
-      end
-    else
-      {:error, :user_not_found}
-    end
-  end
-
-  def by_username(username) when is_binary(username) do
-    query = from u in User,
-    left_join: p in Profile,
-      on: u.id == p.user_id,
-    left_join: pr in Preference,
-      on: u.id == pr.user_id,
-    select: %{
-      id: u.id,
-      username: u.username,
-      email: u.email,
-      passhash: u.passhash,
-      confirmation_token: u.confirmation_token,
-      reset_token: u.reset_token,
-      reset_expiration: u.reset_expiration,
-      deleted: u.deleted,
-      malicious_score: u.malicious_score,
-      created_at: u.created_at,
-      updated_at: u.updated_at,
-      imported_at: u.imported_at,
-      avatar: p.avatar,
-      position: p.position,
-      signature: p.signature,
-      raw_signature: p.raw_signature,
-      fields: p.fields,
-      post_count: p.post_count,
-      last_active: p.last_active,
-      posts_per_page: pr.posts_per_page,
-      threads_per_page: pr.threads_per_page,
-      collapsed_categories: pr.collapsed_categories,
-      ignored_boards: pr.ignored_boards,
-      ban_expiration: fragment("""
-        CASE WHEN EXISTS (
-          SELECT user_id
-          FROM roles_users
-          WHERE role_id = (SELECT id FROM roles WHERE lookup = \'banned\') and user_id = ?
-        )
-        THEN (
-          SELECT expiration
-          FROM users.bans
-          WHERE user_id = ?
-        )
-        ELSE NULL END
-      """, u.id, u.id)},
-    where: u.username == ^username
-
-    case Repo.one(query) do
-      nil -> {:error, :user_not_found}
-      user ->
-         # set all user's roles
-        user = Map.put(user, :roles, Role.by_user_id(user.id))
-        # set primary role info
-        primary_role = List.first(user[:roles])
-        hc = Map.get(primary_role, :highlight_color)
-        user = user
-        |> Map.put(:role_name, primary_role.name)
-        |> Map.put(:role_highlight_color, (if hc, do: hc, else: ""))
-        |> format_user
-        {:ok, user}
-    end
-  end
   def valid_password?(%{passhash: hashed_password} = _user, password)
       when is_binary(hashed_password) and byte_size(password) > 0 do
     Argon2.verify_pass(password, hashed_password)
   end
+
+  ## === Private Helper Functions ===
+  # sets malicious score of a user, outputs user with updated malicious score
+  defp set_malicious_score(%User{ id: id } = user, malicious_score) do
+    set_malicious_score_by_id(id, malicious_score)
+    if malicious_score != nil,
+      do: user |> Map.put(:malicious_score, malicious_score),
+      else: user
+  end
+
+  # sets malicious score of a user
+  defp set_malicious_score_by_id(id, malicious_score) do
+    from(u in User, where: u.id == ^id)
+    |> Repo.update_all(set: [malicious_score: malicious_score])
+  end
+
   defp validate_username(changeset) do
     changeset
     |> validate_required(:username)
     |> validate_length(:username, min: 3, max: 255)
     |> unique_constraint(:username)
   end
+
   defp validate_email(changeset) do
     changeset
     |> validate_required([:email])
@@ -196,6 +133,7 @@ defmodule EpochtalkServer.Models.User do
     |> unsafe_validate_unique(:email, Repo)
     |> unique_constraint(:email)
   end
+
   defp validate_password(changeset) do
     changeset
     |> validate_required([:password])
@@ -209,9 +147,9 @@ defmodule EpochtalkServer.Models.User do
     # |> validate_format(:password, ~r/[!?@#$%^&*_0-9]/, message: "at least one digit or punctuation character")
     |> hash_password()
   end
+
   defp hash_password(changeset) do
     password = get_change(changeset, :password)
-
     if password && changeset.valid? do
       changeset
       |> put_change(:passhash, Argon2.hash_pwd_salt(password))
@@ -219,13 +157,5 @@ defmodule EpochtalkServer.Models.User do
     else
       changeset
     end
-  end
-  defp format_user(user) do
-    user = Map.filter(user, fn {_, v} -> v end) # remove nil
-    user = if f = Map.get(user, :fields), do: Map.merge(user, f), else: user # merge fields onto user
-    user = if cc = Map.get(user, :collapsed_categories), do: Map.put(user, :collapsed_categories, Map.get(cc, "cats")), else: user # unnest cats
-    user = if ib = Map.get(user, :ignored_boards), do: Map.put(user, :ignored_boards, Map.get(ib, "boards")), else: user #unnest boards
-    Map.delete(user, :fields) # strip fields from user
-    |> Map.put(:avatar, Map.get(user, :avatar)) # sets avatar back to nil if not set
   end
 end

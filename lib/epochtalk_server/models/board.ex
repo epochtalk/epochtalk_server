@@ -23,6 +23,8 @@ defmodule EpochtalkServer.Models.Board do
     many_to_many :categories, Category, join_through: BoardMapping
   end
 
+  ## === Changesets Functions ===
+
   def changeset(board, attrs) do
     board
     |> cast(attrs, [:id, :name, :slug, :description, :post_count, :thread_count, :viewable_by, :postable_by, :created_at, :imported_at, :updated_at, :meta])
@@ -40,7 +42,11 @@ defmodule EpochtalkServer.Models.Board do
     |> unique_constraint(:id, name: :boards_pkey)
     |> unique_constraint(:slug, name: :boards_slug_index)
   end
+
+  ## === Database Functions ===
+
   def insert(%Board{} = board), do: Repo.insert(board)
+
   def create(board) do
     board_cs = create_changeset(%Board{}, board)
     case Repo.insert(board_cs) do

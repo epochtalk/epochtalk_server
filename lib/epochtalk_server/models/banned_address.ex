@@ -19,6 +19,8 @@ defmodule EpochtalkServer.Models.BannedAddress do
     field :updates, {:array, :naive_datetime}
   end
 
+  ## === Changesets Functions ===
+
   def changeset(banned_address, attrs \\ %{}) do
     now = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
     attrs = attrs
@@ -36,12 +38,14 @@ defmodule EpochtalkServer.Models.BannedAddress do
       _   -> changeset_hostname(banned_address, attrs)
     end
   end
+
   def changeset_hostname(banned_address, attrs \\ %{}) do
     banned_address
     |> cast(attrs, [:hostname, :weight, :decay, :imported_at, :created_at, :updates])
     |> validate_required([:hostname, :weight, :decay, :created_at, :updates])
     |> unique_constraint(:hostname, name: :banned_addresses_hostname_index)
   end
+
   def changeset_ip(banned_address, attrs \\ %{}) do
     cs_data = banned_address
     |> cast(attrs, [:ip1, :ip2, :ip3, :ip4, :weight, :decay, :imported_at, :created_at, :updates])
@@ -60,9 +64,11 @@ defmodule EpochtalkServer.Models.BannedAddress do
     end
   end
 
+  ## === Database Functions ===
+
   def upsert(address_list) when is_list(address_list) do
     Repo.transaction(fn ->
-      Enum.each(address_list ,&BannedAddress.upsert(&1))
+      Enum.each(address_list ,&upsert(&1))
     end)
   end
   def upsert(banned_address) do
@@ -104,6 +110,8 @@ defmodule EpochtalkServer.Models.BannedAddress do
     end
   end
 
+  ## === External Helper Functions ===
+
   def calculate_malicious_score_from_ip(ip) do
     case :inet.parse_address(to_charlist(ip)) do
       {:ok, ip} ->
@@ -121,7 +129,10 @@ defmodule EpochtalkServer.Models.BannedAddress do
     end
   end
 
+  ## === Private Helper Functions ===
+
   defp hostname_from_host({ _, name, _, _, _, _ }), do: List.to_string(name)
+
   defp calculate_hostname_score(hostname) do
     (from ba in BannedAddress,
       where: like(ba.hostname, ^hostname),
@@ -129,6 +140,7 @@ defmodule EpochtalkServer.Models.BannedAddress do
     |> Repo.one
     |> calculate_score_decay
   end
+
   defp calculate_ip32_score({ ip1, ip2, ip3, ip4 }) do
     (from ba in BannedAddress,
       where: ba.ip1 == ^ip1 and ba.ip2 == ^ip2 and ba.ip3 == ^ip3 and ba.ip4 == ^ip4,
@@ -136,6 +148,7 @@ defmodule EpochtalkServer.Models.BannedAddress do
     |> Repo.one
     |> calculate_score_decay
   end
+
   defp calculate_ip24_score({ ip1, ip2, ip3, _ }) do
     (from ba in BannedAddress,
       where: ba.ip1 == ^ip1 and ba.ip2 == ^ip2 and ba.ip3 == ^ip3,
@@ -143,6 +156,7 @@ defmodule EpochtalkServer.Models.BannedAddress do
     |> Repo.one
     |> calculate_score_decay
   end
+
   defp calculate_ip16_score({ ip1, ip2, _, _ }) do
     (from ba in BannedAddress,
       where: ba.ip1 == ^ip1 and ba.ip2 == ^ip2,
@@ -166,15 +180,15 @@ defmodule EpochtalkServer.Models.BannedAddress do
 
   # returns the decayed score given a banned address
   # no banned address data found return 0
-  def calculate_score_decay(), do: 0
-  def calculate_score_decay(banned_address) when banned_address == %{}, do: 0
-  def calculate_score_decay(banned_address) when is_nil(banned_address), do: 0
+  defp calculate_score_decay(nil), do: 0
+  defp calculate_score_decay(banned_address) when banned_address == %{}, do: 0
+  defp calculate_score_decay(banned_address) when is_nil(banned_address), do: 0
   # banned address data found and decays, calculate
-  def calculate_score_decay(%{ decay: true, updates: updates, weight: weight, created_at: created_at } = _banned_address) do
+  defp calculate_score_decay(%{ decay: true, updates: updates, weight: weight, created_at: created_at } = _banned_address) do
     last_update_date = if length(updates) > 0, do: List.last(updates), else: created_at
     diff_ms = abs(NaiveDateTime.diff(last_update_date, NaiveDateTime.utc_now()) * 1000)
     decay_for_time(diff_ms, weight)
   end
   # banned address data found, but does not decay
-  def calculate_score_decay(banned_address), do: Decimal.to_float(banned_address.weight)
+  defp calculate_score_decay(banned_address), do: Decimal.to_float(banned_address.weight)
 end

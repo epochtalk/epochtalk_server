@@ -9,16 +9,17 @@ defmodule EpochtalkServer.Models.Permission do
     field :path, :string
   end
 
+  ## === Changesets Functions ===
+
   def changeset(permission, attrs \\ %{}) do
     permission
     |> cast(attrs, [:path])
     |> validate_required([:path])
   end
-  def by_path(path)
-      when is_binary(path) do
-    Repo.get_by(Permission, path: path)
-  end
-  def all() do
-    Repo.all(Permission)
-  end
+
+  ## === Database Functions ===
+
+  def all(), do: Repo.all(Permission)
+
+  def by_path(path) when is_binary(path), do: Repo.get_by(Permission, path: path)
 end

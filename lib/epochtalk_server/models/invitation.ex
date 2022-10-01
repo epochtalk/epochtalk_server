@@ -12,6 +12,8 @@ defmodule EpochtalkServer.Models.Invitation do
     field :created_at, :naive_datetime
   end
 
+  ## === Changesets Functions ===
+
   def create_changeset(invitation, attrs \\ %{}) do
     now = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
     attrs = attrs
@@ -27,6 +29,9 @@ defmodule EpochtalkServer.Models.Invitation do
       )
   end
 
+  ## === Database Functions ===
+
   def create(email), do: Repo.insert(create_changeset(%Invitation{}, %{email: email}))
+
   def delete(email), do: Repo.delete_all(from(i in Invitation, where: i.email == ^email))
 end

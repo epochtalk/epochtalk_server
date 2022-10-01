@@ -8,8 +8,9 @@ defmodule EpochtalkServerWeb.ErrorHelpers do
   @doc """
   Renders error json from error data which could be a message or changeset errors.
   """
-  def render_json_error(conn, status, %Ecto.Changeset{} = changeset), do:
+  def render_json_error(conn, status, %Ecto.Changeset{} = changeset) do
     render_json_error(conn, status, changeset_error_to_string(changeset))
+  end
   def render_json_error(conn, status, message) do
     conn
     |> put_status(status)

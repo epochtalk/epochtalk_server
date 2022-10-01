@@ -15,6 +15,8 @@ defmodule EpochtalkServer.Models.BoardMapping do
     field :view_order, :integer
   end
 
+  ## === Changesets Functions ===
+
   def changeset(board_mapping, attrs) do
     board_mapping
     |> cast(attrs, [:board_id, :parent_id, :category_id, :view_order])
@@ -22,6 +24,9 @@ defmodule EpochtalkServer.Models.BoardMapping do
     |> unique_constraint([:board_id, :parent_id], name: :board_mapping_board_id_parent_id_index)
     |> unique_constraint([:board_id, :category_id], name: :board_mapping_board_id_category_id_index)
   end
+
+  ## === Database Functions ===
+
   def insert(%BoardMapping{} = board_mapping), do: Repo.insert(board_mapping)
 
   def delete_board(id) do

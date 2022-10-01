@@ -3,6 +3,7 @@ defmodule EpochtalkServer.Models.Role do
   import Ecto.Changeset
   import Ecto.Query, only: [from: 2]
   alias EpochtalkServer.Repo
+  alias EpochtalkServer.Models.User
   alias EpochtalkServer.Models.Role
   alias EpochtalkServer.Models.RoleUser
 
@@ -21,29 +22,31 @@ defmodule EpochtalkServer.Models.Role do
     field :updated_at, :naive_datetime
   end
 
+  ## === Changesets Functions ===
+
   def changeset(role, attrs \\ %{}) do
     role
     |> cast(attrs, [:name, :description, :lookup, :priority, :permissions])
     |> validate_required([:name, :description, :lookup, :priority, :permissions])
   end
+
+  ## === Database Functions ===
+
+  ## SELECT OPERATIONS
+
   def all, do: from(r in Role, order_by: r.id) |> Repo.all
+
+  def get_banned_role_id(), do: Repo.one(from(r in Role, select: r.id, where: r.lookup == "banned"))
+
+  def get_newbie_role_id(), do: Repo.one(from(r in Role, select: r.id, where: r.lookup == "newbie"))
+
+  def get_default(), do: by_lookup("user")
+
   def by_lookup(lookups) when is_list(lookups) do
     from(r in Role, where: r.lookup in ^lookups) |> Repo.all
   end
   def by_lookup(lookup), do: Repo.get_by(Role, lookup: lookup)
-  def insert([]), do: {:error, "Role list is empty"}
-  def insert(%Role{} = role), do: Repo.insert(role)
-  def insert([%{}|_] = roles), do: Repo.insert_all(Role, roles)
 
-  def set_permissions(id, permissions) do
-    Role
-    |> Repo.get(id)
-    |> change(%{ permissions: permissions })
-    |> Repo.update
-  end
-
-  def get_banned_role_id(), do: Repo.one(from(r in Role, select: r.id, where: r.lookup == "banned"))
-  def get_newbie_role_id(), do: Repo.one(from(r in Role, select: r.id, where: r.lookup == "newbie"))
   def by_user_id(user_id) do
     query = from ru in RoleUser,
       join: r in Role,
@@ -54,17 +57,47 @@ defmodule EpochtalkServer.Models.Role do
       [] -> [get_default()] # user has no roles, return default role
       users_roles -> users_roles # user has roles, return them
     end
-    |> handle_banned_user_role # if banned, only [ banned ] is returned for roles
+    |> Role.handle_banned_user_role # if banned, only [ banned ] is returned for roles
   end
-  def get_default(), do: by_lookup("user")
 
-  defp handle_banned_user_role(roles), do: if ban_role = reduce_ban_role(roles), do: [ban_role], else: roles
-  defp reduce_ban_role([]), do: nil
-  defp reduce_ban_role([role | _]) when role.lookup === "banned", do: role
-  defp reduce_ban_role([_ | roles]), do: reduce_ban_role(roles)
+  ## CREATE OPERATIONS
 
-  def get_masked_permissions(roles) when is_list(roles), do: Enum.reduce(roles, %{}, &get_masked_permissions(&2, &1))
-  defp get_masked_permissions(target, source) do
+  # For seeding roles
+  def insert([]), do: {:error, "Role list is empty"}
+  def insert(%Role{} = role), do: Repo.insert(role)
+  def insert([%{}|_] = roles), do: Repo.insert_all(Role, roles)
+
+  ## UPDATE OPERATIONS
+
+  def set_permissions(id, permissions) do
+    Role
+    |> Repo.get(id)
+    |> change(%{ permissions: permissions })
+    |> Repo.update
+  end
+
+  ## === External Helper Functions ===
+
+  # appends the default roles to User Model, if user has no roles
+  def handle_empty_user_roles(%User{roles: [%Role{} | _]} = user), do: user
+  def handle_empty_user_roles(%User{roles: []} = user), do: user |> Map.put(:roles, [Role.get_default()])
+  def handle_empty_user_roles(%User{} = user), do: user |> Map.put(:roles, [Role.get_default()])
+
+  # called with user model, outputs user model with updated role
+  def handle_banned_user_role(%User{roles: [%Role{} | _] = roles} = user) do
+    if banned_role = Enum.find(roles, &(&1.lookup == "banned")),
+      do: user |> Map.put(:roles, [banned_role]),
+      else: user
+   end
+  # called with just roles, ouput updated roles
+  def handle_banned_user_role(roles), do: if ban_role = reduce_ban_role(roles), do: [ban_role], else: roles
+
+  # Given %User{}.roles, outputs xored permissions
+  def get_masked_permissions(roles) when is_list(roles), do: Enum.reduce(roles, %{}, &mask_permissions(&2, &1))
+
+  ## === Private Helper Functions ===
+
+  defp mask_permissions(target, source) do
     merge_keys = [:highlight_color, :permissions, :priority, :priority_restrictions]
     filtered_source_keys = Map.keys(source) |> Enum.filter(&Enum.member?(merge_keys, &1))
     target_is_lesser_role = !Map.get(target, :priority) or target.priority > source.priority
@@ -92,4 +125,8 @@ defmodule EpochtalkServer.Models.Role do
   # NOT a map. We fall back to standard merge behavior, preferring
   # the value on the right.
   defp deep_resolve(_key, _left, right), do: right
+
+  defp reduce_ban_role([]), do: nil
+  defp reduce_ban_role([role | _]) when role.lookup === "banned", do: role
+  defp reduce_ban_role([_ | roles]), do: reduce_ban_role(roles)
 end

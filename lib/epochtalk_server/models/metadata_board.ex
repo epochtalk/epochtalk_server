@@ -19,6 +19,8 @@ defmodule EpochtalkServer.Models.MetadataBoard do
     field :last_post_position, :integer
   end
 
+  ## === Changesets Functions ===
+
   def changeset(permission, attrs \\ %{}) do
     permission
     |> cast(attrs, [:id, :board_id, :post_count, :thread_count,
@@ -27,5 +29,8 @@ defmodule EpochtalkServer.Models.MetadataBoard do
       :last_post_position])
     |> validate_required([:board_id])
   end
+
+  ## === Database Functions ===
+
   def insert(%MetadataBoard{} = metadata_boards), do: Repo.insert(metadata_boards)
 end

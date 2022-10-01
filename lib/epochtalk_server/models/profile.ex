@@ -15,6 +15,8 @@ defmodule EpochtalkServer.Models.Profile do
     field :last_active, :naive_datetime
   end
 
+  ## === Changesets Functions ===
+
   def changeset(permission, attrs \\ %{}) do
     permission
     |> cast(attrs, [:user_id, :avatar, :position, :signature, :raw_signature, :post_count, :field, :last_active])

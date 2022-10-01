@@ -13,11 +13,15 @@ defmodule EpochtalkServer.Models.BoardModerator do
     belongs_to :board, Board
   end
 
+  ## === Changesets Functions ===
+
   def changeset(permission, attrs \\ %{}) do
     permission
     |> cast(attrs, [:user_id, :board_id])
     |> validate_required([:user_id, :board_id])
   end
+
+  ## === Database Functions ===
 
   defp get_boards_by_user_id(user_id) when is_integer(user_id) do
     from(bm in BoardModerator, where: bm.user_id == ^user_id)

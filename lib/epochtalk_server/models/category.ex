@@ -18,12 +18,13 @@ defmodule EpochtalkServer.Models.Category do
     many_to_many :boards, Board, join_through: BoardMapping
   end
 
+  ## === Changesets Functions ===
+
   def changeset(category, attrs) do
     category
     |> cast(attrs, [:id, :name, :view_order, :viewable_by, :postable_by, :created_at, :imported_at, :updated_at, :meta])
     |> unique_constraint(:id, name: :categories_pkey)
   end
-  def insert(%Category{} = category), do: Repo.insert(category)
 
   def create_changeset(category, attrs) do
     now = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
@@ -33,25 +34,25 @@ defmodule EpochtalkServer.Models.Category do
     category
     |> cast(attrs, [:name, :viewable_by, :created_at, :updated_at])
   end
-  def create(category) do
-    category_cs = create_changeset(%Category{}, category)
-    db_cat = Repo.insert!(category_cs)
-    %{
-      id: db_cat.id,
-      name: db_cat.name,
-      viewable_by: db_cat.viewable_by
-    }
-  end
 
-  def changeset_for_board_mapping(category, attrs) do
+  def update_for_board_mapping_changeset(category, attrs) do
     category
     |> cast(attrs, [:id, :name, :view_order, :viewable_by])
     |> unique_constraint(:id, name: :categories_pkey)
   end
 
+  ## === Database Functions ===
+
+  def insert(%Category{} = category), do: Repo.insert(category)
+
+  def create(attrs) do
+    category_cs = create_changeset(%Category{}, attrs)
+    Repo.insert!(category_cs)
+  end
+
   def update_for_board_mapping(%{ id: id } = category_map) do
     %Category{ id: id }
-    |> changeset_for_board_mapping(category_map)
+    |> update_for_board_mapping_changeset(category_map)
     |> Repo.update
   end
 end

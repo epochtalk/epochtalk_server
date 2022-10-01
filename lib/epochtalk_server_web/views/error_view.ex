@@ -15,10 +15,7 @@ defmodule EpochtalkServerWeb.ErrorView do
   # match assigns.message and assigns.status
   defp format_error(%{message: message, status: status}), do: format_error(status, message)
   # match stack and status (Ex: function error from redis in session)
-  defp format_error(%{stack: _, status: status}) do
-    format_error(status, "Something went wrong")
-  end
-
+  defp format_error(%{stack: _, status: status}), do: format_error(status, "Something went wrong")
   # format errors with readable message
   defp format_error(status, message) when is_binary(message) do
     %{
@@ -28,5 +25,5 @@ defmodule EpochtalkServerWeb.ErrorView do
     }
   end
   # format errors with unknown error
-  defp format_error(status, data), do: format_error(status, "Something went wrong")
+  defp format_error(status, _data), do: format_error(status, "Something went wrong")
 end

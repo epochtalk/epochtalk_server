@@ -36,6 +36,7 @@ defmodule EpochtalkServer.MixProject do
       {:argon2_elixir, "~> 3.0.0"},
       {:corsica, "~> 1.2.0"},
       {:ecto_sql, "~> 3.6"},
+      {:ex_doc, "~> 0.28.5"},
       {:guardian, "~> 2.2.4"},
       {:guardian_db, "~> 2.1.0"},
       {:guardian_redis, "~> 0.1.0"},

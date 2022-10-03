@@ -24,7 +24,7 @@ defmodule EpochtalkServer.Session do
     # return user with token
     {:ok, user, encoded_token, conn}
   end
-  defp save(user, session_id) do
+  defp save(%User{} = user, session_id) do
     # TODO: return role lookups from db instead of entire roles
     avatar = if is_nil(user.profile), do: nil, else: user.profile.avatar
     update_user_info(user.id, user.username, avatar)

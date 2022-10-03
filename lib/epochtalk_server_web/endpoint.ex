@@ -1,5 +1,7 @@
 defmodule EpochtalkServerWeb.Endpoint do
   use Phoenix.Endpoint, otp_app: :epochtalk_server
+  alias EpochtalkServerWeb.Endpoint.CacheBodyReader
+
   # get x-forwarded ip
   plug RemoteIp
 
@@ -40,4 +42,4 @@ defmodule EpochtalkServerWeb.Endpoint do
 end
 
 # used to help preparse raw req body, in case of malformed payload
-defmodule CacheBodyReader, do: def read_body(conn, _opts), do: {:ok, conn.assigns.raw_body, conn}
+defmodule EpochtalkServerWeb.Endpoint.CacheBodyReader, do: def read_body(conn, _opts), do: {:ok, conn.assigns.raw_body, conn}

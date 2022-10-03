@@ -78,11 +78,22 @@ defmodule EpochtalkServer.Models.Role do
 
   ## === External Helper Functions ===
 
-  # appends the default roles to User Model, if user has no roles
+
+  @doc """
+  default role is not stored in the database, in order to save space
+  checks the role array on the user model
+  if roles array is empty, sets the default role by appending it
+
+  """
   def handle_empty_user_roles(%User{roles: [%Role{} | _]} = user), do: user
   def handle_empty_user_roles(%User{roles: []} = user), do: user |> Map.put(:roles, [Role.get_default()])
   def handle_empty_user_roles(%User{} = user), do: user |> Map.put(:roles, [Role.get_default()])
 
+  @doc """
+  The `banned` `Role` takes priority over all other roles
+  If a `User` is banned, only return the `banned` `Role`
+
+  """
   # called with user model, outputs user model with updated role
   def handle_banned_user_role(%User{roles: [%Role{} | _] = roles} = user) do
     if banned_role = Enum.find(roles, &(&1.lookup == "banned")),

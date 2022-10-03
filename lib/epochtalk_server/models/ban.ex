@@ -84,12 +84,19 @@ defmodule EpochtalkServer.Models.Ban do
   def ban_by_user_id(user_id, expiration) do
     Repo.transaction(fn ->
       RoleUser.set_user_role(Role.get_banned_role_id, user_id)
-      case Repo.get_by(Ban, user_id: user_id) do
-        nil -> ban_changeset(%Ban{}, %{user_id: user_id, expiration: expiration})
-        ban -> ban_changeset(ban, %{user_id: user_id, expiration: expiration})
+      case Repo.get_by(Ban, user_id: user_id) do # look for existing ban
+        nil -> ban_changeset(%Ban{}, %{user_id: user_id, expiration: expiration}) # create new
+        ban -> ban_changeset(ban, %{user_id: user_id, expiration: expiration}) # update existing
       end
       |> Repo.insert_or_update!
     end)
+    |> case do
+      {:ok, ban_changeset} -> {:ok, ban_changeset}
+      {:error, err} -> # print error, return error atom
+        # TODO(akinsey): handle in logger (telemetry possibly)
+        IO.inspect err
+        {:error, :ban_error}
+    end
   end
 
   @doc """
@@ -112,9 +119,7 @@ defmodule EpochtalkServer.Models.Ban do
         |> Repo.preload([:ban_info, :roles], force: true)
         |> Role.handle_banned_user_role() # only return banned role inside roles once user is banned
         {:ok, user}
-      {:error, err} -> # print error, return error atom
-        IO.inspect err
-        {:error, :ban_error}
+      {:error, _} -> {:error, :ban_error}
     end
   end
 
@@ -132,6 +137,12 @@ defmodule EpochtalkServer.Models.Ban do
         cs -> Repo.update!(unban_changeset(cs, %{ user_id: user_id }))
       end # unban the user
     end)
+    |> case do
+      {:ok, ban_changeset} -> {:ok, ban_changeset}
+      {:error, err} -> # print error, return error atom
+        IO.inspect err
+        {:error, :unban_error}
+    end
   end
 
   @doc """
@@ -142,16 +153,15 @@ defmodule EpochtalkServer.Models.Ban do
   def unban(%User{ban_info: %Ban{expiration: expiration}, id: user_id} = user) do
     if NaiveDateTime.compare(expiration, NaiveDateTime.utc_now) == :lt do
       case unban_by_user_id(user_id) do
-        {:ok, _result} -> #successful unban, update user roles and ban_info
+        {:ok, nil} -> {:ok, user} # user wasn't banned, return user
+        {:ok, _result} -> # successful unban, update user roles and ban_info
           user = user
           |> Repo.preload([:roles], force: true)
-          |> Role.handle_empty_user_roles() # check if roles are empty after unbanning
+          |> Role.handle_empty_user_roles() # if user's roles empty, default to user role
           |> Map.put(:malicious_score, nil) # clear malicious score
           |> Map.put(:ban_info, nil) # clear ban info so session gets updated
           {:ok, user}
-        {:error, err} -> # print error, return error atom
-          IO.inspect err
-          {:error, :unban_error}
+        {:error, _} -> {:error, :unban_error}
       end
     else
      {:ok, user}

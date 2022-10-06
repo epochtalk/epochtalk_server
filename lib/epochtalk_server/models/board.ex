@@ -6,6 +6,9 @@ defmodule EpochtalkServer.Models.Board do
   alias EpochtalkServer.Models.BoardMapping
   alias EpochtalkServer.Models.Board
   alias EpochtalkServer.Models.MetadataBoard
+  @moduledoc """
+  `Board` model, for performing actions relating to forum boards
+  """
 
   schema "boards" do
     field :name, :string
@@ -25,6 +28,13 @@ defmodule EpochtalkServer.Models.Board do
 
   ## === Changesets Functions ===
 
+  @doc """
+  Create generic changeset for `Board` model
+  """
+  @spec changeset(
+    board :: %EpochtalkServer.Models.Board{},
+    attrs :: %{} | nil
+  ) :: %EpochtalkServer.Models.Board{}
   def changeset(board, attrs) do
     board
     |> cast(attrs, [:id, :name, :slug, :description, :post_count, :thread_count, :viewable_by, :postable_by, :created_at, :imported_at, :updated_at, :meta])
@@ -32,6 +42,16 @@ defmodule EpochtalkServer.Models.Board do
     |> unique_constraint(:id, name: :boards_pkey)
     |> unique_constraint(:slug, name: :boards_slug_index)
   end
+
+  ## === Changesets Functions ===
+
+  @doc """
+  Create changeset for creation of `Board` model
+  """
+  @spec create_changeset(
+    board :: %EpochtalkServer.Models.Board{},
+    attrs :: %{} | nil
+  ) :: %EpochtalkServer.Models.Board{}
   def create_changeset(board, attrs) do
     now = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
     attrs = attrs

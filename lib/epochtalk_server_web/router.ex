@@ -4,13 +4,14 @@ defmodule EpochtalkServerWeb.Router do
   pipeline :api do
     plug :accepts, ["json"]
   end
+
   pipeline :maybe_auth do
     plug Guardian.Plug.Pipeline, module: EpochtalkServer.Auth.Guardian,
                                error_handler: EpochtalkServerWeb.GuardianErrorHandler
-
     plug Guardian.Plug.VerifyHeader, claims: %{"typ" => "access"}
     plug Guardian.Plug.LoadResource, allow_blank: true
   end
+
   pipeline :enforce_auth do
     plug Guardian.Plug.EnsureAuthenticated
   end
@@ -19,6 +20,7 @@ defmodule EpochtalkServerWeb.Router do
     pipe_through [:api, :maybe_auth, :enforce_auth]
     get "/authenticate", AuthController, :authenticate
   end
+
   scope "/api", EpochtalkServerWeb do
     pipe_through [:api, :maybe_auth]
     get "/register/username/:username", AuthController, :username
@@ -35,7 +37,6 @@ defmodule EpochtalkServerWeb.Router do
   if Mix.env() == :dev do
     scope "/dev" do
       pipe_through [:fetch_session, :protect_from_forgery]
-
       forward "/mailbox", Plug.Swoosh.MailboxPreview
     end
   end

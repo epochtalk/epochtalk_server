@@ -20,7 +20,7 @@ defmodule EpochtalkServer.Session do
 
     # save session
     save(user, session_id)
-    #TODO(akinsey): error handling
+    # TODO(akinsey): error handling
     # return user with token
     {:ok, user, encoded_token, conn}
   end

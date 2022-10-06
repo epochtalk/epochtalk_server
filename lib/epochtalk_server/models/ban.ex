@@ -7,7 +7,7 @@ defmodule EpochtalkServer.Models.Ban do
   alias EpochtalkServer.Models.RoleUser
   alias EpochtalkServer.Models.Ban
   @moduledoc """
-  Ban model, for performing actions relating to banning
+  `Ban` model, for performing actions relating to banning
   """
 
   # max naivedatetime, used for permanent bans

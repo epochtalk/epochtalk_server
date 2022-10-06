@@ -4,6 +4,9 @@ defmodule EpochtalkServer.Models.BannedAddress do
   import Ecto.Query, only: [from: 2]
   alias EpochtalkServer.Repo
   alias EpochtalkServer.Models.BannedAddress
+  @moduledoc """
+  `BannedAddress` model, for performing actions relating to banning by ip/hostname
+  """
 
   @primary_key false
   schema "banned_addresses" do
@@ -21,7 +24,14 @@ defmodule EpochtalkServer.Models.BannedAddress do
 
   ## === Changesets Functions ===
 
-  def changeset(banned_address, attrs \\ %{}) do
+  @doc """
+  Creates changeset for upsert of `BannedAddress` model
+  """
+  @spec upsert_changeset(
+    banned_address :: %EpochtalkServer.Models.BannedAddress{},
+    attrs :: %{} | nil
+  ) :: %EpochtalkServer.Models.BannedAddress{}
+  def upsert_changeset(banned_address, attrs \\ %{}) do
     now = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
     attrs = attrs
     |> Map.put(:created_at, now)
@@ -34,19 +44,33 @@ defmodule EpochtalkServer.Models.BannedAddress do
         |> Map.put(:ip2, Enum.at(ip, 1))
         |> Map.put(:ip3, Enum.at(ip, 2))
         |> Map.put(:ip4, Enum.at(ip, 3))
-        changeset_ip(banned_address, attrs)
-      _   -> changeset_hostname(banned_address, attrs)
+        ip_changeset(banned_address, attrs)
+      _   -> hostname_changeset(banned_address, attrs)
     end
   end
 
-  def changeset_hostname(banned_address, attrs \\ %{}) do
+  @doc """
+  Creates changeset of `BannedAddress` model with hostname information
+  """
+  @spec hostname_changeset(
+    banned_address :: %EpochtalkServer.Models.BannedAddress{},
+    attrs :: %{} | nil
+  ) :: %EpochtalkServer.Models.BannedAddress{}
+  def hostname_changeset(banned_address, attrs \\ %{}) do
     banned_address
     |> cast(attrs, [:hostname, :weight, :decay, :imported_at, :created_at, :updates])
     |> validate_required([:hostname, :weight, :decay, :created_at, :updates])
     |> unique_constraint(:hostname, name: :banned_addresses_hostname_index)
   end
 
-  def changeset_ip(banned_address, attrs \\ %{}) do
+  @doc """
+  Creates changeset of `BannedAddress` model with IP information
+  """
+  @spec ip_changeset(
+    banned_address :: %EpochtalkServer.Models.BannedAddress{},
+    attrs :: %{} | nil
+  ) :: %EpochtalkServer.Models.BannedAddress{}
+  def ip_changeset(banned_address, attrs \\ %{}) do
     cs_data = banned_address
     |> cast(attrs, [:ip1, :ip2, :ip3, :ip4, :weight, :decay, :imported_at, :created_at, :updates])
     |> validate_required([:ip1, :ip2, :ip3, :ip4, :weight, :decay, :created_at, :updates])
@@ -66,12 +90,24 @@ defmodule EpochtalkServer.Models.BannedAddress do
 
   ## === Database Functions ===
 
+  @doc """
+  Upserts a `BannedAddress` into the database and handles calculation of weight accounting for decay
+  """
+  @spec upsert(
+    banned_address_or_list :: %{} | [%{}] | %EpochtalkServer.Models.BannedAddress{} | [%EpochtalkServer.Models.BannedAddress{}]
+  ) :: {:ok, banned_address_changeset :: Ecto.Changeset.t()} | {:error, :banned_address_error}
   def upsert(address_list) when is_list(address_list) do
-    Repo.transaction(fn ->
-      Enum.each(address_list ,&upsert(&1))
-    end)
+    Repo.transaction(fn -> Enum.each(address_list ,&upsert_one(&1)) end)
+    |> case do
+      {:ok, banned_address_changeset} -> {:ok, banned_address_changeset}
+      {:error, err} -> # print error, return error atom
+        # TODO(akinsey): handle in logger (telemetry possibly)
+        IO.inspect err
+        {:error, :banned_address_error}
+    end
   end
-  def upsert(banned_address) do
+  def upsert(banned_address), do: upsert([banned_address])
+  defp upsert_one(banned_address) do
     case Map.get(banned_address, :hostname) do
       # IP type banned address
       nil ->
@@ -82,7 +118,7 @@ defmodule EpochtalkServer.Models.BannedAddress do
         ip4 = Enum.at(ip, 3)
         db_banned_address = Repo.get_by(BannedAddress, %{ip1: ip1, ip2: ip2, ip3: ip3, ip4: ip4})
         if db_banned_address do # update
-          cs_data = changeset(db_banned_address, banned_address)
+          cs_data = upsert_changeset(db_banned_address, banned_address)
           updated_cs = Map.merge(cs_data.data, cs_data.changes)
           from(ba in BannedAddress, where: ba.ip1 == ^ip1 and ba.ip2 == ^ip2 and ba.ip3 == ^ip3 and ba.ip4 == ^ip4)
           |> Repo.update_all(set: [
@@ -91,13 +127,13 @@ defmodule EpochtalkServer.Models.BannedAddress do
             updates: Map.get(updated_cs, :updates)
           ])
           {:ok, updated_cs}
-        else Repo.insert(changeset(%BannedAddress{}, banned_address), returning: true) end #insert
+        else Repo.insert(upsert_changeset(%BannedAddress{}, banned_address), returning: true) end #insert
       # hostname type banned address
       hostname ->
         if db_banned_address = Repo.get_by(BannedAddress, hostname: hostname) do # update
           # grab changes from changeset, this is a workaround since
           # we can't use Repo.update, because there is no primary key
-          cs_data = changeset(db_banned_address, banned_address)
+          cs_data = upsert_changeset(db_banned_address, banned_address)
           updated_cs = Map.merge(cs_data.data, cs_data.changes)
           from(ba in BannedAddress, where: ba.hostname == ^hostname)
           |> Repo.update_all(set: [
@@ -106,18 +142,24 @@ defmodule EpochtalkServer.Models.BannedAddress do
             updates: Map.get(updated_cs, :updates)
           ])
           {:ok, updated_cs}
-        else Repo.insert(changeset(%BannedAddress{}, banned_address), returning: true) end # insert
+        else Repo.insert(upsert_changeset(%BannedAddress{}, banned_address), returning: true) end # insert
     end
   end
 
   ## === External Helper Functions ===
 
-  def calculate_malicious_score_from_ip(ip) do
+  @doc """
+  Calculates the malicious score of the provided IP address, `float` score is returned if IP/Hostname are malicious, otherwise nil
+  """
+  @spec calculate_malicious_score_from_ip(
+    ip_address :: String.t()
+  ) :: float | nil
+  def calculate_malicious_score_from_ip(ip) when is_binary(ip) do
     case :inet.parse_address(to_charlist(ip)) do
       {:ok, ip} ->
         hostname_score = case :inet_res.gethostbyaddr(ip) do
           {:ok, host} -> hostname_from_host(host) |> calculate_hostname_score
-          {:error, _} -> nil # no hostname found, return nil for hostname score
+          {:error, _} -> 0 # no hostname found, return nil for hostname score
         end
         ip32_score = calculate_ip32_score(ip)
         ip24_score = calculate_ip24_score(ip)

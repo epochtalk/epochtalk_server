@@ -26,9 +26,11 @@ defmodule EpochtalkServer.Models.Ban do
 
   @doc """
   Create generic changeset for `Ban` model
-
-  Returns `%EpochtalkServer.Models.Ban{}`
   """
+  @spec changeset(
+    ban :: %EpochtalkServer.Models.Ban{},
+    attrs :: %{} | nil
+  ) :: %EpochtalkServer.Models.Ban{}
   def changeset(ban, attrs \\ %{}) do
     ban
     |> cast(attrs, [:id, :user_id, :expiration, :created_at, :updated_at])
@@ -37,9 +39,11 @@ defmodule EpochtalkServer.Models.Ban do
 
   @doc """
   Create ban changeset for `Ban` model, handles upsert of ban for banning
-
-  Returns `%EpochtalkServer.Models.Ban{}`
   """
+  @spec ban_changeset(
+    ban :: %EpochtalkServer.Models.Ban{},
+    attrs :: %{} | nil
+  ) :: %EpochtalkServer.Models.Ban{}
   def ban_changeset(ban, attrs \\ %{}) do
     now = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
     attrs = attrs
@@ -53,9 +57,11 @@ defmodule EpochtalkServer.Models.Ban do
 
   @doc """
   Create unban changeset for `Ban` model, handles update of ban for unbanning
-
-  Returns `%EpochtalkServer.Models.Ban{}`
   """
+  @spec unban_changeset(
+    ban :: %EpochtalkServer.Models.Ban{},
+    attrs :: %{} | nil
+  ) :: %EpochtalkServer.Models.Ban{}
   def unban_changeset(ban, attrs \\ %{}) do
     now = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
     attrs = attrs
@@ -70,17 +76,20 @@ defmodule EpochtalkServer.Models.Ban do
 
   @doc """
   Fetches `Ban` associated for a specific `User`
-
-  Returns `%EpochtalkServer.Models.Ban{} | nil`
   """
+  @spec by_user_id(
+    user_id :: integer
+  ) :: {:ok, ban_changeset :: Ecto.Changeset.t()} | {:error, ban_changeset :: Ecto.Changeset.t()}
   def by_user_id(user_id) when is_integer(user_id), do: Repo.get_by(Ban, user_id: user_id)
 
   @doc """
   Used to ban a `User` by `user_id` until supplied `expiration`. Passing `nil` for `expiration` will
   permanently ban the `User`
-
-  Returns `{:ok, %EpochtalkServer.Models.Ban{}} | {:error, :ban_error}`
   """
+  @spec ban_by_user_id(
+    user_id :: integer,
+    expiration :: Calendar.naive_datetime() | nil
+  ) :: {:ok, ban_changeset :: Ecto.Changeset.t()} | {:error, :ban_error}
   def ban_by_user_id(user_id, expiration) do
     Repo.transaction(fn ->
       RoleUser.set_user_role(Role.get_banned_role_id, user_id)
@@ -101,17 +110,20 @@ defmodule EpochtalkServer.Models.Ban do
 
   @doc """
   Used to ban a `User` permanently. Updates supplied `User` model to reflect ban and returns.
-
-  Returns `{:ok, %EpochtalkServer.Models.User{}}`
   """
+  @spec ban(
+    user :: %EpochtalkServer.Models.User{}
+  ) :: {:ok, user_changeset :: Ecto.Changeset.t()} | {:error, :ban_error}
   def ban(%User{} = user), do: ban(user, nil)
 
   @doc """
   Used to ban a `User` until supplied `expiration`. Passing `nil` for `expiration` will
   permanently ban the `User`. Updates supplied `User` model to reflect ban and returns.
-
-  Returns `{:ok, %EpochtalkServer.Models.User{}} | {:error, :ban_error}`
   """
+  @spec ban(
+    user :: %EpochtalkServer.Models.User{},
+    expiration :: Calendar.naive_datetime() | nil
+  ) :: {:ok, user_changeset :: Ecto.Changeset.t()} | {:error, :ban_error}
   def ban(%User{ id: id} = user, expiration) do
     case ban_by_user_id(id, expiration) do
       {:ok, _ban_info} -> # successful ban, update roles/ban info on user
@@ -124,10 +136,11 @@ defmodule EpochtalkServer.Models.Ban do
   end
 
   @doc """
-  Used to unban a `User` by `user_id`.
-
-  Returns `{:ok, %EpochtalkServer.Models.Ban{}} | {:ok, nil} | {:error, :unban_error}`
+  Used to unban a `User` by `user_id`. Will return `{:ok, nil}` if user was never banned.
   """
+  @spec unban_by_user_id(
+    user_id :: integer
+  ) :: {:ok, ban_changeset :: Ecto.Changeset.t()} | {:ok, nil} | {:error, :unban_error}
   def unban_by_user_id(user_id) when is_integer(user_id) do
     Repo.transaction(fn ->
       RoleUser.delete_user_role(Role.get_banned_role_id, user_id) # delete ban role from user
@@ -147,9 +160,10 @@ defmodule EpochtalkServer.Models.Ban do
 
   @doc """
   Used to unban a `User`. Updates supplied `User` model to reflect unbanning and returns.
-
-  Returns `{:ok, %EpochtalkServer.Models.User{}} | {:error, :unban_error}`
   """
+  @spec unban(
+    user :: %EpochtalkServer.Models.User{}
+  ) :: {:ok, user_changeset :: Ecto.Changeset.t()} | {:error, :unban_error}
   def unban(%User{ban_info: %Ban{expiration: expiration}, id: user_id} = user) do
     if NaiveDateTime.compare(expiration, NaiveDateTime.utc_now) == :lt do
       case unban_by_user_id(user_id) do

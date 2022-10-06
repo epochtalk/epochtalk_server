@@ -22,7 +22,7 @@ Repo.transaction(fn ->
 
   board_id = Board.create(board)
   |> case do
-    b -> b.id
+    {:ok, b} -> b.id
   end
 
   board_mapping = [

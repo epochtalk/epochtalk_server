@@ -45,13 +45,17 @@ defmodule EpochtalkServer.Models.Board do
 
   ## === Database Functions ===
 
-  def insert(%Board{} = board), do: Repo.insert(board)
-
+  @doc """
+  Creates a new `Board` in the database
+  """
+  @spec create(
+    board_attrs :: %{}
+  ) :: {:ok, board :: %EpochtalkServer.Models.Board{}} | {:error, Ecto.Changeset.t()}
   def create(board) do
     board_cs = create_changeset(%Board{}, board)
     case Repo.insert(board_cs) do
       {:ok, db_board} -> case MetadataBoard.insert(%MetadataBoard{ board_id: db_board.id}) do
-          {:ok, _} -> db_board
+          {:ok, _} -> {:ok, db_board}
           {:error, cs} -> {:error, cs}
         end
       {:error, cs} -> {:error, cs}

@@ -2,6 +2,9 @@ defmodule EpochtalkServer.Models.Preference do
   use Ecto.Schema
   import Ecto.Changeset
   alias EpochtalkServer.Models.User
+  @moduledoc """
+  `Preference` model, for performing actions relating to a user's preferences
+  """
 
   @primary_key false
   @schema_prefix "users"
@@ -21,8 +24,15 @@ defmodule EpochtalkServer.Models.Preference do
 
   ## === Changesets Functions ===
 
-  def changeset(permission, attrs \\ %{}) do
-    permission
+  @doc """
+  Creates a generic changeset for `Preference` model
+  """
+  @spec changeset(
+    preference :: %EpochtalkServer.Models.Preference{},
+    attrs :: %{} | nil
+  ) :: %EpochtalkServer.Models.Preference{}
+  def changeset(preference, attrs \\ %{}) do
+    preference
     |> cast(attrs, [:user_id, :posts_per_page, :threads_per_page,
       :collapsed_categories, :ignored_boards, :timezone_offset,
       :notify_replied_threads, :ignore_newbies, :patroller_view,

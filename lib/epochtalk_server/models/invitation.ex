@@ -4,6 +4,9 @@ defmodule EpochtalkServer.Models.Invitation do
   import Ecto.Query, only: [from: 2]
   alias EpochtalkServer.Repo
   alias EpochtalkServer.Models.Invitation
+  @moduledoc """
+  `Invitation` model, for performing actions relating to inviting new users to the forum
+  """
 
   @primary_key false
   schema "invitations" do
@@ -14,6 +17,13 @@ defmodule EpochtalkServer.Models.Invitation do
 
   ## === Changesets Functions ===
 
+  @doc """
+  Create changeset for inserting a new `Invitation` model
+  """
+  @spec create_changeset(
+    invitation :: %EpochtalkServer.Models.Invitation{},
+    attrs :: %{} | nil
+  ) :: %EpochtalkServer.Models.Invitation{}
   def create_changeset(invitation, attrs \\ %{}) do
     now = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
     attrs = attrs
@@ -31,7 +41,19 @@ defmodule EpochtalkServer.Models.Invitation do
 
   ## === Database Functions ===
 
+  @doc """
+  Creates a new `Invitation` in the database
+  """
+  @spec create(
+    email :: String.t()
+  ) :: {:ok, invitation :: %EpochtalkServer.Models.Invitation{}} | {:error, Ecto.Changeset.t()}
   def create(email), do: Repo.insert(create_changeset(%Invitation{}, %{email: email}))
 
+  @doc """
+  Deletes `Invitation` from the database by email
+  """
+  @spec delete(
+    email :: String.t()
+  ) :: {non_neg_integer(), nil | [term()]}
   def delete(email), do: Repo.delete_all(from(i in Invitation, where: i.email == ^email))
 end

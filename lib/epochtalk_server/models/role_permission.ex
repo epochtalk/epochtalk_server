@@ -6,6 +6,9 @@ defmodule EpochtalkServer.Models.RolePermission do
   alias EpochtalkServer.Models.RolePermission
   alias EpochtalkServer.Models.Role
   alias EpochtalkServer.Models.Permission
+  @moduledoc """
+  `RolePermission` model, for performing actions relating to a roles permissions
+  """
 
   @primary_key false
   schema "roles_permissions" do
@@ -20,6 +23,13 @@ defmodule EpochtalkServer.Models.RolePermission do
 
   ## === Changesets Functions ===
 
+  @doc """
+  Creates a generic changeset for `RolePermission` model
+  """
+  @spec changeset(
+    role_permission :: %EpochtalkServer.Models.RolePermission{},
+    attrs :: %{} | nil
+  ) :: %EpochtalkServer.Models.RolePermission{}
   def changeset(role_permission, attrs \\ %{}) do
     role_permission
     |> cast(attrs, [:role_id, :permission_path, :value, :modified])
@@ -28,6 +38,12 @@ defmodule EpochtalkServer.Models.RolePermission do
 
   ## === Database Functions ===
 
+  @doc """
+  Inserts a new `RolePermission` into the database
+  """
+  @spec insert(
+    role_permission_or_role_permissions :: %EpochtalkServer.Models.RolePermission{} | [%{}]
+  ) :: {:ok, role :: %EpochtalkServer.Models.RolePermission{}} | {non_neg_integer(), nil | [term()]} | {:error, Ecto.Changeset.t()}
   def insert([]), do: {:error, "Role permission list is empty"}
   def insert(%RolePermission{} = role_permission), do: Repo.insert(role_permission)
   def insert([%{}|_] = roles_permissions), do: Repo.insert_all(RolePermission, roles_permissions)
@@ -52,6 +68,12 @@ defmodule EpochtalkServer.Models.RolePermission do
   #   # update roles table
   # end
 
+  @doc """
+  Used to update the value of a `RolePermission` in the database, if it exists or created it, if it doesnt
+  """
+  @spec upsert_value(
+    role_permissions :: [%{}]
+  ) :: {non_neg_integer(), nil | [term()]}
   # change the default values of roles permissions
   def upsert_value([]), do: {:error, "Role permission list is empty"}
   def upsert_value([%{}|_] = roles_permissions) do
@@ -63,7 +85,12 @@ defmodule EpochtalkServer.Models.RolePermission do
     )
   end
 
-  # derives a single nested map of all permissions for a role
+  @doc """
+  Derives a single nested map of all permissions for a role
+  """
+  @spec permissions_map_by_role_id(
+    role_id :: integer
+  ) :: %{}
   def permissions_map_by_role_id(role_id) do
     from(rp in RolePermission,
       where: rp.role_id == ^role_id)
@@ -75,9 +102,13 @@ defmodule EpochtalkServer.Models.RolePermission do
     |> Iteraptor.from_flatmap
   end
 
-  # for server-side role-loading use, only runs if roles permissions table is currently empty
-  # sets all roles permissions to value: false, modified: false
-  def maybe_init! do
+  @doc """
+  Sets all roles permissions to value: false, modified: false
+
+  For server-side role-loading use, only runs if roles permissions table is currently empty
+  """
+  @spec maybe_init!() :: [%RolePermission{}] | nil
+  def maybe_init!() do
     if Repo.one(from rp in RolePermission, select: count(rp.value)) == 0, do: Enum.each(Role.all, fn role ->
       Enum.each(Permission.all, fn permission ->
         %RolePermission{}

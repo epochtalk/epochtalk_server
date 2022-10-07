@@ -4,6 +4,9 @@ defmodule EpochtalkServer.Models.MetadataBoard do
   alias EpochtalkServer.Repo
   alias EpochtalkServer.Models.Board
   alias EpochtalkServer.Models.MetadataBoard
+ @moduledoc """
+  `MetadataBoard` model, for performing actions relating to `Board` metadata
+  """
 
   @schema_prefix "metadata"
   schema "boards" do
@@ -21,8 +24,15 @@ defmodule EpochtalkServer.Models.MetadataBoard do
 
   ## === Changesets Functions ===
 
-  def changeset(permission, attrs \\ %{}) do
-    permission
+  @doc """
+  Create changeset for inserting a new `MetadataBoard` model
+  """
+  @spec changeset(
+    metadata_board :: %EpochtalkServer.Models.MetadataBoard{},
+    attrs :: %{} | nil
+  ) :: %EpochtalkServer.Models.MetadataBoard{}
+  def changeset(metadata_board, attrs \\ %{}) do
+    metadata_board
     |> cast(attrs, [:id, :board_id, :post_count, :thread_count,
       :total_post, :total_thread_count, :last_post_username,
       :last_post_created_at, :last_thread_id, :last_thread_title,
@@ -32,5 +42,11 @@ defmodule EpochtalkServer.Models.MetadataBoard do
 
   ## === Database Functions ===
 
-  def insert(%MetadataBoard{} = metadata_boards), do: Repo.insert(metadata_boards)
+  @doc """
+  Inserts a new `MetadataBoard` into the database
+  """
+  @spec insert(
+    metadata_board :: %EpochtalkServer.Models.MetadataBoard{}
+  ) :: {:ok, metadata_board :: %EpochtalkServer.Models.MetadataBoard{}} | {:error, Ecto.Changeset.t()}
+  def insert(%MetadataBoard{} = metadata_board), do: Repo.insert(metadata_board)
 end

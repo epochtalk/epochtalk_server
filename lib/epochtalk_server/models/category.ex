@@ -5,6 +5,9 @@ defmodule EpochtalkServer.Models.Category do
   alias EpochtalkServer.Models.Board
   alias EpochtalkServer.Models.Category
   alias EpochtalkServer.Models.BoardMapping
+  @moduledoc """
+  `Category` model, for performing actions relating to forum categories
+  """
 
   schema "categories" do
     field :name, :string
@@ -20,12 +23,26 @@ defmodule EpochtalkServer.Models.Category do
 
   ## === Changesets Functions ===
 
+  @doc """
+  Create generic changeset for `Category` model
+  """
+  @spec changeset(
+    category :: %EpochtalkServer.Models.Category{},
+    attrs :: %{} | nil
+  ) :: %EpochtalkServer.Models.Category{}
   def changeset(category, attrs) do
     category
     |> cast(attrs, [:id, :name, :view_order, :viewable_by, :postable_by, :created_at, :imported_at, :updated_at, :meta])
     |> unique_constraint(:id, name: :categories_pkey)
   end
 
+  @doc """
+  Creates changeset for inserting a new `Category` model
+  """
+  @spec create_changeset(
+    category :: %EpochtalkServer.Models.Category{},
+    attrs :: %{} | nil
+  ) :: %EpochtalkServer.Models.Category{}
   def create_changeset(category, attrs) do
     now = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
     attrs = attrs
@@ -35,6 +52,13 @@ defmodule EpochtalkServer.Models.Category do
     |> cast(attrs, [:name, :viewable_by, :created_at, :updated_at])
   end
 
+  @doc """
+  Creates changeset for updating an existing `Category` model
+  """
+  @spec create_changeset(
+    category :: %EpochtalkServer.Models.Category{},
+    attrs :: %{} | nil
+  ) :: %EpochtalkServer.Models.Category{}
   def update_for_board_mapping_changeset(category, attrs) do
     category
     |> cast(attrs, [:id, :name, :view_order, :viewable_by])
@@ -43,13 +67,23 @@ defmodule EpochtalkServer.Models.Category do
 
   ## === Database Functions ===
 
-  def insert(%Category{} = category), do: Repo.insert(category)
-
+  @doc """
+  Creates a new `Category` in the database
+  """
+  @spec create(
+    category_attrs :: %{}
+  ) :: {:ok, category :: %EpochtalkServer.Models.Category{}} | {:error, Ecto.Changeset.t()}
   def create(attrs) do
     category_cs = create_changeset(%Category{}, attrs)
-    Repo.insert!(category_cs)
+    Repo.insert(category_cs)
   end
 
+  @doc """
+  Updates an existing `Category` in the database, used by board mapping to recategorize boards
+  """
+  @spec update_for_board_mapping(
+    category_map :: %{ id: id :: integer }
+  ) :: {:ok, category :: %EpochtalkServer.Models.Category{}} | {:error, Ecto.Changeset.t()}
   def update_for_board_mapping(%{ id: id } = category_map) do
     %Category{ id: id }
     |> update_for_board_mapping_changeset(category_map)

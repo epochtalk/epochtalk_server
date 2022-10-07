@@ -18,12 +18,11 @@ board = %{
 }
 
 Repo.transaction(fn ->
-  category_id = Category.create(category).id
+  category_id = Category.create(category)
+  |> case do {:ok, c} -> c.id end
 
   board_id = Board.create(board)
-  |> case do
-    {:ok, b} -> b.id
-  end
+  |> case do {:ok, b} -> b.id end
 
   board_mapping = [
     %{

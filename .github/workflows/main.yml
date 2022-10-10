@@ -21,3 +21,7 @@ jobs:
     # - name: Build
     #   run: docker build --tag epochtalk_server .
     # - name: run semantic release
+
+    # write key to file
+    - name: test secrets
+      run: echo "${{ secrets.TEST_KEY }}" > TEST_KEY.txt

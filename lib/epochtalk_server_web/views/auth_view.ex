@@ -2,11 +2,34 @@ defmodule EpochtalkServerWeb.AuthView do
   use EpochtalkServerWeb, :view
   alias EpochtalkServer.Models.Role
   alias EpochtalkServer.Models.User
+  @moduledoc """
+  Renders `User` data for auth, in JSON format for frontend
+  """
 
+  @doc """
+  Renders if record was found, in JSON
+
+  ## Example
+    iex> EpochtalkServerWeb.AuthView.render("search.json", %{found: true})
+    %{found: true}
+  """
   def render("search.json", %{found: found}), do: %{found: found}
 
-  def render("logout.json", _data), do: true
+  @doc """
+  Renders if logout success, in JSON
 
+  ## Example
+    iex> EpochtalkServerWeb.AuthView.render("logout.json", %{})
+    %{success: true}
+  """
+  def render("logout.json", _data), do: %{success: true}
+
+
+  @doc """
+  Renders formatted user JSON. Takes in a `User` with all associations preloaded
+  and outputs formatted user json used for auth. Masks all user's roles to generate
+  correct permissions set.
+  """
   def render("user.json", %{user: user, token: token}), do: format_user_reply(user, token)
 
   # Format reply - from Models.User (login, register)

@@ -1,0 +1,23 @@
+name: Build-ECR
+
+on:
+  push:
+    branches:
+      - master
+      - github-actions
+
+jobs:
+  build_job:
+    name: Build
+    runs-on: [self-hosted, Linux, X64]
+    steps:
+    - name: Get branch name
+      id: branch-name
+      uses: tj-actions/branch-names@v6.1
+    - name: Checkout
+      uses: actions/checkout@v3.1.0
+      with:
+        ref: ${{ github.event.client_payload.branch }}
+    # - name: Build
+    #   run: docker build --tag epochtalk_server .
+    # - name: run semantic release

@@ -1,5 +1,8 @@
 defmodule EpochtalkServerWeb.UserController do
   use EpochtalkServerWeb, :controller
+  @moduledoc """
+  Controller For `User` related API requests
+  """
   alias EpochtalkServer.Models.User
   alias EpochtalkServer.Models.Ban
   alias EpochtalkServer.Models.Invitation
@@ -14,13 +17,23 @@ defmodule EpochtalkServerWeb.UserController do
     InvalidPayload
   }
 
+  @doc """
+  Used to check if a username has already been taken
+  """
   def username(conn, %{"username" => username}), do: render(conn, "username.json", data: %{found: User.with_username_exists?(username)})
 
+  @doc """
+  Used to check if an email has already been taken
+  """
   def email(conn, %{"email" => email}), do: render(conn, "email.json", data: %{found: User.with_email_exists?(email)})
 
-  # TODO(akinsey): handle config.inviteOnly
-  # TODO(akinsey): handle config.newbieEnabled
-  # TODO(akinsey): Send confirmation email
+  @doc """
+  Registers a new `User`
+
+  - TODO(akinsey): handle config.inviteOnly
+  - TODO(akinsey): handle config.newbieEnabled
+  - TODO(akinsey): Send confirmation email
+  """
   def register(conn, %{"username" => _, "email" => _, "password" => _} = attrs) do
     with {:auth, false} <- {:auth, Guardian.Plug.authenticated?(conn)}, # check auth
          {:ok, user} <- User.create(attrs), # create user
@@ -41,14 +54,21 @@ defmodule EpochtalkServerWeb.UserController do
   end
   def register(_conn, _attrs), do: raise(InvalidPayload)
 
-  def authenticate(conn), do: authenticate(conn, nil)
+  @doc """
+  Authenticates currently logged in `User`
+  """
   def authenticate(conn, _attrs) do
     token = Guardian.Plug.current_token(conn)
     user = Guardian.Plug.current_resource(conn)
     render(conn, "user.json", %{ user: user, token: token})
   end
 
-  # TODO: check if user is on page that requires auth
+  @doc """
+  Logs out the logged in `User`
+
+  - TODO(boka): check if user is on page that requires auth
+  - TODO(boka): Delete users session
+  """
   def logout(conn, _attrs) do
     with {:auth, true} <- {:auth, Guardian.Plug.authenticated?(conn)},
          conn <- Guardian.Plug.sign_out(conn) do
@@ -59,6 +79,9 @@ defmodule EpochtalkServerWeb.UserController do
     end
   end
 
+  @doc """
+  Logs in an existing `User`
+  """
   def login(conn, attrs) when not is_map_key(attrs, "rememberMe"), do: login(conn, Map.put(attrs, "rememberMe", false))
   def login(conn, %{"username" => username, "password" => password, "rememberMe" => remember_me} = _attrs) do
     with {:auth, false} <- {:auth, Guardian.Plug.authenticated?(conn)},

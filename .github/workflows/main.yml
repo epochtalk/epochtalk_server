@@ -20,6 +20,23 @@ jobs:
         ref: ${{ github.event.client_payload.branch }}
     # - name: Build
     #   run: docker build --tag epochtalk_server .
+  pre_release_job:
+    name: Pre-Release
+    runs-on: [self-hosted, Linux, X64]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3.1.0
+      - name: Semantic Release
+        uses: cycjimmy/semantic-release-action@v3.0.0
+        with:
+          dry_run: true
+          semantic_version: 19.0.5
+          branches: |
+            [
+              'github-actions'
+            ]
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   release_job:
     name: Release
     runs-on: [self-hosted, Linux, X64]
@@ -32,8 +49,7 @@ jobs:
           semantic_version: 19.0.5
           branches: |
             [
-              'master',
-              'github-actions'
+              'master'
             ]
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

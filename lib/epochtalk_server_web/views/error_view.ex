@@ -1,4 +1,7 @@
 defmodule EpochtalkServerWeb.ErrorView do
+  @moduledoc """
+  Renders and formats error data, in JSON format for frontend
+  """
   use EpochtalkServerWeb, :view
 
   @doc """

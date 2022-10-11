@@ -25,3 +25,5 @@ jobs:
     # write key to file
     - name: test secrets
       run: echo "${{ secrets.TEST_KEY }}" > TEST_KEY.txt
+    - name: check github token
+      run: echo "${{ secrets.GITHUB_TOKEN }}" > TEST_GHKEY.txt

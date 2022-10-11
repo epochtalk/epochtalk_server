@@ -18,16 +18,16 @@ defmodule EpochtalkServerWeb.Router do
 
   scope "/api", EpochtalkServerWeb do
     pipe_through [:api, :maybe_auth, :enforce_auth]
-    get "/authenticate", AuthController, :authenticate
+    get "/authenticate", UserController, :authenticate
   end
 
   scope "/api", EpochtalkServerWeb do
     pipe_through [:api, :maybe_auth]
-    get "/register/username/:username", AuthController, :username
-    get "/register/email/:email", AuthController, :email
-    post "/register", AuthController, :register
-    post "/login", AuthController, :login
-    delete "/logout", AuthController, :logout
+    get "/register/username/:username", UserController, :username
+    get "/register/email/:email", UserController, :email
+    post "/register", UserController, :register
+    post "/login", UserController, :login
+    delete "/logout", UserController, :logout
   end
 
   # Enables the Swoosh mailbox preview in development.

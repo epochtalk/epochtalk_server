@@ -1,4 +1,4 @@
-defmodule EpochtalkServerWeb.AuthController do
+defmodule EpochtalkServerWeb.UserController do
   use EpochtalkServerWeb, :controller
   alias EpochtalkServer.Models.User
   alias EpochtalkServer.Models.Ban
@@ -14,9 +14,9 @@ defmodule EpochtalkServerWeb.AuthController do
     InvalidPayload
   }
 
-  def username(conn, %{"username" => username}), do: render(conn, "search.json", found: User.with_username_exists?(username))
+  def username(conn, %{"username" => username}), do: render(conn, "username.json", data: %{found: User.with_username_exists?(username)})
 
-  def email(conn, %{"email" => email}), do: render(conn, "search.json", found: User.with_email_exists?(email))
+  def email(conn, %{"email" => email}), do: render(conn, "email.json", data: %{found: User.with_email_exists?(email)})
 
   # TODO(akinsey): handle config.inviteOnly
   # TODO(akinsey): handle config.newbieEnabled
@@ -52,7 +52,7 @@ defmodule EpochtalkServerWeb.AuthController do
   def logout(conn, _attrs) do
     with {:auth, true} <- {:auth, Guardian.Plug.authenticated?(conn)},
          conn <- Guardian.Plug.sign_out(conn) do
-      render(conn, "logout.json")
+      render(conn, "logout.json", data: %{success: true})
     else
       {:auth, false} -> raise(NotLoggedIn)
       _ -> ErrorHelpers.render_json_error(conn, 500, "There was an issue signing out")
@@ -67,7 +67,7 @@ defmodule EpochtalkServerWeb.AuthController do
          {:missing_passhash, true} <- {:missing_passhash, !!Map.get(user, :passhash)},
          {:valid_password, true} <- {:valid_password, User.valid_password?(user, password)},
          {:ok, user} = Ban.unban(user),
-         {:ok, user, token, conn} = Session.create(user, remember_me, conn) do
+         {:ok, user, token, conn} = Session.create(user, remember_me, conn)do
       render(conn, "user.json", %{ user: user, token: token})
     else
       {:auth, true} -> ErrorHelpers.render_json_error(conn, 400, "Already logged in")

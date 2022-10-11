@@ -1,29 +1,10 @@
-defmodule EpochtalkServerWeb.AuthView do
+defmodule EpochtalkServerWeb.UserView do
   use EpochtalkServerWeb, :view
   alias EpochtalkServer.Models.Role
   alias EpochtalkServer.Models.User
   @moduledoc """
-  Renders `User` data for auth, in JSON format for frontend
+  Renders and formats `User` data, in JSON format for frontend
   """
-
-  @doc """
-  Renders if record was found, in JSON
-
-  ## Example
-    iex> EpochtalkServerWeb.AuthView.render("search.json", %{found: true})
-    %{found: true}
-  """
-  def render("search.json", %{found: found}), do: %{found: found}
-
-  @doc """
-  Renders if logout success, in JSON
-
-  ## Example
-    iex> EpochtalkServerWeb.AuthView.render("logout.json", %{})
-    %{success: true}
-  """
-  def render("logout.json", _data), do: %{success: true}
-
 
   @doc """
   Renders formatted user JSON. Takes in a `User` with all associations preloaded
@@ -31,6 +12,18 @@ defmodule EpochtalkServerWeb.AuthView do
   correct permissions set.
   """
   def render("user.json", %{user: user, token: token}), do: format_user_reply(user, token)
+
+  @doc """
+  Renders whatever data it is passed when template not found. Data pass through
+  for rendering misc responses (ex: {found: true} or {success: true})
+  ## Example
+      iex> EpochtalkServerWeb.UserView.render("DoesNotExist.json", data: %{found: true})
+      %{found: true}
+      iex> EpochtalkServerWeb.UserView.render("DoesNotExist.json", data: %{success: true})
+      %{success: true}
+  """
+  def template_not_found(_template, %{conn: %{ assigns: %{ data: data }}}), do: data
+  def template_not_found(_template, %{ data: data }), do: data
 
   # Format reply - from Models.User (login, register)
   defp format_user_reply(%User{} = user, token) do

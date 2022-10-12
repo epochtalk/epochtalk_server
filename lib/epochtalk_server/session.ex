@@ -15,10 +15,10 @@ defmodule EpochtalkServer.Session do
   - TODO(boka): Handle expiration of redis sessions (this is handled in guardian but not redis)
   """
   @spec create(
-    user :: %EpochtalkServer.Models.User{},
+    user :: User.t(),
     remember_me :: boolean,
     conn :: Plug.Conn.t()
-  ) :: {:ok, user :: %EpochtalkServer.Models.User{}, encoded_token :: String.t(), conn :: Plug.Conn.t()}
+  ) :: {:ok, user :: User.t(), encoded_token :: String.t(), conn :: Plug.Conn.t()}
   def create(%User{} = user, remember_me, conn) do
     datetime = NaiveDateTime.utc_now
     session_id = UUID.uuid1()
@@ -32,50 +32,56 @@ defmodule EpochtalkServer.Session do
     encoded_token = Guardian.Plug.current_token(conn)
 
     # save session
-    save(user, session_id)
-    # TODO(akinsey): error handling
-    # return user with token
-    {:ok, user, encoded_token, conn}
+    case save(user, session_id) do
+      {:ok, _} -> {:ok, user, encoded_token, conn}
+      {:error, error} -> {:error, error}
+    end
   end
 
   @doc """
   Gets all sessions for a specific `User`
   """
   @spec get_sessions(
-    user_id :: integer
-  ) :: {:ok, Redix.Protocol.redis_value()} | {:error, atom() | Redix.Error.t() | Redix.ConnectionError.t()}
-  def get_sessions(user_id) do
+    user :: User.t()
+  ) :: {:ok, user :: User.t(), sessions :: [String.t()]} | {:error, atom() | Redix.Error.t() | Redix.ConnectionError.t()}
+  def get_sessions(%User{} = user) do
     # get session id's from redis under "user:{user_id}:sessions"
-    session_key = generate_key(user_id, "sessions")
-    Redix.command(:redix, ["SMEMBERS", session_key])
+    session_key = generate_key(user.id, "sessions")
+    case Redix.command(:redix, ["SMEMBERS", session_key]) do
+      {:ok, sessions} -> {:ok, user, sessions}
+      {:error, error} -> {:error, error}
+    end
   end
 
   @doc """
   Deletes a specific `User` session
   """
   @spec delete_session(
-    user_id :: integer,
+    user :: User.t(),
     session_id :: String.t()
-  ) :: {:ok, Redix.Protocol.redis_value()} | {:error, atom() | Redix.Error.t() | Redix.ConnectionError.t()}
-  def delete_session(user_id, session_id) do
+  ) :: {:ok, user :: User.t()} | {:error, atom() | Redix.Error.t() | Redix.ConnectionError.t()}
+  def delete_session(%User{} = user, session_id) do
     # delete session id from redis under "user:{user_id}:sessions"
-    session_key = generate_key(user_id, "sessions")
-    Redix.command(:redix, ["SREM", session_key, session_id])
+    session_key = generate_key(user.id, "sessions")
+    case Redix.command(:redix, ["SREM", session_key, session_id]) do
+      {:ok, _} -> {:ok, user}
+      {:error, error} -> {:error, error}
+    end
   end
 
   @doc """
   Deletes every session instance for the specified `User`
   """
   @spec delete_sessions(
-    user_id :: integer,
+    user :: User.t(),
     session_id :: String.t()
   ) :: {:ok, Redix.Protocol.redis_value()} | {:error, atom() | Redix.Error.t() | Redix.ConnectionError.t()}
-  def delete_sessions(user_id, session_id) do
+  def delete_sessions(%User{} = user, session_id) do
     # delete session id from redis under "user:{user_id}:sessions"
-    session_key = generate_key(user_id, "sessions")
+    session_key = generate_key(user.id, "sessions")
     Redix.command(:redix, ["SPOP", session_key, session_id])
     # repeat until redix returns nil
-    |> unless do delete_sessions(user_id, session_id) end
+    |> unless do delete_sessions(user.id, session_id) end
   end
 
   defp save(%User{} = user, session_id) do

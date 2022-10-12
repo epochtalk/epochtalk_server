@@ -13,6 +13,12 @@ defmodule EpochtalkServer.Models.Ban do
   # max naivedatetime, used for permanent bans
   @max_date ~N[9999-12-31 00:00:00.000]
 
+  @type t :: %__MODULE__{
+    user_id: non_neg_integer,
+    expiration: NaiveDateTime.t(),
+    created_at: NaiveDateTime.t(),
+    updated_at: NaiveDateTime.t()
+  }
   @schema_prefix "users"
   @derive {Jason.Encoder, only: [:user_id, :expiration, :created_at, :updated_at]}
   schema "bans" do
@@ -28,9 +34,9 @@ defmodule EpochtalkServer.Models.Ban do
   Create generic changeset for `Ban` model
   """
   @spec changeset(
-    ban :: %EpochtalkServer.Models.Ban{},
+    ban :: t(),
     attrs :: %{} | nil
-  ) :: %EpochtalkServer.Models.Ban{}
+  ) :: t()
   def changeset(ban, attrs \\ %{}) do
     ban
     |> cast(attrs, [:id, :user_id, :expiration, :created_at, :updated_at])
@@ -41,9 +47,9 @@ defmodule EpochtalkServer.Models.Ban do
   Create ban changeset for `Ban` model, handles upsert of ban for banning
   """
   @spec ban_changeset(
-    ban :: %EpochtalkServer.Models.Ban{},
+    ban :: t(),
     attrs :: %{} | nil
-  ) :: %EpochtalkServer.Models.Ban{}
+  ) :: t()
   def ban_changeset(ban, attrs \\ %{}) do
     now = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
     attrs = attrs
@@ -59,9 +65,9 @@ defmodule EpochtalkServer.Models.Ban do
   Create unban changeset for `Ban` model, handles update of ban for unbanning
   """
   @spec unban_changeset(
-    ban :: %EpochtalkServer.Models.Ban{},
+    ban :: t(),
     attrs :: %{} | nil
-  ) :: %EpochtalkServer.Models.Ban{}
+  ) :: t()
   def unban_changeset(ban, attrs \\ %{}) do
     now = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
     attrs = attrs
@@ -112,7 +118,7 @@ defmodule EpochtalkServer.Models.Ban do
   Used to ban a `User` permanently. Updates supplied `User` model to reflect ban and returns.
   """
   @spec ban(
-    user :: %EpochtalkServer.Models.User{}
+    user :: User.t()
   ) :: {:ok, user_changeset :: Ecto.Changeset.t()} | {:error, :ban_error}
   def ban(%User{} = user), do: ban(user, nil)
 
@@ -121,7 +127,7 @@ defmodule EpochtalkServer.Models.Ban do
   permanently ban the `User`. Updates supplied `User` model to reflect ban and returns.
   """
   @spec ban(
-    user :: %EpochtalkServer.Models.User{},
+    user :: User.t(),
     expiration :: Calendar.naive_datetime() | nil
   ) :: {:ok, user_changeset :: Ecto.Changeset.t()} | {:error, :ban_error}
   def ban(%User{ id: id} = user, expiration) do
@@ -162,7 +168,7 @@ defmodule EpochtalkServer.Models.Ban do
   Used to unban a `User`. Updates supplied `User` model to reflect unbanning and returns.
   """
   @spec unban(
-    user :: %EpochtalkServer.Models.User{}
+    user :: User.t()
   ) :: {:ok, user_changeset :: Ecto.Changeset.t()} | {:error, :unban_error}
   def unban(%User{ban_info: %Ban{expiration: expiration}, id: user_id} = user) do
     if NaiveDateTime.compare(expiration, NaiveDateTime.utc_now) == :lt do

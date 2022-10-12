@@ -5,7 +5,16 @@ defmodule EpochtalkServer.Models.Profile do
   @moduledoc """
   `Profile` model, for performing actions relating a user's profile
   """
-
+  @type t :: %__MODULE__{
+    user_id: non_neg_integer,
+    avatar: String.t(),
+    position: String.t(),
+    signature: String.t(),
+    raw_signature: String.t(),
+    post_count: non_neg_integer,
+    fields: %{},
+    last_active: NaiveDateTime.t()
+  }
   @schema_prefix "users"
   schema "profiles" do
     belongs_to :user, User
@@ -24,9 +33,9 @@ defmodule EpochtalkServer.Models.Profile do
   Creates a generic changeset for `Profile` model
   """
   @spec changeset(
-    profile :: %EpochtalkServer.Models.Profile{},
+    profile :: t(),
     attrs :: %{} | nil
-  ) :: %EpochtalkServer.Models.Profile{}
+  ) :: t()
   def changeset(profile, attrs \\ %{}) do
     profile
     |> cast(attrs, [:user_id, :avatar, :position, :signature, :raw_signature, :post_count, :field, :last_active])

@@ -7,7 +7,18 @@ defmodule EpochtalkServer.Models.BannedAddress do
   @moduledoc """
   `BannedAddress` model, for performing actions relating to banning by ip/hostname
   """
-
+  @type t :: %__MODULE__{
+    hostname: String.t(),
+    ip1: non_neg_integer,
+    ip2: non_neg_integer,
+    ip3: non_neg_integer,
+    ip4: non_neg_integer,
+    weight: float,
+    decay: boolean,
+    created_at: NaiveDateTime.t(),
+    imported_at: NaiveDateTime.t(),
+    updates: [NaiveDateTime.t()]
+  }
   @primary_key false
   schema "banned_addresses" do
     field :hostname, :string
@@ -28,9 +39,9 @@ defmodule EpochtalkServer.Models.BannedAddress do
   Creates changeset for upsert of `BannedAddress` model
   """
   @spec upsert_changeset(
-    banned_address :: %EpochtalkServer.Models.BannedAddress{},
+    banned_address :: t(),
     attrs :: %{} | nil
-  ) :: %EpochtalkServer.Models.BannedAddress{}
+  ) :: t()
   def upsert_changeset(banned_address, attrs \\ %{}) do
     now = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
     attrs = attrs
@@ -53,9 +64,9 @@ defmodule EpochtalkServer.Models.BannedAddress do
   Creates changeset of `BannedAddress` model with hostname information
   """
   @spec hostname_changeset(
-    banned_address :: %EpochtalkServer.Models.BannedAddress{},
+    banned_address :: t(),
     attrs :: %{} | nil
-  ) :: %EpochtalkServer.Models.BannedAddress{}
+  ) :: t()
   def hostname_changeset(banned_address, attrs \\ %{}) do
     banned_address
     |> cast(attrs, [:hostname, :weight, :decay, :imported_at, :created_at, :updates])
@@ -67,9 +78,9 @@ defmodule EpochtalkServer.Models.BannedAddress do
   Creates changeset of `BannedAddress` model with IP information
   """
   @spec ip_changeset(
-    banned_address :: %EpochtalkServer.Models.BannedAddress{},
+    banned_address :: t(),
     attrs :: %{} | nil
-  ) :: %EpochtalkServer.Models.BannedAddress{}
+  ) :: t()
   def ip_changeset(banned_address, attrs \\ %{}) do
     cs_data = banned_address
     |> cast(attrs, [:ip1, :ip2, :ip3, :ip4, :weight, :decay, :imported_at, :created_at, :updates])
@@ -94,7 +105,7 @@ defmodule EpochtalkServer.Models.BannedAddress do
   Upserts a `BannedAddress` into the database and handles calculation of weight accounting for decay
   """
   @spec upsert(
-    banned_address_or_list :: %{} | [%{}] | %EpochtalkServer.Models.BannedAddress{} | [%EpochtalkServer.Models.BannedAddress{}]
+    banned_address_or_list :: %{} | [%{}] | t() | [t()]
   ) :: {:ok, banned_address_changeset :: Ecto.Changeset.t()} | {:error, :banned_address_error}
   def upsert(address_list) when is_list(address_list) do
     Repo.transaction(fn -> Enum.each(address_list ,&upsert_one(&1)) end)

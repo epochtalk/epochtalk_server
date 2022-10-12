@@ -8,6 +8,11 @@ defmodule EpochtalkServer.Models.Invitation do
   `Invitation` model, for performing actions relating to inviting new users to the forum
   """
 
+  @type t :: %__MODULE__{
+    email: String.t(),
+    hash: String.t(),
+    created_at: NaiveDateTime.t()
+  }
   @primary_key false
   schema "invitations" do
     field :email, :string
@@ -21,9 +26,9 @@ defmodule EpochtalkServer.Models.Invitation do
   Create changeset for inserting a new `Invitation` model
   """
   @spec create_changeset(
-    invitation :: %EpochtalkServer.Models.Invitation{},
+    invitation :: t(),
     attrs :: %{} | nil
-  ) :: %EpochtalkServer.Models.Invitation{}
+  ) :: t()
   def create_changeset(invitation, attrs \\ %{}) do
     now = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
     attrs = attrs
@@ -46,7 +51,7 @@ defmodule EpochtalkServer.Models.Invitation do
   """
   @spec create(
     email :: String.t()
-  ) :: {:ok, invitation :: %EpochtalkServer.Models.Invitation{}} | {:error, Ecto.Changeset.t()}
+  ) :: {:ok, invitation :: t()} | {:error, Ecto.Changeset.t()}
   def create(email), do: Repo.insert(create_changeset(%Invitation{}, %{email: email}))
 
   @doc """

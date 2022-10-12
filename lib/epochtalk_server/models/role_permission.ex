@@ -10,6 +10,12 @@ defmodule EpochtalkServer.Models.RolePermission do
   `RolePermission` model, for performing actions relating to a roles permissions
   """
 
+  @type t :: %__MODULE__{
+    role: Role.t(),
+    permission: Permission.t(),
+    value: boolean,
+    modified: boolean
+  }
   @primary_key false
   schema "roles_permissions" do
     belongs_to :role, Role, foreign_key: :role_id, type: :integer
@@ -27,9 +33,9 @@ defmodule EpochtalkServer.Models.RolePermission do
   Creates a generic changeset for `RolePermission` model
   """
   @spec changeset(
-    role_permission :: %EpochtalkServer.Models.RolePermission{},
+    role_permission :: t(),
     attrs :: %{} | nil
-  ) :: %EpochtalkServer.Models.RolePermission{}
+  ) :: t()
   def changeset(role_permission, attrs \\ %{}) do
     role_permission
     |> cast(attrs, [:role_id, :permission_path, :value, :modified])
@@ -42,8 +48,8 @@ defmodule EpochtalkServer.Models.RolePermission do
   Inserts a new `RolePermission` into the database
   """
   @spec insert(
-    role_permission_or_role_permissions :: %EpochtalkServer.Models.RolePermission{} | [%{}]
-  ) :: {:ok, role :: %EpochtalkServer.Models.RolePermission{}} | {non_neg_integer(), nil | [term()]} | {:error, Ecto.Changeset.t()}
+    role_permission_or_role_permissions :: t() | [%{}]
+  ) :: {:ok, role :: t()} | {non_neg_integer(), nil | [term()]} | {:error, Ecto.Changeset.t()}
   def insert([]), do: {:error, "Role permission list is empty"}
   def insert(%RolePermission{} = role_permission), do: Repo.insert(role_permission)
   def insert([%{}|_] = roles_permissions), do: Repo.insert_all(RolePermission, roles_permissions)

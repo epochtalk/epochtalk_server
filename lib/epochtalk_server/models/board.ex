@@ -9,7 +9,20 @@ defmodule EpochtalkServer.Models.Board do
   @moduledoc """
   `Board` model, for performing actions relating to forum boards
   """
-
+  @type t :: %__MODULE__{
+    category: Category.t(),
+    name: String.t(),
+    slug: String.t(),
+    description: String.t(),
+    post_count: non_neg_integer,
+    thread_count: non_neg_integer,
+    viewable_by: non_neg_integer,
+    postable_by: non_neg_integer,
+    right_to_left: boolean,
+    created_at: NaiveDateTime.t(),
+    imported_at: NaiveDateTime.t(),
+    meta: %{}
+  }
   schema "boards" do
     field :name, :string
     field :slug, :string
@@ -23,7 +36,7 @@ defmodule EpochtalkServer.Models.Board do
     field :imported_at, :naive_datetime
     field :updated_at, :naive_datetime
     field :meta, :map
-    many_to_many :categories, Category, join_through: BoardMapping
+    many_to_many :category, Category, join_through: BoardMapping
   end
 
   ## === Changesets Functions ===
@@ -32,9 +45,9 @@ defmodule EpochtalkServer.Models.Board do
   Create generic changeset for `Board` model
   """
   @spec changeset(
-    board :: %EpochtalkServer.Models.Board{},
+    board :: t(),
     attrs :: %{} | nil
-  ) :: %EpochtalkServer.Models.Board{}
+  ) :: t()
   def changeset(board, attrs) do
     board
     |> cast(attrs, [:id, :name, :slug, :description, :post_count, :thread_count, :viewable_by, :postable_by, :created_at, :imported_at, :updated_at, :meta])
@@ -49,9 +62,9 @@ defmodule EpochtalkServer.Models.Board do
   Create changeset for creation of `Board` model
   """
   @spec create_changeset(
-    board :: %EpochtalkServer.Models.Board{},
+    board :: t(),
     attrs :: %{} | nil
-  ) :: %EpochtalkServer.Models.Board{}
+  ) :: t()
   def create_changeset(board, attrs) do
     now = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
     attrs = attrs
@@ -70,7 +83,7 @@ defmodule EpochtalkServer.Models.Board do
   """
   @spec create(
     board_attrs :: %{}
-  ) :: {:ok, board :: %EpochtalkServer.Models.Board{}} | {:error, Ecto.Changeset.t()}
+  ) :: {:ok, board :: t()} | {:error, Ecto.Changeset.t()}
   def create(board) do
     board_cs = create_changeset(%Board{}, board)
     case Repo.insert(board_cs) do

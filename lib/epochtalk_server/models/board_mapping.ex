@@ -9,7 +9,12 @@ defmodule EpochtalkServer.Models.BoardMapping do
   @moduledoc """
   `BoardMapping` model, for performing actions relating to mapping forum boards and categories
   """
-
+  @type t :: %__MODULE__{
+    board: Board.t(),
+    parent: Board.t(),
+    category: Category.t(),
+    view_order: non_neg_integer
+  }
   @primary_key false
   schema "board_mapping" do
     belongs_to :board, Board, primary_key: true
@@ -24,9 +29,9 @@ defmodule EpochtalkServer.Models.BoardMapping do
   Create generic changeset for `BoardMapping` model
   """
   @spec changeset(
-    board_mapping :: %EpochtalkServer.Models.BoardMapping{},
+    board_mapping :: t(),
     attrs :: %{} | nil
-  ) :: %EpochtalkServer.Models.BoardMapping{}
+  ) :: t()
   def changeset(board_mapping, attrs) do
     board_mapping
     |> cast(attrs, [:board_id, :parent_id, :category_id, :view_order])

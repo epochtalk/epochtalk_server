@@ -5,7 +5,19 @@ defmodule EpochtalkServer.Models.Preference do
   @moduledoc """
   `Preference` model, for performing actions relating to a user's preferences
   """
-
+  @type t :: %__MODULE__{
+    user_id: non_neg_integer,
+    posts_per_page: non_neg_integer,
+    threads_per_page: non_neg_integer,
+    collapsed_categories: %{},
+    ignored_boards: %{},
+    timezone_offset: String.t(),
+    notify_replied_threads: boolean,
+    ignore_newbies: boolean,
+    patroller_view: boolean,
+    email_mentions: boolean,
+    email_messages: boolean
+  }
   @primary_key false
   @schema_prefix "users"
   schema "preferences" do
@@ -28,9 +40,9 @@ defmodule EpochtalkServer.Models.Preference do
   Creates a generic changeset for `Preference` model
   """
   @spec changeset(
-    preference :: %EpochtalkServer.Models.Preference{},
+    preference :: t(),
     attrs :: %{} | nil
-  ) :: %EpochtalkServer.Models.Preference{}
+  ) :: t()
   def changeset(preference, attrs \\ %{}) do
     preference
     |> cast(attrs, [:user_id, :posts_per_page, :threads_per_page,

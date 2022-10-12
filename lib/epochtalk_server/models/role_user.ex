@@ -11,6 +11,11 @@ defmodule EpochtalkServer.Models.RoleUser do
   """
 
   @admin_role_id 1
+
+  @type t :: %__MODULE__{
+    user: User.t(),
+    role: Role.t()
+  }
   @primary_key false
   schema "roles_users" do
     belongs_to :user, User
@@ -23,9 +28,9 @@ defmodule EpochtalkServer.Models.RoleUser do
   Creates a generic changeset for `RoleUser` model
   """
   @spec changeset(
-    role_user :: %EpochtalkServer.Models.RoleUser{},
+    role_user :: t(),
     attrs :: %{} | nil
-  ) :: %EpochtalkServer.Models.RoleUser{}
+  ) :: t()
   def changeset(role_user, attrs \\ %{}) do
     role_user
     |> cast(attrs, [:user_id, :role_id])
@@ -39,7 +44,7 @@ defmodule EpochtalkServer.Models.RoleUser do
   """
   @spec set_admin(
     user_id :: integer
-  ) :: {:ok, role_user :: %EpochtalkServer.Models.RoleUser{}} | {:error, Ecto.Changeset.t()}
+  ) :: {:ok, role_user :: t()} | {:error, Ecto.Changeset.t()}
   def set_admin(user_id), do: set_user_role(@admin_role_id, user_id)
 
   @doc """
@@ -48,7 +53,7 @@ defmodule EpochtalkServer.Models.RoleUser do
   @spec set_user_role(
     role_id :: integer,
     user_id :: integer
-  ) :: {:ok, role_user :: %EpochtalkServer.Models.RoleUser{}} | {:error, Ecto.Changeset.t()}
+  ) :: {:ok, role_user :: t()} | {:error, Ecto.Changeset.t()}
   def set_user_role(role_id, user_id) do
     case Repo.one(from(ru in RoleUser, where: ru.role_id == ^role_id and ru.user_id == ^user_id)) do
       nil -> Repo.insert(changeset(%RoleUser{}, %{role_id: role_id, user_id: user_id}))

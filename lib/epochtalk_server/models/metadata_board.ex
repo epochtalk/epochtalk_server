@@ -8,6 +8,18 @@ defmodule EpochtalkServer.Models.MetadataBoard do
   `MetadataBoard` model, for performing actions relating to `Board` metadata
   """
 
+  @type t :: %__MODULE__{
+    board: Board.t(),
+    post_count: non_neg_integer,
+    thread_count: non_neg_integer,
+    total_post: non_neg_integer,
+    total_thread_count: non_neg_integer,
+    last_post_username: String.t(),
+    last_post_created_at: NaiveDateTime.t(),
+    last_thread_id: non_neg_integer,
+    last_thread_title: String.t(),
+    last_post_position: non_neg_integer
+  }
   @schema_prefix "metadata"
   schema "boards" do
     belongs_to :board, Board
@@ -28,9 +40,9 @@ defmodule EpochtalkServer.Models.MetadataBoard do
   Create changeset for inserting a new `MetadataBoard` model
   """
   @spec changeset(
-    metadata_board :: %EpochtalkServer.Models.MetadataBoard{},
+    metadata_board :: t(),
     attrs :: %{} | nil
-  ) :: %EpochtalkServer.Models.MetadataBoard{}
+  ) :: t()
   def changeset(metadata_board, attrs \\ %{}) do
     metadata_board
     |> cast(attrs, [:id, :board_id, :post_count, :thread_count,
@@ -46,7 +58,7 @@ defmodule EpochtalkServer.Models.MetadataBoard do
   Inserts a new `MetadataBoard` into the database
   """
   @spec insert(
-    metadata_board :: %EpochtalkServer.Models.MetadataBoard{}
-  ) :: {:ok, metadata_board :: %EpochtalkServer.Models.MetadataBoard{}} | {:error, Ecto.Changeset.t()}
+    metadata_board :: t()
+  ) :: {:ok, metadata_board :: t()} | {:error, Ecto.Changeset.t()}
   def insert(%MetadataBoard{} = metadata_board), do: Repo.insert(metadata_board)
 end

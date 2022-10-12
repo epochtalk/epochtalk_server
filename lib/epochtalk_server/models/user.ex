@@ -14,7 +14,27 @@ defmodule EpochtalkServer.Models.User do
   @moduledoc """
   `User` model, for performing actions relating a user
   """
-
+  @type t :: %__MODULE__{
+    id: non_neg_integer,
+    email: String.t(),
+    username: String.t(),
+    password: String.t(),
+    password_confirmation: String.t(),
+    passhash: String.t(),
+    confirmation_token: String.t(),
+    reset_token: String.t(),
+    reset_expiration: String.t(),
+    deleted: boolean,
+    malicious_score: float,
+    created_at: NaiveDateTime.t(),
+    imported_at: NaiveDateTime.t(),
+    updated_at: NaiveDateTime.t(),
+    preferences: Preference.t(),
+    profile: Profile.t(),
+    ban_info: Ban.t(),
+    roles: [Role.t()],
+    moderating: [BoardModerator.t()]
+  }
   schema "users" do
     field :email, :string
     field :username, :string
@@ -46,9 +66,9 @@ defmodule EpochtalkServer.Models.User do
   if validation of username, email and password do not pass.
   """
   @spec registration_changeset(
-    user :: %EpochtalkServer.Models.User{},
+    user :: t(),
     attrs :: %{} | nil
-  ) :: %EpochtalkServer.Models.User{}
+  ) :: t()
   def registration_changeset(user, attrs) do
     user
     |> cast(attrs, [:id, :email, :username, :created_at, :updated_at, :deleted, :malicious_score, :password])
@@ -65,7 +85,7 @@ defmodule EpochtalkServer.Models.User do
   """
   @spec create(
     attrs :: %{}
-  ) :: {:ok, user :: %EpochtalkServer.Models.User{}} | {:error, Ecto.Changeset.t()}
+  ) :: {:ok, user :: t()} | {:error, Ecto.Changeset.t()}
   def create(attrs) do
     user_cs = User.registration_changeset(%User{}, attrs)
     case Repo.insert(user_cs) do
@@ -84,7 +104,7 @@ defmodule EpochtalkServer.Models.User do
   @spec create(
     attrs :: %{},
     admin :: boolean
-  ) :: {:ok, user :: %EpochtalkServer.Models.User{}} | {:error, Ecto.Changeset.t()}
+  ) :: {:ok, user :: t()} | {:error, Ecto.Changeset.t()}
   def create(attrs, true = _admin) do
     Repo.transaction(fn ->
       {:ok, user} = create(attrs)
@@ -113,7 +133,7 @@ defmodule EpochtalkServer.Models.User do
   """
   @spec by_id(
     id :: integer
-  ) :: %EpochtalkServer.Models.User{} | nil
+  ) :: t() | nil
   def by_id(id) when is_integer(id), do: Repo.get_by(User, id: id)
 
   @doc """
@@ -131,7 +151,7 @@ defmodule EpochtalkServer.Models.User do
   """
   @spec by_username(
     username :: String.t()
-  ) :: {:ok, user :: %EpochtalkServer.Models.User{}} | {:error, :user_not_found}
+  ) :: {:ok, user :: t()} | {:error, :user_not_found}
   def by_username(username) when is_binary(username) do
     query = from u in User,
       where: u.username == ^username,
@@ -148,9 +168,9 @@ defmodule EpochtalkServer.Models.User do
   and in place. Otherwise the user is just returned with no change.
   """
   @spec handle_malicious_user(
-    user :: %EpochtalkServer.Models.User{},
+    user :: t(),
     ip :: tuple
-  ) :: {:ok, user :: %EpochtalkServer.Models.User{}} | {:error, :ban_error}
+  ) :: {:ok, user :: t()} | {:error, :ban_error}
   def handle_malicious_user(%User{} = user, ip) do
     # convert ip tuple into string
     ip_str = ip |> :inet_parse.ntoa |> to_string
@@ -170,7 +190,7 @@ defmodule EpochtalkServer.Models.User do
   Validates with Argon2 that a `User` `passhash` matches the supplied `password`
   """
   @spec valid_password?(
-    user :: %EpochtalkServer.Models.User{},
+    user :: t(),
     password :: String.t()
   ) :: true | false
   def valid_password?(%User{passhash: hashed_password} = _user, password)

@@ -9,7 +9,17 @@ defmodule EpochtalkServer.Models.Role do
   @moduledoc """
   `Role` model, for performing actions relating to user roles
   """
-
+  @type t :: %__MODULE__{
+    name: String.t(),
+    description: String.t(),
+    lookup: String.t(),
+    priority: non_neg_integer,
+    highlight_color: String.t(),
+    permissions: %{},
+    priority_restrictions: [non_neg_integer],
+    created_at: NaiveDateTime.t(),
+    updated_at: NaiveDateTime.t()
+  }
   @derive {Jason.Encoder, only: [:name, :description, :lookup, :priority, :highlight_color, :permissions, :priority_restrictions, :created_at, :updated_at]}
   schema "roles" do
     field :name, :string
@@ -31,9 +41,9 @@ defmodule EpochtalkServer.Models.Role do
   Create generic changeset for the `Role` model
   """
   @spec changeset(
-    role :: %EpochtalkServer.Models.Role{},
+    role :: t(),
     attrs :: %{} | nil
-  ) :: %EpochtalkServer.Models.Role{}
+  ) :: t()
   def changeset(role, attrs \\ %{}) do
     role
     |> cast(attrs, [:name, :description, :lookup, :priority, :permissions])
@@ -47,7 +57,7 @@ defmodule EpochtalkServer.Models.Role do
   @doc """
   Returns every `Role` record in the database
   """
-  @spec all() :: [%EpochtalkServer.Models.Role{}] | []
+  @spec all() :: [t()] | []
   def all, do: from(r in Role, order_by: r.id) |> Repo.all
 
   @doc """
@@ -65,7 +75,7 @@ defmodule EpochtalkServer.Models.Role do
   @doc """
   Returns default `Role`, for base installation this is the `user` role
   """
-  @spec get_default() :: %EpochtalkServer.Models.Role{} | nil
+  @spec get_default() :: t() | nil
   def get_default(), do: by_lookup("user")
 
   @doc """
@@ -73,7 +83,7 @@ defmodule EpochtalkServer.Models.Role do
   """
   @spec by_lookup(
     lookup_or_lookups :: String.t() | [String.t()]
-  ) :: %EpochtalkServer.Models.Role{} | [%EpochtalkServer.Models.Role{}] | [] | nil
+  ) :: t() | [t()] | [] | nil
   def by_lookup(lookups) when is_list(lookups) do
     from(r in Role, where: r.lookup in ^lookups) |> Repo.all
   end
@@ -84,7 +94,7 @@ defmodule EpochtalkServer.Models.Role do
   """
   @spec by_user_id(
     user_id :: integer
-  ) :: [%EpochtalkServer.Models.Role{}]
+  ) :: [t()]
   def by_user_id(user_id) do
     query = from ru in RoleUser,
       join: r in Role,
@@ -106,8 +116,8 @@ defmodule EpochtalkServer.Models.Role do
   Inserts a new `Role` into the database
   """
   @spec insert(
-    role_or_roles :: %EpochtalkServer.Models.Role{} | [%{}]
-  ) :: {:ok, role :: %EpochtalkServer.Models.Role{}} | {non_neg_integer(), nil | [term()]} | {:error, Ecto.Changeset.t()}
+    role_or_roles :: t() | [%{}]
+  ) :: {:ok, role :: t()} | {non_neg_integer(), nil | [term()]} | {:error, Ecto.Changeset.t()}
   def insert([]), do: {:error, "Role list is empty"}
   def insert(%Role{} = role), do: Repo.insert(role)
   def insert([%{}|_] = roles), do: Repo.insert_all(Role, roles)
@@ -120,7 +130,7 @@ defmodule EpochtalkServer.Models.Role do
   @spec set_permissions(
     id :: integer,
     permissions_attrs :: %{}
-  ) :: {:ok, role :: %EpochtalkServer.Models.Role{}} | {:error, Ecto.Changeset.t()}
+  ) :: {:ok, role :: t()} | {:error, Ecto.Changeset.t()}
   def set_permissions(id, permissions) do
     Role
     |> Repo.get(id)
@@ -140,8 +150,8 @@ defmodule EpochtalkServer.Models.Role do
   and is expected to return the updated user's roles.
   """
   @spec handle_empty_user_roles(
-    user :: %EpochtalkServer.Models.User{}
-  ) :: %EpochtalkServer.Models.User{}
+    user :: User.t()
+  ) :: User.t()
   def handle_empty_user_roles(%User{roles: [%Role{} | _]} = user), do: user
   def handle_empty_user_roles(%User{roles: []} = user), do: user |> Map.put(:roles, [Role.get_default()])
   def handle_empty_user_roles(%User{} = user), do: user |> Map.put(:roles, [Role.get_default()])
@@ -154,8 +164,8 @@ defmodule EpochtalkServer.Models.Role do
   and is expected to return the updated user's roles.
   """
   @spec handle_banned_user_role(
-    user_or_roles :: %EpochtalkServer.Models.User{} | [%EpochtalkServer.Models.Role{}]
-  ) :: %EpochtalkServer.Models.User{} | [%EpochtalkServer.Models.Role{}]
+    user_or_roles :: User.t() | [t()]
+  ) :: User.t() | [t()]
   # called with user model, outputs user model with updated role
   def handle_banned_user_role(%User{roles: [%Role{} | _] = roles} = user) do
     if banned_role = Enum.find(roles, &(&1.lookup == "banned")),
@@ -170,7 +180,7 @@ defmodule EpochtalkServer.Models.Role do
   Takes in list of user's roles, and returns an xored map of all `Role` permissions
   """
   @spec get_masked_permissions(
-    roles :: [%EpochtalkServer.Models.Role{}]
+    roles :: [t()]
   ) :: %{}
   # Given %User{}.roles, outputs xored permissions
   def get_masked_permissions(roles) when is_list(roles), do: Enum.reduce(roles, %{}, &mask_permissions(&2, &1))

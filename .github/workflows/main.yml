@@ -30,7 +30,7 @@ jobs:
       with:
         tags: epochtalk_server:latest
   pre_release_job:
-    needs: build_job
+    needs: docker_build_job
     name: Pre-Release
     runs-on: [self-hosted, Linux, X64]
     steps:
@@ -48,7 +48,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   release_job:
-    needs: build_job
+    needs: docker_build_job
     name: Release
     runs-on: [self-hosted, Linux, X64]
     steps:

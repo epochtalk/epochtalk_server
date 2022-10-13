@@ -20,6 +20,13 @@ jobs:
           ref: ${{ github.event.client_payload.branch }}
     # - name: Build
     #   run: docker build --tag epochtalk_server .
+  docker_build_job:
+    needs: build_job
+    name: Docker Build
+    runs-on: [self-hosted, Linux, X64]
+    steps:
+    - name: Build and push Docker images
+      uses: docker/build-push-action@v3.2.0
   pre_release_job:
     needs: build_job
     name: Pre-Release

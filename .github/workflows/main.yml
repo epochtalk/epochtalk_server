@@ -1,0 +1,66 @@
+name: Build-ECR
+
+on:
+  push:
+    branches:
+      - master
+      - github-actions
+
+jobs:
+  build_job:
+    name: Build
+    runs-on: [self-hosted, Linux, X64]
+    steps:
+      - name: Get branch name
+        id: branch-name
+        uses: tj-actions/branch-names@v6.1
+      - name: Checkout
+        uses: actions/checkout@v3.1.0
+        with:
+          ref: ${{ github.event.client_payload.branch }}
+  docker_build_job:
+    needs: build_job
+    name: Docker Build
+    runs-on: [self-hosted, Linux, X64]
+    steps:
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Build and push Docker images
+        uses: docker/build-push-action@v3.2.0
+        with:
+          tags: epochtalk_server:latest
+  pre_release_job:
+    needs: docker_build_job
+    name: Pre-Release
+    runs-on: [self-hosted, Linux, X64]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3.1.0
+      - name: Semantic Release
+        uses: cycjimmy/semantic-release-action@v3.0.0
+        with:
+          dry_run: true
+          semantic_version: 19.0.5
+          branches: |
+            [
+              'github-actions'
+            ]
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  release_job:
+    needs: docker_build_job
+    name: Release
+    runs-on: [self-hosted, Linux, X64]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3.1.0
+      - name: Semantic Release
+        uses: cycjimmy/semantic-release-action@v3.0.0
+        with:
+          semantic_version: 19.0.5
+          branches: |
+            [
+              'master'
+            ]
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

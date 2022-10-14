@@ -8,7 +8,7 @@ defmodule EpochtalkServer.Models.Permission do
   """
 
   @type t :: %__MODULE__{
-    path: String.t()
+    path: String.t() | nil
   }
   @primary_key false
   schema "permissions" do
@@ -20,10 +20,7 @@ defmodule EpochtalkServer.Models.Permission do
   @doc """
   Creates a generic changeset for `Permission` model
   """
-  @spec changeset(
-    permission :: t(),
-    attrs :: %{} | nil
-  ) :: t()
+  @spec changeset(permission :: t(), attrs :: map() | nil) :: %Ecto.Changeset{}
   def changeset(permission, attrs \\ %{}) do
     permission
     |> cast(attrs, [:path])

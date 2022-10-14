@@ -11,10 +11,10 @@ defmodule EpochtalkServer.Models.RolePermission do
   """
 
   @type t :: %__MODULE__{
-    role: Role.t(),
-    permission: Permission.t(),
-    value: boolean,
-    modified: boolean
+    role: Role.t() | term(),
+    permission: Permission.t() | term(),
+    value: boolean | nil,
+    modified: boolean | nil
   }
   @primary_key false
   schema "roles_permissions" do
@@ -32,10 +32,7 @@ defmodule EpochtalkServer.Models.RolePermission do
   @doc """
   Creates a generic changeset for `RolePermission` model
   """
-  @spec changeset(
-    role_permission :: t(),
-    attrs :: %{} | nil
-  ) :: t()
+  @spec changeset(role_permission :: t(), attrs :: map() | nil) :: %Ecto.Changeset{}
   def changeset(role_permission, attrs \\ %{}) do
     role_permission
     |> cast(attrs, [:role_id, :permission_path, :value, :modified])
@@ -47,9 +44,7 @@ defmodule EpochtalkServer.Models.RolePermission do
   @doc """
   Inserts a new `RolePermission` into the database
   """
-  @spec insert(
-    role_permission_or_role_permissions :: t() | [%{}]
-  ) :: {:ok, role :: t()} | {non_neg_integer(), nil | [term()]} | {:error, Ecto.Changeset.t()}
+  @spec insert(role_permission_or_role_permissions :: t() | [map()]) :: {:ok, role :: t()} | {non_neg_integer(), nil | [term()]} | {:error, Ecto.Changeset.t()}
   def insert([]), do: {:error, "Role permission list is empty"}
   def insert(%RolePermission{} = role_permission), do: Repo.insert(role_permission)
   def insert([%{}|_] = roles_permissions), do: Repo.insert_all(RolePermission, roles_permissions)
@@ -77,9 +72,7 @@ defmodule EpochtalkServer.Models.RolePermission do
   @doc """
   Used to update the value of a `RolePermission` in the database, if it exists or created it, if it doesnt
   """
-  @spec upsert_value(
-    role_permissions :: [%{}]
-  ) :: {non_neg_integer(), nil | [term()]}
+  @spec upsert_value(role_permissions :: [%{}]) :: {non_neg_integer(), nil | [term()]}
   # change the default values of roles permissions
   def upsert_value([]), do: {:error, "Role permission list is empty"}
   def upsert_value([%{}|_] = roles_permissions) do
@@ -94,9 +87,7 @@ defmodule EpochtalkServer.Models.RolePermission do
   @doc """
   Derives a single nested map of all permissions for a role
   """
-  @spec permissions_map_by_role_id(
-    role_id :: integer
-  ) :: %{}
+  @spec permissions_map_by_role_id(role_id :: integer) :: map()
   def permissions_map_by_role_id(role_id) do
     from(rp in RolePermission,
       where: rp.role_id == ^role_id)

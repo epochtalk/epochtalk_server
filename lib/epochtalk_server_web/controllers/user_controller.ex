@@ -9,13 +9,7 @@ defmodule EpochtalkServerWeb.UserController do
   alias EpochtalkServer.Auth.Guardian
   alias EpochtalkServer.Session
   alias EpochtalkServerWeb.ErrorHelpers
-  alias EpochtalkServerWeb.CustomErrors.{
-    InvalidCredentials,
-    NotLoggedIn,
-    AccountNotConfirmed,
-    AccountMigrationNotComplete,
-    InvalidPayload
-  }
+  alias EpochtalkServerWeb.CustomErrors.InvalidPayload
 
   @doc """
   Used to check if a username has already been taken
@@ -74,7 +68,7 @@ defmodule EpochtalkServerWeb.UserController do
          conn <- Guardian.Plug.sign_out(conn) do
       render(conn, "logout.json", data: %{success: true})
     else
-      {:auth, false} -> raise(NotLoggedIn)
+      {:auth, false} -> ErrorHelpers.render_json_error(conn, 400, "Not logged in")
       _ -> ErrorHelpers.render_json_error(conn, 500, "There was an issue signing out")
     end
   end
@@ -89,18 +83,19 @@ defmodule EpochtalkServerWeb.UserController do
          {:not_confirmed, false} <- {:not_confirmed, !!Map.get(user, :confirmation_token)},
          {:missing_passhash, true} <- {:missing_passhash, !!Map.get(user, :passhash)},
          {:valid_password, true} <- {:valid_password, User.valid_password?(user, password)},
-         {:ok, user} = Ban.unban(user),
-         {:ok, user, token, conn} = Session.create(user, remember_me, conn)do
+         {:ok, user} <- Ban.unban(user),
+         {:ok, user, token, conn} <- Session.create(user, remember_me, conn) do
       render(conn, "user.json", %{ user: user, token: token})
     else
       {:auth, true} -> ErrorHelpers.render_json_error(conn, 400, "Already logged in")
-      {:error, :user_not_found} -> raise(InvalidCredentials)
-      {:not_confirmed, true} -> raise(AccountNotConfirmed)
-      {:missing_passhash, false} -> raise(AccountMigrationNotComplete)
-      {:valid_password, false} -> raise(InvalidCredentials)
+      {:error, :user_not_found} -> ErrorHelpers.render_json_error(conn, 400, "Invalid credentials")
+      {:not_confirmed, true} -> ErrorHelpers.render_json_error(conn, 400, "User account not confirmed")
+      {:missing_passhash, false} -> ErrorHelpers.render_json_error(conn, 403, "User account migration not complete, please reset password")
+      {:valid_password, false} -> ErrorHelpers.render_json_error(conn, 400, "Invalid credentials")
       {:error, :unban_error} -> ErrorHelpers.render_json_error(conn, 500, "There was an issue unbanning user, upon login")
       _ -> ErrorHelpers.render_json_error(conn, 500, "There was an issue while attempting to login")
     end
   end
   def login(_conn, _attrs), do: raise(InvalidPayload)
+
 end

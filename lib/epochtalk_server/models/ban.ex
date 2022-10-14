@@ -14,10 +14,10 @@ defmodule EpochtalkServer.Models.Ban do
   @max_date ~N[9999-12-31 00:00:00.000]
 
   @type t :: %__MODULE__{
-    user_id: non_neg_integer,
-    expiration: NaiveDateTime.t(),
-    created_at: NaiveDateTime.t(),
-    updated_at: NaiveDateTime.t()
+    user_id: non_neg_integer | nil,
+    expiration: NaiveDateTime.t() | nil,
+    created_at: NaiveDateTime.t() | nil,
+    updated_at: NaiveDateTime.t() | nil
   }
   @schema_prefix "users"
   @derive {Jason.Encoder, only: [:user_id, :expiration, :created_at, :updated_at]}
@@ -33,10 +33,7 @@ defmodule EpochtalkServer.Models.Ban do
   @doc """
   Create generic changeset for `Ban` model
   """
-  @spec changeset(
-    ban :: t(),
-    attrs :: %{} | nil
-  ) :: t()
+  @spec changeset(ban :: t(), attrs :: map() | nil) :: %Ecto.Changeset{}
   def changeset(ban, attrs \\ %{}) do
     ban
     |> cast(attrs, [:id, :user_id, :expiration, :created_at, :updated_at])
@@ -46,10 +43,7 @@ defmodule EpochtalkServer.Models.Ban do
   @doc """
   Create ban changeset for `Ban` model, handles upsert of ban for banning
   """
-  @spec ban_changeset(
-    ban :: t(),
-    attrs :: %{} | nil
-  ) :: t()
+  @spec ban_changeset(ban :: t(), attrs :: map() | nil) :: %Ecto.Changeset{}
   def ban_changeset(ban, attrs \\ %{}) do
     now = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
     attrs = attrs
@@ -64,10 +58,7 @@ defmodule EpochtalkServer.Models.Ban do
   @doc """
   Create unban changeset for `Ban` model, handles update of ban for unbanning
   """
-  @spec unban_changeset(
-    ban :: t(),
-    attrs :: %{} | nil
-  ) :: t()
+  @spec unban_changeset(ban :: t(), attrs :: map() | nil) :: %Ecto.Changeset{}
   def unban_changeset(ban, attrs \\ %{}) do
     now = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
     attrs = attrs
@@ -167,9 +158,7 @@ defmodule EpochtalkServer.Models.Ban do
   @doc """
   Used to unban a `User`. Updates supplied `User` model to reflect unbanning and returns.
   """
-  @spec unban(
-    user :: User.t()
-  ) :: {:ok, user_changeset :: Ecto.Changeset.t()} | {:error, :unban_error}
+  @spec unban(user :: User.t()) :: {:ok, user :: User.t()} | {:error, :unban_error}
   def unban(%User{ban_info: %Ban{expiration: expiration}, id: user_id} = user) do
     if NaiveDateTime.compare(expiration, NaiveDateTime.utc_now) == :lt do
       case unban_by_user_id(user_id) do

@@ -26,6 +26,22 @@ config :epochtalk_server, EpochtalkServerWeb.Endpoint,
   secret_key_base: "9ORa6oGSN+xlXNedSn0gIKVc/6//naQqSiZsRJ8vNbcvHpPOTPMLgcn134WIH3Pd",
   watchers: []
 
+config :epochtalk_server, EpochtalkServer.Mailer,
+  adapter: Swoosh.Adapters.SMTP,
+  relay: "smtp.example.com",
+  username: "username",
+  password: "password",
+  ssl: true,
+  tls: :if_available,
+  auth: :always,
+  port: 465,
+  retries: 2,
+  no_mx_lookups: false
+  # dkim: [
+  #   s: "default", d: "domain.com",
+  #   private_key: {:pem_plain, File.read!("priv/keys/domain.private")}
+  # ]
+
 # ## SSL Support
 #
 # In order to use HTTPS in development, a self-signed
@@ -59,3 +75,7 @@ config :phoenix, :stacktrace_depth, 20
 
 # Initialize plugs at runtime for faster development compilation
 config :phoenix, :plug_init_mode, :runtime
+
+if File.exists?("config/dev.secret.exs") do
+  import_config "dev.secret.exs"
+end

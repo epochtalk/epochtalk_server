@@ -11,7 +11,7 @@ defmodule EpochtalkServer.Application do
       # Start Guardian Redis Redix connection
       GuardianRedis.Redix,
       # Start the server Redis connection
-      {Redix, host: "localhost", name: :redix},
+      {Redix, host: redix_config()[:host], name: redix_config()[:name]},
       # Start the Ecto repository
       EpochtalkServer.Repo,
       # Start the Telemetry supervisor
@@ -37,4 +37,7 @@ defmodule EpochtalkServer.Application do
     EpochtalkServerWeb.Endpoint.config_change(changed, removed)
     :ok
   end
+
+  # fetch redix config
+  defp redix_config, do: Application.get_env(:epochtalk_server, :redix)
 end

@@ -22,12 +22,17 @@ config :guardian, Guardian.DB,
   # schema_name: "guardian_tokens" # default
   # token_types: ["refresh_token"] # store all token types if not set
 
-# Configure GuardianRedis
+# Configure GuardianRedis (for auth)
 # (implementation of Guardian.DB storage in redis)
 config :guardian_redis, :redis,
-  host: "127.0.0.1",
+  host: System.get_env("REDIS_HOST") || "127.0.0.1",
   port: 6379,
   pool_size: 10
+
+# Configures redix (for sessions storage)
+config :epochtalk_server, :redix,
+  host: System.get_env("REDIS_HOST") || "127.0.0.1",
+  name: :redix
 
 # Configures the endpoint
 config :epochtalk_server, EpochtalkServerWeb.Endpoint,

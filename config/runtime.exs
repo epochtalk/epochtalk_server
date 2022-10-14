@@ -80,4 +80,27 @@ if config_env() == :prod do
   #     config :swoosh, :api_client, Swoosh.ApiClient.Hackney
   #
   # See https://hexdocs.pm/swoosh/Swoosh.html#module-installation for details.
+  config :epochtalk_server, EpochtalkServer.Mailer,
+    relay: System.get_env("EMAILER_SMTP_RELAY") || "smtp.example.com",
+    username: System.get_env("EMAILER_SMTP_USERNAME") || "username",
+    password: System.get_env("EMAILER_SMTP_PASSWORD") || "password",
+    port: System.get_env("EMAILER_SMTP_PORT") || 465
+
+  # Configure Guardian for Runtime
+  config :epochtalk_server, EpochtalkServer.Auth.Guardian,
+    secret_key: System.get_env("GUARDIAN_SECRET_KEY") ||
+      raise """
+      environment variable GUARDIAN_SECRET_KEY is missing.
+      You can generate one by calling: mix guardian.gen.secret
+      """
+
+  # Configure Guardian Redis
+  config :guardian_redis, :redis,
+    host: System.get_env("REDIS_HOST") || "127.0.0.1",
+    port: String.to_integer(System.get_env("REDIS_PORT") || "6379"),
+    pool_size: String.to_integer(System.get_env("REDIS_POOL_SIZE") || "10")
+
+  # Configure Redis for Session Storage
+  config :epochtalk_server, :redix,
+    host: System.get_env("REDIS_HOST") || "127.0.0.1"
 end

@@ -26,21 +26,8 @@ config :epochtalk_server, EpochtalkServerWeb.Endpoint,
   secret_key_base: "9ORa6oGSN+xlXNedSn0gIKVc/6//naQqSiZsRJ8vNbcvHpPOTPMLgcn134WIH3Pd",
   watchers: []
 
-config :epochtalk_server, EpochtalkServer.Mailer,
-  adapter: Swoosh.Adapters.SMTP,
-  relay: "smtp.example.com",
-  username: "username",
-  password: "password",
-  ssl: true,
-  tls: :if_available,
-  auth: :always,
-  port: 465,
-  retries: 2,
-  no_mx_lookups: false
-  # dkim: [
-  #   s: "default", d: "domain.com",
-  #   private_key: {:pem_plain, File.read!("priv/keys/domain.private")}
-  # ]
+# Configure Local Mailer by default for dev mode (this can be overridden in dev.secret.exs)
+config :epochtalk_server, EpochtalkServer.Mailer, adapter: Swoosh.Adapters.Local
 
 # ## SSL Support
 #

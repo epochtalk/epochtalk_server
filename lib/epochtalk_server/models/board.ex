@@ -10,18 +10,18 @@ defmodule EpochtalkServer.Models.Board do
   `Board` model, for performing actions relating to forum boards
   """
   @type t :: %__MODULE__{
-    category: Category.t(),
-    name: String.t(),
-    slug: String.t(),
-    description: String.t(),
-    post_count: non_neg_integer,
-    thread_count: non_neg_integer,
-    viewable_by: non_neg_integer,
-    postable_by: non_neg_integer,
-    right_to_left: boolean,
-    created_at: NaiveDateTime.t(),
-    imported_at: NaiveDateTime.t(),
-    meta: %{}
+    category: Category.t() | term(),
+    name: String.t() | nil,
+    slug: String.t() | nil,
+    description: String.t() | nil,
+    post_count: non_neg_integer | nil,
+    thread_count: non_neg_integer | nil,
+    viewable_by: non_neg_integer | nil,
+    postable_by: non_neg_integer | nil,
+    right_to_left: boolean | nil,
+    created_at: NaiveDateTime.t() | nil,
+    imported_at: NaiveDateTime.t() | nil,
+    meta: map() | nil
   }
   schema "boards" do
     field :name, :string
@@ -46,8 +46,8 @@ defmodule EpochtalkServer.Models.Board do
   """
   @spec changeset(
     board :: t(),
-    attrs :: %{} | nil
-  ) :: t()
+    attrs :: map() | nil
+  ) :: %Ecto.Changeset{}
   def changeset(board, attrs) do
     board
     |> cast(attrs, [:id, :name, :slug, :description, :post_count, :thread_count, :viewable_by, :postable_by, :created_at, :imported_at, :updated_at, :meta])
@@ -61,10 +61,7 @@ defmodule EpochtalkServer.Models.Board do
   @doc """
   Create changeset for creation of `Board` model
   """
-  @spec create_changeset(
-    board :: t(),
-    attrs :: %{} | nil
-  ) :: t()
+  @spec create_changeset(board :: t(), attrs :: map() | nil) :: %Ecto.Changeset{}
   def create_changeset(board, attrs) do
     now = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
     attrs = attrs
@@ -82,7 +79,7 @@ defmodule EpochtalkServer.Models.Board do
   Creates a new `Board` in the database
   """
   @spec create(
-    board_attrs :: %{}
+    board_attrs :: map()
   ) :: {:ok, board :: t()} | {:error, Ecto.Changeset.t()}
   def create(board) do
     board_cs = create_changeset(%Board{}, board)

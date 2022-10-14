@@ -10,10 +10,10 @@ defmodule EpochtalkServer.Models.BoardMapping do
   `BoardMapping` model, for performing actions relating to mapping forum boards and categories
   """
   @type t :: %__MODULE__{
-    board: Board.t(),
-    parent: Board.t(),
-    category: Category.t(),
-    view_order: non_neg_integer
+    board: Board.t() | term(),
+    parent: Board.t() | term(),
+    category: Category.t() | term(),
+    view_order: non_neg_integer | nil
   }
   @primary_key false
   schema "board_mapping" do
@@ -28,10 +28,7 @@ defmodule EpochtalkServer.Models.BoardMapping do
   @doc """
   Create generic changeset for `BoardMapping` model
   """
-  @spec changeset(
-    board_mapping :: t(),
-    attrs :: %{} | nil
-  ) :: t()
+  @spec changeset(board_mapping :: t(), attrs :: map() | nil) :: %Ecto.Changeset{}
   def changeset(board_mapping, attrs) do
     board_mapping
     |> cast(attrs, [:board_id, :parent_id, :category_id, :view_order])
@@ -45,9 +42,7 @@ defmodule EpochtalkServer.Models.BoardMapping do
   @doc """
   Deletes a `Board` from the `BoardMapping`
   """
-  @spec delete_board_by_id(
-    board_id :: integer()
-  ) :: {non_neg_integer(), nil | [term()]}
+  @spec delete_board_by_id(board_id :: integer()) :: {non_neg_integer(), nil | [term()]}
   def delete_board_by_id(id) when is_integer(id) do
     query = from bm in BoardMapping,
       where: bm.board_id == ^id
@@ -57,9 +52,7 @@ defmodule EpochtalkServer.Models.BoardMapping do
   @doc """
   Updates `BoardMapping` in the database
   """
-  @spec update(
-    board_mapping_list :: [%{}]
-  ) :: {:ok, Ecto.Changeset.t()} | {:error, Ecto.Changeset.t()}| {:error, any()}
+  @spec update(board_mapping_list :: [%{}]) :: {:ok, Ecto.Changeset.t()} | {:error, Ecto.Changeset.t()}| {:error, any()}
   def update(board_mapping_list) do
     Repo.transaction(fn ->
       Enum.each(board_mapping_list, &update(&1, Map.get(&1, :type)))

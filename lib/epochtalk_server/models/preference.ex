@@ -6,17 +6,17 @@ defmodule EpochtalkServer.Models.Preference do
   `Preference` model, for performing actions relating to a user's preferences
   """
   @type t :: %__MODULE__{
-    user_id: non_neg_integer,
-    posts_per_page: non_neg_integer,
-    threads_per_page: non_neg_integer,
-    collapsed_categories: %{},
-    ignored_boards: %{},
-    timezone_offset: String.t(),
-    notify_replied_threads: boolean,
-    ignore_newbies: boolean,
-    patroller_view: boolean,
-    email_mentions: boolean,
-    email_messages: boolean
+    user_id: non_neg_integer | nil,
+    posts_per_page: non_neg_integer | nil,
+    threads_per_page: non_neg_integer | nil,
+    collapsed_categories: %{} | nil,
+    ignored_boards: %{} | nil,
+    timezone_offset: String.t() | nil,
+    notify_replied_threads: boolean | nil,
+    ignore_newbies: boolean | nil,
+    patroller_view: boolean | nil,
+    email_mentions: boolean | nil,
+    email_messages: boolean | nil
   }
   @primary_key false
   @schema_prefix "users"
@@ -39,10 +39,7 @@ defmodule EpochtalkServer.Models.Preference do
   @doc """
   Creates a generic changeset for `Preference` model
   """
-  @spec changeset(
-    preference :: t(),
-    attrs :: %{} | nil
-  ) :: t()
+  @spec changeset(preference :: t(), attrs :: map() | nil) :: %Ecto.Changeset{}
   def changeset(preference, attrs \\ %{}) do
     preference
     |> cast(attrs, [:user_id, :posts_per_page, :threads_per_page,

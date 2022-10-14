@@ -35,6 +35,7 @@ defmodule EpochtalkServer.MixProject do
     [
       {:argon2_elixir, "~> 3.0.0"},
       {:corsica, "~> 1.2.0"},
+      {:dialyxir, "~> 1.0", only: [:dev], runtime: false},
       {:ecto_sql, "~> 3.6"},
       {:ex_doc, "~> 0.28.5"},
       {:gen_smtp, "~> 1.2"},
@@ -76,7 +77,7 @@ defmodule EpochtalkServer.MixProject do
      "seed.roles": ["run priv/repo/seed_roles.exs"],
      "seed.rp": ["run priv/repo/seed_roles_permissions.exs"],
      "seed.user": ["run priv/repo/seed_user.exs"],
-     test: ["ecto.create --quiet", "ecto.migrate", "test"]
+     test: ["ecto.create --quiet", "ecto.migrate", "test"],
     ]
   end
 end

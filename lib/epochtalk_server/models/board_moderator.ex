@@ -23,8 +23,8 @@ defmodule EpochtalkServer.Models.BoardModerator do
   """
   @spec changeset(
     board_moderator :: t(),
-    attrs :: %{} | nil
-  ) :: Board.t()
+    attrs :: map() | nil
+  ) :: %Ecto.Changeset{}
   def changeset(board_moderator, attrs \\ %{}) do
     board_moderator
     |> cast(attrs, [:user_id, :board_id])

@@ -9,15 +9,15 @@ defmodule EpochtalkServer.Models.Category do
   `Category` model, for performing actions relating to forum categories
   """
   @type t :: %__MODULE__{
-    name: String.t(),
-    view_order: non_neg_integer,
-    viewable_by: non_neg_integer,
-    postable_by: non_neg_integer,
-    created_at: NaiveDateTime.t(),
-    imported_at: NaiveDateTime.t(),
-    updated_at: NaiveDateTime.t(),
-    meta: %{},
-    boards: [Board.t()]
+    name: String.t() | nil,
+    view_order: non_neg_integer | nil,
+    viewable_by: non_neg_integer | nil,
+    postable_by: non_neg_integer | nil,
+    created_at: NaiveDateTime.t() | nil,
+    imported_at: NaiveDateTime.t() | nil,
+    updated_at: NaiveDateTime.t() | nil,
+    meta: map() | nil,
+    boards: [Board.t()] | term()
   }
   schema "categories" do
     field :name, :string
@@ -36,10 +36,7 @@ defmodule EpochtalkServer.Models.Category do
   @doc """
   Create generic changeset for `Category` model
   """
-  @spec changeset(
-    category :: t(),
-    attrs :: %{} | nil
-  ) :: t()
+  @spec changeset(category :: t(), attrs :: map() | nil) :: %Ecto.Changeset{}
   def changeset(category, attrs) do
     category
     |> cast(attrs, [:id, :name, :view_order, :viewable_by, :postable_by, :created_at, :imported_at, :updated_at, :meta])
@@ -49,10 +46,7 @@ defmodule EpochtalkServer.Models.Category do
   @doc """
   Creates changeset for inserting a new `Category` model
   """
-  @spec create_changeset(
-    category :: t(),
-    attrs :: %{} | nil
-  ) :: t()
+  @spec create_changeset(category :: t(), attrs :: map() | nil) :: %Ecto.Changeset{}
   def create_changeset(category, attrs) do
     now = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
     attrs = attrs
@@ -65,10 +59,7 @@ defmodule EpochtalkServer.Models.Category do
   @doc """
   Creates changeset for updating an existing `Category` model
   """
-  @spec create_changeset(
-    category :: t(),
-    attrs :: %{} | nil
-  ) :: t()
+  @spec update_for_board_mapping_changeset(category :: t(), attrs :: map() | nil) :: %Ecto.Changeset{}
   def update_for_board_mapping_changeset(category, attrs) do
     category
     |> cast(attrs, [:id, :name, :view_order, :viewable_by])
@@ -80,9 +71,7 @@ defmodule EpochtalkServer.Models.Category do
   @doc """
   Creates a new `Category` in the database
   """
-  @spec create(
-    category_attrs :: %{}
-  ) :: {:ok, category :: t()} | {:error, Ecto.Changeset.t()}
+  @spec create(category_attrs :: map()) :: {:ok, category :: t()} | {:error, Ecto.Changeset.t()}
   def create(attrs) do
     category_cs = create_changeset(%Category{}, attrs)
     Repo.insert(category_cs)
@@ -91,9 +80,7 @@ defmodule EpochtalkServer.Models.Category do
   @doc """
   Updates an existing `Category` in the database, used by board mapping to recategorize boards
   """
-  @spec update_for_board_mapping(
-    category_map :: %{ id: id :: integer }
-  ) :: {:ok, category :: t()} | {:error, Ecto.Changeset.t()}
+  @spec update_for_board_mapping(category_map :: %{ id: id :: integer }) :: {:ok, category :: t()} | {:error, Ecto.Changeset.t()}
   def update_for_board_mapping(%{ id: id } = category_map) do
     %Category{ id: id }
     |> update_for_board_mapping_changeset(category_map)

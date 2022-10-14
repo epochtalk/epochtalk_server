@@ -9,9 +9,9 @@ defmodule EpochtalkServer.Models.Invitation do
   """
 
   @type t :: %__MODULE__{
-    email: String.t(),
-    hash: String.t(),
-    created_at: NaiveDateTime.t()
+    email: String.t() | nil,
+    hash: String.t() | nil,
+    created_at: NaiveDateTime.t() | nil
   }
   @primary_key false
   schema "invitations" do
@@ -25,10 +25,7 @@ defmodule EpochtalkServer.Models.Invitation do
   @doc """
   Create changeset for inserting a new `Invitation` model
   """
-  @spec create_changeset(
-    invitation :: t(),
-    attrs :: %{} | nil
-  ) :: t()
+  @spec create_changeset(invitation :: t(), attrs :: map() | nil) :: %Ecto.Changeset{}
   def create_changeset(invitation, attrs \\ %{}) do
     now = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
     attrs = attrs
@@ -49,16 +46,12 @@ defmodule EpochtalkServer.Models.Invitation do
   @doc """
   Creates a new `Invitation` in the database
   """
-  @spec create(
-    email :: String.t()
-  ) :: {:ok, invitation :: t()} | {:error, Ecto.Changeset.t()}
+  @spec create(email :: String.t()) :: {:ok, invitation :: t()} | {:error, Ecto.Changeset.t()}
   def create(email), do: Repo.insert(create_changeset(%Invitation{}, %{email: email}))
 
   @doc """
   Deletes `Invitation` from the database by email
   """
-  @spec delete(
-    email :: String.t()
-  ) :: {non_neg_integer(), nil | [term()]}
+  @spec delete(email :: String.t()) :: {non_neg_integer(), nil | [term()]}
   def delete(email), do: Repo.delete_all(from(i in Invitation, where: i.email == ^email))
 end

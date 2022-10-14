@@ -13,8 +13,8 @@ defmodule EpochtalkServer.Models.RoleUser do
   @admin_role_id 1
 
   @type t :: %__MODULE__{
-    user: User.t(),
-    role: Role.t()
+    user: User.t() | term(),
+    role: Role.t() | term()
   }
   @primary_key false
   schema "roles_users" do
@@ -27,10 +27,7 @@ defmodule EpochtalkServer.Models.RoleUser do
   @doc """
   Creates a generic changeset for `RoleUser` model
   """
-  @spec changeset(
-    role_user :: t(),
-    attrs :: %{} | nil
-  ) :: t()
+  @spec changeset(role_user :: t(), attrs :: map() | nil) :: %Ecto.Changeset{}
   def changeset(role_user, attrs \\ %{}) do
     role_user
     |> cast(attrs, [:user_id, :role_id])
@@ -42,9 +39,7 @@ defmodule EpochtalkServer.Models.RoleUser do
   @doc """
   Assigns a specific `User` to have the `superAdministrator` `Role`
   """
-  @spec set_admin(
-    user_id :: integer
-  ) :: {:ok, role_user :: t()} | {:error, Ecto.Changeset.t()}
+  @spec set_admin(user_id :: integer) :: {:ok, role_user :: t()} | {:error, Ecto.Changeset.t()}
   def set_admin(user_id), do: set_user_role(@admin_role_id, user_id)
 
   @doc """

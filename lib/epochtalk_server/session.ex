@@ -72,16 +72,14 @@ defmodule EpochtalkServer.Session do
   @doc """
   Deletes every session instance for the specified `User`
   """
-  @spec delete_sessions(
-    user :: User.t(),
-    session_id :: String.t()
-  ) :: {:ok, Redix.Protocol.redis_value()} | {:error, atom() | Redix.Error.t() | Redix.ConnectionError.t()}
-  def delete_sessions(%User{} = user, session_id) do
+  @spec delete_sessions(user :: User.t()) :: :ok
+  def delete_sessions(%User{} = user) do
     # delete session id from redis under "user:{user_id}:sessions"
     session_key = generate_key(user.id, "sessions")
-    Redix.command(:redix, ["SPOP", session_key, session_id])
-    # repeat until redix returns nil
-    |> unless do delete_sessions(user.id, session_id) end
+    case Redix.command(:redix, ["SPOP", session_key]) do
+      {:ok, nil} -> :ok
+      _ -> delete_sessions(user) # repeat until redix returns nil
+    end
   end
 
   defp save(%User{} = user, session_id) do
@@ -102,7 +100,7 @@ defmodule EpochtalkServer.Session do
     role_lookups = roles |> Enum.map(&(&1.lookup))
     role_key = generate_key(user_id, "roles")
     Redix.command(:redix, ["DEL", role_key])
-    unless role_lookups == nil or role_lookups == [], do:
+    unless role_lookups == [], do:
       Enum.each(role_lookups, &Redix.command(:redix, ["SADD", role_key, &1]))
   end
 
@@ -112,7 +110,7 @@ defmodule EpochtalkServer.Session do
     # save/replace moderating boards to redis under "user:{user_id}:moderating"
     moderating_key = generate_key(user_id, "moderating")
     Redix.command(:redix, ["DEL", moderating_key])
-    unless moderating == nil or moderating == [], do:
+    unless moderating == [], do:
       Enum.each(moderating, &Redix.command(:redix, ["SADD", moderating_key, &1]))
   end
 

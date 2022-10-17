@@ -14,6 +14,9 @@ defmodule EpochtalkServer.Application do
       {Redix, host: redix_config()[:host], name: redix_config()[:name]},
       # Start the Ecto repository
       EpochtalkServer.Repo,
+      # Warm frontend_config variable (referenced by api controllers)
+      # This worker starts, does its thing and dies
+      {Task, &EpochtalkServer.Models.Configuration.warm_frontend_config/0},
       # Start the Telemetry supervisor
       EpochtalkServerWeb.Telemetry,
       # Start the PubSub system

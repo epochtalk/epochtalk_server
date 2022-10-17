@@ -1,5 +1,6 @@
 defmodule EpochtalkServer.Models.Configuration do
   use Ecto.Schema
+  import Logger, only: [debug: 1]
   import Ecto.Changeset
   alias EpochtalkServer.Repo
   alias EpochtalkServer.Models.Configuration
@@ -64,7 +65,31 @@ defmodule EpochtalkServer.Models.Configuration do
   def set_default(config_map) when is_map(config_map) do
     %Configuration{}
     |> create_changeset(%{ name: "default", config: config_map })
-    |> Repo.insert()
+    |> Repo.insert(returning: [:config])
+  end
+
+  ## === External Helper Functions ===
+  @doc """
+  Warms `:epochtalk_server[:frontend_config]` config variable using `Configuration` stored in database,
+  if present. If there is no `Configuration` in the database, the default value is taken
+  from `:epochtalk_server[:frontend_config]` and inserted into the database as the default
+  `Configuration`.
+  """
+  def warm_frontend_config() do
+    frontend_config = case Configuration.get_default() do
+      nil ->
+        debug("Frontend Configurations not found, setting defaults in Database")
+        config = Application.get_env(:epochtalk_server, :frontend_config)
+        case Configuration.set_default(config) do
+          {:ok, configuration} -> configuration.config
+          {:error, _} -> raise("There was an issue with :epochtalk_server[:frontend_configs], please check config/config.exs")
+        end
+      configuration ->
+        debug("Loading Frontend Configurations from Database")
+        configuration.config
+    end
+    Application.put_env(:epochtalk_server, :frontend_config, frontend_config)
+    debug "Frontend Configuration:\n" <> inspect(frontend_config, pretty: true, syntax_colors: IO.ANSI.syntax_colors)
   end
 
 end

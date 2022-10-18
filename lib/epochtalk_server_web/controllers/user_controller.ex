@@ -8,6 +8,7 @@ defmodule EpochtalkServerWeb.UserController do
   alias EpochtalkServer.Models.Invitation
   alias EpochtalkServer.Auth.Guardian
   alias EpochtalkServer.Session
+  alias EpochtalkServer.Mailer
   alias EpochtalkServerWeb.ErrorHelpers
   alias EpochtalkServerWeb.CustomErrors.InvalidPayload
 
@@ -23,13 +24,12 @@ defmodule EpochtalkServerWeb.UserController do
 
   @doc """
   Registers a new `User`
-
-  - TODO(akinsey): handle config.inviteOnly
-  - TODO(akinsey): handle config.newbieEnabled
-  - TODO(akinsey): Send confirmation email
   """
   def register(conn, %{"username" => _, "email" => _, "password" => _} = attrs) do
+    config = Application.get_env(:epochtalk_server, :frontend_config)
     with {:auth, false} <- {:auth, Guardian.Plug.authenticated?(conn)}, # check auth
+         {:invite_only, false} <- {:invite_only, !!config["invite_only"]},
+         {:verify_registration, false} <- {:verify_registration, !!config["verify_registration"]},
          {:ok, user} <- User.create(attrs), # create user
          {_count, nil} <- Invitation.delete(user.email), # delete invitation
          {:ok, user} <- User.handle_malicious_user(user, conn.remote_ip), # ban if malicious
@@ -38,6 +38,10 @@ defmodule EpochtalkServerWeb.UserController do
     else
       # user already authenticated
       {:auth, true} -> ErrorHelpers.render_json_error(conn, 400, "Cannot register a new account while logged in")
+      # forum is set to invite only
+      {:invite_only, true} -> ErrorHelpers.render_json_error(conn, 423, "Registration is closed, forum is invite only")
+      # verify registration is on, run register_but_verify instead
+      {:verify_registration, true} -> register_but_verify(conn, attrs)
       # error banning in handle_malicious_user
       {:error, :ban_error} -> ErrorHelpers.render_json_error(conn, 500, "There was an error banning malicious user, upon login")
       # error in user.create
@@ -47,6 +51,23 @@ defmodule EpochtalkServerWeb.UserController do
     end
   end
   def register(_conn, _attrs), do: raise(InvalidPayload)
+
+  defp register_but_verify(conn, attrs) do
+    # add confirmation token
+    attrs = attrs |> Map.put("confirmation_token", :crypto.strong_rand_bytes(20) |> Base.encode64)
+    with {:ok, user} <- User.create(attrs), # create user
+         {_count, nil} <- Invitation.delete(user.email), # delete invitation
+         {:ok, _email} <- Mailer.send_confirm_account(user) do # send confirm account email
+      render(conn, "register_but_verify.json", user: user)
+    else
+      # error in user.create
+      {:error, data} -> ErrorHelpers.render_json_error(conn, 400, data)
+      # error email failed to send
+      {:error, :not_delivered} -> ErrorHelpers.render_json_error(conn, 500, "Sending of account confirmation email failed, mailer is not properly configured.")
+      # Catch all for any other errors
+      _ -> ErrorHelpers.render_json_error(conn, 500, "There was an issue registering")
+    end
+  end
 
   @doc """
   Authenticates currently logged in `User`

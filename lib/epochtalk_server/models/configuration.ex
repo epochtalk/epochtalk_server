@@ -69,6 +69,7 @@ defmodule EpochtalkServer.Models.Configuration do
   end
 
   ## === External Helper Functions ===
+
   @doc """
   Warms `:epochtalk_server[:frontend_config]` config variable using `Configuration` stored in database,
   if present. If there is no `Configuration` in the database, the default value is taken
@@ -77,19 +78,38 @@ defmodule EpochtalkServer.Models.Configuration do
   """
   def warm_frontend_config() do
     frontend_config = case Configuration.get_default() do
-      nil ->
+      nil -> # no configurations in database
         debug("Frontend Configurations not found, setting defaults in Database")
-        config = Application.get_env(:epochtalk_server, :frontend_config)
-        case Configuration.set_default(config) do
+        frontend_config = Application.get_env(:epochtalk_server, :frontend_config)
+        case Configuration.set_default(frontend_config) do
           {:ok, configuration} -> configuration.config
           {:error, _} -> raise("There was an issue with :epochtalk_server[:frontend_configs], please check config/config.exs")
         end
-      configuration ->
+      configuration -> # configuration found in database
         debug("Loading Frontend Configurations from Database")
         configuration.config
     end
     Application.put_env(:epochtalk_server, :frontend_config, frontend_config)
-    debug "Frontend Configuration:\n" <> inspect(frontend_config, pretty: true, syntax_colors: IO.ANSI.syntax_colors)
+    set_git_revision()
+    debug "Frontend Configuration:\n"
+      <> inspect(
+          Application.get_env(:epochtalk_server, :frontend_config),
+          pretty: true,
+          syntax_colors: IO.ANSI.syntax_colors
+        )
   end
 
+  ## === Private Helper Functions ===
+
+  defp set_git_revision() do
+    # revision
+    {rev, _} = System.cmd("git", ["rev-parse", "--short", "HEAD"])
+    [rev | _] = rev |> String.split("\n")
+    # TODO(boka): git tag --points-at HEAD v[0-9]*
+    # TODO(boka): directory release version
+
+    frontend_config = Application.get_env(:epochtalk_server, :frontend_config)
+      |> Map.put("revision", rev)
+    Application.put_env(:epochtalk_server, :frontend_config, frontend_config)
+  end
 end

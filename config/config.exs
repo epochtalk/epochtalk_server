@@ -10,10 +10,11 @@ import Config
 config :epochtalk_server,
   ecto_repos: [EpochtalkServer.Repo],
   frontend_config: %{
-    newbie_enabled: true,
+    public_url: "http://localhost:8000",
+    newbie_enabled: false,
     login_required: false,
     invite_only: false,
-    verify_registration: false,
+    verify_registration: true,
     ga_key: "UA-XXXXX-Y",
     revision: nil,
     website: %{
@@ -26,7 +27,7 @@ config :epochtalk_server,
       default_avatar_shape: "circle"
     },
     portal: %{enabled: false, board_id: nil},
-    emailer: %{ses_mode: false, options: %{}},
+    emailer: %{ses_mode: false, options: %{from_address: "info@epochtalk.com"}},
     images: %{s3_mode: false, options: %{}},
     rate_limiting: %{}
   }

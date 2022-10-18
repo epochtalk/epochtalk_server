@@ -4,9 +4,13 @@ defmodule EpochtalkServer.Application do
   @moduledoc false
 
   use Application
+  @env Mix.env()
 
   @impl true
   def start(_type, _args) do
+    # Set Environment to config
+    # Work around for dialyzer rendering @env as :dev
+    Application.put_env(:epochtalk_server, :env, @env)
     children = [
       # Start Guardian Redis Redix connection
       GuardianRedis.Redix,
@@ -27,6 +31,11 @@ defmodule EpochtalkServer.Application do
       # {EpochtalkServer.Worker, arg}
     ]
 
+    # don't run config_warmer during tests
+    children = if Application.get_env(:epochtalk_server, :env) == :test,
+      do: List.delete(children, {Task, &EpochtalkServer.Models.Configuration.warm_frontend_config/0}),
+      else: children
+
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: EpochtalkServer.Supervisor]
@@ -42,5 +51,5 @@ defmodule EpochtalkServer.Application do
   end
 
   # fetch redix config
-  defp redix_config, do: Application.get_env(:epochtalk_server, :redix)
+  defp redix_config(), do: Application.get_env(:epochtalk_server, :redix)
 end

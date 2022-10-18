@@ -74,8 +74,9 @@ defmodule EpochtalkServer.Models.Configuration do
   Warms `:epochtalk_server[:frontend_config]` config variable using `Configuration` stored in database,
   if present. If there is no `Configuration` in the database, the default value is taken
   from `:epochtalk_server[:frontend_config]` and inserted into the database as the default
-  `Configuration`.
+  `Configuration`. Run as a Task on application startup.
   """
+  @spec warm_frontend_config() :: :ok
   def warm_frontend_config() do
     frontend_config = case Configuration.get_default() do
       nil -> # no configurations in database

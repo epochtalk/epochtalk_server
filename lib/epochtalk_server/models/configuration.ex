@@ -98,19 +98,28 @@ defmodule EpochtalkServer.Models.Configuration do
           pretty: true,
           syntax_colors: IO.ANSI.syntax_colors
         )
+    :ok
   end
 
   ## === Private Helper Functions ===
 
   defp set_git_revision() do
+    # tag
+    {tag, _} = System.cmd("git", ["tag", "--points-at", "HEAD", "v[0-9]*"])
+    IO.inspect tag
+    [tag | _] = tag |> String.split("\n")
+
     # revision
-    {rev, _} = System.cmd("git", ["rev-parse", "--short", "HEAD"])
-    [rev | _] = rev |> String.split("\n")
-    # TODO(boka): git tag --points-at HEAD v[0-9]*
+    {hash, _} = System.cmd("git", ["rev-parse", "--short", "HEAD"])
+    [hash | _] = hash |> String.split("\n")
+
     # TODO(boka): directory release version
 
+    # tag takes precidence over revision
+    revision = unless tag == "", do: tag, else: hash
+
     frontend_config = Application.get_env(:epochtalk_server, :frontend_config)
-      |> Map.put("revision", rev)
+      |> Map.put("revision", revision)
     Application.put_env(:epochtalk_server, :frontend_config, frontend_config)
   end
 end

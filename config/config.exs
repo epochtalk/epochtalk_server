@@ -10,6 +10,7 @@ import Config
 config :epochtalk_server,
   ecto_repos: [EpochtalkServer.Repo],
   frontend_config: %{
+    newbie_enabled: true,
     login_required: false,
     invite_only: false,
     verify_registration: false,

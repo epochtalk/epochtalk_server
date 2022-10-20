@@ -10,11 +10,16 @@ import Config
 config :epochtalk_server,
   ecto_repos: [EpochtalkServer.Repo],
   frontend_config: %{
-    public_url: "http://localhost:8000",
+    frontend_url: "http://localhost:8000",
+    backend_url: "http://localhost:4000",
     newbie_enabled: false,
     login_required: false,
     invite_only: false,
     verify_registration: true,
+    post_max_length: 10_000,
+    max_image_size: 10_485_760,
+    max_avatar_size: 102_400,
+    mobile_break_width: 767,
     ga_key: "UA-XXXXX-Y",
     revision: nil,
     website: %{
@@ -28,7 +33,7 @@ config :epochtalk_server,
     },
     portal: %{enabled: false, board_id: nil},
     emailer: %{ses_mode: false, options: %{from_address: "info@epochtalk.com"}},
-    images: %{s3_mode: false, options: %{}},
+    images: %{s3_mode: false, options: %{ local_host: "http://localhost:4000" }},
     rate_limiting: %{}
   }
 

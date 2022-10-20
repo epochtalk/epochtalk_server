@@ -7,10 +7,10 @@ defmodule EpochtalkServer.Mailer do
   @spec send_confirm_account(recipient :: User.t()) :: {:ok, term} | {:error, term}
   def send_confirm_account(%User{ email: email, username: username, confirmation_token: token}) do
     config = Application.get_env(:epochtalk_server, :frontend_config)
-    public_url = config["public_url"]
+    frontend_url = config["frontend_url"]
     website_title = config["website"]["title"]
     from_address = config["emailer"]["options"]["from_address"]
-    confirm_url = "#{public_url}/confirm/#{String.downcase(username)}/#{token}"
+    confirm_url = "#{frontend_url}/confirm/#{String.downcase(username)}/#{token}"
     content = generate_from_base_template("""
       <h3>Account Confirmation</h3>
       Please visit the link below to complete the registration process for the account <strong>#{username}</strong>.<br /><br />

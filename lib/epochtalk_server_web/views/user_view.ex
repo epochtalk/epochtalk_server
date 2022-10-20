@@ -14,6 +14,24 @@ defmodule EpochtalkServerWeb.UserView do
   def render("user.json", %{user: user, token: token}), do: format_user_reply(user, token)
 
   @doc """
+  Renders formatted JSON response for registration confirmation.
+  ## Example
+    iex> EpochtalkServerWeb.UserView.render("register_with_verify.json", %{user: %User{ username: "Test" }})
+    %{
+      username: "Test",
+      confirm_token: true,
+      message: "Successfully registered, please confirm account to login."
+    }
+  """
+  def render("register_with_verify.json", %{user: user}) do
+    %{
+      username: user.username,
+      confirm_token: true,
+      message: "Successfully registered, please confirm account to login."
+    }
+  end
+
+  @doc """
   Renders whatever data it is passed when template not found. Data pass through
   for rendering misc responses (ex: {found: true} or {success: true})
   ## Example

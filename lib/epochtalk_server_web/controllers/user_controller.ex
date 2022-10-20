@@ -70,6 +70,26 @@ defmodule EpochtalkServerWeb.UserController do
   end
 
   @doc """
+  Confirms a newly registered `User`. Used when `:epochtalk_server[:frontend_config]["verify_registration"]`
+  configuration is set to `true`
+  """
+  def confirm(conn, %{"username" => username, "token" => token}) do
+    with {:ok, user} <- User.by_username(username), # create user
+         {:token_valid, true} <- {:token_valid, user.confirmation_token == token}, # check confirmation token
+         {:ok, user} <- User.handle_malicious_user(user, conn.remote_ip), # ban if malicious
+         {:ok, user, token, conn} <- Session.create(user, false, conn) do # create session
+      render(conn, "user.json", %{ user: user, token: token})
+    else
+      {:error, :user_not_found} -> ErrorHelpers.render_json_error(conn, 400, "Confirmation error, account not found")
+      {:token_valid, false} -> ErrorHelpers.render_json_error(conn, 400, "Account confirmation error, invalid token")
+      {:error, :ban_error} -> ErrorHelpers.render_json_error(conn, 500, "There was an error banning malicious user, upon confirming account")
+      {:error, data} -> ErrorHelpers.render_json_error(conn, 400, data)
+      _ -> ErrorHelpers.render_json_error(conn, 500, "There was an issue registering")
+    end
+  end
+  def confirm(_conn, _attrs), do: raise(InvalidPayload)
+
+  @doc """
   Authenticates currently logged in `User`
   """
   def authenticate(conn, _attrs) do

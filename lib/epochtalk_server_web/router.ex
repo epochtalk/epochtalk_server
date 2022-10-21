@@ -32,7 +32,7 @@ defmodule EpochtalkServerWeb.Router do
   end
 
   scope "/", EpochtalkServerWeb do
-    get "/config.js", ConfigurationController, :config_file
+    get "/config.js", ConfigurationController, :config
   end
 
   # Enables the Swoosh mailbox preview in development.

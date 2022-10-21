@@ -58,7 +58,14 @@ conventions.  Please refer to these guidelines!
 
 * Pass dialyzer
 
+  To run [dialyzer](https://hexdocs.pm/dialyxir/Mix.Tasks.Dialyzer.html)
+  locally, run this command:
+
   `mix dialyzer`
+
+  Dialyzer is a "static analysis tool that identifies software discrepancies"
+  in the project and attempts to do things such as; identify code that will
+  almost certainly fail, doesn't match the documented spec, or is unreachable.
 
 * Pass CI tests/build
 

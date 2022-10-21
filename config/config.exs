@@ -8,7 +8,34 @@
 import Config
 
 config :epochtalk_server,
-  ecto_repos: [EpochtalkServer.Repo]
+  ecto_repos: [EpochtalkServer.Repo],
+  frontend_config: %{
+    frontend_url: "http://localhost:8000",
+    backend_url: "http://localhost:4000",
+    newbie_enabled: false,
+    login_required: false,
+    invite_only: false,
+    verify_registration: true,
+    post_max_length: 10_000,
+    max_image_size: 10_485_760,
+    max_avatar_size: 102_400,
+    mobile_break_width: 767,
+    ga_key: "UA-XXXXX-Y",
+    revision: nil,
+    website: %{
+      title: "Epochtalk Forums",
+      description: "Open source forum software",
+      keywords: "open source, free forum, forum software, forum",
+      logo: nil,
+      favicon: nil,
+      default_avatar: "/images/avatar.png",
+      default_avatar_shape: "circle"
+    },
+    portal: %{enabled: false, board_id: nil},
+    emailer: %{ses_mode: false, options: %{from_address: "info@epochtalk.com"}},
+    images: %{s3_mode: false, options: %{ local_host: "http://localhost:4000" }},
+    rate_limiting: %{}
+  }
 
 # Configure Guardian
 config :epochtalk_server, EpochtalkServer.Auth.Guardian,

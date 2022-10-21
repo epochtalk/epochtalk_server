@@ -70,10 +70,15 @@ defmodule EpochtalkServer.Models.Role do
   def get_newbie_role_id(), do: Repo.one(from(r in Role, select: r.id, where: r.lookup == "newbie"))
 
   @doc """
-  Returns default `Role`, for base installation this is the `user` role
+  Returns default `Role`, for base installation this is the `user` role, if `:epochtalk_server[:frontend_config]["newbie_enabled"]`
+  configuration is set to true, then `newbie` is the default role.
   """
   @spec get_default() :: t() | nil
-  def get_default(), do: by_lookup("user")
+  def get_default() do
+    config = Application.get_env(:epochtalk_server, :frontend_config)
+    newbie_enabled = config["newbie_enabled"]
+    by_lookup(if newbie_enabled, do: "newbie", else: "user")
+  end
 
   @doc """
   Returns a `Role` or list of roles, for specified lookup(s)

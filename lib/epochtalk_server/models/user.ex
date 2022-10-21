@@ -68,7 +68,7 @@ defmodule EpochtalkServer.Models.User do
   @spec registration_changeset(user :: t(), attrs :: map() | nil) :: %Ecto.Changeset{}
   def registration_changeset(user, attrs) do
     user
-    |> cast(attrs, [:id, :email, :username, :created_at, :updated_at, :deleted, :malicious_score, :password])
+    |> cast(attrs, [:id, :email, :confirmation_token, :username, :created_at, :updated_at, :deleted, :malicious_score, :password])
     |> unique_constraint(:id, name: :users_pkey)
     |> validate_username()
     |> validate_email()

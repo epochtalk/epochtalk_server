@@ -3,6 +3,7 @@
 Before your pull request can be accepted, it must conform to our projects
 conventions.  Please refer to these guidelines!
 
+
 ## Responsibilities
 
 * Write tests
@@ -49,6 +50,7 @@ conventions.  Please refer to these guidelines!
 
 * Pass CI tests/build
 
+
 ## Documentation overview
 
 
@@ -79,7 +81,7 @@ When you call changeset you pass an empty User model and a map of attributes to
 populate the model with.  Initially, the User model is empty and dialyzer checks
 all code paths, so it's running the changeset function and there's an empty user
 
-if type doesn't handle empty, then it will error.
+If type doesn't handle empty, then it will error.
 
 Use `| term()` for associations, database relationship in ecto.
 

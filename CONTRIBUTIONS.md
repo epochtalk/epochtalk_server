@@ -20,6 +20,9 @@ conventions.  Please refer to these guidelines!
 * Commit code using [Angular Commit Message](https://gist.github.com/brianclements/841ea7bffdb01346392c)
   conventions.
 
+  This is important because this project uses Semantic Release to create
+  versioned releases, which requires adherence to Angular Commit conventions.
+
 * Write documentation
 
   View the [Documentation](#Documentation overview) section of this document for a

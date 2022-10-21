@@ -29,7 +29,7 @@ jobs:
         uses: docker/build-push-action@v3.2.0
         with:
           push: false
-          tags: epochtalk_server:latest
+          tags: epochtalk_server:${{ github.event.client_payload.branch }}
   pre_release_job:
     needs: docker_build_job
     name: Pre-Release

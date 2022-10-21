@@ -50,6 +50,14 @@ conventions.  Please refer to these guidelines!
 
 * Pass CI tests/build
 
+  Any time code is pushed to this repo, our CI system will automatically run
+  tests and attempt to build the project for production release.  When viewing
+  the branch on GitHub, it will either show up as test/CI `passing` or `failed`.
+
+  Code that doesn't pass the tests and CI build will not be merged!  Please view
+  the results and fix your code accordingly.  If you have any questions or get
+  stuck, feel free to submit an issue to this project for help.
+
 * Submit a pull request
 
   Once your code is ready, submit a pull request and an internal team member

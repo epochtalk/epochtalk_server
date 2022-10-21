@@ -1,5 +1,9 @@
 defmodule EpochtalkServerWeb.Endpoint do
   use Phoenix.Endpoint, otp_app: :epochtalk_server
+  alias EpochtalkServerWeb.Endpoint.CacheBodyReader
+
+  # get x-forwarded ip
+  plug RemoteIp
 
   # cors configuration
   plug Corsica, origins: "*", allow_headers: :all
@@ -25,13 +29,17 @@ defmodule EpochtalkServerWeb.Endpoint do
 
   plug Plug.RequestId
   plug Plug.Telemetry, event_prefix: [:phoenix, :endpoint]
-
+  plug EpochtalkServerWeb.Plugs.PrepareParse # handle malformed json payload
   plug Plug.Parsers,
     parsers: [:urlencoded, :multipart, :json],
     pass: ["*/*"],
+    body_reader: {CacheBodyReader, :read_body, []},
     json_decoder: Phoenix.json_library()
 
   plug Plug.MethodOverride
   plug Plug.Head
   plug EpochtalkServerWeb.Router
 end
+
+# used to help preparse raw req body, in case of malformed payload
+defmodule EpochtalkServerWeb.Endpoint.CacheBodyReader, do: def read_body(conn, _opts), do: {:ok, conn.assigns.raw_body, conn}

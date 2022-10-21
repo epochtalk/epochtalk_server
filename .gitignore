@@ -24,3 +24,6 @@ epochtalk_server-*.tar
 
 # Ignore generated seed files
 priv/repo/seeds/permissions.json
+
+# Ignore secret config files
+config/*.secret.exs

@@ -50,6 +50,17 @@ conventions.  Please refer to these guidelines!
 
 * Pass CI tests/build
 
+* Submit a pull request
+
+  Once your code is ready, submit a pull request and an internal team member
+  will review your changes.  We'll list any suggestion for improvements or fixes
+  in the comments on the pull request.  Once all concerns are addressed and
+  changes are approved, the PR will be merged into our codebase.
+
+  Release tags are updated via Semantic Release, which analyzes commits with
+  Angular Commit message convention and selects an appropriate version to
+  release on GitHub.
+
 
 ## Documentation overview
 

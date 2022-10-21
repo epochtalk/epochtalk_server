@@ -42,7 +42,16 @@ conventions.  Please refer to these guidelines!
 
 * Pass tests
 
+  To run tests locally, run this command:
+
   `mix test`
+
+  This will run all tests in the project.  Tests are also run automatically in
+  the CI system on push to GitHub, but this is a good, quick way to make sure
+  they're passing without waiting for the entire build and test process to
+  finish in CI (which takes a while).
+
+  All tests must pass before code can be merged into the main branch.
 
 * Pass dialyzer
 

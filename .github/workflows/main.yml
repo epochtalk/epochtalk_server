@@ -60,7 +60,7 @@ jobs:
     runs-on: [self-hosted, Linux, X64]
     steps:
     - name: Run tests in docker container
-      run: docker run --rm --env-file epochtalk_server.env epochtalk/epochtalk_server mix test
+      run: docker run --rm -e DATABASE_URL=$DATABASE_URL -e REDIS_HOST=$REDIS_HOST epochtalk/epochtalk_server mix test
       env:
         DATABASE_URL: postgresql://postgres:postgres@postgres/epochtalk_server
         REDIS_HOST: redis

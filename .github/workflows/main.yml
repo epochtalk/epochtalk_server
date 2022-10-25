@@ -50,6 +50,9 @@ jobs:
     needs: docker_build_job
     name: Run tests
     runs-on: [self-hosted, Linux, X64]
+    steps:
+    - name: Run tests in docker container
+      run: docker run --rm --env-file epochtalk_server.env epochtalk/epochtalk_server mix test
   pre_release_job:
     needs: docker_build_job
     name: Pre-Release

@@ -169,8 +169,13 @@ defmodule EpochtalkServer.Models.Role do
   Takes in list of user's roles, and returns an xored map of all `Role` permissions
   """
   @spec get_masked_permissions(roles :: [t()]) :: map()
-  def get_masked_permissions(roles) when is_list(roles), do: Enum.reduce(roles, %{}, &mask_permissions(&2, &1))
-
+  def get_masked_permissions(roles) when is_list(roles) do
+    masked_role = Enum.reduce(roles, %{}, &mask_permissions(&2, &1))
+    masked_role.permissions
+    |> Map.put(:highlight_color, masked_role.highlight_color)
+    |> Map.put(:priority_restrictions, masked_role.priority_restrictions)
+    |> Map.put(:priority, masked_role.priority)
+  end
   ## === Private Helper Functions ===
 
   defp mask_permissions(target, source) do

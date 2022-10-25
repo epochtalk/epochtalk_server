@@ -31,6 +31,8 @@ jobs:
           push: false
           load: true
           tags: epochtalk/epochtalk_server:latest
+          cache-from: type=registry,ref=epochtalk/epochtalk_server:latest
+          cache-to: type=inline
   test_job:
     services:
       postgres:

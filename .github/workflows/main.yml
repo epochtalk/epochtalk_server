@@ -47,6 +47,14 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+      redis:
+        image: redis: 7.0.4
+        # Set health checks to wait until redis has started
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     needs: docker_build_job
     name: Run tests
     runs-on: [self-hosted, Linux, X64]
@@ -55,6 +63,7 @@ jobs:
       run: docker run --rm --env-file epochtalk_server.env epochtalk/epochtalk_server mix test
       env:
         DATABASE_URL: postgresql://postgres:postgres@postgres/epochtalk_server
+        REDIS_HOST: redis
   pre_release_job:
     needs: docker_build_job
     name: Pre-Release

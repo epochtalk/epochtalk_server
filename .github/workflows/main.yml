@@ -29,6 +29,7 @@ jobs:
         uses: docker/build-push-action@v3.2.0
         with:
           push: false
+          load: true
           tags: epochtalk/epochtalk_server:latest
   pre_release_job:
     needs: docker_build_job

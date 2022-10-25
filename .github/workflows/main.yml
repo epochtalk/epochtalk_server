@@ -53,6 +53,8 @@ jobs:
     steps:
     - name: Run tests in docker container
       run: docker run --rm --env-file epochtalk_server.env epochtalk/epochtalk_server mix test
+      env:
+        DATABASE_URL: postgresql://postgres:postgres@postgres/epochtalk_server
   pre_release_job:
     needs: docker_build_job
     name: Pre-Release

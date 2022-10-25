@@ -1,0 +1,22 @@
+window.title = '<%= @config["website"]["title"] %>'
+window.description = '<%= @config["website"]["description"] %>'
+window.keywords = '<%= @config["website"]["keywords"] %>'
+window.logo = '<%= @config["website"]["logo"] %>'
+window.default_avatar = '<%= @config["website"]["default_avatar"] %>'
+window.default_avatar_shape = '<%= @config["website"]["default_avatar_shape"] %>'
+window.favicon = '<%= @config["website"]["favicon"] %>'
+window.images_local_root = '<%= @config["images"]["options"]["local_host"] %>'
+window.post_max_length = '<%= @config["post_max_length"] %>'
+window.mobile_break_width = '<%= @config["mobile_break_width"] %>'
+window.max_image_size = '<%= @config["max_image_size"] %>'
+window.max_avatar_size = '<%= @config["max_avatar_size"] %>'
+window.frontend_url = '<%= @config["frontend_url"] %>'
+window.backend_url = '<%= @config["backend_url"] %>'
+window.portal = {
+  enabled: <%= @config["portal"]["enabled"] %>,
+  board_id: <%= if board_id = @config["portal"]["board_id"], do: board_id, else: "null" %>
+};
+window.ga_key = '<%= @config["ga_key"] %>'
+window.google_api_key = '<%= @config["google_api_key"] %>'
+window.google_client_id = '<%= @config["google_client_id"] %>'
+window.google_app_domain = '<%= @config["google_app_domain"] %>'

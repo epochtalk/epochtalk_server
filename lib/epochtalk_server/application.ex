@@ -4,14 +4,23 @@ defmodule EpochtalkServer.Application do
   @moduledoc false
 
   use Application
+  @env Mix.env()
 
   @impl true
   def start(_type, _args) do
+    # Set Environment to config
+    # Work around for dialyzer rendering @env as :dev
+    Application.put_env(:epochtalk_server, :env, @env)
     children = [
       # Start Guardian Redis Redix connection
       GuardianRedis.Redix,
+      # Start the server Redis connection
+      {Redix, host: redix_config()[:host], name: redix_config()[:name]},
       # Start the Ecto repository
       EpochtalkServer.Repo,
+      # Warm frontend_config variable (referenced by api controllers)
+      # This worker starts, does its thing and dies
+      {Task, &EpochtalkServer.Models.Configuration.warm_frontend_config/0},
       # Start the Telemetry supervisor
       EpochtalkServerWeb.Telemetry,
       # Start the PubSub system
@@ -21,6 +30,11 @@ defmodule EpochtalkServer.Application do
       # Start a worker by calling: EpochtalkServer.Worker.start_link(arg)
       # {EpochtalkServer.Worker, arg}
     ]
+
+    # don't run config_warmer during tests
+    children = if Application.get_env(:epochtalk_server, :env) == :test,
+      do: List.delete(children, {Task, &EpochtalkServer.Models.Configuration.warm_frontend_config/0}),
+      else: children
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
@@ -35,4 +49,7 @@ defmodule EpochtalkServer.Application do
     EpochtalkServerWeb.Endpoint.config_change(changed, removed)
     :ok
   end
+
+  # fetch redix config
+  defp redix_config(), do: Application.get_env(:epochtalk_server, :redix)
 end

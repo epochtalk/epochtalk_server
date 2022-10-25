@@ -2,10 +2,22 @@ defmodule EpochtalkServer.Models.Profile do
   use Ecto.Schema
   import Ecto.Changeset
   alias EpochtalkServer.Models.User
-
+  @moduledoc """
+  `Profile` model, for performing actions relating a user's profile
+  """
+  @type t :: %__MODULE__{
+    user_id: non_neg_integer | nil,
+    avatar: String.t() | nil,
+    position: String.t() | nil,
+    signature: String.t() | nil,
+    raw_signature: String.t() | nil,
+    post_count: non_neg_integer | nil,
+    fields: map() | nil,
+    last_active: NaiveDateTime.t() | nil
+  }
   @schema_prefix "users"
   schema "profiles" do
-    belongs_to :user_id, User
+    belongs_to :user, User
     field :avatar, :string
     field :position, :string
     field :signature, :string
@@ -15,8 +27,14 @@ defmodule EpochtalkServer.Models.Profile do
     field :last_active, :naive_datetime
   end
 
-  def changeset(permission, attrs \\ %{}) do
-    permission
+  ## === Changesets Functions ===
+
+  @doc """
+  Creates a generic changeset for `Profile` model
+  """
+  @spec changeset(profile :: t(), attrs :: map() | nil) :: %Ecto.Changeset{}
+  def changeset(profile, attrs \\ %{}) do
+    profile
     |> cast(attrs, [:user_id, :avatar, :position, :signature, :raw_signature, :post_count, :field, :last_active])
     |> validate_required([:user_id])
   end

@@ -8,12 +8,38 @@
 import Config
 
 config :epochtalk_server,
-  ecto_repos: [EpochtalkServer.Repo]
+  ecto_repos: [EpochtalkServer.Repo],
+  frontend_config: %{
+    frontend_url: "http://localhost:8000",
+    backend_url: "http://localhost:4000",
+    newbie_enabled: false,
+    login_required: false,
+    invite_only: false,
+    verify_registration: true,
+    post_max_length: 10_000,
+    max_image_size: 10_485_760,
+    max_avatar_size: 102_400,
+    mobile_break_width: 767,
+    ga_key: "UA-XXXXX-Y",
+    revision: nil,
+    website: %{
+      title: "Epochtalk Forums",
+      description: "Open source forum software",
+      keywords: "open source, free forum, forum software, forum",
+      logo: nil,
+      favicon: nil,
+      default_avatar: "/images/avatar.png",
+      default_avatar_shape: "circle"
+    },
+    portal: %{enabled: false, board_id: nil},
+    emailer: %{ses_mode: false, options: %{from_address: "info@epochtalk.com"}},
+    images: %{s3_mode: false, options: %{ local_host: "http://localhost:4000" }},
+    rate_limiting: %{}
+  }
 
 # Configure Guardian
 config :epochtalk_server, EpochtalkServer.Auth.Guardian,
        issuer: "EpochtalkServer",
-       # TODO: configure this at runtime through env
        secret_key: "Secret key. You can use `mix guardian.gen.secret` to get one"
 
 # Configure Guardian.DB
@@ -22,12 +48,17 @@ config :guardian, Guardian.DB,
   # schema_name: "guardian_tokens" # default
   # token_types: ["refresh_token"] # store all token types if not set
 
-# Configure GuardianRedis
+# Configure GuardianRedis (for auth)
 # (implementation of Guardian.DB storage in redis)
 config :guardian_redis, :redis,
   host: "127.0.0.1",
   port: 6379,
   pool_size: 10
+
+# Configures redix (for sessions storage)
+config :epochtalk_server, :redix,
+  host: "127.0.0.1",
+  name: :redix
 
 # Configures the endpoint
 config :epochtalk_server, EpochtalkServerWeb.Endpoint,
@@ -43,12 +74,30 @@ config :epochtalk_server, EpochtalkServerWeb.Endpoint,
 
 # Configures the mailer
 #
-# By default it uses the "Local" adapter which stores the emails
-# locally. You can see the emails in your browser, at "/dev/mailbox".
+# By default "SMTP" adapter is being used.
 #
-# For production it's recommended to configure a different adapter
-# at the `config/runtime.exs`.
-config :epochtalk_server, EpochtalkServer.Mailer, adapter: Swoosh.Adapters.Local
+# For Development `config/dev.exs` loads the "Local" adapter which allows preview
+# of sent emails at the url `/dev/mailbox`. To test SMTP in Development mode,
+# mailer configurations for adapter, credentials and other options can be
+# overriden in `config/dev.secret.exs`
+#
+# For production configurations are fetched from system environment variables.
+# Overrides for production are in `config/runtime.exs`.
+config :epochtalk_server, EpochtalkServer.Mailer,
+  adapter: Swoosh.Adapters.SMTP,
+  relay: "smtp.example.com",
+  username: "username",
+  password: "password",
+  ssl: true,
+  tls: :if_available,
+  auth: :always,
+  port: 465,
+  retries: 2,
+  no_mx_lookups: false
+  # dkim: [
+  #   s: "default", d: "domain.com",
+  #   private_key: {:pem_plain, File.read!("priv/keys/domain.private")}
+  # ]
 
 # Swoosh API client is needed for adapters other than SMTP.
 config :swoosh, :api_client, false
@@ -56,7 +105,7 @@ config :swoosh, :api_client, false
 # Configures Elixir's Logger
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",
-  metadata: [:request_id]
+  metadata: [:request_id, :remote_ip]
 
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason

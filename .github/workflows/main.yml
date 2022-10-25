@@ -47,6 +47,9 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+    needs: docker_build_job
+    name: Run tests
+    runs-on: [self-hosted, Linux, X64]
   pre_release_job:
     needs: docker_build_job
     name: Pre-Release

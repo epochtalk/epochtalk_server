@@ -62,7 +62,7 @@ jobs:
     - name: Run tests in docker container
       run: docker run --rm -e DATABASE_URL=$DATABASE_URL -e REDIS_HOST=$REDIS_HOST -e SECRET_KEY_BASE=$SECRET_KEY_BASE -e GUARDIAN_SECRET_KEY=$GUARDIAN_SECRET_KEY epochtalk/epochtalk_server mix test
       env:
-        DATABASE_URL: postgresql://postgres:postgres@postgres/epochtalk_server
+        DATABASE_URL: ecto://postgres:postgres@postgres/epochtalk_server
         REDIS_HOST: redis
         SECRET_KEY_BASE: ${{ secrets.TEST_SECRET_KEY_BASE }}
         GUARDIAN_SECRET_KEY: ${{ secrets.TEST_GUARDIAN_SECRET_KEY }}

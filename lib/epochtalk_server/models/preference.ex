@@ -1,7 +1,10 @@
 defmodule EpochtalkServer.Models.Preference do
   use Ecto.Schema
   import Ecto.Changeset
+  alias EpochtalkServer.Repo
+  alias EpochtalkServer.Models.Preference
   alias EpochtalkServer.Models.User
+
   @moduledoc """
   `Preference` model, for performing actions relating to a user's preferences
   """
@@ -48,4 +51,12 @@ defmodule EpochtalkServer.Models.Preference do
       :email_mentions, :email_messages])
     |> validate_required([:user_id])
   end
+
+  @doc """
+  Fetches `Preference` associated with a specific `User`
+  """
+  @spec by_user_id(
+    user_id :: integer
+  ) :: {:ok, preference_changeset :: Ecto.Changeset.t()} | {:error, preference_changeset :: Ecto.Changeset.t()}
+  def by_user_id(user_id) when is_integer(user_id), do: Repo.get_by(Preference, user_id: user_id)
 end

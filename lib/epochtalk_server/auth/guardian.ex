@@ -30,7 +30,7 @@ defmodule EpochtalkServer.Auth.Guardian do
       1 ->
         # session is active, populate data
         resource = %{
-          id: user_id,
+          id: String.to_integer(user_id),
           session_id: session_id,
           username: Redix.command!(:redix, ["HGET", "user:#{user_id}", "username"]),
           avatar: Redix.command!(:redix, ["HGET", "user:#{user_id}", "avatar"]),

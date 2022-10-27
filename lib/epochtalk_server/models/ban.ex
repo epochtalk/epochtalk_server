@@ -72,7 +72,7 @@ defmodule EpochtalkServer.Models.Ban do
   ## === Database Functions ===
 
   @doc """
-  Fetches `Ban` associated for a specific `User`
+  Fetches `Ban` associated with a specific `User`
   """
   @spec by_user_id(
     user_id :: integer

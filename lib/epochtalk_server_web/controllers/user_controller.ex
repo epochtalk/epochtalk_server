@@ -4,7 +4,6 @@ defmodule EpochtalkServerWeb.UserController do
   Controller For `User` related API requests
   """
   alias EpochtalkServer.Models.User
-  alias EpochtalkServer.Models.Preference
   alias EpochtalkServer.Models.Ban
   alias EpochtalkServer.Models.Invitation
   alias EpochtalkServer.Auth.Guardian

@@ -69,7 +69,7 @@ jobs:
         SECRET_KEY_BASE: ${{ secrets.TEST_SECRET_KEY_BASE }}
         GUARDIAN_SECRET_KEY: ${{ secrets.TEST_GUARDIAN_SECRET_KEY }}
   pre_release_job:
-    needs: docker_build_job
+    needs: test_job
     name: Pre-Release
     runs-on: [self-hosted, Linux, X64]
     steps:
@@ -87,7 +87,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   release_job:
-    needs: docker_build_job
+    needs: test_job
     name: Release
     runs-on: [self-hosted, Linux, X64]
     steps:

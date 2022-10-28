@@ -19,11 +19,11 @@ defmodule EpochtalkServerWeb.Router do
   scope "/api", EpochtalkServerWeb do
     pipe_through [:api, :maybe_auth, :enforce_auth]
     get "/authenticate", UserController, :authenticate
+    get "/users/preferences", PreferenceController, :preferences
   end
 
   scope "/api", EpochtalkServerWeb do
     pipe_through [:api, :maybe_auth]
-    get "/users/preferences", UserController, :preferences
     get "/register/username/:username", UserController, :username
     get "/register/email/:email", UserController, :email
     post "/register", UserController, :register

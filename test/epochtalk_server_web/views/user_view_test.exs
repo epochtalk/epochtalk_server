@@ -11,7 +11,7 @@ defmodule EpochtalkServerWeb.UserViewTest do
   alias EpochtalkServer.Models.BoardModerator
 
   # Specify that we want to use doctests:
-  doctest EpochtalkServerWeb.UserView
+  doctest UserView
 
   # this was too long to be a doctest, we still need to test with Sandbox db connection
   test "renders user.json" do

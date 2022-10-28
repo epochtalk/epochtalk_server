@@ -115,8 +115,11 @@ defmodule EpochtalkServerWeb.UserController do
   - TODO(boka): Delete users session
   """
   def logout(conn, _attrs) do
-    with {:auth, true} <- {:auth, Guardian.Plug.authenticated?(conn)},
-         conn <- Guardian.Plug.sign_out(conn) do
+    with {:auth, true} <- {:auth, Guardian.Plug.authenticated?(conn)} do
+      user = Guardian.Plug.current_resource(conn)
+      token = Guardian.Plug.current_token(conn)
+      EpochtalkServerWeb.Endpoint.broadcast("user:#{user.id}", "logout", %{ token: token})
+      Guardian.Plug.sign_out(conn)
       render(conn, "logout.json", data: %{success: true})
     else
       {:auth, false} -> ErrorHelpers.render_json_error(conn, 400, "Not logged in")

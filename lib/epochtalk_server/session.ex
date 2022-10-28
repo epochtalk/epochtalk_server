@@ -21,8 +21,7 @@ defmodule EpochtalkServer.Session do
   ) :: {:ok, user :: User.t(), encoded_token :: String.t(), conn :: Plug.Conn.t()}
   def create(%User{} = user, remember_me, conn) do
     datetime = NaiveDateTime.utc_now
-    session_id = UUID.uuid1()
-    decoded_token = %{ user_id: user.id, session_id: session_id, timestamp: datetime }
+    decoded_token = %{ user_id: user.id, timestamp: datetime }
 
     # set token expiration based on rememberMe
     ttl = if remember_me, do: {4, :weeks}, else: {1, :day}
@@ -30,6 +29,8 @@ defmodule EpochtalkServer.Session do
     # sign user in and get encoded token
     conn = Guardian.Plug.sign_in(conn, decoded_token, %{}, ttl: ttl)
     encoded_token = Guardian.Plug.current_token(conn)
+    # jti is a unique identifier for the jwt token, use it as session_id
+    %{claims: %{"jti" => session_id}} = Guardian.peek(encoded_token)
 
     # save session
     case save(user, session_id) do

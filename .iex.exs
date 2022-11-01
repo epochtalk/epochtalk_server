@@ -13,6 +13,7 @@ alias EpochtalkServer.Models.{
   Configuration,
   Invitation,
   MetadataBoard,
+  Notification,
   Permission,
   Preference,
   Profile,

@@ -10,6 +10,7 @@ defmodule EpochtalkServer.Models.Board do
   `Board` model, for performing actions relating to forum boards
   """
   @type t :: %__MODULE__{
+    id: non_neg_integer | nil,
     category: Category.t() | term(),
     name: String.t() | nil,
     slug: String.t() | nil,

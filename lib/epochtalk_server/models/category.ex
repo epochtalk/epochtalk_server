@@ -9,6 +9,7 @@ defmodule EpochtalkServer.Models.Category do
   `Category` model, for performing actions relating to forum categories
   """
   @type t :: %__MODULE__{
+    id: non_neg_integer | nil,
     name: String.t() | nil,
     view_order: non_neg_integer | nil,
     viewable_by: non_neg_integer | nil,

@@ -9,6 +9,7 @@ defmodule EpochtalkServer.Models.MetadataBoard do
   """
 
   @type t :: %__MODULE__{
+    id: non_neg_integer | nil,
     board: Board.t() | term(),
     post_count: non_neg_integer | nil,
     thread_count: non_neg_integer | nil,

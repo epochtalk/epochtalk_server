@@ -10,6 +10,7 @@ defmodule EpochtalkServer.Models.Role do
   `Role` model, for performing actions relating to user roles
   """
   @type t :: %__MODULE__{
+    id: non_neg_integer | nil,
     name: String.t() | nil,
     description: String.t() | nil,
     lookup: String.t() | nil,

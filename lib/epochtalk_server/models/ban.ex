@@ -14,6 +14,7 @@ defmodule EpochtalkServer.Models.Ban do
   @max_date ~N[9999-12-31 00:00:00.000]
 
   @type t :: %__MODULE__{
+    id: non_neg_integer | nil,
     user_id: non_neg_integer | nil,
     expiration: NaiveDateTime.t() | nil,
     created_at: NaiveDateTime.t() | nil,

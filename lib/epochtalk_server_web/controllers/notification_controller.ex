@@ -29,8 +29,12 @@ defmodule EpochtalkServerWeb.NotificationController do
   end
   def dismiss(conn, %{"type" => type}) do
     with {:auth, user} <- {:auth, Guardian.Plug.current_resource(conn)},
-         {_count, nil} <- Notification.dismiss_type_by_user_id(user.id, type),
-      do: render(conn, "dismiss.json", data: %{success: true}),
-      else: ({:auth, nil} -> ErrorHelpers.render_json_error(conn, 400, "Not logged in, cannot dismiss notification counts"))
+         {_count, nil} <- Notification.dismiss_type_by_user_id(user.id, type) do
+      render(conn, "dismiss.json", data: %{success: true})
+    else
+      {:auth, nil} -> ErrorHelpers.render_json_error(conn, 400, "Not logged in, cannot dismiss notification counts")
+      {:error, :invalid_notification_type} -> ErrorHelpers.render_json_error(conn, 400, "Cannot dismiss, invalid notification type")
+      _ -> ErrorHelpers.render_json_error(conn, 500, "Something went wrong, could not dismiss notifications")
+    end
   end
 end

@@ -20,6 +20,7 @@ alias EpochtalkServer.Models.{
   Role,
   RolePermission,
   RoleUser,
+  Thread,
   User
 }
 

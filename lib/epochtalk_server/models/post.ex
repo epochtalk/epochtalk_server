@@ -1,6 +1,8 @@
 defmodule EpochtalkServer.Models.Post do
   use Ecto.Schema
   import Ecto.Changeset
+  # alias EpochtalkServer.Repo
+  # alias EpochtalkServer.Models.Post
   alias EpochtalkServer.Models.Thread
   alias EpochtalkServer.Models.User
   @moduledoc """

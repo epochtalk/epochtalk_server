@@ -38,7 +38,7 @@ defmodule EpochtalkServer.Models.BannedAddress do
   @doc """
   Creates changeset for upsert of `BannedAddress` model
   """
-  @spec upsert_changeset(banned_address :: t(), attrs :: map() | nil) :: %Ecto.Changeset{}
+  @spec upsert_changeset(banned_address :: t(), attrs :: map() | nil) :: Ecto.Changeset.t()
   def upsert_changeset(banned_address, attrs \\ %{}) do
     now = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
     attrs = attrs
@@ -60,7 +60,7 @@ defmodule EpochtalkServer.Models.BannedAddress do
   @doc """
   Creates changeset of `BannedAddress` model with hostname information
   """
-  @spec hostname_changeset(banned_address :: t(), attrs :: map() | nil) :: %Ecto.Changeset{}
+  @spec hostname_changeset(banned_address :: t(), attrs :: map() | nil) :: Ecto.Changeset.t()
   def hostname_changeset(banned_address, attrs \\ %{}) do
     banned_address
     |> cast(attrs, [:hostname, :weight, :decay, :imported_at, :created_at, :updates])
@@ -71,7 +71,7 @@ defmodule EpochtalkServer.Models.BannedAddress do
   @doc """
   Creates changeset of `BannedAddress` model with IP information
   """
-  @spec ip_changeset(banned_address :: t(), attrs :: map() | nil) :: %Ecto.Changeset{}
+  @spec ip_changeset(banned_address :: t(), attrs :: map() | nil) :: Ecto.Changeset.t()
   def ip_changeset(banned_address, attrs \\ %{}) do
     cs_data = banned_address
     |> cast(attrs, [:ip1, :ip2, :ip3, :ip4, :weight, :decay, :imported_at, :created_at, :updates])

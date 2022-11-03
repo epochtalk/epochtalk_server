@@ -32,7 +32,7 @@ defmodule EpochtalkServer.Models.RolePermission do
   @doc """
   Creates a generic changeset for `RolePermission` model
   """
-  @spec changeset(role_permission :: t(), attrs :: map() | nil) :: %Ecto.Changeset{}
+  @spec changeset(role_permission :: t(), attrs :: map() | nil) :: Ecto.Changeset.t()
   def changeset(role_permission, attrs \\ %{}) do
     role_permission
     |> cast(attrs, [:role_id, :permission_path, :value, :modified])

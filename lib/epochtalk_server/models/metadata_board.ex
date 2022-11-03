@@ -43,7 +43,7 @@ defmodule EpochtalkServer.Models.MetadataBoard do
   @spec changeset(
     metadata_board :: t(),
     attrs :: map() | nil
-  ) :: %Ecto.Changeset{}
+  ) :: Ecto.Changeset.t()
   def changeset(metadata_board, attrs \\ %{}) do
     metadata_board
     |> cast(attrs, [:id, :board_id, :post_count, :thread_count,

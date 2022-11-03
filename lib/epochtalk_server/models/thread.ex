@@ -37,7 +37,7 @@ defmodule EpochtalkServer.Models.Thread do
   @doc """
   Create generic changeset for `Thread` model
   """
-  @spec changeset(thread :: t(), attrs :: map() | nil) :: %Ecto.Changeset{}
+  @spec changeset(thread :: t(), attrs :: map() | nil) :: Ecto.Changeset.t()
   def changeset(thread, attrs) do
     thread
     |> cast(attrs, [:id, :board_id, :locked, :sticky, :slug, :moderated, :post_count, :created_at, :imported_at, :updated_at])

@@ -41,7 +41,7 @@ defmodule EpochtalkServer.Models.Role do
   @doc """
   Create generic changeset for the `Role` model
   """
-  @spec changeset(role :: t(), attrs :: map() | nil) :: %Ecto.Changeset{}
+  @spec changeset(role :: t(), attrs :: map() | nil) :: Ecto.Changeset.t()
   def changeset(role, attrs \\ %{}) do
     role
     |> cast(attrs, [:name, :description, :lookup, :priority, :permissions])

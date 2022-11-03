@@ -48,7 +48,7 @@ defmodule EpochtalkServer.Models.Board do
   @spec changeset(
     board :: t(),
     attrs :: map() | nil
-  ) :: %Ecto.Changeset{}
+  ) :: Ecto.Changeset.t()
   def changeset(board, attrs) do
     board
     |> cast(attrs, [:id, :name, :slug, :description, :post_count, :thread_count, :viewable_by, :postable_by, :created_at, :imported_at, :updated_at, :meta])
@@ -62,7 +62,7 @@ defmodule EpochtalkServer.Models.Board do
   @doc """
   Create changeset for creation of `Board` model
   """
-  @spec create_changeset(board :: t(), attrs :: map() | nil) :: %Ecto.Changeset{}
+  @spec create_changeset(board :: t(), attrs :: map() | nil) :: Ecto.Changeset.t()
   def create_changeset(board, attrs) do
     now = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
     attrs = attrs

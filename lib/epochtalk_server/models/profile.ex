@@ -33,7 +33,7 @@ defmodule EpochtalkServer.Models.Profile do
   @doc """
   Creates a generic changeset for `Profile` model
   """
-  @spec changeset(profile :: t(), attrs :: map() | nil) :: %Ecto.Changeset{}
+  @spec changeset(profile :: t(), attrs :: map() | nil) :: Ecto.Changeset.t()
   def changeset(profile, attrs \\ %{}) do
     profile
     |> cast(attrs, [:id, :user_id, :avatar, :position, :signature, :raw_signature, :post_count, :field, :last_active])

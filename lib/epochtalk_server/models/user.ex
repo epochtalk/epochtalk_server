@@ -65,7 +65,7 @@ defmodule EpochtalkServer.Models.User do
   Creates a registration changeset for `User` model, returns an error changeset
   if validation of username, email and password do not pass.
   """
-  @spec registration_changeset(user :: t(), attrs :: map() | nil) :: %Ecto.Changeset{}
+  @spec registration_changeset(user :: t(), attrs :: map() | nil) :: Ecto.Changeset.t()
   def registration_changeset(user, attrs) do
     user
     |> cast(attrs, [:id, :email, :confirmation_token, :username, :created_at, :updated_at, :deleted, :malicious_score, :password])

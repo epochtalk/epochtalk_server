@@ -42,7 +42,7 @@ defmodule EpochtalkServer.Models.Preference do
   @doc """
   Creates a generic changeset for `Preference` model
   """
-  @spec changeset(preference :: t(), attrs :: map() | nil) :: %Ecto.Changeset{}
+  @spec changeset(preference :: t(), attrs :: map() | nil) :: Ecto.Changeset.t()
   def changeset(preference, attrs \\ %{}) do
     preference
     |> cast(attrs, [:user_id, :posts_per_page, :threads_per_page,

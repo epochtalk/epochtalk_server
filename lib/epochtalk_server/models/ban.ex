@@ -34,7 +34,7 @@ defmodule EpochtalkServer.Models.Ban do
   @doc """
   Create generic changeset for `Ban` model
   """
-  @spec changeset(ban :: t(), attrs :: map() | nil) :: %Ecto.Changeset{}
+  @spec changeset(ban :: t(), attrs :: map() | nil) :: Ecto.Changeset.t()
   def changeset(ban, attrs \\ %{}) do
     ban
     |> cast(attrs, [:id, :user_id, :expiration, :created_at, :updated_at])
@@ -44,7 +44,7 @@ defmodule EpochtalkServer.Models.Ban do
   @doc """
   Create ban changeset for `Ban` model, handles upsert of ban for banning
   """
-  @spec ban_changeset(ban :: t(), attrs :: map() | nil) :: %Ecto.Changeset{}
+  @spec ban_changeset(ban :: t(), attrs :: map() | nil) :: Ecto.Changeset.t()
   def ban_changeset(ban, attrs \\ %{}) do
     now = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
     attrs = attrs
@@ -59,7 +59,7 @@ defmodule EpochtalkServer.Models.Ban do
   @doc """
   Create unban changeset for `Ban` model, handles update of ban for unbanning
   """
-  @spec unban_changeset(ban :: t(), attrs :: map() | nil) :: %Ecto.Changeset{}
+  @spec unban_changeset(ban :: t(), attrs :: map() | nil) :: Ecto.Changeset.t()
   def unban_changeset(ban, attrs \\ %{}) do
     now = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
     attrs = attrs

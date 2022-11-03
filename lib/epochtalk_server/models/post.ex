@@ -32,13 +32,13 @@ defmodule EpochtalkServer.Models.Post do
     field :imported_at, :naive_datetime
     # field :smf_message, :map, virtual: true
   end
-  
+
   ## === Changesets Functions ===
 
   @doc """
   Create generic changeset for `Post` model
   """
-  @spec changeset(post :: t(), attrs :: map() | nil) :: %Ecto.Changeset{}
+  @spec changeset(post :: t(), attrs :: map() | nil) :: Ecto.Changeset.t()
   def changeset(post, attrs) do
     post
     |> cast(attrs, [:id, :thread_id, :user_id, :locked, :deleted, :position, :content, :metadata, :imported_at, :created_at, :updated_at])

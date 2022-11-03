@@ -37,7 +37,7 @@ defmodule EpochtalkServer.Models.Notification do
   @doc """
   Create generic changeset for `Notification` model
   """
-  @spec changeset(notification :: t(), attrs :: map() | nil) :: %Ecto.Changeset{}
+  @spec changeset(notification :: t(), attrs :: map() | nil) :: Ecto.Changeset.t()
   def changeset(notification, attrs) do
     notification
     |> cast(attrs, [:id, :sender_id, :receiver_id, :data, :viewed, :type, :created_at])

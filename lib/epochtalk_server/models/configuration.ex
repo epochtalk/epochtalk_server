@@ -26,7 +26,7 @@ defmodule EpochtalkServer.Models.Configuration do
   @spec create_changeset(
     configuration :: t(),
     attrs :: map() | nil
-  ) :: %Ecto.Changeset{}
+  ) :: Ecto.Changeset.t()
   def create_changeset(configuration, attrs \\ %{}) do
     configuration
     |> cast(attrs, [:name, :config])

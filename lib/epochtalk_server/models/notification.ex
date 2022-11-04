@@ -5,7 +5,6 @@ defmodule EpochtalkServer.Models.Notification do
   alias EpochtalkServer.Repo
   alias EpochtalkServer.Models.Notification
   alias EpochtalkServer.Models.User
-  @max_count 99
   @types %{
     message: "message",
     mention: "mention"
@@ -48,20 +47,20 @@ defmodule EpochtalkServer.Models.Notification do
   Returns `Notification` counts for a specific `User` by `id`, from the database. Used
   to display new message/mention notifications.
   """
-  @spec counts_by_user_id(user_id :: integer) :: map()
-  def counts_by_user_id(user_id) when is_integer(user_id) do
+  @spec counts_by_user_id(user_id :: non_neg_integer, max: non_neg_integer) :: map()
+  def counts_by_user_id(user_id, max: max) when is_integer(user_id) do
     query = from n in Notification,
       where: n.receiver_id == ^user_id and n.viewed == false,
-      limit: @max_count + 1
+      limit: ^max + 1
     query
-    |> Repo.one()
+    |> Repo.all()
     |> case do
-      nil -> %{ message: 0, mentions: 0 }
+      [] -> %{ message: 0, mentions: 0 }
       notifications ->
         {messages, mentions} = Enum.split_with(notifications, &(&1.type == @types.message))
         %{
-          message: (if (count = length(messages)) > @max_count, do: "#{@max_count}+", else: count),
-          mention: (if (count = length(mentions)) > @max_count, do: "#{@max_count}+", else: count)
+          message: (if (count = length(messages)) > max, do: "#{max}+", else: count),
+          mention: (if (count = length(mentions)) > max, do: "#{max}+", else: count)
         }
     end
   end

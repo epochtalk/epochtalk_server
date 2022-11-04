@@ -6,16 +6,16 @@ defmodule EpochtalkServerWeb.NotificationController do
   alias EpochtalkServer.Auth.Guardian
   alias EpochtalkServer.Models.Notification
   alias EpochtalkServerWeb.ErrorHelpers
+  alias EpochtalkServerWeb.Helpers.Validate
 
   @doc """
   Used to retrieve `Notification` counts for a specific `User`
   """
-  def counts(conn, _attrs) do
-    with {:auth, user} <- {:auth, Guardian.Plug.current_resource(conn)} do
-      render(conn, "counts.json", data: Notification.counts_by_user_id(user.id))
-    else
-      {:auth, nil} -> ErrorHelpers.render_json_error(conn, 400, "Not logged in, cannot fetch notification counts")
-    end
+  def counts(conn, attrs) do
+    with max <- Validate.optional_pos_int(attrs["max"], "max"),
+         {:auth, user} <- {:auth, Guardian.Plug.current_resource(conn)},
+      do: render(conn, "counts.json", data: Notification.counts_by_user_id(user.id, max: max || 99)),
+      else: ({:auth, nil} -> ErrorHelpers.render_json_error(conn, 400, "Not logged in, cannot fetch notification counts"))
   end
 
   @doc """

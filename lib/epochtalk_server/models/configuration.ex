@@ -106,7 +106,6 @@ defmodule EpochtalkServer.Models.Configuration do
   defp set_git_revision() do
     # tag
     {tag, _} = System.cmd("git", ["tag", "--points-at", "HEAD", "v[0-9]*"])
-    IO.inspect tag
     [tag | _] = tag |> String.split("\n")
 
     # revision

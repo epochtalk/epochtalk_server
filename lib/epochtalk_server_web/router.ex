@@ -20,6 +20,7 @@ defmodule EpochtalkServerWeb.Router do
     pipe_through [:api, :maybe_auth, :enforce_auth]
     get "/authenticate", UserController, :authenticate
     get "/users/preferences", PreferenceController, :preferences
+    get "/mentions", MentionController, :page
     get "/notifications/counts", NotificationController, :counts
     post "/notifications/dismiss", NotificationController, :dismiss
   end

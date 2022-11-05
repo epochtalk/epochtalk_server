@@ -48,22 +48,23 @@ defmodule EpochtalkServer.Models.Mention do
 
   @doc """
   Page `Mention` models by for a specific `User`
-  ### Valid Attrs
-  | name       | type              | details                                             |
-  | ---------- | ----------------- | --------------------------------------------------- |
-  | `page`     | `non_neg_integer` | the page to return                                  |
-  | `limit`    | `non_neg_integer` | records per page to return                          |
-  | `extended` | `boolean`         | returns board and post details with mention if true |
+  ### Valid Options
+  | name        | type              | details                                             |
+  | ----------- | ----------------- | --------------------------------------------------- |
+  | `:per_page` | `non_neg_integer` | records per page to return                          |
+  | `:extended` | `boolean`         | returns board and post details with mention if true |
   """
-  @spec page_by_user_id(user_id :: integer, attrs :: map() | nil) :: {:ok, mentions :: [t()] | [], pagination_data :: map()}
-  def page_by_user_id(user_id, attrs \\ %{}) do
-    page_query(user_id, extended: attrs["extended"] == "true")
-    |> Pagination.page_simple(attrs["page"], per_page: attrs["limit"])
+  @spec page_by_user_id(user_id :: non_neg_integer, page :: non_neg_integer, per_page: non_neg_integer, extended: boolean) :: {:ok, mentions :: [t()] | [], pagination_data :: map()}
+  def page_by_user_id(user_id, page \\ 1, opts \\ []) do
+    page_query(user_id, opts[:extended])
+    |> Pagination.page_simple(page, per_page: opts[:per_page])
   end
 
   ## === Helper Functions ===
 
-  defp page_query(user_id, extended: false) do # doesn't load board association
+  # doesn't load board association
+  defp page_query(user_id, nil = _extended), do: page_query(user_id, false)
+  defp page_query(user_id, false = _extended) do
     from m in Mention,
       where: m.mentionee_id == ^user_id,
       left_join: notification in Notification,
@@ -76,7 +77,7 @@ defmodule EpochtalkServer.Models.Mention do
       select_merge: %{notification_id: notification.id, viewed: notification.viewed}, # set virtual field from notification join
       preload: [mentioner: {mentioner, profile: profile}, post: post, thread: thread]
   end
-  defp page_query(user_id, extended: true) do # loads board association on thread
+  defp page_query(user_id, true = _extended) do # loads board association on thread
     from m in Mention,
       where: m.mentionee_id == ^user_id,
       left_join: notification in Notification,
@@ -90,49 +91,4 @@ defmodule EpochtalkServer.Models.Mention do
       select_merge: %{notification_id: notification.id, viewed: notification.viewed}, # set virtual field from notification join
       preload: [mentioner: {mentioner, profile: profile}, post: post, thread: {thread, board: board}]
   end
-
-
-  # def page_by_user_id(user_id, attrs) do
-  #   limit = String.to_integer(attrs["limit"] || "25")
-  #   page = String.to_integer(attrs["page"] || "1")
-  #   extended = String.to_existing_atom(attrs["extended"] || "false")
-  #   options = [
-  #     limit: limit + 1, # query one extra, to see if there's a next page
-  #     offset: (page * limit) - limit,
-  #     extended: extended
-  #   ]
-  #   query = page_query(user_id, options)
-  #   mentions = Repo.all(query, prefix: "public")
-  #   next = length(mentions) > limit # check if theres a next page
-  #   mentions = if next, do: mentions |> Enum.reverse() |> tl() |> Enum.reverse(), else: mentions
-  #   {:ok, mentions, %{
-  #     next: next,
-  #     prev: page > 1,
-  #     page: page,
-  #     limit: limit,
-  #     extended: extended
-  #   }}
-  # end
-
-  # def page_by_user_id(user_id, options \\ []) do
-  #   page = Keyword.get(options, :page, @defaults.page)
-  #   limit = Keyword.get(options, :limit, @defaults.limit) + 1
-  #   offset = (page * limit) - limit
-  #   extended = Keyword.get(options, :extended, @defaults.extended)
-  #   query = Mention
-  #     |> where([m], m.mentionee_id == ^user_id)
-  #     |> join(:left, [m], mentioner in assoc(m, :mentioner))
-  #     |> join(:left, [m], post in assoc(m, :post))
-  #     |> join(:left, [m], thread in assoc(m, :thread))
-  #     |> order_by(desc: :created_at)
-  #     |> limit(^limit)
-  #     |> offset(^offset)
-  #   query = if extended do
-  #       join(query, :left, [thread], board in assoc(thread, :board))
-  #       |> preload([m, mentioner, post, thread, board], [mentioner: mentioner, post: post, thread: {thread, board: board}])
-  #     else
-  #       preload(query, [m, mentioner, post, thread], [mentioner: mentioner, post: post, thread: thread])
-  #     end
-  #   Repo.all(query, prefix: "public")
-  # end
 end

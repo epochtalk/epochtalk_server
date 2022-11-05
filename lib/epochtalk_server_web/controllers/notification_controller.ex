@@ -12,7 +12,7 @@ defmodule EpochtalkServerWeb.NotificationController do
   Used to retrieve `Notification` counts for a specific `User`
   """
   def counts(conn, attrs) do
-    with max <- Validate.optional_pos_int(attrs["max"], "max"),
+    with max <- Validate.cast(attrs, "max", :integer, min: 1),
          {:auth, user} <- {:auth, Guardian.Plug.current_resource(conn)},
       do: render(conn, "counts.json", data: Notification.counts_by_user_id(user.id, max: max || 99)),
       else: ({:auth, nil} -> ErrorHelpers.render_json_error(conn, 400, "Not logged in, cannot fetch notification counts"))

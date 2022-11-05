@@ -26,12 +26,16 @@ defmodule EpochtalkServerWeb.Helpers.Pagination do
   @spec page_simple(query :: Ecto.Queryable.t(), page :: integer | String.t() | nil, per_page: integer | String.t() | nil) :: {:ok, list :: [term()] | [], pagination_data :: map()}
   def page_simple(query, nil, per_page: nil),
     do: page_simple(query, 1, per_page: 25)
+  def page_simple(query, page, per_page: nil) when is_integer(page),
+    do: page_simple(query, page, per_page: 25)
+  def page_simple(query, nil, per_page: per_page) when is_integer(per_page),
+    do: page_simple(query, 1, per_page: per_page)
   def page_simple(query, nil, per_page: per_page) when is_binary(per_page),
-    do: page_simple(query, 1, per_page: Validate.optional_pos_int(per_page, "limit"))
+    do: page_simple(query, 1, per_page: Validate.cast_str(per_page, :integer, key: "limit", min: 1))
   def page_simple(query, page, per_page: nil) when is_binary(page),
-    do: page_simple(query, Validate.optional_pos_int(page, "page"), per_page: 25)
+    do: page_simple(query, Validate.cast_str(page, :integer, key: "page", min: 1), per_page: 25)
   def page_simple(query, page, per_page: per_page) when is_binary(page) and is_binary(per_page),
-    do: page_simple(query, Validate.optional_pos_int(page, "page"), per_page: Validate.optional_pos_int(per_page, "limit"))
+    do: page_simple(query, Validate.cast_str(page, :integer, key: "page", min: 1), per_page: Validate.cast_str(per_page, :integer, key: "limit", min: 1))
   def page_simple(query, page, per_page: per_page) do
     result = query
       |> limit(^per_page+1) # query one extra to see if there's a next page

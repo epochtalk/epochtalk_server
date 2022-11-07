@@ -6,10 +6,10 @@ import Config
 # to provide built-in test partitioning in CI environment.
 # Run `mix help test` for more information.
 config :epochtalk_server, EpochtalkServer.Repo,
-  username: System.get_env("DATABASE_USER") || "postgres",
-  password: System.get_env("DATABASE_PASSWORD") || "postgres",
-  hostname: System.get_env("DATABASE_HOST") || "localhost",
-  database: (System.get_env("DATABASE_NAME") || "epochtalk_server_test") <> "#{System.get_env("MIX_TEST_PARTITION")}",
+  username: "postgres",
+  password: "postgres",
+  hostname: "localhost",
+  database: "epochtalk_server_test#{System.get_env("MIX_TEST_PARTITION")}",
   pool: Ecto.Adapters.SQL.Sandbox,
   pool_size: 10
 

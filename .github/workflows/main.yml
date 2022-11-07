@@ -21,7 +21,7 @@ jobs:
   docker_build_job:
     needs: build_job
     name: Docker Build
-    runs-on: [self-hosted, Linux, X64]
+    runs-on: ubuntu-latest
     steps:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
@@ -58,7 +58,7 @@ jobs:
           --health-retries 5
     needs: docker_build_job
     name: Run tests
-    runs-on: [self-hosted, Linux, X64]
+    runs-on: ubuntu-latest
     steps:
     - name: Run tests in docker container
       run: docker run --rm -e MIX_ENV=test -e DATABASE_USER=$DATABASE_USER -e DATABASE_PASSWORD=$DATABASE_PASSWORD -e DATABASE_NAME=$DATABASE_NAME -e DATABASE_HOST=$DATABASE_HOST -e REDIS_HOST=$REDIS_HOST -e SECRET_KEY_BASE=$SECRET_KEY_BASE -e GUARDIAN_SECRET_KEY=$GUARDIAN_SECRET_KEY epochtalk/epochtalk_server mix test
@@ -73,7 +73,7 @@ jobs:
   pre_release_job:
     needs: test_job
     name: Pre-Release
-    runs-on: [self-hosted, Linux, X64]
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v3.1.0
@@ -91,7 +91,7 @@ jobs:
   release_job:
     needs: test_job
     name: Release
-    runs-on: [self-hosted, Linux, X64]
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v3.1.0

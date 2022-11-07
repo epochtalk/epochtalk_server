@@ -9,7 +9,7 @@ on:
 jobs:
   build_job:
     name: Build
-    runs-on: [self-hosted, Linux, X64]
+    runs-on: ubuntu-latest
     steps:
       - name: Get branch name
         id: branch-name

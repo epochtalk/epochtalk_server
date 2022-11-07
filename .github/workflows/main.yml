@@ -103,12 +103,6 @@ jobs:
           key: ${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-${{ hashFiles('mix.lock') }}
       - name: Run tests
         run: mix test
-        env:
-          DATABASE_USER: postgres
-          DATABASE_PASSWORD: postgres
-          DATABASE_NAME: epochtalk_server
-          DATABASE_HOST: postgres
-          REDIS_HOST: redis
   pre_release_job:
     needs: test_job
     name: Pre-Release

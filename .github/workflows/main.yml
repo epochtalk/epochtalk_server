@@ -19,22 +19,6 @@ jobs:
         with:
           ref: ${{ github.event.client_payload.branch }}
   docker_build_job:
-    needs: build_job
-    name: Docker Build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3.1.0
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-      - name: Build and push Docker images
-        uses: docker/build-push-action@v3.2.0
-        with:
-          context: .
-          push: false
-          load: true
-          tags: epochtalk/epochtalk_server:latest
-  test_job:
     services:
       postgres:
         image: postgres:14.2
@@ -58,20 +42,31 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-    needs: docker_build_job
-    name: Run tests
+    needs: build_job
+    name: Docker Build
     runs-on: ubuntu-latest
     steps:
-    - name: Run tests in docker container
-      run: docker run --rm -e MIX_ENV=test -e DATABASE_USER=$DATABASE_USER -e DATABASE_PASSWORD=$DATABASE_PASSWORD -e DATABASE_NAME=$DATABASE_NAME -e DATABASE_HOST=$DATABASE_HOST -e REDIS_HOST=$REDIS_HOST -e SECRET_KEY_BASE=$SECRET_KEY_BASE -e GUARDIAN_SECRET_KEY=$GUARDIAN_SECRET_KEY epochtalk/epochtalk_server mix test
-      env:
-        DATABASE_USER: postgres
-        DATABASE_PASSWORD: postgres
-        DATABASE_NAME: epochtalk_server
-        DATABASE_HOST: postgres
-        REDIS_HOST: redis
-        SECRET_KEY_BASE: ${{ secrets.TEST_SECRET_KEY_BASE }}
-        GUARDIAN_SECRET_KEY: ${{ secrets.TEST_GUARDIAN_SECRET_KEY }}
+      - name: Checkout
+        uses: actions/checkout@v3.1.0
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Build and push Docker images
+        uses: docker/build-push-action@v3.2.0
+        with:
+          context: .
+          push: false
+          load: true
+          tags: epochtalk/epochtalk_server:latest
+      - name: Run tests in docker container
+        run: docker run --rm -e MIX_ENV=test -e DATABASE_USER=$DATABASE_USER -e DATABASE_PASSWORD=$DATABASE_PASSWORD -e DATABASE_NAME=$DATABASE_NAME -e DATABASE_HOST=$DATABASE_HOST -e REDIS_HOST=$REDIS_HOST -e SECRET_KEY_BASE=$SECRET_KEY_BASE -e GUARDIAN_SECRET_KEY=$GUARDIAN_SECRET_KEY epochtalk/epochtalk_server mix test
+        env:
+          DATABASE_USER: postgres
+          DATABASE_PASSWORD: postgres
+          DATABASE_NAME: epochtalk_server
+          DATABASE_HOST: postgres
+          REDIS_HOST: redis
+          SECRET_KEY_BASE: ${{ secrets.TEST_SECRET_KEY_BASE }}
+          GUARDIAN_SECRET_KEY: ${{ secrets.TEST_GUARDIAN_SECRET_KEY }}
   pre_release_job:
     needs: test_job
     name: Pre-Release

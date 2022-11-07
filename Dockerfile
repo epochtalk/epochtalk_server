@@ -10,8 +10,8 @@ RUN mix deps.get
 # enable configuration by environment
 COPY config/docker.secret.exs config/prod.secret.exs
 
-# compile for testing
-ENV MIX_ENV=test
+# compile for production
+ENV MIX_ENV=prod
 RUN mix compile
 
 CMD until mix ecto.setup; do sleep 1; done

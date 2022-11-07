@@ -28,11 +28,10 @@ jobs:
       - name: Build and push Docker images
         uses: docker/build-push-action@v3.2.0
         with:
+          context: .
           push: false
           load: true
           tags: epochtalk/epochtalk_server:latest
-          cache-from: type=registry,ref=epochtalk/epochtalk_server:latest
-          cache-to: type=inline
   test_job:
     services:
       postgres:

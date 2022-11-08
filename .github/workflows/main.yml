@@ -1,4 +1,4 @@
-name: Build-ECR
+name: CI test and build
 
 on:
   push:

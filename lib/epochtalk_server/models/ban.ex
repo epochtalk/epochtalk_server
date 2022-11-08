@@ -1,5 +1,6 @@
 defmodule EpochtalkServer.Models.Ban do
   use Ecto.Schema
+  require Logger
   import Ecto.Changeset
   alias EpochtalkServer.Repo
   alias EpochtalkServer.Models.User
@@ -101,7 +102,7 @@ defmodule EpochtalkServer.Models.Ban do
       {:ok, ban_changeset} -> {:ok, ban_changeset}
       {:error, err} -> # print error, return error atom
         # TODO(akinsey): handle in logger (telemetry possibly)
-        IO.inspect err
+        Logger.error(inspect(err))
         {:error, :ban_error}
     end
   end
@@ -151,7 +152,7 @@ defmodule EpochtalkServer.Models.Ban do
     |> case do
       {:ok, ban_changeset} -> {:ok, ban_changeset}
       {:error, err} -> # print error, return error atom
-        IO.inspect err
+        Logger.error(inspect(err))
         {:error, :unban_error}
     end
   end

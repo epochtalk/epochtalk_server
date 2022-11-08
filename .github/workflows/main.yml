@@ -5,8 +5,7 @@ on:
     branches:
       - github-actions
   pull_request:
-    types:
-      - [opened, closed]
+    types: [opened, closed]
     branches:
       - main
 

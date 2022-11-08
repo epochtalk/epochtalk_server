@@ -45,8 +45,6 @@ jobs:
           mix local.hex --force
           mix deps.get
           mix deps.compile
-        env:
-          MIX_ENV: test
   test_job:
     needs: dependencies
     name: Run tests

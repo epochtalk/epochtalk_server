@@ -74,8 +74,7 @@ jobs:
             deps
             _build
           key: ${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-${{ hashFiles('mix.lock') }}
-      # TODO(boka): enable formatter
-      # - run: mix format --check-formatted
+      - run: mix format --check-formatted
       - run: mix credo || ret=$?; if [ $ret != 2 ]; then exit $ret; fi
       - run: mix dialyzer --no-check --ignore-exit-status
   test_job:

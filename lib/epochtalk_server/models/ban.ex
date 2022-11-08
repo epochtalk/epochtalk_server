@@ -14,6 +14,7 @@ defmodule EpochtalkServer.Models.Ban do
   @max_date ~N[9999-12-31 00:00:00.000]
 
   @type t :: %__MODULE__{
+    id: non_neg_integer | nil,
     user_id: non_neg_integer | nil,
     expiration: NaiveDateTime.t() | nil,
     created_at: NaiveDateTime.t() | nil,
@@ -33,7 +34,7 @@ defmodule EpochtalkServer.Models.Ban do
   @doc """
   Create generic changeset for `Ban` model
   """
-  @spec changeset(ban :: t(), attrs :: map() | nil) :: %Ecto.Changeset{}
+  @spec changeset(ban :: t(), attrs :: map() | nil) :: Ecto.Changeset.t()
   def changeset(ban, attrs \\ %{}) do
     ban
     |> cast(attrs, [:id, :user_id, :expiration, :created_at, :updated_at])
@@ -43,7 +44,7 @@ defmodule EpochtalkServer.Models.Ban do
   @doc """
   Create ban changeset for `Ban` model, handles upsert of ban for banning
   """
-  @spec ban_changeset(ban :: t(), attrs :: map() | nil) :: %Ecto.Changeset{}
+  @spec ban_changeset(ban :: t(), attrs :: map() | nil) :: Ecto.Changeset.t()
   def ban_changeset(ban, attrs \\ %{}) do
     now = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
     attrs = attrs
@@ -58,7 +59,7 @@ defmodule EpochtalkServer.Models.Ban do
   @doc """
   Create unban changeset for `Ban` model, handles update of ban for unbanning
   """
-  @spec unban_changeset(ban :: t(), attrs :: map() | nil) :: %Ecto.Changeset{}
+  @spec unban_changeset(ban :: t(), attrs :: map() | nil) :: Ecto.Changeset.t()
   def unban_changeset(ban, attrs \\ %{}) do
     now = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
     attrs = attrs
@@ -72,7 +73,7 @@ defmodule EpochtalkServer.Models.Ban do
   ## === Database Functions ===
 
   @doc """
-  Fetches `Ban` associated for a specific `User`
+  Fetches `Ban` associated with a specific `User`
   """
   @spec by_user_id(
     user_id :: integer
@@ -121,7 +122,7 @@ defmodule EpochtalkServer.Models.Ban do
     user :: User.t(),
     expiration :: Calendar.naive_datetime() | nil
   ) :: {:ok, user_changeset :: Ecto.Changeset.t()} | {:error, :ban_error}
-  def ban(%User{ id: id} = user, expiration) do
+  def ban(%User{id: id} = user, expiration) do
     case ban_by_user_id(id, expiration) do
       {:ok, _ban_info} -> # successful ban, update roles/ban info on user
         user = user
@@ -144,7 +145,7 @@ defmodule EpochtalkServer.Models.Ban do
       User.clear_malicious_score_by_id(user_id) # clear user malicious score
       case Repo.get_by(Ban, user_id: user_id) do
         nil -> {:ok, nil}
-        cs -> Repo.update!(unban_changeset(cs, %{ user_id: user_id }))
+        cs -> Repo.update!(unban_changeset(cs, %{user_id: user_id}))
       end # unban the user
     end)
     |> case do

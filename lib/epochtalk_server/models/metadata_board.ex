@@ -9,6 +9,7 @@ defmodule EpochtalkServer.Models.MetadataBoard do
   """
 
   @type t :: %__MODULE__{
+    id: non_neg_integer | nil,
     board: Board.t() | term(),
     post_count: non_neg_integer | nil,
     thread_count: non_neg_integer | nil,
@@ -42,7 +43,7 @@ defmodule EpochtalkServer.Models.MetadataBoard do
   @spec changeset(
     metadata_board :: t(),
     attrs :: map() | nil
-  ) :: %Ecto.Changeset{}
+  ) :: Ecto.Changeset.t()
   def changeset(metadata_board, attrs \\ %{}) do
     metadata_board
     |> cast(attrs, [:id, :board_id, :post_count, :thread_count,

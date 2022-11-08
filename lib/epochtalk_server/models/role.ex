@@ -10,6 +10,7 @@ defmodule EpochtalkServer.Models.Role do
   `Role` model, for performing actions relating to user roles
   """
   @type t :: %__MODULE__{
+    id: non_neg_integer | nil,
     name: String.t() | nil,
     description: String.t() | nil,
     lookup: String.t() | nil,
@@ -40,7 +41,7 @@ defmodule EpochtalkServer.Models.Role do
   @doc """
   Create generic changeset for the `Role` model
   """
-  @spec changeset(role :: t(), attrs :: map() | nil) :: %Ecto.Changeset{}
+  @spec changeset(role :: t(), attrs :: map() | nil) :: Ecto.Changeset.t()
   def changeset(role, attrs \\ %{}) do
     role
     |> cast(attrs, [:name, :description, :lookup, :priority, :permissions])
@@ -70,10 +71,15 @@ defmodule EpochtalkServer.Models.Role do
   def get_newbie_role_id(), do: Repo.one(from(r in Role, select: r.id, where: r.lookup == "newbie"))
 
   @doc """
-  Returns default `Role`, for base installation this is the `user` role
+  Returns default `Role`, for base installation this is the `user` role, if `:epochtalk_server[:frontend_config]["newbie_enabled"]`
+  configuration is set to true, then `newbie` is the default role.
   """
   @spec get_default() :: t() | nil
-  def get_default(), do: by_lookup("user")
+  def get_default() do
+    config = Application.get_env(:epochtalk_server, :frontend_config)
+    newbie_enabled = config["newbie_enabled"]
+    by_lookup(if newbie_enabled, do: "newbie", else: "user")
+  end
 
   @doc """
   Returns a `Role` or list of roles, for specified lookup(s)
@@ -122,7 +128,7 @@ defmodule EpochtalkServer.Models.Role do
   def set_permissions(id, permissions) do
     Role
     |> Repo.get(id)
-    |> change(%{ permissions: permissions })
+    |> change(%{permissions: permissions})
     |> Repo.update
   end
 
@@ -164,8 +170,13 @@ defmodule EpochtalkServer.Models.Role do
   Takes in list of user's roles, and returns an xored map of all `Role` permissions
   """
   @spec get_masked_permissions(roles :: [t()]) :: map()
-  def get_masked_permissions(roles) when is_list(roles), do: Enum.reduce(roles, %{}, &mask_permissions(&2, &1))
-
+  def get_masked_permissions(roles) when is_list(roles) do
+    masked_role = Enum.reduce(roles, %{}, &mask_permissions(&2, &1))
+    masked_role.permissions
+    |> Map.put(:highlight_color, masked_role.highlight_color)
+    |> Map.put(:priority_restrictions, masked_role.priority_restrictions)
+    |> Map.put(:priority, masked_role.priority)
+  end
   ## === Private Helper Functions ===
 
   defp mask_permissions(target, source) do
@@ -174,24 +185,36 @@ defmodule EpochtalkServer.Models.Role do
     target_is_lesser_role = !Map.get(target, :priority) or target.priority > source.priority
     Enum.reduce(filtered_source_keys, %{}, fn key, acc ->
       case key do
-        :priority_restrictions -> # merge priority restrictions
-          source_pr = source.priority_restrictions
-          if target_is_lesser_role and !!source_pr and length(source_pr),
-            do: Map.put(acc, :priority_restrictions, source_pr),
-            else: Map.put(acc, :priority_restrictions, Map.get(target, :priority_restrictions))
-        :permissions -> # merge permissions
-          target_permissions = if p = Map.get(target, key), do: p, else: %{}
-          Map.put(acc, key, deep_merge(target_permissions, Map.get(source, key)))
-        key when key in [:priority, :highlight_color] -> # merge priority/highlight_color
-          if target_is_lesser_role, do: Map.put(acc, key, Map.get(source, key)), else: Map.put(acc, key, Map.get(target, key))
+        :priority_restrictions -> merge_priority_restrictions(acc, target, source, target_is_lesser_role)
+        :permissions -> merge_permissions(acc, target, source)
+        :priority -> merge_key(:priority, acc, target, source, target_is_lesser_role)
+        :highlight_color -> merge_key(:highlight_color, acc, target, source, target_is_lesser_role)
       end
     end)
+  end
+
+  defp merge_priority_restrictions(acc, target, source, target_is_lesser_role) do
+    source_pr = source.priority_restrictions
+    if target_is_lesser_role and !!source_pr and length(source_pr),
+      do: Map.put(acc, :priority_restrictions, source_pr),
+      else: Map.put(acc, :priority_restrictions, Map.get(target, :priority_restrictions))
+  end
+
+  defp merge_permissions(acc, target, source) do
+    target_permissions = if p = Map.get(target, :permissions), do: p, else: %{}
+    Map.put(acc, :permissions, deep_merge(target_permissions, Map.get(source, :permissions)))
+  end
+
+  defp merge_key(key, acc, target, source, target_is_lesser_role) do
+    if target_is_lesser_role,
+      do: Map.put(acc, key, Map.get(source, key)),
+      else: Map.put(acc, key, Map.get(target, key))
   end
 
   defp deep_merge(left, right), do: Map.merge(left, right, &deep_resolve/3)
   # Key exists in both maps, and both values are maps as well.
   # These can be merged recursively.
-  defp deep_resolve(_key, left = %{}, right = %{}), do: deep_merge(left, right)
+  defp deep_resolve(_key, %{} = left, %{} = right), do: deep_merge(left, right)
   # Key exists in both maps, but at least one of the values is
   # NOT a map. We fall back to standard merge behavior, preferring
   # the value on the right.

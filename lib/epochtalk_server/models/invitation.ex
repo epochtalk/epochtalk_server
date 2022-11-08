@@ -25,7 +25,7 @@ defmodule EpochtalkServer.Models.Invitation do
   @doc """
   Create changeset for inserting a new `Invitation` model
   """
-  @spec create_changeset(invitation :: t(), attrs :: map() | nil) :: %Ecto.Changeset{}
+  @spec create_changeset(invitation :: t(), attrs :: map() | nil) :: Ecto.Changeset.t()
   def create_changeset(invitation, attrs \\ %{}) do
     now = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
     attrs = attrs

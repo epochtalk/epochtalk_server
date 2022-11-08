@@ -65,10 +65,10 @@ defmodule EpochtalkServer.Models.User do
   Creates a registration changeset for `User` model, returns an error changeset
   if validation of username, email and password do not pass.
   """
-  @spec registration_changeset(user :: t(), attrs :: map() | nil) :: %Ecto.Changeset{}
+  @spec registration_changeset(user :: t(), attrs :: map() | nil) :: Ecto.Changeset.t()
   def registration_changeset(user, attrs) do
     user
-    |> cast(attrs, [:id, :email, :username, :created_at, :updated_at, :deleted, :malicious_score, :password])
+    |> cast(attrs, [:id, :email, :confirmation_token, :username, :created_at, :updated_at, :deleted, :malicious_score, :password])
     |> unique_constraint(:id, name: :users_pkey)
     |> validate_username()
     |> validate_email()
@@ -176,7 +176,7 @@ defmodule EpochtalkServer.Models.User do
 
   ## === Private Helper Functions ===
   # sets malicious score of a user, outputs user with updated malicious score
-  defp set_malicious_score(%User{ id: id } = user, malicious_score) do
+  defp set_malicious_score(%User{id: id} = user, malicious_score) do
     set_malicious_score_by_id(id, malicious_score)
     if malicious_score != nil,
       do: user |> Map.put(:malicious_score, malicious_score),

@@ -32,7 +32,7 @@ defmodule EpochtalkServer.Models.RolePermission do
   @doc """
   Creates a generic changeset for `RolePermission` model
   """
-  @spec changeset(role_permission :: t(), attrs :: map() | nil) :: %Ecto.Changeset{}
+  @spec changeset(role_permission :: t(), attrs :: map() | nil) :: Ecto.Changeset.t()
   def changeset(role_permission, attrs \\ %{}) do
     role_permission
     |> cast(attrs, [:role_id, :permission_path, :value, :modified])
@@ -104,12 +104,12 @@ defmodule EpochtalkServer.Models.RolePermission do
 
   For server-side role-loading use, only runs if roles permissions table is currently empty
   """
-  @spec maybe_init!() :: [%RolePermission{}] | nil
+  @spec maybe_init!() :: [t()] | nil
   def maybe_init!() do
     if Repo.one(from rp in RolePermission, select: count(rp.value)) == 0, do: Enum.each(Role.all, fn role ->
       Enum.each(Permission.all, fn permission ->
         %RolePermission{}
-        |> changeset(%{ role_id: role.id, permission_path: permission.path, value: false, modified: false })
+        |> changeset(%{role_id: role.id, permission_path: permission.path, value: false, modified: false})
         |> Repo.insert!
       end)
     end)

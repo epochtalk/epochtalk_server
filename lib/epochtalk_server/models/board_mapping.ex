@@ -28,7 +28,7 @@ defmodule EpochtalkServer.Models.BoardMapping do
   @doc """
   Create generic changeset for `BoardMapping` model
   """
-  @spec changeset(board_mapping :: t(), attrs :: map() | nil) :: %Ecto.Changeset{}
+  @spec changeset(board_mapping :: t(), attrs :: map() | nil) :: Ecto.Changeset.t()
   def changeset(board_mapping, attrs) do
     board_mapping
     |> cast(attrs, [:board_id, :parent_id, :category_id, :view_order])

@@ -9,6 +9,7 @@ defmodule EpochtalkServer.Models.Category do
   `Category` model, for performing actions relating to forum categories
   """
   @type t :: %__MODULE__{
+    id: non_neg_integer | nil,
     name: String.t() | nil,
     view_order: non_neg_integer | nil,
     viewable_by: non_neg_integer | nil,
@@ -36,7 +37,7 @@ defmodule EpochtalkServer.Models.Category do
   @doc """
   Create generic changeset for `Category` model
   """
-  @spec changeset(category :: t(), attrs :: map() | nil) :: %Ecto.Changeset{}
+  @spec changeset(category :: t(), attrs :: map() | nil) :: Ecto.Changeset.t()
   def changeset(category, attrs) do
     category
     |> cast(attrs, [:id, :name, :view_order, :viewable_by, :postable_by, :created_at, :imported_at, :updated_at, :meta])
@@ -46,7 +47,7 @@ defmodule EpochtalkServer.Models.Category do
   @doc """
   Creates changeset for inserting a new `Category` model
   """
-  @spec create_changeset(category :: t(), attrs :: map() | nil) :: %Ecto.Changeset{}
+  @spec create_changeset(category :: t(), attrs :: map() | nil) :: Ecto.Changeset.t()
   def create_changeset(category, attrs) do
     now = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
     attrs = attrs
@@ -59,7 +60,7 @@ defmodule EpochtalkServer.Models.Category do
   @doc """
   Creates changeset for updating an existing `Category` model
   """
-  @spec update_for_board_mapping_changeset(category :: t(), attrs :: map() | nil) :: %Ecto.Changeset{}
+  @spec update_for_board_mapping_changeset(category :: t(), attrs :: map() | nil) :: Ecto.Changeset.t()
   def update_for_board_mapping_changeset(category, attrs) do
     category
     |> cast(attrs, [:id, :name, :view_order, :viewable_by])
@@ -80,9 +81,9 @@ defmodule EpochtalkServer.Models.Category do
   @doc """
   Updates an existing `Category` in the database, used by board mapping to recategorize boards
   """
-  @spec update_for_board_mapping(category_map :: %{ id: id :: integer }) :: {:ok, category :: t()} | {:error, Ecto.Changeset.t()}
-  def update_for_board_mapping(%{ id: id } = category_map) do
-    %Category{ id: id }
+  @spec update_for_board_mapping(category_map :: %{id: id :: integer}) :: {:ok, category :: t()} | {:error, Ecto.Changeset.t()}
+  def update_for_board_mapping(%{id: id} = category_map) do
+    %Category{id: id}
     |> update_for_board_mapping_changeset(category_map)
     |> Repo.update
   end

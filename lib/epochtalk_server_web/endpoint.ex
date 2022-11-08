@@ -8,6 +8,10 @@ defmodule EpochtalkServerWeb.Endpoint do
   # cors configuration
   plug Corsica, origins: "*", allow_headers: :all
 
+  socket "/socket", EpochtalkServerWeb.UserSocket,
+    websocket: true,
+    longpoll: false
+
   # socket "/live", Phoenix.LiveView.Socket, websocket: [connect_info: [session: @session_options]]
 
   # Serve at "/" the static files from "priv/static" directory.

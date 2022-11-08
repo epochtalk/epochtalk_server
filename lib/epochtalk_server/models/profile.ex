@@ -6,6 +6,7 @@ defmodule EpochtalkServer.Models.Profile do
   `Profile` model, for performing actions relating a user's profile
   """
   @type t :: %__MODULE__{
+    id: non_neg_integer | nil,
     user_id: non_neg_integer | nil,
     avatar: String.t() | nil,
     position: String.t() | nil,
@@ -32,10 +33,10 @@ defmodule EpochtalkServer.Models.Profile do
   @doc """
   Creates a generic changeset for `Profile` model
   """
-  @spec changeset(profile :: t(), attrs :: map() | nil) :: %Ecto.Changeset{}
+  @spec changeset(profile :: t(), attrs :: map() | nil) :: Ecto.Changeset.t()
   def changeset(profile, attrs \\ %{}) do
     profile
-    |> cast(attrs, [:user_id, :avatar, :position, :signature, :raw_signature, :post_count, :field, :last_active])
-    |> validate_required([:user_id])
+    |> cast(attrs, [:id, :user_id, :avatar, :position, :signature, :raw_signature, :post_count, :field, :last_active])
+    |> validate_required([:id, :user_id])
   end
 end

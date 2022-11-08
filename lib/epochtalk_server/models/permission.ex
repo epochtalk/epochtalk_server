@@ -20,7 +20,7 @@ defmodule EpochtalkServer.Models.Permission do
   @doc """
   Creates a generic changeset for `Permission` model
   """
-  @spec changeset(permission :: t(), attrs :: map() | nil) :: %Ecto.Changeset{}
+  @spec changeset(permission :: t(), attrs :: map() | nil) :: Ecto.Changeset.t()
   def changeset(permission, attrs \\ %{}) do
     permission
     |> cast(attrs, [:path])

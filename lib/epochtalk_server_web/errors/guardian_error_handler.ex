@@ -2,8 +2,8 @@ defmodule EpochtalkServerWeb.GuardianErrorHandler do
   alias EpochtalkServerWeb.ErrorHelpers
 
   @doc """
-  This is used to convert errors coming out of the guardian pipelines into a 401
-  renders error tuple from guardian pipeline into a json error response
+  This is used to convert errors coming out of the guardian pipelines into a json error,
+  Renders error tuples received from guardian pipeline into a json error response.
   """
   @behaviour Guardian.Plug.ErrorHandler
   @impl Guardian.Plug.ErrorHandler

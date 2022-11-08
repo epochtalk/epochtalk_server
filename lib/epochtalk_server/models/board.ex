@@ -10,6 +10,7 @@ defmodule EpochtalkServer.Models.Board do
   `Board` model, for performing actions relating to forum boards
   """
   @type t :: %__MODULE__{
+    id: non_neg_integer | nil,
     category: Category.t() | term(),
     name: String.t() | nil,
     slug: String.t() | nil,
@@ -47,7 +48,7 @@ defmodule EpochtalkServer.Models.Board do
   @spec changeset(
     board :: t(),
     attrs :: map() | nil
-  ) :: %Ecto.Changeset{}
+  ) :: Ecto.Changeset.t()
   def changeset(board, attrs) do
     board
     |> cast(attrs, [:id, :name, :slug, :description, :post_count, :thread_count, :viewable_by, :postable_by, :created_at, :imported_at, :updated_at, :meta])
@@ -61,7 +62,7 @@ defmodule EpochtalkServer.Models.Board do
   @doc """
   Create changeset for creation of `Board` model
   """
-  @spec create_changeset(board :: t(), attrs :: map() | nil) :: %Ecto.Changeset{}
+  @spec create_changeset(board :: t(), attrs :: map() | nil) :: Ecto.Changeset.t()
   def create_changeset(board, attrs) do
     now = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
     attrs = attrs
@@ -84,7 +85,7 @@ defmodule EpochtalkServer.Models.Board do
   def create(board) do
     board_cs = create_changeset(%Board{}, board)
     case Repo.insert(board_cs) do
-      {:ok, db_board} -> case MetadataBoard.insert(%MetadataBoard{ board_id: db_board.id}) do
+      {:ok, db_board} -> case MetadataBoard.insert(%MetadataBoard{board_id: db_board.id}) do
           {:ok, _} -> {:ok, db_board}
           {:error, cs} -> {:error, cs}
         end

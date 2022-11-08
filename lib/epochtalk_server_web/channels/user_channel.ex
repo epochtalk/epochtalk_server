@@ -1,8 +1,15 @@
 defmodule EpochtalkServerWeb.UserChannel do
   use EpochtalkServerWeb, :channel
-
+  @moduledoc """
+  Handles `User` websocket channel. Used to broadcast events like
+  reauthenticate and logout.
+  """
   # intercept ["logout"]
 
+
+  @moduledoc """
+  Handles joining of `user:<id>` channel, checks that user is authenticated.
+  """
   @impl true
   def join("user:" <> _user_id, _payload, socket) do
     if authorized?(socket) do

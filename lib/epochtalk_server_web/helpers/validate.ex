@@ -84,24 +84,9 @@ defmodule EpochtalkServerWeb.Helpers.Validate do
   def cast_str(str, type, opts) when is_binary(str) and is_atom(type) and is_list(opts) do
     opts = opts ++ [type: type] # add type to opts so InvalidPayload raise has metadata
     case type do
-      :integer -> cast_to_int(str, opts)
       :boolean -> cast_to_bool(str, opts)
+      :integer -> cast_to_int(str, opts)
       _ -> str # type not supported, return string
-    end
-  end
-
-  defp cast_to_int(str, opts) do
-    case Integer.parse(str) do
-      {num, ""} ->
-        min = !!opts[:min]
-        max = !!opts[:max]
-        if min or max,
-          do: (valid_min = min and !max and num >= opts[:min]
-            valid_max = max and !min and num <= opts[:max]
-            valid_range = max and min and num <= opts[:max] and num >= opts[:min]
-            if valid_range or valid_max or valid_min, do: num, else: raise(InvalidPayload, opts)),
-        else: num
-      _ -> raise(InvalidPayload, opts)
     end
   end
 
@@ -114,4 +99,18 @@ defmodule EpochtalkServerWeb.Helpers.Validate do
       _ -> raise(InvalidPayload, opts)
     end
   end
+
+  defp cast_to_int(str, opts) do
+    case Integer.parse(str) do
+      {num, ""} -> validate_int_opts(num, opts)
+      _ -> raise(InvalidPayload, opts)
+    end
+  end
+
+  defp validate_int_opts(value, opts), do: validate_int_opts(value, opts[:min], opts[:max], opts)
+  defp validate_int_opts(value, nil, nil, _opts), do: value
+  defp validate_int_opts(value, min, max, _opts) when value >= min and value <= max, do: value
+  defp validate_int_opts(value, min, nil, _opts) when value >= min, do: value
+  defp validate_int_opts(value, nil, max, _opts) when value <= max, do: value
+  defp validate_int_opts(_value, _min, _max, opts), do: raise(InvalidPayload, opts)
 end

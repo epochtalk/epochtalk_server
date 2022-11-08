@@ -41,9 +41,13 @@ defmodule EpochtalkServer.Auth.Guardian do
         moderating = Redix.command!(:redix, ["SMEMBERS", "user:#{user_id}:moderating"])
         resource = if moderating && length(moderating) != 0,
           do: Map.put(resource, :moderating, moderating), else: resource
-        resource = if (ban_expiration = Redix.command!(:redix, ["HEXISTS", "user:#{user_id}:ban_info", "ban_expiration"])) != 0,
+
+        ban_expiration = Redix.command!(:redix, ["HEXISTS", "user:#{user_id}:ban_info", "ban_expiration"])
+        resource = if ban_expiration != 0,
           do: Map.put(resource, :ban_expiration, ban_expiration), else: resource
-        resource = if (malicious_score = Redix.command!(:redix, ["HEXISTS", "user:#{user_id}:ban_info", "malicious_score"])) != 0,
+
+        malicious_score = Redix.command!(:redix, ["HEXISTS", "user:#{user_id}:ban_info", "malicious_score"])
+        resource = if malicious_score != 0,
           do: Map.put(resource, :malicious_score, malicious_score), else: resource
         {:ok,  resource}
     end

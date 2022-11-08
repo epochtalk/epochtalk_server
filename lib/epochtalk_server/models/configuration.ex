@@ -115,7 +115,7 @@ defmodule EpochtalkServer.Models.Configuration do
     # TODO(boka): directory release version
 
     # tag takes precidence over revision
-    revision = unless tag == "", do: tag, else: hash
+    revision = if tag == "", do: hash, else: tag
 
     frontend_config = Application.get_env(:epochtalk_server, :frontend_config)
       |> Map.put("revision", revision)

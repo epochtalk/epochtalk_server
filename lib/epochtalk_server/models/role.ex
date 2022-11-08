@@ -185,18 +185,30 @@ defmodule EpochtalkServer.Models.Role do
     target_is_lesser_role = !Map.get(target, :priority) or target.priority > source.priority
     Enum.reduce(filtered_source_keys, %{}, fn key, acc ->
       case key do
-        :priority_restrictions -> # merge priority restrictions
-          source_pr = source.priority_restrictions
-          if target_is_lesser_role and !!source_pr and length(source_pr),
-            do: Map.put(acc, :priority_restrictions, source_pr),
-            else: Map.put(acc, :priority_restrictions, Map.get(target, :priority_restrictions))
-        :permissions -> # merge permissions
-          target_permissions = if p = Map.get(target, key), do: p, else: %{}
-          Map.put(acc, key, deep_merge(target_permissions, Map.get(source, key)))
-        key when key in [:priority, :highlight_color] -> # merge priority/highlight_color
-          if target_is_lesser_role, do: Map.put(acc, key, Map.get(source, key)), else: Map.put(acc, key, Map.get(target, key))
+        :priority_restrictions -> merge_priority_restrictions(acc, target, source, target_is_lesser_role)
+        :permissions -> merge_permissions(acc, target, source)
+        :priority -> merge_key(:priority, acc, target, source, target_is_lesser_role)
+        :highlight_color -> merge_key(:highlight_color, acc, target, source, target_is_lesser_role)
       end
     end)
+  end
+
+  defp merge_priority_restrictions(acc, target, source, target_is_lesser_role) do
+    source_pr = source.priority_restrictions
+    if target_is_lesser_role and !!source_pr and length(source_pr),
+      do: Map.put(acc, :priority_restrictions, source_pr),
+      else: Map.put(acc, :priority_restrictions, Map.get(target, :priority_restrictions))
+  end
+
+  defp merge_permissions(acc, target, source) do
+    target_permissions = if p = Map.get(target, :permissions), do: p, else: %{}
+    Map.put(acc, :permissions, deep_merge(target_permissions, Map.get(source, :permissions)))
+  end
+
+  defp merge_key(key, acc, target, source, target_is_lesser_role) do
+    if target_is_lesser_role,
+      do: Map.put(acc, key, Map.get(source, key)),
+      else: Map.put(acc, key, Map.get(target, key))
   end
 
   defp deep_merge(left, right), do: Map.merge(left, right, &deep_resolve/3)

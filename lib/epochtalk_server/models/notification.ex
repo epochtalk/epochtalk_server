@@ -58,9 +58,11 @@ defmodule EpochtalkServer.Models.Notification do
       [] -> %{ message: 0, mentions: 0 }
       notifications ->
         {messages, mentions} = Enum.split_with(notifications, &(&1.type == @types.message))
+        msg_count = length(messages)
+        men_count = length(mentions)
         %{
-          message: (if (count = length(messages)) > max, do: "#{max}+", else: count),
-          mention: (if (count = length(mentions)) > max, do: "#{max}+", else: count)
+          message: (if msg_count > max, do: "#{max}+", else: msg_count),
+          mention: (if men_count > max, do: "#{max}+", else: men_count)
         }
     end
   end

@@ -104,7 +104,7 @@ defmodule EpochtalkServer.Models.RolePermission do
 
   For server-side role-loading use, only runs if roles permissions table is currently empty
   """
-  @spec maybe_init!() :: [%RolePermission{}] | nil
+  @spec maybe_init!() :: [t()] | nil
   def maybe_init!() do
     if Repo.one(from rp in RolePermission, select: count(rp.value)) == 0, do: Enum.each(Role.all, fn role ->
       Enum.each(Permission.all, fn permission ->

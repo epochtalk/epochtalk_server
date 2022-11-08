@@ -97,7 +97,7 @@ defmodule EpochtalkServer.Models.BannedAddress do
   """
   @spec upsert(banned_address_or_list :: map() | [map()] | t() | [t()]) :: {:ok, banned_address_changeset :: Ecto.Changeset.t()} | {:error, :banned_address_error}
   def upsert(address_list) when is_list(address_list) do
-    Repo.transaction(fn -> Enum.each(address_list ,&upsert_one(&1)) end)
+    Repo.transaction(fn -> Enum.each(address_list, &upsert_one(&1)) end)
     |> case do
       {:ok, banned_address_changeset} -> {:ok, banned_address_changeset}
       {:error, err} -> # print error, return error atom

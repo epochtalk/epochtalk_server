@@ -3,7 +3,7 @@ name: Build-ECR
 on:
   push:
     branches:
-      - master
+      - main
       - github-actions
 
 jobs:
@@ -167,7 +167,7 @@ jobs:
           semantic_version: 19.0.5
           branches: |
             [
-              'master'
+              'main'
             ]
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

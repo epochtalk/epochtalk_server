@@ -76,7 +76,7 @@ jobs:
           key: ${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-${{ hashFiles('mix.lock') }}
       # TODO(boka): enable formatter
       # - run: mix format --check-formatted
-      - run: mix credo
+      - run: mix credo --mute-exit-status
       - run: mix dialyzer --no-check --ignore-exit-status
   test_job:
     needs: dependencies

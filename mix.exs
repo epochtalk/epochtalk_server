@@ -78,7 +78,7 @@ defmodule EpochtalkServer.MixProject do
      "seed.roles": ["run priv/repo/seed_roles.exs"],
      "seed.rp": ["run priv/repo/seed_roles_permissions.exs"],
      "seed.user": ["run priv/repo/seed_user.exs"],
-     test: ["ecto.create --quiet", "ecto.migrate", "test"],
+     test: ["ecto.drop", "ecto.create --quiet", "ecto.migrate --quiet", "seed.all", "test"],
     ]
   end
 end

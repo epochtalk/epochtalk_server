@@ -8,10 +8,27 @@ defmodule EpochtalkServerWeb.UserChannel do
 
 
   @doc """
-  Handles joining of `user:<id>` channel, checks that user is authenticated.
+  Handles joining of `user:<user_id>` channel, checks that user is authenticated.
+  This is a channel private to the specific `User` used to broadcast events
+  such as reauthenticate or logout.
   """
   @impl true
   def join("user:" <> _user_id, _payload, socket) do
+    if authorized?(socket) do
+      {:ok, socket}
+    else
+      {:error, %{reason: "unauthorized"}}
+    end
+  end
+
+  @doc """
+  Handles joining of `user:role` channel. Message is broadcast on this channel when
+  a role is updated, this tells the client to reauthenticate to fetch new roles. Message
+  contains the `lookup` of the role, if the client will check the user's roles for the
+  role `lookup` and reauthenticate if necessary.
+  """
+  @impl true
+  def join("user:role", _payload, socket) do
     if authorized?(socket) do
       {:ok, socket}
     else

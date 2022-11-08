@@ -33,20 +33,19 @@ config :epochtalk_server,
     },
     portal: %{enabled: false, board_id: nil},
     emailer: %{ses_mode: false, options: %{from_address: "info@epochtalk.com"}},
-    images: %{s3_mode: false, options: %{ local_host: "http://localhost:4000" }},
+    images: %{s3_mode: false, options: %{local_host: "http://localhost:4000"}},
     rate_limiting: %{}
   }
 
 # Configure Guardian
 config :epochtalk_server, EpochtalkServer.Auth.Guardian,
-       issuer: "EpochtalkServer",
-       secret_key: "Secret key. You can use `mix guardian.gen.secret` to get one"
+  issuer: "EpochtalkServer",
+  secret_key: "Secret key. You can use `mix guardian.gen.secret` to get one"
 
 # Configure Guardian.DB
-config :guardian, Guardian.DB,
-  repo: GuardianRedis.Repo
-  # schema_name: "guardian_tokens" # default
-  # token_types: ["refresh_token"] # store all token types if not set
+config :guardian, Guardian.DB, repo: GuardianRedis.Repo
+# schema_name: "guardian_tokens" # default
+# token_types: ["refresh_token"] # store all token types if not set
 
 # Configure GuardianRedis (for auth)
 # (implementation of Guardian.DB storage in redis)
@@ -94,10 +93,11 @@ config :epochtalk_server, EpochtalkServer.Mailer,
   port: 465,
   retries: 2,
   no_mx_lookups: false
-  # dkim: [
-  #   s: "default", d: "domain.com",
-  #   private_key: {:pem_plain, File.read!("priv/keys/domain.private")}
-  # ]
+
+# dkim: [
+#   s: "default", d: "domain.com",
+#   private_key: {:pem_plain, File.read!("priv/keys/domain.private")}
+# ]
 
 # Swoosh API client is needed for adapters other than SMTP.
 config :swoosh, :api_client, false

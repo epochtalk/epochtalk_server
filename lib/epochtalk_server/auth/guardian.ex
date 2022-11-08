@@ -139,6 +139,7 @@ defmodule EpochtalkServer.Auth.Guardian do
     sub = Integer.to_string(user_id)
     {:ok, sub}
   end
+
   def subject_for_token(_, _), do: {:error, :reason_for_error}
 
   @doc """
@@ -160,6 +161,7 @@ defmodule EpochtalkServer.Auth.Guardian do
       0 ->
         # session is not active, return error
         {:error, "No session with id #{session_id}"}
+
       1 ->
         # session is active, populate data
         resource = %{
@@ -167,23 +169,37 @@ defmodule EpochtalkServer.Auth.Guardian do
           session_id: session_id,
           username: Redix.command!(:redix, ["HGET", "user:#{user_id}", "username"]),
           avatar: Redix.command!(:redix, ["HGET", "user:#{user_id}", "avatar"]),
-          roles: Redix.command!(:redix, ["SMEMBERS", "user:#{user_id}:roles"]) |> Role.by_lookup
+          roles: Redix.command!(:redix, ["SMEMBERS", "user:#{user_id}:roles"]) |> Role.by_lookup()
         }
+
         # only append moderating, ban_expiration and malicious_score if present
         moderating = Redix.command!(:redix, ["SMEMBERS", "user:#{user_id}:moderating"])
-        resource = if moderating && length(moderating) != 0,
-          do: Map.put(resource, :moderating, moderating), else: resource
 
-        ban_expiration = Redix.command!(:redix, ["HEXISTS", "user:#{user_id}:ban_info", "ban_expiration"])
-        resource = if ban_expiration != 0,
-          do: Map.put(resource, :ban_expiration, ban_expiration), else: resource
+        resource =
+          if moderating && length(moderating) != 0,
+            do: Map.put(resource, :moderating, moderating),
+            else: resource
 
-        malicious_score = Redix.command!(:redix, ["HEXISTS", "user:#{user_id}:ban_info", "malicious_score"])
-        resource = if malicious_score != 0,
-          do: Map.put(resource, :malicious_score, malicious_score), else: resource
-        {:ok,  resource}
+        ban_expiration =
+          Redix.command!(:redix, ["HEXISTS", "user:#{user_id}:ban_info", "ban_expiration"])
+
+        resource =
+          if ban_expiration != 0,
+            do: Map.put(resource, :ban_expiration, ban_expiration),
+            else: resource
+
+        malicious_score =
+          Redix.command!(:redix, ["HEXISTS", "user:#{user_id}:ban_info", "malicious_score"])
+
+        resource =
+          if malicious_score != 0,
+            do: Map.put(resource, :malicious_score, malicious_score),
+            else: resource
+
+        {:ok, resource}
     end
   end
+
   def resource_from_claims(_claims), do: {:error, :reason_for_error}
 
   @doc """

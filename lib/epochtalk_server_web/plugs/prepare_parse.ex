@@ -6,7 +6,8 @@ defmodule EpochtalkServerWeb.Plugs.PrepareParse do
     MalformedPayload,
     OversizedPayload
   }
-  @env Mix.env
+
+  @env Mix.env()
   @methods ~w(POST PUT PATCH)
 
   @doc """
@@ -19,6 +20,7 @@ defmodule EpochtalkServerWeb.Plugs.PrepareParse do
   """
   def call(conn, opts) do
     %{method: method} = conn
+
     if method in @methods and @env != :test do
       case Plug.Conn.read_body(conn, opts) do
         {:error, :timeout} -> raise Plug.TimeoutError
@@ -27,7 +29,9 @@ defmodule EpochtalkServerWeb.Plugs.PrepareParse do
         {:ok, "" = body, conn} -> update_in(conn.assigns[:raw_body], &[body | &1 || []])
         {:ok, body, conn} -> try_decode(conn, body)
       end
-    else conn end
+    else
+      conn
+    end
   end
 
   defp try_decode(conn, body) do

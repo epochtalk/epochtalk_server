@@ -39,9 +39,16 @@ defmodule EpochtalkServerWeb.Helpers.Validate do
       iex> Validate.cast(attrs, "post_count", :integer, required: true)
       ** (EpochtalkServerWeb.CustomErrors.InvalidPayload) Invalid payload, key 'post_count' should be of type 'integer'
   """
-  @spec cast(attrs :: map, key :: String.t(), type :: atom, required: boolean, min: integer, max: integer) :: any()
-  def cast(attrs, key, type, opts \\ []) when is_map(attrs) and is_binary(key) and is_atom(type) and is_list(opts),
-    do: (if is_nil(attrs[key]), do: nil, else: "#{attrs[key]}") |> cast_str(type, opts ++ [key: key])
+  @spec cast(attrs :: map, key :: String.t(), type :: atom,
+          required: boolean,
+          min: integer,
+          max: integer
+        ) :: any()
+  def cast(attrs, key, type, opts \\ [])
+      when is_map(attrs) and is_binary(key) and is_atom(type) and is_list(opts),
+      do:
+        if(is_nil(attrs[key]), do: nil, else: "#{attrs[key]}")
+        |> cast_str(type, opts ++ [key: key])
 
   @doc """
   Helper used to validate and cast request parameters. Takes in a `String.t()` and casts it
@@ -75,18 +82,30 @@ defmodule EpochtalkServerWeb.Helpers.Validate do
       iex> Validate.cast_str(nil, :integer, key: "post_count", required: true)
       ** (EpochtalkServerWeb.CustomErrors.InvalidPayload) Invalid payload, key 'post_count' should be of type 'integer'
   """
-  @spec cast_str(str :: String.t(), type :: atom, key: String.t(), required: boolean, min: integer, max: integer) :: any()
+  @spec cast_str(str :: String.t(), type :: atom,
+          key: String.t(),
+          required: boolean,
+          min: integer,
+          max: integer
+        ) :: any()
   def cast_str(str, type, opts \\ [])
-  def cast_str(nil, type, opts) when is_atom(type) and is_list(opts), # if nil and required, raise
-    do: (if opts[:required], do: raise(InvalidPayload, opts ++ [type: type]), else: nil)
-  def cast_str("", type, opts) when is_atom(type), # cannot cast empty string, raise
+  # if nil and required, raise
+  def cast_str(nil, type, opts) when is_atom(type) and is_list(opts),
+    do: if(opts[:required], do: raise(InvalidPayload, opts ++ [type: type]), else: nil)
+
+  # cannot cast empty string, raise
+  def cast_str("", type, opts) when is_atom(type),
     do: raise(InvalidPayload, opts ++ [type: type])
+
   def cast_str(str, type, opts) when is_binary(str) and is_atom(type) and is_list(opts) do
-    opts = opts ++ [type: type] # add type to opts so InvalidPayload raise has metadata
+    # add type to opts so InvalidPayload raise has metadata
+    opts = opts ++ [type: type]
+
     case type do
       :boolean -> cast_to_bool(str, opts)
       :integer -> cast_to_int(str, opts)
-      _ -> str # type not supported, return string
+      # type not supported, return string
+      _ -> str
     end
   end
 
@@ -94,7 +113,8 @@ defmodule EpochtalkServerWeb.Helpers.Validate do
     case str do
       "true" -> true
       "false" -> false
-      "1" -> true # not necessary, but can support js frontends and harms nothing
+      # not necessary, but can support js frontends and harms nothing
+      "1" -> true
       "0" -> false
       _ -> raise(InvalidPayload, opts)
     end

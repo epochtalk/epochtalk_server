@@ -1,5 +1,6 @@
 defmodule EpochtalkServerWeb.NotificationView do
   use EpochtalkServerWeb, :view
+
   @moduledoc """
   Renders and formats `User` data, in JSON format for frontend
   """

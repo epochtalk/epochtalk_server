@@ -1,6 +1,7 @@
 defmodule EpochtalkServerWeb.Telemetry do
   use Supervisor
   import Telemetry.Metrics
+
   @moduledoc """
   Description of all events occuring in application
   """

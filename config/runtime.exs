@@ -88,11 +88,12 @@ if config_env() == :prod do
 
   # Configure Guardian for Runtime
   config :epochtalk_server, EpochtalkServer.Auth.Guardian,
-    secret_key: System.get_env("GUARDIAN_SECRET_KEY") ||
-      raise """
-      environment variable GUARDIAN_SECRET_KEY is missing.
-      You can generate one by calling: mix guardian.gen.secret
-      """
+    secret_key:
+      System.get_env("GUARDIAN_SECRET_KEY") ||
+        raise("""
+        environment variable GUARDIAN_SECRET_KEY is missing.
+        You can generate one by calling: mix guardian.gen.secret
+        """)
 
   # Configure Guardian Redis
   config :guardian_redis, :redis,
@@ -101,6 +102,5 @@ if config_env() == :prod do
     pool_size: String.to_integer(System.get_env("REDIS_POOL_SIZE") || "10")
 
   # Configure Redis for Session Storage
-  config :epochtalk_server, :redix,
-    host: System.get_env("REDIS_HOST") || "127.0.0.1"
+  config :epochtalk_server, :redix, host: System.get_env("REDIS_HOST") || "127.0.0.1"
 end

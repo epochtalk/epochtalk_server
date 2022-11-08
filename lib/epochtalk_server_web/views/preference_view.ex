@@ -1,10 +1,11 @@
 defmodule EpochtalkServerWeb.PreferenceView do
   use EpochtalkServerWeb, :view
+
   @moduledoc """
   Renders and formats `Preference` data, in JSON format for frontend
   """
 
-    @doc """
+  @doc """
   Renders formatted JSON response for user preferences.
   ## Example
     iex> EpochtalkServerWeb.PreferenceView.render("preferences.json", %{preferences: nil})
@@ -48,6 +49,7 @@ defmodule EpochtalkServerWeb.PreferenceView do
       email_messages: true
     }
   end
+
   def render("preferences.json", %{preferences: preferences}) do
     %{
       posts_per_page: preferences.posts_per_page,

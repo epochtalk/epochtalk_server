@@ -1,5 +1,6 @@
 defmodule EpochtalkServerWeb.UserSocket do
   use Phoenix.Socket
+
   @moduledoc """
   Handles `User` socket connection and authentication.
   """
@@ -33,6 +34,7 @@ defmodule EpochtalkServerWeb.UserSocket do
       {:error, _reason} -> :error
     end
   end
+
   def connect(_params, socket, _connect_info), do: {:ok, socket}
 
   # Socket id's are topics that allow you to identify all sockets for a given user:

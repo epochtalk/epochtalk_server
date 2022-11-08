@@ -33,7 +33,9 @@ defmodule EpochtalkServerWeb.Endpoint do
 
   plug Plug.RequestId
   plug Plug.Telemetry, event_prefix: [:phoenix, :endpoint]
-  plug EpochtalkServerWeb.Plugs.PrepareParse # handle malformed json payload
+  # handle malformed json payload
+  plug EpochtalkServerWeb.Plugs.PrepareParse
+
   plug Plug.Parsers,
     parsers: [:urlencoded, :multipart, :json],
     pass: ["*/*"],
@@ -46,4 +48,5 @@ defmodule EpochtalkServerWeb.Endpoint do
 end
 
 # used to help preparse raw req body, in case of malformed payload
-defmodule EpochtalkServerWeb.Endpoint.CacheBodyReader, do: def read_body(conn, _opts), do: {:ok, conn.assigns.raw_body, conn}
+defmodule EpochtalkServerWeb.Endpoint.CacheBodyReader,
+  do: def(read_body(conn, _opts), do: {:ok, conn.assigns.raw_body, conn})

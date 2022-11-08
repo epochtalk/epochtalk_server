@@ -1,5 +1,6 @@
 defmodule EpochtalkServer.Models.BannedAddress do
   use Ecto.Schema
+  require Logger
   import Ecto.Changeset
   import Ecto.Query, only: [from: 2]
   alias EpochtalkServer.Repo
@@ -102,7 +103,7 @@ defmodule EpochtalkServer.Models.BannedAddress do
       {:ok, banned_address_changeset} -> {:ok, banned_address_changeset}
       {:error, err} -> # print error, return error atom
         # TODO(akinsey): handle in logger (telemetry possibly)
-        IO.inspect err
+        Logger.error(inspect(err))
         {:error, :banned_address_error}
     end
   end

@@ -1,5 +1,8 @@
 defmodule EpochtalkServerWeb.GuardianErrorHandler do
   alias EpochtalkServerWeb.ErrorHelpers
+  @moduledoc """
+  Helper module which intercepts guardian errors.
+  """
 
   @doc """
   This is used to convert errors coming out of the guardian pipelines into a json error,

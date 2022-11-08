@@ -1,5 +1,8 @@
 defmodule EpochtalkServerWeb.UserSocket do
   use Phoenix.Socket
+  @moduledoc """
+  Handles `User` socket connection and authentication.
+  """
 
   # A Socket handler
   #

@@ -3,8 +3,12 @@ name: Build-ECR
 on:
   push:
     branches:
-      - main
       - github-actions
+  pull-request:
+    types:
+      - [opened, closed]
+    branches:
+      - main
 
 jobs:
   dependencies:

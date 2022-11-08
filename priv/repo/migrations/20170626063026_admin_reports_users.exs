@@ -3,8 +3,11 @@ defmodule EpochtalkServer.Repo.Migrations.AdminReportsUsers do
   @schema_prefix "administration"
 
   def change do
-    create table(:reports_users, [prefix: @schema_prefix]) do
-      add :status, :report_status_type, default: fragment("'Pending'::report_status_type"), null: false
+    create table(:reports_users, prefix: @schema_prefix) do
+      add :status, :report_status_type,
+        default: fragment("'Pending'::report_status_type"),
+        null: false
+
       add :reporter_user_id, :bigint
       add :reporter_reason, :text, default: "", null: false
       add :reviewer_user_id, :bigint
@@ -12,6 +15,7 @@ defmodule EpochtalkServer.Repo.Migrations.AdminReportsUsers do
       add :created_at, :timestamp
       add :updated_at, :timestamp
     end
+
     create index(:reports_users, [:created_at], prefix: @schema_prefix)
 
     execute """

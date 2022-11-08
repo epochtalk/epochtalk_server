@@ -3,7 +3,7 @@ defmodule EpochtalkServer.Repo.Migrations.FactoidsSchema do
   @schema_prefix "factoids"
 
   def change do
-    create table(:analytics, [prefix: @schema_prefix, primary_key: false]) do
+    create table(:analytics, prefix: @schema_prefix, primary_key: false) do
       add :round, :integer, primary_key: true
       add :total_impressions, :integer, default: 0, null: false
       add :total_authed_impressions, :integer, default: 0, null: false
@@ -11,7 +11,7 @@ defmodule EpochtalkServer.Repo.Migrations.FactoidsSchema do
       add :total_unique_authed_users_impressions, :integer, default: 0, null: false
     end
 
-    create table(:authed_users, [prefix: @schema_prefix, primary_key: false]) do
+    create table(:authed_users, prefix: @schema_prefix, primary_key: false) do
       add :round, :integer, null: false
       add :user_id, :bigint, null: false
     end
@@ -46,8 +46,7 @@ defmodule EpochtalkServer.Repo.Migrations.FactoidsSchema do
     FOR EACH ROW EXECUTE PROCEDURE public.update_unique_authed_user_score_on_factoid()
     """
 
-
-    create table(:unique_ip, [prefix: @schema_prefix, primary_key: false]) do
+    create table(:unique_ip, prefix: @schema_prefix, primary_key: false) do
       add :round, :integer, null: false
       add :unique_ip, :string, null: false
     end

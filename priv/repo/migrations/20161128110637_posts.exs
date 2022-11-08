@@ -13,7 +13,7 @@ defmodule EpochtalkServer.Repo.Migrations.Posts do
       add :imported_at, :timestamp
       add :updated_at, :timestamp
     end
-    
+
     create index(:posts, [:thread_id])
     create index(:posts, [:user_id])
     create index(:posts, [:thread_id, :position])

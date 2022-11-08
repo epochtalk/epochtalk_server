@@ -7,7 +7,7 @@ defmodule EpochtalkServerWeb.UserChannel do
   # intercept ["logout"]
 
 
-  @moduledoc """
+  @doc """
   Handles joining of `user:<id>` channel, checks that user is authenticated.
   """
   @impl true

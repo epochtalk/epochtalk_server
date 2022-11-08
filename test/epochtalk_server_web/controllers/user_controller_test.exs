@@ -1,10 +1,8 @@
 defmodule EpochtalkServerWeb.UserControllerTest do
   use EpochtalkServerWeb.ConnCase, async: false
   import Ecto.Changeset
-  import Ecto.Query
   alias EpochtalkServer.Models.User
   alias EpochtalkServer.Models.Ban
-  # alias EpochtalkServer.Models.BannedAddress
   alias EpochtalkServer.Repo
   alias EpochtalkServer.Auth.Guardian
 
@@ -65,16 +63,11 @@ defmodule EpochtalkServerWeb.UserControllerTest do
     setup [:create_user]
 
     # TODO(crod) Figure out an IP address to test malicious score for banning a user
-    # test "renders error of malicious IP" do
-    #   {:ok, user} = User.by_username(@create_attrs.username)
-    #   {:ok, user} = User.handle_malicious_user(user, {0, 1, 1, 1})
-    #   ip_str = {0, 1, 1, 1} |> :inet_parse.ntoa |> to_string
-    #   IO.inspect ip_str
-    #   # calculate user's malicious score from ip, nil if less than 1
-    #   malicious_score = BannedAddress.calculate_malicious_score_from_ip(ip_str)
-    #   IO.inspect malicious_score
-    #   IO.inspect user.ban_info
-    # end
+    test "renders error of malicious IP", %{conn: conn} do
+      {:ok, user} = User.by_username(@create_attrs.username)
+      {:ok, user} = User.handle_malicious_user(user, conn.remote_ip)
+      assert user.id == user.ban_info.user_id
+    end
   end
 
   describe "register" do

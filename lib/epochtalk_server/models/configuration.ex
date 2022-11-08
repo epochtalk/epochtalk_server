@@ -64,7 +64,7 @@ defmodule EpochtalkServer.Models.Configuration do
   ) :: {:ok, configuration :: t()} | {:error, Ecto.Changeset.t()}
   def set_default(config_map) when is_map(config_map) do
     %Configuration{}
-    |> create_changeset(%{ name: "default", config: config_map })
+    |> create_changeset(%{name: "default", config: config_map})
     |> Repo.insert(returning: [:config])
   end
 

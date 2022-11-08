@@ -11,7 +11,7 @@ defmodule EpochtalkServerWeb.CustomErrors do
     def exception(value) do
       case value do
         [] -> %InvalidPayload{}
-        _ -> %InvalidPayload{ message: gen_message(Enum.into(value, %{ required: false })) }
+        _ -> %InvalidPayload{message: gen_message(Enum.into(value, %{required: false}))}
       end
     end
 

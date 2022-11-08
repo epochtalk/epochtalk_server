@@ -109,7 +109,7 @@ defmodule EpochtalkServer.Models.RolePermission do
     if Repo.one(from rp in RolePermission, select: count(rp.value)) == 0, do: Enum.each(Role.all, fn role ->
       Enum.each(Permission.all, fn permission ->
         %RolePermission{}
-        |> changeset(%{ role_id: role.id, permission_path: permission.path, value: false, modified: false })
+        |> changeset(%{role_id: role.id, permission_path: permission.path, value: false, modified: false})
         |> Repo.insert!
       end)
     end)

@@ -5,7 +5,7 @@ defmodule EpochtalkServer.Mailer do
   alias EpochtalkServer.Models.User
 
   @spec send_confirm_account(recipient :: User.t()) :: {:ok, term} | {:error, term}
-  def send_confirm_account(%User{ email: email, username: username, confirmation_token: token}) do
+  def send_confirm_account(%User{email: email, username: username, confirmation_token: token}) do
     config = Application.get_env(:epochtalk_server, :frontend_config)
     frontend_url = config["frontend_url"]
     website_title = config["website"]["title"]

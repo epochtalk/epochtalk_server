@@ -55,7 +55,7 @@ defmodule EpochtalkServer.Models.Notification do
     query
     |> Repo.all()
     |> case do
-      [] -> %{ message: 0, mentions: 0 }
+      [] -> %{message: 0, mentions: 0}
       notifications ->
         {messages, mentions} = Enum.split_with(notifications, &(&1.type == @types.message))
         msg_count = length(messages)

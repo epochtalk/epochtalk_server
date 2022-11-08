@@ -102,7 +102,7 @@ defmodule EpochtalkServerWeb.MentionViewTest do
     page: 1,
     prev: false
   }
-   assert result == render(MentionView, "page.json", %{ mentions: mentions, pagination_data: pagination_data, extended: false})
+   assert result == render(MentionView, "page.json", %{mentions: mentions, pagination_data: pagination_data, extended: false})
   end
 
   test "renders page.json [extended: true]" do
@@ -205,6 +205,6 @@ defmodule EpochtalkServerWeb.MentionViewTest do
     prev: true,
     extended: true
   }
-   assert result == render(MentionView, "page.json", %{ mentions: mentions, pagination_data: pagination_data, extended: true})
+   assert result == render(MentionView, "page.json", %{mentions: mentions, pagination_data: pagination_data, extended: true})
   end
 end

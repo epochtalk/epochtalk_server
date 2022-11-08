@@ -34,7 +34,7 @@ defmodule EpochtalkServerWeb.UserController do
          {_count, nil} <- Invitation.delete(user.email), # delete invitation
          {:ok, user} <- User.handle_malicious_user(user, conn.remote_ip), # ban if malicious
          {:ok, user, token, conn} <- Session.create(user, false, conn) do # create session
-      render(conn, "user.json", %{ user: user, token: token})
+      render(conn, "user.json", %{user: user, token: token})
     else
       # user already authenticated
       {:auth, true} -> ErrorHelpers.render_json_error(conn, 400, "Cannot register a new account while logged in")
@@ -78,7 +78,7 @@ defmodule EpochtalkServerWeb.UserController do
          {:token_valid, true} <- {:token_valid, user.confirmation_token == token}, # check confirmation token
          {:ok, user} <- User.handle_malicious_user(user, conn.remote_ip), # ban if malicious
          {:ok, user, token, conn} <- Session.create(user, false, conn) do # create session
-      render(conn, "user.json", %{ user: user, token: token})
+      render(conn, "user.json", %{user: user, token: token})
     else
       {:error, :user_not_found} -> ErrorHelpers.render_json_error(conn, 400, "Confirmation error, account not found")
       {:token_valid, false} -> ErrorHelpers.render_json_error(conn, 400, "Account confirmation error, invalid token")
@@ -95,7 +95,7 @@ defmodule EpochtalkServerWeb.UserController do
   def authenticate(conn, _attrs) do
     token = Guardian.Plug.current_token(conn)
     user = Guardian.Plug.current_resource(conn)
-    render(conn, "user.json", %{ user: user, token: token})
+    render(conn, "user.json", %{user: user, token: token})
   end
 
   @doc """
@@ -108,7 +108,7 @@ defmodule EpochtalkServerWeb.UserController do
     with {:auth, true} <- {:auth, Guardian.Plug.authenticated?(conn)} do
       user = Guardian.Plug.current_resource(conn)
       token = Guardian.Plug.current_token(conn)
-      EpochtalkServerWeb.Endpoint.broadcast("user:#{user.id}", "logout", %{ token: token})
+      EpochtalkServerWeb.Endpoint.broadcast("user:#{user.id}", "logout", %{token: token})
       Guardian.Plug.sign_out(conn)
       render(conn, "logout.json", data: %{success: true})
     else
@@ -129,7 +129,7 @@ defmodule EpochtalkServerWeb.UserController do
          {:valid_password, true} <- {:valid_password, User.valid_password?(user, password)},
          {:ok, user} <- Ban.unban(user),
          {:ok, user, token, conn} <- Session.create(user, remember_me, conn) do
-      render(conn, "user.json", %{ user: user, token: token})
+      render(conn, "user.json", %{user: user, token: token})
     else
       {:auth, true} -> ErrorHelpers.render_json_error(conn, 400, "Already logged in")
       {:error, :user_not_found} -> ErrorHelpers.render_json_error(conn, 400, "Invalid credentials")

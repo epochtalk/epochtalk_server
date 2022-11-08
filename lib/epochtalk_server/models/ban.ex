@@ -122,7 +122,7 @@ defmodule EpochtalkServer.Models.Ban do
     user :: User.t(),
     expiration :: Calendar.naive_datetime() | nil
   ) :: {:ok, user_changeset :: Ecto.Changeset.t()} | {:error, :ban_error}
-  def ban(%User{ id: id} = user, expiration) do
+  def ban(%User{id: id} = user, expiration) do
     case ban_by_user_id(id, expiration) do
       {:ok, _ban_info} -> # successful ban, update roles/ban info on user
         user = user
@@ -145,7 +145,7 @@ defmodule EpochtalkServer.Models.Ban do
       User.clear_malicious_score_by_id(user_id) # clear user malicious score
       case Repo.get_by(Ban, user_id: user_id) do
         nil -> {:ok, nil}
-        cs -> Repo.update!(unban_changeset(cs, %{ user_id: user_id }))
+        cs -> Repo.update!(unban_changeset(cs, %{user_id: user_id}))
       end # unban the user
     end)
     |> case do

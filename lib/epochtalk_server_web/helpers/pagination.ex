@@ -38,8 +38,8 @@ defmodule EpochtalkServerWeb.Helpers.Pagination do
     do: page_simple(query, Validate.cast_str(page, :integer, key: "page", min: 1), per_page: Validate.cast_str(per_page, :integer, key: "limit", min: 1))
   def page_simple(query, page, per_page: per_page) do
     result = query
-      |> limit(^per_page+1) # query one extra to see if there's a next page
-      |> offset(^((page*per_page)-per_page))
+      |> limit(^(per_page + 1)) # query one extra to see if there's a next page
+      |> offset(^((page * per_page) - per_page))
       |> Repo.all(prefix: "public")
     next = length(result) > per_page # next page exists if extra record is returned
     result = if next, # remove extra record if necessary

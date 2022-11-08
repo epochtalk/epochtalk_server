@@ -85,7 +85,7 @@ defmodule EpochtalkServer.Models.Board do
   def create(board) do
     board_cs = create_changeset(%Board{}, board)
     case Repo.insert(board_cs) do
-      {:ok, db_board} -> case MetadataBoard.insert(%MetadataBoard{ board_id: db_board.id}) do
+      {:ok, db_board} -> case MetadataBoard.insert(%MetadataBoard{board_id: db_board.id}) do
           {:ok, _} -> {:ok, db_board}
           {:error, cs} -> {:error, cs}
         end

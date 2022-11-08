@@ -43,6 +43,6 @@ defmodule EpochtalkServerWeb.UserSocket do
   #
   # Returning `nil` makes this socket anonymous.
   @impl true
-  def id(%{ assigns: %{ user_id: user_id }} = _socket), do: "user:#{user_id}"
+  def id(%{assigns: %{user_id: user_id}} = _socket), do: "user:#{user_id}"
   def id(_socket), do: nil
 end

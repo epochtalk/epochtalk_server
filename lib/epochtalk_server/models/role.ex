@@ -128,7 +128,7 @@ defmodule EpochtalkServer.Models.Role do
   def set_permissions(id, permissions) do
     Role
     |> Repo.get(id)
-    |> change(%{ permissions: permissions })
+    |> change(%{permissions: permissions})
     |> Repo.update
   end
 
@@ -214,7 +214,7 @@ defmodule EpochtalkServer.Models.Role do
   defp deep_merge(left, right), do: Map.merge(left, right, &deep_resolve/3)
   # Key exists in both maps, and both values are maps as well.
   # These can be merged recursively.
-  defp deep_resolve(_key, left = %{}, right = %{}), do: deep_merge(left, right)
+  defp deep_resolve(_key, %{} = left, %{} = right), do: deep_merge(left, right)
   # Key exists in both maps, but at least one of the values is
   # NOT a map. We fall back to standard merge behavior, preferring
   # the value on the right.

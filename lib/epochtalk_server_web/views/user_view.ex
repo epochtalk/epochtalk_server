@@ -40,8 +40,8 @@ defmodule EpochtalkServerWeb.UserView do
       iex> EpochtalkServerWeb.UserView.render("DoesNotExist.json", data: %{success: true})
       %{success: true}
   """
-  def template_not_found(_template, %{conn: %{ assigns: %{ data: data }}}), do: data
-  def template_not_found(_template, %{ data: data }), do: data
+  def template_not_found(_template, %{conn: %{assigns: %{data: data}}}), do: data
+  def template_not_found(_template, %{data: data}), do: data
 
   # Format reply - from Models.User (login, register)
   defp format_user_reply(%User{} = user, token) do

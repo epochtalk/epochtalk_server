@@ -13,5 +13,5 @@ defmodule EpochtalkServerWeb.NotificationView do
       iex> EpochtalkServerWeb.NotificationView.render("DoesNotExist.json", data: %{success: true})
       %{success: true}
   """
-  def template_not_found(_template, %{ data: data }), do: data
+  def template_not_found(_template, %{data: data}), do: data
 end

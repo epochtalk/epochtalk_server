@@ -21,7 +21,7 @@ defmodule EpochtalkServer.Session do
   ) :: {:ok, user :: User.t(), encoded_token :: String.t(), conn :: Plug.Conn.t()}
   def create(%User{} = user, remember_me, conn) do
     datetime = NaiveDateTime.utc_now
-    decoded_token = %{ user_id: user.id, timestamp: datetime }
+    decoded_token = %{user_id: user.id, timestamp: datetime}
 
     # set token expiration based on rememberMe
     ttl = if remember_me, do: {4, :weeks}, else: {1, :day}
@@ -88,7 +88,7 @@ defmodule EpochtalkServer.Session do
     avatar = if is_nil(user.profile), do: nil, else: user.profile.avatar
     update_user_info(user.id, user.username, avatar)
     update_roles(user.id, user.roles)
-    ban_info = if is_nil(user.ban_info), do: %{}, else: %{ ban_expiration: user.ban_info.expiration }
+    ban_info = if is_nil(user.ban_info), do: %{}, else: %{ban_expiration: user.ban_info.expiration}
     ban_info = if !is_nil(user.malicious_score) && user.malicious_score >= 1, do: Map.put(ban_info, :malicious_score, user.malicious_score), else: ban_info
     update_ban_info(user.id, ban_info)
     update_moderating(user.id, user.moderating)

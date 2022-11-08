@@ -85,7 +85,7 @@ defmodule EpochtalkServer.Models.BannedAddress do
         # min(2 * old_score, old_score + 1000) to get new weight where
         # old_score accounts for previous decay
         weight = min(2 * weight, weight + 1000)
-        change(cs_data, %{ weight: weight })
+        change(cs_data, %{weight: weight})
       false -> cs_data
     end
   end
@@ -171,7 +171,7 @@ defmodule EpochtalkServer.Models.BannedAddress do
 
   ## === Private Helper Functions ===
 
-  defp hostname_from_host({ _, name, _, _, _, _ }), do: List.to_string(name)
+  defp hostname_from_host({_, name, _, _, _, _}), do: List.to_string(name)
 
   defp calculate_hostname_score(hostname) do
     (from ba in BannedAddress,
@@ -181,7 +181,7 @@ defmodule EpochtalkServer.Models.BannedAddress do
     |> calculate_score_decay
   end
 
-  defp calculate_ip32_score({ ip1, ip2, ip3, ip4 }) do
+  defp calculate_ip32_score({ip1, ip2, ip3, ip4}) do
     (from ba in BannedAddress,
       where: ba.ip1 == ^ip1 and ba.ip2 == ^ip2 and ba.ip3 == ^ip3 and ba.ip4 == ^ip4,
       select: %{weight: ba.weight, decay: ba.decay, created_at: ba.created_at, updates: ba.updates})
@@ -189,7 +189,7 @@ defmodule EpochtalkServer.Models.BannedAddress do
     |> calculate_score_decay
   end
 
-  defp calculate_ip24_score({ ip1, ip2, ip3, _ }) do
+  defp calculate_ip24_score({ip1, ip2, ip3, _}) do
     (from ba in BannedAddress,
       where: ba.ip1 == ^ip1 and ba.ip2 == ^ip2 and ba.ip3 == ^ip3,
       select: %{weight: ba.weight, decay: ba.decay, created_at: ba.created_at, updates: ba.updates})
@@ -197,7 +197,7 @@ defmodule EpochtalkServer.Models.BannedAddress do
     |> calculate_score_decay
   end
 
-  defp calculate_ip16_score({ ip1, ip2, _, _ }) do
+  defp calculate_ip16_score({ip1, ip2, _, _}) do
     (from ba in BannedAddress,
       where: ba.ip1 == ^ip1 and ba.ip2 == ^ip2,
       select: %{weight: ba.weight, decay: ba.decay, created_at: ba.created_at, updates: ba.updates})
@@ -224,7 +224,7 @@ defmodule EpochtalkServer.Models.BannedAddress do
   defp calculate_score_decay(banned_address) when banned_address == %{}, do: 0
   defp calculate_score_decay(banned_address) when is_nil(banned_address), do: 0
   # banned address data found and decays, calculate
-  defp calculate_score_decay(%{ decay: true, updates: updates, weight: weight, created_at: created_at } = _banned_address) do
+  defp calculate_score_decay(%{decay: true, updates: updates, weight: weight, created_at: created_at} = _banned_address) do
     last_update_date = if length(updates) > 0, do: List.last(updates), else: created_at
     diff_ms = abs(NaiveDateTime.diff(last_update_date, NaiveDateTime.utc_now()) * 1000)
     decay_for_time(diff_ms, weight)

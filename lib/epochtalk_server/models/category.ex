@@ -81,9 +81,9 @@ defmodule EpochtalkServer.Models.Category do
   @doc """
   Updates an existing `Category` in the database, used by board mapping to recategorize boards
   """
-  @spec update_for_board_mapping(category_map :: %{ id: id :: integer }) :: {:ok, category :: t()} | {:error, Ecto.Changeset.t()}
-  def update_for_board_mapping(%{ id: id } = category_map) do
-    %Category{ id: id }
+  @spec update_for_board_mapping(category_map :: %{id: id :: integer}) :: {:ok, category :: t()} | {:error, Ecto.Changeset.t()}
+  def update_for_board_mapping(%{id: id} = category_map) do
+    %Category{id: id}
     |> update_for_board_mapping_changeset(category_map)
     |> Repo.update
   end

@@ -176,7 +176,7 @@ defmodule EpochtalkServer.Models.User do
 
   ## === Private Helper Functions ===
   # sets malicious score of a user, outputs user with updated malicious score
-  defp set_malicious_score(%User{ id: id } = user, malicious_score) do
+  defp set_malicious_score(%User{id: id} = user, malicious_score) do
     set_malicious_score_by_id(id, malicious_score)
     if malicious_score != nil,
       do: user |> Map.put(:malicious_score, malicious_score),

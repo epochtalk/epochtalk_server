@@ -4,9 +4,10 @@ defmodule EpochtalkServerWeb.UserControllerTest do
   alias EpochtalkServer.Models.User
   alias EpochtalkServer.Models.Ban
   alias EpochtalkServer.Repo
-  alias EpochtalkServer.Auth.Guardian
 
   @create_attrs %{username: "createtest", email: "createtest@test.com", password: "password"}
+
+  @auth_attrs %{username: "authtest", email: "authtest@test.com", password: "password"}
 
   @register_attrs %{username: "registertest", email: "registertest@test.com", password: "password"}
 
@@ -62,7 +63,6 @@ defmodule EpochtalkServerWeb.UserControllerTest do
   describe "malicious IP" do
     setup [:create_user]
 
-    # TODO(crod) Figure out an IP address to test malicious score for banning a user
     test "renders error of malicious IP", %{conn: conn} do
       {:ok, user} = User.by_username(@create_attrs.username)
       {:ok, user} = User.handle_malicious_user(user, conn.remote_ip)
@@ -84,17 +84,11 @@ defmodule EpochtalkServerWeb.UserControllerTest do
       assert %{"message" => "Email has already been taken"} = json_response(conn, 400)
     end
 
-    # TODO(crod): Figure out how to get past recycling for testing when user is logged in
-    # test "renders errors when user is already authenticated", %{conn: conn} do
-    #   user = User.create(@register_login_attrs)
-    #   login_conn = post(conn, Routes.user_path(conn, :login, @register_login_attrs))
-    #   IO.puts "auth #{inspect(Guardian.Plug.authenticated?(login_conn))}"
-    #   IO.puts "conn #{inspect(login_conn)}"
-
-    #   register_conn = post(conn, Routes.user_path(login_conn, :register, @register_login_attrs))
-    #   IO.puts "auth #{inspect(Guardian.Plug.authenticated?(register_conn))}"
-    #   IO.puts "conn #{inspect(register_conn)}"
-    # end
+    @tag :authenticated
+    test "renders errors when user is already authenticated", %{conn: conn} do
+      conn = post(conn, Routes.user_path(conn, :register, @auth_attrs))
+      assert %{"message" => "Cannot register a new account while logged in"} = json_response(conn, 400)
+    end
 
     test "renders errors when username is missing", %{conn: conn} do
       conn = post(conn, Routes.user_path(conn, :register, @invalid_username_attrs))
@@ -143,14 +137,10 @@ defmodule EpochtalkServerWeb.UserControllerTest do
       assert %{"id" => ^id} = json_response(conn, 200)
     end
 
-    test "renders error when invalid username", %{conn: conn} do
-      conn = post(conn, Routes.user_path(conn, :login, @invalid_login_username_attrs))
-      assert %{"message" => "Invalid credentials"} = json_response(conn, 400)
-    end
-
-    test "renders error when missing password", %{conn: conn} do
-      conn = post(conn, Routes.user_path(conn, :login, @invalid_login_password_attrs))
-      assert %{"message" => "Invalid credentials"} = json_response(conn, 400)
+    @tag :authenticated
+    test "renders error when user is already logged in", %{conn: conn} do
+      conn = post(conn, Routes.user_path(conn, :login, @auth_attrs))
+      assert %{"message" => "Already logged in"} = json_response(conn, 400)
     end
 
     test "renders error if user cannot be found", %{conn: conn} do
@@ -177,62 +167,39 @@ defmodule EpochtalkServerWeb.UserControllerTest do
       conn = post(conn, Routes.user_path(conn, :login, @login_attrs))
       assert %{"message" => "User account migration not complete, please reset password"} = json_response(conn, 403)
     end
+
+
+    test "renders error when invalid username", %{conn: conn} do
+      conn = post(conn, Routes.user_path(conn, :login, @invalid_login_username_attrs))
+      assert %{"message" => "Invalid credentials"} = json_response(conn, 400)
+    end
+
+    test "renders error when missing password", %{conn: conn} do
+      conn = post(conn, Routes.user_path(conn, :login, @invalid_login_password_attrs))
+      assert %{"message" => "Invalid credentials"} = json_response(conn, 400)
+    end
   end
 
   describe "logout" do
-    setup [:create_login_user]
-
-    setup %{conn: conn} do
-      login_conn = post(conn, Routes.user_path(conn, :login, @login_attrs))
-      {:ok, conn: login_conn}
+    @tag :authenticated
+    test "logout success", %{conn: conn} do
+      conn = delete(conn, Routes.user_path(conn, :logout))
+      assert %{"success" => true} = json_response(conn, 200)
     end
 
-    test "logout", %{conn: conn} do
-      assert true == Guardian.Plug.authenticated?(conn)
-      conn = Guardian.Plug.sign_out(conn)
-      {:ok, user} = User.by_username(@login_attrs.username)
-      id = user.id
-      assert %{"id" => ^id} = json_response(conn, 200)
+    test "renders error when user is not logged in", %{conn: conn} do
+      conn = delete(conn, Routes.user_path(conn, :logout))
+      assert %{"message" => "Not logged in"} = json_response(conn, 200)
     end
+  end
 
-    test "authenticate", %{conn: conn} do
-      assert true == Guardian.Plug.authenticated?(conn)
-      {:ok, user} = User.by_username(@login_attrs.username)
-      assert Guardian.Plug.current_resource(conn).user_id == user.id
+  describe "authenticate" do
+    @tag :authenticated
+    test "authenticate success", %{conn: conn} do
+      conn = get(conn, Routes.user_path(conn, :authenticate))
+      {:ok, user} = User.by_username(@auth_attrs.username)
+      assert user.id == String.to_integer(json_response(conn, 200)["id"])
     end
-
-    # TODO(crod): Figure out how to get past recycling for testing user_controller.logout
-    # test "logout", %{conn: conn} do
-    #   login_conn = post(conn, Routes.user_path(conn, :login, @login_attrs))
-    #   IO.puts "Auth from test conn: #{inspect(conn)}"
-    #   IO.puts "Auth from test current_token: #{inspect(Guardian.Plug.current_token(conn))}"
-    #   IO.puts "Auth from test current_resource: #{inspect(Guardian.Plug.current_resource(conn))}"
-    #   saved_assigns = conn.assigns
-    #   saved_private = conn.private
-    #   saved_body = conn.resp_body
-    #   conn =
-    #     conn
-    #     |> recycle()
-    #     # |> Map.put(:assigns, saved_assigns)
-    #     |> Map.put(:private, saved_private)
-    #     # |> Map.put(:resp_body, saved_body)
-    #   IO.puts "Auth from test private: #{inspect(conn.private)}"
-    #   IO.puts "Auth from test authenticated?: #{inspect(Guardian.Plug.authenticated?(conn))}"
-    #   IO.puts ""
-
-    #   logout_conn = post(conn, Routes.user_path(conn, :logout))
-    #   assert %{"success" => true} = json_response(logout_conn, 200)
-    # end
-
-    # TODO(crod): Figure out how to get past recycling for testing user_controller.authenticate
-    # test "authenticate", %{conn: conn} do
-    #   login_conn = post(conn, Routes.user_path(conn, :login, @login_attrs))
-    #   IO.puts "Auth from test: #{inspect(login_conn)}"
-    #   IO.puts "Auth from test: #{inspect(Guardian.Plug.authenticated?(login_conn))}"
-    #   auth_conn = get(login_conn, Routes.user_path(login_conn, :authenticate, login))
-    #   IO.puts "Auth Response: #{inspect(json_response(auth_conn, 200))}"
-    #   assert %{"id" => id} = json_response(auth_conn, 200)
-    # end
   end
 
   defp create_user(_) do

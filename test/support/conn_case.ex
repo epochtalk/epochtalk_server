@@ -32,7 +32,22 @@ defmodule EpochtalkServerWeb.ConnCase do
   end
 
   setup tags do
-    EpochtalkServer.DataCase.setup_sandbox(tags)
-    {:ok, conn: Phoenix.ConnTest.build_conn()}
+    alias EpochtalkServer.Session
+    alias EpochtalkServer.Models.User
+
+    :ok = Ecto.Adapters.SQL.Sandbox.checkout(EpochtalkServer.Repo)
+
+    unless tags[:async] do
+      Ecto.Adapters.SQL.Sandbox.mode(EpochtalkServer.Repo, {:shared, self()})
+    end
+
+    if tags[:authenticated] do
+      {:ok, user} = User.create(%{username: "authtest", email: "authtest@test.com", password: "password"})
+      conn = Phoenix.ConnTest.build_conn()
+      {:ok, user, token, conn} = Session.create(user, false, conn)
+      {:ok, conn: conn, user: user, token: token}
+    else
+      {:ok, conn: Phoenix.ConnTest.build_conn()}
+    end
   end
 end

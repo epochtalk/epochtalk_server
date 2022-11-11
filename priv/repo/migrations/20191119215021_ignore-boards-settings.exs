@@ -3,7 +3,7 @@ defmodule :"Elixir.EpochtalkServer.Repo.Migrations.Ignore-boards-settings" do
   @schema_prefix "users"
 
   def change do
-    alter table(:preferences, [prefix: @schema_prefix]) do
+    alter table(:preferences, prefix: @schema_prefix) do
       add :ignored_boards, :jsonb, default: fragment("'{\"boards\": []}'::jsonb")
     end
   end

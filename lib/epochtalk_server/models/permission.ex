@@ -3,13 +3,14 @@ defmodule EpochtalkServer.Models.Permission do
   import Ecto.Changeset
   alias EpochtalkServer.Repo
   alias EpochtalkServer.Models.Permission
+
   @moduledoc """
   `Permission` model, for performing actions relating to `Role` permissions, used for seeding
   """
 
   @type t :: %__MODULE__{
-    path: String.t() | nil
-  }
+          path: String.t() | nil
+        }
   @primary_key false
   schema "permissions" do
     field :path, :string
@@ -20,7 +21,7 @@ defmodule EpochtalkServer.Models.Permission do
   @doc """
   Creates a generic changeset for `Permission` model
   """
-  @spec changeset(permission :: t(), attrs :: map() | nil) :: %Ecto.Changeset{}
+  @spec changeset(permission :: t(), attrs :: map() | nil) :: Ecto.Changeset.t()
   def changeset(permission, attrs \\ %{}) do
     permission
     |> cast(attrs, [:path])

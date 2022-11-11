@@ -3,7 +3,7 @@ defmodule EpochtalkServer.Repo.Migrations.AdsRounds do
   @schema_prefix "ads"
 
   def change do
-    create table(:rounds, [prefix: @schema_prefix, primary_key: false]) do
+    create table(:rounds, prefix: @schema_prefix, primary_key: false) do
       add :round, :serial, primary_key: true
       add :current, :boolean, default: false
       add :start_time, :timestamp

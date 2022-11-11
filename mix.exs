@@ -35,11 +35,13 @@ defmodule EpochtalkServer.MixProject do
     [
       {:argon2_elixir, "~> 3.0.0"},
       {:corsica, "~> 1.2.0"},
+      {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.0", only: [:dev], runtime: false},
       {:ecto_sql, "~> 3.6"},
       {:ex_doc, "~> 0.28.5"},
       {:gen_smtp, "~> 1.2"},
       {:guardian, "~> 2.2"},
+      {:guardian_phoenix, "~> 2.0"},
       {:guardian_db, "~> 2.1"},
       {:guardian_redis, "~> 0.1"},
       {:iteraptor, git: "https://github.com/epochtalk/elixir-iteraptor.git", tag: "1.13.1"},
@@ -67,18 +69,18 @@ defmodule EpochtalkServer.MixProject do
   defp aliases do
     [
       setup: ["deps.get", "ecto.setup"],
-     "ecto.setup": ["ecto.create", "ecto.migrate", "seed.all"],
-     "ecto.reset": ["ecto.drop", "ecto.setup"],
-     "db.migrate": ["ecto.migrate", "ecto.dump"],
-     "db.rollback": ["ecto.rollback", "ecto.dump"],
-     "seed.all": ["seed.prp", "seed.permissions", "seed.roles", "seed.rp", "seed.forum"],
-     "seed.forum": ["run priv/repo/seed_forum.exs"],
-     "seed.permissions": ["run priv/repo/seed_permissions.exs"],
-     "seed.prp": ["run priv/repo/process_roles_permissions.exs"],
-     "seed.roles": ["run priv/repo/seed_roles.exs"],
-     "seed.rp": ["run priv/repo/seed_roles_permissions.exs"],
-     "seed.user": ["run priv/repo/seed_user.exs"],
-     test: ["ecto.create --quiet", "ecto.migrate", "test"],
+      "ecto.setup": ["ecto.create", "ecto.migrate", "seed.all"],
+      "ecto.reset": ["ecto.drop", "ecto.setup"],
+      "db.migrate": ["ecto.migrate", "ecto.dump"],
+      "db.rollback": ["ecto.rollback", "ecto.dump"],
+      "seed.all": ["seed.prp", "seed.permissions", "seed.roles", "seed.rp", "seed.forum"],
+      "seed.forum": ["run priv/repo/seed_forum.exs"],
+      "seed.permissions": ["run priv/repo/seed_permissions.exs"],
+      "seed.prp": ["run priv/repo/process_roles_permissions.exs"],
+      "seed.roles": ["run priv/repo/seed_roles.exs"],
+      "seed.rp": ["run priv/repo/seed_roles_permissions.exs"],
+      "seed.user": ["run priv/repo/seed_user.exs"],
+      test: ["ecto.create --quiet", "ecto.migrate", "test"]
     ]
   end
 end

@@ -5,6 +5,7 @@ defmodule EpochtalkServer.Repo.Migrations.PrivateMessagesDeletedByUserIdsAddDefa
     alter table(:private_conversations) do
       modify :deleted_by_user_ids, {:array, :bigint}, default: []
     end
+
     alter table(:private_messages) do
       modify :deleted_by_user_ids, {:array, :bigint}, default: []
     end

@@ -8,7 +8,7 @@ defmodule EpochtalkServer.Repo.Migrations.BoardSlugs do
       add :slug, :string, size: 100
     end
 
-    #index
+    # index
     create unique_index(:boards, [:slug])
 
     # flush so query populating slug will work
@@ -17,7 +17,8 @@ defmodule EpochtalkServer.Repo.Migrations.BoardSlugs do
     # update existing boards, set slug = id
     from(b in "boards",
       update: [set: [slug: b.id]],
-      where: true)
+      where: true
+    )
     |> EpochtalkServer.Repo.update_all([])
 
     # modify boards after slug update, don't allow null

@@ -3,7 +3,7 @@ defmodule EpochtalkServer.Repo.Migrations.MentionsSchema do
   @schema_prefix "mentions"
 
   def change do
-    create table(:ignored, [prefix: @schema_prefix, primary_key: false]) do
+    create table(:ignored, prefix: @schema_prefix, primary_key: false) do
       add :user_id, :bigint, null: false
       add :ignored_user_id, :bigint, null: false
     end
@@ -28,8 +28,7 @@ defmodule EpochtalkServer.Repo.Migrations.MentionsSchema do
     ON DELETE CASCADE;
     """
 
-
-    create table(:mentions, [prefix: @schema_prefix]) do
+    create table(:mentions, prefix: @schema_prefix) do
       add :thread_id, :bigint, null: false
       add :post_id, :bigint, null: false
       add :mentioner_id, :bigint, null: false

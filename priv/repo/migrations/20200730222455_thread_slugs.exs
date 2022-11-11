@@ -8,7 +8,7 @@ defmodule EpochtalkServer.Repo.Migrations.ThreadSlugs do
       add :slug, :string, size: 100
     end
 
-    #index
+    # index
     create unique_index(:threads, [:slug])
 
     # flush so query populating slug will work
@@ -17,7 +17,8 @@ defmodule EpochtalkServer.Repo.Migrations.ThreadSlugs do
     # update existing threads, set slug = id
     from(t in "threads",
       update: [set: [slug: t.id]],
-      where: true)
+      where: true
+    )
     |> EpochtalkServer.Repo.update_all([])
 
     # modify threads after slug update, don't allow null

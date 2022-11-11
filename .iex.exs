@@ -12,14 +12,18 @@ alias EpochtalkServer.Models.{
   Category,
   Configuration,
   Invitation,
+  Mention,
   MetadataBoard,
+  Notification,
   Permission,
+  Post,
   Preference,
   Profile,
   Role,
   RolePermission,
   RoleUser,
+  Thread,
   User
 }
 
-reload = fn() -> r Enum.map(__ENV__.aliases, fn {_, module} -> module end) end
+reload = fn -> r(Enum.map(__ENV__.aliases, fn {_, module} -> module end)) end

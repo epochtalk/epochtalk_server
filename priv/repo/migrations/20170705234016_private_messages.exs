@@ -7,7 +7,9 @@ defmodule EpochtalkServer.Repo.Migrations.PrivateMessages do
     end
 
     create table(:private_messages) do
-      add :conversation_id, references(:private_conversations, on_delete: :delete_all), null: false
+      add :conversation_id, references(:private_conversations, on_delete: :delete_all),
+        null: false
+
       add :sender_id, references(:users, on_delete: :delete_all)
       add :receiver_id, references(:users, on_delete: :delete_all)
       add :copied_ids, {:array, :bigint}

@@ -6,6 +6,7 @@ defmodule EpochtalkServer.Models.RoleUser do
   alias EpochtalkServer.Models.User
   alias EpochtalkServer.Models.Role
   alias EpochtalkServer.Models.RoleUser
+
   @moduledoc """
   `RoleUser` model, for performing actions relating a setting a `Role` for a `User`
   """
@@ -13,9 +14,9 @@ defmodule EpochtalkServer.Models.RoleUser do
   @admin_role_id 1
 
   @type t :: %__MODULE__{
-    user: User.t() | term(),
-    role: Role.t() | term()
-  }
+          user: User.t() | term(),
+          role: Role.t() | term()
+        }
   @primary_key false
   schema "roles_users" do
     belongs_to :user, User
@@ -27,7 +28,7 @@ defmodule EpochtalkServer.Models.RoleUser do
   @doc """
   Creates a generic changeset for `RoleUser` model
   """
-  @spec changeset(role_user :: t(), attrs :: map() | nil) :: %Ecto.Changeset{}
+  @spec changeset(role_user :: t(), attrs :: map() | nil) :: Ecto.Changeset.t()
   def changeset(role_user, attrs \\ %{}) do
     role_user
     |> cast(attrs, [:user_id, :role_id])
@@ -46,9 +47,9 @@ defmodule EpochtalkServer.Models.RoleUser do
   Assigns a specific `User` to have the specified `Role`
   """
   @spec set_user_role(
-    role_id :: integer,
-    user_id :: integer
-  ) :: {:ok, role_user :: t()} | {:error, Ecto.Changeset.t()}
+          role_id :: integer,
+          user_id :: integer
+        ) :: {:ok, role_user :: t()} | {:error, Ecto.Changeset.t()}
   def set_user_role(role_id, user_id) do
     case Repo.one(from(ru in RoleUser, where: ru.role_id == ^role_id and ru.user_id == ^user_id)) do
       nil -> Repo.insert(changeset(%RoleUser{}, %{role_id: role_id, user_id: user_id}))
@@ -60,12 +61,14 @@ defmodule EpochtalkServer.Models.RoleUser do
   Removes specified `Role` from specified `User`
   """
   @spec delete_user_role(
-    role_id :: integer,
-    user_id :: integer
-  ) :: {non_neg_integer(), nil | [term()]}
+          role_id :: integer,
+          user_id :: integer
+        ) :: {non_neg_integer(), nil | [term()]}
   def delete_user_role(role_id, user_id) do
-    query = from ru in RoleUser,
-      where: ru.role_id == ^role_id and ru.user_id == ^user_id
+    query =
+      from ru in RoleUser,
+        where: ru.role_id == ^role_id and ru.user_id == ^user_id
+
     Repo.delete_all(query)
   end
 end

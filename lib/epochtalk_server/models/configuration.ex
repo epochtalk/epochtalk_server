@@ -4,15 +4,16 @@ defmodule EpochtalkServer.Models.Configuration do
   import Ecto.Changeset
   alias EpochtalkServer.Repo
   alias EpochtalkServer.Models.Configuration
- @moduledoc """
+
+  @moduledoc """
   `Configuration` model, for performing actions relating to frontend `Configuration`
   """
 
   @type t :: %__MODULE__{
-    id: non_neg_integer | nil,
-    name: String.t() | nil,
-    config: map() | nil
-  }
+          id: non_neg_integer | nil,
+          name: String.t() | nil,
+          config: map() | nil
+        }
   schema "configurations" do
     field :name, :string
     field :config, :map
@@ -24,9 +25,9 @@ defmodule EpochtalkServer.Models.Configuration do
   Create changeset for creating a new `Configuration` model
   """
   @spec create_changeset(
-    configuration :: t(),
-    attrs :: map() | nil
-  ) :: %Ecto.Changeset{}
+          configuration :: t(),
+          attrs :: map() | nil
+        ) :: Ecto.Changeset.t()
   def create_changeset(configuration, attrs \\ %{}) do
     configuration
     |> cast(attrs, [:name, :config])
@@ -39,10 +40,9 @@ defmodule EpochtalkServer.Models.Configuration do
   @doc """
   Creates a new `Configuration` into the database
   """
-  @spec create(
-    configuration :: t()
-  ) :: {:ok, configuration :: t()} | {:error, Ecto.Changeset.t()}
-  def create(%Configuration{} = configuration), do: configuration |> create_changeset() |> Repo.insert()
+  @spec create(configuration :: t()) :: {:ok, configuration :: t()} | {:error, Ecto.Changeset.t()}
+  def create(%Configuration{} = configuration),
+    do: configuration |> create_changeset() |> Repo.insert()
 
   @doc """
   Gets a `Configuration` from the database by `name`
@@ -59,12 +59,11 @@ defmodule EpochtalkServer.Models.Configuration do
   @doc """
   Inserts a default `Configuration` into the database given `config_map`
   """
-  @spec set_default(
-    config_map :: map()
-  ) :: {:ok, configuration :: t()} | {:error, Ecto.Changeset.t()}
+  @spec set_default(config_map :: map()) ::
+          {:ok, configuration :: t()} | {:error, Ecto.Changeset.t()}
   def set_default(config_map) when is_map(config_map) do
     %Configuration{}
-    |> create_changeset(%{ name: "default", config: config_map })
+    |> create_changeset(%{name: "default", config: config_map})
     |> Repo.insert(returning: [:config])
   end
 
@@ -78,26 +77,41 @@ defmodule EpochtalkServer.Models.Configuration do
   """
   @spec warm_frontend_config() :: :ok
   def warm_frontend_config() do
-    frontend_config = case Configuration.get_default() do
-      nil -> # no configurations in database
-        debug("Frontend Configurations not found, setting defaults in Database")
-        frontend_config = Application.get_env(:epochtalk_server, :frontend_config)
-        case Configuration.set_default(frontend_config) do
-          {:ok, configuration} -> configuration.config
-          {:error, _} -> raise("There was an issue with :epochtalk_server[:frontend_configs], please check config/config.exs")
-        end
-      configuration -> # configuration found in database
-        debug("Loading Frontend Configurations from Database")
-        configuration.config
-    end
+    frontend_config =
+      case Configuration.get_default() do
+        # no configurations in database
+        nil ->
+          debug("Frontend Configurations not found, setting defaults in Database")
+          frontend_config = Application.get_env(:epochtalk_server, :frontend_config)
+
+          case Configuration.set_default(frontend_config) do
+            {:ok, configuration} ->
+              configuration.config
+
+            {:error, _} ->
+              raise(
+                "There was an issue with :epochtalk_server[:frontend_configs], please check config/config.exs"
+              )
+          end
+
+        # configuration found in database
+        configuration ->
+          debug("Loading Frontend Configurations from Database")
+          configuration.config
+      end
+
     Application.put_env(:epochtalk_server, :frontend_config, frontend_config)
     set_git_revision()
-    debug "Frontend Configuration:\n"
-      <> inspect(
+
+    debug(
+      "Frontend Configuration:\n" <>
+        inspect(
           Application.get_env(:epochtalk_server, :frontend_config),
           pretty: true,
-          syntax_colors: IO.ANSI.syntax_colors
+          syntax_colors: IO.ANSI.syntax_colors()
         )
+    )
+
     :ok
   end
 
@@ -106,7 +120,6 @@ defmodule EpochtalkServer.Models.Configuration do
   defp set_git_revision() do
     # tag
     {tag, _} = System.cmd("git", ["tag", "--points-at", "HEAD", "v[0-9]*"])
-    IO.inspect tag
     [tag | _] = tag |> String.split("\n")
 
     # revision
@@ -116,10 +129,12 @@ defmodule EpochtalkServer.Models.Configuration do
     # TODO(boka): directory release version
 
     # tag takes precidence over revision
-    revision = unless tag == "", do: tag, else: hash
+    revision = if tag == "", do: hash, else: tag
 
-    frontend_config = Application.get_env(:epochtalk_server, :frontend_config)
+    frontend_config =
+      Application.get_env(:epochtalk_server, :frontend_config)
       |> Map.put("revision", revision)
+
     Application.put_env(:epochtalk_server, :frontend_config, frontend_config)
   end
 end

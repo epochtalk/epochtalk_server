@@ -1,10 +1,10 @@
 defmodule EpochtalkServer.Repo.Migrations.AdminReportsMessagesNotes do
   use Ecto.Migration
-  
+
   @schema_prefix "administration"
 
   def change do
-    create table(:reports_messages_notes, [prefix: @schema_prefix]) do
+    create table(:reports_messages_notes, prefix: @schema_prefix) do
       add :report_id, :bigint, null: false
       add :user_id, :bigint
       add :note, :text, default: "", null: false

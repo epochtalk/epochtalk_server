@@ -8,6 +8,10 @@ defmodule EpochtalkServerWeb.Endpoint do
   # cors configuration
   plug Corsica, origins: "*", allow_headers: :all
 
+  socket "/socket", EpochtalkServerWeb.UserSocket,
+    websocket: true,
+    longpoll: false
+
   # socket "/live", Phoenix.LiveView.Socket, websocket: [connect_info: [session: @session_options]]
 
   # Serve at "/" the static files from "priv/static" directory.
@@ -29,7 +33,9 @@ defmodule EpochtalkServerWeb.Endpoint do
 
   plug Plug.RequestId
   plug Plug.Telemetry, event_prefix: [:phoenix, :endpoint]
-  plug EpochtalkServerWeb.Plugs.PrepareParse # handle malformed json payload
+  # handle malformed json payload
+  plug EpochtalkServerWeb.Plugs.PrepareParse
+
   plug Plug.Parsers,
     parsers: [:urlencoded, :multipart, :json],
     pass: ["*/*"],
@@ -42,4 +48,5 @@ defmodule EpochtalkServerWeb.Endpoint do
 end
 
 # used to help preparse raw req body, in case of malformed payload
-defmodule EpochtalkServerWeb.Endpoint.CacheBodyReader, do: def read_body(conn, _opts), do: {:ok, conn.assigns.raw_body, conn}
+defmodule EpochtalkServerWeb.Endpoint.CacheBodyReader,
+  do: def(read_body(conn, _opts), do: {:ok, conn.assigns.raw_body, conn})

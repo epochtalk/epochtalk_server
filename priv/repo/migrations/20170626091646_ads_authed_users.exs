@@ -3,14 +3,14 @@ defmodule EpochtalkServer.Repo.Migrations.AdsAuthedUsers do
   @schema_prefix "ads"
 
   def change do
-    create table(:authed_users, [prefix: @schema_prefix, primary_key: false]) do
+    create table(:authed_users, prefix: @schema_prefix, primary_key: false) do
       add :ad_id, :bigint, null: false
       add :user_id, :bigint, null: false
     end
 
     create index(:authed_users, [:ad_id], prefix: @schema_prefix)
     create unique_index(:authed_users, [:ad_id, :user_id], prefix: @schema_prefix)
-    
+
     execute """
     ALTER TABLE ONLY #{@schema_prefix}.authed_users
     ADD CONSTRAINT authed_users_ad_id_fkey

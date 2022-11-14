@@ -3,7 +3,7 @@ defmodule EpochtalkServer.Repo.Migrations.ModSchema do
   @schema_prefix "mod"
 
   def change do
-    create table(:notes, [prefix: @schema_prefix]) do
+    create table(:notes, prefix: @schema_prefix) do
       add :moderator_id, :bigint
       add :subject, :string
       add :body, :text, default: ""
@@ -19,7 +19,7 @@ defmodule EpochtalkServer.Repo.Migrations.ModSchema do
     REFERENCES public.users(id);
     """
 
-    create table(:reports, [prefix: @schema_prefix]) do
+    create table(:reports, prefix: @schema_prefix) do
       add :user_id, :bigint
       add :thread_id, :bigint
       add :post_id, :bigint

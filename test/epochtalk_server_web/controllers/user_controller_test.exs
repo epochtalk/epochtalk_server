@@ -209,7 +209,7 @@ defmodule EpochtalkServerWeb.UserControllerTest do
     test "authenticate success", %{conn: conn} do
       conn = get(conn, Routes.user_path(conn, :authenticate))
       {:ok, user} = User.by_username(@auth_attrs.username)
-      assert user.id == String.to_integer(json_response(conn, 200)["id"])
+      assert user.id == json_response(conn, 200)["id"]
     end
 
     test "renders error when user is not loegged in", %{conn: conn} do

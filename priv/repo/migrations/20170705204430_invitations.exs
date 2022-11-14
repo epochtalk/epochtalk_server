@@ -9,7 +9,10 @@ defmodule EpochtalkServer.Repo.Migrations.Invitations do
     end
 
     # CONSTRAINT invitations_email_check CHECK ((length((email)::text) <= 255))
-    create constraint(:invitations, :invitations_email_check, check: "(length((email)::text) <= 255)")
+    create constraint(:invitations, :invitations_email_check,
+             check: "(length((email)::text) <= 255)"
+           )
+
     create index(:invitations, [:hash])
     create unique_index(:invitations, [:email])
     create index(:invitations, [:created_at])

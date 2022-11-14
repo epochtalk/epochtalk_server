@@ -31,7 +31,7 @@ defmodule EpochtalkServer.Repo.Migrations.Users do
     create unique_index(:user_activity, [:user_id])
 
     create table(:user_notes) do
-      add :user_id, references(:users,  on_delete: :delete_all)
+      add :user_id, references(:users, on_delete: :delete_all)
       add :author_id, references(:users, on_delete: :delete_all)
       add :note, :text, default: "", null: false
       add :created_at, :timestamp

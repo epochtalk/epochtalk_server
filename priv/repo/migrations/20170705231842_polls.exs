@@ -5,12 +5,14 @@ defmodule EpochtalkServer.Repo.Migrations.Polls do
     create table(:polls) do
       add :thread_id, references(:threads), null: false
       add :question, :text, null: false
-      add :locked , :boolean, default: false
+      add :locked, :boolean, default: false
       add :max_answers, :integer, default: 1, null: false
       add :expiration, :timestamp
       add :change_vote, :boolean, default: false, null: false
       # display_mode polls_display_enum DEFAULT 'always'::polls_display_enum NOT NULL
-      add :display_mode, :polls_display_enum, default: fragment("'always'::polls_display_enum"), null: false
+      add :display_mode, :polls_display_enum,
+        default: fragment("'always'::polls_display_enum"),
+        null: false
     end
 
     create unique_index(:polls, [:thread_id])

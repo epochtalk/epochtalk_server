@@ -12,14 +12,14 @@ defmodule EpochtalkServerWeb.Helpers.Pagination do
 
   ## Example
       iex> import Ecto.Query
-      iex> alias EpochtalkServer.Models.{ User, Role }
+      iex> alias EpochtalkServer.Models.{ Mention, Invitation }
       iex> alias EpochtalkServerWeb.Helpers.Pagination
-      iex> User
+      iex> Mention
       ...> |> order_by(asc: :id)
       ...> |> Pagination.page_simple(1, per_page: 25)
       {:ok, [], %{limit: 25, next: false, page: 1, prev: false}}
-      iex> Role
-      ...> |> order_by(desc: :lookup)
+      iex> Invitation
+      ...> |> order_by(desc: :email)
       ...> |> Pagination.page_simple(1, per_page: 10)
       {:ok, [], %{limit: 10, next: false, page: 1, prev: false}}
   """

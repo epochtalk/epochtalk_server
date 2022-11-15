@@ -27,7 +27,7 @@ defmodule EpochtalkServerWeb.UserSocket do
   @impl true
   def connect(%{"token" => token}, socket, _connect_info) do
     case Guardian.Phoenix.Socket.authenticate(socket, EpochtalkServer.Auth.Guardian, token) do
-      {:ok, authed_socket} -> {:ok, authed_socket}
+      {:ok, authed_socket } -> {:ok, authed_socket |> assign(:user_id, authed_socket.assigns[:guardian_default_resource].id)}
       {:error, _reason} -> :error
     end
   end

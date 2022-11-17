@@ -67,6 +67,7 @@ defmodule EpochtalkServerWeb.UserControllerTest do
     setup [:create_user]
 
     test "renders error of malicious IP", %{conn: conn} do
+      Repo.all(EpochtalkServer.Models.BannedAddress) |> IO.inspect
       {:ok, user} = User.by_username(@create_attrs.username)
       {:ok, user} = User.handle_malicious_user(user, conn.remote_ip)
       assert user.id == user.ban_info.user_id

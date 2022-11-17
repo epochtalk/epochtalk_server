@@ -64,6 +64,8 @@ defmodule EpochtalkServer.Models.BannedAddress do
           |> Map.put(:ip2, Enum.at(ip, 1))
           |> Map.put(:ip3, Enum.at(ip, 2))
           |> Map.put(:ip4, Enum.at(ip, 3))
+        IO.puts("banned address ip")
+        IO.inspect(attrs)
 
         ip_changeset(banned_address, attrs)
 
@@ -214,7 +216,8 @@ defmodule EpochtalkServer.Models.BannedAddress do
       {:ok, ip} ->
         hostname_score =
           case :inet_res.gethostbyaddr(ip) do
-            {:ok, host} -> hostname_from_host(host) |> calculate_hostname_score
+            {:ok, host} ->
+              hostname_from_host(host) |> IO.inspect |> calculate_hostname_score
             # no hostname found, return nil for hostname score
             {:error, _} -> 0
           end

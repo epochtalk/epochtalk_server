@@ -212,11 +212,10 @@ defmodule EpochtalkServer.Models.BannedAddress do
   def calculate_malicious_score_from_ip(ip) when is_binary(ip) do
     case :inet.parse_address(to_charlist(ip)) do
       {:ok, ip} ->
-        IO.inspect(ip)
         hostname_score =
           case :inet.gethostbyaddr(ip) do
             {:ok, host} ->
-              hostname_from_host(host) |> IO.inspect |> calculate_hostname_score
+              hostname_from_host(host) |> calculate_hostname_score
 
             # no hostname found, return nil for hostname score
             {:error, _} ->

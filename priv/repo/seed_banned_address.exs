@@ -3,7 +3,7 @@ alias EpochtalkServer.Repo
 
 banned_address =
   %{
-    hostname: "localhost",
+    # either use hostname OR ip; not both
     ip: "127.0.0.1",
     weight: 1.0,
     created_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second),

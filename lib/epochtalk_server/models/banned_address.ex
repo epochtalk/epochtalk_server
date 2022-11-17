@@ -214,7 +214,7 @@ defmodule EpochtalkServer.Models.BannedAddress do
       {:ok, ip} ->
         IO.inspect(ip)
         hostname_score =
-          case :inet_res.gethostbyaddr(ip) do
+          case :inet.gethostbyaddr(ip) do
             {:ok, host} ->
               hostname_from_host(host) |> IO.inspect |> calculate_hostname_score
 

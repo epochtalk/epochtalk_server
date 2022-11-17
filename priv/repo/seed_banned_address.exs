@@ -18,7 +18,6 @@ banned_hostname =
     imported_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
   }
 
-
 try do
   Repo.insert(BannedAddress.upsert_changeset(%BannedAddress{}, banned_ip), returning: true)
   |> case do
@@ -39,4 +38,3 @@ rescue
     IO.puts("Error seeding Banned Address. Banned Address may already be seeded.")
     raise Postgrex.Error
 end
-

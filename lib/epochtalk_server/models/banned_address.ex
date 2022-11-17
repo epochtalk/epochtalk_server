@@ -216,8 +216,10 @@ defmodule EpochtalkServer.Models.BannedAddress do
           case :inet_res.gethostbyaddr(ip) do
             {:ok, host} ->
               hostname_from_host(host) |> calculate_hostname_score
+
             # no hostname found, return nil for hostname score
-            {:error, _} -> 0
+            {:error, _} ->
+              0
           end
 
         ip32_score = calculate_ip32_score(ip)

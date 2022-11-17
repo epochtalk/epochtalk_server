@@ -71,6 +71,8 @@ defmodule EpochtalkServerWeb.UserControllerTest do
       {:ok, user} = User.by_username(@create_attrs.username)
       {:ok, user} = User.handle_malicious_user(user, conn.remote_ip)
       assert user.id == user.ban_info.user_id
+      # check that ip and hostname were banned
+      assert user.malicious_score == 4.0416
     end
   end
 

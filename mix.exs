@@ -74,13 +74,21 @@ defmodule EpochtalkServer.MixProject do
       "db.migrate": ["ecto.migrate", "ecto.dump"],
       "db.rollback": ["ecto.rollback", "ecto.dump"],
       "seed.all": ["seed.prp", "seed.permissions", "seed.roles", "seed.rp", "seed.forum"],
+      "seed.banned_address": ["run priv/repo/seed_banned_address.exs"],
       "seed.forum": ["run priv/repo/seed_forum.exs"],
       "seed.permissions": ["run priv/repo/seed_permissions.exs"],
       "seed.prp": ["run priv/repo/process_roles_permissions.exs"],
       "seed.roles": ["run priv/repo/seed_roles.exs"],
       "seed.rp": ["run priv/repo/seed_roles_permissions.exs"],
       "seed.user": ["run priv/repo/seed_user.exs"],
-      test: ["ecto.create --quiet", "ecto.migrate", "test"]
+      test: [
+        "ecto.drop",
+        "ecto.create --quiet",
+        "ecto.migrate --quiet",
+        "seed.banned_address",
+        "seed.all",
+        "test"
+      ]
     ]
   end
 end

@@ -20,16 +20,21 @@ defmodule EpochtalkServerWeb.NotificationController do
 
   @doc """
   Used to dismiss `Notification` counts for a specific `User`
-  TODO(akinsey): add websocket broadcast to "refreshMentions"
   """
   def dismiss(conn, %{"id" => id}) do
-    with {_count, nil} <- Notification.dismiss(id),
-      do: render(conn, "dismiss.json", data: %{success: true}),
-      else: (_ -> ErrorHelpers.render_json_error(conn, 500, "Something went wrong, could not dismiss notifications"))
+    with {:auth, user} <- {:auth, Guardian.Plug.current_resource(conn)},
+         {_count, nil} <- Notification.dismiss(id) do
+      EpochtalkServerWeb.Endpoint.broadcast("user:#{user.id}", "refreshMentions", %{})
+      render(conn, "dismiss.json", data: %{success: true})
+    else
+      {:auth, nil} -> ErrorHelpers.render_json_error(conn, 400, "Not logged in, cannot dismiss notification counts")
+      _ -> ErrorHelpers.render_json_error(conn, 500, "Something went wrong, could not dismiss notifications")
+    end
   end
   def dismiss(conn, %{"type" => type}) do
     with {:auth, user} <- {:auth, Guardian.Plug.current_resource(conn)},
          {_count, nil} <- Notification.dismiss_type_by_user_id(user.id, type) do
+      EpochtalkServerWeb.Endpoint.broadcast("user:#{user.id}", "refreshMentions", %{})
       render(conn, "dismiss.json", data: %{success: true})
     else
       {:auth, nil} -> ErrorHelpers.render_json_error(conn, 400, "Not logged in, cannot dismiss notification counts")

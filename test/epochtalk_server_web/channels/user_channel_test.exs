@@ -1,27 +1,17 @@
 defmodule EpochtalkServerWeb.UserChannelTest do
   use EpochtalkServerWeb.ChannelCase
 
-  # setup do
-  #   {:ok, _, socket} =
-  #     EpochtalkServerWeb.UserSocket
-  #     |> socket("user_id", %{some: :assign})
-  #     |> subscribe_and_join(EpochtalkServerWeb.UserChannel, "user:lobby")
+  setup do
+    {:ok, _, socket} =
+      EpochtalkServerWeb.UserSocket
+      |> socket("user_id", %{user_id: 1})
+      |> subscribe_and_join(EpochtalkServerWeb.UserChannel, "user:public")
 
-  #   %{socket: socket}
-  # end
+    %{socket: socket}
+  end
 
-  # test "ping replies with status ok", %{socket: socket} do
-  #   ref = push(socket, "ping", %{"hello" => "there"})
-  #   assert_reply ref, :ok, %{"hello" => "there"}
-  # end
-
-  # test "shout broadcasts to user:lobby", %{socket: socket} do
-  #   push(socket, "shout", %{"hello" => "all"})
-  #   assert_broadcast "shout", %{"hello" => "all"}
-  # end
-
-  # test "broadcasts are pushed to the client", %{socket: socket} do
-  #   broadcast_from!(socket, "broadcast", %{"some" => "data"})
-  #   assert_push "broadcast", %{"some" => "data"}
-  # end
+  test "is_online replies with online false", %{socket: socket} do
+    ref = push(socket, "is_online", %{"user_id" => 2})
+    assert_reply ref, :ok, %{id: 2, online: false}
+  end
 end

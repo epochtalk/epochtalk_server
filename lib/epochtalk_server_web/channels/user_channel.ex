@@ -1,5 +1,6 @@
 defmodule EpochtalkServerWeb.UserChannel do
   use EpochtalkServerWeb, :channel
+
   @moduledoc """
   Handles `User` websocket channels. These channels are used to broadcast events to
   the client. With the current design, API route can broadcast messages when an
@@ -62,7 +63,8 @@ defmodule EpochtalkServerWeb.UserChannel do
   contains the `lookup` of the role, if the client will check the user's roles for the
   role `lookup` and reauthenticate if necessary.
   """
-  @spec join_role_channel(socket :: Phoenix.Socket.t()) :: {:ok, Phoenix.Socket.t()} | {:error, data :: map()}
+  @spec join_role_channel(socket :: Phoenix.Socket.t()) ::
+          {:ok, Phoenix.Socket.t()} | {:error, data :: map()}
   def join_role_channel(socket) do
     if authorized?(socket) do
       {:ok, socket}
@@ -76,7 +78,8 @@ defmodule EpochtalkServerWeb.UserChannel do
   This is a channel private to the specific `User` used to broadcast events
   such as reauthenticate or logout.
   """
-  @spec join_user_channel(socket :: Phoenix.Socket.t(), user_id :: String.t()) :: {:ok, Phoenix.Socket.t()} | {:error, data :: map()}
+  @spec join_user_channel(socket :: Phoenix.Socket.t(), user_id :: String.t()) ::
+          {:ok, Phoenix.Socket.t()} | {:error, data :: map()}
   def join_user_channel(socket, user_id) do
     if authorized?(socket) do
       {:ok, socket}
@@ -101,12 +104,17 @@ defmodule EpochtalkServerWeb.UserChannel do
   `User` with `user_id` is connected using Presence. Returns `user_id`
   and `online`, a boolean indicating if the `User` is connected.
   """
-  @spec is_online(socket :: Phoenix.Socket.t(), user_id :: non_neg_integer) :: {:reply, {:ok, %{id: non_neg_integer, online: boolean}}, socket :: Phoenix.Socket.t()}
+  @spec is_online(socket :: Phoenix.Socket.t(), user_id :: non_neg_integer) ::
+          {:reply, {:ok, %{id: non_neg_integer, online: boolean}}, socket :: Phoenix.Socket.t()}
   def is_online(socket, user_id) do
-    online = case Presence.get_by_key("user:public", user_id) do
-      [] -> false # empty array is returned if user isn't in channel
-      _meta -> true # meta map is returned if user is online
-    end
+    online =
+      case Presence.get_by_key("user:public", user_id) do
+        # empty array is returned if user isn't in channel
+        [] -> false
+        # meta map is returned if user is online
+        _meta -> true
+      end
+
     # Return response to client who sent `is_online` message
     {:reply, {:ok, %{id: user_id, online: online}}, socket}
   end

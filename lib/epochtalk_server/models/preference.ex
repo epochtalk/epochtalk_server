@@ -9,18 +9,18 @@ defmodule EpochtalkServer.Models.Preference do
   `Preference` model, for performing actions relating to a user's preferences
   """
   @type t :: %__MODULE__{
-    user_id: non_neg_integer | nil,
-    posts_per_page: non_neg_integer | nil,
-    threads_per_page: non_neg_integer | nil,
-    collapsed_categories: %{} | nil,
-    ignored_boards: %{} | nil,
-    timezone_offset: String.t() | nil,
-    notify_replied_threads: boolean | nil,
-    ignore_newbies: boolean | nil,
-    patroller_view: boolean | nil,
-    email_mentions: boolean | nil,
-    email_messages: boolean | nil
-  }
+          user_id: non_neg_integer | nil,
+          posts_per_page: non_neg_integer | nil,
+          threads_per_page: non_neg_integer | nil,
+          collapsed_categories: %{} | nil,
+          ignored_boards: %{} | nil,
+          timezone_offset: String.t() | nil,
+          notify_replied_threads: boolean | nil,
+          ignore_newbies: boolean | nil,
+          patroller_view: boolean | nil,
+          email_mentions: boolean | nil,
+          email_messages: boolean | nil
+        }
   @primary_key false
   @schema_prefix "users"
   schema "preferences" do
@@ -45,18 +45,27 @@ defmodule EpochtalkServer.Models.Preference do
   @spec changeset(preference :: t(), attrs :: map() | nil) :: Ecto.Changeset.t()
   def changeset(preference, attrs \\ %{}) do
     preference
-    |> cast(attrs, [:user_id, :posts_per_page, :threads_per_page,
-      :collapsed_categories, :ignored_boards, :timezone_offset,
-      :notify_replied_threads, :ignore_newbies, :patroller_view,
-      :email_mentions, :email_messages])
+    |> cast(attrs, [
+      :user_id,
+      :posts_per_page,
+      :threads_per_page,
+      :collapsed_categories,
+      :ignored_boards,
+      :timezone_offset,
+      :notify_replied_threads,
+      :ignore_newbies,
+      :patroller_view,
+      :email_mentions,
+      :email_messages
+    ])
     |> validate_required([:user_id])
   end
 
   @doc """
   Fetches `Preference` associated with a specific `User`
   """
-  @spec by_user_id(
-    user_id :: integer
-  ) :: {:ok, preference_changeset :: Ecto.Changeset.t()} | {:error, preference_changeset :: Ecto.Changeset.t()}
+  @spec by_user_id(user_id :: integer) ::
+          {:ok, preference_changeset :: Ecto.Changeset.t()}
+          | {:error, preference_changeset :: Ecto.Changeset.t()}
   def by_user_id(user_id) when is_integer(user_id), do: Repo.get_by(Preference, user_id: user_id)
 end

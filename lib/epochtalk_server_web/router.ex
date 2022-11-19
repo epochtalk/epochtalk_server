@@ -1,13 +1,15 @@
 defmodule EpochtalkServerWeb.Router do
   use EpochtalkServerWeb, :router
-  @env Mix.env
+  @env Mix.env()
   pipeline :api do
     plug :accepts, ["json"]
   end
 
   pipeline :maybe_auth do
-    plug Guardian.Plug.Pipeline, module: EpochtalkServer.Auth.Guardian,
-                               error_handler: EpochtalkServerWeb.GuardianErrorHandler
+    plug Guardian.Plug.Pipeline,
+      module: EpochtalkServer.Auth.Guardian,
+      error_handler: EpochtalkServerWeb.GuardianErrorHandler
+
     plug Guardian.Plug.VerifyHeader, claims: %{"typ" => "access"}
     plug Guardian.Plug.LoadResource, allow_blank: true
   end

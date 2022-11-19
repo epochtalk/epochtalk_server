@@ -6,6 +6,7 @@ defmodule EpochtalkServer.Repo.Migrations.Configurations do
       add :name, :string
       add :config, :jsonb
     end
+
     create unique_index(:configurations, [:name])
   end
 end

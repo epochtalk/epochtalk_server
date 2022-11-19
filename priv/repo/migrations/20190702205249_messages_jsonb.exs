@@ -3,7 +3,7 @@ defmodule EpochtalkServer.Repo.Migrations.MessagesJsonb do
   @schema_prefix "messages"
 
   def up do
-    alter table(:private_messages, [prefix: @schema_prefix]) do
+    alter table(:private_messages, prefix: @schema_prefix) do
       remove :body
       remove :subject
       add :content, :jsonb
@@ -11,7 +11,7 @@ defmodule EpochtalkServer.Repo.Migrations.MessagesJsonb do
   end
 
   def down do
-    alter table(:private_messages, [prefix: @schema_prefix]) do
+    alter table(:private_messages, prefix: @schema_prefix) do
       remove :content
       add :body, :text, default: "", null: false
       add :subject, :string, null: false

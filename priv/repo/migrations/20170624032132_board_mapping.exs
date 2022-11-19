@@ -3,7 +3,9 @@ defmodule EpochtalkServer.Repo.Migrations.BoardMapping do
 
   def change do
     create table(:board_mapping, primary_key: false) do
-      add :board_id, references(:boards, on_update: :update_all, on_delete: :delete_all), null: false
+      add :board_id, references(:boards, on_update: :update_all, on_delete: :delete_all),
+        null: false
+
       add :parent_id, references(:boards, on_update: :update_all, on_delete: :delete_all)
       add :category_id, references(:categories, on_update: :update_all, on_delete: :delete_all)
       add :view_order, :integer, null: false

@@ -3,7 +3,7 @@ defmodule EpochtalkServer.Repo.Migrations.UserTimezoneOffset do
   @schema_prefix "users"
 
   def change do
-    alter table(:preferences, [prefix: @schema_prefix]) do
+    alter table(:preferences, prefix: @schema_prefix) do
       add :timezone_offset, :string, default: ""
     end
   end

@@ -3,7 +3,7 @@ defmodule EpochtalkServer.Repo.Migrations.AdsUniqueIp do
   @schema_prefix "ads"
 
   def change do
-    create table(:unique_ip, [prefix: @schema_prefix, primary_key: false]) do
+    create table(:unique_ip, prefix: @schema_prefix, primary_key: false) do
       add :ad_id, :bigint, null: false
       add :unique_ip, :string, null: false
     end
@@ -17,6 +17,7 @@ defmodule EpochtalkServer.Repo.Migrations.AdsUniqueIp do
     FOREIGN KEY (ad_id)
     REFERENCES public.ads(id) ON DELETE CASCADE;
     """
+
     execute("
     CREATE FUNCTION update_unique_ip_score_on_ad() RETURNS trigger
         LANGUAGE plpgsql

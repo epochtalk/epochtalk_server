@@ -5,6 +5,7 @@ defmodule EpochtalkServer.Models.Notification do
   alias EpochtalkServer.Repo
   alias EpochtalkServer.Models.Notification
   alias EpochtalkServer.Models.User
+
   @types %{
     message: "message",
     mention: "mention"
@@ -14,14 +15,14 @@ defmodule EpochtalkServer.Models.Notification do
   `Notification` model, for performing actions relating to forum categories
   """
   @type t :: %__MODULE__{
-    id: non_neg_integer | nil,
-    sender_id: non_neg_integer | nil,
-    receiver_id: non_neg_integer | nil,
-    data: map() | nil,
-    viewed: boolean | nil,
-    type: String.t() | nil,
-    created_at: NaiveDateTime.t() | nil
-  }
+          id: non_neg_integer | nil,
+          sender_id: non_neg_integer | nil,
+          receiver_id: non_neg_integer | nil,
+          data: map() | nil,
+          viewed: boolean | nil,
+          type: String.t() | nil,
+          created_at: NaiveDateTime.t() | nil
+        }
   schema "notifications" do
     belongs_to :sender, User
     belongs_to :receiver, User
@@ -49,20 +50,25 @@ defmodule EpochtalkServer.Models.Notification do
   """
   @spec counts_by_user_id(user_id :: non_neg_integer, max: non_neg_integer) :: map()
   def counts_by_user_id(user_id, max: max) when is_integer(user_id) do
-    query = from n in Notification,
-      where: n.receiver_id == ^user_id and n.viewed == false,
-      limit: ^max + 1
+    query =
+      from n in Notification,
+        where: n.receiver_id == ^user_id and n.viewed == false,
+        limit: ^max + 1
+
     query
     |> Repo.all()
     |> case do
-      [] -> %{message: 0, mentions: 0}
+      [] ->
+        %{message: 0, mentions: 0}
+
       notifications ->
         {messages, mentions} = Enum.split_with(notifications, &(&1.type == @types.message))
         msg_count = length(messages)
         men_count = length(mentions)
+
         %{
-          message: (if msg_count > max, do: "#{max}+", else: msg_count),
-          mention: (if men_count > max, do: "#{max}+", else: men_count)
+          message: if(msg_count > max, do: "#{max}+", else: msg_count),
+          mention: if(men_count > max, do: "#{max}+", else: men_count)
         }
     end
   end
@@ -71,11 +77,14 @@ defmodule EpochtalkServer.Models.Notification do
   Dismisses `Notification` counts for a specific `User` by `id`. Used
   to display clear message/mention notifications.
   """
-  @spec dismiss_type_by_user_id(user_id :: integer, type :: String.t()) :: {non_neg_integer, nil | [term()]} | {:error, :invalid_notification_type}
+  @spec dismiss_type_by_user_id(user_id :: integer, type :: String.t()) ::
+          {non_neg_integer, nil | [term()]} | {:error, :invalid_notification_type}
   def dismiss_type_by_user_id(user_id, type) when is_integer(user_id) do
     if valid_type(type) do
-      query = from n in Notification,
-        where: n.receiver_id == ^user_id and n.viewed == false and n.type == ^type
+      query =
+        from n in Notification,
+          where: n.receiver_id == ^user_id and n.viewed == false and n.type == ^type
+
       Repo.update_all(query, set: [viewed: true])
     else
       {:error, :invalid_notification_type}

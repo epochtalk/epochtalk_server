@@ -11,30 +11,31 @@ defmodule EpochtalkServer.Models.User do
   alias EpochtalkServer.Models.BannedAddress
   alias EpochtalkServer.Models.BoardModerator
   alias EpochtalkServer.Models.Ban
+
   @moduledoc """
   `User` model, for performing actions relating a user
   """
   @type t :: %__MODULE__{
-    id: non_neg_integer | nil,
-    email: String.t() | nil,
-    username: String.t() | nil,
-    password: String.t() | nil,
-    password_confirmation: String.t() | nil,
-    passhash: String.t() | nil,
-    confirmation_token: String.t() | nil,
-    reset_token: String.t() | nil,
-    reset_expiration: String.t() | nil,
-    deleted: boolean | nil,
-    malicious_score: float | nil,
-    created_at: NaiveDateTime.t() | nil,
-    imported_at: NaiveDateTime.t() | nil,
-    updated_at: NaiveDateTime.t() | nil,
-    preferences: Preference.t() | term(),
-    profile: Profile.t() | term(),
-    ban_info: Ban.t() | term(),
-    roles: [Role.t()] | term(),
-    moderating: [BoardModerator.t()] | term()
-  }
+          id: non_neg_integer | nil,
+          email: String.t() | nil,
+          username: String.t() | nil,
+          password: String.t() | nil,
+          password_confirmation: String.t() | nil,
+          passhash: String.t() | nil,
+          confirmation_token: String.t() | nil,
+          reset_token: String.t() | nil,
+          reset_expiration: String.t() | nil,
+          deleted: boolean | nil,
+          malicious_score: float | nil,
+          created_at: NaiveDateTime.t() | nil,
+          imported_at: NaiveDateTime.t() | nil,
+          updated_at: NaiveDateTime.t() | nil,
+          preferences: Preference.t() | term(),
+          profile: Profile.t() | term(),
+          ban_info: Ban.t() | term(),
+          roles: [Role.t()] | term(),
+          moderating: [BoardModerator.t()] | term()
+        }
   schema "users" do
     field :email, :string
     field :username, :string
@@ -68,7 +69,17 @@ defmodule EpochtalkServer.Models.User do
   @spec registration_changeset(user :: t(), attrs :: map() | nil) :: Ecto.Changeset.t()
   def registration_changeset(user, attrs) do
     user
-    |> cast(attrs, [:id, :email, :confirmation_token, :username, :created_at, :updated_at, :deleted, :malicious_score, :password])
+    |> cast(attrs, [
+      :id,
+      :email,
+      :confirmation_token,
+      :username,
+      :created_at,
+      :updated_at,
+      :deleted,
+      :malicious_score,
+      :password
+    ])
     |> unique_constraint(:id, name: :users_pkey)
     |> validate_username()
     |> validate_email()
@@ -83,20 +94,29 @@ defmodule EpochtalkServer.Models.User do
   @spec create(attrs :: map()) :: {:ok, user :: t()} | {:error, Ecto.Changeset.t()}
   def create(attrs) do
     user_cs = User.registration_changeset(%User{}, attrs)
+
     case Repo.insert(user_cs) do
       {:ok, user} ->
-        user = user
-          |> Repo.preload([:preferences, :profile, :ban_info, :moderating]) # load associations
-          |> Role.handle_empty_user_roles() # appends default role
+        user =
+          user
+          # load associations
+          |> Repo.preload([:preferences, :profile, :ban_info, :moderating])
+          # appends default role
+          |> Role.handle_empty_user_roles()
+
         {:ok, user}
-      {:error, err} -> {:error, err} # changeset error
+
+      # changeset error
+      {:error, err} ->
+        {:error, err}
     end
   end
 
   @doc """
   Creates a new `User` in the database and assigns the `superAdministrator` `Role`, used for seeding
   """
-  @spec create(attrs :: map(), admin :: boolean) :: {:ok, user :: t()} | {:error, Ecto.Changeset.t()}
+  @spec create(attrs :: map(), admin :: boolean) ::
+          {:ok, user :: t()} | {:error, Ecto.Changeset.t()}
   def create(attrs, true = _admin) do
     Repo.transaction(fn ->
       {:ok, user} = create(attrs)
@@ -108,7 +128,8 @@ defmodule EpochtalkServer.Models.User do
   Checks if `User` with `username` exists in the database
   """
   @spec with_username_exists?(username :: String.t()) :: true | false
-  def with_username_exists?(username), do: Repo.exists?(from u in User, where: u.username == ^username)
+  def with_username_exists?(username),
+    do: Repo.exists?(from u in User, where: u.username == ^username)
 
   @doc """
   Checks if `User` with `email` exists in the database
@@ -135,9 +156,11 @@ defmodule EpochtalkServer.Models.User do
   """
   @spec by_username(username :: String.t()) :: {:ok, user :: t()} | {:error, :user_not_found}
   def by_username(username) when is_binary(username) do
-    query = from u in User,
-      where: u.username == ^username,
-      preload: [:preferences, :profile, :ban_info, :moderating, :roles]
+    query =
+      from u in User,
+        where: u.username == ^username,
+        preload: [:preferences, :profile, :ban_info, :moderating, :roles]
+
     if user = Repo.one(query),
       do: {:ok, user |> Role.handle_empty_user_roles() |> Role.handle_banned_user_role()},
       else: {:error, :user_not_found}
@@ -149,10 +172,11 @@ defmodule EpochtalkServer.Models.User do
   `malicious_score` is updated and is assigned the `banned` `Role`, in the database
   and in place. Otherwise the user is just returned with no change.
   """
-  @spec handle_malicious_user(user :: t(), ip :: tuple) :: {:ok, user :: t()} | {:error, :ban_error}
+  @spec handle_malicious_user(user :: t(), ip :: tuple) ::
+          {:ok, user :: t()} | {:error, :ban_error}
   def handle_malicious_user(%User{} = user, ip) do
     # convert ip tuple into string
-    ip_str = ip |> :inet_parse.ntoa |> to_string
+    ip_str = ip |> :inet_parse.ntoa() |> to_string
     # calculate user's malicious score from ip, nil if less than 1
     malicious_score = BannedAddress.calculate_malicious_score_from_ip(ip_str)
     # set user's malicious score
@@ -178,6 +202,7 @@ defmodule EpochtalkServer.Models.User do
   # sets malicious score of a user, outputs user with updated malicious score
   defp set_malicious_score(%User{id: id} = user, malicious_score) do
     set_malicious_score_by_id(id, malicious_score)
+
     if malicious_score != nil,
       do: user |> Map.put(:malicious_score, malicious_score),
       else: user
@@ -221,6 +246,7 @@ defmodule EpochtalkServer.Models.User do
 
   defp hash_password(changeset) do
     password = get_change(changeset, :password)
+
     if password && changeset.valid? do
       changeset
       |> put_change(:passhash, Argon2.hash_pwd_salt(password))

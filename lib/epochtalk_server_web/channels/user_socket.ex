@@ -1,5 +1,6 @@
 defmodule EpochtalkServerWeb.UserSocket do
   use Phoenix.Socket
+
   @moduledoc """
   Handles `User` socket connection and authentication.
   """
@@ -42,13 +43,19 @@ defmodule EpochtalkServerWeb.UserSocket do
   @doc """
   Connects to socket and authenticates if token is provided, still connects anonymously if token is not provided.
   """
-  @spec connect_maybe_auth(params :: map(), socket :: Phoenix.Socket.t(), connect_info :: map()) ::  {:ok, Phoenix.Socket.t()} | {:error, term()} | :error
+  @spec connect_maybe_auth(params :: map(), socket :: Phoenix.Socket.t(), connect_info :: map()) ::
+          {:ok, Phoenix.Socket.t()} | {:error, term()} | :error
   def connect_maybe_auth(%{"token" => token} = _params, socket, _connect_info) do
     case Guardian.Phoenix.Socket.authenticate(socket, EpochtalkServer.Auth.Guardian, token) do
-      {:ok, authed_socket } -> {:ok, authed_socket |> assign(:user_id, authed_socket.assigns[:guardian_default_resource].id)}
-      {:error, _reason} -> :error
+      {:ok, authed_socket} ->
+        {:ok,
+         authed_socket |> assign(:user_id, authed_socket.assigns[:guardian_default_resource].id)}
+
+      {:error, _reason} ->
+        :error
     end
   end
+
   def connect_maybe_auth(_params, socket, _connect_info), do: {:ok, socket}
 
   @doc """

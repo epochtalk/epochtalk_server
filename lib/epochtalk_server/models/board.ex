@@ -6,24 +6,25 @@ defmodule EpochtalkServer.Models.Board do
   alias EpochtalkServer.Models.BoardMapping
   alias EpochtalkServer.Models.Board
   alias EpochtalkServer.Models.MetadataBoard
+
   @moduledoc """
   `Board` model, for performing actions relating to forum boards
   """
   @type t :: %__MODULE__{
-    id: non_neg_integer | nil,
-    category: Category.t() | term(),
-    name: String.t() | nil,
-    slug: String.t() | nil,
-    description: String.t() | nil,
-    post_count: non_neg_integer | nil,
-    thread_count: non_neg_integer | nil,
-    viewable_by: non_neg_integer | nil,
-    postable_by: non_neg_integer | nil,
-    right_to_left: boolean | nil,
-    created_at: NaiveDateTime.t() | nil,
-    imported_at: NaiveDateTime.t() | nil,
-    meta: map() | nil
-  }
+          id: non_neg_integer | nil,
+          category: Category.t() | term(),
+          name: String.t() | nil,
+          slug: String.t() | nil,
+          description: String.t() | nil,
+          post_count: non_neg_integer | nil,
+          thread_count: non_neg_integer | nil,
+          viewable_by: non_neg_integer | nil,
+          postable_by: non_neg_integer | nil,
+          right_to_left: boolean | nil,
+          created_at: NaiveDateTime.t() | nil,
+          imported_at: NaiveDateTime.t() | nil,
+          meta: map() | nil
+        }
   schema "boards" do
     field :name, :string
     field :slug, :string
@@ -46,12 +47,25 @@ defmodule EpochtalkServer.Models.Board do
   Create generic changeset for `Board` model
   """
   @spec changeset(
-    board :: t(),
-    attrs :: map() | nil
-  ) :: Ecto.Changeset.t()
+          board :: t(),
+          attrs :: map() | nil
+        ) :: Ecto.Changeset.t()
   def changeset(board, attrs) do
     board
-    |> cast(attrs, [:id, :name, :slug, :description, :post_count, :thread_count, :viewable_by, :postable_by, :created_at, :imported_at, :updated_at, :meta])
+    |> cast(attrs, [
+      :id,
+      :name,
+      :slug,
+      :description,
+      :post_count,
+      :thread_count,
+      :viewable_by,
+      :postable_by,
+      :created_at,
+      :imported_at,
+      :updated_at,
+      :meta
+    ])
     |> cast_assoc(:categories)
     |> unique_constraint(:id, name: :boards_pkey)
     |> unique_constraint(:slug, name: :boards_slug_index)
@@ -65,11 +79,24 @@ defmodule EpochtalkServer.Models.Board do
   @spec create_changeset(board :: t(), attrs :: map() | nil) :: Ecto.Changeset.t()
   def create_changeset(board, attrs) do
     now = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
-    attrs = attrs
-    |> Map.put(:created_at, now)
-    |> Map.put(:updated_at, now)
+
+    attrs =
+      attrs
+      |> Map.put(:created_at, now)
+      |> Map.put(:updated_at, now)
+
     board
-    |> cast(attrs, [:name, :slug, :description, :viewable_by, :postable_by, :right_to_left, :created_at, :updated_at, :meta])
+    |> cast(attrs, [
+      :name,
+      :slug,
+      :description,
+      :viewable_by,
+      :postable_by,
+      :right_to_left,
+      :created_at,
+      :updated_at,
+      :meta
+    ])
     |> unique_constraint(:id, name: :boards_pkey)
     |> unique_constraint(:slug, name: :boards_slug_index)
   end
@@ -79,17 +106,19 @@ defmodule EpochtalkServer.Models.Board do
   @doc """
   Creates a new `Board` in the database
   """
-  @spec create(
-    board_attrs :: map()
-  ) :: {:ok, board :: t()} | {:error, Ecto.Changeset.t()}
+  @spec create(board_attrs :: map()) :: {:ok, board :: t()} | {:error, Ecto.Changeset.t()}
   def create(board) do
     board_cs = create_changeset(%Board{}, board)
+
     case Repo.insert(board_cs) do
-      {:ok, db_board} -> case MetadataBoard.insert(%MetadataBoard{board_id: db_board.id}) do
+      {:ok, db_board} ->
+        case MetadataBoard.insert(%MetadataBoard{board_id: db_board.id}) do
           {:ok, _} -> {:ok, db_board}
           {:error, cs} -> {:error, cs}
         end
-      {:error, cs} -> {:error, cs}
+
+      {:error, cs} ->
+        {:error, cs}
     end
   end
 end

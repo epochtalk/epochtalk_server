@@ -58,9 +58,9 @@ defmodule EpochtalkServerWeb.UserChannel do
   end
 
   @doc """
-  Handles joining of `user:role` channel. Message is broadcast on this channel when
-  a role is updated, this tells the client to reauthenticate to fetch new roles. Message
-  contains the `lookup` of the role, if the client will check the user's roles for the
+  Handles joining of `user:role` channel. Messages are broadcast on this channel when
+  a roles are updated, which tell the client to reauthenticate inorder to fetch new roles.
+  Messages contain the `lookup` of the updated role, the client will check the user's roles for the
   role `lookup` and reauthenticate if necessary.
   """
   @spec join_role_channel(socket :: Phoenix.Socket.t()) ::

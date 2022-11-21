@@ -41,7 +41,7 @@ defmodule EpochtalkServerWeb.UserSocket do
   def id(socket), do: maybe_socket_id(socket)
 
   @doc """
-  Connects to socket and authenticates if token is provided, still connects anonymously if token is not provided.
+  Connects to socket and authenticates if token is provided, otherwise connects anonymously.
   """
   @spec connect_maybe_auth(params :: map(), socket :: Phoenix.Socket.t(), connect_info :: map()) ::
           {:ok, Phoenix.Socket.t()} | {:error, term()} | :error

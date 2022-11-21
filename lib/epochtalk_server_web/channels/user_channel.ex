@@ -74,9 +74,9 @@ defmodule EpochtalkServerWeb.UserChannel do
   end
 
   @doc """
-  Handles joining of `user:<user_id>` channel, checks that user is authenticated.
-  This is a channel private to the specific `User` used to broadcast events
-  such as reauthenticate or logout.
+  Handles joining of `user:<user_id>` channel, enforces that user is authenticated.
+  This channel is used to broadcast events such as reauthenticate or logout to a
+  specific `User` with matching `user_id`.
   """
   @spec join_user_channel(socket :: Phoenix.Socket.t(), user_id :: String.t()) ::
           {:ok, Phoenix.Socket.t()} | {:error, data :: map()}

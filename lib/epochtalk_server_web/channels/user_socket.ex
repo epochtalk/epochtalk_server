@@ -11,7 +11,6 @@ defmodule EpochtalkServerWeb.UserSocket do
   # assign values that can be accessed by your channel topics.
 
   ## Channels
-
   channel "user:*", EpochtalkServerWeb.UserChannel
 
   # Socket params are passed from the client and can
@@ -26,16 +25,7 @@ defmodule EpochtalkServerWeb.UserSocket do
   # See `Phoenix.Token` documentation for examples in
   # performing token verification on connect.
   @impl true
-  def connect(%{"token" => token}, socket, _connect_info) do
-    case Guardian.Phoenix.Socket.authenticate(socket, EpochtalkServer.Auth.Guardian, token) do
-      {:ok, authed_socket} -> {:ok, authed_socket}
-      # user = Guardian.Phoenix.Socket.current_resource(authed_socket)
-      # {:ok, assign(authed_socket, :user, user)}
-      {:error, _reason} -> :error
-    end
-  end
-
-  def connect(_params, socket, _connect_info), do: {:ok, socket}
+  def connect(params, socket, connect_info), do: connect_maybe_auth(params, socket, connect_info)
 
   # Socket id's are topics that allow you to identify all sockets for a given user:
   #
@@ -48,6 +38,30 @@ defmodule EpochtalkServerWeb.UserSocket do
   #
   # Returning `nil` makes this socket anonymous.
   @impl true
-  def id(%{assigns: %{user_id: user_id}} = _socket), do: "user:#{user_id}"
-  def id(_socket), do: nil
+  def id(socket), do: maybe_socket_id(socket)
+
+  @doc """
+  Connects to socket and authenticates if token is provided, otherwise connects anonymously.
+  """
+  @spec connect_maybe_auth(params :: map(), socket :: Phoenix.Socket.t(), connect_info :: map()) ::
+          {:ok, Phoenix.Socket.t()} | {:error, term()} | :error
+  def connect_maybe_auth(%{"token" => token} = _params, socket, _connect_info) do
+    case Guardian.Phoenix.Socket.authenticate(socket, EpochtalkServer.Auth.Guardian, token) do
+      {:ok, authed_socket} ->
+        {:ok,
+         authed_socket |> assign(:user_id, authed_socket.assigns[:guardian_default_resource].id)}
+
+      {:error, _reason} ->
+        :error
+    end
+  end
+
+  def connect_maybe_auth(_params, socket, _connect_info), do: {:ok, socket}
+
+  @doc """
+  Returns socket id `"user:<user_id>"` if authenticated and `nil` if not authenticated.
+  """
+  @spec maybe_socket_id(socket :: Phoenix.Socket.t()) :: String.t() | nil
+  def maybe_socket_id(%{assigns: %{user_id: user_id}} = _socket), do: "user:#{user_id}"
+  def maybe_socket_id(_socket), do: nil
 end

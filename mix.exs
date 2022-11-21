@@ -55,8 +55,7 @@ defmodule EpochtalkServer.MixProject do
       {:remote_ip, "~> 1.0.0"},
       {:swoosh, "~> 1.8"},
       {:telemetry_metrics, "~> 0.6"},
-      {:telemetry_poller, "~> 1.0"},
-      {:uuid, "~> 1.1.8"}
+      {:telemetry_poller, "~> 1.0"}
     ]
   end
 

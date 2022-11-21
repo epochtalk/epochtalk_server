@@ -89,7 +89,6 @@ defmodule EpochtalkServer.Session do
   end
 
   defp save(%User{} = user, session_id) do
-    # TODO: return role lookups from db instead of entire roles
     avatar = if is_nil(user.profile), do: nil, else: user.profile.avatar
     update_user_info(user.id, user.username, avatar)
     update_roles(user.id, user.roles)

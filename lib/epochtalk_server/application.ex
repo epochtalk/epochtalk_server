@@ -20,12 +20,14 @@ defmodule EpochtalkServer.Application do
       # Start the Ecto repository
       EpochtalkServer.Repo,
       # Warm frontend_config variable (referenced by api controllers)
-      # This worker starts, does its thing and dies
+      # This task starts, does its thing and dies
       {Task, &EpochtalkServer.Models.Configuration.warm_frontend_config/0},
       # Start the Telemetry supervisor
       EpochtalkServerWeb.Telemetry,
       # Start the PubSub system
       {Phoenix.PubSub, name: EpochtalkServer.PubSub},
+      # Start Presence for Phoenix channel tracking
+      EpochtalkServerWeb.Presence,
       # Start the Endpoint (http/https)
       EpochtalkServerWeb.Endpoint
       # Start a worker by calling: EpochtalkServer.Worker.start_link(arg)

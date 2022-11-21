@@ -26,47 +26,62 @@ defmodule EpochtalkServerWeb.UserControllerTest do
   @invalid_login_password_attrs %{username: "logintest", password: "1"}
   @invalid_login_username_attrs %{username: "test", password: "password"}
 
-  describe "check username and email" do
+  describe "username/2" do
     setup [:create_user]
 
-    test "check if username is taken", %{conn: conn, user: user} do
+    test "found => true if username is taken", %{conn: conn, user: user} do
       conn = get(conn, Routes.user_path(conn, :username, user.username))
       assert %{"found" => true} = json_response(conn, 200)
     end
 
-    test "check if email is taken", %{conn: conn, user: user} do
-      conn = get(conn, Routes.user_path(conn, :email, user.email))
-      assert %{"found" => true} = json_response(conn, 200)
+    test "found => false if username is not found in the system", %{conn: conn} do
+      conn = get(conn, Routes.user_path(conn, :username, "false_username"))
+      assert %{"found" => false} = json_response(conn, 200)
     end
   end
 
-  describe "ban" do
+  describe "email/2" do
     setup [:create_user]
 
-    test "correctly ban user", %{user: user} do
+    test "found => true if email is taken", %{conn: conn, user: user} do
+      conn = get(conn, Routes.user_path(conn, :email, user.email))
+      assert %{"found" => true} = json_response(conn, 200)
+    end
+
+    test "found => false if email is not found in the system", %{conn: conn} do
+      conn = get(conn, Routes.user_path(conn, :email, "false@test.com"))
+      assert %{"found" => false} = json_response(conn, 200)
+    end
+  end
+
+  describe "ban/1" do
+    setup [:create_user]
+
+    test "user is banned", %{user: user} do
       {:ok, user} = Ban.ban(user)
       assert user.id == user.ban_info.user_id
     end
   end
 
-  describe "unban" do
+  describe "unban/1" do
     setup [:create_user]
 
+    # Setup by banning a user first using ban/2
     setup %{user: user} do
       {:ok, user} = Ban.ban(user, NaiveDateTime.utc_now())
       {:ok, user: user}
     end
 
-    test "correctly unban user", %{user: user} do
+    test "user is unbanned", %{user: user} do
       {:ok, user} = Ban.unban(user)
       assert nil == user.ban_info
     end
   end
 
-  describe "malicious IP" do
+  describe "handle_malicious_user/2" do
     setup [:create_user]
 
-    test "renders error of malicious IP", %{conn: conn} do
+    test "user is banned if malicious", %{conn: conn} do
       {:ok, user} = User.by_username(@create_attrs.username)
       {:ok, user} = User.handle_malicious_user(user, conn.remote_ip)
       assert user.id == user.ban_info.user_id
@@ -75,14 +90,14 @@ defmodule EpochtalkServerWeb.UserControllerTest do
     end
   end
 
-  describe "register" do
-    test "new user", %{conn: conn} do
+  describe "register/2" do
+    test "user is registered and returns newly registered user with 200", %{conn: conn} do
       conn = post(conn, Routes.user_path(conn, :register, @register_attrs))
       {:ok, user} = User.by_username(@register_attrs.username)
       assert user.id == json_response(conn, 200)["id"]
     end
 
-    test "renders errors when email is taken", %{conn: conn} do
+    test "errors with 400 when email is already taken", %{conn: conn} do
       User.create(@register_attrs)
       conn = post(conn, Routes.user_path(conn, :register, @register_attrs))
 
@@ -91,7 +106,7 @@ defmodule EpochtalkServerWeb.UserControllerTest do
     end
 
     @tag :authenticated
-    test "renders errors when user is already authenticated", %{conn: conn} do
+    test "errors with 400 when user is logged in", %{conn: conn} do
       conn = post(conn, Routes.user_path(conn, :register, @auth_attrs))
 
       assert %{
@@ -100,14 +115,14 @@ defmodule EpochtalkServerWeb.UserControllerTest do
              } = json_response(conn, 400)
     end
 
-    test "renders errors when username is missing", %{conn: conn} do
+    test "errors with 400 when username is missing", %{conn: conn} do
       conn = post(conn, Routes.user_path(conn, :register, @invalid_username_attrs))
 
       assert %{"error" => "Bad Request", "message" => "Username can't be blank"} =
                json_response(conn, 400)
     end
 
-    test "renders errors when password is missing", %{conn: conn} do
+    test "errors with 400 when password is missing", %{conn: conn} do
       conn = post(conn, Routes.user_path(conn, :register, @invalid_password_attrs))
 
       assert %{"error" => "Bad Request", "message" => "Password can't be blank"} =
@@ -115,10 +130,10 @@ defmodule EpochtalkServerWeb.UserControllerTest do
     end
   end
 
-  describe "confirm" do
+  describe "confirm/2" do
     setup [:create_user]
 
-    test "confirm", %{conn: conn} do
+    test "confirms user using token", %{conn: conn} do
       {:ok, user} = User.by_username(@create_attrs.username)
 
       User
@@ -140,14 +155,14 @@ defmodule EpochtalkServerWeb.UserControllerTest do
       assert user.id == json_response(conn, 200)["id"]
     end
 
-    test "renders errors when user not found", %{conn: conn} do
+    test "errors with 400 when user not found", %{conn: conn} do
       conn = post(conn, Routes.user_path(conn, :confirm, @confirm_invalid_username))
 
       assert %{"error" => "Bad Request", "message" => "Confirmation error, account not found"} =
                json_response(conn, 400)
     end
 
-    test "renders errors when token is invalid", %{conn: conn} do
+    test "errors with 400 when token is invalid", %{conn: conn} do
       conn = post(conn, Routes.user_path(conn, :confirm, @confirm_invalid_token))
 
       assert %{"error" => "Bad Request", "message" => "Account confirmation error, invalid token"} =
@@ -155,31 +170,31 @@ defmodule EpochtalkServerWeb.UserControllerTest do
     end
   end
 
-  describe "login" do
+  describe "login/2" do
     setup [:create_login_user]
 
-    test "login", %{conn: conn} do
+    test "logs in a user", %{conn: conn} do
       conn = post(conn, Routes.user_path(conn, :login, @login_attrs))
       {:ok, user} = User.by_username(@login_attrs.username)
       assert user.id == json_response(conn, 200)["id"]
     end
 
     @tag :authenticated
-    test "renders error when user is already logged in", %{conn: conn} do
+    test "errors with 400 when user is already logged in", %{conn: conn} do
       conn = post(conn, Routes.user_path(conn, :login, @auth_attrs))
 
       assert %{"error" => "Bad Request", "message" => "Already logged in"} =
                json_response(conn, 400)
     end
 
-    test "renders error if user cannot be found", %{conn: conn} do
+    test "errors with 400 if user cannot be found", %{conn: conn} do
       conn = post(conn, Routes.user_path(conn, :login, @create_attrs))
 
       assert %{"error" => "Bad Request", "message" => "Invalid credentials"} =
                json_response(conn, 400)
     end
 
-    test "renders error if user not confirmed", %{conn: conn} do
+    test "errors with 400 if user is not confirmed", %{conn: conn} do
       {:ok, user} = User.by_username(@login_attrs.username)
 
       User
@@ -193,7 +208,7 @@ defmodule EpochtalkServerWeb.UserControllerTest do
                json_response(conn, 400)
     end
 
-    test "renders error if user missing passhash", %{conn: conn} do
+    test "errors with 403 if user is missing passhash", %{conn: conn} do
       {:ok, user} = User.by_username(@login_attrs.username)
 
       User
@@ -209,14 +224,14 @@ defmodule EpochtalkServerWeb.UserControllerTest do
              } = json_response(conn, 403)
     end
 
-    test "renders error when invalid username", %{conn: conn} do
+    test "errors with 400 when username is not found", %{conn: conn} do
       conn = post(conn, Routes.user_path(conn, :login, @invalid_login_username_attrs))
 
       assert %{"error" => "Bad Request", "message" => "Invalid credentials"} =
                json_response(conn, 400)
     end
 
-    test "renders error when missing password", %{conn: conn} do
+    test "errors with 400 when password is not found", %{conn: conn} do
       conn = post(conn, Routes.user_path(conn, :login, @invalid_login_password_attrs))
 
       assert %{"error" => "Bad Request", "message" => "Invalid credentials"} =
@@ -224,28 +239,28 @@ defmodule EpochtalkServerWeb.UserControllerTest do
     end
   end
 
-  describe "logout" do
+  describe "logout/1" do
     @tag :authenticated
-    test "logout success", %{conn: conn} do
+    test "success if user is logged out", %{conn: conn} do
       conn = delete(conn, Routes.user_path(conn, :logout))
       assert %{"success" => true} = json_response(conn, 200)
     end
 
-    test "renders error when user is not logged in", %{conn: conn} do
+    test "errors with 400 when user is not logged in", %{conn: conn} do
       conn = delete(conn, Routes.user_path(conn, :logout))
       assert %{"error" => "Bad Request", "message" => "Not logged in"} = json_response(conn, 400)
     end
   end
 
-  describe "authenticate" do
+  describe "authenticate/1" do
     @tag :authenticated
-    test "authenticate success", %{conn: conn} do
+    test "success if current logged in user is authenticated", %{conn: conn} do
       conn = get(conn, Routes.user_path(conn, :authenticate))
       {:ok, user} = User.by_username(@auth_attrs.username)
       assert user.id == json_response(conn, 200)["id"]
     end
 
-    test "renders error when user is not loegged in", %{conn: conn} do
+    test "errors with 401 when user is not logged in but trying to authenticate", %{conn: conn} do
       conn = get(conn, Routes.user_path(conn, :authenticate))
 
       assert %{"error" => "Unauthorized", "message" => "Unauthenticated"} =

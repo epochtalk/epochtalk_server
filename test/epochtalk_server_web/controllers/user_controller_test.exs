@@ -34,7 +34,7 @@ defmodule EpochtalkServerWeb.UserControllerTest do
       assert %{"found" => true} = json_response(conn, 200)
     end
 
-    test "found => false if username is not found in the system", %{conn: conn, user: user} do
+    test "found => false if username is not found in the system", %{conn: conn} do
       conn = get(conn, Routes.user_path(conn, :username, "false_username"))
       assert %{"found" => false} = json_response(conn, 200)
     end

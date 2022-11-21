@@ -1,6 +1,7 @@
 defmodule EpochtalkServerWeb.UserChannelTest do
   use EpochtalkServerWeb.ChannelCase
 
+  #TODO(akinsey): Improve testing for sockets
   setup do
     {:ok, _, socket} =
       EpochtalkServerWeb.UserSocket

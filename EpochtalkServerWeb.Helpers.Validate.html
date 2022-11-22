@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.28.6">
+    <meta name="project" content="epochtalk_server v0.1.0">
+
+    <title>EpochtalkServerWeb.Helpers.Validate — epochtalk_server v0.1.0</title>
+    <link rel="stylesheet" href="dist/html-elixir-5CLCQQME.css" />
+
+    <script src="dist/handlebars.runtime-NWIB6V2M.js"></script>
+    <script src="dist/handlebars.templates-X7YVL3G2.js"></script>
+    <script src="dist/sidebar_items-2B5768A3.js"></script>
+
+      <script src="docs_config.js"></script>
+
+    <script async src="dist/html-PLW5RNNI.js"></script>
+
+
+  </head>
+  <body data-type="modules" class="page-module">
+    <script>
+
+      try {
+        var settings = JSON.parse(localStorage.getItem('ex_doc:settings') || '{}');
+
+        if (settings.theme === 'dark' ||
+           ((settings.theme === 'system' || settings.theme == null) &&
+             window.matchMedia('(prefers-color-scheme: dark)').matches)
+           ) {
+          document.body.classList.add('dark')
+        }
+      } catch (error) { }
+    </script>
+
+<div class="main">
+
+<button class="sidebar-button sidebar-toggle" aria-label="toggle sidebar">
+  <i class="ri-menu-line ri-lg" title="Collapse/expand sidebar"></i>
+</button>
+
+<section class="sidebar">
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button" aria-label="Submit Search">
+      <i class="ri-search-2-line" aria-hidden="true" title="Submit search"></i>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button" aria-label="Cancel Search">
+      <i class="ri-close-line ri-lg" aria-hidden="true" title="Cancel search"></i>
+    </button>
+    <label class="search-label">
+      <p class="sr-only">Search</p>
+      <input name="q" type="text" class="search-input" placeholder="Search..." aria-label="Input your search terms" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+
+    <div class="sidebar-projectDetails">
+      <a href="api-reference.html" class="sidebar-projectName" translate="no">
+epochtalk_server
+      </a>
+      <strong class="sidebar-projectVersion" translate="no">
+        v0.1.0
+      </strong>
+    </div>
+    <ul class="sidebar-listNav">
+      <li><a id="extras-list-link" href="#full-list">Pages</a></li>
+
+        <li><a id="modules-list-link" href="#full-list">Modules</a></li>
+
+
+    </ul>
+  </div>
+
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <output role="status" id="toast"></output>
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+<h1>
+<button class="settings display-settings">
+  <i class="ri-settings-3-line"></i>
+  <span class="sr-only">Settings</span>
+</button>
+
+
+  <span translate="no">EpochtalkServerWeb.Helpers.Validate</span> 
+  <small class="app-vsn" translate="no">(epochtalk_server v0.1.0)</small>
+
+</h1>
+
+
+  <section id="moduledoc">
+<p>Helper for validating and casting query parameters not associated with a model.</p><p><em>Note:</em> Changesets are used to validate query parameters that are associated with a model.</p>
+  </section>
+
+
+  <section id="summary" class="details-list">
+    <h1 class="section-heading">
+      <a class="hover-link" href="#summary">
+        <i class="ri-link-m" aria-hidden="true"></i>
+        <span class="sr-only">Link to this section</span>
+      </a>
+      Summary
+    </h1>
+
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+
+      <div class="summary-row">
+        <div class="summary-signature">
+          <a href="#cast/4" translate="no">cast(attrs, key, type, opts \\ [])</a>
+
+        </div>
+
+          <div class="summary-synopsis"><p>Helper used to validate and cast request parameters directly out of the incoming
+paylod map (usually a controller function's <code class="inline">attrs</code> parameter) to the specified type.
+Will raise an <a href="EpochtalkServerWeb.CustomErrors.InvalidPayload.html"><code class="inline">EpochtalkServerWeb.CustomErrors.InvalidPayload</code></a> exception if map value does
+not pass validation and casting.</p></div>
+
+      </div>
+
+      <div class="summary-row">
+        <div class="summary-signature">
+          <a href="#cast_str/3" translate="no">cast_str(str, type, opts \\ [])</a>
+
+        </div>
+
+          <div class="summary-synopsis"><p>Helper used to validate and cast request parameters. Takes in a <code class="inline">String.t()</code> and casts it
+to the specified type. Will raise an <a href="EpochtalkServerWeb.CustomErrors.InvalidPayload.html"><code class="inline">EpochtalkServerWeb.CustomErrors.InvalidPayload</code></a>
+exception if string does not pass validation and casting.</p></div>
+
+      </div>
+
+  </div>
+
+  </section>
+
+
+  <section id="functions" class="details-list">
+    <h1 class="section-heading">
+      <a class="hover-link" href="#functions">
+        <i class="ri-link-m" aria-hidden="true"></i>
+        <span class="sr-only">Link to this section</span>
+      </a>
+Functions
+    </h1>
+    <div class="functions-list">
+<section class="detail" id="cast/4">
+
+    <span id="cast/3"></span>
+
+  <div class="detail-header">
+    <a href="#cast/4" class="detail-link" title="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature" translate="no">cast(attrs, key, type, opts \\ [])</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> cast(attrs :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>(), key :: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>(), type :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>(),
+  required: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>(),
+  min: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">integer</a>(),
+  max: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">integer</a>()
+) :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">any</a>()</pre>
+
+      </div>
+
+<p>Helper used to validate and cast request parameters directly out of the incoming
+paylod map (usually a controller function's <code class="inline">attrs</code> parameter) to the specified type.
+Will raise an <a href="EpochtalkServerWeb.CustomErrors.InvalidPayload.html"><code class="inline">EpochtalkServerWeb.CustomErrors.InvalidPayload</code></a> exception if map value does
+not pass validation and casting.</p><h3 id="cast/4-valid-types" class="section-heading">
+  <a href="#cast/4-valid-types" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i>
+  <p class="sr-only">valid-types</p>
+  </a>
+  Valid Types
+</h3>
+<table><thead><tr><th style="text-align: left;">type</th><th style="text-align: left;">supported options</th></tr></thead><tbody><tr><td style="text-align: left;"><code class="inline">:integer</code></td><td style="text-align: left;"><code class="inline">:required</code>, <code class="inline">:key</code>, <code class="inline">:min</code>, <code class="inline">:max</code></td></tr><tr><td style="text-align: left;"><code class="inline">:boolean</code></td><td style="text-align: left;"><code class="inline">:required</code>, <code class="inline">:key</code></td></tr></tbody></table><h3 id="cast/4-valid-options" class="section-heading">
+  <a href="#cast/4-valid-options" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i>
+  <p class="sr-only">valid-options</p>
+  </a>
+  Valid Options
+</h3>
+<table><thead><tr><th style="text-align: left;">option</th><th style="text-align: left;">description</th></tr></thead><tbody><tr><td style="text-align: left;"><code class="inline">:required</code></td><td style="text-align: left;"><code class="inline">true</code> will raise an exception if casting nil</td></tr><tr><td style="text-align: left;"><code class="inline">:min</code></td><td style="text-align: left;"><code class="inline">min</code> of value being cast to <code class="inline">:integer</code></td></tr><tr><td style="text-align: left;"><code class="inline">:max</code></td><td style="text-align: left;"><code class="inline">max</code> of value being cast to <code class="inline">:integer</code></td></tr></tbody></table><h2 id="cast/4-example" class="section-heading">
+  <a href="#cast/4-example" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i>
+  <p class="sr-only">example</p>
+  </a>
+  Example
+</h2>
+<pre><code class="makeup elixir" translate="no"><span class="gp unselectable">iex&gt; </span><span class="kn">alias</span><span class="w"> </span><span class="nc">EpochtalkServerWeb.Helpers.Validate</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="n">attrs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p" data-group-id="2150163269-1">%{</span><span class="s">&quot;page&quot;</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="s">&quot;42&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;extended&quot;</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="s">&quot;true&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;debug&quot;</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="s">&quot;false&quot;</span><span class="p" data-group-id="2150163269-1">}</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Validate</span><span class="o">.</span><span class="n">cast</span><span class="p" data-group-id="2150163269-2">(</span><span class="n">attrs</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;page&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">:integer</span><span class="p">,</span><span class="w"> </span><span class="ss">min</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="ss">max</span><span class="p">:</span><span class="w"> </span><span class="mi">99</span><span class="p">,</span><span class="w"> </span><span class="ss">required</span><span class="p">:</span><span class="w"> </span><span class="no">true</span><span class="p" data-group-id="2150163269-2">)</span><span class="w">
+</span><span class="mi">42</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Validate</span><span class="o">.</span><span class="n">cast</span><span class="p" data-group-id="2150163269-3">(</span><span class="n">attrs</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;limit&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">:integer</span><span class="p">,</span><span class="w"> </span><span class="ss">min</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p" data-group-id="2150163269-3">)</span><span class="w">
+</span><span class="no">nil</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Validate</span><span class="o">.</span><span class="n">cast</span><span class="p" data-group-id="2150163269-4">(</span><span class="n">attrs</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;debug&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">:boolean</span><span class="p" data-group-id="2150163269-4">)</span><span class="w">
+</span><span class="no">false</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Validate</span><span class="o">.</span><span class="n">cast</span><span class="p" data-group-id="2150163269-5">(</span><span class="n">attrs</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;extended&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">:unsupported</span><span class="p" data-group-id="2150163269-5">)</span><span class="w"> </span><span class="c1"># returns input if type not supported</span><span class="w">
+</span><span class="s">&quot;true&quot;</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Validate</span><span class="o">.</span><span class="n">cast</span><span class="p" data-group-id="2150163269-6">(</span><span class="n">attrs</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;post_count&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">:integer</span><span class="p">,</span><span class="w"> </span><span class="ss">required</span><span class="p">:</span><span class="w"> </span><span class="no">true</span><span class="p" data-group-id="2150163269-6">)</span><span class="w">
+</span><span class="gt">** (EpochtalkServerWeb.CustomErrors.InvalidPayload) Invalid payload, key &#39;post_count&#39; should be of type &#39;integer&#39;</span></code></pre>
+  </section>
+</section>
+<section class="detail" id="cast_str/3">
+
+    <span id="cast_str/2"></span>
+
+  <div class="detail-header">
+    <a href="#cast_str/3" class="detail-link" title="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature" translate="no">cast_str(str, type, opts \\ [])</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> cast_str(str :: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>(), type :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">atom</a>(),
+  key: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>(),
+  required: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>(),
+  min: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">integer</a>(),
+  max: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">integer</a>()
+) :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">any</a>()</pre>
+
+      </div>
+
+<p>Helper used to validate and cast request parameters. Takes in a <code class="inline">String.t()</code> and casts it
+to the specified type. Will raise an <a href="EpochtalkServerWeb.CustomErrors.InvalidPayload.html"><code class="inline">EpochtalkServerWeb.CustomErrors.InvalidPayload</code></a>
+exception if string does not pass validation and casting.</p><h3 id="cast_str/3-valid-types" class="section-heading">
+  <a href="#cast_str/3-valid-types" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i>
+  <p class="sr-only">valid-types</p>
+  </a>
+  Valid Types
+</h3>
+<table><thead><tr><th style="text-align: left;">type</th><th style="text-align: left;">supported options</th></tr></thead><tbody><tr><td style="text-align: left;"><code class="inline">:integer</code></td><td style="text-align: left;"><code class="inline">:required</code>, <code class="inline">:key</code>, <code class="inline">:min</code>, <code class="inline">:max</code></td></tr><tr><td style="text-align: left;"><code class="inline">:boolean</code></td><td style="text-align: left;"><code class="inline">:required</code>, <code class="inline">:key</code></td></tr></tbody></table><h3 id="cast_str/3-valid-options" class="section-heading">
+  <a href="#cast_str/3-valid-options" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i>
+  <p class="sr-only">valid-options</p>
+  </a>
+  Valid Options
+</h3>
+<table><thead><tr><th style="text-align: left;">option</th><th style="text-align: left;">description</th></tr></thead><tbody><tr><td style="text-align: left;"><code class="inline">:key</code></td><td style="text-align: left;">reference name of the value attempting to be cast</td></tr><tr><td style="text-align: left;"><code class="inline">:required</code></td><td style="text-align: left;"><code class="inline">true</code> will raise an exception if casting nil</td></tr><tr><td style="text-align: left;"><code class="inline">:min</code></td><td style="text-align: left;"><code class="inline">min</code> of value being cast to <code class="inline">:integer</code></td></tr><tr><td style="text-align: left;"><code class="inline">:max</code></td><td style="text-align: left;"><code class="inline">max</code> of value being cast to <code class="inline">:integer</code></td></tr></tbody></table><h2 id="cast_str/3-example" class="section-heading">
+  <a href="#cast_str/3-example" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i>
+  <p class="sr-only">example</p>
+  </a>
+  Example
+</h2>
+<pre><code class="makeup elixir" translate="no"><span class="gp unselectable">iex&gt; </span><span class="kn">alias</span><span class="w"> </span><span class="nc">EpochtalkServerWeb.Helpers.Validate</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Validate</span><span class="o">.</span><span class="n">cast_str</span><span class="p" data-group-id="0266309945-1">(</span><span class="s">&quot;15&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">:integer</span><span class="p">,</span><span class="w"> </span><span class="ss">key</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;page&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">min</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="ss">max</span><span class="p">:</span><span class="w"> </span><span class="mi">99</span><span class="p">,</span><span class="w"> </span><span class="ss">required</span><span class="p">:</span><span class="w"> </span><span class="no">true</span><span class="p" data-group-id="0266309945-1">)</span><span class="w">
+</span><span class="mi">15</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Validate</span><span class="o">.</span><span class="n">cast_str</span><span class="p" data-group-id="0266309945-2">(</span><span class="no">nil</span><span class="p">,</span><span class="w"> </span><span class="ss">:integer</span><span class="p">,</span><span class="w"> </span><span class="ss">key</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;limit&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">min</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p" data-group-id="0266309945-2">)</span><span class="w">
+</span><span class="no">nil</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Validate</span><span class="o">.</span><span class="n">cast_str</span><span class="p" data-group-id="0266309945-3">(</span><span class="s">&quot;false&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">:boolean</span><span class="p" data-group-id="0266309945-3">)</span><span class="w">
+</span><span class="no">false</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Validate</span><span class="o">.</span><span class="n">cast_str</span><span class="p" data-group-id="0266309945-4">(</span><span class="s">&quot;true&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">:unsupported</span><span class="p" data-group-id="0266309945-4">)</span><span class="w"> </span><span class="c1"># returns input if type not supported</span><span class="w">
+</span><span class="s">&quot;true&quot;</span><span class="w">
+</span><span class="gp unselectable">iex&gt; </span><span class="nc">Validate</span><span class="o">.</span><span class="n">cast_str</span><span class="p" data-group-id="0266309945-5">(</span><span class="no">nil</span><span class="p">,</span><span class="w"> </span><span class="ss">:integer</span><span class="p">,</span><span class="w"> </span><span class="ss">key</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;post_count&quot;</span><span class="p">,</span><span class="w"> </span><span class="ss">required</span><span class="p">:</span><span class="w"> </span><span class="no">true</span><span class="p" data-group-id="0266309945-5">)</span><span class="w">
+</span><span class="gt">** (EpochtalkServerWeb.CustomErrors.InvalidPayload) Invalid payload, key &#39;post_count&#39; should be of type &#39;integer&#39;</span></code></pre>
+  </section>
+</section>
+
+    </div>
+  </section>
+
+      <footer class="footer">
+
+        <p>
+          Built using
+          <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener" translate="no">ExDoc</a> (v0.28.6) for the
+
+            <a href="https://elixir-lang.org" title="Elixir" target="_blank" translate="no">Elixir programming language</a>
+
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+
+
+  </body>
+</html>

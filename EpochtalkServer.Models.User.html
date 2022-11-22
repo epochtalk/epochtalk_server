@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.28.6">
+    <meta name="project" content="epochtalk_server v0.1.0">
+
+    <title>EpochtalkServer.Models.User — epochtalk_server v0.1.0</title>
+    <link rel="stylesheet" href="dist/html-elixir-5CLCQQME.css" />
+
+    <script src="dist/handlebars.runtime-NWIB6V2M.js"></script>
+    <script src="dist/handlebars.templates-X7YVL3G2.js"></script>
+    <script src="dist/sidebar_items-2B5768A3.js"></script>
+
+      <script src="docs_config.js"></script>
+
+    <script async src="dist/html-PLW5RNNI.js"></script>
+
+
+  </head>
+  <body data-type="modules" class="page-module">
+    <script>
+
+      try {
+        var settings = JSON.parse(localStorage.getItem('ex_doc:settings') || '{}');
+
+        if (settings.theme === 'dark' ||
+           ((settings.theme === 'system' || settings.theme == null) &&
+             window.matchMedia('(prefers-color-scheme: dark)').matches)
+           ) {
+          document.body.classList.add('dark')
+        }
+      } catch (error) { }
+    </script>
+
+<div class="main">
+
+<button class="sidebar-button sidebar-toggle" aria-label="toggle sidebar">
+  <i class="ri-menu-line ri-lg" title="Collapse/expand sidebar"></i>
+</button>
+
+<section class="sidebar">
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button" aria-label="Submit Search">
+      <i class="ri-search-2-line" aria-hidden="true" title="Submit search"></i>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button" aria-label="Cancel Search">
+      <i class="ri-close-line ri-lg" aria-hidden="true" title="Cancel search"></i>
+    </button>
+    <label class="search-label">
+      <p class="sr-only">Search</p>
+      <input name="q" type="text" class="search-input" placeholder="Search..." aria-label="Input your search terms" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+
+    <div class="sidebar-projectDetails">
+      <a href="api-reference.html" class="sidebar-projectName" translate="no">
+epochtalk_server
+      </a>
+      <strong class="sidebar-projectVersion" translate="no">
+        v0.1.0
+      </strong>
+    </div>
+    <ul class="sidebar-listNav">
+      <li><a id="extras-list-link" href="#full-list">Pages</a></li>
+
+        <li><a id="modules-list-link" href="#full-list">Modules</a></li>
+
+
+    </ul>
+  </div>
+
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <output role="status" id="toast"></output>
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+<h1>
+<button class="settings display-settings">
+  <i class="ri-settings-3-line"></i>
+  <span class="sr-only">Settings</span>
+</button>
+
+
+  <span translate="no">EpochtalkServer.Models.User</span> 
+  <small class="app-vsn" translate="no">(epochtalk_server v0.1.0)</small>
+
+</h1>
+
+
+  <section id="moduledoc">
+<p><code class="inline">User</code> model, for performing actions relating a user</p>
+  </section>
+
+
+  <section id="summary" class="details-list">
+    <h1 class="section-heading">
+      <a class="hover-link" href="#summary">
+        <i class="ri-link-m" aria-hidden="true"></i>
+        <span class="sr-only">Link to this section</span>
+      </a>
+      Summary
+    </h1>
+
+  <div class="summary-types summary">
+    <h2>
+      <a href="#types">Types</a>
+    </h2>
+
+      <div class="summary-row">
+        <div class="summary-signature">
+          <a href="#t:t/0" translate="no">t()</a>
+
+        </div>
+
+      </div>
+
+  </div>
+
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+
+      <div class="summary-row">
+        <div class="summary-signature">
+          <a href="#by_id/1" translate="no">by_id(id)</a>
+
+        </div>
+
+          <div class="summary-synopsis"><p>Gets a <code class="inline">User</code> from the database by <code class="inline">id</code></p></div>
+
+      </div>
+
+      <div class="summary-row">
+        <div class="summary-signature">
+          <a href="#by_username/1" translate="no">by_username(username)</a>
+
+        </div>
+
+          <div class="summary-synopsis"><p>Gets a <code class="inline">User</code> by <code class="inline">username</code>, from the database, with all of it's associations preloaded.
+Appends the <code class="inline">user</code> <code class="inline">Role</code> to <code class="inline">user.roles</code> if no roles present. Strips all roles but
+<code class="inline">banned</code> from <code class="inline">user.roles</code> if user is banned.</p></div>
+
+      </div>
+
+      <div class="summary-row">
+        <div class="summary-signature">
+          <a href="#clear_malicious_score_by_id/1" translate="no">clear_malicious_score_by_id(id)</a>
+
+        </div>
+
+          <div class="summary-synopsis"><p>Clears the malicious score of a <code class="inline">User</code> by <code class="inline">id</code>, from the database</p></div>
+
+      </div>
+
+      <div class="summary-row">
+        <div class="summary-signature">
+          <a href="#create/1" translate="no">create(attrs)</a>
+
+        </div>
+
+          <div class="summary-synopsis"><p>Creates a new <code class="inline">User</code> in the database, used for registration</p></div>
+
+      </div>
+
+      <div class="summary-row">
+        <div class="summary-signature">
+          <a href="#create/2" translate="no">create(attrs, admin)</a>
+
+        </div>
+
+          <div class="summary-synopsis"><p>Creates a new <code class="inline">User</code> in the database and assigns the <code class="inline">superAdministrator</code> <code class="inline">Role</code>, used for seeding</p></div>
+
+      </div>
+
+      <div class="summary-row">
+        <div class="summary-signature">
+          <a href="#handle_malicious_user/2" translate="no">handle_malicious_user(user, ip)</a>
+
+        </div>
+
+          <div class="summary-synopsis"><p>Checks if the provided <code class="inline">User</code> is malicious using the provided <code class="inline">ip</code>. If the <code class="inline">User</code>
+is found to be malicious after checking <code class="inline">BannedAddress</code> records, the user's
+<code class="inline">malicious_score</code> is updated and is assigned the <code class="inline">banned</code> <code class="inline">Role</code>, in the database
+and in place. Otherwise the user is just returned with no change.</p></div>
+
+      </div>
+
+      <div class="summary-row">
+        <div class="summary-signature">
+          <a href="#registration_changeset/2" translate="no">registration_changeset(user, attrs)</a>
+
+        </div>
+
+          <div class="summary-synopsis"><p>Creates a registration changeset for <code class="inline">User</code> model, returns an error changeset
+if validation of username, email and password do not pass.</p></div>
+
+      </div>
+
+      <div class="summary-row">
+        <div class="summary-signature">
+          <a href="#valid_password?/2" translate="no">valid_password?(user, password)</a>
+
+        </div>
+
+          <div class="summary-synopsis"><p>Validates with Argon2 that a <code class="inline">User</code> <code class="inline">passhash</code> matches the supplied <code class="inline">password</code></p></div>
+
+      </div>
+
+      <div class="summary-row">
+        <div class="summary-signature">
+          <a href="#with_email_exists?/1" translate="no">with_email_exists?(email)</a>
+
+        </div>
+
+          <div class="summary-synopsis"><p>Checks if <code class="inline">User</code> with <code class="inline">email</code> exists in the database</p></div>
+
+      </div>
+
+      <div class="summary-row">
+        <div class="summary-signature">
+          <a href="#with_username_exists?/1" translate="no">with_username_exists?(username)</a>
+
+        </div>
+
+          <div class="summary-synopsis"><p>Checks if <code class="inline">User</code> with <code class="inline">username</code> exists in the database</p></div>
+
+      </div>
+
+  </div>
+
+  </section>
+
+
+  <section id="types" class="details-list">
+    <h1 class="section-heading">
+      <a class="hover-link" href="#types">
+        <i class="ri-link-m" aria-hidden="true"></i>
+        <span class="sr-only">Link to this section</span>
+      </a>
+Types
+    </h1>
+    <div class="types-list">
+<section class="detail" id="t:t/0">
+
+  <div class="detail-header">
+    <a href="#t:t/0" class="detail-link" title="Link to this type">
+      <i class="ri-link-m" aria-hidden="true"></i>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature" translate="no">t()</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@type</span> t() :: %EpochtalkServer.Models.User{
+  __meta__: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
+  ban_info: <a href="EpochtalkServer.Models.Ban.html#t:t/0">EpochtalkServer.Models.Ban.t</a>() | <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
+  confirmation_token: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>() | nil,
+  created_at: <a href="https://hexdocs.pm/elixir/NaiveDateTime.html#t:t/0">NaiveDateTime.t</a>() | nil,
+  deleted: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>() | nil,
+  email: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>() | nil,
+  id: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>() | nil,
+  imported_at: <a href="https://hexdocs.pm/elixir/NaiveDateTime.html#t:t/0">NaiveDateTime.t</a>() | nil,
+  malicious_score: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">float</a>() | nil,
+  moderating: [<a href="EpochtalkServer.Models.BoardModerator.html#t:t/0">EpochtalkServer.Models.BoardModerator.t</a>()] | <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
+  passhash: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>() | nil,
+  password: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>() | nil,
+  password_confirmation: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>() | nil,
+  preferences: <a href="EpochtalkServer.Models.Preference.html#t:t/0">EpochtalkServer.Models.Preference.t</a>() | <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
+  profile: <a href="EpochtalkServer.Models.Profile.html#t:t/0">EpochtalkServer.Models.Profile.t</a>() | <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
+  reset_expiration: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>() | nil,
+  reset_token: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>() | nil,
+  roles: [<a href="EpochtalkServer.Models.Role.html#t:t/0">EpochtalkServer.Models.Role.t</a>()] | <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
+  smf_member: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
+  updated_at: <a href="https://hexdocs.pm/elixir/NaiveDateTime.html#t:t/0">NaiveDateTime.t</a>() | nil,
+  username: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>() | nil
+}</pre>
+
+      </div>
+
+
+  </section>
+</section>
+
+    </div>
+  </section>
+
+  <section id="functions" class="details-list">
+    <h1 class="section-heading">
+      <a class="hover-link" href="#functions">
+        <i class="ri-link-m" aria-hidden="true"></i>
+        <span class="sr-only">Link to this section</span>
+      </a>
+Functions
+    </h1>
+    <div class="functions-list">
+<section class="detail" id="by_id/1">
+
+  <div class="detail-header">
+    <a href="#by_id/1" class="detail-link" title="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature" translate="no">by_id(id)</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> by_id(id :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">integer</a>()) :: <a href="#t:t/0">t</a>() | nil</pre>
+
+      </div>
+
+<p>Gets a <code class="inline">User</code> from the database by <code class="inline">id</code></p>
+  </section>
+</section>
+<section class="detail" id="by_username/1">
+
+  <div class="detail-header">
+    <a href="#by_username/1" class="detail-link" title="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature" translate="no">by_username(username)</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> by_username(username :: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()) ::
+  {:ok, user :: <a href="#t:t/0">t</a>()} | {:error, :user_not_found}</pre>
+
+      </div>
+
+<p>Gets a <code class="inline">User</code> by <code class="inline">username</code>, from the database, with all of it's associations preloaded.
+Appends the <code class="inline">user</code> <code class="inline">Role</code> to <code class="inline">user.roles</code> if no roles present. Strips all roles but
+<code class="inline">banned</code> from <code class="inline">user.roles</code> if user is banned.</p>
+  </section>
+</section>
+<section class="detail" id="clear_malicious_score_by_id/1">
+
+  <div class="detail-header">
+    <a href="#clear_malicious_score_by_id/1" class="detail-link" title="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature" translate="no">clear_malicious_score_by_id(id)</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> clear_malicious_score_by_id(id :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">integer</a>()) :: {<a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>(), nil}</pre>
+
+      </div>
+
+<p>Clears the malicious score of a <code class="inline">User</code> by <code class="inline">id</code>, from the database</p>
+  </section>
+</section>
+<section class="detail" id="create/1">
+
+  <div class="detail-header">
+    <a href="#create/1" class="detail-link" title="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature" translate="no">create(attrs)</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> create(attrs :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>()) :: {:ok, user :: <a href="#t:t/0">t</a>()} | {:error, <a href="https://hexdocs.pm/ecto/3.9.1/Ecto.Changeset.html#t:t/0">Ecto.Changeset.t</a>()}</pre>
+
+      </div>
+
+<p>Creates a new <code class="inline">User</code> in the database, used for registration</p>
+  </section>
+</section>
+<section class="detail" id="create/2">
+
+  <div class="detail-header">
+    <a href="#create/2" class="detail-link" title="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature" translate="no">create(attrs, admin)</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> create(attrs :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>(), admin :: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>()) ::
+  {:ok, user :: <a href="#t:t/0">t</a>()} | {:error, <a href="https://hexdocs.pm/ecto/3.9.1/Ecto.Changeset.html#t:t/0">Ecto.Changeset.t</a>()}</pre>
+
+      </div>
+
+<p>Creates a new <code class="inline">User</code> in the database and assigns the <code class="inline">superAdministrator</code> <code class="inline">Role</code>, used for seeding</p>
+  </section>
+</section>
+<section class="detail" id="handle_malicious_user/2">
+
+  <div class="detail-header">
+    <a href="#handle_malicious_user/2" class="detail-link" title="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature" translate="no">handle_malicious_user(user, ip)</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> handle_malicious_user(user :: <a href="#t:t/0">t</a>(), ip :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">tuple</a>()) ::
+  {:ok, user :: <a href="#t:t/0">t</a>()} | {:error, :ban_error}</pre>
+
+      </div>
+
+<p>Checks if the provided <code class="inline">User</code> is malicious using the provided <code class="inline">ip</code>. If the <code class="inline">User</code>
+is found to be malicious after checking <code class="inline">BannedAddress</code> records, the user's
+<code class="inline">malicious_score</code> is updated and is assigned the <code class="inline">banned</code> <code class="inline">Role</code>, in the database
+and in place. Otherwise the user is just returned with no change.</p>
+  </section>
+</section>
+<section class="detail" id="registration_changeset/2">
+
+  <div class="detail-header">
+    <a href="#registration_changeset/2" class="detail-link" title="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature" translate="no">registration_changeset(user, attrs)</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> registration_changeset(user :: <a href="#t:t/0">t</a>(), attrs :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>() | nil) :: <a href="https://hexdocs.pm/ecto/3.9.1/Ecto.Changeset.html#t:t/0">Ecto.Changeset.t</a>()</pre>
+
+      </div>
+
+<p>Creates a registration changeset for <code class="inline">User</code> model, returns an error changeset
+if validation of username, email and password do not pass.</p>
+  </section>
+</section>
+<section class="detail" id="valid_password?/2">
+
+  <div class="detail-header">
+    <a href="#valid_password?/2" class="detail-link" title="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature" translate="no">valid_password?(user, password)</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> valid_password?(user :: <a href="#t:t/0">t</a>(), password :: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()) :: true | false</pre>
+
+      </div>
+
+<p>Validates with Argon2 that a <code class="inline">User</code> <code class="inline">passhash</code> matches the supplied <code class="inline">password</code></p>
+  </section>
+</section>
+<section class="detail" id="with_email_exists?/1">
+
+  <div class="detail-header">
+    <a href="#with_email_exists?/1" class="detail-link" title="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature" translate="no">with_email_exists?(email)</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> with_email_exists?(email :: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()) :: true | false</pre>
+
+      </div>
+
+<p>Checks if <code class="inline">User</code> with <code class="inline">email</code> exists in the database</p>
+  </section>
+</section>
+<section class="detail" id="with_username_exists?/1">
+
+  <div class="detail-header">
+    <a href="#with_username_exists?/1" class="detail-link" title="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature" translate="no">with_username_exists?(username)</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> with_username_exists?(username :: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()) :: true | false</pre>
+
+      </div>
+
+<p>Checks if <code class="inline">User</code> with <code class="inline">username</code> exists in the database</p>
+  </section>
+</section>
+
+    </div>
+  </section>
+
+      <footer class="footer">
+
+        <p>
+          Built using
+          <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener" translate="no">ExDoc</a> (v0.28.6) for the
+
+            <a href="https://elixir-lang.org" title="Elixir" target="_blank" translate="no">Elixir programming language</a>
+
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+
+
+  </body>
+</html>

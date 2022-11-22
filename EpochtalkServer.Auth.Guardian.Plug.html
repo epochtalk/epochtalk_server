@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.28.6">
+    <meta name="project" content="epochtalk_server v0.1.0">
+
+    <title>EpochtalkServer.Auth.Guardian.Plug — epochtalk_server v0.1.0</title>
+    <link rel="stylesheet" href="dist/html-elixir-5CLCQQME.css" />
+
+    <script src="dist/handlebars.runtime-NWIB6V2M.js"></script>
+    <script src="dist/handlebars.templates-X7YVL3G2.js"></script>
+    <script src="dist/sidebar_items-2B5768A3.js"></script>
+
+      <script src="docs_config.js"></script>
+
+    <script async src="dist/html-PLW5RNNI.js"></script>
+
+
+  </head>
+  <body data-type="modules" class="page-module">
+    <script>
+
+      try {
+        var settings = JSON.parse(localStorage.getItem('ex_doc:settings') || '{}');
+
+        if (settings.theme === 'dark' ||
+           ((settings.theme === 'system' || settings.theme == null) &&
+             window.matchMedia('(prefers-color-scheme: dark)').matches)
+           ) {
+          document.body.classList.add('dark')
+        }
+      } catch (error) { }
+    </script>
+
+<div class="main">
+
+<button class="sidebar-button sidebar-toggle" aria-label="toggle sidebar">
+  <i class="ri-menu-line ri-lg" title="Collapse/expand sidebar"></i>
+</button>
+
+<section class="sidebar">
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button" aria-label="Submit Search">
+      <i class="ri-search-2-line" aria-hidden="true" title="Submit search"></i>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button" aria-label="Cancel Search">
+      <i class="ri-close-line ri-lg" aria-hidden="true" title="Cancel search"></i>
+    </button>
+    <label class="search-label">
+      <p class="sr-only">Search</p>
+      <input name="q" type="text" class="search-input" placeholder="Search..." aria-label="Input your search terms" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+
+    <div class="sidebar-projectDetails">
+      <a href="api-reference.html" class="sidebar-projectName" translate="no">
+epochtalk_server
+      </a>
+      <strong class="sidebar-projectVersion" translate="no">
+        v0.1.0
+      </strong>
+    </div>
+    <ul class="sidebar-listNav">
+      <li><a id="extras-list-link" href="#full-list">Pages</a></li>
+
+        <li><a id="modules-list-link" href="#full-list">Modules</a></li>
+
+
+    </ul>
+  </div>
+
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <output role="status" id="toast"></output>
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+<h1>
+<button class="settings display-settings">
+  <i class="ri-settings-3-line"></i>
+  <span class="sr-only">Settings</span>
+</button>
+
+
+  <span translate="no">EpochtalkServer.Auth.Guardian.Plug</span> 
+  <small class="app-vsn" translate="no">(epochtalk_server v0.1.0)</small>
+
+</h1>
+
+
+
+  <section id="summary" class="details-list">
+    <h1 class="section-heading">
+      <a class="hover-link" href="#summary">
+        <i class="ri-link-m" aria-hidden="true"></i>
+        <span class="sr-only">Link to this section</span>
+      </a>
+      Summary
+    </h1>
+
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+
+      <div class="summary-row">
+        <div class="summary-signature">
+          <a href="#authenticated?/2" translate="no">authenticated?(conn, opts \\ [])</a>
+
+        </div>
+
+      </div>
+
+      <div class="summary-row">
+        <div class="summary-signature">
+          <a href="#clear_remember_me/2" translate="no">clear_remember_me(conn, opts \\ [])</a>
+
+        </div>
+
+      </div>
+
+      <div class="summary-row">
+        <div class="summary-signature">
+          <a href="#current_claims/2" translate="no">current_claims(conn, opts \\ [])</a>
+
+        </div>
+
+      </div>
+
+      <div class="summary-row">
+        <div class="summary-signature">
+          <a href="#current_resource/2" translate="no">current_resource(conn, opts \\ [])</a>
+
+        </div>
+
+      </div>
+
+      <div class="summary-row">
+        <div class="summary-signature">
+          <a href="#current_token/2" translate="no">current_token(conn, opts \\ [])</a>
+
+        </div>
+
+      </div>
+
+      <div class="summary-row">
+        <div class="summary-signature">
+          <a href="#implementation/0" translate="no">implementation()</a>
+
+        </div>
+
+      </div>
+
+      <div class="summary-row">
+        <div class="summary-signature">
+          <a href="#put_current_claims/3" translate="no">put_current_claims(conn, claims, opts \\ [])</a>
+
+        </div>
+
+      </div>
+
+      <div class="summary-row">
+        <div class="summary-signature">
+          <a href="#put_current_resource/3" translate="no">put_current_resource(conn, resource, opts \\ [])</a>
+
+        </div>
+
+      </div>
+
+      <div class="summary-row">
+        <div class="summary-signature">
+          <a href="#put_current_token/3" translate="no">put_current_token(conn, token, opts \\ [])</a>
+
+        </div>
+
+      </div>
+
+      <div class="summary-row">
+        <div class="summary-signature">
+          <a href="#put_session_token/3" translate="no">put_session_token(conn, token, opts \\ [])</a>
+
+        </div>
+
+      </div>
+
+      <div class="summary-row">
+        <div class="summary-signature">
+          <a href="#remember_me/4" translate="no">remember_me(conn, resource, claims \\ %{}, opts \\ [])</a>
+
+        </div>
+
+      </div>
+
+      <div class="summary-row">
+        <div class="summary-signature">
+          <a href="#remember_me_from_token/4" translate="no">remember_me_from_token(conn, token, claims \\ %{}, opts \\ [])</a>
+
+        </div>
+
+      </div>
+
+      <div class="summary-row">
+        <div class="summary-signature">
+          <a href="#sign_in/4" translate="no">sign_in(conn, resource, claims \\ %{}, opts \\ [])</a>
+
+        </div>
+
+      </div>
+
+      <div class="summary-row">
+        <div class="summary-signature">
+          <a href="#sign_out/2" translate="no">sign_out(conn, opts \\ [])</a>
+
+        </div>
+
+      </div>
+
+  </div>
+
+  </section>
+
+
+  <section id="functions" class="details-list">
+    <h1 class="section-heading">
+      <a class="hover-link" href="#functions">
+        <i class="ri-link-m" aria-hidden="true"></i>
+        <span class="sr-only">Link to this section</span>
+      </a>
+Functions
+    </h1>
+    <div class="functions-list">
+<section class="detail" id="authenticated?/2">
+
+    <span id="authenticated?/1"></span>
+
+  <div class="detail-header">
+    <a href="#authenticated?/2" class="detail-link" title="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature" translate="no">authenticated?(conn, opts \\ [])</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+
+  </section>
+</section>
+<section class="detail" id="clear_remember_me/2">
+
+    <span id="clear_remember_me/1"></span>
+
+  <div class="detail-header">
+    <a href="#clear_remember_me/2" class="detail-link" title="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature" translate="no">clear_remember_me(conn, opts \\ [])</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+
+  </section>
+</section>
+<section class="detail" id="current_claims/2">
+
+    <span id="current_claims/1"></span>
+
+  <div class="detail-header">
+    <a href="#current_claims/2" class="detail-link" title="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature" translate="no">current_claims(conn, opts \\ [])</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+
+  </section>
+</section>
+<section class="detail" id="current_resource/2">
+
+    <span id="current_resource/1"></span>
+
+  <div class="detail-header">
+    <a href="#current_resource/2" class="detail-link" title="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature" translate="no">current_resource(conn, opts \\ [])</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+
+  </section>
+</section>
+<section class="detail" id="current_token/2">
+
+    <span id="current_token/1"></span>
+
+  <div class="detail-header">
+    <a href="#current_token/2" class="detail-link" title="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature" translate="no">current_token(conn, opts \\ [])</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+
+  </section>
+</section>
+<section class="detail" id="implementation/0">
+
+  <div class="detail-header">
+    <a href="#implementation/0" class="detail-link" title="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature" translate="no">implementation()</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> implementation() :: EpochtalkServer.Auth.Guardian</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="put_current_claims/3">
+
+    <span id="put_current_claims/2"></span>
+
+  <div class="detail-header">
+    <a href="#put_current_claims/3" class="detail-link" title="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature" translate="no">put_current_claims(conn, claims, opts \\ [])</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+
+  </section>
+</section>
+<section class="detail" id="put_current_resource/3">
+
+    <span id="put_current_resource/2"></span>
+
+  <div class="detail-header">
+    <a href="#put_current_resource/3" class="detail-link" title="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature" translate="no">put_current_resource(conn, resource, opts \\ [])</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+
+  </section>
+</section>
+<section class="detail" id="put_current_token/3">
+
+    <span id="put_current_token/2"></span>
+
+  <div class="detail-header">
+    <a href="#put_current_token/3" class="detail-link" title="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature" translate="no">put_current_token(conn, token, opts \\ [])</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+
+  </section>
+</section>
+<section class="detail" id="put_session_token/3">
+
+    <span id="put_session_token/2"></span>
+
+  <div class="detail-header">
+    <a href="#put_session_token/3" class="detail-link" title="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature" translate="no">put_session_token(conn, token, opts \\ [])</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+
+  </section>
+</section>
+<section class="detail" id="remember_me/4">
+
+    <span id="remember_me/2"></span>
+
+    <span id="remember_me/3"></span>
+
+  <div class="detail-header">
+    <a href="#remember_me/4" class="detail-link" title="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature" translate="no">remember_me(conn, resource, claims \\ %{}, opts \\ [])</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+
+  </section>
+</section>
+<section class="detail" id="remember_me_from_token/4">
+
+    <span id="remember_me_from_token/2"></span>
+
+    <span id="remember_me_from_token/3"></span>
+
+  <div class="detail-header">
+    <a href="#remember_me_from_token/4" class="detail-link" title="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature" translate="no">remember_me_from_token(conn, token, claims \\ %{}, opts \\ [])</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> remember_me_from_token(
+  <a href="https://hexdocs.pm/plug/1.13.6/Plug.Conn.html#t:t/0">Plug.Conn.t</a>(),
+  <a href="https://hexdocs.pm/guardian/2.3.0/Guardian.Token.html#t:token/0">Guardian.Token.token</a>(),
+  <a href="https://hexdocs.pm/guardian/2.3.0/Guardian.Token.html#t:claims/0">Guardian.Token.claims</a>(),
+  <a href="https://hexdocs.pm/guardian/2.3.0/Guardian.html#t:options/0">Guardian.options</a>()
+) :: <a href="https://hexdocs.pm/plug/1.13.6/Plug.Conn.html#t:t/0">Plug.Conn.t</a>()</pre>
+
+      </div>
+
+
+  </section>
+</section>
+<section class="detail" id="sign_in/4">
+
+    <span id="sign_in/2"></span>
+
+    <span id="sign_in/3"></span>
+
+  <div class="detail-header">
+    <a href="#sign_in/4" class="detail-link" title="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature" translate="no">sign_in(conn, resource, claims \\ %{}, opts \\ [])</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+
+  </section>
+</section>
+<section class="detail" id="sign_out/2">
+
+    <span id="sign_out/1"></span>
+
+  <div class="detail-header">
+    <a href="#sign_out/2" class="detail-link" title="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature" translate="no">sign_out(conn, opts \\ [])</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+
+  </section>
+</section>
+
+    </div>
+  </section>
+
+      <footer class="footer">
+
+        <p>
+          Built using
+          <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener" translate="no">ExDoc</a> (v0.28.6) for the
+
+            <a href="https://elixir-lang.org" title="Elixir" target="_blank" translate="no">Elixir programming language</a>
+
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+
+
+  </body>
+</html>

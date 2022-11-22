@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.28.6">
+    <meta name="project" content="epochtalk_server v0.1.0">
+
+    <title>API Reference — epochtalk_server v0.1.0</title>
+    <link rel="stylesheet" href="dist/html-elixir-5CLCQQME.css" />
+
+    <script src="dist/handlebars.runtime-NWIB6V2M.js"></script>
+    <script src="dist/handlebars.templates-X7YVL3G2.js"></script>
+    <script src="dist/sidebar_items-2B5768A3.js"></script>
+
+      <script src="docs_config.js"></script>
+
+    <script async src="dist/html-PLW5RNNI.js"></script>
+
+
+  </head>
+  <body data-type="extras" class="page-extra">
+    <script>
+
+      try {
+        var settings = JSON.parse(localStorage.getItem('ex_doc:settings') || '{}');
+
+        if (settings.theme === 'dark' ||
+           ((settings.theme === 'system' || settings.theme == null) &&
+             window.matchMedia('(prefers-color-scheme: dark)').matches)
+           ) {
+          document.body.classList.add('dark')
+        }
+      } catch (error) { }
+    </script>
+
+<div class="main">
+
+<button class="sidebar-button sidebar-toggle" aria-label="toggle sidebar">
+  <i class="ri-menu-line ri-lg" title="Collapse/expand sidebar"></i>
+</button>
+
+<section class="sidebar">
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button" aria-label="Submit Search">
+      <i class="ri-search-2-line" aria-hidden="true" title="Submit search"></i>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button" aria-label="Cancel Search">
+      <i class="ri-close-line ri-lg" aria-hidden="true" title="Cancel search"></i>
+    </button>
+    <label class="search-label">
+      <p class="sr-only">Search</p>
+      <input name="q" type="text" class="search-input" placeholder="Search..." aria-label="Input your search terms" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+
+    <div class="sidebar-projectDetails">
+      <a href="api-reference.html" class="sidebar-projectName" translate="no">
+epochtalk_server
+      </a>
+      <strong class="sidebar-projectVersion" translate="no">
+        v0.1.0
+      </strong>
+    </div>
+    <ul class="sidebar-listNav">
+      <li><a id="extras-list-link" href="#full-list">Pages</a></li>
+
+        <li><a id="modules-list-link" href="#full-list">Modules</a></li>
+
+
+    </ul>
+  </div>
+
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <output role="status" id="toast"></output>
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+<h1>
+<button class="settings display-settings">
+  <i class="ri-settings-3-line"></i>
+  <span class="sr-only">Settings</span>
+</button>
+
+
+  <span>API Reference <small class="app-vsn">epochtalk_server v0.1.0</small></span>
+</h1>
+
+
+  <section class="details-list">
+    <h2 id="modules" class="section-heading">
+  <a href="#modules" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i>
+  <p class="sr-only">modules</p>
+  </a>
+  Modules
+</h2>
+
+    <div class="summary">
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="EpochtalkServer.html" translate="no">EpochtalkServer</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>EpochtalkServer keeps the contexts that define your domain
+and business logic.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="EpochtalkServer.Auth.Guardian.html" translate="no">EpochtalkServer.Auth.Guardian</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Guardian provides a singular interface for authentication in Elixir applications
+that is <code class="inline">token</code> based.
+Tokens should be</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="EpochtalkServer.Auth.Guardian.Plug.html" translate="no">EpochtalkServer.Auth.Guardian.Plug</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="EpochtalkServer.Mailer.html" translate="no">EpochtalkServer.Mailer</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Used to generate and send emails from the API to a <code class="inline">User</code>.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="EpochtalkServer.Models.Ban.html" translate="no">EpochtalkServer.Models.Ban</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p><code class="inline">Ban</code> model, for performing actions relating to banning</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="EpochtalkServer.Models.BannedAddress.html" translate="no">EpochtalkServer.Models.BannedAddress</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p><code class="inline">BannedAddress</code> model, for performing actions relating to banning by ip/hostname</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="EpochtalkServer.Models.Board.html" translate="no">EpochtalkServer.Models.Board</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p><code class="inline">Board</code> model, for performing actions relating to forum boards</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="EpochtalkServer.Models.BoardMapping.html" translate="no">EpochtalkServer.Models.BoardMapping</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p><code class="inline">BoardMapping</code> model, for performing actions relating to mapping forum boards and categories</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="EpochtalkServer.Models.BoardModerator.html" translate="no">EpochtalkServer.Models.BoardModerator</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p><code class="inline">BoardModerator</code> model, for performing actions relating to <code class="inline">Board</code> moderators</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="EpochtalkServer.Models.Category.html" translate="no">EpochtalkServer.Models.Category</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p><code class="inline">Category</code> model, for performing actions relating to forum categories</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="EpochtalkServer.Models.Configuration.html" translate="no">EpochtalkServer.Models.Configuration</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p><code class="inline">Configuration</code> model, for performing actions relating to frontend <code class="inline">Configuration</code></p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="EpochtalkServer.Models.Invitation.html" translate="no">EpochtalkServer.Models.Invitation</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p><code class="inline">Invitation</code> model, for performing actions relating to inviting new users to the forum</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="EpochtalkServer.Models.Mention.html" translate="no">EpochtalkServer.Models.Mention</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p><code class="inline">Mention</code> model, for performing actions relating to forum categories</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="EpochtalkServer.Models.MetadataBoard.html" translate="no">EpochtalkServer.Models.MetadataBoard</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p><code class="inline">MetadataBoard</code> model, for performing actions relating to <code class="inline">Board</code> metadata</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="EpochtalkServer.Models.Notification.html" translate="no">EpochtalkServer.Models.Notification</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p><code class="inline">Notification</code> model, for performing actions relating to forum categories</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="EpochtalkServer.Models.Permission.html" translate="no">EpochtalkServer.Models.Permission</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p><code class="inline">Permission</code> model, for performing actions relating to <code class="inline">Role</code> permissions, used for seeding</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="EpochtalkServer.Models.Post.html" translate="no">EpochtalkServer.Models.Post</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p><code class="inline">Post</code> model, for performing actions relating to forum posts</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="EpochtalkServer.Models.Preference.html" translate="no">EpochtalkServer.Models.Preference</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p><code class="inline">Preference</code> model, for performing actions relating to a user's preferences</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="EpochtalkServer.Models.Profile.html" translate="no">EpochtalkServer.Models.Profile</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p><code class="inline">Profile</code> model, for performing actions relating a user's profile</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="EpochtalkServer.Models.Role.html" translate="no">EpochtalkServer.Models.Role</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p><code class="inline">Role</code> model, for performing actions relating to user roles</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="EpochtalkServer.Models.RolePermission.html" translate="no">EpochtalkServer.Models.RolePermission</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p><code class="inline">RolePermission</code> model, for performing actions relating to a roles permissions</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="EpochtalkServer.Models.RoleUser.html" translate="no">EpochtalkServer.Models.RoleUser</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p><code class="inline">RoleUser</code> model, for performing actions relating a setting a <code class="inline">Role</code> for a <code class="inline">User</code></p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="EpochtalkServer.Models.Thread.html" translate="no">EpochtalkServer.Models.Thread</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p><code class="inline">Thread</code> model, for performing actions relating to forum threads</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="EpochtalkServer.Models.User.html" translate="no">EpochtalkServer.Models.User</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p><code class="inline">User</code> model, for performing actions relating a user</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="EpochtalkServer.Repo.html" translate="no">EpochtalkServer.Repo</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="EpochtalkServer.Session.html" translate="no">EpochtalkServer.Session</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Manages <code class="inline">User</code> sessions in Redis. Used by Auth related <code class="inline">User</code> actions.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="EpochtalkServerWeb.html" translate="no">EpochtalkServerWeb</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>The entrypoint for defining your web interface, such
+as controllers, views, channels and so on.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="EpochtalkServerWeb.ConfigurationController.html" translate="no">EpochtalkServerWeb.ConfigurationController</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Controller For <code class="inline">Configuration</code> related API requests</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="EpochtalkServerWeb.ConfigurationView.html" translate="no">EpochtalkServerWeb.ConfigurationView</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Renders and formats <code class="inline">Configuration</code> data, in JSON format for frontend</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="EpochtalkServerWeb.CustomErrors.html" translate="no">EpochtalkServerWeb.CustomErrors</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="EpochtalkServerWeb.CustomErrors.InvalidPayload.html" translate="no">EpochtalkServerWeb.CustomErrors.InvalidPayload</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Exception raised when api request payload is incorrect</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="EpochtalkServerWeb.CustomErrors.MalformedPayload.html" translate="no">EpochtalkServerWeb.CustomErrors.MalformedPayload</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Exception raised when api request payload JSON is malformed</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="EpochtalkServerWeb.CustomErrors.OversizedPayload.html" translate="no">EpochtalkServerWeb.CustomErrors.OversizedPayload</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Exception raised when api request payload is too large</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="EpochtalkServerWeb.Endpoint.html" translate="no">EpochtalkServerWeb.Endpoint</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="EpochtalkServerWeb.Endpoint.CacheBodyReader.html" translate="no">EpochtalkServerWeb.Endpoint.CacheBodyReader</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="EpochtalkServerWeb.ErrorHelpers.html" translate="no">EpochtalkServerWeb.ErrorHelpers</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Conveniences for translating and building error messages.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="EpochtalkServerWeb.ErrorView.html" translate="no">EpochtalkServerWeb.ErrorView</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Renders and formats error data, in JSON format for frontend</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="EpochtalkServerWeb.GuardianErrorHandler.html" translate="no">EpochtalkServerWeb.GuardianErrorHandler</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Helper module which intercepts guardian errors.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="EpochtalkServerWeb.Helpers.Pagination.html" translate="no">EpochtalkServerWeb.Helpers.Pagination</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Helper for paginating database queries</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="EpochtalkServerWeb.Helpers.Validate.html" translate="no">EpochtalkServerWeb.Helpers.Validate</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Helper for validating and casting query parameters not associated with a model.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="EpochtalkServerWeb.MentionController.html" translate="no">EpochtalkServerWeb.MentionController</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Controller For <code class="inline">Mention</code> related API requests</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="EpochtalkServerWeb.MentionView.html" translate="no">EpochtalkServerWeb.MentionView</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Renders and formats <code class="inline">User</code> data, in JSON format for frontend</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="EpochtalkServerWeb.NotificationController.html" translate="no">EpochtalkServerWeb.NotificationController</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Controller For <code class="inline">Notification</code> related API requests</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="EpochtalkServerWeb.NotificationView.html" translate="no">EpochtalkServerWeb.NotificationView</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Renders and formats <code class="inline">User</code> data, in JSON format for frontend</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="EpochtalkServerWeb.Plugs.PrepareParse.html" translate="no">EpochtalkServerWeb.Plugs.PrepareParse</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Plug that pre-parses request body and raises errors if there are problems</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="EpochtalkServerWeb.PreferenceController.html" translate="no">EpochtalkServerWeb.PreferenceController</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Controller For <code class="inline">Preference</code> related API requests</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="EpochtalkServerWeb.PreferenceView.html" translate="no">EpochtalkServerWeb.PreferenceView</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Renders and formats <code class="inline">Preference</code> data, in JSON format for frontend</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="EpochtalkServerWeb.Presence.html" translate="no">EpochtalkServerWeb.Presence</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>This module is used to track <code class="inline">User</code> presence in websocket channels. Currently used
+by the <code class="inline">user:public</code> channel to check if a <code class="inline">User</code> is online.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="EpochtalkServerWeb.Router.html" translate="no">EpochtalkServerWeb.Router</a>
+
+  </div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="EpochtalkServerWeb.Router.Helpers.html" translate="no">EpochtalkServerWeb.Router.Helpers</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Module with named helpers generated from EpochtalkServerWeb.Router.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="EpochtalkServerWeb.Telemetry.html" translate="no">EpochtalkServerWeb.Telemetry</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Description of all events occuring in application</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="EpochtalkServerWeb.UserChannel.html" translate="no">EpochtalkServerWeb.UserChannel</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Handles <code class="inline">User</code> websocket channels. These channels are used to broadcast events to
+the client. With the current design, API route can broadcast messages when an
+action is performed, this notifies the client to perform an action, such as requesting data
+from the server.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="EpochtalkServerWeb.UserController.html" translate="no">EpochtalkServerWeb.UserController</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Controller For <code class="inline">User</code> related API requests</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="EpochtalkServerWeb.UserSocket.html" translate="no">EpochtalkServerWeb.UserSocket</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Handles <code class="inline">User</code> socket connection and authentication.</p></div>
+
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="EpochtalkServerWeb.UserView.html" translate="no">EpochtalkServerWeb.UserView</a>
+
+  </div>
+
+    <div class="summary-synopsis"><p>Renders and formats <code class="inline">User</code> data, in JSON format for frontend</p></div>
+
+</div>
+
+    </div>
+  </section>
+
+
+<div class="bottom-actions">
+  <div class="bottom-actions-item">
+
+  </div>
+  <div class="bottom-actions-item">
+
+  </div>
+</div>
+      <footer class="footer">
+
+        <p>
+          Built using
+          <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener" translate="no">ExDoc</a> (v0.28.6) for the
+
+            <a href="https://elixir-lang.org" title="Elixir" target="_blank" translate="no">Elixir programming language</a>
+
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+
+
+  </body>
+</html>

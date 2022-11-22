@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.28.6">
+    <meta name="project" content="epochtalk_server v0.1.0">
+
+    <title>EpochtalkServer.Models.Notification — epochtalk_server v0.1.0</title>
+    <link rel="stylesheet" href="dist/html-elixir-5CLCQQME.css" />
+
+    <script src="dist/handlebars.runtime-NWIB6V2M.js"></script>
+    <script src="dist/handlebars.templates-X7YVL3G2.js"></script>
+    <script src="dist/sidebar_items-2B5768A3.js"></script>
+
+      <script src="docs_config.js"></script>
+
+    <script async src="dist/html-PLW5RNNI.js"></script>
+
+
+  </head>
+  <body data-type="modules" class="page-module">
+    <script>
+
+      try {
+        var settings = JSON.parse(localStorage.getItem('ex_doc:settings') || '{}');
+
+        if (settings.theme === 'dark' ||
+           ((settings.theme === 'system' || settings.theme == null) &&
+             window.matchMedia('(prefers-color-scheme: dark)').matches)
+           ) {
+          document.body.classList.add('dark')
+        }
+      } catch (error) { }
+    </script>
+
+<div class="main">
+
+<button class="sidebar-button sidebar-toggle" aria-label="toggle sidebar">
+  <i class="ri-menu-line ri-lg" title="Collapse/expand sidebar"></i>
+</button>
+
+<section class="sidebar">
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button" aria-label="Submit Search">
+      <i class="ri-search-2-line" aria-hidden="true" title="Submit search"></i>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button" aria-label="Cancel Search">
+      <i class="ri-close-line ri-lg" aria-hidden="true" title="Cancel search"></i>
+    </button>
+    <label class="search-label">
+      <p class="sr-only">Search</p>
+      <input name="q" type="text" class="search-input" placeholder="Search..." aria-label="Input your search terms" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+
+    <div class="sidebar-projectDetails">
+      <a href="api-reference.html" class="sidebar-projectName" translate="no">
+epochtalk_server
+      </a>
+      <strong class="sidebar-projectVersion" translate="no">
+        v0.1.0
+      </strong>
+    </div>
+    <ul class="sidebar-listNav">
+      <li><a id="extras-list-link" href="#full-list">Pages</a></li>
+
+        <li><a id="modules-list-link" href="#full-list">Modules</a></li>
+
+
+    </ul>
+  </div>
+
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <output role="status" id="toast"></output>
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+<h1>
+<button class="settings display-settings">
+  <i class="ri-settings-3-line"></i>
+  <span class="sr-only">Settings</span>
+</button>
+
+
+  <span translate="no">EpochtalkServer.Models.Notification</span> 
+  <small class="app-vsn" translate="no">(epochtalk_server v0.1.0)</small>
+
+</h1>
+
+
+  <section id="moduledoc">
+<p><code class="inline">Notification</code> model, for performing actions relating to forum categories</p>
+  </section>
+
+
+  <section id="summary" class="details-list">
+    <h1 class="section-heading">
+      <a class="hover-link" href="#summary">
+        <i class="ri-link-m" aria-hidden="true"></i>
+        <span class="sr-only">Link to this section</span>
+      </a>
+      Summary
+    </h1>
+
+  <div class="summary-types summary">
+    <h2>
+      <a href="#types">Types</a>
+    </h2>
+
+      <div class="summary-row">
+        <div class="summary-signature">
+          <a href="#t:t/0" translate="no">t()</a>
+
+        </div>
+
+      </div>
+
+  </div>
+
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+
+      <div class="summary-row">
+        <div class="summary-signature">
+          <a href="#changeset/2" translate="no">changeset(notification, attrs)</a>
+
+        </div>
+
+          <div class="summary-synopsis"><p>Create generic changeset for <code class="inline">Notification</code> model</p></div>
+
+      </div>
+
+      <div class="summary-row">
+        <div class="summary-signature">
+          <a href="#counts_by_user_id/2" translate="no">counts_by_user_id(user_id, list)</a>
+
+        </div>
+
+          <div class="summary-synopsis"><p>Returns <code class="inline">Notification</code> counts for a specific <code class="inline">User</code> by <code class="inline">id</code>, from the database. Used
+to display new message/mention notifications.</p></div>
+
+      </div>
+
+      <div class="summary-row">
+        <div class="summary-signature">
+          <a href="#dismiss/1" translate="no">dismiss(id)</a>
+
+        </div>
+
+          <div class="summary-synopsis"><p>Dismisses specific <code class="inline">Notification</code> by <code class="inline">id</code>. Used
+to display clear a specific message/mention <code class="inline">Notification</code>.</p></div>
+
+      </div>
+
+      <div class="summary-row">
+        <div class="summary-signature">
+          <a href="#dismiss_type_by_user_id/2" translate="no">dismiss_type_by_user_id(user_id, type)</a>
+
+        </div>
+
+          <div class="summary-synopsis"><p>Dismisses <code class="inline">Notification</code> counts for a specific <code class="inline">User</code> by <code class="inline">id</code>. Used
+to display clear message/mention notifications.</p></div>
+
+      </div>
+
+  </div>
+
+  </section>
+
+
+  <section id="types" class="details-list">
+    <h1 class="section-heading">
+      <a class="hover-link" href="#types">
+        <i class="ri-link-m" aria-hidden="true"></i>
+        <span class="sr-only">Link to this section</span>
+      </a>
+Types
+    </h1>
+    <div class="types-list">
+<section class="detail" id="t:t/0">
+
+  <div class="detail-header">
+    <a href="#t:t/0" class="detail-link" title="Link to this type">
+      <i class="ri-link-m" aria-hidden="true"></i>
+      <span class="sr-only">Link to this type</span>
+    </a>
+    <h1 class="signature" translate="no">t()</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@type</span> t() :: %EpochtalkServer.Models.Notification{
+  __meta__: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
+  created_at: <a href="https://hexdocs.pm/elixir/NaiveDateTime.html#t:t/0">NaiveDateTime.t</a>() | nil,
+  data: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>() | nil,
+  id: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>() | nil,
+  receiver: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
+  receiver_id: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>() | nil,
+  sender: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>(),
+  sender_id: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>() | nil,
+  type: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>() | nil,
+  viewed: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>() | nil
+}</pre>
+
+      </div>
+
+
+  </section>
+</section>
+
+    </div>
+  </section>
+
+  <section id="functions" class="details-list">
+    <h1 class="section-heading">
+      <a class="hover-link" href="#functions">
+        <i class="ri-link-m" aria-hidden="true"></i>
+        <span class="sr-only">Link to this section</span>
+      </a>
+Functions
+    </h1>
+    <div class="functions-list">
+<section class="detail" id="changeset/2">
+
+  <div class="detail-header">
+    <a href="#changeset/2" class="detail-link" title="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature" translate="no">changeset(notification, attrs)</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> changeset(notification :: <a href="#t:t/0">t</a>(), attrs :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>() | nil) :: <a href="https://hexdocs.pm/ecto/3.9.1/Ecto.Changeset.html#t:t/0">Ecto.Changeset.t</a>()</pre>
+
+      </div>
+
+<p>Create generic changeset for <code class="inline">Notification</code> model</p>
+  </section>
+</section>
+<section class="detail" id="counts_by_user_id/2">
+
+  <div class="detail-header">
+    <a href="#counts_by_user_id/2" class="detail-link" title="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature" translate="no">counts_by_user_id(user_id, list)</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> counts_by_user_id(user_id :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>(), [{:max, <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>()}]) ::
+  <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>()</pre>
+
+      </div>
+
+<p>Returns <code class="inline">Notification</code> counts for a specific <code class="inline">User</code> by <code class="inline">id</code>, from the database. Used
+to display new message/mention notifications.</p>
+  </section>
+</section>
+<section class="detail" id="dismiss/1">
+
+  <div class="detail-header">
+    <a href="#dismiss/1" class="detail-link" title="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature" translate="no">dismiss(id)</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> dismiss(id :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">integer</a>()) :: {<a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>(), nil | [<a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()]}</pre>
+
+      </div>
+
+<p>Dismisses specific <code class="inline">Notification</code> by <code class="inline">id</code>. Used
+to display clear a specific message/mention <code class="inline">Notification</code>.</p>
+  </section>
+</section>
+<section class="detail" id="dismiss_type_by_user_id/2">
+
+  <div class="detail-header">
+    <a href="#dismiss_type_by_user_id/2" class="detail-link" title="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature" translate="no">dismiss_type_by_user_id(user_id, type)</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> dismiss_type_by_user_id(user_id :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">integer</a>(), type :: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()) ::
+  {<a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>(), nil | [<a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">term</a>()]} | {:error, :invalid_notification_type}</pre>
+
+      </div>
+
+<p>Dismisses <code class="inline">Notification</code> counts for a specific <code class="inline">User</code> by <code class="inline">id</code>. Used
+to display clear message/mention notifications.</p>
+  </section>
+</section>
+
+    </div>
+  </section>
+
+      <footer class="footer">
+
+        <p>
+          Built using
+          <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener" translate="no">ExDoc</a> (v0.28.6) for the
+
+            <a href="https://elixir-lang.org" title="Elixir" target="_blank" translate="no">Elixir programming language</a>
+
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+
+
+  </body>
+</html>

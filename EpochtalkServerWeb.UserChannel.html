@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.28.6">
+    <meta name="project" content="epochtalk_server v0.1.0">
+
+    <title>EpochtalkServerWeb.UserChannel — epochtalk_server v0.1.0</title>
+    <link rel="stylesheet" href="dist/html-elixir-5CLCQQME.css" />
+
+    <script src="dist/handlebars.runtime-NWIB6V2M.js"></script>
+    <script src="dist/handlebars.templates-X7YVL3G2.js"></script>
+    <script src="dist/sidebar_items-2B5768A3.js"></script>
+
+      <script src="docs_config.js"></script>
+
+    <script async src="dist/html-PLW5RNNI.js"></script>
+
+
+  </head>
+  <body data-type="modules" class="page-module">
+    <script>
+
+      try {
+        var settings = JSON.parse(localStorage.getItem('ex_doc:settings') || '{}');
+
+        if (settings.theme === 'dark' ||
+           ((settings.theme === 'system' || settings.theme == null) &&
+             window.matchMedia('(prefers-color-scheme: dark)').matches)
+           ) {
+          document.body.classList.add('dark')
+        }
+      } catch (error) { }
+    </script>
+
+<div class="main">
+
+<button class="sidebar-button sidebar-toggle" aria-label="toggle sidebar">
+  <i class="ri-menu-line ri-lg" title="Collapse/expand sidebar"></i>
+</button>
+
+<section class="sidebar">
+  <form class="sidebar-search" action="search.html">
+    <button type="submit" class="search-button" aria-label="Submit Search">
+      <i class="ri-search-2-line" aria-hidden="true" title="Submit search"></i>
+    </button>
+    <button type="button" tabindex="-1" class="search-close-button" aria-label="Cancel Search">
+      <i class="ri-close-line ri-lg" aria-hidden="true" title="Cancel search"></i>
+    </button>
+    <label class="search-label">
+      <p class="sr-only">Search</p>
+      <input name="q" type="text" class="search-input" placeholder="Search..." aria-label="Input your search terms" autocomplete="off" />
+    </label>
+  </form>
+
+  <div class="autocomplete">
+    <div class="autocomplete-results">
+    </div>
+  </div>
+
+  <div class="sidebar-header">
+
+    <div class="sidebar-projectDetails">
+      <a href="api-reference.html" class="sidebar-projectName" translate="no">
+epochtalk_server
+      </a>
+      <strong class="sidebar-projectVersion" translate="no">
+        v0.1.0
+      </strong>
+    </div>
+    <ul class="sidebar-listNav">
+      <li><a id="extras-list-link" href="#full-list">Pages</a></li>
+
+        <li><a id="modules-list-link" href="#full-list">Modules</a></li>
+
+
+    </ul>
+  </div>
+
+  <div class="gradient"></div>
+  <ul id="full-list" class="sidebar-fullList"></ul>
+</section>
+
+<section class="content">
+  <output role="status" id="toast"></output>
+  <div class="content-outer">
+    <div id="content" class="content-inner">
+
+<h1>
+<button class="settings display-settings">
+  <i class="ri-settings-3-line"></i>
+  <span class="sr-only">Settings</span>
+</button>
+
+
+  <span translate="no">EpochtalkServerWeb.UserChannel</span> 
+  <small class="app-vsn" translate="no">(epochtalk_server v0.1.0)</small>
+
+</h1>
+
+
+  <section id="moduledoc">
+<p>Handles <code class="inline">User</code> websocket channels. These channels are used to broadcast events to
+the client. With the current design, API route can broadcast messages when an
+action is performed, this notifies the client to perform an action, such as requesting data
+from the server.</p><p><em>TODO(akinsey):</em> This is a direct port of the old epochtalk websocket architecture,
+there is room for improvement. For certain messages (ex: announcement) relevant data
+can be sent over the channel via the broadcast message payload. Currently, receiving
+a message triggers the client to manually make an api request for the updated data.</p><h3 id="module-supported-user-channels" class="section-heading">
+  <a href="#module-supported-user-channels" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i>
+  <p class="sr-only">supported-user-channels</p>
+  </a>
+  Supported User Channels
+</h3>
+<table><thead><tr><th style="text-align: left;">channel⠀⠀⠀⠀⠀⠀</th><th style="text-align: left;">authed</th><th style="text-align: left;">purpose</th></tr></thead><tbody><tr><td style="text-align: left;"><code class="inline">user:public</code></td><td style="text-align: left;">maybe</td><td style="text-align: left;">All logged in and anonymous users are connected to this channel. Used to track user's online status and to broadcast MOTD announcements.</td></tr><tr><td style="text-align: left;"><code class="inline">user:&lt;user_id&gt;</code></td><td style="text-align: left;">yes</td><td style="text-align: left;">Used to broadcast changes that affect a particular user (ex: logout)</td></tr><tr><td style="text-align: left;"><code class="inline">user:role</code></td><td style="text-align: left;">yes</td><td style="text-align: left;">Used to broadcast when a role has its permissions changed</td></tr></tbody></table><h3 id="module-client-handled-messages-messages-broadcast-from-server" class="section-heading">
+  <a href="#module-client-handled-messages-messages-broadcast-from-server" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i>
+  <p class="sr-only">client-handled-messages-messages-broadcast-from-server</p>
+  </a>
+  Client Handled Messages (messages broadcast from server)
+</h3>
+<table><thead><tr><th style="text-align: left;">broadcast message</th><th style="text-align: left;">channel⠀⠀⠀⠀⠀⠀</th><th style="text-align: left;">payload⠀⠀⠀⠀⠀⠀</th><th style="text-align: left;">client action</th></tr></thead><tbody><tr><td style="text-align: left;"><code class="inline">announcement</code></td><td style="text-align: left;"><code class="inline">user:public</code></td><td style="text-align: left;"><code class="inline">%{}</code></td><td style="text-align: left;">fetches MOTD announcement</td></tr><tr><td style="text-align: left;"><code class="inline">reauthenticate</code></td><td style="text-align: left;"><code class="inline">user:&lt;user_id&gt;</code></td><td style="text-align: left;"><code class="inline">%{}</code></td><td style="text-align: left;">reauthenticates, fetches user changes</td></tr><tr><td style="text-align: left;"><code class="inline">logout</code></td><td style="text-align: left;"><code class="inline">user:&lt;user_id&gt;</code></td><td style="text-align: left;"><code class="inline">%{:token}</code></td><td style="text-align: left;">logout all user sessions with token</td></tr><tr><td style="text-align: left;"><code class="inline">newMessage</code></td><td style="text-align: left;"><code class="inline">user:&lt;user_id&gt;</code></td><td style="text-align: left;"><code class="inline">%{}</code></td><td style="text-align: left;">fetches new messages/counts</td></tr><tr><td style="text-align: left;"><code class="inline">refreshMentions</code></td><td style="text-align: left;"><code class="inline">user:&lt;user_id&gt;</code></td><td style="text-align: left;"><code class="inline">%{}</code></td><td style="text-align: left;">fetches new mentions/counts</td></tr><tr><td style="text-align: left;"><code class="inline">permissionsChanged</code></td><td style="text-align: left;"><code class="inline">user:role</code></td><td style="text-align: left;"><code class="inline">%{}</code></td><td style="text-align: left;">reauthenticates, fetches new permissions</td></tr></tbody></table><h3 id="module-server-handled-messages-messages-broadcast-from-client" class="section-heading">
+  <a href="#module-server-handled-messages-messages-broadcast-from-client" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i>
+  <p class="sr-only">server-handled-messages-messages-broadcast-from-client</p>
+  </a>
+  Server Handled Messages (messages broadcast from client)
+</h3>
+<table><thead><tr><th style="text-align: left;">broadcast message</th><th style="text-align: left;">channel</th><th style="text-align: left;">payload⠀⠀⠀⠀⠀⠀</th><th style="text-align: left;">server action</th></tr></thead><tbody><tr><td style="text-align: left;"><code class="inline">is_online</code></td><td style="text-align: left;"><code class="inline">user:public</code></td><td style="text-align: left;"><code class="inline">%{:user_id}</code></td><td style="text-align: left;">replies to client with the specified user's online status</td></tr></tbody></table>
+  </section>
+
+
+  <section id="summary" class="details-list">
+    <h1 class="section-heading">
+      <a class="hover-link" href="#summary">
+        <i class="ri-link-m" aria-hidden="true"></i>
+        <span class="sr-only">Link to this section</span>
+      </a>
+      Summary
+    </h1>
+
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+
+      <div class="summary-row">
+        <div class="summary-signature">
+          <a href="#child_spec/1" translate="no">child_spec(init_arg)</a>
+
+        </div>
+
+      </div>
+
+      <div class="summary-row">
+        <div class="summary-signature">
+          <a href="#is_online/2" translate="no">is_online(socket, user_id)</a>
+
+        </div>
+
+          <div class="summary-synopsis"><p>Handles message <code class="inline">is_online</code>, checks <code class="inline">user:public</code> channel to see if
+<code class="inline">User</code> with <code class="inline">user_id</code> is connected using Presence. Returns <code class="inline">user_id</code>
+and <code class="inline">online</code>, a boolean indicating if the <code class="inline">User</code> is connected.</p></div>
+
+      </div>
+
+      <div class="summary-row">
+        <div class="summary-signature">
+          <a href="#join_public_channel/1" translate="no">join_public_channel(socket)</a>
+
+        </div>
+
+          <div class="summary-synopsis"><p>Handles joining of <code class="inline">user:public</code> channel. Message is broadcast on this channel when
+a <code class="inline">MOTD</code> is updated, this tells the client to fetch the MOTD.</p></div>
+
+      </div>
+
+      <div class="summary-row">
+        <div class="summary-signature">
+          <a href="#join_role_channel/1" translate="no">join_role_channel(socket)</a>
+
+        </div>
+
+          <div class="summary-synopsis"><p>Handles joining of <code class="inline">user:role</code> channel. Messages are broadcast on this channel when
+a roles are updated, which tell the client to reauthenticate inorder to fetch new roles.
+Messages contain the <code class="inline">lookup</code> of the updated role, the client will check the user's roles for the
+role <code class="inline">lookup</code> and reauthenticate if necessary.</p></div>
+
+      </div>
+
+      <div class="summary-row">
+        <div class="summary-signature">
+          <a href="#join_user_channel/2" translate="no">join_user_channel(socket, user_id)</a>
+
+        </div>
+
+          <div class="summary-synopsis"><p>Handles joining of <code class="inline">user:&lt;user_id&gt;</code> channel, enforces that user is authenticated.
+This channel is used to broadcast events such as reauthenticate or logout to a
+specific <code class="inline">User</code> with matching <code class="inline">user_id</code>.</p></div>
+
+      </div>
+
+      <div class="summary-row">
+        <div class="summary-signature">
+          <a href="#start_link/1" translate="no">start_link(triplet)</a>
+
+        </div>
+
+      </div>
+
+      <div class="summary-row">
+        <div class="summary-signature">
+          <a href="#track_user_online/1" translate="no">track_user_online(socket)</a>
+
+        </div>
+
+          <div class="summary-synopsis"><p>Tracks a <code class="inline">User</code> that joins a channel using <code class="inline">Presence</code>. Currently
+used to track a <code class="inline">User</code> that joins the <code class="inline">user:public</code> channel. Used by forum
+order to keep track of online users.</p></div>
+
+      </div>
+
+  </div>
+
+  </section>
+
+
+  <section id="functions" class="details-list">
+    <h1 class="section-heading">
+      <a class="hover-link" href="#functions">
+        <i class="ri-link-m" aria-hidden="true"></i>
+        <span class="sr-only">Link to this section</span>
+      </a>
+Functions
+    </h1>
+    <div class="functions-list">
+<section class="detail" id="child_spec/1">
+
+  <div class="detail-header">
+    <a href="#child_spec/1" class="detail-link" title="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature" translate="no">child_spec(init_arg)</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+
+  </section>
+</section>
+<section class="detail" id="is_online/2">
+
+  <div class="detail-header">
+    <a href="#is_online/2" class="detail-link" title="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature" translate="no">is_online(socket, user_id)</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> is_online(socket :: <a href="https://hexdocs.pm/phoenix/1.6.14/Phoenix.Socket.html#t:t/0">Phoenix.Socket.t</a>(), user_id :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>()) ::
+  {:reply, {:ok, %{id: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">non_neg_integer</a>(), online: <a href="https://hexdocs.pm/elixir/typespecs.html#built-in-types">boolean</a>()}},
+   socket :: <a href="https://hexdocs.pm/phoenix/1.6.14/Phoenix.Socket.html#t:t/0">Phoenix.Socket.t</a>()}</pre>
+
+      </div>
+
+<p>Handles message <code class="inline">is_online</code>, checks <code class="inline">user:public</code> channel to see if
+<code class="inline">User</code> with <code class="inline">user_id</code> is connected using Presence. Returns <code class="inline">user_id</code>
+and <code class="inline">online</code>, a boolean indicating if the <code class="inline">User</code> is connected.</p>
+  </section>
+</section>
+<section class="detail" id="join_public_channel/1">
+
+  <div class="detail-header">
+    <a href="#join_public_channel/1" class="detail-link" title="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature" translate="no">join_public_channel(socket)</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> join_public_channel(socket :: <a href="https://hexdocs.pm/phoenix/1.6.14/Phoenix.Socket.html#t:t/0">Phoenix.Socket.t</a>()) :: {:ok, <a href="https://hexdocs.pm/phoenix/1.6.14/Phoenix.Socket.html#t:t/0">Phoenix.Socket.t</a>()}</pre>
+
+      </div>
+
+<p>Handles joining of <code class="inline">user:public</code> channel. Message is broadcast on this channel when
+a <code class="inline">MOTD</code> is updated, this tells the client to fetch the MOTD.</p>
+  </section>
+</section>
+<section class="detail" id="join_role_channel/1">
+
+  <div class="detail-header">
+    <a href="#join_role_channel/1" class="detail-link" title="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature" translate="no">join_role_channel(socket)</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> join_role_channel(socket :: <a href="https://hexdocs.pm/phoenix/1.6.14/Phoenix.Socket.html#t:t/0">Phoenix.Socket.t</a>()) ::
+  {:ok, <a href="https://hexdocs.pm/phoenix/1.6.14/Phoenix.Socket.html#t:t/0">Phoenix.Socket.t</a>()} | {:error, data :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>()}</pre>
+
+      </div>
+
+<p>Handles joining of <code class="inline">user:role</code> channel. Messages are broadcast on this channel when
+a roles are updated, which tell the client to reauthenticate inorder to fetch new roles.
+Messages contain the <code class="inline">lookup</code> of the updated role, the client will check the user's roles for the
+role <code class="inline">lookup</code> and reauthenticate if necessary.</p>
+  </section>
+</section>
+<section class="detail" id="join_user_channel/2">
+
+  <div class="detail-header">
+    <a href="#join_user_channel/2" class="detail-link" title="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature" translate="no">join_user_channel(socket, user_id)</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> join_user_channel(socket :: <a href="https://hexdocs.pm/phoenix/1.6.14/Phoenix.Socket.html#t:t/0">Phoenix.Socket.t</a>(), user_id :: <a href="https://hexdocs.pm/elixir/String.html#t:t/0">String.t</a>()) ::
+  {:ok, <a href="https://hexdocs.pm/phoenix/1.6.14/Phoenix.Socket.html#t:t/0">Phoenix.Socket.t</a>()} | {:error, data :: <a href="https://hexdocs.pm/elixir/typespecs.html#basic-types">map</a>()}</pre>
+
+      </div>
+
+<p>Handles joining of <code class="inline">user:&lt;user_id&gt;</code> channel, enforces that user is authenticated.
+This channel is used to broadcast events such as reauthenticate or logout to a
+specific <code class="inline">User</code> with matching <code class="inline">user_id</code>.</p>
+  </section>
+</section>
+<section class="detail" id="start_link/1">
+
+  <div class="detail-header">
+    <a href="#start_link/1" class="detail-link" title="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature" translate="no">start_link(triplet)</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+
+  </section>
+</section>
+<section class="detail" id="track_user_online/1">
+
+  <div class="detail-header">
+    <a href="#track_user_online/1" class="detail-link" title="Link to this function">
+      <i class="ri-link-m" aria-hidden="true"></i>
+      <span class="sr-only">Link to this function</span>
+    </a>
+    <h1 class="signature" translate="no">track_user_online(socket)</h1>
+
+
+  </div>
+
+  <section class="docstring">
+
+      <div class="specs">
+
+          <pre translate="no"><span class="attribute">@spec</span> track_user_online(socket :: <a href="https://hexdocs.pm/phoenix/1.6.14/Phoenix.Socket.html#t:t/0">Phoenix.Socket.t</a>()) ::
+  {:noreply, <a href="https://hexdocs.pm/phoenix/1.6.14/Phoenix.Socket.html#t:t/0">Phoenix.Socket.t</a>()}</pre>
+
+      </div>
+
+<p>Tracks a <code class="inline">User</code> that joins a channel using <code class="inline">Presence</code>. Currently
+used to track a <code class="inline">User</code> that joins the <code class="inline">user:public</code> channel. Used by forum
+order to keep track of online users.</p>
+  </section>
+</section>
+
+    </div>
+  </section>
+
+      <footer class="footer">
+
+        <p>
+          Built using
+          <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener" translate="no">ExDoc</a> (v0.28.6) for the
+
+            <a href="https://elixir-lang.org" title="Elixir" target="_blank" translate="no">Elixir programming language</a>
+
+        </p>
+      </footer>
+    </div>
+  </div>
+</section>
+</div>
+
+
+  </body>
+</html>

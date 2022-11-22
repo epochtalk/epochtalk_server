@@ -1,6 +1,6 @@
 # EpochtalkServer
 
-[![Build Status](https://github.com/epochtalk/epochtalk_server/workflows/main.yml/badge.svg)](https://github.com/epochtalk/epochtalk_server/actions)
+[![Build Status](https://github.com/epochtalk/epochtalk_server/actions/workflows/main.yml/badge.svg)](https://github.com/epochtalk/epochtalk_server/actions)
 [![Documentation](https://img.shields.io/badge/documentation-gray)](https://docs.epochtalk.org/api-reference.html)
 
 To start your Phoenix server:

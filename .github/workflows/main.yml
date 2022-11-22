@@ -178,6 +178,7 @@ on:
   push:
     branches:
       - main
+      - github-actions
 jobs:
   generateDocs:
     name: Generate project documentation

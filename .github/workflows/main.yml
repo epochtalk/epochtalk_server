@@ -195,5 +195,6 @@ jobs:
         uses: peaceiris/actions-gh-pages@v3.9.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          external_repository: epochtalk/server.epochtalk.github.io
           publish_dir: ./doc
           publish_branch: gh-pages

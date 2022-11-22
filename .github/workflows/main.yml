@@ -175,6 +175,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   generateDocs:
     if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/github-actions' }}
+    needs: dependencies
     name: Generate project documentation
     runs-on: ubuntu-latest
     steps:

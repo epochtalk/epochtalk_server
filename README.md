@@ -1,5 +1,7 @@
 # EpochtalkServer
 
+[![Documentation](https://img.shields.io/badge/documentation-gray)](https://docs.epochtalk.org/api-reference.html)
+
 To start your Phoenix server:
 
   * Install dependencies with `mix deps.get`

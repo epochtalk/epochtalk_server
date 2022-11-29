@@ -7,16 +7,13 @@ defmodule EpochtalkServerWeb.UserChannelTest do
 
   describe "websocket channel 'user:public'" do
     setup do
-      {:ok, user} = User.create(%{username: "test", email: "test@test.com", password: "password"})
-      conn = Phoenix.ConnTest.build_conn()
-      {:ok, user, token, _conn} = Session.create(user, false, conn)
+      {socket, user_id} = create_authed_socket()
 
       {:ok, _payload, socket} =
-        UserSocket
-        |> socket("user:#{user.id}", %{guardian_default_token: token, user_id: user.id})
+        socket
         |> subscribe_and_join(UserChannel, "user:public")
 
-      %{socket: socket, user_id: user.id}
+      %{socket: socket, user_id: user_id}
     end
 
     test "joins with authentication", %{socket: socket} do
@@ -60,13 +57,10 @@ defmodule EpochtalkServerWeb.UserChannelTest do
 
   describe "websocket channel 'user:role'" do
     setup do
-      {:ok, user} = User.create(%{username: "test", email: "test@test.com", password: "password"})
-      conn = Phoenix.ConnTest.build_conn()
-      {:ok, user, token, _conn} = Session.create(user, false, conn)
+      {socket, _user_id} = create_authed_socket()
 
       {:ok, _payload, socket} =
-        UserSocket
-        |> socket("user:#{user.id}", %{guardian_default_token: token, user_id: user.id})
+        socket
         |> subscribe_and_join(UserChannel, "user:role")
 
       %{socket: socket}
@@ -96,14 +90,11 @@ defmodule EpochtalkServerWeb.UserChannelTest do
 
   describe "websocket channel 'user:<user_id>'" do
     setup do
-      {:ok, user} = User.create(%{username: "test", email: "test@test.com", password: "password"})
-      conn = Phoenix.ConnTest.build_conn()
-      {:ok, user, token, _conn} = Session.create(user, false, conn)
+      {socket, user_id} = create_authed_socket()
 
       {:ok, _payload, socket} =
-        UserSocket
-        |> socket("user:#{user.id}", %{guardian_default_token: token, user_id: user.id})
-        |> subscribe_and_join(UserChannel, "user:#{user.id}")
+        socket
+        |> subscribe_and_join(UserChannel, "user:#{user_id}")
 
       %{socket: socket}
     end
@@ -144,5 +135,17 @@ defmodule EpochtalkServerWeb.UserChannelTest do
       assert_push "refreshMentions", %{}
       refute_push "refreshMentions", %{}
     end
+  end
+
+  defp create_authed_socket() do
+    {:ok, user} = User.create(%{username: "test", email: "test@test.com", password: "password"})
+    conn = Phoenix.ConnTest.build_conn()
+    {:ok, user, token, _conn} = Session.create(user, false, conn)
+
+    socket =
+      UserSocket
+      |> socket("user:#{user.id}", %{guardian_default_token: token, user_id: user.id})
+
+    {socket, user.id}
   end
 end

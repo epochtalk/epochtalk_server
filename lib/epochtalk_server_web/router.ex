@@ -25,6 +25,7 @@ defmodule EpochtalkServerWeb.Router do
     get "/mentions", MentionController, :page
     get "/notifications/counts", NotificationController, :counts
     post "/notifications/dismiss", NotificationController, :dismiss
+    get "/admin/modlog", ModerationLogController, :page
   end
 
   scope "/api", EpochtalkServerWeb do

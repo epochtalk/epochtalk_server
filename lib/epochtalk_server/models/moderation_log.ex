@@ -3,6 +3,7 @@ defmodule EpochtalkServer.Models.ModerationLog do
   import Ecto.Changeset
   import Ecto.Query
   alias EpochtalkServer.Repo
+  alias EpochtalkServer.Models.ModerationLog
   alias EpochtalkServerWeb.Helpers.Pagination
 
   @moduledoc """
@@ -56,6 +57,15 @@ defmodule EpochtalkServer.Models.ModerationLog do
   end
 
   ## === Database Functions ===
+
+  @doc """
+  Creates a new `ModerationLog` in the database
+  """
+  @spec create(attrs :: map()) :: {:ok, moderation_log :: t()} | {:error, Ecto.Changeset.t()}
+  def create(attrs) do
+    moderation_log_cs = ModerationLog.changeset(%ModerationLog{}, attrs)
+    Repo.insert(moderation_log_cs)
+  end
 
   @doc """
   Page `ModerationLog` models

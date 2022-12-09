@@ -91,6 +91,9 @@ defmodule EpochtalkServer.Models.RolePermission do
     # update role's permissions
     permissions = RolePermission.permissions_map_by_role_id(role_id)
     Role.set_permissions(role_id, permissions)
+
+    # return success
+    { :ok, :success }
   end
   # def modify_by_role(role, %RolePermission{} = permission) do
   #   # change role permission

@@ -35,6 +35,8 @@ defmodule EpochtalkServerWeb.Router do
     post "/login", UserController, :login
     post "/confirm", UserController, :confirm
     delete "/logout", UserController, :logout
+
+    put "/admin/roles/update", RoleController, :update
   end
 
   scope "/", EpochtalkServerWeb do

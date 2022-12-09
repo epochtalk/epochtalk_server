@@ -67,19 +67,26 @@ defmodule EpochtalkServer.Models.RolePermission do
     )
     |> Repo.all()
     new_permissions = new_permissions |> Iteraptor.to_flatmap
+    new_role_permissions = []
 
     # change a permission if if's different
-    for %{permission_path: permission_path, value: old_value} <- old_role_permissions, do
+    for %{permission_path: permission_path, value: old_value} = old_role_permission <- old_role_permissions, do
       # check new value for permission_path
       # if value is not there, set it to false
       new = new_permissions[permission_path] || false
-      # if new value is different, set modified true
-      if value != new_value -> default.modified = true
+      # if new value is different
+      if value != new_value do
+        # set modified true
+        old_role_permission.modified = true
       # if new value is same, set modified false
-      else default.modified = false
+      else
+        old_role_permission.modified = false
+      end
+      new_role_permissions = [ new_role_permissions | old_role_permission ]
     end
-    # update roles table
-    RolePermission.insert/update_all([RolePermission, RolePermission, ...])
+
+    # update role permissions for this role
+    upsert_modified(new_role_permissions)
   end
   # def modify_by_role(role, %RolePermission{} = permission) do
   #   # change role permission

@@ -67,10 +67,9 @@ defmodule EpochtalkServer.Models.RolePermission do
     )
     |> Repo.all()
     new_permissions = new_permissions |> Iteraptor.to_flatmap
-    new_role_permissions = []
 
     # change a permission if if's different
-    for %{permission_path: permission_path, value: old_value} = old_role_permission <- old_role_permissions do
+    new_role_permissions = Enum.reduce(old_role_permissions, [], fn (%{permission_path: permission_path, value: old_value} = old_role_permission, acc) ->
       # check new value for permission_path
       # if value is not there, set it to false
       new_value = new_permissions[permission_path] || false
@@ -82,8 +81,8 @@ defmodule EpochtalkServer.Models.RolePermission do
       else
         %{ role_id: role_id, permission_path: permission_path, modified: false }
       end
-      new_role_permissions = [ new_role_permissions | old_role_permission ]
-    end
+      [ new_role_permission | acc ]
+    end)
 
     # update role permissions for this role
     upsert_modified(new_role_permissions)

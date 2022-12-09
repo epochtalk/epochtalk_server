@@ -59,14 +59,14 @@ defmodule EpochtalkServer.Models.RolePermission do
     do: Repo.insert_all(RolePermission, roles_permissions)
 
   ## for admin api use, modifying permissions for a role
-  def modify_by_role(%Role{id: role_id, permissions: permissions} = _role) do
+  def modify_by_role(%Role{id: role_id, permissions: new_permissions} = _new_role) do
     # if a permission is false, they're not included in the permissions
     # if they're all false, permissions can be empty
     old_role_permissions = from(rp in RolePermission,
       where: rp.role_id == ^role_id
     )
     |> Repo.all()
-    new_permissions = permissions |> Iteraptor.to_flatmap
+    new_permissions = new_permissions |> Iteraptor.to_flatmap
 
     # change a permission if if's different
     for %{permission_path: permission_path, value: old_value} <- old_role_permissions, do

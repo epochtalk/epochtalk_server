@@ -91,7 +91,7 @@ defmodule EpochtalkServer.Models.RolePermission do
   # end
 
   @doc """
-  Used to update the value of a `RolePermission` in the database, if it exists or created it, if it doesnt
+  Used to update the value of a `RolePermission` in the database, if it exists or create it, if it doesnt
   """
   @spec upsert_value(role_permissions :: [%{}]) :: {non_neg_integer(), nil | [term()]}
   # change the default values of roles permissions

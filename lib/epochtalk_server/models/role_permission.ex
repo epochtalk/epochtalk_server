@@ -91,6 +91,22 @@ defmodule EpochtalkServer.Models.RolePermission do
   # end
 
   @doc """
+  Used to update the modified field of a `RolePermission` in the database (should already exist)
+  """
+  @spec upsert_modified(role_permissions :: [%{}]) :: {non_neg_integer(), nil | [term()]}
+  def upsert_modified([]), do: {:error, "Role permission list is empty"}
+  def upsert_modified([%{} | _] = roles_permissions) do
+    Repo.insert_all(
+      RolePermission,
+      role_permissions,
+      # only replace modified value, :modified
+      on_conflict: {:replace, [:modified]},
+      # check conflicts on unique index keys
+      conflict_target: [:role_id, :permission_path]
+    )
+  end
+
+  @doc """
   Used to update the value of a `RolePermission` in the database, if it exists or create it, if it doesnt
   """
   @spec upsert_value(role_permissions :: [%{}]) :: {non_neg_integer(), nil | [term()]}

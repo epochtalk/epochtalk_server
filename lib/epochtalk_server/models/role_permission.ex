@@ -73,7 +73,7 @@ defmodule EpochtalkServer.Models.RolePermission do
     for %{permission_path: permission_path, value: old_value} = old_role_permission <- old_role_permissions do
       # check new value for permission_path
       # if value is not there, set it to false
-      new_value = new_permissions[permission_path].value || false
+      new_value = new_permissions[permission_path] || false
       # if new value is different
       if old_value != new_value do
         # set modified true

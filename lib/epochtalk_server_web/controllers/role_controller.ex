@@ -8,6 +8,7 @@ defmodule EpochtalkServerWeb.RoleController do
   alias EpochtalkServerWeb.ErrorHelpers
   alias EpochtalkServerWeb.Helpers.Validate
   alias EpochtalkServer.Models.Role
+  alias EpochtalkServer.Models.RolePermission
 
   @doc """
   Used to update a specific `Role`
@@ -15,13 +16,11 @@ defmodule EpochtalkServerWeb.RoleController do
   def update(conn, %{"id" => _, "permissions" => permissions} = attrs) do
     with id <- Validate.cast(attrs, "id", :integer, min: 1),
          {:auth, _user} <- {:auth, Guardian.Plug.current_resource(conn)},
-         {:ok, data} <- some_func(%Role{id: id, permissions: permissions}) do
+         {:ok, data} <- RolePermission.modify_by_role(%Role{id: id, permissions: permissions}) do
       render(conn, "update.json", data: data)
     else
       {:auth, nil} ->
         ErrorHelpers.render_json_error(conn, 400, "Not logged in, cannot update role")
     end
   end
-
-  defp some_func(role), do: {:ok, role}
 end

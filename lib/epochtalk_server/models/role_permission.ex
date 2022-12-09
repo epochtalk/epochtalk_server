@@ -59,16 +59,28 @@ defmodule EpochtalkServer.Models.RolePermission do
     do: Repo.insert_all(RolePermission, roles_permissions)
 
   ## for admin api use, modifying permissions for a role
-  # no permissions to modify
-  # def modify_by_role(role, []), do: {:error, "No permissions to modify"}
-  # def modify_by_role(role, [%Permission{}|_] = permissions) do
-  #   # change role permission for each permission
-  #     # check default value
-  #     # check new value
-  #     # if new value is different, set modified true
-  #     # if new value is same, set modified false
-  #   # update roles table
-  # end
+  def modify_by_role(%Role{id: role_id, permissions: permissions} = _role) do
+    # if a permission is false, they're not included in the permissions
+    # if they're all false, permissions can be empty
+    old_role_permissions = from(rp in RolePermission,
+      where: rp.role_id == ^role_id
+    )
+    |> Repo.all()
+    new_permissions = permissions |> Iteraptor.to_flatmap
+
+    # change a permission if if's different
+    for %{permission_path: permission_path, value: old_value} <- old_role_permissions, do
+      # check new value for permission_path
+      # if value is not there, set it to false
+      new = new_permissions[permission_path] || false
+      # if new value is different, set modified true
+      if value != new_value -> default.modified = true
+      # if new value is same, set modified false
+      else default.modified = false
+    end
+    # update roles table
+    RolePermission.insert/update_all([RolePermission, RolePermission, ...])
+  end
   # def modify_by_role(role, %RolePermission{} = permission) do
   #   # change role permission
   #     # check default value

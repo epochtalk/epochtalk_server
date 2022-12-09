@@ -4,7 +4,7 @@ alias EpochtalkServer.Models.RolePermission
 alias EpochtalkServer.Models.Role
 alias EpochtalkServer.Repo
 
-# helper function to create role permissions changeset beore upsert
+# helper function to create role permissions changeset before upsert
 create_role_permission_changeset = fn({role_lookup, permissions}) ->
   role = Role.by_lookup(role_lookup)
   permissions

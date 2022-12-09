@@ -87,6 +87,10 @@ defmodule EpochtalkServer.Models.RolePermission do
 
     # update role permissions for this role
     upsert_modified(new_role_permissions)
+
+    # update role's permissions
+    RolePermission.permissions_map_by_role_id(role.id)
+    |> Enum.each(fn {role, permissions} -> Role.set_permissions(role.id, permissions) end)
   end
   # def modify_by_role(role, %RolePermission{} = permission) do
   #   # change role permission

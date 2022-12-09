@@ -109,7 +109,7 @@ defmodule EpochtalkServer.Models.RolePermission do
   def upsert_modified([%{} | _] = roles_permissions) do
     Repo.insert_all(
       RolePermission,
-      role_permissions,
+      roles_permissions,
       # only replace modified value, :modified
       on_conflict: {:replace, [:modified]},
       # check conflicts on unique index keys

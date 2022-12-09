@@ -75,12 +75,12 @@ defmodule EpochtalkServer.Models.RolePermission do
       # if value is not there, set it to false
       new_value = new_permissions[permission_path] || false
       # if new value is different
-      if old_value != new_value do
+      new_role_permission = if old_value != new_value do
         # set modified true
-        Map.put(old_role_permission, :modified, true)
+        %{ role_id: role_id, permission_path: permission_path, modified: true }
       # if new value is same, set modified false
       else
-        Map.put(old_role_permission, :modified, false)
+        %{ role_id: role_id, permission_path: permission_path, modified: false }
       end
       new_role_permissions = [ new_role_permissions | old_role_permission ]
     end

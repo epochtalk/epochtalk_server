@@ -25,6 +25,7 @@ defmodule EpochtalkServerWeb.Router do
     get "/mentions", MentionController, :page
     get "/notifications/counts", NotificationController, :counts
     post "/notifications/dismiss", NotificationController, :dismiss
+    put "/admin/roles/update", RoleController, :update
   end
 
   scope "/api", EpochtalkServerWeb do
@@ -35,8 +36,6 @@ defmodule EpochtalkServerWeb.Router do
     post "/login", UserController, :login
     post "/confirm", UserController, :confirm
     delete "/logout", UserController, :logout
-
-    put "/admin/roles/update", RoleController, :update
   end
 
   scope "/", EpochtalkServerWeb do

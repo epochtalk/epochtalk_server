@@ -4,15 +4,17 @@ defmodule EpochtalkServerWeb.ModerationLogControllerTest do
   alias EpochtalkServer.Models.ModerationLog
   alias EpochtalkServer.Repo
 
-  @create_attrs %{mod: %{username: "mod",
-                         id: 1,
-                         ip: "127.0.0.1"},
-                  action: %{api_url: "/api/boards/all",
-                            api_method: "post",
-                            type: "adminBoards.updateCategories",
-                            display_text: "updated boards and categories",
-                            display_url: "admin-management.boards"},
-                  action_obj: %{}}
+  @create_attrs %{
+    mod: %{username: "mod", id: 1, ip: "127.0.0.1"},
+    action: %{
+      api_url: "/api/boards/all",
+      api_method: "post",
+      type: "adminBoards.updateCategories",
+      display_text: "updated boards and categories",
+      display_url: "admin-management.boards"
+    },
+    action_obj: %{}
+  }
 
   describe "create/1" do
     test "success if moderation_log entry is created in database", %{} do

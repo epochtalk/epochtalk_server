@@ -22,7 +22,19 @@ defmodule EpochtalkServer.Models.ModerationLog do
           action_display_url: String.t() | nil
         }
   @primary_key false
-  @derive {Jason.Encoder, only: [:mod_username, :mod_id, :mod_ip, :action_api_url, :action_api_method, :action_obj, :action_taken_at, :action_type, :action_display_text, :action_display_url]}
+  @derive {Jason.Encoder,
+           only: [
+             :mod_username,
+             :mod_id,
+             :mod_ip,
+             :action_api_url,
+             :action_api_method,
+             :action_obj,
+             :action_taken_at,
+             :action_type,
+             :action_display_text,
+             :action_display_url
+           ]}
   schema "moderation_log" do
     field :mod_username, :string
     field :mod_id, :integer
@@ -80,6 +92,7 @@ defmodule EpochtalkServer.Models.ModerationLog do
   @spec create(attrs :: map()) :: {:ok, moderation_log :: t()} | {:error, Ecto.Changeset.t()}
   def create(attrs) do
     moderation_log_cs = ModerationLog.changeset(%ModerationLog{}, attrs)
+
     case Repo.insert(moderation_log_cs) do
       {:ok, moderation_log} ->
         {:ok, moderation_log}
@@ -107,6 +120,7 @@ defmodule EpochtalkServer.Models.ModerationLog do
       |> where(^filter_where(attrs))
       # |> limit(^attrs[:limit])
       |> Repo.all()
+
     {:ok, moderation_logs}
   end
 
@@ -116,7 +130,7 @@ defmodule EpochtalkServer.Models.ModerationLog do
         like = "%#{mod}%"
 
         case Integer.parse(mod) do
-          {num, ""} -> dynamic([q], q.mod_id == ^mod  and ^dynamic)
+          {num, ""} -> dynamic([q], q.mod_id == ^mod and ^dynamic)
           _ -> dynamic([q], (ilike(q.mod_username, ^like) or ilike(q.mod_ip, ^like)) and ^dynamic)
         end
 

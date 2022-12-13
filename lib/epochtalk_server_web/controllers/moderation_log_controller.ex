@@ -13,12 +13,9 @@ defmodule EpochtalkServerWeb.ModerationLogController do
   Used to page `ModerationLog` models for moderation log view`
   """
   def page(conn, attrs) do
-    with {page} <- Validate.cast(attrs, "page", :integer, min: 1),
-         {limit} <- Validate.cast(attrs, "limit", :integer, min: 1),
-         {:auth, true} <- {:auth, Guardian.Plug.authenticated?(conn)},
-         {:ok, moderation_log, data} <-
-           ModerationLog.page(page, per_page: limit) do
-      render(conn, "page.json", moderation_log: moderation_log, pagination_data: data)
+    with {:auth, true} <- {:auth, Guardian.Plug.authenticated?(conn)},
+         {:ok, moderation_logs} <- ModerationLog.page(attrs) do
+      render(conn, "page.json", moderation_logs: moderation_logs)
     else
       {:auth, false} ->
         ErrorHelpers.render_json_error(conn, 400, "Not logged in, cannot page moderation log")

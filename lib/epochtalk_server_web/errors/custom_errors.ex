@@ -1,4 +1,22 @@
 defmodule EpochtalkServerWeb.CustomErrors do
+  # ACL Permissions
+  defmodule InvalidPermission do
+    @moduledoc """
+    Exception raised when api request payload is incorrect
+    """
+    @default_message "Forbidden, invalid permissions to perform this action"
+    defexception plug_status: 403, message: @default_message
+
+    @impl true
+    def exception(value) do
+      case value do
+        [message: nil] -> %InvalidPermission{}
+        [message: message] -> %InvalidPermission{message: message}
+        _ -> %InvalidPermission{}
+      end
+    end
+  end
+
   # API Payload Handling
   defmodule InvalidPayload do
     @moduledoc """

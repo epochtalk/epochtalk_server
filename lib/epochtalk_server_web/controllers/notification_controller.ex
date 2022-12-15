@@ -51,6 +51,7 @@ defmodule EpochtalkServerWeb.NotificationController do
   """
   def dismiss(conn, %{"id" => id}) do
     with {:auth, user} <- {:auth, Guardian.Plug.current_resource(conn)},
+         :ok <- ACL.allow!(conn, "notifications.dismiss"),
          {_count, nil} <- Notification.dismiss(id) do
       EpochtalkServerWeb.Endpoint.broadcast("user:#{user.id}", "refreshMentions", %{})
       render(conn, "dismiss.json", data: %{success: true})

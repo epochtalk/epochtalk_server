@@ -2,9 +2,10 @@ defmodule EpochtalkServer.Models.ModerationLog do
   use Ecto.Schema
   import Ecto.Changeset
   import Ecto.Query
-  alias EpochtalkServer.Repo
   alias EpochtalkServer.Models.ModerationLog
+  alias EpochtalkServerWeb.Helpers.ModerationLogDisplayData
   alias EpochtalkServerWeb.Helpers.Pagination
+  alias EpochtalkServer.Repo
 
   @moduledoc """
   `ModerationLog` model, for performing actions relating to the moderation log
@@ -57,6 +58,15 @@ defmodule EpochtalkServer.Models.ModerationLog do
   def changeset(moderation_log, attrs) do
     now = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
 
+    display_data = ModerationLogDisplayData.getDisplayData(get_in(attrs, [:action, :type]))
+
+    action_obj =
+      if Map.has_key?(display_data, :dataQuery) do
+        display_data.dataQuery.(get_in(attrs, [:action, :obj]))
+      else
+        get_in(attrs, [:action, :obj])
+      end
+
     attrs =
       attrs
       |> Map.put(:action_taken_at, now)
@@ -65,9 +75,10 @@ defmodule EpochtalkServer.Models.ModerationLog do
       |> Map.put(:mod_ip, get_in(attrs, [:mod, :ip]))
       |> Map.put(:action_api_url, get_in(attrs, [:action, :api_url]))
       |> Map.put(:action_api_method, get_in(attrs, [:action, :api_method]))
+      |> Map.put(:action_obj, get_in(attrs, [:action, :obj]))
       |> Map.put(:action_type, get_in(attrs, [:action, :type]))
-      |> Map.put(:action_display_text, get_in(attrs, [:action, :display_text]))
-      |> Map.put(:action_display_url, get_in(attrs, [:action, :display_url]))
+      |> Map.put(:action_display_text, display_data.genDisplayText.(action_obj))
+      |> Map.put(:action_display_url, display_data.genDisplayUrl.(action_obj))
 
     moderation_log
     |> cast(attrs, [
@@ -130,9 +141,32 @@ defmodule EpochtalkServer.Models.ModerationLog do
         like = "%#{mod}%"
 
         case Integer.parse(mod) do
-          {num, ""} -> dynamic([q], q.mod_id == ^mod and ^dynamic)
+          {_, ""} -> dynamic([q], q.mod_id == ^mod and ^dynamic)
           _ -> dynamic([q], (ilike(q.mod_username, ^like) or ilike(q.mod_ip, ^like)) and ^dynamic)
         end
+
+      {"action", action}, dynamic ->
+        dynamic([q], q.action_type == ^action and ^dynamic)
+
+      {"keyword", keyword}, dynamic ->
+        like = "%#{keyword}%"
+        dynamic([q], ilike(q.action_display_text, ^like) and ^dynamic)
+
+      {"bdate", bdate}, dynamic ->
+        {:ok, bdate} = NaiveDateTime.from_iso8601(bdate <> " 00:00:00")
+        dynamic([q], q.action_taken_at < ^bdate and ^dynamic)
+
+      {"adate", adate}, dynamic ->
+        {:ok, adate} = NaiveDateTime.from_iso8601(adate <> " 00:00:00")
+        dynamic([q], q.action_taken_at > ^adate and ^dynamic)
+
+      {"sdate", sdate}, dynamic ->
+        {:ok, sdate} = NaiveDateTime.from_iso8601(sdate <> " 00:00:00")
+        dynamic([q], q.action_taken_at > ^sdate and ^dynamic)
+
+      {"edate", edate}, dynamic ->
+        {:ok, edate} = NaiveDateTime.from_iso8601(edate <> " 00:00:00")
+        dynamic([q], q.action_taken_at < ^edate and ^dynamic)
 
       {_, _}, dynamic ->
         # Not a where parameter

@@ -5,21 +5,21 @@ defmodule EpochtalkServerWeb.Helpers.ModerationLogHelper do
   alias EpochtalkServer.Models.Board
   alias EpochtalkServer.Repo
 
-  def getDisplayData(action_type) do
+  def get_display_data(action_type) do
     case action_type do
       "adminBoards.updateCategories" ->
         %{
-          genDisplayText: fn _ -> "updated boards and categories" end,
-          genDisplayUrl: fn _ -> "admin-management.boards" end
+          get_display_text: fn _ -> "updated boards and categories" end,
+          get_display_url: fn _ -> "admin-management.boards" end
         }
 
       # =========== Admin Moderator Routes ===========
       "adminModerators.add" ->
         %{
-          genDisplayText: fn data ->
+          get_display_text: fn data ->
             "added user(s) '#{Enum.join(data.usernames, " ")}' to list of moderators for board '#{data.board_name}'"
           end,
-          genDisplayUrl: fn data -> "threads.data({ boardSlug: '#{data.board_slug}' })" end,
+          get_display_url: fn data -> "threads.data({ boardSlug: '#{data.board_slug}' })" end,
           dataQuery: fn data ->
             board = Repo.get_by(Board, id: data.board_id)
 

@@ -30,20 +30,24 @@ defmodule EpochtalkServerWeb.ModerationLogControllerTest do
     }
   }
 
-  describe "getDisplayData/1" do
+  describe "get_display_data/1" do
     test "success if dislay text and url is generated from ModerationLogHelper" do
       action_obj = get_in(@create_update_boards_attrs, [:action, :obj])
 
       display_data =
-        ModerationLogHelper.getDisplayData(get_in(@create_update_boards_attrs, [:action, :type]))
+        ModerationLogHelper.get_display_data(
+          get_in(@create_update_boards_attrs, [:action, :type])
+        )
 
-      assert display_data.genDisplayText.(action_obj) == "updated boards and categories"
-      assert display_data.genDisplayUrl.(action_obj) == "admin-management.boards"
+      assert display_data.get_display_text.(action_obj) == "updated boards and categories"
+      assert display_data.get_display_url.(action_obj) == "admin-management.boards"
     end
 
     test "success if dislay text and url is generated from ModerationLogHelper using dataQuery function" do
       display_data =
-        ModerationLogHelper.getDisplayData(get_in(@create_add_moderators_attrs, [:action, :type]))
+        ModerationLogHelper.get_display_data(
+          get_in(@create_add_moderators_attrs, [:action, :type])
+        )
 
       action_obj =
         if Map.has_key?(display_data, :dataQuery) do
@@ -52,10 +56,10 @@ defmodule EpochtalkServerWeb.ModerationLogControllerTest do
           get_in(@create_add_moderators_attrs, [:action, :obj])
         end
 
-      assert display_data.genDisplayText.(action_obj) ==
+      assert display_data.get_display_text.(action_obj) ==
                "added user(s) '#{Enum.join(action_obj.usernames, " ")}' to list of moderators for board '#{action_obj.board_name}'"
 
-      assert display_data.genDisplayUrl.(action_obj) ==
+      assert display_data.get_display_url.(action_obj) ==
                "threads.data({ boardSlug: '#{action_obj.board_slug}' })"
     end
   end

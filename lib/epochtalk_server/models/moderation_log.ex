@@ -58,7 +58,7 @@ defmodule EpochtalkServer.Models.ModerationLog do
   def changeset(moderation_log, attrs) do
     now = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
 
-    display_data = ModerationLogHelper.getDisplayData(get_in(attrs, [:action, :type]))
+    display_data = ModerationLogHelper.get_display_data(get_in(attrs, [:action, :type]))
 
     action_obj =
       if Map.has_key?(display_data, :dataQuery) do
@@ -77,8 +77,8 @@ defmodule EpochtalkServer.Models.ModerationLog do
       |> Map.put(:action_api_method, get_in(attrs, [:action, :api_method]))
       |> Map.put(:action_obj, get_in(attrs, [:action, :obj]))
       |> Map.put(:action_type, get_in(attrs, [:action, :type]))
-      |> Map.put(:action_display_text, display_data.genDisplayText.(action_obj))
-      |> Map.put(:action_display_url, display_data.genDisplayUrl.(action_obj))
+      |> Map.put(:action_display_text, display_data.get_display_text.(action_obj))
+      |> Map.put(:action_display_url, display_data.get_display_url.(action_obj))
 
     moderation_log
     |> cast(attrs, [
@@ -118,9 +118,7 @@ defmodule EpochtalkServer.Models.ModerationLog do
   Page `ModerationLog` models
   """
   @spec page(attrs :: map()) :: {:ok, moderation_logs :: [t()] | []}
-  # TODO (crod951) Write ModerationLog page query logic
   def page(attrs \\ []) do
-    # TODO (crod951): Add checks for fields - page, limit, mod, action, keyword, bdate, adate, sdate, edate
     page_query(attrs)
     # |> Pagination.page_simple(page, per_page: attrs[:limit])
   end
@@ -138,12 +136,7 @@ defmodule EpochtalkServer.Models.ModerationLog do
   defp filter_where(attrs) do
     Enum.reduce(attrs, dynamic(true), fn
       {"mod", mod}, dynamic ->
-        like = "%#{mod}%"
-
-        case Integer.parse(mod) do
-          {_, ""} -> dynamic([q], q.mod_id == ^mod and ^dynamic)
-          _ -> dynamic([q], (ilike(q.mod_username, ^like) or ilike(q.mod_ip, ^like)) and ^dynamic)
-        end
+        filter_mod(mod, dynamic)
 
       {"action", action}, dynamic ->
         dynamic([q], q.action_type == ^action and ^dynamic)
@@ -172,5 +165,14 @@ defmodule EpochtalkServer.Models.ModerationLog do
         # Not a where parameter
         dynamic
     end)
+  end
+
+  defp filter_mod(mod, dynamic) do
+    like = "%#{mod}%"
+
+    case Integer.parse(mod) do
+      {_, ""} -> dynamic([q], q.mod_id == ^mod and ^dynamic)
+      _ -> dynamic([q], (ilike(q.mod_username, ^like) or ilike(q.mod_ip, ^like)) and ^dynamic)
+    end
   end
 end

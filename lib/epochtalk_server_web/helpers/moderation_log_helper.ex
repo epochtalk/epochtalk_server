@@ -1,4 +1,4 @@
-defmodule EpochtalkServerWeb.Helpers.ModerationLogDisplayData do
+defmodule EpochtalkServerWeb.Helpers.ModerationLogHelper do
   @moduledoc """
   Helper for obtaining display data for ModerationLog entries
   """

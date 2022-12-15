@@ -1,7 +1,7 @@
 defmodule EpochtalkServerWeb.ModerationLogControllerTest do
   use EpochtalkServerWeb.ConnCase, async: false
   alias EpochtalkServer.Models.ModerationLog
-  alias EpochtalkServerWeb.Helpers.ModerationLogDisplayData
+  alias EpochtalkServerWeb.Helpers.ModerationLogHelper
 
   @create_update_boards_attrs %{
     mod: %{username: "mod", id: 1, ip: "127.0.0.1"},
@@ -31,23 +31,19 @@ defmodule EpochtalkServerWeb.ModerationLogControllerTest do
   }
 
   describe "getDisplayData/1" do
-    test "success if dislay text and url is generated from ModerationLogDisplayData" do
+    test "success if dislay text and url is generated from ModerationLogHelper" do
       action_obj = get_in(@create_update_boards_attrs, [:action, :obj])
 
       display_data =
-        ModerationLogDisplayData.getDisplayData(
-          get_in(@create_update_boards_attrs, [:action, :type])
-        )
+        ModerationLogHelper.getDisplayData(get_in(@create_update_boards_attrs, [:action, :type]))
 
       assert display_data.genDisplayText.(action_obj) == "updated boards and categories"
       assert display_data.genDisplayUrl.(action_obj) == "admin-management.boards"
     end
 
-    test "success if dislay text and url is generated from ModerationLogDisplayData using dataQuery function" do
+    test "success if dislay text and url is generated from ModerationLogHelper using dataQuery function" do
       display_data =
-        ModerationLogDisplayData.getDisplayData(
-          get_in(@create_add_moderators_attrs, [:action, :type])
-        )
+        ModerationLogHelper.getDisplayData(get_in(@create_add_moderators_attrs, [:action, :type]))
 
       action_obj =
         if Map.has_key?(display_data, :dataQuery) do
@@ -76,6 +72,17 @@ defmodule EpochtalkServerWeb.ModerationLogControllerTest do
       assert moderation_log.action_type == @create_update_boards_attrs.action.type
       assert moderation_log.action_display_text == "updated boards and categories"
       assert moderation_log.action_display_url == "admin-management.boards"
+    end
+
+    test "success if moderation_log entry is created in database using helper dataQuery function",
+         %{} do
+      {:ok, moderation_log} = ModerationLog.create(@create_add_moderators_attrs)
+      assert moderation_log.mod_username == @create_add_moderators_attrs.mod.username
+      assert moderation_log.mod_id == @create_add_moderators_attrs.mod.id
+      assert moderation_log.mod_ip == @create_add_moderators_attrs.mod.ip
+      assert moderation_log.action_api_url == @create_add_moderators_attrs.action.api_url
+      assert moderation_log.action_api_method == @create_add_moderators_attrs.action.api_method
+      assert moderation_log.action_type == @create_add_moderators_attrs.action.type
     end
   end
 end

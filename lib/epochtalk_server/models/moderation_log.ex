@@ -3,7 +3,7 @@ defmodule EpochtalkServer.Models.ModerationLog do
   import Ecto.Changeset
   import Ecto.Query
   alias EpochtalkServer.Models.ModerationLog
-  alias EpochtalkServerWeb.Helpers.ModerationLogDisplayData
+  alias EpochtalkServerWeb.Helpers.ModerationLogHelper
   alias EpochtalkServerWeb.Helpers.Pagination
   alias EpochtalkServer.Repo
 
@@ -58,7 +58,7 @@ defmodule EpochtalkServer.Models.ModerationLog do
   def changeset(moderation_log, attrs) do
     now = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
 
-    display_data = ModerationLogDisplayData.getDisplayData(get_in(attrs, [:action, :type]))
+    display_data = ModerationLogHelper.getDisplayData(get_in(attrs, [:action, :type]))
 
     action_obj =
       if Map.has_key?(display_data, :dataQuery) do

@@ -56,8 +56,11 @@ defmodule EpochtalkServerWeb.ModerationLogControllerTest do
           get_in(@create_add_moderators_attrs, [:action, :obj])
         end
 
-      assert display_data.genDisplayText.(action_obj) == "added user(s) '#{Enum.join(action_obj.usernames, " ")}' to list of moderators for board '#{action_obj.board_name}'"
-      assert display_data.genDisplayUrl.(action_obj) == "threads.data({ boardSlug: '#{action_obj.board_slug}' })"
+      assert display_data.genDisplayText.(action_obj) ==
+               "added user(s) '#{Enum.join(action_obj.usernames, " ")}' to list of moderators for board '#{action_obj.board_name}'"
+
+      assert display_data.genDisplayUrl.(action_obj) ==
+               "threads.data({ boardSlug: '#{action_obj.board_slug}' })"
     end
   end
 

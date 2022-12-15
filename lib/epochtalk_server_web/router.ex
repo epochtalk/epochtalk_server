@@ -24,7 +24,6 @@ defmodule EpochtalkServerWeb.Router do
     plug Guardian.Plug.EnsureAuthenticated
   end
 
-
   scope "/api", EpochtalkServerWeb do
     pipe_through [:api, :enforce_auth]
     get "/users/preferences", PreferenceController, :preferences

@@ -1,5 +1,6 @@
 defmodule EpochtalkServerWeb.CustomErrors do
   # ACL Permissions
+  # credo:disable-for-next-line
   defmodule InvalidPermission do
     @moduledoc """
     Exception raised when api request payload is incorrect

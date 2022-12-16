@@ -22,7 +22,8 @@ defmodule EpochtalkServerWeb.Helpers.ACL do
   """
   def allow!(%Plug.Conn{} = conn, permission_path), do: allow!(conn, permission_path, nil)
 
-  def allow!(%User{} = user, permission_path), do: allow!(%Plug.Conn{private: %{guardian_default_resource: user}}, permission_path, nil)
+  def allow!(%User{} = user, permission_path),
+    do: allow!(%Plug.Conn{private: %{guardian_default_resource: user}}, permission_path, nil)
 
   @doc """
   Same as `ACL.allow!/2` but allows a custom error message to be raised if the
@@ -51,5 +52,11 @@ defmodule EpochtalkServerWeb.Helpers.ACL do
         %User{} = user,
         permission_path,
         error_msg
-      ), do: allow!(%Plug.Conn{private: %{guardian_default_resource: user}}, permission_path, error_msg)
+      ),
+      do:
+        allow!(
+          %Plug.Conn{private: %{guardian_default_resource: user}},
+          permission_path,
+          error_msg
+        )
 end

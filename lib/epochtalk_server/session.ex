@@ -1,4 +1,7 @@
 defmodule EpochtalkServer.Session do
+  @one_day_in_seconds 1 * 24 * 60 * 60
+  @four_weeks_in_seconds 4 * 7 * @one_day_in_seconds
+
   @moduledoc """
   Manages `User` sessions in Redis. Used by Auth related `User` actions.
   """

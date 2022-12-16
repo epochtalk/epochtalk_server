@@ -205,12 +205,12 @@ defmodule EpochtalkServer.Session do
     get_sessions_by_user_id(user_id)
     |> Enum.each(fn session ->
       [session_id, expiration] = String.split(session, ":")
-      if expiration < now do
+      if String.to_integer(expiration) < now do
         delete_session_by_user_id(user_id, session_id)
       end
     end)
     # add new session, noting unix expiration
-    Redix.command(:redix, ["SADD", session_key, session_id <> ":" <> unix_expiration])
+    Redix.command(:redix, ["SADD", session_key, session_id <> ":" <> Integer.to_string(unix_expiration)])
     # set ttl
     maybe_extend_ttl(session_key, ttl)
   end

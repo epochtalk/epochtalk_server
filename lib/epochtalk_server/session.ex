@@ -210,9 +210,10 @@ defmodule EpochtalkServer.Session do
       end
     end)
     # add new session, noting unix expiration
-    Redix.command(:redix, ["SADD", session_key, session_id <> ":" <> Integer.to_string(unix_expiration)])
+    result = Redix.command(:redix, ["SADD", session_key, session_id <> ":" <> Integer.to_string(unix_expiration)])
     # set ttl
     maybe_extend_ttl(session_key, ttl)
+    result
   end
 
   defp generate_key(user_id, "user"), do: "user:#{user_id}"

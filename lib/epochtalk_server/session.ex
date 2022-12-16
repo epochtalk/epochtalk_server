@@ -58,6 +58,15 @@ defmodule EpochtalkServer.Session do
       {:error, error} -> {:error, error}
     end
   end
+  defp get_sessions_by_user_id(user_id) do
+    # get session id's from redis under "user:{user_id}:sessions"
+    session_key = generate_key(user_id, "sessions")
+
+    case Redix.command(:redix, ["SMEMBERS", session_key]) do
+      {:ok, sessions} -> {:ok, user_id, sessions}
+      {:error, error} -> {:error, error}
+    end
+  end
 
   @doc """
   Deletes a specific `User` session
@@ -73,6 +82,15 @@ defmodule EpochtalkServer.Session do
 
     case Redix.command(:redix, ["SREM", session_key, session_id]) do
       {:ok, _} -> {:ok, user}
+      {:error, error} -> {:error, error}
+    end
+  end
+  defp delete_session_by_user_id(user_id, session_id) do
+    # delete session id from redis under "user:{user_id}:sessions"
+    session_key = generate_key(user_id, "sessions")
+
+    case Redix.command(:redix, ["SREM", session_key, session_id]) do
+      {:ok, _} -> {:ok, user_id}
       {:error, error} -> {:error, error}
     end
   end
@@ -121,7 +139,7 @@ defmodule EpochtalkServer.Session do
       do: Enum.each(role_lookups, &Redix.command(:redix, ["SADD", role_key, &1]))
 
     # set expiration
-    Redix.command(:redix, ["EXPIRE", role_key, ttl])
+    maybe_extend_expiration(role_key, ttl)
   end
 
   defp update_moderating(user_id, moderating, ttl) do
@@ -135,7 +153,7 @@ defmodule EpochtalkServer.Session do
       do: Enum.each(moderating, &Redix.command(:redix, ["SADD", moderating_key, &1]))
 
     # set expiration
-    Redix.command(:redix, ["EXPIRE", moderating_key, ttl])
+    maybe_extend_expiration(moderating_key, ttl)
   end
 
   defp update_user_info(user_id, username, ttl) do
@@ -145,7 +163,7 @@ defmodule EpochtalkServer.Session do
     # save username to redis hash under "user:{user_id}"
     Redix.command(:redix, ["HSET", user_key, "username", username])
     # set expiration
-    Redix.command(:redix, ["EXPIRE", user_key, ttl])
+    maybe_extend_expiration(user_key, ttl)
   end
 
   defp update_user_info(user_id, username, avatar, ttl) when is_nil(avatar) or avatar == "" do
@@ -157,7 +175,7 @@ defmodule EpochtalkServer.Session do
     user_key = generate_key(user_id, "user")
     Redix.command(:redix, ["HSET", user_key, "username", username, "avatar", avatar])
     # set expiration
-    Redix.command(:redix, ["EXPIRE", user_key, ttl])
+    maybe_extend_expiration(user_key, ttl)
   end
 
   defp update_ban_info(user_id, ban_info, ttl) do
@@ -172,7 +190,7 @@ defmodule EpochtalkServer.Session do
       do: Redix.command(:redix, ["HSET", ban_key, "malicious_score", malicious_score])
 
     # set expiration
-    Redix.command(:redix, ["EXPIRE", ban_key, ttl])
+    maybe_extend_expiration(ban_key, ttl)
   end
 
   defp set_session(user_id, session_id) do

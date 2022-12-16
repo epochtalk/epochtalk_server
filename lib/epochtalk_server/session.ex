@@ -197,7 +197,22 @@ defmodule EpochtalkServer.Session do
   defp add_session(user_id, session_id, ttl) do
     # save session id to redis under "user:{user_id}:sessions"
     session_key = generate_key(user_id, "sessions")
-    Redix.command(:redix, ["SADD", session_key, session_id])
+    # current unix time (default :seconds)
+    now = DateTime.utc_now |> DateTime.to_unix
+    # intended unix expiration of this session
+    unix_expiration = now + ttl
+    # delete expired sessions
+    get_sessions_by_user_id(user_id)
+    |> Enum.each(fn session ->
+      [session_id, expiration] = String.split(session, ":")
+      if expiration < now do
+        delete_session_by_user_id(user_id, session_id)
+      end
+    end)
+    # add new session, noting unix expiration
+    Redix.command(:redix, ["SADD", session_key, session_id <> ":" <> unix_expiration])
+    # handle sessions key expiration
+    maybe_extend_expiration(session_key, ttl)
   end
 
   defp generate_key(user_id, "user"), do: "user:#{user_id}"

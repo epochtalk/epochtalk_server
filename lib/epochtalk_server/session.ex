@@ -27,16 +27,17 @@ defmodule EpochtalkServer.Session do
     decoded_token = %{user_id: user.id, timestamp: datetime}
 
     # set token expiration based on rememberMe
-    ttl = if remember_me, do: {4, :weeks}, else: {1, :day}
+    guardian_ttl = if remember_me, do: {4, :weeks}, else: {1, :day}
 
     # sign user in and get encoded token
-    conn = Guardian.Plug.sign_in(conn, decoded_token, %{}, ttl: ttl)
+    conn = Guardian.Plug.sign_in(conn, decoded_token, %{}, ttl: guardian_ttl)
     encoded_token = Guardian.Plug.current_token(conn)
     # jti is a unique identifier for the jwt token, use it as session_id
     %{claims: %{"jti" => session_id}} = Guardian.peek(encoded_token)
 
+    redis_ttl = if remember_me, do: @four_weeks_in_seconds, else: @one_day_in_seconds
     # save session
-    case save(user, session_id) do
+    case save(user, session_id, redis_ttl) do
       {:ok, _} -> {:ok, user, encoded_token, conn}
       {:error, error} -> {:error, error}
     end
@@ -91,7 +92,7 @@ defmodule EpochtalkServer.Session do
     end
   end
 
-  defp save(%User{} = user, session_id) do
+  defp save(%User{} = user, session_id, ttl) do
     avatar = if is_nil(user.profile), do: nil, else: user.profile.avatar
     update_user_info(user.id, user.username, avatar)
     update_roles(user.id, user.roles)

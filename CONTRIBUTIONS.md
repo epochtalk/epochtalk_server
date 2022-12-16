@@ -67,6 +67,23 @@ conventions.  Please refer to these guidelines!
   in the project and attempts to do things such as; identify code that will
   almost certainly fail, doesn't match the documented spec, or is unreachable.
 
+* Pass static analysis
+
+  This project uses `credo` and `mix format` to ensure that the code submitted
+  to our `main` branch is formatted and consistent.
+
+  Our CI workflow runs `mix format --check-formatted` and `mix credo`.  In order
+  for a pull request to be accepted, it must pass these checks.
+
+  For formatting, simply run `mix format` before submitting a pull request and
+  commit the changes.
+
+  For credo, you can run `mix credo` locally.  This tool will analyze the code
+  you wrote and suggest changes.  View the suggestions and update your code
+  accordingly; any result other than a `design` issue will cause the CI workflow
+  to fail when submitting pull requests, so be sure to address all other
+  concerns!
+
 * Pass CI tests/build
 
   Any time code is pushed to this repo, our CI system will automatically run

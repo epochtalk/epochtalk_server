@@ -193,6 +193,7 @@ defmodule EpochtalkServer.Session do
     maybe_extend_expiration(ban_key, ttl)
   end
 
+  # clean expired sessions and add a new one
   defp add_session(user_id, session_id, ttl) do
     # save session id to redis under "user:{user_id}:sessions"
     session_key = generate_key(user_id, "sessions")

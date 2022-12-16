@@ -220,7 +220,7 @@ defmodule EpochtalkServer.Session do
   defp maybe_extend_ttl(key, ttl) do
     # extend ttl if new one is further out
     if ttl > Redix.command(:redix, ["TTL", key]) do
-      Redix.command(:redix, ["EXPIRE", session_key, ttl])
+      Redix.command(:redix, ["EXPIRE", key, ttl])
     end
   end
 end

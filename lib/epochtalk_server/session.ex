@@ -125,7 +125,7 @@ defmodule EpochtalkServer.Session do
 
     update_ban_info(user.id, ban_info, ttl)
     update_moderating(user.id, user.moderating, ttl)
-    set_session(user.id, session_id)
+    add_session(user.id, session_id, ttl)
   end
 
   # use default role
@@ -193,7 +193,7 @@ defmodule EpochtalkServer.Session do
     maybe_extend_expiration(ban_key, ttl)
   end
 
-  defp set_session(user_id, session_id) do
+  defp add_session(user_id, session_id, ttl) do
     # save session id to redis under "user:{user_id}:sessions"
     session_key = generate_key(user_id, "sessions")
     Redix.command(:redix, ["SADD", session_key, session_id])

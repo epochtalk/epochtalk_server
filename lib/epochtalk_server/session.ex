@@ -183,4 +183,10 @@ defmodule EpochtalkServer.Session do
 
   defp generate_key(user_id, "user"), do: "user:#{user_id}"
   defp generate_key(user_id, type), do: "user:#{user_id}:#{type}"
+  defp maybe_extend_expiration(key, ttl) do
+    # extend expiration if new ttl is further out
+    if ttl > Redix.command(:redix, ["TTL", key]) do
+      Redix.command(:redix, ["EXPIRE", session_key, ttl])
+    end
+  end
 end

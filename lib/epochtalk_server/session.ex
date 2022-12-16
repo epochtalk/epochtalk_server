@@ -138,8 +138,8 @@ defmodule EpochtalkServer.Session do
     unless role_lookups == [],
       do: Enum.each(role_lookups, &Redix.command(:redix, ["SADD", role_key, &1]))
 
-    # set expiration
-    maybe_extend_expiration(role_key, ttl)
+    # set ttl
+    maybe_extend_ttl(role_key, ttl)
   end
 
   defp update_moderating(user_id, moderating, ttl) do
@@ -152,8 +152,8 @@ defmodule EpochtalkServer.Session do
     unless moderating == [],
       do: Enum.each(moderating, &Redix.command(:redix, ["SADD", moderating_key, &1]))
 
-    # set expiration
-    maybe_extend_expiration(moderating_key, ttl)
+    # set ttl
+    maybe_extend_ttl(moderating_key, ttl)
   end
 
   defp update_user_info(user_id, username, ttl) do
@@ -162,8 +162,8 @@ defmodule EpochtalkServer.Session do
     Redix.command(:redix, ["HDEL", user_key, "avatar"])
     # save username to redis hash under "user:{user_id}"
     Redix.command(:redix, ["HSET", user_key, "username", username])
-    # set expiration
-    maybe_extend_expiration(user_key, ttl)
+    # set ttl
+    maybe_extend_ttl(user_key, ttl)
   end
 
   defp update_user_info(user_id, username, avatar, ttl) when is_nil(avatar) or avatar == "" do
@@ -174,8 +174,8 @@ defmodule EpochtalkServer.Session do
     # save username, avatar to redis hash under "user:{user_id}"
     user_key = generate_key(user_id, "user")
     Redix.command(:redix, ["HSET", user_key, "username", username, "avatar", avatar])
-    # set expiration
-    maybe_extend_expiration(user_key, ttl)
+    # set ttl
+    maybe_extend_ttl(user_key, ttl)
   end
 
   defp update_ban_info(user_id, ban_info, ttl) do
@@ -189,8 +189,8 @@ defmodule EpochtalkServer.Session do
     if malicious_score = Map.get(ban_info, :malicious_score),
       do: Redix.command(:redix, ["HSET", ban_key, "malicious_score", malicious_score])
 
-    # set expiration
-    maybe_extend_expiration(ban_key, ttl)
+    # set ttl
+    maybe_extend_ttl(ban_key, ttl)
   end
 
   # clean expired sessions and add a new one
@@ -211,14 +211,14 @@ defmodule EpochtalkServer.Session do
     end)
     # add new session, noting unix expiration
     Redix.command(:redix, ["SADD", session_key, session_id <> ":" <> unix_expiration])
-    # handle sessions key expiration
-    maybe_extend_expiration(session_key, ttl)
+    # set ttl
+    maybe_extend_ttl(session_key, ttl)
   end
 
   defp generate_key(user_id, "user"), do: "user:#{user_id}"
   defp generate_key(user_id, type), do: "user:#{user_id}:#{type}"
-  defp maybe_extend_expiration(key, ttl) do
-    # extend expiration if new ttl is further out
+  defp maybe_extend_ttl(key, ttl) do
+    # extend ttl if new one is further out
     if ttl > Redix.command(:redix, ["TTL", key]) do
       Redix.command(:redix, ["EXPIRE", session_key, ttl])
     end

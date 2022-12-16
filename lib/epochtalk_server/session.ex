@@ -193,7 +193,9 @@ defmodule EpochtalkServer.Session do
     maybe_extend_ttl(ban_key, ttl)
   end
 
+  # these two rules ensure that sessions will eventually be deleted:
   # clean expired sessions and add a new one
+  # ttl expiry for this key will delete all sessions in the set
   defp add_session(user_id, session_id, ttl) do
     # save session id to redis under "user:{user_id}:sessions"
     session_key = generate_key(user_id, "sessions")

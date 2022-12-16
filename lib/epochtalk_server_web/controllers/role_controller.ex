@@ -13,8 +13,9 @@ defmodule EpochtalkServerWeb.RoleController do
   @doc """
   Used to update a specific `Role`
   """
-  def update(conn, %{"id" => _, "permissions" => permissions} = attrs) do
+  def update(conn, %{"id" => _, "permissions" => permissions, "priority_restrictions" => priority_restrictions} = attrs) do
     with id <- Validate.cast(attrs, "id", :integer, min: 1),
+         priority_restrictions <- Validate.cast(attrs, "priority_restrictions", :integer, array: true),
          {:auth, _user} <- {:auth, Guardian.Plug.current_resource(conn)},
          {:ok, data} <- RolePermission.modify_by_role(%Role{id: id, permissions: permissions}) do
       render(conn, "update.json", data: data)

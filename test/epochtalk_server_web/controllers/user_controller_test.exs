@@ -263,7 +263,7 @@ defmodule EpochtalkServerWeb.UserControllerTest do
     test "errors with 401 when user is not logged in but trying to authenticate", %{conn: conn} do
       conn = get(conn, Routes.user_path(conn, :authenticate))
 
-      assert %{"error" => "Unauthorized", "message" => "Unauthenticated"} =
+      assert %{"error" => "Unauthorized", "message" => "No resource found", "status" => 401} =
                json_response(conn, 401)
     end
   end

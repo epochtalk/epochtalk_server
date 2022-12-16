@@ -61,7 +61,7 @@ defmodule EpochtalkServer.Session do
     session_key = generate_key(user_id, "sessions")
 
     case Redix.command(:redix, ["SMEMBERS", session_key]) do
-      {:ok, sessions} -> {:ok, user_id, sessions}
+      {:ok, sessions} -> sessions
       {:error, error} -> {:error, error}
     end
   end

@@ -14,8 +14,6 @@ defmodule EpochtalkServer.Session do
   * Logs `User` in with Guardian to get token
   * Saves `User` session info to redis (avatar, roles, moderating, ban info, etc)
   * returns {:ok, user, token and conn}
-
-  - TODO(boka): Handle expiration of redis sessions (this is handled in guardian but not redis)
   """
   @spec create(
           user :: User.t(),

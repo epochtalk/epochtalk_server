@@ -12,6 +12,7 @@ defmodule EpochtalkServerWeb.UserController do
   alias EpochtalkServer.Mailer
   alias EpochtalkServerWeb.ErrorHelpers
   alias EpochtalkServerWeb.CustomErrors.InvalidPayload
+  alias EpochtalkServerWeb.Helpers.Validate
 
   @doc """
   Used to check if a username has already been taken
@@ -181,9 +182,10 @@ defmodule EpochtalkServerWeb.UserController do
 
   def login(
         conn,
-        %{"username" => username, "password" => password, "rememberMe" => remember_me} = _attrs
+        %{"username" => username, "password" => password} = attrs
       ) do
-    with {:auth, false} <- {:auth, Guardian.Plug.authenticated?(conn)},
+    with remember_me <- Validate.cast(attrs, "rememberMe", :boolean),
+         {:auth, false} <- {:auth, Guardian.Plug.authenticated?(conn)},
          {:ok, user} <- User.by_username(username),
          {:not_confirmed, false} <- {:not_confirmed, !!Map.get(user, :confirmation_token)},
          {:missing_passhash, true} <- {:missing_passhash, !!Map.get(user, :passhash)},

@@ -28,6 +28,10 @@ defmodule EpochtalkServerWeb.Helpers.ACL do
   @doc """
   Same as `ACL.allow!/2` but allows a custom error message to be raised if the
   `User` does not have the proper permissions.
+
+  TODO(akinsey): implement logic to handle if connection is not authenticated.
+  Default to `private` role if `frontend_configs.login_required` is enabled, otherwise
+  default to `anonymous` role.
   """
   def allow!(
         %Plug.Conn{private: %{guardian_default_resource: user}} = _conn,

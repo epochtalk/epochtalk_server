@@ -220,7 +220,8 @@ defmodule EpochtalkServer.Session do
   defp generate_key(user_id, type), do: "user:#{user_id}:#{type}"
   defp maybe_extend_ttl(key, ttl) do
     # extend ttl if new one is further out
-    if ttl > Redix.command(:redix, ["TTL", key]) do
+    {:ok, old_ttl} = Redix.command(:redix, ["TTL", key])
+    if ttl > old_ttl do
       Redix.command(:redix, ["EXPIRE", key, ttl])
     end
   end

@@ -38,7 +38,16 @@ defmodule EpochtalkServerWeb.Helpers.ACL do
         permission_path,
         error_msg
       ) do
-    authed_permissions = Role.get_masked_permissions(user.roles || [])
+    # check if login is required to view forum
+    config = Application.get_env(:epochtalk_server, :frontend_config)
+    login_required = config["login_required"]
+
+    # default to user's roles > anonymous > private
+    user_roles = if user == nil,
+      do: (if login_required, do: [Role.by_lookup("private")], else: [Role.by_lookup("anonymous")]),
+      else: user.roles
+
+    authed_permissions = Role.get_masked_permissions(user_roles)
     # convert path to array
     path_list = String.split(permission_path, ".")
     # append "allow" to array

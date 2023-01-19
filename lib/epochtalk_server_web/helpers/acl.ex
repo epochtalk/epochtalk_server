@@ -15,29 +15,29 @@ defmodule EpochtalkServerWeb.Helpers.ACL do
 
   Raises `CustomErrors.InvalidPermission` exception if the `User` does not have
   the proper permissions.
-
-  TODO(akinsey): figure out how to typespec this function. The requirement that
-  dialyzer has to use a valid authenticated connection, is preventing it from reaching
-  `:ok`. Currently when spec is added, dialyzer will only reach the `raise`
   """
-  def allow!(%Plug.Conn{} = conn, permission_path), do: allow!(conn, permission_path, nil)
+  @spec allow!(Plug.Conn.t() | User.t(), permission_path :: String.t()) :: no_return | :ok
+  def allow!(%Plug.Conn{} = conn, permission_path) when is_binary(permission_path),
+    do: allow!(conn, permission_path, nil)
 
-  def allow!(%User{} = user, permission_path),
+  def allow!(%User{} = user, permission_path) when is_binary(permission_path),
     do: allow!(%Plug.Conn{private: %{guardian_default_resource: user}}, permission_path, nil)
 
   @doc """
   Same as `ACL.allow!/2` but allows a custom error message to be raised if the
   `User` does not have the proper permissions.
-
-  TODO(akinsey): implement logic to handle if connection is not authenticated.
-  Default to `private` role if `frontend_configs.login_required` is enabled, otherwise
-  default to `anonymous` role.
   """
+  @spec allow!(
+          %Plug.Conn{} | User.t(),
+          permission_path :: String.t(),
+          error_msg :: String.t() | nil
+        ) :: no_return | :ok
   def allow!(
         %Plug.Conn{private: %{guardian_default_resource: user}} = _conn,
         permission_path,
         error_msg
-      ) do
+      )
+      when is_binary(permission_path) do
     # check if login is required to view forum
     config = Application.get_env(:epochtalk_server, :frontend_config)
     login_required = config["login_required"]
@@ -68,7 +68,8 @@ defmodule EpochtalkServerWeb.Helpers.ACL do
         %Plug.Conn{} = _conn,
         permission_path,
         error_msg
-      ),
+      )
+      when is_binary(permission_path) and is_binary(error_msg),
       do:
         allow!(
           %Plug.Conn{private: %{guardian_default_resource: nil}},
@@ -80,7 +81,8 @@ defmodule EpochtalkServerWeb.Helpers.ACL do
         %User{} = user,
         permission_path,
         error_msg
-      ),
+      )
+      when is_binary(permission_path) and is_binary(error_msg),
       do:
         allow!(
           %Plug.Conn{private: %{guardian_default_resource: user}},

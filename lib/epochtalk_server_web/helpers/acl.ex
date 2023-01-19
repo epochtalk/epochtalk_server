@@ -43,11 +43,14 @@ defmodule EpochtalkServerWeb.Helpers.ACL do
     login_required = config["login_required"]
 
     # default to user's roles > anonymous > private
-    user_roles = if user == nil,
-      do: (if login_required, do: [Role.by_lookup("private")], else: [Role.by_lookup("anonymous")]),
-      else: user.roles
+    user_roles =
+      if user == nil,
+        do:
+          if(login_required, do: [Role.by_lookup("private")], else: [Role.by_lookup("anonymous")]),
+        else: user.roles
 
     authed_permissions = Role.get_masked_permissions(user_roles)
+
     # convert path to array
     path_list = String.split(permission_path, ".")
     # append "allow" to array
@@ -60,6 +63,18 @@ defmodule EpochtalkServerWeb.Helpers.ACL do
     if !has_permission, do: raise(InvalidPermission, message: error_msg)
     :ok
   end
+
+  def allow!(
+        %Plug.Conn{} = _conn,
+        permission_path,
+        error_msg
+      ),
+      do:
+        allow!(
+          %Plug.Conn{private: %{guardian_default_resource: nil}},
+          permission_path,
+          error_msg
+        )
 
   def allow!(
         %User{} = user,

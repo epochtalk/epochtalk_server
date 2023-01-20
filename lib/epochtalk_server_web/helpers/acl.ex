@@ -65,27 +65,27 @@ defmodule EpochtalkServerWeb.Helpers.ACL do
   end
 
   def allow!(
-        %Plug.Conn{} = _conn,
+        %User{} = user,
         permission_path,
         error_msg
       )
-      when is_binary(permission_path) and is_binary(error_msg),
+      when (is_binary(permission_path) and is_binary(error_msg)) or is_nil(error_msg),
       do:
         allow!(
-          %Plug.Conn{private: %{guardian_default_resource: nil}},
+          %Plug.Conn{private: %{guardian_default_resource: user}},
           permission_path,
           error_msg
         )
 
   def allow!(
-        %User{} = user,
+        _,
         permission_path,
         error_msg
       )
-      when is_binary(permission_path) and is_binary(error_msg),
+      when (is_binary(permission_path) and is_binary(error_msg)) or is_nil(error_msg),
       do:
         allow!(
-          %Plug.Conn{private: %{guardian_default_resource: user}},
+          %Plug.Conn{private: %{guardian_default_resource: nil}},
           permission_path,
           error_msg
         )

@@ -14,6 +14,43 @@ defmodule EpochtalkServerWeb.ACLTest do
       assert ACL.allow!(user, "threads.create.allow") == :ok
     end
 
+    test "defaults to 'anonymous' role if not authenticated", %{conn: conn} do
+      assert ACL.allow!(conn, "boards.allCategories") == :ok
+      assert ACL.allow!(conn, "posts.byThread") == :ok
+
+      assert_raise InvalidPermission,
+                   ~r/^Forbidden, invalid permissions to perform this action/,
+                   fn ->
+                     ACL.allow!(%Plug.Conn{}, "posts.create")
+                   end
+    end
+
+    test "defaults to 'private' role if 'frontend_config.login_required' is true", %{conn: conn} do
+      frontend_config =
+        Application.get_env(:epochtalk_server, :frontend_config)
+        |> Map.put(:login_required, true)
+
+      Application.put_env(:epochtalk_server, :frontend_config, frontend_config)
+
+      assert_raise InvalidPermission,
+                   ~r/^Forbidden, invalid permissions to perform this action/,
+                   fn ->
+                     ACL.allow!(conn, "boards.allCategories")
+                   end
+
+      assert_raise InvalidPermission,
+                   ~r/^Forbidden, invalid permissions to perform this action/,
+                   fn ->
+                     ACL.allow!(conn, "posts.create")
+                   end
+
+      frontend_config =
+        Application.get_env(:epochtalk_server, :frontend_config)
+        |> Map.put(:login_required, false)
+
+      Application.put_env(:epochtalk_server, :frontend_config, frontend_config)
+    end
+
     test "raises 'InvalidPermissions' error with unauthenticated connection" do
       assert_raise InvalidPermission,
                    ~r/^Forbidden, invalid permissions to perform this action/,
@@ -72,6 +109,43 @@ defmodule EpochtalkServerWeb.ACLTest do
       assert_raise InvalidPermission, ~r/^You cannot create threads/, fn ->
         ACL.allow!(%Plug.Conn{}, "threads.create", "You cannot create threads")
       end
+    end
+
+    test "defaults to 'anonymous' role if not authenticated", %{conn: conn} do
+      assert ACL.allow!(conn, "boards.allCategories", "You cannot query all categories") == :ok
+      assert ACL.allow!(conn, "posts.byThread", "You cannot query threads") == :ok
+
+      assert_raise InvalidPermission,
+                   ~r/^You cannot create posts/,
+                   fn ->
+                     ACL.allow!(%Plug.Conn{}, "posts.create", "You cannot create posts")
+                   end
+    end
+
+    test "defaults to 'private' role if 'frontend_config.login_required' is true", %{conn: conn} do
+      frontend_config =
+        Application.get_env(:epochtalk_server, :frontend_config)
+        |> Map.put(:login_required, true)
+
+      Application.put_env(:epochtalk_server, :frontend_config, frontend_config)
+
+      assert_raise InvalidPermission,
+                   ~r/^You cannot view categories/,
+                   fn ->
+                     ACL.allow!(conn, "boards.allCategories", "You cannot view categories")
+                   end
+
+      assert_raise InvalidPermission,
+                   ~r/^You cannot create posts/,
+                   fn ->
+                     ACL.allow!(conn, "posts.create", "You cannot create posts")
+                   end
+
+      frontend_config =
+        Application.get_env(:epochtalk_server, :frontend_config)
+        |> Map.put(:login_required, false)
+
+      Application.put_env(:epochtalk_server, :frontend_config, frontend_config)
     end
 
     @tag :authenticated

@@ -111,9 +111,9 @@ defmodule EpochtalkServerWeb.ACLTest do
       end
     end
 
-    test "defaults to 'anonymous' role if not authenticated", %{conn: conn} do
-      assert ACL.allow!(conn, "boards.allCategories", "You cannot query all categories") == :ok
-      assert ACL.allow!(conn, "posts.byThread", "You cannot query threads") == :ok
+    test "defaults to 'anonymous' role if not authenticated" do
+      assert ACL.allow!(%Plug.Conn{}, "boards.allCategories", "You cannot query all categories") == :ok
+      assert ACL.allow!(%Plug.Conn{}, "posts.byThread", "You cannot query threads") == :ok
 
       assert_raise InvalidPermission,
                    ~r/^You cannot create posts/,

@@ -14,9 +14,9 @@ defmodule EpochtalkServerWeb.ACLTest do
       assert ACL.allow!(user, "threads.create.allow") == :ok
     end
 
-    test "defaults to 'anonymous' role if not authenticated", %{conn: conn} do
-      assert ACL.allow!(conn, "boards.allCategories") == :ok
-      assert ACL.allow!(conn, "posts.byThread") == :ok
+    test "defaults to 'anonymous' role if not authenticated" do
+      assert ACL.allow!(%Plug.Conn{}, "boards.allCategories") == :ok
+      assert ACL.allow!(%Plug.Conn{}, "posts.byThread") == :ok
 
       assert_raise InvalidPermission,
                    ~r/^Forbidden, invalid permissions to perform this action/,

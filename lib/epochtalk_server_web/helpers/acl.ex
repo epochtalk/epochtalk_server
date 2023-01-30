@@ -88,4 +88,19 @@ defmodule EpochtalkServerWeb.Helpers.ACL do
           permission_path,
           error_msg
         )
+
+  @doc """
+  Helper which returns the active User's priority.
+
+  Will return priorty of role with highest permissions if the user is authenticated, otherwise anonymous priority
+  is returned if `frontend_config.login_required` is false otherwise private role priority is returned. If
+  user is banned the Banned role priority is returned.
+  """
+  @spec get_user_priority(User.t()) :: non_neg_integer
+  def get_user_priority(%{ id: id, roles: roles } = _user) when not is_nil(id) and is_list(roles),
+    do: Role.get_masked_permissions(roles).priority
+
+  def get_user_priority(nil),
+    do: Role.get_default_unauthenticated().priority
+
 end

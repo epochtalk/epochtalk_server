@@ -40,7 +40,7 @@ defmodule EpochtalkServerWeb.Helpers.ACL do
       when is_binary(permission_path) do
     # check if login is required to view forum
     config = Application.get_env(:epochtalk_server, :frontend_config)
-    login_required = config[:login_required]
+    login_required = config[:login_required] || config["login_required"]
     # default to user's roles > anonymous > private
     user_roles =
       if user == nil,

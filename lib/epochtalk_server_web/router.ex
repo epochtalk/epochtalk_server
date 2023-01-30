@@ -37,6 +37,7 @@ defmodule EpochtalkServerWeb.Router do
     pipe_through [:api, :maybe_auth]
     get "/register/username/:username", UserController, :username
     get "/register/email/:email", UserController, :email
+    get "/boards", BoardController, :by_category
     post "/register", UserController, :register
     post "/login", UserController, :login
     post "/confirm", UserController, :confirm

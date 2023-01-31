@@ -100,10 +100,9 @@ defmodule EpochtalkServerWeb.Helpers.ACL do
   prior to calling this function or if this function should handle defaulting the user's roles
   """
   @spec get_user_priority(User.t()) :: non_neg_integer
-  def get_user_priority(%{ id: id, roles: roles } = _user) when not is_nil(id) and is_list(roles),
+  def get_user_priority(%{id: id, roles: roles} = _user) when not is_nil(id) and is_list(roles),
     do: Role.get_masked_permissions(roles).priority
 
   def get_user_priority(nil),
     do: Role.get_default_unauthenticated().priority
-
 end

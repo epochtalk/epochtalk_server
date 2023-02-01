@@ -234,9 +234,12 @@ defmodule EpochtalkServer.Session do
     maybe_extend_ttl(key, ttl, old_ttl)
   end
   defp maybe_extend_ttl(key, ttl, old_ttl) do
-    # extend ttl if new one is further out
     if ttl > old_ttl do
+      # extend ttl if new one is further out
       Redix.command(:redix, ["EXPIRE", key, ttl])
+    else
+      # re-set old_ttl (necessary when old ttl has been dropped)
+      Redix.command(:redix, ["EXPIRE", key, old_ttl])
     end
   end
 end

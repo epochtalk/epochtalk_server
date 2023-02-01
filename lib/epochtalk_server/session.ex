@@ -83,11 +83,11 @@ defmodule EpochtalkServer.Session do
       {:error, error} -> {:error, error}
     end
   end
-  defp delete_session_by_user_id(user_id, session_id) do
-    # delete session id from redis under "user:{user_id}:sessions"
+  defp delete_session_by_user_id(user_id, session) do
+    # delete session from redis under "user:{user_id}:sessions"
     session_key = generate_key(user_id, "sessions")
 
-    case Redix.command(:redix, ["SREM", session_key, session_id]) do
+    case Redix.command(:redix, ["SREM", session_key, session]) do
       {:ok, _} -> {:ok, user_id}
       {:error, error} -> {:error, error}
     end
@@ -206,7 +206,7 @@ defmodule EpochtalkServer.Session do
     |> Enum.each(fn session ->
       [session_id, expiration] = String.split(session, ":")
       if String.to_integer(expiration) < now do
-        delete_session_by_user_id(user_id, session_id)
+        delete_session_by_user_id(user_id, session)
       end
     end)
     # add new session, noting unix expiration

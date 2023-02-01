@@ -52,7 +52,13 @@ defmodule EpochtalkServer.Session do
     session_key = generate_key(user.id, "sessions")
 
     case Redix.command(:redix, ["SMEMBERS", session_key]) do
-      {:ok, sessions} -> {:ok, user, sessions}
+      {:ok, sessions} ->
+        session_ids = sessions
+          |> Enum.map(fn session ->
+            [session_id, _expiration] = session |> String.split(":")
+            session_id
+          end)
+        {:ok, user, session_ids}
       {:error, error} -> {:error, error}
     end
   end

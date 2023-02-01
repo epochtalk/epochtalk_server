@@ -137,13 +137,15 @@ defmodule EpochtalkServer.Session do
     # save/replace roles to redis under "user:{user_id}:roles"
     role_lookups = roles |> Enum.map(& &1.lookup)
     role_key = generate_key(user_id, "roles")
+    # get current TTL
+    {:ok, old_ttl} = Redix.command(:redix, ["TTL", role_key])
     Redix.command(:redix, ["DEL", role_key])
 
     unless role_lookups == [],
       do: Enum.each(role_lookups, &Redix.command(:redix, ["SADD", role_key, &1]))
 
     # set ttl
-    maybe_extend_ttl(role_key, ttl)
+    maybe_extend_ttl(role_key, ttl, old_ttl)
   end
 
   defp update_moderating(user_id, moderating, ttl) do
@@ -151,13 +153,15 @@ defmodule EpochtalkServer.Session do
     moderating = moderating |> Enum.map(& &1.board_id)
     # save/replace moderating boards to redis under "user:{user_id}:moderating"
     moderating_key = generate_key(user_id, "moderating")
+    # get current TTL
+    {:ok, old_ttl} = Redix.command(:redix, ["TTL", moderating_key])
     Redix.command(:redix, ["DEL", moderating_key])
 
     unless moderating == [],
       do: Enum.each(moderating, &Redix.command(:redix, ["SADD", moderating_key, &1]))
 
     # set ttl
-    maybe_extend_ttl(moderating_key, ttl)
+    maybe_extend_ttl(moderating_key, ttl, old_ttl)
   end
 
   defp update_user_info(user_id, username, ttl) do

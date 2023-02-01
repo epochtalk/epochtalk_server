@@ -189,6 +189,8 @@ defmodule EpochtalkServer.Session do
   defp update_ban_info(user_id, ban_info, ttl) do
     # save/replace ban_expiration to redis under "user:{user_id}:baninfo"
     ban_key = generate_key(user_id, "baninfo")
+    # get current TTL
+    {:ok, old_ttl} = Redix.command(:redix, ["TTL", ban_key])
     Redix.command(:redix, ["HDEL", ban_key, "ban_expiration", "malicious_score"])
 
     if ban_exp = Map.get(ban_info, :ban_expiration),
@@ -198,7 +200,7 @@ defmodule EpochtalkServer.Session do
       do: Redix.command(:redix, ["HSET", ban_key, "malicious_score", malicious_score])
 
     # set ttl
-    maybe_extend_ttl(ban_key, ttl)
+    maybe_extend_ttl(ban_key, ttl, old_ttl)
   end
 
   # these two rules ensure that sessions will eventually be deleted:

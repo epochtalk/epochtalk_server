@@ -53,15 +53,20 @@ defmodule EpochtalkServer.Session do
 
     case Redix.command(:redix, ["SMEMBERS", session_key]) do
       {:ok, sessions} ->
-        session_ids = sessions
+        session_ids =
+          sessions
           |> Enum.map(fn session ->
             [session_id, _expiration] = session |> String.split(":")
             session_id
           end)
+
         {:ok, user, session_ids}
-      {:error, error} -> {:error, error}
+
+      {:error, error} ->
+        {:error, error}
     end
   end
+
   defp get_sessions_by_user_id(user_id) do
     # get session id's from redis under "user:{user_id}:sessions"
     session_key = generate_key(user_id, "sessions")
@@ -89,6 +94,7 @@ defmodule EpochtalkServer.Session do
       {:error, error} -> {:error, error}
     end
   end
+
   defp delete_session_by_user_id(user_id, session) do
     # delete session from redis under "user:{user_id}:sessions"
     session_key = generate_key(user_id, "sessions")
@@ -210,19 +216,27 @@ defmodule EpochtalkServer.Session do
     # save session id to redis under "user:{user_id}:sessions"
     session_key = generate_key(user_id, "sessions")
     # current unix time (default :seconds)
-    now = DateTime.utc_now |> DateTime.to_unix
+    now = DateTime.utc_now() |> DateTime.to_unix()
     # intended unix expiration of this session
     unix_expiration = now + ttl
     # delete expired sessions
     get_sessions_by_user_id(user_id)
     |> Enum.each(fn session ->
       [session_id, expiration] = String.split(session, ":")
+
       if String.to_integer(expiration) < now do
         delete_session_by_user_id(user_id, session)
       end
     end)
+
     # add new session, noting unix expiration
-    result = Redix.command(:redix, ["SADD", session_key, session_id <> ":" <> Integer.to_string(unix_expiration)])
+    result =
+      Redix.command(:redix, [
+        "SADD",
+        session_key,
+        session_id <> ":" <> Integer.to_string(unix_expiration)
+      ])
+
     # set ttl
     maybe_extend_ttl(session_key, ttl)
     result
@@ -230,11 +244,13 @@ defmodule EpochtalkServer.Session do
 
   defp generate_key(user_id, "user"), do: "user:#{user_id}"
   defp generate_key(user_id, type), do: "user:#{user_id}:#{type}"
+
   defp maybe_extend_ttl(key, ttl) do
     # get old ttl
     {:ok, old_ttl} = Redix.command(:redix, ["TTL", key])
     maybe_extend_ttl(key, ttl, old_ttl)
   end
+
   defp maybe_extend_ttl(key, ttl, old_ttl) do
     if ttl > old_ttl do
       # extend ttl if new one is further out

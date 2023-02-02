@@ -5,7 +5,7 @@ defmodule EpochtalkServerWeb.BoardController do
   Controller For `Board` related API requests
   """
   alias EpochtalkServer.Auth.Guardian
-  # alias EpochtalkServer.Models.Board
+  alias EpochtalkServer.Models.Board
   alias EpochtalkServerWeb.ErrorHelpers
   alias EpochtalkServerWeb.Helpers.Validate
   alias EpochtalkServerWeb.Helpers.ACL
@@ -21,7 +21,8 @@ defmodule EpochtalkServerWeb.BoardController do
          priority <- ACL.get_user_priority(user) do
          IO.inspect user
       opts = %{page: page, limit: limit, stripped: stripped}
-      render(conn, "categorized.json", data: %{opts: opts, user_id: user.id, priority: priority})
+      Board.by_category(priority, [stripped: stripped, hide_private: true])
+      render(conn, "categorized.json", data: %{opts: opts, user_id: (if user, do: user.id, else: nil), priority: priority})
     else
       _ -> ErrorHelpers.render_json_error(conn, 400, "Error, cannot fetch boards")
     end

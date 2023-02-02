@@ -4,7 +4,9 @@ defmodule EpochtalkServer.Models.BoardMapping do
   import Ecto.Query, only: [from: 2]
   alias EpochtalkServer.Repo
   alias EpochtalkServer.Models.Board
+  alias EpochtalkServer.Models.MetadataBoard
   alias EpochtalkServer.Models.BoardMapping
+  alias EpochtalkServer.Models.Thread
   alias EpochtalkServer.Models.Category
 
   @moduledoc """
@@ -22,6 +24,8 @@ defmodule EpochtalkServer.Models.BoardMapping do
     belongs_to :parent, Board, primary_key: true
     belongs_to :category, Category, primary_key: true
     field :view_order, :integer
+    field :stats, :map, virtual: true
+    field :thread, :map, virtual: true
   end
 
   ## === Changesets Functions ===
@@ -63,6 +67,25 @@ defmodule EpochtalkServer.Models.BoardMapping do
     Repo.transaction(fn ->
       Enum.each(board_mapping_list, &update(&1, Map.get(&1, :type)))
     end)
+  end
+
+
+  @doc """
+  Returns BoardMapping with loaded boards and relevant metadata
+
+  TODO(akinsey): writing this assuming other models will update metadata board table properly.
+  Old implementation was querying metadata boards then filling in holes in the data after the fact.
+  """
+  @spec all() :: [t()]
+  def all() do
+    query = from bm in BoardMapping,
+      left_join: mb in MetadataBoard,
+      on: bm.board_id == mb.board_id,
+      left_join: t in Thread,
+      on: mb.last_thread_id == t.id,
+      select_merge: %{stats: mb, thread: t},
+      preload: [ :board ]
+    Repo.all(query)
   end
 
   ## === Private Helper Functions ===

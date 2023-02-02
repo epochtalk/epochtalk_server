@@ -6,6 +6,7 @@ defmodule EpochtalkServer.Models.Board do
   alias EpochtalkServer.Models.Category
   alias EpochtalkServer.Models.BoardMapping
   alias EpochtalkServer.Models.Board
+  alias EpochtalkServer.Models.Thread
   alias EpochtalkServer.Models.MetadataBoard
 
   @moduledoc """
@@ -122,29 +123,4 @@ defmodule EpochtalkServer.Models.Board do
         {:error, cs}
     end
   end
-
-  @doc """
-  Returns a list containing a user's roles
-  """
-  @spec by_category(user_priority :: non_neg_integer) :: [t()]
-  def by_category(user_priority, opts \\ []) when is_integer(user_priority) do
-    stripped = Keyword.get(opts, :stripped)
-    hide_private = Keyword.get(opts, :hide_private)
-    query = from bm in BoardMapping
-        # where: m.mentionee_id == ^user_id,
-        # left_join: notification in Notification,
-        # on: m.id == type(notification.data["mentionId"], :integer),
-        # left_join: mentioner in assoc(m, :mentioner),
-        # left_join: profile in assoc(mentioner, :profile),
-        # left_join: post in assoc(m, :post),
-        # left_join: thread in assoc(m, :thread),
-        # # sort by id fixes duplicate timestamp issues
-        # order_by: [desc: m.created_at, desc: m.id],
-        # # set virtual field from notification join
-        # select_merge: %{notification_id: notification.id, viewed: notification.viewed},
-        # preload: [mentioner: {mentioner, profile: profile}, post: post, thread: thread]
-
-    Repo.all(query)
-  end
-
 end

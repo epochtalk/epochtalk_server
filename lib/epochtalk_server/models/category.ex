@@ -1,6 +1,7 @@
 defmodule EpochtalkServer.Models.Category do
   use Ecto.Schema
   import Ecto.Changeset
+  import Ecto.Query
   alias EpochtalkServer.Repo
   alias EpochtalkServer.Models.Board
   alias EpochtalkServer.Models.Category
@@ -103,4 +104,10 @@ defmodule EpochtalkServer.Models.Category do
     |> update_for_board_mapping_changeset(category_map)
     |> Repo.update()
   end
+
+  @doc """
+  Returns a list of all categories
+  """
+  @spec all() :: [t()]
+  def all(), do: Repo.all(from Category)
 end

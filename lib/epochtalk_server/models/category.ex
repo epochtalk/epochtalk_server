@@ -109,5 +109,5 @@ defmodule EpochtalkServer.Models.Category do
   Returns a list of all categories
   """
   @spec all() :: [t()]
-  def all(), do: Repo.all(from Category)
+  def all(), do: Repo.all(from Category, order_by: [asc: :view_order])
 end

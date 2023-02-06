@@ -21,9 +21,17 @@ defmodule EpochtalkServerWeb.BoardView do
   """
   def render("by_category.json", %{
         categories: categories,
+        board_moderators: board_moderators,
         board_mapping: board_mapping
       }) do
-    IO.inspect board_mapping
+    # append board moderators to each board in board mapping
+    board_mapping = Enum.map(board_mapping, fn board ->
+      moderators = board_moderators
+        |> Enum.filter(fn mod -> Map.get(mod, :board_id) == Map.get(board, :board_id) end)
+        |> Enum.map(fn mod -> %{id: mod.user_id, username: mod.user.username} end)
+      Map.put(board, :moderators, moderators)
+    end)
+
     # iterate each category
     categories = Enum.reduce(categories, [], fn category, acc ->
       # look through board mapping, filter and process child boards for the current category
@@ -31,6 +39,7 @@ defmodule EpochtalkServerWeb.BoardView do
       acc ++ [category]
     end)
 
+    # return boards nested within categories
     categories
   end
 

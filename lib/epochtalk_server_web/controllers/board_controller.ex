@@ -5,6 +5,7 @@ defmodule EpochtalkServerWeb.BoardController do
   Controller For `Board` related API requests
   """
   alias EpochtalkServer.Auth.Guardian
+  alias EpochtalkServer.Models.BoardModerator
   alias EpochtalkServer.Models.BoardMapping
   alias EpochtalkServer.Models.Category
   alias EpochtalkServerWeb.ErrorHelpers
@@ -20,13 +21,16 @@ defmodule EpochtalkServerWeb.BoardController do
          stripped <- Validate.cast(attrs, "stripped", :boolean, default: false),
          user <- Guardian.Plug.current_resource(conn),
          priority <- ACL.get_user_priority(user) do
-         IO.inspect user
-      opts = %{page: page, limit: limit, stripped: stripped}
+      opts = %{page: page, limit: limit, stripped: stripped, priority: priority}
+      IO.inspect opts
       board_mapping = BoardMapping.all()
+      board_moderators = BoardModerator.all()
       categories = Category.all()
-      IO.inspect board_mapping
-      IO.inspect categories
-      render(conn, "by_category.json", %{categories: categories, board_mapping: board_mapping})
+      render(conn, "by_category.json", %{
+        categories: categories,
+        board_moderators: board_moderators,
+        board_mapping: board_mapping
+      })
     else
       _ -> ErrorHelpers.render_json_error(conn, 400, "Error, cannot fetch boards")
     end

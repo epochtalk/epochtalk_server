@@ -69,7 +69,6 @@ defmodule EpochtalkServer.Models.BoardMapping do
     end)
   end
 
-
   @doc """
   Returns BoardMapping with loaded boards and relevant metadata
 
@@ -79,11 +78,15 @@ defmodule EpochtalkServer.Models.BoardMapping do
   @spec all(opts :: list() | nil) :: [t()]
   def all(opts \\ []) do
     stripped = Keyword.get(opts, :stripped, false)
-    query = if stripped do
+
+    query =
+      if stripped do
         from bm in BoardMapping,
           left_join: b in Board,
           on: bm.board_id == b.id,
-          select_merge: %{board: %{id: b.id, slug: b.slug, name: b.name, viewable_by: b.viewable_by}}
+          select_merge: %{
+            board: %{id: b.id, slug: b.slug, name: b.name, viewable_by: b.viewable_by}
+          }
       else
         from bm in BoardMapping,
           left_join: mb in MetadataBoard,
@@ -91,8 +94,9 @@ defmodule EpochtalkServer.Models.BoardMapping do
           left_join: t in Thread,
           on: mb.last_thread_id == t.id,
           select_merge: %{stats: mb, thread: t},
-          preload: [ :board ]
+          preload: [:board]
       end
+
     Repo.all(query)
   end
 

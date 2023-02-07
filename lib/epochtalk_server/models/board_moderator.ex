@@ -35,5 +35,5 @@ defmodule EpochtalkServer.Models.BoardModerator do
     |> validate_required([:user_id, :board_id])
   end
 
-  def all(), do: Repo.all(from BoardModerator, preload: [user: ^(from User, select: [:username])])
+  def all(), do: Repo.all(from BoardModerator, preload: [user: ^from(User, select: [:username])])
 end

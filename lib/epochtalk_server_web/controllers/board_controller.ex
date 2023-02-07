@@ -23,7 +23,7 @@ defmodule EpochtalkServerWeb.BoardController do
          priority <- ACL.get_user_priority(user) do
       opts = %{page: page, limit: limit, stripped: stripped, priority: priority}
       IO.inspect opts
-      board_mapping = BoardMapping.all()
+      board_mapping = BoardMapping.all(stripped: stripped)
       board_moderators = BoardModerator.all()
       categories = Category.all()
       render(conn, "by_category.json", %{

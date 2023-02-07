@@ -99,9 +99,15 @@ defmodule EpochtalkServerWeb.Helpers.ACL do
   TODO(akinsey): review chain of authenticated user's roles. See if banned and user roles are being defaulted
   prior to calling this function or if this function should handle defaulting the user's roles
   """
-  @spec get_user_priority(User.t()) :: non_neg_integer
+  @spec get_user_priority(Plug.Conn.t() | User.t()) :: non_neg_integer
   def get_user_priority(%{id: id, roles: roles} = _user) when not is_nil(id) and is_list(roles),
     do: Role.get_masked_permissions(roles).priority
+
+  def get_user_priority(%Plug.Conn{private: %{guardian_default_resource: user}} = _conn) when not is_nil(user.id) and is_list(user.roles),
+    do: Role.get_masked_permissions(user.roles).priority
+
+  def get_user_priority(%Plug.Conn{} = _conn),
+    do: Role.get_default_unauthenticated().priority
 
   def get_user_priority(nil),
     do: Role.get_default_unauthenticated().priority

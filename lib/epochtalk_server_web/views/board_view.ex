@@ -2,7 +2,7 @@ defmodule EpochtalkServerWeb.BoardView do
   use EpochtalkServerWeb, :view
 
   @moduledoc """
-  Renders and formats `User` data, in JSON format for frontend
+  Renders and formats `Board` data, in JSON format for frontend
   """
 
   @doc """
@@ -17,7 +17,7 @@ defmodule EpochtalkServerWeb.BoardView do
   def template_not_found(_template, %{data: data}), do: data
 
   @doc """
-  Renders paginated `User` mentions. If extended is true returns additional `Board` and `Post` details.
+  Renders `Board` data by `Category`.
   """
   def render("by_category.json", %{
         categories: categories,

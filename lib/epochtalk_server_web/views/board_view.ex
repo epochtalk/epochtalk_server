@@ -60,7 +60,7 @@ defmodule EpochtalkServerWeb.BoardView do
       end)
 
     # return boards nested within categories
-    categories
+    %{boards: categories}
   end
 
   defp process_children_from_board_mapping(

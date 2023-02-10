@@ -111,7 +111,7 @@ defmodule EpochtalkServer.Session do
 
   defp get_moderating_by_user_id(user_id) do
     moderating_key = generate_key(user_id, "moderating")
-    Redix.command!(:redix, ["SMEMBERS", moderating])
+    Redix.command!(:redix, ["SMEMBERS", moderating_key])
   end
 
   defp get_ban_expiration_by_user_id(user_id) do

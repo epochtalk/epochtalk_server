@@ -6,14 +6,14 @@ defmodule EpochtalkServerWeb.Helpers.QueryHelper do
   import Ecto.Query
 
   @spec build_and(Ecto.Query.t(), atom | binary, binary | number | map) ::
-          %Ecto.Query.DynamicExpr{}
+          Ecto.Query.t()
   def build_and(conditions, field, value) do
     condition = build_condition(field, value)
     dynamic([c], ^condition and ^conditions)
   end
 
   @spec build_or(Ecto.Query.t(), atom | binary, binary | number | map) ::
-          %Ecto.Query.DynamicExpr{}
+          Ecto.Query.t()
   def build_or(conditions, field, value) do
     condition = build_condition(field, value)
     dynamic([c], ^condition or ^conditions)

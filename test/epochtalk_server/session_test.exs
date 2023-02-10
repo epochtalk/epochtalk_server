@@ -9,7 +9,7 @@ defmodule EpochtalkServerWeb.SessionTest do
 
   @login_create_attrs %{username: "logintest", email: "logintest@test.com", password: "password"}
   @login_no_remember_me_attrs %{username: "logintest", password: "password"}
-  @login_remember_me_attrs %{username: "logintest", password: "password", remember_me: "true"}
+  @login_remember_me_attrs %{username: "logintest", password: "password", rememberMe: "true"}
 
   describe "login/2" do
     setup [:create_login_user]

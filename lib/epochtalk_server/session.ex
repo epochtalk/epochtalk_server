@@ -44,7 +44,7 @@ defmodule EpochtalkServer.Session do
   @doc """
   Get username for session by user id
   """
-  @spec get_username_by_user_id(user_id :: String.t()) :: String.t()
+  @spec get_username_by_user_id(user_id :: String.t()) :: username :: String.t()
           | {Redix.Error.t() | Redix.ConnectionError.t()}
   def get_username_by_user_id(user_id) do
     Redix.command!(:redix, ["HGET", "user:#{user_id}", "username"])

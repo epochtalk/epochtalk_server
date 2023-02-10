@@ -25,7 +25,7 @@ conventions.  Please refer to these guidelines!
 
 * Write documentation
 
-  View the [Documentation](#Documentation overview) section of this document for a
+  View the [Documentation](#documentation-overview) section of this document for a
   helpful overview.
 
   See [Writing Documentation](https://hexdocs.pm/elixir/1.13/writing-documentation.html)
@@ -39,7 +39,7 @@ conventions.  Please refer to these guidelines!
 
   * Spec - for all public methods in a module, describes their input and output
 
-  * [Type](#Schema docs) - used with schema to describe the type of data in a model
+  * [Type](#schema-docs) - used with schema to describe the type of data in a model
 
   * Doc tests - checks that data is manipulated correctly in docs
 

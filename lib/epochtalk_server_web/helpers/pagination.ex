@@ -42,35 +42,63 @@ defmodule EpochtalkServerWeb.Helpers.Pagination do
   def page_simple(query, page, per_page: nil) when is_binary(page),
     do: page_simple(query, Validate.cast_str(page, :integer, key: "page", min: 1), per_page: 25)
 
-  def page_simple(query, page, per_page: per_page) when is_binary(page) and is_binary(per_page),
-    do:
-      page_simple(query, Validate.cast_str(page, :integer, key: "page", min: 1),
-        per_page: Validate.cast_str(per_page, :integer, key: "limit", min: 1)
-      )
+  def page_simple(query, page, per_page: per_page)
+      when is_binary(page) and is_binary(per_page),
+      do:
+        page_simple(query, Validate.cast_str(page, :integer, key: "page", min: 1),
+          per_page: Validate.cast_str(per_page, :integer, key: "limit", min: 1)
+        )
 
   def page_simple(query, page, per_page: per_page) do
-    result =
-      query
-      # query one extra to see if there's a next page
-      |> limit(^(per_page + 1))
-      |> offset(^(page * per_page - per_page))
-      |> Repo.all(prefix: "public")
+    options = [prefix: "public"]
 
-    # next page exists if extra record is returned
-    next = length(result) > per_page
-    # remove extra record if necessary
-    result =
-      if next,
-        do: result |> Enum.reverse() |> tl() |> Enum.reverse(),
-        else: result
+    total_records =
+      Keyword.get_lazy(options, :total_records, fn ->
+        total_records(query, options)
+      end)
+
+    total_pages = total_pages(total_records, per_page)
+
+    result = records(query, page, total_pages, per_page, options)
 
     pagination_data = %{
-      next: next,
+      next: page < total_pages,
       prev: page > 1,
       page: page,
-      limit: per_page
+      per_page: per_page,
+      total_records: total_records,
+      total_pages: total_pages
     }
 
     {:ok, result, pagination_data}
+  end
+
+  defp records(_, page, total_pages, _, _) when page > total_pages, do: []
+
+  defp records(query, page, _, per_page, options) do
+    query
+    |> limit(^per_page)
+    |> offset(^(per_page * (page - 1)))
+    |> Repo.all(prefix: options[:prefix])
+  end
+
+  defp total_records(query, options) do
+    total_records =
+      query
+      |> exclude(:preload)
+      |> exclude(:order_by)
+      |> exclude(:select)
+      |> select(count("*"))
+      |> Repo.one(prefix: options[:prefix])
+
+    total_records || 0
+  end
+
+  defp total_pages(0, _), do: 1
+
+  defp total_pages(total_records, per_page) do
+    (total_records / per_page)
+    |> Float.ceil()
+    |> round
   end
 end

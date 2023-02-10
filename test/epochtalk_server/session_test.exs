@@ -32,6 +32,25 @@ defmodule EpochtalkServerWeb.SessionTest do
       assert sessions_ttl > @almost_one_day_in_seconds
       assert sessions_ttl <= @one_day_in_seconds
     end
+
+    test "creates a second user session with remember me (< 4 week ttl)", %{conn: conn} do
+      conn = post(conn, Routes.user_path(conn, :login, @login_remember_me_attrs))
+      {:ok, user} = User.by_username(@login_remember_me_attrs.username)
+      user_ttl = Redix.command!(:redix, ["TTL", "user:#{user.id}"])
+      roles_ttl = Redix.command!(:redix, ["TTL", "user:#{user.id}:roles"])
+      moderating_ttl = Redix.command!(:redix, ["TTL", "user:#{user.id}:moderating"])
+      baninfo_ttl = Redix.command!(:redix, ["TTL", "user:#{user.id}:baninfo"])
+      sessions_ttl = Redix.command!(:redix, ["TTL", "user:#{user.id}:sessions"])
+
+      assert user_ttl > @almost_four_weeks_in_seconds
+      assert user_ttl <= @four_weeks_in_seconds
+      assert roles_ttl > @almost_four_weeks_in_seconds
+      assert roles_ttl <= @four_weeks_in_seconds
+      assert moderating_ttl <= @four_weeks_in_seconds
+      assert baninfo_ttl <= @four_weeks_in_seconds
+      assert sessions_ttl > @almost_four_weeks_in_seconds
+      assert sessions_ttl <= @four_weeks_in_seconds
+    end
   end
 
   defp create_login_user(_) do

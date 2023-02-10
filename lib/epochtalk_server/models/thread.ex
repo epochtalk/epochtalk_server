@@ -1,8 +1,9 @@
 defmodule EpochtalkServer.Models.Thread do
   use Ecto.Schema
   import Ecto.Changeset
-  # alias EpochtalkServer.Repo
-  # alias EpochtalkServer.Models.Thread
+  import Ecto.Query
+  alias EpochtalkServer.Repo
+  alias EpochtalkServer.Models.Thread
   alias EpochtalkServer.Models.Board
   alias EpochtalkServer.Models.Post
 
@@ -58,5 +59,22 @@ defmodule EpochtalkServer.Models.Thread do
     |> unique_constraint(:id, name: :threads_pkey)
     |> unique_constraint(:slug, name: :threads_slug_index)
     |> foreign_key_constraint(:board_id, name: :threads_board_id_fkey)
+  end
+
+  ## === Database Functions ===
+
+  @doc """
+  Returns recent threads accounting for user priority and user's ignored boards
+  """
+  @spec recent(user :: User.t(), user_priority :: non_neg_integer, opts :: list() | nil) :: [t()]
+  def recent(user, user_priority, opts \\ []) do
+    limit = Keyword.get(opts, :limit, 5)
+    IO.inspect user
+    IO.inspect user_priority
+    query = from Thread,
+      order_by: [desc: :updated_at],
+      limit: ^limit
+
+    Repo.all(query)
   end
 end

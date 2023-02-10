@@ -6,6 +6,7 @@ defmodule EpochtalkServerWeb.SessionTest do
   use EpochtalkServerWeb.ConnCase, async: false
   import Ecto.Changeset
   alias EpochtalkServer.Models.User
+  alias EpochtalkServer.Session
 
   @login_create_attrs %{username: "logintest", email: "logintest@test.com", password: "password"}
   @login_no_remember_me_attrs %{username: "logintest", password: "password"}
@@ -72,6 +73,16 @@ defmodule EpochtalkServerWeb.SessionTest do
 
       # flush after three tests, don't keep user sessions active
       Redix.command!(:redix, ["FLUSHALL"])
+    end
+
+    test "log in creates a valid resource", %{conn: conn} do
+      conn = post(conn, Routes.user_path(conn, :login, @login_no_remember_me_attrs))
+      {:ok, user} = User.by_username(@login_no_remember_me_attrs.username)
+
+      # get session_id (jti) from conn
+      session_id = conn.private.guardian_default_claims["jti"]
+      {:ok, resource_user} = Session.get_resource(user.id, session_id)
+      assert user.id == resource_user.id
     end
   end
 

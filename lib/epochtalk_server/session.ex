@@ -46,7 +46,8 @@ defmodule EpochtalkServer.Session do
   Get the resource for a specified user_id and session_id if available
   Otherwise, return an error
   """
-  @spec get_resource(user_id :: String.t(), session_id :: String.t()) :: {:ok, resource :: map()}
+  @spec get_resource(user_id :: String.t(), session_id :: String.t()) ::
+          {:ok, resource :: map()}
           | {:error, reason :: String.t() | Redix.Error.t() | Redix.ConnectionError.t()}
   def get_resource(user_id, session_id) do
     # check if session is active in redis
@@ -54,6 +55,7 @@ defmodule EpochtalkServer.Session do
     |> case do
       {:error, error} ->
         {:error, "Error finding resource from claims #{inspect(error)}"}
+
       false ->
         # session is not active, return error
         {:error, "No session with id #{session_id}"}
@@ -152,7 +154,9 @@ defmodule EpochtalkServer.Session do
 
   defp is_active_for_user_id(session_id, user_id) do
     case get_session_ids_by_user_id(user_id) do
-      {:error, error} -> {:error, error}
+      {:error, error} ->
+        {:error, error}
+
       session_ids ->
         Enum.member?(session_ids, session_id)
     end
@@ -167,10 +171,11 @@ defmodule EpochtalkServer.Session do
       {:error, error} -> {:error, error}
     end
   end
+
   defp get_session_ids_by_user_id(user_id) do
     case get_sessions_by_user_id(user_id) do
       {:error, error} -> {:error, error}
-      sessions -> Enum.map(sessions, & String.split(&1, ":") |> List.first)
+      sessions -> Enum.map(sessions, &(String.split(&1, ":") |> List.first()))
     end
   end
 

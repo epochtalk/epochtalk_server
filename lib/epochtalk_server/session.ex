@@ -79,6 +79,15 @@ defmodule EpochtalkServer.Session do
   end
 
   @doc """
+  Get ban_expiration for session by user id
+  """
+  @spec get_ban_expiration_by_user_id(user_id :: String.t()) :: ban_expiration :: boolean()
+          | {Redix.Error.t() | Redix.ConnectionError.t()}
+  def get_ban_expiration_by_user_id(user_id) do
+    Redix.command!(:redix, ["HEXISTS", "user:#{user_id}:ban_info", "ban_expiration"])
+  end
+
+  @doc """
   Gets all sessions for a specific `User`
   """
   @spec get_sessions(user :: User.t()) ::

@@ -184,8 +184,7 @@ defmodule EpochtalkServer.Auth.Guardian do
             do: Map.put(resource, :moderating, moderating),
             else: resource
 
-        ban_expiration =
-          Redix.command!(:redix, ["HEXISTS", "user:#{user_id}:ban_info", "ban_expiration"])
+        ban_expiration = Session.get_ban_expiration_by_user_id(user_id)
 
         resource =
           if ban_expiration != 0,

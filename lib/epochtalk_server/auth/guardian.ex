@@ -145,8 +145,6 @@ defmodule EpochtalkServer.Auth.Guardian do
   @doc """
   Fetches the resource that is represented by claims.
   For JWT this would normally be found in the `sub` field.
-
-  TODO(boka): refactor fetching of user session (L 161-202) into session.ex
   """
   def resource_from_claims(%{"sub" => sub, "jti" => jti} = _claims) do
     # Here we'll look up our resource from the claims, the subject can be

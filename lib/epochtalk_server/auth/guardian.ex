@@ -172,7 +172,7 @@ defmodule EpochtalkServer.Auth.Guardian do
         resource = %{
           id: user_id,
           session_id: session_id,
-          username: Redix.command!(:redix, ["HGET", "user:#{user_id}", "username"]),
+          username: Session.get_username_by_user_id(user_id),
           avatar: Redix.command!(:redix, ["HGET", "user:#{user_id}", "avatar"]),
           roles: Redix.command!(:redix, ["SMEMBERS", "user:#{user_id}:roles"]) |> Role.by_lookup()
         }

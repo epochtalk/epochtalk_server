@@ -123,7 +123,6 @@ defmodule EpochtalkServer.Auth.Guardian do
   **Note:** Copied from [Guardian Docs](https://github.com/ueberauth/guardian)
   """
   use Guardian, otp_app: :epochtalk_server
-  alias EpochtalkServer.Models.Role
   alias EpochtalkServer.Session
 
   @doc """
@@ -174,7 +173,7 @@ defmodule EpochtalkServer.Auth.Guardian do
           session_id: session_id,
           username: Session.get_username_by_user_id(user_id),
           avatar: Session.get_avatar_by_user_id(user_id),
-          roles: Redix.command!(:redix, ["SMEMBERS", "user:#{user_id}:roles"]) |> Role.by_lookup()
+          roles: Session.get_roles_by_user_id(user_id)
         }
 
         # only append moderating, ban_expiration and malicious_score if present

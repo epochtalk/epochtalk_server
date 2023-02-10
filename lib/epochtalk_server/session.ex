@@ -7,6 +7,7 @@ defmodule EpochtalkServer.Session do
   """
   alias EpochtalkServer.Auth.Guardian
   alias EpochtalkServer.Models.User
+  alias EpochtalkServer.Models.Role
 
   @doc """
   Create session performs the following actions:
@@ -57,6 +58,15 @@ defmodule EpochtalkServer.Session do
           | {Redix.Error.t() | Redix.ConnectionError.t()}
   def get_avatar_by_user_id(user_id) do
     Redix.command!(:redix, ["HGET", "user:#{user_id}", "avatar"])
+  end
+
+  @doc """
+  Get roles for session by user id
+  """
+  @spec get_roles_by_user_id(user_id :: String.t()) :: t() | [t()] | [] | nil
+          | {Redix.Error.t() | Redix.ConnectionError.t()}
+  def get_roles_by_user_id(user_id) do
+    Redix.command!(:redix, ["SMEMBERS", "user:#{user_id}:roles"]) |> Role.by_lookup()
   end
 
   @doc """

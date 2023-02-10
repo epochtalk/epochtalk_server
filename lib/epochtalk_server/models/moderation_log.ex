@@ -5,6 +5,7 @@ defmodule EpochtalkServer.Models.ModerationLog do
   alias EpochtalkServer.Models.ModerationLog
   alias EpochtalkServerWeb.Helpers.ModerationLogHelper
   alias EpochtalkServerWeb.Helpers.Pagination
+  alias EpochtalkServerWeb.Helpers.QueryHelper
   alias EpochtalkServer.Repo
 
   @moduledoc """
@@ -117,20 +118,12 @@ defmodule EpochtalkServer.Models.ModerationLog do
   @doc """
   Page `ModerationLog` models
   """
-  @spec page(attrs :: map()) :: {:ok, moderation_logs :: [t()] | []}
-  def page(attrs \\ []) do
-    page_query(attrs)
-    # |> Pagination.page_simple(page, per_page: attrs[:limit])
-  end
-
-  defp page_query(attrs) do
-    moderation_logs =
-      ModerationLog
-      |> where(^filter_where(attrs))
-      # |> limit(^attrs[:limit])
-      |> Repo.all()
-
-    {:ok, moderation_logs}
+  @spec page(attrs :: map(), page :: non_neg_integer, per_page: non_neg_integer) ::
+          {:ok, moderation_logs :: [t()] | [], pagination_data :: map()}
+  def page(attrs, page \\ 1, opts \\ []) do
+    from(ModerationLog)
+    |> where(^filter_where(attrs))
+    |> Pagination.page_simple(page, per_page: opts[:per_page])
   end
 
   defp filter_where(attrs) do
@@ -139,27 +132,27 @@ defmodule EpochtalkServer.Models.ModerationLog do
         filter_mod(mod, dynamic)
 
       {"action", action}, dynamic ->
-        dynamic([q], q.action_type == ^action and ^dynamic)
+        QueryHelper.build_and(dynamic, :action_type, action)
 
       {"keyword", keyword}, dynamic ->
         like = "%#{keyword}%"
-        dynamic([q], ilike(q.action_display_text, ^like) and ^dynamic)
+        QueryHelper.build_and(dynamic, :action_display_text, %{"like" => like})
 
       {"bdate", bdate}, dynamic ->
         {:ok, bdate} = NaiveDateTime.from_iso8601(bdate <> " 00:00:00")
-        dynamic([q], q.action_taken_at < ^bdate and ^dynamic)
+        QueryHelper.build_and(dynamic, :action_taken_at, %{"<" => bdate})
 
       {"adate", adate}, dynamic ->
         {:ok, adate} = NaiveDateTime.from_iso8601(adate <> " 00:00:00")
-        dynamic([q], q.action_taken_at > ^adate and ^dynamic)
+        QueryHelper.build_and(dynamic, :action_taken_at, %{">" => adate})
 
       {"sdate", sdate}, dynamic ->
         {:ok, sdate} = NaiveDateTime.from_iso8601(sdate <> " 00:00:00")
-        dynamic([q], q.action_taken_at > ^sdate and ^dynamic)
+        QueryHelper.build_and(dynamic, :action_taken_at, %{">" => sdate})
 
       {"edate", edate}, dynamic ->
         {:ok, edate} = NaiveDateTime.from_iso8601(edate <> " 00:00:00")
-        dynamic([q], q.action_taken_at < ^edate and ^dynamic)
+        QueryHelper.build_and(dynamic, :action_taken_at, %{"<" => edate})
 
       {_, _}, dynamic ->
         # Not a where parameter
@@ -171,8 +164,12 @@ defmodule EpochtalkServer.Models.ModerationLog do
     like = "%#{mod}%"
 
     case Integer.parse(mod) do
-      {_, ""} -> dynamic([q], q.mod_id == ^mod and ^dynamic)
-      _ -> dynamic([q], (ilike(q.mod_username, ^like) or ilike(q.mod_ip, ^like)) and ^dynamic)
+      {_, ""} ->
+        QueryHelper.build_and(dynamic, :mod_id, mod)
+
+      _ ->
+        dynamic = QueryHelper.build_and(dynamic, :mod_username, %{"like" => like})
+        QueryHelper.build_or(dynamic, :mod_ip, %{"like" => like})
     end
   end
 end

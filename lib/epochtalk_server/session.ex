@@ -48,7 +48,8 @@ defmodule EpochtalkServer.Session do
   @spec get_username_by_user_id(user_id :: String.t()) :: username :: String.t()
           | {Redix.Error.t() | Redix.ConnectionError.t()}
   def get_username_by_user_id(user_id) do
-    Redix.command!(:redix, ["HGET", "user:#{user_id}", "username"])
+    user_key = generate_key(user_id, "user")
+    Redix.command!(:redix, ["HGET", user_key, "username"])
   end
 
   @doc """
@@ -57,7 +58,8 @@ defmodule EpochtalkServer.Session do
   @spec get_avatar_by_user_id(user_id :: String.t()) :: avatar :: String.t()
           | {Redix.Error.t() | Redix.ConnectionError.t()}
   def get_avatar_by_user_id(user_id) do
-    Redix.command!(:redix, ["HGET", "user:#{user_id}", "avatar"])
+    user_key = generate_key(user_id, "user")
+    Redix.command!(:redix, ["HGET", user_key, "avatar"])
   end
 
   @doc """
@@ -66,7 +68,8 @@ defmodule EpochtalkServer.Session do
   @spec get_roles_by_user_id(user_id :: String.t()) :: t() | [t()] | [] | nil
           | {Redix.Error.t() | Redix.ConnectionError.t()}
   def get_roles_by_user_id(user_id) do
-    Redix.command!(:redix, ["SMEMBERS", "user:#{user_id}:roles"]) |> Role.by_lookup()
+    role_key = generate_key(user_id, "roles")
+    Redix.command!(:redix, ["SMEMBERS", role_key]) |> Role.by_lookup()
   end
 
   @doc """
@@ -75,7 +78,8 @@ defmodule EpochtalkServer.Session do
   @spec get_moderating_by_user_id(user_id :: String.t()) :: moderating :: [String.t()]
           | {Redix.Error.t() | Redix.ConnectionError.t()}
   def get_moderating_by_user_id(user_id) do
-    Redix.command!(:redix, ["SMEMBERS", "user:#{user_id}:moderating"])
+    moderating_key = generate_key(user_id, "moderating")
+    Redix.command!(:redix, ["SMEMBERS", moderating])
   end
 
   @doc """
@@ -84,7 +88,8 @@ defmodule EpochtalkServer.Session do
   @spec get_ban_expiration_by_user_id(user_id :: String.t()) :: ban_expiration :: boolean()
           | {Redix.Error.t() | Redix.ConnectionError.t()}
   def get_ban_expiration_by_user_id(user_id) do
-    Redix.command!(:redix, ["HEXISTS", "user:#{user_id}:ban_info", "ban_expiration"])
+    ban_key = generate_key(user_id, "baninfo")
+    Redix.command!(:redix, ["HEXISTS", ban_key, "ban_expiration"])
   end
 
   @doc """
@@ -93,7 +98,8 @@ defmodule EpochtalkServer.Session do
   @spec get_malicious_score_by_user_id(user_id :: String.t()) :: malicious_score :: boolean()
           | {Redix.Error.t() | Redix.ConnectionError.t()}
   def get_malicious_score_by_user_id(user_id) do
-    Redix.command!(:redix, ["HEXISTS", "user:#{user_id}:ban_info", "malicious_score"])
+    ban_key = generate_key(user_id, "baninfo")
+    Redix.command!(:redix, ["HEXISTS", ban_key, "malicious_score"])
   end
 
   @doc """

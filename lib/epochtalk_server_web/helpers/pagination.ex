@@ -17,11 +17,21 @@ defmodule EpochtalkServerWeb.Helpers.Pagination do
       iex> Mention
       ...> |> order_by(asc: :id)
       ...> |> Pagination.page_simple(1, per_page: 25)
-      {:ok, [], %{limit: 25, next: false, page: 1, prev: false}}
+      {:ok, [], %{next: false,
+               page: 1,
+               per_page: 25,
+               prev: false,
+               total_pages: 1,
+               total_records: 0}}
       iex> Invitation
       ...> |> order_by(desc: :email)
       ...> |> Pagination.page_simple(1, per_page: 10)
-      {:ok, [], %{limit: 10, next: false, page: 1, prev: false}}
+      {:ok, [], %{next: false,
+               page: 1,
+               per_page: 10,
+               prev: false,
+               total_pages: 1,
+               total_records: 0}}
   """
   @spec page_simple(query :: Ecto.Queryable.t(), page :: integer | String.t() | nil,
           per_page: integer | String.t() | nil

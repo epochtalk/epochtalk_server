@@ -191,8 +191,7 @@ defmodule EpochtalkServer.Auth.Guardian do
             do: Map.put(resource, :ban_expiration, ban_expiration),
             else: resource
 
-        malicious_score =
-          Redix.command!(:redix, ["HEXISTS", "user:#{user_id}:ban_info", "malicious_score"])
+        malicious_score = Session.get_malicious_score_by_user_id(user_id)
 
         resource =
           if malicious_score != 0,

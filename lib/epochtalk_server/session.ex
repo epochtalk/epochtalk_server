@@ -88,6 +88,15 @@ defmodule EpochtalkServer.Session do
   end
 
   @doc """
+  Get malicious_score for session by user id
+  """
+  @spec get_malicious_score_by_user_id(user_id :: String.t()) :: malicious_score :: boolean()
+          | {Redix.Error.t() | Redix.ConnectionError.t()}
+  def get_malicious_score_by_user_id(user_id) do
+    Redix.command!(:redix, ["HEXISTS", "user:#{user_id}:ban_info", "malicious_score"])
+  end
+
+  @doc """
   Gets all sessions for a specific `User`
   """
   @spec get_sessions(user :: User.t()) ::

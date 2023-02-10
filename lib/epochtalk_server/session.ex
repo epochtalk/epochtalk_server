@@ -319,7 +319,7 @@ defmodule EpochtalkServer.Session do
     # delete expired sessions
     get_sessions_by_user_id(user_id)
     |> Enum.each(fn session ->
-      [session_id, expiration] = String.split(session, ":")
+      [_session_id, expiration] = String.split(session, ":")
 
       if String.to_integer(expiration) < now do
         delete_session_by_user_id(user_id, session)

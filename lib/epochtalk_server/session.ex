@@ -66,6 +66,18 @@ defmodule EpochtalkServer.Session do
         {:error, error}
     end
   end
+  @doc """
+  Checks if a session is active
+  """
+  @spec is_active_for_user_id(session_id :: String.t(), user_id :: String.t()) :: boolean()
+          | {:error, atom() | Redix.Error.t() | Redix.ConnectionError.t()}
+  def is_active_for_user_id(session_id, user_id) do
+    case get_session_ids_by_user_id(user_id) do
+      {:error, error} -> {:error, error}
+      session_ids ->
+        Enum.member?(session_ids, session_id)
+    end
+  end
 
   defp get_sessions_by_user_id(user_id) do
     # get session id's from redis under "user:{user_id}:sessions"

@@ -124,6 +124,7 @@ defmodule EpochtalkServer.Auth.Guardian do
   """
   use Guardian, otp_app: :epochtalk_server
   alias EpochtalkServer.Models.Role
+  alias EpochtalkServer.Session
 
   @doc """
   Fetches the subject for a token for the provided resource and claims
@@ -158,13 +159,15 @@ defmodule EpochtalkServer.Auth.Guardian do
     # we are using the jti for sessions_id since it's unique
     session_id = jti
     # check if session is active in redis
-    Redix.command!(:redix, ["SISMEMBER", "user:#{user_id}:sessions", session_id])
+    Session.is_active_for_user_id(session_id, user_id)
     |> case do
-      0 ->
+      {:error, error} ->
+        {:error, "Error finding resource from claims #{inspect(error)}"}
+      false ->
         # session is not active, return error
         {:error, "No session with id #{session_id}"}
 
-      1 ->
+      true ->
         # session is active, populate data
         resource = %{
           id: user_id,

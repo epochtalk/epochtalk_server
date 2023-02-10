@@ -2,6 +2,7 @@ defmodule EpochtalkServerWeb.SessionTest do
   @one_day_in_seconds 1 * 24 * 60 * 60
   @almost_one_day_in_seconds @one_day_in_seconds - 100
   @four_weeks_in_seconds 4 * 7 * @one_day_in_seconds
+  @almost_four_weeks_in_seconds @four_weeks_in_seconds - 100
   use EpochtalkServerWeb.ConnCase, async: false
   import Ecto.Changeset
   alias EpochtalkServer.Models.User

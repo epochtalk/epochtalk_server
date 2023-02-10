@@ -177,7 +177,7 @@ defmodule EpochtalkServer.Auth.Guardian do
         }
 
         # only append moderating, ban_expiration and malicious_score if present
-        moderating = Redix.command!(:redix, ["SMEMBERS", "user:#{user_id}:moderating"])
+        moderating = Session.get_moderating_by_user_id(user_id)
 
         resource =
           if moderating && length(moderating) != 0,

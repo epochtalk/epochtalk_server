@@ -70,6 +70,15 @@ defmodule EpochtalkServer.Session do
   end
 
   @doc """
+  Get moderating for session by user id
+  """
+  @spec get_moderating_by_user_id(user_id :: String.t()) :: moderating :: [String.t()]
+          | {Redix.Error.t() | Redix.ConnectionError.t()}
+  def get_moderating_by_user_id(user_id) do
+    Redix.command!(:redix, ["SMEMBERS", "user:#{user_id}:moderating"])
+  end
+
+  @doc """
   Gets all sessions for a specific `User`
   """
   @spec get_sessions(user :: User.t()) ::

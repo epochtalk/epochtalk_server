@@ -76,6 +76,12 @@ defmodule EpochtalkServer.Session do
       {:error, error} -> {:error, error}
     end
   end
+  defp get_session_ids_by_user_id(user_id) do
+    case get_sessions_by_user_id(user_id) do
+      {:error, error} -> {:error, error}
+      sessions -> Enum.map(sessions, & String.split(&1, ":") |> List.first)
+    end
+  end
 
   @doc """
   Deletes a specific `User` session

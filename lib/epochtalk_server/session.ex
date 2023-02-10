@@ -42,6 +42,52 @@ defmodule EpochtalkServer.Session do
     end
   end
 
+  def get_resource(user_id, session_id) do
+    # check if session is active in redis
+    is_active_for_user_id(session_id, user_id)
+    |> case do
+      {:error, error} ->
+        {:error, "Error finding resource from claims #{inspect(error)}"}
+      false ->
+        # session is not active, return error
+        {:error, "No session with id #{session_id}"}
+
+      true ->
+        # session is active, populate data
+        resource = %{
+          id: user_id,
+          session_id: session_id,
+          username: get_username_by_user_id(user_id),
+          avatar: get_avatar_by_user_id(user_id),
+          roles: get_roles_by_user_id(user_id)
+        }
+
+        # only append moderating, ban_expiration and malicious_score if present
+        moderating = get_moderating_by_user_id(user_id)
+
+        resource =
+          if moderating && length(moderating) != 0,
+            do: Map.put(resource, :moderating, moderating),
+            else: resource
+
+        ban_expiration = get_ban_expiration_by_user_id(user_id)
+
+        resource =
+          if ban_expiration != 0,
+            do: Map.put(resource, :ban_expiration, ban_expiration),
+            else: resource
+
+        malicious_score = get_malicious_score_by_user_id(user_id)
+
+        resource =
+          if malicious_score != 0,
+            do: Map.put(resource, :malicious_score, malicious_score),
+            else: resource
+
+        {:ok, resource}
+    end
+  end
+
   @doc """
   Get username for session by user id
   """

@@ -6,7 +6,6 @@ defmodule EpochtalkServer.Models.Board do
   alias EpochtalkServer.Models.Category
   alias EpochtalkServer.Models.BoardMapping
   alias EpochtalkServer.Models.Board
-  alias EpochtalkServer.Models.Thread
   alias EpochtalkServer.Models.MetadataBoard
 
   @moduledoc """
@@ -121,6 +120,31 @@ defmodule EpochtalkServer.Models.Board do
 
       {:error, cs} ->
         {:error, cs}
+    end
+  end
+
+
+  @doc """
+  Determines if the provided `user_priority` has write access to the board with the specified `id`
+
+  TODO(akinsey): Should this check against banned user_priority?
+  """
+  @spec get_write_access_by_id(id :: non_neg_integer, user_priority :: non_neg_integer) :: {:ok, can_write :: boolean} | {:error, :board_does_not_exist}
+  def get_write_access_by_id(id, user_priority) do
+    query = from b in Board,
+      where: b.id == ^id,
+      select: %{postable_by: b.postable_by}
+    board = Repo.one(query)
+    if board do
+      # allow write if postable_by is nil
+      can_write = is_nil(board.postable_by)
+      # if postable_by is an integer, check against user priority
+      can_write = if is_integer(board.postable_by),
+        do: user_priority <= board.postable_by,
+        else: can_write
+      {:ok, can_write}
+    else
+      {:error, :board_does_not_exist}
     end
   end
 end

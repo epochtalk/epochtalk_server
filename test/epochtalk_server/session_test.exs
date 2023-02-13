@@ -75,7 +75,7 @@ defmodule EpochtalkServerWeb.SessionTest do
       Redix.command!(:redix, ["FLUSHALL"])
     end
 
-    test "log in creates a valid resource", %{conn: conn} do
+    test "creates a valid resource", %{conn: conn} do
       conn = post(conn, Routes.user_path(conn, :login, @login_no_remember_me_attrs))
       {:ok, user} = User.by_username(@login_no_remember_me_attrs.username)
 

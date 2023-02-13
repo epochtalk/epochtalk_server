@@ -61,31 +61,39 @@ defmodule EpochtalkServer.Session do
         {:error, "No session with id #{session_id}"}
 
       true ->
+        user_key = generate_key(user_id, "user")
+        username = Redix.command!(:redix, ["HGET", user_key, "username"])
+        avatar = Redix.command!(:redix, ["HGET", user_key, "avatar"])
+        role_key = generate_key(user_id, "roles")
+        roles = Redix.command!(:redix, ["SMEMBERS", role_key]) |> Role.by_lookup()
+
         # session is active, populate data
         resource = %{
           id: user_id,
           session_id: session_id,
-          username: get_username_by_user_id(user_id),
-          avatar: get_avatar_by_user_id(user_id),
-          roles: get_roles_by_user_id(user_id)
+          username: username,
+          avatar: avatar,
+          roles: roles
         }
 
         # only append moderating, ban_expiration and malicious_score if present
-        moderating = get_moderating_by_user_id(user_id)
+        moderating_key = generate_key(user_id, "moderating")
+        moderating = Redix.command!(:redix, ["SMEMBERS", moderating_key])
 
         resource =
           if moderating && length(moderating) != 0,
             do: Map.put(resource, :moderating, moderating),
             else: resource
 
-        ban_expiration = get_ban_expiration_by_user_id(user_id)
+        ban_key = generate_key(user_id, "baninfo")
+        ban_expiration = Redix.command!(:redix, ["HEXISTS", ban_key, "ban_expiration"])
 
         resource =
           if ban_expiration != 0,
             do: Map.put(resource, :ban_expiration, ban_expiration),
             else: resource
 
-        malicious_score = get_malicious_score_by_user_id(user_id)
+        malicious_score = Redix.command!(:redix, ["HEXISTS", ban_key, "malicious_score"])
 
         resource =
           if malicious_score != 0,
@@ -94,36 +102,6 @@ defmodule EpochtalkServer.Session do
 
         {:ok, resource}
     end
-  end
-
-  defp get_username_by_user_id(user_id) do
-    user_key = generate_key(user_id, "user")
-    Redix.command!(:redix, ["HGET", user_key, "username"])
-  end
-
-  defp get_avatar_by_user_id(user_id) do
-    user_key = generate_key(user_id, "user")
-    Redix.command!(:redix, ["HGET", user_key, "avatar"])
-  end
-
-  defp get_roles_by_user_id(user_id) do
-    role_key = generate_key(user_id, "roles")
-    Redix.command!(:redix, ["SMEMBERS", role_key]) |> Role.by_lookup()
-  end
-
-  defp get_moderating_by_user_id(user_id) do
-    moderating_key = generate_key(user_id, "moderating")
-    Redix.command!(:redix, ["SMEMBERS", moderating_key])
-  end
-
-  defp get_ban_expiration_by_user_id(user_id) do
-    ban_key = generate_key(user_id, "baninfo")
-    Redix.command!(:redix, ["HEXISTS", ban_key, "ban_expiration"])
-  end
-
-  defp get_malicious_score_by_user_id(user_id) do
-    ban_key = generate_key(user_id, "baninfo")
-    Redix.command!(:redix, ["HEXISTS", ban_key, "malicious_score"])
   end
 
   @doc """

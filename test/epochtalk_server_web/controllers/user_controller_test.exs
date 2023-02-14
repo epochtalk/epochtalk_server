@@ -13,9 +13,6 @@ defmodule EpochtalkServerWeb.UserControllerTest do
 
   @invalid_username_confirm %{username: "invalidusernametest", token: 1}
 
-  @blank_username_attrs %{username: "", email: "blankusernametest@test.com", password: "password"}
-  @blank_password_attrs %{username: "blankpasswordtest", email: "blankpasswordtest@test.com", password: ""}
-
   @invalid_password_login_attrs %{username: "logintest", password: "1"}
   @invalid_username_login_attrs %{username: "invalidlogintest", password: "password"}
 
@@ -93,14 +90,16 @@ defmodule EpochtalkServerWeb.UserControllerTest do
     end
 
     test "errors with 400 when username is missing", %{conn: conn} do
-      conn = post(conn, Routes.user_path(conn, :register, @blank_username_attrs))
+      blank_username_attrs = %{username: "", email: "blankusernametest@test.com", password: "password"}
+      conn = post(conn, Routes.user_path(conn, :register, blank_username_attrs))
 
       assert %{"error" => "Bad Request", "message" => "Username can't be blank"} =
                json_response(conn, 400)
     end
 
     test "errors with 400 when password is missing", %{conn: conn} do
-      conn = post(conn, Routes.user_path(conn, :register, @blank_password_attrs))
+      blank_password_attrs = %{username: "blankpasswordtest", email: "blankpasswordtest@test.com", password: ""}
+      conn = post(conn, Routes.user_path(conn, :register, blank_password_attrs))
 
       assert %{"error" => "Bad Request", "message" => "Password can't be blank"} =
                json_response(conn, 400)

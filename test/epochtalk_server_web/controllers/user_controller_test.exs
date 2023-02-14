@@ -20,7 +20,6 @@ defmodule EpochtalkServerWeb.UserControllerTest do
   @blank_username_attrs %{username: "", email: "blankusernametest@test.com", password: "password"}
   @blank_password_attrs %{username: "blankpasswordtest", email: "blankpasswordtest@test.com", password: ""}
 
-  @login_create_attrs %{username: "logintest", email: "logintest@test.com", password: "password"}
   @invalid_password_login_attrs %{username: "logintest", password: "1"}
   @invalid_username_login_attrs %{username: "invalidlogintest", password: "password"}
 
@@ -158,8 +157,6 @@ defmodule EpochtalkServerWeb.UserControllerTest do
   end
 
   describe "login/2" do
-    setup [:create_login_user]
-
     test "logs in a user", %{conn: conn, user: user, user_attrs: user_attrs} do
       conn = post(conn, Routes.user_path(conn, :login, user_attrs))
       assert user.id == json_response(conn, 200)["id"]
@@ -250,10 +247,5 @@ defmodule EpochtalkServerWeb.UserControllerTest do
   defp ban_user(%{user: user}) do
     {:ok, banned_user} = Ban.ban(user, NaiveDateTime.utc_now())
     {:ok, banned_user: banned_user}
-  end
-
-  defp create_login_user(_) do
-    {:ok, user} = User.create(@login_create_attrs)
-    {:ok, user: user, user_attrs: @login_create_attrs}
   end
 end

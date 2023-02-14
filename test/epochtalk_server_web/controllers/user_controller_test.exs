@@ -126,7 +126,7 @@ defmodule EpochtalkServerWeb.UserControllerTest do
     end
 
     test "errors with 400 when user not found", %{conn: conn} do
-      invalid_username_confirm = %{username: "invalidusernametest", token: 1}
+      invalid_username_confirm = %{username: "invalidusernametest", token: "(anything)"}
       conn = post(conn, Routes.user_path(conn, :confirm, invalid_username_confirm))
 
       assert %{"error" => "Bad Request", "message" => "Confirmation error, account not found"} =

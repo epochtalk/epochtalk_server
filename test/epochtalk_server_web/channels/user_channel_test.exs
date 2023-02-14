@@ -138,7 +138,13 @@ defmodule EpochtalkServerWeb.UserChannelTest do
   end
 
   defp create_authed_socket() do
-    {:ok, user} = User.create(%{username: "test", email: "test@test.com", password: "password"})
+    {:ok, user} =
+      User.create(%{
+        username: "userchanneltest",
+        email: "userchanneltest@test.com",
+        password: "password"
+      })
+
     conn = Phoenix.ConnTest.build_conn()
     {:ok, user, token, _conn} = Session.create(user, false, conn)
 

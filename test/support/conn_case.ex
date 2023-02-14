@@ -15,6 +15,16 @@ defmodule EpochtalkServerWeb.ConnCase do
   this option is not recommended for other databases.
   """
 
+  # username/email/password from user seed in `mix test` (see mix.exs)
+  @test_username "test"
+  @test_email "test@test.com"
+  @test_password "password"
+  @test_user_attrs %{
+    username: @test_username,
+    email: @test_email,
+    password: @test_password
+  }
+
   use ExUnit.CaseTemplate
 
   using do
@@ -41,15 +51,14 @@ defmodule EpochtalkServerWeb.ConnCase do
       Ecto.Adapters.SQL.Sandbox.mode(EpochtalkServer.Repo, {:shared, self()})
     end
 
-    if tags[:authenticated] do
-      {:ok, user} =
-        User.create(%{username: "authtest", email: "authtest@test.com", password: "password"})
+    {:ok, user} = User.by_username(@test_username)
 
+    if tags[:authenticated] do
       conn = Phoenix.ConnTest.build_conn()
       {:ok, user, token, conn} = Session.create(user, false, conn)
-      {:ok, conn: conn, user: user, token: token}
+      {:ok, conn: conn, authed_user: user, token: token, authed_user_attrs: @test_user_attrs}
     else
-      {:ok, conn: Phoenix.ConnTest.build_conn()}
+      {:ok, conn: Phoenix.ConnTest.build_conn(), user: user, user_attrs: @test_user_attrs}
     end
   end
 end

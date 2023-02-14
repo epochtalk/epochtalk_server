@@ -161,9 +161,8 @@ defmodule EpochtalkServerWeb.UserControllerTest do
   describe "login/2" do
     setup [:create_login_user]
 
-    test "logs in a user", %{conn: conn} do
-      conn = post(conn, Routes.user_path(conn, :login, @login_attrs))
-      {:ok, user} = User.by_username(@login_attrs.username)
+    test "logs in a user", %{conn: conn, user: user, user_attrs: user_attrs} do
+      conn = post(conn, Routes.user_path(conn, :login, user_attrs))
       assert user.id == json_response(conn, 200)["id"]
     end
 

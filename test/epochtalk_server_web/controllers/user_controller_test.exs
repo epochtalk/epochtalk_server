@@ -186,15 +186,13 @@ defmodule EpochtalkServerWeb.UserControllerTest do
                json_response(conn, 400)
     end
 
-    test "errors with 403 if user is missing passhash", %{conn: conn} do
-      {:ok, user} = User.by_username(@login_attrs.username)
-
+    test "errors with 403 if user is missing passhash", %{conn: conn, user: user, user_attrs: user_attrs} do
       User
       |> Repo.get(user.id)
       |> change(%{passhash: nil})
       |> Repo.update()
 
-      conn = post(conn, Routes.user_path(conn, :login, @login_attrs))
+      conn = post(conn, Routes.user_path(conn, :login, user_attrs))
 
       assert %{
                "error" => "Forbidden",

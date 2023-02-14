@@ -129,7 +129,7 @@ defmodule EpochtalkServerWeb.UserControllerTest do
       |> Repo.update()
 
       # refresh user data
-      {:ok, confirmed_user} = User.by_username(@create_attrs.username)
+      {:ok, confirmed_user} = User.by_username(user.username)
 
       conn =
         post(

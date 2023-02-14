@@ -66,7 +66,9 @@ defmodule EpochtalkServerWeb.ACLTest do
     end
 
     @tag :authenticated
-    test "raises 'InvalidPermissions' error with invalid 'User' role permissions", %{authed_user: authed_user} do
+    test "raises 'InvalidPermissions' error with invalid 'User' role permissions", %{
+      authed_user: authed_user
+    } do
       assert_raise InvalidPermission,
                    ~r/^Forbidden, invalid permissions to perform this action/,
                    fn ->
@@ -90,11 +92,17 @@ defmodule EpochtalkServerWeb.ACLTest do
   describe "allow!/3" do
     @tag :authenticated
     test "returns :ok with valid 'User' role permissions", %{authed_user: authed_user} do
-      assert ACL.allow!(authed_user, "boards.allCategories", "You cannot query all categories") == :ok
+      assert ACL.allow!(authed_user, "boards.allCategories", "You cannot query all categories") ==
+               :ok
+
       assert ACL.allow!(authed_user, "posts.create", "You cannot create posts") == :ok
       assert ACL.allow!(authed_user, "threads.create", "You cannot create threads") == :ok
 
-      assert ACL.allow!(authed_user, "boards.allCategories.allow", "You cannot query all categories") ==
+      assert ACL.allow!(
+               authed_user,
+               "boards.allCategories.allow",
+               "You cannot query all categories"
+             ) ==
                :ok
 
       assert ACL.allow!(authed_user, "posts.create.allow", "You cannot create posts") == :ok

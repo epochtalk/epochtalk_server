@@ -16,7 +16,13 @@ defmodule EpochtalkServerWeb.UserSocketTest do
     end
 
     test "returns authenticated socket for a valid JWT with backing user" do
-      {:ok, user} = User.create(%{username: "usersockettest", email: "usersockettest@test.com", password: "password"})
+      {:ok, user} =
+        User.create(%{
+          username: "usersockettest",
+          email: "usersockettest@test.com",
+          password: "password"
+        })
+
       conn = Phoenix.ConnTest.build_conn()
       {:ok, user, token, _conn} = Session.create(user, false, conn)
       user_id = user.id

@@ -68,7 +68,10 @@ defmodule EpochtalkServerWeb.UserControllerTest do
       assert registered_user.id == json_response(conn, 200)["id"]
     end
 
-    test "errors with 400 when email is already taken", %{conn: conn, user_attrs: existing_user_attrs} do
+    test "errors with 400 when email is already taken", %{
+      conn: conn,
+      user_attrs: existing_user_attrs
+    } do
       conn = post(conn, Routes.user_path(conn, :register, existing_user_attrs))
 
       assert %{"error" => "Bad Request", "message" => "Email has already been taken"} =
@@ -76,7 +79,10 @@ defmodule EpochtalkServerWeb.UserControllerTest do
     end
 
     @tag :authenticated
-    test "errors with 400 when user is logged in", %{conn: conn, authed_user_attrs: authed_user_attrs} do
+    test "errors with 400 when user is logged in", %{
+      conn: conn,
+      authed_user_attrs: authed_user_attrs
+    } do
       conn = post(conn, Routes.user_path(conn, :register, authed_user_attrs))
 
       assert %{
@@ -86,7 +92,12 @@ defmodule EpochtalkServerWeb.UserControllerTest do
     end
 
     test "errors with 400 when username is missing", %{conn: conn} do
-      blank_username_attrs = %{username: "", email: "blankusernametest@test.com", password: "password"}
+      blank_username_attrs = %{
+        username: "",
+        email: "blankusernametest@test.com",
+        password: "password"
+      }
+
       conn = post(conn, Routes.user_path(conn, :register, blank_username_attrs))
 
       assert %{"error" => "Bad Request", "message" => "Username can't be blank"} =
@@ -94,7 +105,12 @@ defmodule EpochtalkServerWeb.UserControllerTest do
     end
 
     test "errors with 400 when password is missing", %{conn: conn} do
-      blank_password_attrs = %{username: "blankpasswordtest", email: "blankpasswordtest@test.com", password: ""}
+      blank_password_attrs = %{
+        username: "blankpasswordtest",
+        email: "blankpasswordtest@test.com",
+        password: ""
+      }
+
       conn = post(conn, Routes.user_path(conn, :register, blank_password_attrs))
 
       assert %{"error" => "Bad Request", "message" => "Password can't be blank"} =
@@ -150,14 +166,21 @@ defmodule EpochtalkServerWeb.UserControllerTest do
     end
 
     @tag :authenticated
-    test "errors with 400 when user is already logged in", %{conn: conn, authed_user_attrs: authed_user_attrs} do
+    test "errors with 400 when user is already logged in", %{
+      conn: conn,
+      authed_user_attrs: authed_user_attrs
+    } do
       conn = post(conn, Routes.user_path(conn, :login, authed_user_attrs))
 
       assert %{"error" => "Bad Request", "message" => "Already logged in"} =
                json_response(conn, 400)
     end
 
-    test "errors with 400 if user is not confirmed", %{conn: conn, user: user, user_attrs: user_attrs} do
+    test "errors with 400 if user is not confirmed", %{
+      conn: conn,
+      user: user,
+      user_attrs: user_attrs
+    } do
       User
       |> Repo.get(user.id)
       |> change(%{confirmation_token: "1"})
@@ -169,7 +192,11 @@ defmodule EpochtalkServerWeb.UserControllerTest do
                json_response(conn, 400)
     end
 
-    test "errors with 403 if user is missing passhash", %{conn: conn, user: user, user_attrs: user_attrs} do
+    test "errors with 403 if user is missing passhash", %{
+      conn: conn,
+      user: user,
+      user_attrs: user_attrs
+    } do
       User
       |> Repo.get(user.id)
       |> change(%{passhash: nil})
@@ -215,7 +242,10 @@ defmodule EpochtalkServerWeb.UserControllerTest do
 
   describe "authenticate/1" do
     @tag :authenticated
-    test "success if current logged in user is authenticated", %{conn: conn, authed_user_attrs: authed_user_attrs} do
+    test "success if current logged in user is authenticated", %{
+      conn: conn,
+      authed_user_attrs: authed_user_attrs
+    } do
       conn = get(conn, Routes.user_path(conn, :authenticate))
       {:ok, user} = User.by_username(authed_user_attrs.username)
       assert user.id == json_response(conn, 200)["id"]

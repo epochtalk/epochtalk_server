@@ -26,8 +26,6 @@ defmodule EpochtalkServerWeb.UserControllerTest do
   @invalid_login_username_attrs %{username: "invalidlogintest", password: "password"}
 
   describe "username/2" do
-    setup [:create_user]
-
     test "found => true if username is taken", %{conn: conn, user: user} do
       conn = get(conn, Routes.user_path(conn, :username, user.username))
       assert %{"found" => true} = json_response(conn, 200)
@@ -40,8 +38,6 @@ defmodule EpochtalkServerWeb.UserControllerTest do
   end
 
   describe "email/2" do
-    setup [:create_user]
-
     test "found => true if email is taken", %{conn: conn, user: user} do
       conn = get(conn, Routes.user_path(conn, :email, user.email))
       assert %{"found" => true} = json_response(conn, 200)

@@ -5,8 +5,6 @@ defmodule EpochtalkServerWeb.UserControllerTest do
   alias EpochtalkServer.Models.Ban
   alias EpochtalkServer.Repo
 
-  @invalid_username_confirm %{username: "invalidusernametest", token: 1}
-
   @invalid_password_login_attrs %{username: "logintest", password: "1"}
   @invalid_username_login_attrs %{username: "invalidlogintest", password: "password"}
 
@@ -130,7 +128,8 @@ defmodule EpochtalkServerWeb.UserControllerTest do
     end
 
     test "errors with 400 when user not found", %{conn: conn} do
-      conn = post(conn, Routes.user_path(conn, :confirm, @invalid_username_confirm))
+      invalid_username_confirm = %{username: "invalidusernametest", token: 1}
+      conn = post(conn, Routes.user_path(conn, :confirm, invalid_username_confirm))
 
       assert %{"error" => "Bad Request", "message" => "Confirmation error, account not found"} =
                json_response(conn, 400)

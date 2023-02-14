@@ -22,8 +22,8 @@ defmodule EpochtalkServerWeb.UserControllerTest do
 
   @login_create_attrs %{username: "logintest", email: "logintest@test.com", password: "password"}
   @login_attrs %{username: "logintest", password: "password"}
-  @invalid_login_password_attrs %{username: "logintest", password: "1"}
-  @invalid_login_username_attrs %{username: "invalidlogintest", password: "password"}
+  @invalid_password_login_attrs %{username: "logintest", password: "1"}
+  @invalid_username_login_attrs %{username: "invalidlogintest", password: "password"}
 
   describe "username/2" do
     test "found => true if username is taken", %{conn: conn, user: user} do
@@ -206,14 +206,14 @@ defmodule EpochtalkServerWeb.UserControllerTest do
     end
 
     test "errors with 400 when username is not found", %{conn: conn} do
-      conn = post(conn, Routes.user_path(conn, :login, @invalid_login_username_attrs))
+      conn = post(conn, Routes.user_path(conn, :login, @invalid_username_login_attrs))
 
       assert %{"error" => "Bad Request", "message" => "Invalid credentials"} =
                json_response(conn, 400)
     end
 
     test "errors with 400 when password is not found", %{conn: conn} do
-      conn = post(conn, Routes.user_path(conn, :login, @invalid_login_password_attrs))
+      conn = post(conn, Routes.user_path(conn, :login, @invalid_password_login_attrs))
 
       assert %{"error" => "Bad Request", "message" => "Invalid credentials"} =
                json_response(conn, 400)

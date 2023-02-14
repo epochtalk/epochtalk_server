@@ -24,7 +24,8 @@ defmodule EpochtalkServerWeb.UserControllerTest do
     end
 
     test "found => false if email is not found in the system", %{conn: conn} do
-      conn = get(conn, Routes.user_path(conn, :email, "false@test.com"))
+      invalid_email = "false@test.com"
+      conn = get(conn, Routes.user_path(conn, :email, invalid_email))
       assert %{"found" => false} = json_response(conn, 200)
     end
   end

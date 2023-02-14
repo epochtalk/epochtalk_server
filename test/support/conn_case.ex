@@ -56,7 +56,7 @@ defmodule EpochtalkServerWeb.ConnCase do
     if tags[:authenticated] do
       conn = Phoenix.ConnTest.build_conn()
       {:ok, user, token, conn} = Session.create(user, false, conn)
-      {:ok, conn: conn, user: user, token: token, user_attrs: @test_user_attrs}
+      {:ok, conn: conn, authed_user: user, token: token, authed_user_attrs: @test_user_attrs}
     else
       {:ok, conn: Phoenix.ConnTest.build_conn(), user: user, user_attrs: @test_user_attrs}
     end

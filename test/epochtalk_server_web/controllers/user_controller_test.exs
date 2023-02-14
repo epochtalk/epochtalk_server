@@ -76,7 +76,7 @@ defmodule EpochtalkServerWeb.UserControllerTest do
     end
 
     @tag :authenticated
-    test "errors with 400 when user is logged in", %{conn: conn, user_attrs: authed_user_attrs} do
+    test "errors with 400 when user is logged in", %{conn: conn, authed_user_attrs: authed_user_attrs} do
       conn = post(conn, Routes.user_path(conn, :register, authed_user_attrs))
 
       assert %{
@@ -149,7 +149,7 @@ defmodule EpochtalkServerWeb.UserControllerTest do
     end
 
     @tag :authenticated
-    test "errors with 400 when user is already logged in", %{conn: conn, user_attrs: authed_user_attrs} do
+    test "errors with 400 when user is already logged in", %{conn: conn, authed_user_attrs: authed_user_attrs} do
       conn = post(conn, Routes.user_path(conn, :login, authed_user_attrs))
 
       assert %{"error" => "Bad Request", "message" => "Already logged in"} =
@@ -214,7 +214,7 @@ defmodule EpochtalkServerWeb.UserControllerTest do
 
   describe "authenticate/1" do
     @tag :authenticated
-    test "success if current logged in user is authenticated", %{conn: conn, user_attrs: authed_user_attrs} do
+    test "success if current logged in user is authenticated", %{conn: conn, authed_user_attrs: authed_user_attrs} do
       conn = get(conn, Routes.user_path(conn, :authenticate))
       {:ok, user} = User.by_username(authed_user_attrs.username)
       assert user.id == json_response(conn, 200)["id"]

@@ -134,7 +134,8 @@ defmodule EpochtalkServerWeb.UserControllerTest do
     end
 
     test "errors with 400 when token is invalid", %{conn: conn, user_attrs: valid_user_attrs} do
-      invalid_token_confirm = %{username: valid_user_attrs.username, token: 1}
+      invalid_token = 1
+      invalid_token_confirm = %{username: valid_user_attrs.username, token: invalid_token}
       conn = post(conn, Routes.user_path(conn, :confirm, invalid_token_confirm))
 
       assert %{"error" => "Bad Request", "message" => "Account confirmation error, invalid token"} =

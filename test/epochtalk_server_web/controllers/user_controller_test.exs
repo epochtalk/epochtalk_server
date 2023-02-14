@@ -21,7 +21,6 @@ defmodule EpochtalkServerWeb.UserControllerTest do
   @blank_password_attrs %{username: "blankpasswordtest", email: "blankpasswordtest@test.com", password: ""}
 
   @login_create_attrs %{username: "logintest", email: "logintest@test.com", password: "password"}
-  @login_attrs %{username: "logintest", password: "password"}
   @invalid_password_login_attrs %{username: "logintest", password: "1"}
   @invalid_username_login_attrs %{username: "invalidlogintest", password: "password"}
 

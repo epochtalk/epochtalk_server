@@ -7,7 +7,8 @@ defmodule EpochtalkServerWeb.UserControllerTest do
 
   @create_attrs %{username: "createtest", email: "createtest@test.com", password: "password"}
 
-  @auth_attrs %{username: "authtest", email: "authtest@test.com", password: "password"}
+  # TODO(boka): refactor this into an external source
+  @auth_attrs %{username: "test", email: "test@test.com", password: "password"}
 
   @register_attrs %{
     username: "registertest",

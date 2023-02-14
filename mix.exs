@@ -86,6 +86,7 @@ defmodule EpochtalkServer.MixProject do
         "ecto.migrate --quiet",
         "seed.banned_address",
         "seed.all",
+        "seed.user test test@test.com password",
         "test"
       ]
     ]

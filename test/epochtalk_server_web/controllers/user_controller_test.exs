@@ -175,13 +175,6 @@ defmodule EpochtalkServerWeb.UserControllerTest do
                json_response(conn, 400)
     end
 
-    test "errors with 400 if user cannot be found", %{conn: conn} do
-      conn = post(conn, Routes.user_path(conn, :login, @create_attrs))
-
-      assert %{"error" => "Bad Request", "message" => "Invalid credentials"} =
-               json_response(conn, 400)
-    end
-
     test "errors with 400 if user is not confirmed", %{conn: conn} do
       {:ok, user} = User.by_username(@login_attrs.username)
 

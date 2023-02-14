@@ -75,9 +75,8 @@ defmodule EpochtalkServerWeb.UserControllerTest do
       assert user.id == json_response(conn, 200)["id"]
     end
 
-    test "errors with 400 when email is already taken", %{conn: conn} do
-      User.create(@register_attrs)
-      conn = post(conn, Routes.user_path(conn, :register, @register_attrs))
+    test "errors with 400 when email is already taken", %{conn: conn, user_attrs: existing_user_attrs} do
+      conn = post(conn, Routes.user_path(conn, :register, existing_user_attrs))
 
       assert %{"error" => "Bad Request", "message" => "Email has already been taken"} =
                json_response(conn, 400)

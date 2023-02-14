@@ -5,9 +5,6 @@ defmodule EpochtalkServerWeb.UserControllerTest do
   alias EpochtalkServer.Models.Ban
   alias EpochtalkServer.Repo
 
-  @create_username "createtest"
-  @create_attrs %{username: @create_username, email: "createtest@test.com", password: "password"}
-
   @register_attrs %{
     username: "registertest",
     email: "registertest@test.com",
@@ -48,8 +45,6 @@ defmodule EpochtalkServerWeb.UserControllerTest do
   end
 
   describe "ban/1" do
-    setup [:create_user]
-
     test "user is banned", %{user: user} do
       {:ok, user} = Ban.ban(user)
       assert user.id == user.ban_info.user_id
@@ -57,7 +52,7 @@ defmodule EpochtalkServerWeb.UserControllerTest do
   end
 
   describe "unban/1" do
-    setup [:create_user, :ban_user]
+    setup [:ban_user]
 
     test "user is unbanned", %{banned_user: banned_user} do
       {:ok, banned_user} = Ban.unban(banned_user)
@@ -66,8 +61,6 @@ defmodule EpochtalkServerWeb.UserControllerTest do
   end
 
   describe "handle_malicious_user/2" do
-    setup [:create_user]
-
     test "user is banned if malicious", %{conn: conn, user: user} do
       {:ok, user} = User.handle_malicious_user(user, conn.remote_ip)
       assert user.id == user.ban_info.user_id
@@ -117,8 +110,6 @@ defmodule EpochtalkServerWeb.UserControllerTest do
   end
 
   describe "confirm/2" do
-    setup [:create_user]
-
     test "confirms user using token", %{conn: conn, user: user} do
       # confirm user
       User
@@ -240,10 +231,6 @@ defmodule EpochtalkServerWeb.UserControllerTest do
     end
   end
 
-  defp create_user(_) do
-    {:ok, user} = User.create(@create_attrs)
-    {:ok, user: user}
-  end
   defp ban_user(%{user: user}) do
     {:ok, banned_user} = Ban.ban(user, NaiveDateTime.utc_now())
     {:ok, banned_user: banned_user}

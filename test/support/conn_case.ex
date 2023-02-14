@@ -15,8 +15,15 @@ defmodule EpochtalkServerWeb.ConnCase do
   this option is not recommended for other databases.
   """
 
-  # username from user seed in `mix test` (see mix.exs)
+  # username/email/password from user seed in `mix test` (see mix.exs)
   @test_username "test"
+  @test_email "test@test.com"
+  @test_password "password"
+  @test_user_attrs %{
+    username: @test_username,
+    email: @test_email,
+    password: @test_password
+  }
 
   use ExUnit.CaseTemplate
 
@@ -49,7 +56,7 @@ defmodule EpochtalkServerWeb.ConnCase do
 
       conn = Phoenix.ConnTest.build_conn()
       {:ok, user, token, conn} = Session.create(user, false, conn)
-      {:ok, conn: conn, user: user, token: token}
+      {:ok, conn: conn, user: user, token: token, user_attrs: @test_user_attrs}
     else
       {:ok, conn: Phoenix.ConnTest.build_conn()}
     end

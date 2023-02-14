@@ -17,16 +17,16 @@ defmodule EpochtalkServerWeb.UserControllerTest do
     password: "password"
   }
 
-  @confirm_invalid_username %{username: "blank", token: 1}
+  @confirm_invalid_username %{username: "invalidusernametest", token: 1}
   @confirm_invalid_token %{username: @create_username, token: 1}
 
-  @invalid_username_attrs %{username: "", email: "invalidtest@test.com", password: "password"}
-  @invalid_password_attrs %{username: "invalid", email: "invalidtest@test.com", password: ""}
+  @invalid_username_attrs %{username: "", email: "invalidusernametest@test.com", password: "password"}
+  @invalid_password_attrs %{username: "invalidpasswordtest", email: "invalidpasswordtest@test.com", password: ""}
 
   @login_create_attrs %{username: "logintest", email: "logintest@test.com", password: "password"}
   @login_attrs %{username: "logintest", password: "password"}
   @invalid_login_password_attrs %{username: "logintest", password: "1"}
-  @invalid_login_username_attrs %{username: "test", password: "password"}
+  @invalid_login_username_attrs %{username: "invalidlogintest", password: "password"}
 
   describe "username/2" do
     setup [:create_user]

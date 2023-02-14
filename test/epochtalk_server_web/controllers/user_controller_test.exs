@@ -5,12 +5,6 @@ defmodule EpochtalkServerWeb.UserControllerTest do
   alias EpochtalkServer.Models.Ban
   alias EpochtalkServer.Repo
 
-  @register_attrs %{
-    username: "registertest",
-    email: "registertest@test.com",
-    password: "password"
-  }
-
   @invalid_username_confirm %{username: "invalidusernametest", token: 1}
 
   @invalid_password_login_attrs %{username: "logintest", password: "1"}
@@ -67,9 +61,15 @@ defmodule EpochtalkServerWeb.UserControllerTest do
 
   describe "register/2" do
     test "user is registered and returns newly registered user with 200", %{conn: conn} do
-      conn = post(conn, Routes.user_path(conn, :register, @register_attrs))
-      {:ok, user} = User.by_username(@register_attrs.username)
-      assert user.id == json_response(conn, 200)["id"]
+      register_attrs = %{
+        username: "registertest",
+        email: "registertest@test.com",
+        password: "password"
+      }
+
+      conn = post(conn, Routes.user_path(conn, :register, register_attrs))
+      {:ok, registered_user} = User.by_username(register_attrs.username)
+      assert registered_user.id == json_response(conn, 200)["id"]
     end
 
     test "errors with 400 when email is already taken", %{conn: conn, user_attrs: existing_user_attrs} do

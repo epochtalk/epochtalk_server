@@ -260,6 +260,6 @@ defmodule EpochtalkServerWeb.UserControllerTest do
 
   defp create_login_user(_) do
     {:ok, user} = User.create(@login_create_attrs)
-    {:ok, user: user}
+    {:ok, user: user, user_attrs: @login_create_attrs}
   end
 end

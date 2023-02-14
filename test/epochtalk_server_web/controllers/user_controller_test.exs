@@ -121,26 +121,26 @@ defmodule EpochtalkServerWeb.UserControllerTest do
   describe "confirm/2" do
     setup [:create_user]
 
-    test "confirms user using token", %{conn: conn} do
-      {:ok, user} = User.by_username(@create_attrs.username)
-
+    test "confirms user using token", %{conn: conn, user: user} do
+      # confirm user
       User
       |> Repo.get(user.id)
       |> change(%{confirmation_token: :crypto.strong_rand_bytes(20) |> Base.encode64()})
       |> Repo.update()
 
-      {:ok, user} = User.by_username(@create_attrs.username)
+      # refresh user data
+      {:ok, confirmed_user} = User.by_username(@create_attrs.username)
 
       conn =
         post(
           conn,
           Routes.user_path(conn, :confirm, %{
-            username: user.username,
-            token: user.confirmation_token
+            username: confirmed_user.username,
+            token: confirmed_user.confirmation_token
           })
         )
 
-      assert user.id == json_response(conn, 200)["id"]
+      assert confirmed_user.id == json_response(conn, 200)["id"]
     end
 
     test "errors with 400 when user not found", %{conn: conn} do

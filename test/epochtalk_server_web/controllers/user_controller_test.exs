@@ -64,13 +64,7 @@ defmodule EpochtalkServerWeb.UserControllerTest do
   end
 
   describe "unban/1" do
-    setup [:create_user]
-
-    # Setup by banning a user first using ban/2
-    setup %{user: user} do
-      {:ok, user} = Ban.ban(user, NaiveDateTime.utc_now())
-      {:ok, user: user}
-    end
+    setup [:create_user, :ban_user]
 
     test "user is unbanned", %{user: user} do
       {:ok, user} = Ban.unban(user)
@@ -270,6 +264,10 @@ defmodule EpochtalkServerWeb.UserControllerTest do
 
   defp create_user(_) do
     {:ok, user} = User.create(@create_attrs)
+    {:ok, user: user}
+  end
+  defp ban_user(%{user: user}) do
+    {:ok, user} = Ban.ban(user, NaiveDateTime.utc_now())
     {:ok, user: user}
   end
 

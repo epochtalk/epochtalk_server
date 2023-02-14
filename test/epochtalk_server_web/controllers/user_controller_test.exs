@@ -102,8 +102,8 @@ defmodule EpochtalkServerWeb.UserControllerTest do
     end
 
     @tag :authenticated
-    test "errors with 400 when user is logged in", %{conn: conn} do
-      conn = post(conn, Routes.user_path(conn, :register, @auth_attrs))
+    test "errors with 400 when user is logged in", %{conn: conn, user_attrs: authed_user_attrs} do
+      conn = post(conn, Routes.user_path(conn, :register, authed_user_attrs))
 
       assert %{
                "error" => "Bad Request",

@@ -15,6 +15,9 @@ defmodule EpochtalkServerWeb.ConnCase do
   this option is not recommended for other databases.
   """
 
+  # username from user seed in `mix test` (see mix.exs)
+  @test_username "test"
+
   use ExUnit.CaseTemplate
 
   using do
@@ -42,7 +45,7 @@ defmodule EpochtalkServerWeb.ConnCase do
     end
 
     if tags[:authenticated] do
-      {:ok, user} = User.by_username("test")
+      {:ok, user} = User.by_username(@test_username)
 
       conn = Phoenix.ConnTest.build_conn()
       {:ok, user, token, conn} = Session.create(user, false, conn)

@@ -5,7 +5,8 @@ defmodule EpochtalkServerWeb.UserControllerTest do
   alias EpochtalkServer.Models.Ban
   alias EpochtalkServer.Repo
 
-  @create_attrs %{username: "createtest", email: "createtest@test.com", password: "password"}
+  @create_username "createtest"
+  @create_attrs %{username: @create_username, email: "createtest@test.com", password: "password"}
 
   # TODO(boka): refactor this into an external source
   @auth_attrs %{username: "test", email: "test@test.com", password: "password"}
@@ -17,7 +18,7 @@ defmodule EpochtalkServerWeb.UserControllerTest do
   }
 
   @confirm_invalid_username %{username: "blank", token: 1}
-  @confirm_invalid_token %{username: "createtest", token: 1}
+  @confirm_invalid_token %{username: @create_username, token: 1}
 
   @invalid_username_attrs %{username: "", email: "invalidtest@test.com", password: "password"}
   @invalid_password_attrs %{username: "invalid", email: "invalidtest@test.com", password: ""}

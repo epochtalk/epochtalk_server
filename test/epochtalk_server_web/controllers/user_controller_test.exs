@@ -68,7 +68,7 @@ defmodule EpochtalkServerWeb.UserControllerTest do
   describe "unban/1" do
     setup [:create_user, :ban_user]
 
-    test "user is unbanned", %{banned_user: user} do
+    test "user is unbanned", %{banned_user: banned_user} do
       {:ok, banned_user} = Ban.unban(banned_user)
       assert nil == banned_user.ban_info
     end
@@ -268,9 +268,9 @@ defmodule EpochtalkServerWeb.UserControllerTest do
     {:ok, user} = User.create(@create_attrs)
     {:ok, user: user}
   end
-  defp ban_user(%{banned_user: user}) do
-    {:ok, user} = Ban.ban(user, NaiveDateTime.utc_now())
-    {:ok, user: user}
+  defp ban_user(%{user: user}) do
+    {:ok, banned_user} = Ban.ban(user, NaiveDateTime.utc_now())
+    {:ok, banned_user: banned_user}
   end
 
   defp create_login_user(_) do

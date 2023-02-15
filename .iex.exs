@@ -7,6 +7,7 @@ alias EpochtalkServer.Models.{
   Ban,
   BannedAddress,
   Board,
+  BoardBan,
   BoardMapping,
   BoardModerator,
   Category,

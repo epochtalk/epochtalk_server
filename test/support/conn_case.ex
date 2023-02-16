@@ -68,11 +68,9 @@ defmodule EpochtalkServerWeb.ConnCase do
     end
 
     # ban user if necessary
-    case context[:banned] do
-      true ->
-        {:ok, banned_user} = Ban.ban(user)
-        context_updates |> Tuple.append(banned_user)
-      _ -> # don't do anything
+    if context[:banned] do
+      {:ok, banned_user} = Ban.ban(user)
+      context_updates |> Tuple.append(banned_user)
     end
 
     context_updates

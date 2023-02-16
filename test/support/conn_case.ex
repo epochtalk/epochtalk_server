@@ -54,16 +54,17 @@ defmodule EpochtalkServerWeb.ConnCase do
     {:ok, user} = User.by_username(@test_username)
     conn = Phoenix.ConnTest.build_conn()
 
-    case context do
-      %{authenticated: type} ->
+    # log user in if necessary
+    case context[:authenticated] do
+      # :authenticated not set, return default conn
+      nil -> {:ok, conn: conn, user: user, user_attrs: @test_user_attrs}
+      type ->
         remember_me = case type do
-          "remember_me" -> true
+          :remember_me -> true
           _ -> false
         end
         {:ok, user, token, authed_conn} = Session.create(user, remember_me, conn)
         {:ok, conn: authed_conn, authed_user: user, token: token, authed_user_attrs: @test_user_attrs}
-      _ ->
-        {:ok, conn: conn, user: user, user_attrs: @test_user_attrs}
     end
   end
 end

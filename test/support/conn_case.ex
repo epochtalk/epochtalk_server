@@ -55,7 +55,7 @@ defmodule EpochtalkServerWeb.ConnCase do
     conn = Phoenix.ConnTest.build_conn()
 
     # log user in if necessary
-    case context[:authenticated] do
+    context_updates = case context[:authenticated] do
       # :authenticated not set, return default conn
       nil -> {:ok, conn: conn, user: user, user_attrs: @test_user_attrs}
       type ->
@@ -66,5 +66,15 @@ defmodule EpochtalkServerWeb.ConnCase do
         {:ok, user, token, authed_conn} = Session.create(user, remember_me, conn)
         {:ok, conn: authed_conn, authed_user: user, token: token, authed_user_attrs: @test_user_attrs}
     end
+
+    # ban user if necessary
+    case context[:banned] do
+      true ->
+        {:ok, banned_user} = Ban.ban(user)
+        context_updates |> Tuple.append(banned_user)
+      _ -> # don't do anything
+    end
+
+    context_updates
   end
 end

@@ -15,14 +15,13 @@ defmodule EpochtalkServerWeb.SessionTest do
   describe "login/2" do
     setup [:create_login_user]
 
-    test "creates a user session without remember me (< 1 day ttl)", %{conn: conn} do
-      conn = post(conn, Routes.user_path(conn, :login, @login_no_remember_me_attrs))
-      {:ok, user} = User.by_username(@login_no_remember_me_attrs.username)
-      user_ttl = Redix.command!(:redix, ["TTL", "user:#{user.id}"])
-      roles_ttl = Redix.command!(:redix, ["TTL", "user:#{user.id}:roles"])
-      moderating_ttl = Redix.command!(:redix, ["TTL", "user:#{user.id}:moderating"])
-      baninfo_ttl = Redix.command!(:redix, ["TTL", "user:#{user.id}:baninfo"])
-      sessions_ttl = Redix.command!(:redix, ["TTL", "user:#{user.id}:sessions"])
+    @tag :authenticated
+    test "creates a user session without remember me (< 1 day ttl)", %{authed_user: user} do
+      user_ttl = Redix.command!(:redix, ["TTL", "user:#{authed_user.id}"])
+      roles_ttl = Redix.command!(:redix, ["TTL", "user:#{authed_user.id}:roles"])
+      moderating_ttl = Redix.command!(:redix, ["TTL", "user:#{authed_user.id}:moderating"])
+      baninfo_ttl = Redix.command!(:redix, ["TTL", "user:#{authed_user.id}:baninfo"])
+      sessions_ttl = Redix.command!(:redix, ["TTL", "user:#{authed_user.id}:sessions"])
 
       assert user_ttl > @almost_one_day_in_seconds
       assert user_ttl <= @one_day_in_seconds

@@ -16,7 +16,7 @@ defmodule EpochtalkServerWeb.SessionTest do
     setup [:create_login_user]
 
     @tag :authenticated
-    test "creates a user session without remember me (< 1 day ttl)", %{authed_user: user} do
+    test "creates a user session without remember me (< 1 day ttl)", %{authed_user: authed_user} do
       user_ttl = Redix.command!(:redix, ["TTL", "user:#{authed_user.id}"])
       roles_ttl = Redix.command!(:redix, ["TTL", "user:#{authed_user.id}:roles"])
       moderating_ttl = Redix.command!(:redix, ["TTL", "user:#{authed_user.id}:moderating"])

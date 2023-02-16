@@ -52,13 +52,13 @@ defmodule EpochtalkServerWeb.ConnCase do
     end
 
     {:ok, user} = User.by_username(@test_username)
+    conn = Phoenix.ConnTest.build_conn()
 
     if tags[:authenticated] do
-      conn = Phoenix.ConnTest.build_conn()
-      {:ok, user, token, conn} = Session.create(user, false, conn)
-      {:ok, conn: conn, authed_user: user, token: token, authed_user_attrs: @test_user_attrs}
+      {:ok, user, token, authed_conn} = Session.create(user, false, conn)
+      {:ok, conn: authed_conn, authed_user: user, token: token, authed_user_attrs: @test_user_attrs}
     else
-      {:ok, conn: Phoenix.ConnTest.build_conn(), user: user, user_attrs: @test_user_attrs}
+      {:ok, conn: conn, user: user, user_attrs: @test_user_attrs}
     end
   end
 end

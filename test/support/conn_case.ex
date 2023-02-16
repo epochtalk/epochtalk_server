@@ -58,6 +58,10 @@ defmodule EpochtalkServerWeb.ConnCase do
       remember_me = false
       {:ok, user, token, authed_conn} = Session.create(user, remember_me, conn)
       {:ok, conn: authed_conn, authed_user: user, token: token, authed_user_attrs: @test_user_attrs}
+    else if tags[:authenticated_remember_me] do
+      remember_me = true
+      {:ok, user, token, authed_conn} = Session.create(user, remember_me, conn)
+      {:ok, conn: authed_conn, authed_user: user, token: token, authed_user_attrs: @test_user_attrs}
     else
       {:ok, conn: conn, user: user, user_attrs: @test_user_attrs}
     end

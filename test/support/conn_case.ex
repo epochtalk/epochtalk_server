@@ -41,29 +41,29 @@ defmodule EpochtalkServerWeb.ConnCase do
     end
   end
 
-  setup tags do
+  setup context do
     alias EpochtalkServer.Session
     alias EpochtalkServer.Models.User
 
     :ok = Ecto.Adapters.SQL.Sandbox.checkout(EpochtalkServer.Repo)
 
-    unless tags[:async] do
+    unless context[:async] do
       Ecto.Adapters.SQL.Sandbox.mode(EpochtalkServer.Repo, {:shared, self()})
     end
 
     {:ok, user} = User.by_username(@test_username)
     conn = Phoenix.ConnTest.build_conn()
 
-    if tags[:authenticated] do
-      remember_me = false
-      {:ok, user, token, authed_conn} = Session.create(user, remember_me, conn)
-      {:ok, conn: authed_conn, authed_user: user, token: token, authed_user_attrs: @test_user_attrs}
-    else if tags[:authenticated_remember_me] do
-      remember_me = true
-      {:ok, user, token, authed_conn} = Session.create(user, remember_me, conn)
-      {:ok, conn: authed_conn, authed_user: user, token: token, authed_user_attrs: @test_user_attrs}
-    else
-      {:ok, conn: conn, user: user, user_attrs: @test_user_attrs}
+    case context do
+      %{authenticated: type} ->
+        remember_me = case type do
+          "remember_me" -> true
+          _ -> false
+        end
+        {:ok, user, token, authed_conn} = Session.create(user, remember_me, conn)
+        {:ok, conn: authed_conn, authed_user: user, token: token, authed_user_attrs: @test_user_attrs}
+      _ ->
+        {:ok, conn: conn, user: user, user_attrs: @test_user_attrs}
     end
   end
 end

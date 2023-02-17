@@ -11,10 +11,18 @@ defmodule EpochtalkServerWeb.SessionTest do
   @login_create_attrs %{username: "logintest", email: "logintest@test.com", password: "password"}
   @login_no_remember_me_attrs %{username: "logintest", password: "password"}
   @login_remember_me_attrs %{username: "logintest", password: "password", rememberMe: "true"}
+  describe "get_resource/2" do
+    test "gets a valid resource", %{conn: conn, user_attrs: user_attrs} do
+      conn = post(conn, Routes.user_path(conn, :login, user_attrs))
+      {:ok, user} = User.by_username(user_attrs.username)
 
+      # get session_id (jti) from conn
+      session_id = conn.private.guardian_default_claims["jti"]
+      {:ok, resource_user} = Session.get_resource(user.id, session_id)
+      assert user.id == resource_user.id
+    end
+  end
   describe "redis expiration/ttl" do
-    setup [:create_login_user]
-
     @tag :authenticated
     test "creates a user session without remember me (< 1 day ttl)", %{authed_user: authed_user} do
       user_ttl = Redix.command!(:redix, ["TTL", "user:#{authed_user.id}"])
@@ -71,20 +79,5 @@ defmodule EpochtalkServerWeb.SessionTest do
       # flush after three tests, don't keep user sessions active
       Redix.command!(:redix, ["FLUSHALL"])
     end
-
-    test "creates a valid resource", %{conn: conn} do
-      conn = post(conn, Routes.user_path(conn, :login, @login_no_remember_me_attrs))
-      {:ok, user} = User.by_username(@login_no_remember_me_attrs.username)
-
-      # get session_id (jti) from conn
-      session_id = conn.private.guardian_default_claims["jti"]
-      {:ok, resource_user} = Session.get_resource(user.id, session_id)
-      assert user.id == resource_user.id
-    end
-  end
-
-  defp create_login_user(_) do
-    {:ok, user} = User.create(@login_create_attrs)
-    {:ok, user: user}
   end
 end

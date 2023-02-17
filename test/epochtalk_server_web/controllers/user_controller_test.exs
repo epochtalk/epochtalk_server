@@ -257,9 +257,4 @@ defmodule EpochtalkServerWeb.UserControllerTest do
                json_response(conn, 401)
     end
   end
-
-  defp ban_user(%{user: user}) do
-    {:ok, banned_user} = Ban.ban(user, NaiveDateTime.utc_now())
-    {:ok, banned_user: banned_user}
-  end
 end

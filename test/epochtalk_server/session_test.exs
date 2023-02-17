@@ -7,7 +7,7 @@ defmodule EpochtalkServerWeb.SessionTest do
   alias EpochtalkServer.Session
 
   describe "get_resource/2" do
-    test "errors when session_id is invalid" , %{conn: conn, user: user} do
+    test "errors when session_id is invalid" , %{user: user} do
       session_id = "bogussessionid"
       assert Session.get_resource(user.id, session_id) == {:error, "No session for user_id #{user.id} with id #{session_id}"}
     end

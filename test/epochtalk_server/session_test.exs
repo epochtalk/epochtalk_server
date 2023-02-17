@@ -64,58 +64,58 @@ defmodule EpochtalkServerWeb.SessionTest do
       assert sessions_ttl <= @four_weeks_in_seconds
     end
 
-    # test "handles updating ttl", %{conn: conn, user: user} do
-    #   remember_me = false
-    #   {:ok, authed_user, _token, _authed_conn} = Session.create(user, remember_me, conn)
-    #   user_ttl = Redix.command!(:redix, ["TTL", "user:#{authed_user.id}"])
-    #   roles_ttl = Redix.command!(:redix, ["TTL", "user:#{authed_user.id}:roles"])
-    #   moderating_ttl = Redix.command!(:redix, ["TTL", "user:#{authed_user.id}:moderating"])
-    #   baninfo_ttl = Redix.command!(:redix, ["TTL", "user:#{authed_user.id}:baninfo"])
-    #   sessions_ttl = Redix.command!(:redix, ["TTL", "user:#{authed_user.id}:sessions"])
-    #
-    #   assert user_ttl > @almost_one_day_in_seconds
-    #   assert user_ttl <= @one_day_in_seconds
-    #   assert roles_ttl > @almost_one_day_in_seconds
-    #   assert roles_ttl <= @one_day_in_seconds
-    #   assert moderating_ttl <= @one_day_in_seconds
-    #   assert baninfo_ttl <= @one_day_in_seconds
-    #   assert sessions_ttl > @almost_one_day_in_seconds
-    #   assert sessions_ttl <= @one_day_in_seconds
-    #
-    #   remember_me = true
-    #   {:ok, authed_user, _token, _authed_conn} = Session.create(user, remember_me, conn)
-    #   user_ttl = Redix.command!(:redix, ["TTL", "user:#{authed_user.id}"])
-    #   roles_ttl = Redix.command!(:redix, ["TTL", "user:#{authed_user.id}:roles"])
-    #   moderating_ttl = Redix.command!(:redix, ["TTL", "user:#{authed_user.id}:moderating"])
-    #   baninfo_ttl = Redix.command!(:redix, ["TTL", "user:#{authed_user.id}:baninfo"])
-    #   sessions_ttl = Redix.command!(:redix, ["TTL", "user:#{authed_user.id}:sessions"])
-    #
-    #   assert user_ttl > @almost_four_weeks_in_seconds
-    #   assert user_ttl <= @four_weeks_in_seconds
-    #   assert roles_ttl > @almost_four_weeks_in_seconds
-    #   assert roles_ttl <= @four_weeks_in_seconds
-    #   assert moderating_ttl <= @four_weeks_in_seconds
-    #   assert baninfo_ttl <= @four_weeks_in_seconds
-    #   assert sessions_ttl > @almost_four_weeks_in_seconds
-    #   assert sessions_ttl <= @four_weeks_in_seconds
-    #
-    #   remember_me = false
-    #   {:ok, authed_user, _token, _authed_conn} = Session.create(user, remember_me, conn)
-    #   user_ttl = Redix.command!(:redix, ["TTL", "user:#{authed_user.id}"])
-    #   roles_ttl = Redix.command!(:redix, ["TTL", "user:#{authed_user.id}:roles"])
-    #   moderating_ttl = Redix.command!(:redix, ["TTL", "user:#{authed_user.id}:moderating"])
-    #   baninfo_ttl = Redix.command!(:redix, ["TTL", "user:#{authed_user.id}:baninfo"])
-    #   sessions_ttl = Redix.command!(:redix, ["TTL", "user:#{authed_user.id}:sessions"])
-    #
-    #   assert user_ttl > @almost_four_weeks_in_seconds
-    #   assert user_ttl <= @four_weeks_in_seconds
-    #   assert roles_ttl > @almost_four_weeks_in_seconds
-    #   assert roles_ttl <= @four_weeks_in_seconds
-    #   assert moderating_ttl <= @four_weeks_in_seconds
-    #   assert baninfo_ttl <= @four_weeks_in_seconds
-    #   assert sessions_ttl > @almost_four_weeks_in_seconds
-    #   assert sessions_ttl <= @four_weeks_in_seconds
-    # end
+    test "handles updating ttl", %{conn: conn, user: user} do
+      remember_me_1 = false
+      {:ok, authed_user_1, _token, _authed_conn} = Session.create(user, remember_me_1, conn)
+      user_ttl_1 = Redix.command!(:redix, ["TTL", "user:#{authed_user_1.id}"])
+      roles_ttl_1 = Redix.command!(:redix, ["TTL", "user:#{authed_user_1.id}:roles"])
+      moderating_ttl_1 = Redix.command!(:redix, ["TTL", "user:#{authed_user_1.id}:moderating"])
+      baninfo_ttl_1 = Redix.command!(:redix, ["TTL", "user:#{authed_user_1.id}:baninfo"])
+      sessions_ttl_1 = Redix.command!(:redix, ["TTL", "user:#{authed_user_1.id}:sessions"])
+
+      assert user_ttl_1 > @almost_one_day_in_seconds
+      assert user_ttl_1 <= @one_day_in_seconds
+      assert roles_ttl_1 > @almost_one_day_in_seconds
+      assert roles_ttl_1 <= @one_day_in_seconds
+      assert moderating_ttl_1 <= @one_day_in_seconds
+      assert baninfo_ttl_1 <= @one_day_in_seconds
+      assert sessions_ttl_1 > @almost_one_day_in_seconds
+      assert sessions_ttl_1 <= @one_day_in_seconds
+      #
+      # remember_me = true
+      # {:ok, authed_user, _token, _authed_conn} = Session.create(user, remember_me, conn)
+      # user_ttl = Redix.command!(:redix, ["TTL", "user:#{authed_user.id}"])
+      # roles_ttl = Redix.command!(:redix, ["TTL", "user:#{authed_user.id}:roles"])
+      # moderating_ttl = Redix.command!(:redix, ["TTL", "user:#{authed_user.id}:moderating"])
+      # baninfo_ttl = Redix.command!(:redix, ["TTL", "user:#{authed_user.id}:baninfo"])
+      # sessions_ttl = Redix.command!(:redix, ["TTL", "user:#{authed_user.id}:sessions"])
+      #
+      # assert user_ttl > @almost_four_weeks_in_seconds
+      # assert user_ttl <= @four_weeks_in_seconds
+      # assert roles_ttl > @almost_four_weeks_in_seconds
+      # assert roles_ttl <= @four_weeks_in_seconds
+      # assert moderating_ttl <= @four_weeks_in_seconds
+      # assert baninfo_ttl <= @four_weeks_in_seconds
+      # assert sessions_ttl > @almost_four_weeks_in_seconds
+      # assert sessions_ttl <= @four_weeks_in_seconds
+      #
+      # remember_me = false
+      # {:ok, authed_user, _token, _authed_conn} = Session.create(user, remember_me, conn)
+      # user_ttl = Redix.command!(:redix, ["TTL", "user:#{authed_user.id}"])
+      # roles_ttl = Redix.command!(:redix, ["TTL", "user:#{authed_user.id}:roles"])
+      # moderating_ttl = Redix.command!(:redix, ["TTL", "user:#{authed_user.id}:moderating"])
+      # baninfo_ttl = Redix.command!(:redix, ["TTL", "user:#{authed_user.id}:baninfo"])
+      # sessions_ttl = Redix.command!(:redix, ["TTL", "user:#{authed_user.id}:sessions"])
+      #
+      # assert user_ttl > @almost_four_weeks_in_seconds
+      # assert user_ttl <= @four_weeks_in_seconds
+      # assert roles_ttl > @almost_four_weeks_in_seconds
+      # assert roles_ttl <= @four_weeks_in_seconds
+      # assert moderating_ttl <= @four_weeks_in_seconds
+      # assert baninfo_ttl <= @four_weeks_in_seconds
+      # assert sessions_ttl > @almost_four_weeks_in_seconds
+      # assert sessions_ttl <= @four_weeks_in_seconds
+    end
   end
   defp flush_redis(_) do
     Redix.command!(:redix, ["FLUSHALL"])

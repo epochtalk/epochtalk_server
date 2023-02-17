@@ -37,12 +37,11 @@ defmodule EpochtalkServerWeb.UserControllerTest do
     end
   end
 
+  @tag :banned
   describe "unban/1" do
-    setup [:ban_user]
-
-    test "user is unbanned", %{banned_user: banned_user} do
-      {:ok, banned_user} = Ban.unban(banned_user)
-      assert nil == banned_user.ban_info
+    test "user is unbanned", %{user: user} do
+      {:ok, unbanned_user_changeset} = Ban.unban(user)
+      assert nil == unbanned_user_changeset.ban_info
     end
   end
 

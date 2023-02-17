@@ -32,8 +32,8 @@ defmodule EpochtalkServerWeb.UserControllerTest do
 
   describe "ban/1" do
     test "user is banned", %{user: user} do
-      {:ok, user} = Ban.ban(user)
-      assert user.id == user.ban_info.user_id
+      {:ok, banned_user_changeset} = Ban.ban(user)
+      assert user.id == banned_user_changeset.ban_info.user_id
     end
   end
 

@@ -44,6 +44,7 @@ defmodule EpochtalkServerWeb.ConnCase do
   setup context do
     alias EpochtalkServer.Session
     alias EpochtalkServer.Models.User
+    alias EpochtalkServer.Models.Ban
 
     :ok = Ecto.Adapters.SQL.Sandbox.checkout(EpochtalkServer.Repo)
 
@@ -68,9 +69,12 @@ defmodule EpochtalkServerWeb.ConnCase do
     end
 
     # ban user if necessary
-    if context[:banned] do
-      {:ok, banned_user} = Ban.ban(user)
-      context_updates |> Tuple.append(banned_user)
+    context_updates = if context[:banned] do
+      {:ok, banned_user_changeset} = Ban.ban(user)
+      {:ok, updates_keyword_list} = context_updates
+      {:ok, updates_keyword_list ++ [banned_user_changeset: banned_user_changeset]}
+    else
+      context_updates
     end
 
     context_updates

@@ -19,9 +19,10 @@ defmodule EpochtalkServerWeb.SessionTest do
       flush_redis()
     end
   end
-  describe "redis expiration/ttl" do
-    @tag :authenticated
-    test "creates a user session without remember me (< 1 day ttl)", %{authed_user: authed_user} do
+  describe "create/3 expiration/ttl" do
+    test "creates a user session without remember me (< 1 day ttl)", %{conn: conn, user: user} do
+      remember_me = false
+      {:ok, authed_user, token, authed_conn} = Session.create(user, remember_me, conn)
       user_ttl = Redix.command!(:redix, ["TTL", "user:#{authed_user.id}"])
       roles_ttl = Redix.command!(:redix, ["TTL", "user:#{authed_user.id}:roles"])
       moderating_ttl = Redix.command!(:redix, ["TTL", "user:#{authed_user.id}:moderating"])
@@ -38,8 +39,9 @@ defmodule EpochtalkServerWeb.SessionTest do
       assert sessions_ttl <= @one_day_in_seconds
     end
 
-    @tag authenticated: :remember_me
-    test "creates a second user session with remember me (< 4 week ttl)", %{authed_user: authed_user} do
+    test "creates a second user session with remember me (< 4 week ttl)", %{conn: conn, user: user} do
+      remember_me = true
+      {:ok, authed_user, token, authed_conn} = Session.create(user, remember_me, conn)
       user_ttl = Redix.command!(:redix, ["TTL", "user:#{authed_user.id}"])
       roles_ttl = Redix.command!(:redix, ["TTL", "user:#{authed_user.id}:roles"])
       moderating_ttl = Redix.command!(:redix, ["TTL", "user:#{authed_user.id}:moderating"])
@@ -56,8 +58,9 @@ defmodule EpochtalkServerWeb.SessionTest do
       assert sessions_ttl <= @four_weeks_in_seconds
     end
 
-    @tag :authenticated
-    test "creates a third user session with remember me (still < 4 week ttl)", %{authed_user: authed_user} do
+    test "creates a third user session without remember me (still < 4 week ttl)", %{conn: conn, user: user} do
+      remember_me = false
+      {:ok, authed_user, token, authed_conn} = Session.create(user, remember_me, conn)
       user_ttl = Redix.command!(:redix, ["TTL", "user:#{authed_user.id}"])
       roles_ttl = Redix.command!(:redix, ["TTL", "user:#{authed_user.id}:roles"])
       moderating_ttl = Redix.command!(:redix, ["TTL", "user:#{authed_user.id}:moderating"])

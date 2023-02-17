@@ -7,17 +7,23 @@ defmodule EpochtalkServerWeb.SessionTest do
   alias EpochtalkServer.Session
 
   describe "get_resource/2" do
-    test "errors when session_id is invalid" , %{user: user} do
+    test "errors when session_id is invalid", %{user: user} do
       session_id = "bogussessionid"
-      assert Session.get_resource(user.id, session_id) == {:error, "No session for user_id #{user.id} with id #{session_id}"}
+
+      assert Session.get_resource(user.id, session_id) ==
+               {:error, "No session for user_id #{user.id} with id #{session_id}"}
     end
+
     @tag :authenticated
-    test "errors when user id is invalid" , %{conn: conn} do
+    test "errors when user id is invalid", %{conn: conn} do
       user_id = 0
       # get session_id (jti) from conn
       session_id = conn.private.guardian_default_claims["jti"]
-      assert Session.get_resource(user_id, session_id) == {:error, "No session for user_id #{user_id} with id #{session_id}"}
+
+      assert Session.get_resource(user_id, session_id) ==
+               {:error, "No session for user_id #{user_id} with id #{session_id}"}
     end
+
     @tag :authenticated
     test "gets a valid resource when authenticated", %{conn: conn, authed_user: authed_user} do
       # get session_id (jti) from conn
@@ -26,8 +32,10 @@ defmodule EpochtalkServerWeb.SessionTest do
       assert authed_user.id == resource_user.id
     end
   end
+
   describe "create/3 expiration/ttl" do
     setup [:flush_redis]
+
     test "creates a user session without remember me (< 1 day ttl)", %{conn: conn, user: user} do
       remember_me = false
       {:ok, authed_user, _token, _authed_conn} = Session.create(user, remember_me, conn)
@@ -119,6 +127,7 @@ defmodule EpochtalkServerWeb.SessionTest do
       assert sessions_ttl_3 <= @four_weeks_in_seconds
     end
   end
+
   defp flush_redis(_) do
     Redix.command!(:redix, ["FLUSHALL"])
     :ok

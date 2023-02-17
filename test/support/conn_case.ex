@@ -56,23 +56,29 @@ defmodule EpochtalkServerWeb.ConnCase do
     conn = Phoenix.ConnTest.build_conn()
 
     # log user in if necessary
-    context_updates = case context[:authenticated] do
-      true ->
-        remember_me = false
-        {:ok, user, token, authed_conn} = Session.create(user, remember_me, conn)
-        {:ok, conn: authed_conn, authed_user: user, token: token, authed_user_attrs: @test_user_attrs}
-      # :authenticated not set, return default conn
-      _ -> {:ok, conn: conn, user: user, user_attrs: @test_user_attrs}
-    end
+    context_updates =
+      case context[:authenticated] do
+        true ->
+          remember_me = false
+          {:ok, user, token, authed_conn} = Session.create(user, remember_me, conn)
+
+          {:ok,
+           conn: authed_conn, authed_user: user, token: token, authed_user_attrs: @test_user_attrs}
+
+        # :authenticated not set, return default conn
+        _ ->
+          {:ok, conn: conn, user: user, user_attrs: @test_user_attrs}
+      end
 
     # ban user if necessary
-    context_updates = if context[:banned] do
-      {:ok, banned_user_changeset} = Ban.ban(user)
-      {:ok, updates_keyword_list} = context_updates
-      {:ok, updates_keyword_list ++ [banned_user_changeset: banned_user_changeset]}
-    else
-      context_updates
-    end
+    context_updates =
+      if context[:banned] do
+        {:ok, banned_user_changeset} = Ban.ban(user)
+        {:ok, updates_keyword_list} = context_updates
+        {:ok, updates_keyword_list ++ [banned_user_changeset: banned_user_changeset]}
+      else
+        context_updates
+      end
 
     context_updates
   end

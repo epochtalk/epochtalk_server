@@ -126,6 +126,25 @@ defmodule EpochtalkServerWeb.SessionTest do
       assert sessions_ttl_3 > @almost_four_weeks_in_seconds
       assert sessions_ttl_3 <= @four_weeks_in_seconds
     end
+
+    @tag :banned
+    test "handles ttl for baninfo without remember me (< 1 day ttl)", %{conn: conn, user_attrs: user_attrs, user: user} do
+      post(conn, Routes.user_path(conn, :login, %{username: user_attrs.username, password: user_attrs.password}))
+
+      baninfo_ttl = Redix.command!(:redix, ["TTL", "user:#{user.id}:baninfo"])
+
+      assert baninfo_ttl <= @one_day_in_seconds
+      assert baninfo_ttl > @almost_one_day_in_seconds
+    end
+    @tag :banned
+    test "handles ttl for baninfo with remember me (< 1 day ttl)", %{conn: conn, user_attrs: user_attrs, user: user} do
+      post(conn, Routes.user_path(conn, :login, %{username: user_attrs.username, password: user_attrs.password, rememberMe: true}))
+
+      baninfo_ttl = Redix.command!(:redix, ["TTL", "user:#{user.id}:baninfo"])
+
+      assert baninfo_ttl <= @four_weeks_in_seconds
+      assert baninfo_ttl > @almost_four_weeks_in_seconds
+    end
   end
 
   defp flush_redis(_) do

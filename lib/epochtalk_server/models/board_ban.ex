@@ -41,14 +41,15 @@ defmodule EpochtalkServer.Models.BoardBan do
   ## === Database Functions ===
 
   @doc """
-  Used to check if `User` with specified `user_id` is banned from board.
+  Used to check if `User` is banned from board.
   Accepts a `board_id`, `post_id` or `thread_id` as an option.
 
   Returns `true` if the user is banned from the specified `Board` or `false`
   otherwise.
   """
-  @spec is_banned_from_board(user_id :: non_neg_integer, opts :: list) :: boolean
-  def is_banned_from_board(user_id, opts) do
+  @spec is_banned_from_board(user :: User.t(), opts :: list) :: boolean
+  def is_banned_from_board(user, opts \\ [])
+  def is_banned_from_board(%{id: user_id} = _user, opts) when is_integer(user_id) do
     board_id = Keyword.get(opts, :board_id)
     post_id = Keyword.get(opts, :post_id)
     thread_id = Keyword.get(opts, :thread_id)
@@ -87,8 +88,10 @@ defmodule EpochtalkServer.Models.BoardBan do
           nil
       end
 
-    if query, do: is_integer(Repo.one(query)), else: false
+    result = if query, do: is_integer(Repo.one(query)), else: false
+    {:ok, result}
   end
+  def is_banned_from_board(nil, _opts), do: {:ok, false}
 
   @doc """
   Used to check if `User` with specified `user_id` is not banned from board.
@@ -97,6 +100,11 @@ defmodule EpochtalkServer.Models.BoardBan do
   Returns `true` if the user is **not** banned from the specified `Board` or `false`
   otherwise.
   """
-  @spec is_not_banned_from_board(user_id :: non_neg_integer, opts :: list) :: boolean
-  def is_not_banned_from_board(user_id, opts), do: !is_banned_from_board(user_id, opts)
+  @spec is_not_banned_from_board(user :: User.t(), opts :: list) :: boolean
+  def is_not_banned_from_board(user, opts \\ [])
+  def is_not_banned_from_board(%{id: user_id} = user, opts) when is_integer(user_id) do
+   {:ok, banned} = is_banned_from_board(user, opts)
+   {:ok, !banned}
+  end
+  def is_not_banned_from_board(nil, _opts), do: {:ok, true}
 end

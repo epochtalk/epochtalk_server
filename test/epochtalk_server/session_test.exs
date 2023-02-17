@@ -15,14 +15,13 @@ defmodule EpochtalkServerWeb.SessionTest do
       # assert user.id == resource_user.id
       assert true
     end
-    # @tag :authenticated
+    @tag :authenticated
     # test "gets a valid resource", %{conn: conn, authed_user: authed_user} do
-    #   # get session_id (jti) from conn
-    #   session_id = conn.private.guardian_default_claims["jti"]
-    #   {:ok, resource_user} = Session.get_resource(authed_user.id, session_id)
-    #   assert authed_user.id == resource_user.id
-    #   flush_redis()
-    # end
+      # get session_id (jti) from conn
+      session_id = conn.private.guardian_default_claims["jti"]
+      {:ok, resource_user} = Session.get_resource(authed_user.id, session_id)
+      assert authed_user.id == resource_user.id
+    end
   end
   describe "create/3 expiration/ttl" do
     setup [:flush_redis]

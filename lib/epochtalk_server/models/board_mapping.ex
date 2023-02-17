@@ -18,6 +18,15 @@ defmodule EpochtalkServer.Models.BoardMapping do
           category: Category.t() | term(),
           view_order: non_neg_integer | nil
         }
+  @derive {Jason.Encoder,
+           only: [
+             :board_id,
+             :parent_id,
+             :category_id,
+             :view_order,
+             :stats,
+             :thread
+           ]}
   @primary_key false
   schema "board_mapping" do
     belongs_to :board, Board, primary_key: true

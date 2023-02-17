@@ -98,23 +98,23 @@ defmodule EpochtalkServerWeb.SessionTest do
       assert baninfo_ttl_2 <= @four_weeks_in_seconds
       assert sessions_ttl_2 > @almost_four_weeks_in_seconds
       assert sessions_ttl_2 <= @four_weeks_in_seconds
-      #
-      # remember_me = false
-      # {:ok, authed_user, _token, _authed_conn} = Session.create(user, remember_me, conn)
-      # user_ttl = Redix.command!(:redix, ["TTL", "user:#{authed_user.id}"])
-      # roles_ttl = Redix.command!(:redix, ["TTL", "user:#{authed_user.id}:roles"])
-      # moderating_ttl = Redix.command!(:redix, ["TTL", "user:#{authed_user.id}:moderating"])
-      # baninfo_ttl = Redix.command!(:redix, ["TTL", "user:#{authed_user.id}:baninfo"])
-      # sessions_ttl = Redix.command!(:redix, ["TTL", "user:#{authed_user.id}:sessions"])
-      #
-      # assert user_ttl > @almost_four_weeks_in_seconds
-      # assert user_ttl <= @four_weeks_in_seconds
-      # assert roles_ttl > @almost_four_weeks_in_seconds
-      # assert roles_ttl <= @four_weeks_in_seconds
-      # assert moderating_ttl <= @four_weeks_in_seconds
-      # assert baninfo_ttl <= @four_weeks_in_seconds
-      # assert sessions_ttl > @almost_four_weeks_in_seconds
-      # assert sessions_ttl <= @four_weeks_in_seconds
+
+      remember_me_3 = false
+      {:ok, authed_user_3, _token, _authed_conn} = Session.create(user, remember_me_3, conn)
+      user_ttl_3 = Redix.command!(:redix, ["TTL", "user:#{authed_user_3.id}"])
+      roles_ttl_3 = Redix.command!(:redix, ["TTL", "user:#{authed_user_3.id}:roles"])
+      moderating_ttl_3 = Redix.command!(:redix, ["TTL", "user:#{authed_user_3.id}:moderating"])
+      baninfo_ttl_3 = Redix.command!(:redix, ["TTL", "user:#{authed_user_3.id}:baninfo"])
+      sessions_ttl_3 = Redix.command!(:redix, ["TTL", "user:#{authed_user_3.id}:sessions"])
+
+      assert user_ttl_3 > @almost_four_weeks_in_seconds
+      assert user_ttl_3 <= @four_weeks_in_seconds
+      assert roles_ttl_3 > @almost_four_weeks_in_seconds
+      assert roles_ttl_3 <= @four_weeks_in_seconds
+      assert moderating_ttl_3 <= @four_weeks_in_seconds
+      assert baninfo_ttl_3 <= @four_weeks_in_seconds
+      assert sessions_ttl_3 > @almost_four_weeks_in_seconds
+      assert sessions_ttl_3 <= @four_weeks_in_seconds
     end
   end
   defp flush_redis(_) do

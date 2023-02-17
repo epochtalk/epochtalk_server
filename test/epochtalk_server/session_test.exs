@@ -12,7 +12,7 @@ defmodule EpochtalkServerWeb.SessionTest do
   @login_no_remember_me_attrs %{username: "logintest", password: "password"}
   @login_remember_me_attrs %{username: "logintest", password: "password", rememberMe: "true"}
 
-  describe "login/2" do
+  describe "redis expiration/ttl" do
     setup [:create_login_user]
 
     @tag :authenticated

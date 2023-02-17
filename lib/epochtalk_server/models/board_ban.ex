@@ -14,7 +14,7 @@ defmodule EpochtalkServer.Models.BoardBan do
   """
   @type t :: %__MODULE__{
           user_id: non_neg_integer | nil,
-          user_id: non_neg_integer | nil,
+          user_id: non_neg_integer | nil
         }
   @primary_key false
   @schema_prefix "users"
@@ -33,7 +33,7 @@ defmodule EpochtalkServer.Models.BoardBan do
     board_ban
     |> cast(attrs, [
       :user_id,
-      :board_id,
+      :board_id
     ])
     |> validate_required([:user_id, :board_id])
   end
@@ -53,30 +53,39 @@ defmodule EpochtalkServer.Models.BoardBan do
     post_id = Keyword.get(opts, :post_id)
     thread_id = Keyword.get(opts, :thread_id)
 
-    query = case {board_id, post_id, thread_id} do
-      {nil, nil, nil} -> nil
+    query =
+      cond do
+        is_integer(board_id) ->
+          from bb in BoardBan,
+            where: bb.user_id == ^user_id and bb.board_id == ^board_id,
+            select: bb.user_id
 
-      {board_id, nil, nil} ->
-        from bb in BoardBan,
-          where: bb.user_id == ^user_id and bb.board_id == ^board_id,
-          select: bb.user_id
+        is_integer(post_id) ->
+          from bb in BoardBan,
+            where:
+              bb.user_id == ^user_id and
+                bb.board_id ==
+                  subquery(
+                    from(p in Post,
+                      left_join: t in Thread,
+                      on: t.id == p.thread_id,
+                      where: p.id == ^post_id,
+                      select: t.board_id
+                    )
+                  ),
+            select: bb.user_id
 
-      {nil, post_id, nil} ->
-        from bb in BoardBan,
-          where: bb.user_id == ^user_id and bb.board_id == subquery(
-              from(p in Post, left_join: t in Thread, on: t.id == p.thread_id, where: p.id == ^post_id, select: t.board_id)
-            ),
-          select: bb.user_id
+        is_integer(thread_id) ->
+          from bb in BoardBan,
+            where:
+              bb.user_id == ^user_id and
+                bb.board_id ==
+                  subquery(from(t in Thread, where: t.id == ^thread_id, select: t.board_id)),
+            select: bb.user_id
 
-      {nil, nil, thread_id} ->
-        from bb in BoardBan,
-          where: bb.user_id == ^user_id and bb.board_id == subquery(
-              from(t in Thread, where: t.id == ^thread_id, select: t.board_id)
-            ),
-          select: bb.user_id
-
-      _ -> nil
-    end
+        true ->
+          nil
+      end
 
     if query, do: is_integer(Repo.one(query)), else: false
   end

@@ -27,5 +27,4 @@ defmodule EpochtalkServerWeb.ThreadView do
       %{id: thread.id, slug: thread.slug, updated_at: thread.updated_at}
     end)
   end
-
 end

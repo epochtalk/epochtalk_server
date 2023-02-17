@@ -70,11 +70,12 @@ defmodule EpochtalkServer.Models.Thread do
   @spec recent(user :: User.t(), user_priority :: non_neg_integer, opts :: list() | nil) :: [t()]
   def recent(user, user_priority, opts \\ []) do
     limit = Keyword.get(opts, :limit, 5)
-    IO.inspect user
-    IO.inspect user_priority
-    query = from Thread,
-      order_by: [desc: :updated_at],
-      limit: ^limit
+    # IO.inspect user
+    # IO.inspect user_priority
+    query =
+      from Thread,
+        order_by: [desc: :updated_at],
+        limit: ^limit
 
     Repo.all(query)
   end

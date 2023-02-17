@@ -39,7 +39,8 @@ defmodule EpochtalkServerWeb.BoardController do
          user_priority <- ACL.get_user_priority(conn),
          board_mapping <- BoardMapping.all(),
          board_moderators <- BoardModerator.all(),
-         {:board, [_board]} <- {:board, Enum.filter(board_mapping, fn bm -> bm.board_id == id end)} do
+         {:board, [_board]} <-
+           {:board, Enum.filter(board_mapping, fn bm -> bm.board_id == id end)} do
       render(conn, "find.json", %{
         board_moderators: board_moderators,
         board_mapping: board_mapping,

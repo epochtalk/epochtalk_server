@@ -83,7 +83,7 @@ defmodule EpochtalkServerWeb.BoardView do
         Map.put(board, :moderators, moderators)
       end)
 
-    [ board ] = Enum.filter(board_mapping, fn bm -> bm.board_id == board_id end)
+    [board] = Enum.filter(board_mapping, fn bm -> bm.board_id == board_id end)
 
     # flatten needed boards data
     board =
@@ -109,7 +109,8 @@ defmodule EpochtalkServerWeb.BoardView do
       else: board
 
     # iterate each child board, attempt to map nested children from board mapping
-    board = process_children_from_board_mapping(
+    board =
+      process_children_from_board_mapping(
         :parent_id,
         board_mapping,
         :children,

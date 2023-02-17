@@ -14,6 +14,11 @@ defmodule EpochtalkServer.Models.BoardModerator do
           user_id: non_neg_integer,
           board_id: non_neg_integer
         }
+  @derive {Jason.Encoder,
+           only: [
+             :user_id,
+             :board_id
+           ]}
   @primary_key false
   schema "board_moderators" do
     belongs_to :user, User

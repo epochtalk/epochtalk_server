@@ -128,17 +128,39 @@ defmodule EpochtalkServerWeb.SessionTest do
     end
 
     @tag :banned
-    test "handles ttl for baninfo without remember me (< 1 day ttl)", %{conn: conn, user_attrs: user_attrs, user: user} do
-      post(conn, Routes.user_path(conn, :login, %{username: user_attrs.username, password: user_attrs.password}))
+    test "handles ttl for baninfo without remember me (< 1 day ttl)", %{
+      conn: conn,
+      user_attrs: user_attrs,
+      user: user
+    } do
+      post(
+        conn,
+        Routes.user_path(conn, :login, %{
+          username: user_attrs.username,
+          password: user_attrs.password
+        })
+      )
 
       baninfo_ttl = Redix.command!(:redix, ["TTL", "user:#{user.id}:baninfo"])
 
       assert baninfo_ttl <= @one_day_in_seconds
       assert baninfo_ttl > @almost_one_day_in_seconds
     end
+
     @tag :banned
-    test "handles ttl for baninfo with remember me (< 1 day ttl)", %{conn: conn, user_attrs: user_attrs, user: user} do
-      post(conn, Routes.user_path(conn, :login, %{username: user_attrs.username, password: user_attrs.password, rememberMe: true}))
+    test "handles ttl for baninfo with remember me (< 1 day ttl)", %{
+      conn: conn,
+      user_attrs: user_attrs,
+      user: user
+    } do
+      post(
+        conn,
+        Routes.user_path(conn, :login, %{
+          username: user_attrs.username,
+          password: user_attrs.password,
+          rememberMe: true
+        })
+      )
 
       baninfo_ttl = Redix.command!(:redix, ["TTL", "user:#{user.id}:baninfo"])
 

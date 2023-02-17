@@ -20,6 +20,7 @@ defmodule EpochtalkServerWeb.SessionTest do
       session_id = conn.private.guardian_default_claims["jti"]
       {:ok, resource_user} = Session.get_resource(user.id, session_id)
       assert user.id == resource_user.id
+      flush_redis()
     end
   end
   describe "redis expiration/ttl" do
@@ -75,9 +76,11 @@ defmodule EpochtalkServerWeb.SessionTest do
       assert baninfo_ttl <= @four_weeks_in_seconds
       assert sessions_ttl > @almost_four_weeks_in_seconds
       assert sessions_ttl <= @four_weeks_in_seconds
-
-      # flush after three tests, don't keep user sessions active
-      Redix.command!(:redix, ["FLUSHALL"])
+      flush_redis()
     end
+  end
+  defp flush_redis() do
+    # flush after three tests, don't keep user sessions active
+    Redix.command!(:redix, ["FLUSHALL"])
   end
 end

@@ -8,9 +8,6 @@ defmodule EpochtalkServerWeb.SessionTest do
   alias EpochtalkServer.Models.User
   alias EpochtalkServer.Session
 
-  @login_create_attrs %{username: "logintest", email: "logintest@test.com", password: "password"}
-  @login_no_remember_me_attrs %{username: "logintest", password: "password"}
-  @login_remember_me_attrs %{username: "logintest", password: "password", rememberMe: "true"}
   describe "get_resource/2" do
     test "gets a valid resource", %{conn: conn, user_attrs: user_attrs} do
       conn = post(conn, Routes.user_path(conn, :login, user_attrs))

@@ -10,14 +10,14 @@ defmodule EpochtalkServerWeb.SessionTest do
   describe "get_resource/2" do
     test "errors when session_id is invalid" , %{conn: conn, user: user} do
       session_id = "bogussessionid"
-      assert Session.get_resource(user.id, session_id) == {:error, "No session with id #{session_id}"}
+      assert Session.get_resource(user.id, session_id) == {:error, "No session for user_id #{user.id} with id #{session_id}"}
     end
     @tag :authenticated
     test "errors when user id is invalid" , %{conn: conn} do
       user_id = 0
       # get session_id (jti) from conn
       session_id = conn.private.guardian_default_claims["jti"]
-      assert Session.get_resource(user_id, session_id) == {:error, "No session with id #{session_id}"}
+      assert Session.get_resource(user_id, session_id) == {:error, "No session for user_id #{user_id} with id #{session_id}"}
     end
     @tag :authenticated
     test "gets a valid resource when authenticated", %{conn: conn, authed_user: authed_user} do

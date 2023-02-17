@@ -58,7 +58,7 @@ defmodule EpochtalkServer.Session do
 
       false ->
         # session is not active, return error
-        {:error, "No session with id #{session_id}"}
+        {:error, "No session for user_id #{user_id} with id #{session_id}"}
 
       true ->
         user_key = generate_key(user_id, "user")

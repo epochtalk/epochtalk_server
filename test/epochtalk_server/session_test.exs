@@ -16,7 +16,7 @@ defmodule EpochtalkServerWeb.SessionTest do
       assert true
     end
     @tag :authenticated
-    # test "gets a valid resource", %{conn: conn, authed_user: authed_user} do
+    test "gets a valid resource when authenticated", %{conn: conn, authed_user: authed_user} do
       # get session_id (jti) from conn
       session_id = conn.private.guardian_default_claims["jti"]
       {:ok, resource_user} = Session.get_resource(authed_user.id, session_id)

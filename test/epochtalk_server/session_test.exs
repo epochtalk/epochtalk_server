@@ -8,12 +8,10 @@ defmodule EpochtalkServerWeb.SessionTest do
   alias EpochtalkServer.Session
 
   describe "get_resource/2" do
-    test "errors when resource not valid", %{conn: conn, user: user} do
-      # # get session_id (jti) from conn
-      # session_id = conn.private.guardian_default_claims["jti"]
-      # {:ok, resource_user} = Session.get_resource(user.id, session_id)
-      # assert user.id == resource_user.id
-      assert true
+    test "errors when session_id is invalid" , %{conn: conn, user: user} do
+      flush_redis(:ok)
+      session_id = "bogussessionid"
+      assert Session.get_resource(user.id, session_id) == {:error, "No session with id #{session_id}"}
     end
     @tag :authenticated
     test "gets a valid resource when authenticated", %{conn: conn, authed_user: authed_user} do

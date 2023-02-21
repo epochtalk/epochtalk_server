@@ -2,8 +2,6 @@ defmodule EpochtalkServerWeb.UserSocketTest do
   use EpochtalkServerWeb.ChannelCase
   alias EpochtalkServerWeb.UserSocket
   alias EpochtalkServer.Auth.Guardian
-  alias EpochtalkServer.Session
-  alias EpochtalkServer.Models.User
 
   describe "connect/3" do
     test "returns :error for an invalid JWT" do
@@ -15,18 +13,11 @@ defmodule EpochtalkServerWeb.UserSocketTest do
       assert :error = connect(UserSocket, %{token: token})
     end
 
-    test "returns authenticated socket for a valid JWT with backing user" do
-      {:ok, user} =
-        User.create(%{
-          username: "usersockettest",
-          email: "usersockettest@test.com",
-          password: "password"
-        })
-
-      conn = Phoenix.ConnTest.build_conn()
-      {:ok, user, token, _conn} = Session.create(user, false, conn)
-      user_id = user.id
-
+    @tag :authenticated
+    test "returns authenticated socket for a valid JWT with backing user", %{
+      user_id: user_id,
+      token: token
+    } do
       assert {:ok, %Phoenix.Socket{assigns: %{user_id: ^user_id}}} =
                connect(UserSocket, %{token: token})
     end

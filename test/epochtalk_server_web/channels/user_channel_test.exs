@@ -117,22 +117,4 @@ defmodule EpochtalkServerWeb.UserChannelTest do
       refute_push "refreshMentions", %{}
     end
   end
-
-  defp create_authed_socket() do
-    {:ok, user} =
-      User.create(%{
-        username: "userchanneltest",
-        email: "userchanneltest@test.com",
-        password: "password"
-      })
-
-    conn = Phoenix.ConnTest.build_conn()
-    {:ok, user, token, _conn} = Session.create(user, false, conn)
-
-    socket =
-      UserSocket
-      |> socket("user:#{user.id}", %{guardian_default_token: token, user_id: user.id})
-
-    {socket, user.id}
-  end
 end

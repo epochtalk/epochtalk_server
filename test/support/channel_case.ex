@@ -15,15 +15,8 @@ defmodule EpochtalkServerWeb.ChannelCase do
   this option is not recommended for other databases.
   """
 
-  # username/email/password from user seed in `mix test` (see mix.exs)
+  # username from user seed in `mix test` (see mix.exs)
   @test_username "test"
-  @test_email "test@test.com"
-  @test_password "password"
-  @test_user_attrs %{
-    username: @test_username,
-    email: @test_email,
-    password: @test_password
-  }
 
   use ExUnit.CaseTemplate
 

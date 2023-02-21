@@ -12,7 +12,7 @@ defmodule EpochtalkServerWeb.UserChannelTest do
       assert socket.id == "user:#{socket.assigns.user_id}"
     end
 
-    test "joins without authentication" do
+    test "does not join without authentication" do
       socket = socket(UserSocket, nil, %{})
       assert socket.joined == false
       assert {:ok, _payload, socket} = subscribe_and_join(socket, UserChannel, "user:public")

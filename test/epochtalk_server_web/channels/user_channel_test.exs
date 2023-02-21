@@ -75,16 +75,7 @@ defmodule EpochtalkServerWeb.UserChannelTest do
   end
 
   describe "websocket channel 'user:<user_id>'" do
-    setup do
-      {socket, user_id} = create_authed_socket()
-
-      {:ok, _payload, socket} =
-        socket
-        |> subscribe_and_join(UserChannel, "user:#{user_id}")
-
-      %{socket: socket}
-    end
-
+    @tag authenticated: "user:<user_id>"
     test "joins with authentication", %{socket: socket} do
       assert socket.joined == true
       assert socket.id == "user:#{socket.assigns.user_id}"
@@ -98,24 +89,28 @@ defmodule EpochtalkServerWeb.UserChannelTest do
                subscribe_and_join(socket, UserChannel, "user:1")
     end
 
+    @tag authenticated: "user:<user_id>"
     test "broadcasts 'reauthenticate' message with empty payload", %{socket: socket} do
       assert :ok = broadcast_from(socket, "reauthenticate", %{})
       assert_push "reauthenticate", %{}
       refute_push "reauthenticate", %{}
     end
 
+    @tag authenticated: "user:<user_id>"
     test "broadcasts 'logout' message with token payload", %{socket: socket} do
       assert :ok = broadcast_from(socket, "logout", %{token: "some_token"})
       assert_push "logout", %{token: "some_token"}
       refute_push "logout", %{token: "some_token"}
     end
 
+    @tag authenticated: "user:<user_id>"
     test "broadcasts 'newMessage' message with empty payload", %{socket: socket} do
       assert :ok = broadcast_from(socket, "newMessage", %{})
       assert_push "newMessage", %{}
       refute_push "newMessage", %{}
     end
 
+    @tag authenticated: "user:<user_id>"
     test "broadcasts 'refreshMentions' message with empty payload", %{socket: socket} do
       assert :ok = broadcast_from(socket, "refreshMentions", %{})
       assert_push "refreshMentions", %{}

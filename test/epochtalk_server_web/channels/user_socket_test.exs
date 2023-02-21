@@ -18,7 +18,7 @@ defmodule EpochtalkServerWeb.UserSocketTest do
       user_id: user_id,
       token: token
     } do
-      assert {:ok, %Phoenix.Socket{assigns: %{user_id: user_id}}} =
+      assert {:ok, %Phoenix.Socket{assigns: %{user_id: ^user_id}}} =
                connect(UserSocket, %{token: token})
     end
 

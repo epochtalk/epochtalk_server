@@ -50,16 +50,7 @@ defmodule EpochtalkServerWeb.UserChannelTest do
   end
 
   describe "websocket channel 'user:role'" do
-    setup do
-      {socket, _user_id} = create_authed_socket()
-
-      {:ok, _payload, socket} =
-        socket
-        |> subscribe_and_join(UserChannel, "user:role")
-
-      %{socket: socket}
-    end
-
+    @tag authenticated: "user:role"
     test "joins with authentication", %{socket: socket} do
       assert socket.joined == true
       assert socket.id == "user:#{socket.assigns.user_id}"
@@ -73,6 +64,7 @@ defmodule EpochtalkServerWeb.UserChannelTest do
                subscribe_and_join(socket, UserChannel, "user:role")
     end
 
+    @tag authenticated: "user:role"
     test "server can broadcast 'permissionsChanged' message with lookup payload", %{
       socket: socket
     } do

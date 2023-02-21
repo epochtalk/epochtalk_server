@@ -2,8 +2,6 @@ defmodule EpochtalkServerWeb.UserSocketTest do
   use EpochtalkServerWeb.ChannelCase
   alias EpochtalkServerWeb.UserSocket
   alias EpochtalkServer.Auth.Guardian
-  alias EpochtalkServer.Session
-  alias EpochtalkServer.Models.User
 
   describe "connect/3" do
     test "returns :error for an invalid JWT" do

@@ -1,7 +1,5 @@
 defmodule EpochtalkServerWeb.UserChannelTest do
   use EpochtalkServerWeb.ChannelCase
-  alias EpochtalkServer.Session
-  alias EpochtalkServer.Models.User
   alias EpochtalkServerWeb.UserSocket
   alias EpochtalkServerWeb.UserChannel
 

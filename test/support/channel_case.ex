@@ -60,7 +60,7 @@ defmodule EpochtalkServerWeb.ChannelCase do
         socket
       end
 
-      {:ok, socket: socket, user_id: user_id}
+      {:ok, socket: socket, user_id: user_id, token: token}
     else
       :ok
     end

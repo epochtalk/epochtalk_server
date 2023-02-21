@@ -14,7 +14,10 @@ defmodule EpochtalkServerWeb.UserSocketTest do
     end
 
     @tag :authenticated
-    test "returns authenticated socket for a valid JWT with backing user", %{user_id: user_id, token: token} do
+    test "returns authenticated socket for a valid JWT with backing user", %{
+      user_id: user_id,
+      token: token
+    } do
       assert {:ok, %Phoenix.Socket{assigns: %{user_id: user_id}}} =
                connect(UserSocket, %{token: token})
     end

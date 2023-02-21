@@ -47,18 +47,24 @@ defmodule EpochtalkServerWeb.ChannelCase do
       # create session and socket
       {:ok, authed_user, token, _conn} = Session.create(user, false, conn)
       user_id = authed_user.id
-      socket = UserSocket |> socket("user:#{user_id}", %{guardian_default_token: token, user_id: user_id})
+
+      socket =
+        UserSocket
+        |> socket("user:#{user_id}", %{guardian_default_token: token, user_id: user_id})
 
       # determine which channel to join
-      channel = case context[:authenticated] do
-        true -> nil
-        "user:<user_id>" -> "user:#{user_id}"
-        channel -> channel
-      end
-      socket = if channel do
-        {:ok, _payload, socket} = socket |> subscribe_and_join(UserChannel, channel)
-        socket
-      end
+      channel =
+        case context[:authenticated] do
+          true -> nil
+          "user:<user_id>" -> "user:#{user_id}"
+          channel -> channel
+        end
+
+      socket =
+        if channel do
+          {:ok, _payload, socket} = socket |> subscribe_and_join(UserChannel, channel)
+          socket
+        end
 
       {:ok, socket: socket, user_id: user_id, token: token}
     else

@@ -6,16 +6,7 @@ defmodule EpochtalkServerWeb.UserChannelTest do
   alias EpochtalkServerWeb.UserChannel
 
   describe "websocket channel 'user:public'" do
-    setup do
-      {socket, user_id} = create_authed_socket()
-
-      {:ok, _payload, socket} =
-        socket
-        |> subscribe_and_join(UserChannel, "user:public")
-
-      %{socket: socket, user_id: user_id}
-    end
-
+    @tag authenticated: "user:public"
     test "joins with authentication", %{socket: socket} do
       assert socket.joined == true
       assert socket.id == "user:#{socket.assigns.user_id}"
@@ -29,6 +20,7 @@ defmodule EpochtalkServerWeb.UserChannelTest do
       assert socket.id == nil
     end
 
+    @tag authenticated: "user:public"
     test "server responds to 'is_online' message with %{user_id: <user_id>, online: true} for online user",
          %{
            socket: socket,
@@ -38,6 +30,7 @@ defmodule EpochtalkServerWeb.UserChannelTest do
       assert_reply ref, :ok, %{id: ^user_id, online: true}
     end
 
+    @tag authenticated: "user:public"
     test "server responds to 'is_online' message with %{user_id: <user_id>, online: false} for offline user",
          %{
            socket: socket,
@@ -48,6 +41,7 @@ defmodule EpochtalkServerWeb.UserChannelTest do
       assert_reply ref, :ok, %{id: ^user_id, online: false}
     end
 
+    @tag authenticated: "user:public"
     test "server can broadcast 'announcement' message with motd payload", %{socket: socket} do
       assert :ok = broadcast_from(socket, "announcement", %{motd: "message"})
       assert_push "announcement", %{motd: "message"}

@@ -148,7 +148,7 @@ defmodule EpochtalkServerWeb.SessionTest do
     end
 
     @tag :banned
-    test "handles ttl for baninfo with remember me (< 1 day ttl)", %{
+    test "handles ttl for baninfo with remember me (< 4 weeks ttl)", %{
       conn: conn,
       user_attrs: user_attrs,
       user: user

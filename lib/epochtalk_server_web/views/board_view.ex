@@ -72,18 +72,22 @@ defmodule EpochtalkServerWeb.BoardView do
         board_id: board_id,
         user_priority: user_priority
       }) do
-    # append board moderators to each board in board mapping
-    board_mapping =
-      Enum.map(board_mapping, fn board ->
-        moderators =
-          board_moderators
-          |> Enum.filter(fn mod -> Map.get(mod, :board_id) == Map.get(board, :board_id) end)
-          |> Enum.map(fn mod -> %{id: mod.user_id, username: mod.user.username} end)
+    format_board_data_for_find(board_moderators, board_mapping, board_id, user_priority)
+  end
 
-        Map.put(board, :moderators, moderators)
-      end)
-
+  @doc """
+  Board view helper method for mapping childboards and other metadata to board using board mapping and user priority
+  """
+  def format_board_data_for_find(board_moderators, board_mapping, board_id, user_priority) do
+    # filter out board by id
     [board] = Enum.filter(board_mapping, fn bm -> bm.board_id == board_id end)
+
+    # append board moderators to board
+    moderators =
+      board_moderators
+      |> Enum.filter(fn mod -> Map.get(mod, :board_id) == Map.get(board, :board_id) end)
+      |> Enum.map(fn mod -> %{id: mod.user_id, username: mod.user.username} end)
+    board = Map.put(board, :moderators, moderators)
 
     # flatten needed boards data
     board =
@@ -122,11 +126,7 @@ defmodule EpochtalkServerWeb.BoardView do
     board
   end
 
-
-  @doc """
-  Board view helper method for mapping childboards to board using board mapping and user priority
-  """
-  def process_children_from_board_mapping(
+  defp process_children_from_board_mapping(
          board_mapping_key,
          board_mapping,
          child_key,

@@ -181,7 +181,7 @@ defmodule EpochtalkServerWeb.SessionTest do
     end
 
     @tag :malicious
-    test "handles baninfo ttl and malicious score with remember me (< 1 day ttl)", %{ conn: conn, user: user, malicious_user_changeset: malicious_user_changeset } do
+    test "handles baninfo ttl and malicious score without remember me (< 1 day ttl)", %{ conn: conn, user: user, malicious_user_changeset: malicious_user_changeset } do
       pre_malicious_baninfo_ttl = Redix.command!(:redix, ["TTL", "user:#{user.id}:baninfo"])
       pre_malicious_malicious_score = Redix.command!(:redix, ["HGET", "user:#{user.id}:baninfo", "malicious_score"])
       malicious_user = Map.put(user, :malicious_score, malicious_user_changeset.malicious_score)

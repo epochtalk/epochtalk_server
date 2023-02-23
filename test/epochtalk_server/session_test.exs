@@ -197,6 +197,24 @@ defmodule EpochtalkServerWeb.SessionTest do
       assert malicious_score_ttl <= @one_day_in_seconds
       assert malicious_score_ttl > @almost_one_day_in_seconds
     end
+
+    @tag :malicious
+    test "handles baninfo ttl and malicious score with remember me (< 4 weeks ttl)", %{ conn: conn, user: user, malicious_user_changeset: malicious_user_changeset } do
+      pre_malicious_baninfo_ttl = Redix.command!(:redix, ["TTL", "user:#{user.id}:baninfo"])
+      pre_malicious_malicious_score = Redix.command!(:redix, ["HGET", "user:#{user.id}:baninfo", "malicious_score"])
+      malicious_user = Map.put(user, :malicious_score, malicious_user_changeset.malicious_score)
+      remember_me = true
+      {:ok, authed_user, _token, _authed_conn} = Session.create(malicious_user, remember_me, conn)
+
+      malicious_score_ttl = Redix.command!(:redix, ["TTL", "user:#{authed_user.id}:baninfo"])
+      malicious_score = Redix.command!(:redix, ["HGET", "user:#{authed_user.id}:baninfo", "malicious_score"])
+
+      assert is_nil(pre_malicious_malicious_score)
+      assert malicious_score == "4.0416"
+      assert pre_malicious_baninfo_ttl == -2
+      assert malicious_score_ttl <= @four_weeks_in_seconds
+      assert malicious_score_ttl > @almost_four_weeks_in_seconds
+    end
   end
 
   defp flush_redis(_) do

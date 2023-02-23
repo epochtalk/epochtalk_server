@@ -45,12 +45,12 @@ defmodule EpochtalkServerWeb.UserControllerTest do
     end
   end
 
+  @tag :malicious
   describe "handle_malicious_user/2" do
-    test "user is banned if malicious", %{conn: conn, user: user} do
-      {:ok, malicious_user} = User.handle_malicious_user(user, conn.remote_ip)
-      assert user.id == malicious_user.ban_info.user_id
+    test "user is banned if malicious", %{conn: conn, user: user, malicious_user_changeset: malicious_user_changeset} do
+      assert user.id == malicious_user_changeset.ban_info.user_id
       # check that ip and hostname were banned
-      assert malicious_user.malicious_score == 4.0416
+      assert malicious_user_changeset.malicious_score == 4.0416
     end
   end
 

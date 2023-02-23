@@ -80,6 +80,17 @@ defmodule EpochtalkServerWeb.ConnCase do
         context_updates
       end
 
+    # handle malicious score if necessary
+    context_updates =
+      if context[:malicious] do
+        # returns changeset from Ban.ban()
+        {:ok, malicious_user_changeset} = User.handle_malicious_user(user, conn.remote_ip)
+        {:ok, updates_keyword_list} = context_updates
+        {:ok, updates_keyword_list ++ [malicious_user_changeset: malicious_user_changeset]}
+      else
+        context_updates
+      end
+
     context_updates
   end
 end

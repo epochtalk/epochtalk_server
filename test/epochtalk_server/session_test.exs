@@ -128,12 +128,13 @@ defmodule EpochtalkServerWeb.SessionTest do
     end
 
     @tag :banned
-    test "handles ttl for baninfo without remember me (< 1 day ttl)", %{
+    test "handles baninfo ttl and ban_expiration without remember me (< 1 day ttl)", %{
       conn: conn,
       user_attrs: user_attrs,
       user: user
     } do
       pre_ban_baninfo_ttl = Redix.command!(:redix, ["TTL", "user:#{user.id}:baninfo"])
+      pre_ban_ban_expiration = Redix.command!(:redix, ["HGET", "user:#{user.id}:baninfo", "ban_expiration"])
       post(
         conn,
         Routes.user_path(conn, :login, %{
@@ -143,7 +144,10 @@ defmodule EpochtalkServerWeb.SessionTest do
       )
 
       baninfo_ttl = Redix.command!(:redix, ["TTL", "user:#{user.id}:baninfo"])
+      ban_expiration = Redix.command!(:redix, ["HGET", "user:#{user.id}:baninfo", "ban_expiration"])
 
+      assert is_nil(pre_ban_ban_expiration)
+      assert ban_expiration == "9999-12-31 00:00:00"
       assert pre_ban_baninfo_ttl == -2
       assert baninfo_ttl <= @one_day_in_seconds
       assert baninfo_ttl > @almost_one_day_in_seconds

@@ -133,6 +133,7 @@ defmodule EpochtalkServerWeb.SessionTest do
       user_attrs: user_attrs,
       user: user
     } do
+      pre_ban_baninfo_ttl = Redix.command!(:redix, ["TTL", "user:#{user.id}:baninfo"])
       post(
         conn,
         Routes.user_path(conn, :login, %{
@@ -143,6 +144,7 @@ defmodule EpochtalkServerWeb.SessionTest do
 
       baninfo_ttl = Redix.command!(:redix, ["TTL", "user:#{user.id}:baninfo"])
 
+      assert pre_ban_baninfo_ttl == -2
       assert baninfo_ttl <= @one_day_in_seconds
       assert baninfo_ttl > @almost_one_day_in_seconds
     end

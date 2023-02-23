@@ -36,6 +36,21 @@ defmodule EpochtalkServer.Models.User do
           roles: [Role.t()] | term(),
           moderating: [BoardModerator.t()] | term()
         }
+  @derive {Jason.Encoder, only: [
+    :id,
+    :email,
+    :username,
+    :deleted,
+    :malicious_score,
+    :preferences,
+    :profile,
+    :ban_info,
+    :roles,
+    :moderating,
+    :created_at,
+    :imported_at,
+    :updated_at
+  ]}
   schema "users" do
     field :email, :string
     field :username, :string

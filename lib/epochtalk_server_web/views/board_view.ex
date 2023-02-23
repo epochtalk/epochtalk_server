@@ -122,7 +122,11 @@ defmodule EpochtalkServerWeb.BoardView do
     board
   end
 
-  defp process_children_from_board_mapping(
+
+  @doc """
+  Board view helper method for mapping childboards to board using board mapping and user priority
+  """
+  def process_children_from_board_mapping(
          board_mapping_key,
          board_mapping,
          child_key,

@@ -128,11 +128,16 @@ defmodule EpochtalkServerWeb.SessionTest do
     end
 
     @tag :banned
-    test "handles ttl for baninfo without remember me (< 1 day ttl)", %{
+    test "handles baninfo ttl and ban_expiration without remember me (< 1 day ttl)", %{
       conn: conn,
       user_attrs: user_attrs,
       user: user
     } do
+      pre_ban_baninfo_ttl = Redix.command!(:redix, ["TTL", "user:#{user.id}:baninfo"])
+
+      pre_ban_ban_expiration =
+        Redix.command!(:redix, ["HGET", "user:#{user.id}:baninfo", "ban_expiration"])
+
       post(
         conn,
         Routes.user_path(conn, :login, %{
@@ -143,16 +148,27 @@ defmodule EpochtalkServerWeb.SessionTest do
 
       baninfo_ttl = Redix.command!(:redix, ["TTL", "user:#{user.id}:baninfo"])
 
+      ban_expiration =
+        Redix.command!(:redix, ["HGET", "user:#{user.id}:baninfo", "ban_expiration"])
+
+      assert is_nil(pre_ban_ban_expiration)
+      assert ban_expiration == "9999-12-31 00:00:00"
+      assert pre_ban_baninfo_ttl == -2
       assert baninfo_ttl <= @one_day_in_seconds
       assert baninfo_ttl > @almost_one_day_in_seconds
     end
 
     @tag :banned
-    test "handles ttl for baninfo with remember me (< 1 day ttl)", %{
+    test "handles baninfo ttl and ban_expiration with remember me (< 4 weeks ttl)", %{
       conn: conn,
       user_attrs: user_attrs,
       user: user
     } do
+      pre_ban_baninfo_ttl = Redix.command!(:redix, ["TTL", "user:#{user.id}:baninfo"])
+
+      pre_ban_ban_expiration =
+        Redix.command!(:redix, ["HGET", "user:#{user.id}:baninfo", "ban_expiration"])
+
       post(
         conn,
         Routes.user_path(conn, :login, %{
@@ -164,8 +180,68 @@ defmodule EpochtalkServerWeb.SessionTest do
 
       baninfo_ttl = Redix.command!(:redix, ["TTL", "user:#{user.id}:baninfo"])
 
+      ban_expiration =
+        Redix.command!(:redix, ["HGET", "user:#{user.id}:baninfo", "ban_expiration"])
+
+      assert is_nil(pre_ban_ban_expiration)
+      assert ban_expiration == "9999-12-31 00:00:00"
+      assert pre_ban_baninfo_ttl == -2
       assert baninfo_ttl <= @four_weeks_in_seconds
       assert baninfo_ttl > @almost_four_weeks_in_seconds
+    end
+
+    @tag :malicious
+    test "handles baninfo ttl and malicious score without remember me (< 1 day ttl)", %{
+      conn: conn,
+      user: user,
+      malicious_user_changeset: malicious_user_changeset
+    } do
+      pre_malicious_baninfo_ttl = Redix.command!(:redix, ["TTL", "user:#{user.id}:baninfo"])
+
+      pre_malicious_malicious_score =
+        Redix.command!(:redix, ["HGET", "user:#{user.id}:baninfo", "malicious_score"])
+
+      malicious_user = Map.put(user, :malicious_score, malicious_user_changeset.malicious_score)
+      remember_me = false
+      {:ok, authed_user, _token, _authed_conn} = Session.create(malicious_user, remember_me, conn)
+
+      malicious_score_ttl = Redix.command!(:redix, ["TTL", "user:#{authed_user.id}:baninfo"])
+
+      malicious_score =
+        Redix.command!(:redix, ["HGET", "user:#{authed_user.id}:baninfo", "malicious_score"])
+
+      assert is_nil(pre_malicious_malicious_score)
+      assert malicious_score == "4.0416"
+      assert pre_malicious_baninfo_ttl == -2
+      assert malicious_score_ttl <= @one_day_in_seconds
+      assert malicious_score_ttl > @almost_one_day_in_seconds
+    end
+
+    @tag :malicious
+    test "handles baninfo ttl and malicious score with remember me (< 4 weeks ttl)", %{
+      conn: conn,
+      user: user,
+      malicious_user_changeset: malicious_user_changeset
+    } do
+      pre_malicious_baninfo_ttl = Redix.command!(:redix, ["TTL", "user:#{user.id}:baninfo"])
+
+      pre_malicious_malicious_score =
+        Redix.command!(:redix, ["HGET", "user:#{user.id}:baninfo", "malicious_score"])
+
+      malicious_user = Map.put(user, :malicious_score, malicious_user_changeset.malicious_score)
+      remember_me = true
+      {:ok, authed_user, _token, _authed_conn} = Session.create(malicious_user, remember_me, conn)
+
+      malicious_score_ttl = Redix.command!(:redix, ["TTL", "user:#{authed_user.id}:baninfo"])
+
+      malicious_score =
+        Redix.command!(:redix, ["HGET", "user:#{authed_user.id}:baninfo", "malicious_score"])
+
+      assert is_nil(pre_malicious_malicious_score)
+      assert malicious_score == "4.0416"
+      assert pre_malicious_baninfo_ttl == -2
+      assert malicious_score_ttl <= @four_weeks_in_seconds
+      assert malicious_score_ttl > @almost_four_weeks_in_seconds
     end
   end
 

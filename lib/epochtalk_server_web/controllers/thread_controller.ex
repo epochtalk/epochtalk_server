@@ -35,7 +35,8 @@ defmodule EpochtalkServerWeb.ThreadController do
   @doc """
   Used to retrieve threads by board
 
-  TODO(akinsey): come back to this after implementing thread and post create
+  TODO(akinsey): ensure all board data is present (watched, stick_thread_count),
+  implement thread paging
   """
   def by_board(conn, attrs) do
     with board_id <- Validate.cast(attrs, "board_id", :integer, required: true),
@@ -50,19 +51,17 @@ defmodule EpochtalkServerWeb.ThreadController do
          board_mapping <- BoardMapping.all(),
          board_moderators <- BoardModerator.all() do
       render(conn, "by_board.json", %{
-        data: %{
-          write_access: !!(user && write_access && !board_banned),
-          board_banned: board_banned,
-          user_priority: user_priority,
-          username: (if user, do: user.username),
-          board_id: board_id,
-          board_mapping: board_mapping,
-          board_moderators: board_moderators,
-          page: page,
-          field: field,
-          limit: limit,
-          desc: desc
-        }
+        write_access: !!(user && write_access && !board_banned),
+        board_banned: board_banned,
+        user_priority: user_priority,
+        user: user,
+        board_id: board_id,
+        board_mapping: board_mapping,
+        board_moderators: board_moderators,
+        page: page,
+        field: field,
+        limit: limit,
+        desc: desc
       })
     else
       {:error, :board_does_not_exist} -> ErrorHelpers.render_json_error(conn, 400, "Error, board does not exist")

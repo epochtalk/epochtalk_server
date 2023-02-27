@@ -15,6 +15,7 @@ alias EpochtalkServer.Models.{
   Invitation,
   Mention,
   MetadataBoard,
+  MetadataThread,
   Notification,
   Permission,
   Post,

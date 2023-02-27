@@ -41,7 +41,7 @@ defmodule EpochtalkServerWeb.ThreadController do
   def by_board(conn, attrs) do
     with board_id <- Validate.cast(attrs, "board_id", :integer, required: true),
          page <- Validate.cast(attrs, "page", :integer, default: 1),
-         field <- Validate.cast(attrs, "field", :string),
+         field <- Validate.cast(attrs, "field", :string, default: "updated_at"),
          limit <- Validate.cast(attrs, "limit", :integer, default: 25),
          desc <- Validate.cast(attrs, "desc", :boolean, default: true),
          {:auth, user} <- {:auth, Guardian.Plug.current_resource(conn)},
@@ -54,7 +54,6 @@ defmodule EpochtalkServerWeb.ThreadController do
         write_access: !!(user && write_access && !board_banned),
         board_banned: board_banned,
         user_priority: user_priority,
-        user: user,
         board_id: board_id,
         board_mapping: board_mapping,
         board_moderators: board_moderators,

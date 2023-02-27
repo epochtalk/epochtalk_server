@@ -39,7 +39,6 @@ defmodule EpochtalkServerWeb.ThreadView do
         user_priority: user_priority,
         write_access: write_access,
         board_banned: board_banned,
-        user: user,
         page: page,
         field: field,
         limit: limit,
@@ -49,7 +48,6 @@ defmodule EpochtalkServerWeb.ThreadView do
     result = %{
       board: board,
       write_access: write_access,
-      user: user,
       page: page,
       field: field,
       limit: limit,

@@ -15,17 +15,23 @@ defmodule EpochtalkServerWeb.Router do
   end
 
   pipeline :enforce_auth do
+    plug Guardian.Plug.Pipeline,
+      module: EpochtalkServer.Auth.Guardian,
+      error_handler: EpochtalkServerWeb.GuardianErrorHandler
+
+    plug Guardian.Plug.VerifyHeader, claims: %{"typ" => "access"}
+    plug Guardian.Plug.LoadResource, allow_blank: false
     plug Guardian.Plug.EnsureAuthenticated
   end
 
   scope "/api", EpochtalkServerWeb do
-    pipe_through [:api, :maybe_auth, :enforce_auth]
-    get "/authenticate", UserController, :authenticate
+    pipe_through [:api, :enforce_auth]
     get "/users/preferences", PreferenceController, :preferences
     get "/mentions", MentionController, :page
     get "/notifications/counts", NotificationController, :counts
     post "/notifications/dismiss", NotificationController, :dismiss
     put "/admin/roles/update", RoleController, :update
+    get "/authenticate", UserController, :authenticate
   end
 
   scope "/api", EpochtalkServerWeb do

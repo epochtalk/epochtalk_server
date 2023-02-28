@@ -5,6 +5,7 @@ defmodule EpochtalkServer.Models.Thread do
   alias EpochtalkServer.Repo
   alias EpochtalkServer.Models.User
   alias EpochtalkServer.Models.Thread
+  alias EpochtalkServer.Models.MetadataThread
   alias EpochtalkServer.Models.Board
   alias EpochtalkServer.Models.Post
 
@@ -68,7 +69,7 @@ defmodule EpochtalkServer.Models.Thread do
   Returns recent threads accounting for user priority and user's ignored boards
   """
   @spec recent(user :: User.t(), user_priority :: non_neg_integer, opts :: list() | nil) :: [t()]
-  def recent(user, user_priority, opts \\ []) do
+  def recent(_user, _user_priority, opts \\ []) do
     limit = Keyword.get(opts, :limit, 5)
     # IO.inspect user
     # IO.inspect user_priority
@@ -78,5 +79,57 @@ defmodule EpochtalkServer.Models.Thread do
         limit: ^limit
 
     Repo.all(query)
+  end
+
+  def page_by_board_id(board_id, page \\ 1, opts \\ []) do
+    user_id = Keyword.get(opts, :user_id)
+    per_page = Keyword.get(opts, :per_page, 25)
+    field = Keyword.get(opts, :field, "updated_at")
+    reversed = Keyword.get(opts, :desc, false)
+    offset = (page * opts[:per_page]) - opts[:per_page];
+
+    opts = opts
+      |> Keyword.put(:user_id, user_id)
+      |> Keyword.put(:per_page, per_page)
+      |> Keyword.put(:field, field)
+      |> Keyword.put(:reversed, reversed)
+      |> Keyword.put(:offset, offset)
+
+    %{
+      sticky: sticky_by_board_id(board_id, page, opts),
+      normal: normal_by_board_id(board_id, page, opts)
+    }
+  end
+
+  def sticky_by_board_id(board_id, page, opts) when page == 1 do
+    field = String.to_atom(opts[:field])
+    direction = if opts[:reversed], do: :desc, else: :asc
+    subquery = case field do
+      :views ->
+        from t in Thread,
+          left_join: mt in MetadataThread,
+          on: t.id == mt.thread_id,
+          where: t.board_id == ^board_id and t.sticky == true and not is_nil(t.updated_at),
+          select: %{board_id: t.board_id, updated_at: t.updated_at, views: mt.views, created_at: t.created_at, post_count: t.post_count},
+          order_by: [{^direction, field(mt, ^field)}],
+          limit: ^opts[:per_page],
+          offset: ^opts[:offset]
+      _ ->
+        from t in Thread,
+          left_join: mt in MetadataThread,
+          on: t.id == mt.thread_id,
+          where: t.board_id == ^board_id and t.sticky == true and not is_nil(t.updated_at),
+          select: %{board_id: t.board_id, updated_at: t.updated_at, views: mt.views, created_at: t.created_at, post_count: t.post_count},
+          order_by: [{^direction, field(t, ^field)}],
+          limit: ^opts[:per_page],
+          offset: ^opts[:offset]
+    end
+    Repo.all(subquery)
+    # from e in subquery(query), select: avg(e.salary)
+  end
+  def sticky_by_board_id(_board_id, page, _opts) when page != 1, do: []
+
+
+  defp normal_by_board_id(_board_id, _page, _opts) do
   end
 end

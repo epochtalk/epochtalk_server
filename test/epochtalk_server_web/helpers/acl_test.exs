@@ -5,13 +5,13 @@ defmodule EpochtalkServerWeb.ACLTest do
 
   describe "allow!/2" do
     @tag :authenticated
-    test "returns :ok with valid 'User' role permissions", %{user: user} do
-      assert ACL.allow!(user, "boards.allCategories") == :ok
-      assert ACL.allow!(user, "posts.create") == :ok
-      assert ACL.allow!(user, "threads.create") == :ok
-      assert ACL.allow!(user, "boards.allCategories.allow") == :ok
-      assert ACL.allow!(user, "posts.create.allow") == :ok
-      assert ACL.allow!(user, "threads.create.allow") == :ok
+    test "returns :ok with valid 'User' role permissions", %{authed_user: authed_user} do
+      assert ACL.allow!(authed_user, "boards.allCategories") == :ok
+      assert ACL.allow!(authed_user, "posts.create") == :ok
+      assert ACL.allow!(authed_user, "threads.create") == :ok
+      assert ACL.allow!(authed_user, "boards.allCategories.allow") == :ok
+      assert ACL.allow!(authed_user, "posts.create.allow") == :ok
+      assert ACL.allow!(authed_user, "threads.create.allow") == :ok
     end
 
     test "defaults to 'anonymous' role if not authenticated" do
@@ -66,39 +66,47 @@ defmodule EpochtalkServerWeb.ACLTest do
     end
 
     @tag :authenticated
-    test "raises 'InvalidPermissions' error with invalid 'User' role permissions", %{user: user} do
+    test "raises 'InvalidPermissions' error with invalid 'User' role permissions", %{
+      authed_user: authed_user
+    } do
       assert_raise InvalidPermission,
                    ~r/^Forbidden, invalid permissions to perform this action/,
                    fn ->
-                     ACL.allow!(user, "roles.update")
+                     ACL.allow!(authed_user, "roles.update")
                    end
 
       assert_raise InvalidPermission,
                    ~r/^Forbidden, invalid permissions to perform this action/,
                    fn ->
-                     ACL.allow!(user, "roles.create")
+                     ACL.allow!(authed_user, "roles.create")
                    end
 
       assert_raise InvalidPermission,
                    ~r/^Forbidden, invalid permissions to perform this action/,
                    fn ->
-                     ACL.allow!(user, "adminSettings.find")
+                     ACL.allow!(authed_user, "adminSettings.find")
                    end
     end
   end
 
   describe "allow!/3" do
     @tag :authenticated
-    test "returns :ok with valid 'User' role permissions", %{user: user} do
-      assert ACL.allow!(user, "boards.allCategories", "You cannot query all categories") == :ok
-      assert ACL.allow!(user, "posts.create", "You cannot create posts") == :ok
-      assert ACL.allow!(user, "threads.create", "You cannot create threads") == :ok
-
-      assert ACL.allow!(user, "boards.allCategories.allow", "You cannot query all categories") ==
+    test "returns :ok with valid 'User' role permissions", %{authed_user: authed_user} do
+      assert ACL.allow!(authed_user, "boards.allCategories", "You cannot query all categories") ==
                :ok
 
-      assert ACL.allow!(user, "posts.create.allow", "You cannot create posts") == :ok
-      assert ACL.allow!(user, "threads.create.allow", "You cannot create threads") == :ok
+      assert ACL.allow!(authed_user, "posts.create", "You cannot create posts") == :ok
+      assert ACL.allow!(authed_user, "threads.create", "You cannot create threads") == :ok
+
+      assert ACL.allow!(
+               authed_user,
+               "boards.allCategories.allow",
+               "You cannot query all categories"
+             ) ==
+               :ok
+
+      assert ACL.allow!(authed_user, "posts.create.allow", "You cannot create posts") == :ok
+      assert ACL.allow!(authed_user, "threads.create.allow", "You cannot create threads") == :ok
     end
 
     test "raises 'InvalidPermissions' error with unauthenticated connection" do
@@ -152,17 +160,17 @@ defmodule EpochtalkServerWeb.ACLTest do
 
     @tag :authenticated
     test "raises 'InvalidPermissions' error with custom message with invalid 'User' role permissions",
-         %{user: user} do
+         %{authed_user: authed_user} do
       assert_raise InvalidPermission, ~r/^You cannot update roles/, fn ->
-        ACL.allow!(user, "roles.update", "You cannot update roles")
+        ACL.allow!(authed_user, "roles.update", "You cannot update roles")
       end
 
       assert_raise InvalidPermission, ~r/^You cannot create roles/, fn ->
-        ACL.allow!(user, "roles.create", "You cannot create roles")
+        ACL.allow!(authed_user, "roles.create", "You cannot create roles")
       end
 
       assert_raise InvalidPermission, ~r/^You cannot fetch admin settings/, fn ->
-        ACL.allow!(user, "adminSettings.find", "You cannot fetch admin settings")
+        ACL.allow!(authed_user, "adminSettings.find", "You cannot fetch admin settings")
       end
     end
   end

@@ -5,7 +5,8 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
     @tag :authenticated
     test "gets all roles when authenticated", %{conn: conn} do
       conn = get(conn, Routes.role_path(conn, :all))
-      assert [%{"lookup" => "superAdministrator", "name" => "Super Administrator", "priority" => 0} | roles] = json_response(conn, 200)
+      roles = json_response(conn, 200)
+      assert [%{"lookup" => "superAdministrator", "name" => "Super Administrator", "priority" => 0} | roles] = roles
       assert [%{"lookup" => "administrator", "name" => "Administrator", "priority" => 1} | roles] = roles
       assert [%{"lookup" => "globalModerator", "name" => "Global Moderator", "priority" => 2} | roles] = roles
       assert [%{"lookup" => "moderator", "name" => "Moderator", "priority" => 3} | roles] = roles

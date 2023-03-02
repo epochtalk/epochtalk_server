@@ -18,5 +18,10 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
       assert [%{"lookup" => "private", "name" => "Private", "priority" => 9} | roles] = roles
       assert [] = roles
     end
+
+    test "does not get roles when not authenticated", %{conn: conn} do
+      conn = get(conn, Routes.role_path(conn, :all))
+      assert %{"error" => "Unauthorized", "message" => "No resource found"} = json_response(conn, 401)
+    end
   end
 end

@@ -70,7 +70,7 @@ defmodule EpochtalkServer.Models.RolePermission do
 
     new_permissions = new_permissions |> Iteraptor.to_flatmap()
 
-    # change a permission if if's different
+    # change a permission if it's different
     new_role_permissions =
       Enum.reduce(old_role_permissions, [], fn %{
                                                  permission_path: permission_path,

@@ -104,31 +104,19 @@ defmodule EpochtalkServer.Models.Thread do
   def sticky_by_board_id(board_id, page, opts) when page == 1 do
     field = String.to_atom(opts[:field])
     direction = if opts[:reversed], do: :desc, else: :asc
-    subquery = case field do
-      :views ->
-        from t in Thread,
-          left_join: mt in MetadataThread,
-          on: t.id == mt.thread_id,
-          where: t.board_id == ^board_id and t.sticky == true and not is_nil(t.updated_at),
-          select: %{board_id: t.board_id, updated_at: t.updated_at, views: mt.views, created_at: t.created_at, post_count: t.post_count},
-          order_by: [{^direction, field(mt, ^field)}],
-          limit: ^opts[:per_page],
-          offset: ^opts[:offset]
-      _ ->
-        from t in Thread,
-          left_join: mt in MetadataThread,
-          on: t.id == mt.thread_id,
-          where: t.board_id == ^board_id and t.sticky == true and not is_nil(t.updated_at),
-          select: %{board_id: t.board_id, updated_at: t.updated_at, views: mt.views, created_at: t.created_at, post_count: t.post_count},
-          order_by: [{^direction, field(t, ^field)}],
-          limit: ^opts[:per_page],
-          offset: ^opts[:offset]
-    end
+    subquery = Thread
+    |> join(:left, [t], mt in MetadataThread, on: t.id == mt.thread_id)
+    |> where([t, mt], t.board_id == ^board_id and t.sticky == true and not is_nil(t.updated_at))
+    |> select([t, mt], %{board_id: t.board_id, updated_at: t.updated_at, views: mt.views, created_at: t.created_at, post_count: t.post_count})
+    |> limit(^opts[:per_page])
+    |> offset(^opts[:offset])
+
+    subquery = if field == :views,
+      do: subquery |> order_by([t, mt], [{^direction, mt.views}]),
+      else: subquery |> order_by([t], [{^direction, field(t, ^field)}])
     Repo.all(subquery)
-    # from e in subquery(query), select: avg(e.salary)
   end
   def sticky_by_board_id(_board_id, page, _opts) when page != 1, do: []
-
 
   defp normal_by_board_id(_board_id, _page, _opts) do
   end

@@ -16,7 +16,7 @@ defmodule EpochtalkServerWeb.RoleController do
   def update(
         conn,
         %{
-          "id" => _,
+          "id" => id,
           "permissions" => permissions,
           "priority_restrictions" => priority_restrictions
         } = attrs

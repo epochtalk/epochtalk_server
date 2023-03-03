@@ -135,9 +135,9 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
       }
 
       modified_newbie_permissions = %{
-        adminAccess: %{
-          management: %{
-            bannedAddresses: true
+        "adminAccess" => %{
+          "management" => %{
+            "bannedAddresses" => true
           }
         }
       }

@@ -124,7 +124,7 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
       }
 
       new_newbie_permissions = %{
-        id: 6,
+        id: 7,
         permissions: %{
           adminAccess: %{
             management: %{

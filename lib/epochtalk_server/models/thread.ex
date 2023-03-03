@@ -149,6 +149,17 @@ defmodule EpochtalkServer.Models.Thread do
           ORDER BY created_at
           LIMIT 1
         """, tlist.id, t.time))
+      # join last post info
+      |> join(:left_lateral, [tlist], pl in fragment("""
+          SELECT p.id AS last_post_id, p.position, p.created_at, p.deleted,
+           u.id, u.username, u.deleted as user_deleted, up.avatar
+         FROM posts p
+         LEFT JOIN users u ON p.user_id = u.id
+         LEFT JOIN users.profiles up ON p.user_id = up.user_id
+         WHERE p.thread_id = ?
+         ORDER BY p.created_at DESC
+         LIMIT 1
+        """, tlist.id))
       |> select([tlist, t, p, tv, pl], %{
           id: tlist.id,
           slug: t.slug,
@@ -167,6 +178,14 @@ defmodule EpochtalkServer.Models.Thread do
           user_deleted: p.user_deleted,
           post_id: tv.id,
           post_position: tv.position,
+          last_post_id: pl.last_post_id,
+          last_post_position: pl.position,
+          last_post_created_at: pl.created_at,
+          last_post_deleted: pl.deleted,
+          last_post_user_id: pl.id,
+          last_post_username: pl.username,
+          last_post_user_deleted: pl.user_deleted,
+          last_post_avatar: pl.avatar
         })
     Repo.all(query)
   end

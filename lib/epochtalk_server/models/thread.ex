@@ -121,18 +121,53 @@ defmodule EpochtalkServer.Models.Thread do
 
     # outer query
     query = from(tlist in subquery(inner_query))
+      # join thread info
       |> join(:left_lateral, [tlist], t in fragment("""
-        SELECT
-          t1.locked, t1.sticky, t1.slug, t1.moderated,
-          t1.post_count, t1.created_at, t1.updated_at, mt.views,
-          (SELECT EXISTS ( SELECT 1 FROM polls WHERE thread_id = ? )) as poll,
-          (SELECT time FROM users.thread_views WHERE thread_id = ? AND user_id = ?)
+          SELECT t1.locked, t1.sticky, t1.slug, t1.moderated,
+            t1.post_count, t1.created_at, t1.updated_at, mt.views,
+            (SELECT EXISTS ( SELECT 1 FROM polls WHERE thread_id = ? )) as poll,
+            (SELECT time FROM users.thread_views WHERE thread_id = ? AND user_id = ?)
           FROM threads t1
-          LEFT JOIN metadata.threads mt On ? = mt.thread_id
+          LEFT JOIN metadata.threads mt ON ? = mt.thread_id
           WHERE t1.id = ?
         """, tlist.id, tlist.id, ^opts[:user_id], tlist.id, tlist.id))
-      |> select([tlist, t], %{id: tlist.id, slug: t.slug})
-
+      # join thread title and author info
+      |> join(:left_lateral, [tlist], p in fragment("""
+          SELECT p1.content ->> \'title\' as title, p1.user_id,
+            u.username, u.deleted as user_deleted
+          FROM posts p1
+          LEFT JOIN users u ON p1.user_id = u.id
+          WHERE p1.thread_id = ?
+          ORDER BY p1.created_at
+          LIMIT 1
+        """, tlist.id))
+      # join post id and post position
+      |> join(:left_lateral, [tlist, t], tv in fragment("""
+          SELECT id, position
+          FROM posts
+          WHERE thread_id = ? AND created_at >= ?
+          ORDER BY created_at
+          LIMIT 1
+        """, tlist.id, t.time))
+      |> select([tlist, t, p, tv, pl], %{
+          id: tlist.id,
+          slug: t.slug,
+          locked: t.locked,
+          sticky: t.sticky,
+          moderated: t.moderated,
+          poll: t.poll,
+          created_at: t.created_at,
+          updated_at: t.updated_at,
+          post_count: t.post_count,
+          last_viewed: t.time,
+          view_count: tlist.views,
+          title: p.title,
+          user_id: p.user_id,
+          username: p.username,
+          user_deleted: p.user_deleted,
+          post_id: tv.id,
+          post_position: tv.position,
+        })
     Repo.all(query)
   end
   def sticky_by_board_id(_board_id, page, _opts) when page != 1, do: []

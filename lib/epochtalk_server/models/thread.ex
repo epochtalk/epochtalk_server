@@ -102,19 +102,38 @@ defmodule EpochtalkServer.Models.Thread do
   end
 
   def sticky_by_board_id(board_id, page, opts) when page == 1 do
-    field = String.to_atom(opts[:field])
-    direction = if opts[:reversed], do: :desc, else: :asc
-    subquery = Thread
-    |> join(:left, [t], mt in MetadataThread, on: t.id == mt.thread_id)
-    |> where([t, mt], t.board_id == ^board_id and t.sticky == true and not is_nil(t.updated_at))
-    |> select([t, mt], %{board_id: t.board_id, updated_at: t.updated_at, views: mt.views, created_at: t.created_at, post_count: t.post_count})
+    # base inner_query fetch thread and metadata thread
+    inner_query = Thread
+    |> join(:left, [t2], mt in MetadataThread, on: t2.id == mt.thread_id)
+    |> where([t2, mt], t2.board_id == ^board_id and t2.sticky == true and not is_nil(t2.updated_at))
+    |> select([t2, mt], %{id: t2.id, updated_at: t2.updated_at, views: mt.views, created_at: t2.created_at, post_count: t2.post_count})
     |> limit(^opts[:per_page])
     |> offset(^opts[:offset])
 
-    subquery = if field == :views,
-      do: subquery |> order_by([t, mt], [{^direction, mt.views}]),
-      else: subquery |> order_by([t], [{^direction, field(t, ^field)}])
-    Repo.all(subquery)
+    # handle sort field and direction
+    field = String.to_atom(opts[:field])
+    direction = if opts[:reversed], do: :desc, else: :asc
+
+    # sort by field in joined metadata thread table if sort field is 'view'
+    inner_query = if field == :views,
+      do: inner_query |> order_by([t, mt], [{^direction, mt.views}]),
+      else: inner_query |> order_by([t], [{^direction, field(t, ^field)}])
+
+    # outer query
+    query = from(tlist in subquery(inner_query))
+      |> join(:left_lateral, [tlist], t in fragment("""
+        SELECT
+          t1.locked, t1.sticky, t1.slug, t1.moderated,
+          t1.post_count, t1.created_at, t1.updated_at, mt.views,
+          (SELECT EXISTS ( SELECT 1 FROM polls WHERE thread_id = ? )) as poll,
+          (SELECT time FROM users.thread_views WHERE thread_id = ? AND user_id = ?)
+          FROM threads t1
+          LEFT JOIN metadata.threads mt On ? = mt.thread_id
+          WHERE t1.id = ?
+        """, tlist.id, tlist.id, ^opts[:user_id], tlist.id, tlist.id))
+      |> select([tlist, t], %{id: tlist.id, slug: t.slug})
+
+    Repo.all(query)
   end
   def sticky_by_board_id(_board_id, page, _opts) when page != 1, do: []
 

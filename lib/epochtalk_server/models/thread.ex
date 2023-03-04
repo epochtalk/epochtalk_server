@@ -86,7 +86,7 @@ defmodule EpochtalkServer.Models.Thread do
     per_page = Keyword.get(opts, :per_page, 25)
     field = Keyword.get(opts, :field, "updated_at")
     reversed = Keyword.get(opts, :desc, false)
-    offset = (page * opts[:per_page]) - opts[:per_page];
+    offset = (page * opts[:per_page]) - opts[:per_page]
 
     opts = opts
       |> Keyword.put(:user_id, user_id)
@@ -191,6 +191,38 @@ defmodule EpochtalkServer.Models.Thread do
   end
   def sticky_by_board_id(_board_id, page, _opts) when page != 1, do: []
 
-  defp normal_by_board_id(_board_id, _page, _opts) do
+  def normal_by_board_id(board_id, _page, opts) do
+    normal_count_query = from b in Board, where: b.id == ^board_id, select: b.thread_count
+    sticky_count_query = from t in Thread, where: t.board_id == ^board_id and t.sticky == true, select: count(t.id)
+    normal_thread_count = normal_count_query |> Repo.one()
+    sticky_thread_count = sticky_count_query |> Repo.one()
+
+    thread_count = if normal_thread_count, do: normal_thread_count - sticky_thread_count
+    IO.inspect opts
+    IO.inspect thread_count
+    IO. inspect opts[:offset] > floor(thread_count / 2)
+    # determine wheter to start from front or back
+    opts = if not is_nil(thread_count) and opts[:offset] > floor(thread_count / 2) do
+      # invert reverse
+      reversed = !opts[:reversed]
+      opts = Keyword.put(opts, :reversed, reversed)
+
+      # calculate new per_page
+      per_page = if thread_count <= opts[:offset] + opts[:per_page],
+        do: thread_count - opts[:offset],
+        else: opts[:per_page]
+      opts = Keyword.put(opts, :per_page, per_page)
+
+      # calculate new offset after modifying per_page
+      offset = if thread_count <= opts[:offset] + opts[:per_page],
+        do: 0,
+        else: thread_count - opts[:offset] - opts[:per_page]
+      Keyword.put(opts, :offset, offset)
+    else
+      opts
+    end
+    IO.inspect opts
+
+    %{normal_thread_count: normal_thread_count, sticky_thread_count: sticky_thread_count}
   end
 end

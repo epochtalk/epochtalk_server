@@ -13,14 +13,11 @@ defmodule EpochtalkServerWeb.RoleController do
   @doc """
   Used to update a specific `Role`
   """
-  def update(
-        conn,
-        %{
-          "id" => id,
-          "permissions" => permissions
-        } = attrs
-      ) do
+  def update(conn, attrs) do
     with id <- Validate.cast(attrs, "id", :integer, min: 1),
+         # TODO(boka): implement validators
+         priority_restrictions <- attrs["priority_restrictions"],
+         permissions <- attrs["permissions"],
          {:auth, _user} <- {:auth, Guardian.Plug.current_resource(conn)},
          {:ok, data} <- RolePermission.modify_by_role(%Role{id: id, permissions: permissions}) do
       render(conn, "update.json", data: data)

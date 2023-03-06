@@ -87,6 +87,7 @@ defmodule EpochtalkServer.MixProject do
         "seed.test_banned_address",
         "seed.all",
         "seed.user test test@test.com password",
+        "seed.user admin admin@test.com password admin",
         "test"
       ]
     ]

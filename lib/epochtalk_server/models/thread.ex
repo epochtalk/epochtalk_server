@@ -86,14 +86,14 @@ defmodule EpochtalkServer.Models.Thread do
     per_page = Keyword.get(opts, :per_page, 25)
     field = Keyword.get(opts, :field, "updated_at")
     reversed = Keyword.get(opts, :desc, false)
-    offset = (page * opts[:per_page]) - opts[:per_page]
+    offset = (page * per_page) - per_page
 
     opts = opts
       |> Keyword.put(:user_id, user_id)
       |> Keyword.put(:per_page, per_page)
       |> Keyword.put(:field, field)
       |> Keyword.put(:reversed, reversed)
-      |> Keyword.put(:sort_order, reversed)
+      |> Keyword.put(:sort_order, reversed) # duplicate reversed for outer query
       |> Keyword.put(:offset, offset)
 
     %{

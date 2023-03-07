@@ -93,6 +93,7 @@ defmodule EpochtalkServer.Models.Thread do
       |> Keyword.put(:per_page, per_page)
       |> Keyword.put(:field, field)
       |> Keyword.put(:reversed, reversed)
+      |> Keyword.put(:sort_order, reversed)
       |> Keyword.put(:offset, offset)
 
     %{
@@ -101,12 +102,67 @@ defmodule EpochtalkServer.Models.Thread do
     }
   end
 
-  def sticky_by_board_id(board_id, page, opts) when page == 1 do
-    # base inner_query fetch thread and metadata thread
-    inner_query = inner_thread_query(board_id, true, opts)
+  defp sticky_by_board_id(board_id, page, opts) when page == 1,
+    do: generate_thread_query(board_id, true, opts) |> Repo.all()
+  defp sticky_by_board_id(_board_id, page, _opts) when page != 1, do: []
+
+  defp normal_by_board_id(board_id, _page, opts) do
+    normal_count_query = from b in Board, where: b.id == ^board_id, select: b.thread_count
+    sticky_count_query = from t in Thread, where: t.board_id == ^board_id and t.sticky == true, select: count(t.id)
+    normal_thread_count = normal_count_query |> Repo.one()
+    sticky_thread_count = sticky_count_query |> Repo.one()
+
+    thread_count = if normal_thread_count, do: normal_thread_count - sticky_thread_count
+
+    # determine wheter to start from front or back
+    opts = if not is_nil(thread_count) and opts[:offset] > floor(thread_count / 2) do
+      # invert reverse
+      reversed = !opts[:reversed]
+      opts = Keyword.put(opts, :reversed, reversed)
+
+      # calculate new per_page
+      per_page = if thread_count <= opts[:offset] + opts[:per_page],
+        do: abs(thread_count - opts[:offset]),
+        else: opts[:per_page]
+      opts = Keyword.put(opts, :per_page, per_page)
+
+      # calculate new offset after modifying per_page
+      offset = if thread_count <= opts[:offset] + opts[:per_page],
+        do: 0,
+        else: thread_count - opts[:offset] - opts[:per_page]
+      Keyword.put(opts, :offset, offset)
+    else
+      opts
+    end
+
+    generate_thread_query(board_id, false, opts) |> Repo.all()
+  end
+
+  defp generate_thread_query(board_id, sticky, opts) do
+    # get base threads with metadata to join onto
+    inner_query = Thread
+    |> join(:left, [t2], mt in MetadataThread, on: t2.id == mt.thread_id)
+    |> where([t2, mt], t2.board_id == ^board_id and t2.sticky == ^sticky and not is_nil(t2.updated_at))
+    |> select([t2, mt], %{id: t2.id, updated_at: t2.updated_at, views: mt.views, created_at: t2.created_at, post_count: t2.post_count})
+
+    # if not sticky attach limit and offset to inner query
+    inner_query = if sticky,
+      do: inner_query,
+      else: inner_query |> limit(^opts[:per_page]) |> offset(^opts[:offset])
+
+    # handle sort field and direction
+    field = String.to_atom(opts[:field])
+    direction = if opts[:reversed], do: :desc, else: :asc
+
+    # sort by field in joined metadata thread table if sort field is 'view'
+    inner_query = if field == :views,
+      do: inner_query |> order_by([t, mt], [{^direction, mt.views}]),
+      else: inner_query |> order_by([t], [{^direction, field(t, ^field)}])
 
     # outer query
-    query = from(tlist in subquery(inner_query))
+    sort_order = if opts[:sort_order], do: :desc, else: :asc
+
+    from(tlist in subquery(inner_query))
       # join thread info
       |> join(:left_lateral, [tlist], t in fragment("""
           SELECT t1.locked, t1.sticky, t1.slug, t1.moderated,
@@ -173,67 +229,6 @@ defmodule EpochtalkServer.Models.Thread do
           last_post_user_deleted: pl.user_deleted,
           last_post_avatar: pl.avatar
         })
-    Repo.all(query)
-  end
-  def sticky_by_board_id(_board_id, page, _opts) when page != 1, do: []
-
-  def normal_by_board_id(board_id, _page, opts) do
-    normal_count_query = from b in Board, where: b.id == ^board_id, select: b.thread_count
-    sticky_count_query = from t in Thread, where: t.board_id == ^board_id and t.sticky == true, select: count(t.id)
-    normal_thread_count = normal_count_query |> Repo.one()
-    sticky_thread_count = sticky_count_query |> Repo.one()
-
-    thread_count = if normal_thread_count, do: normal_thread_count - sticky_thread_count
-
-    IO.inspect thread_count
-    IO.inspect opts
-
-    # determine wheter to start from front or back
-    opts = if not is_nil(thread_count) and opts[:offset] > floor(thread_count / 2) do
-      # invert reverse
-      reversed = !opts[:reversed]
-      opts = Keyword.put(opts, :reversed, reversed)
-
-      # calculate new per_page
-      per_page = if thread_count <= opts[:offset] + opts[:per_page],
-        do: thread_count - opts[:offset],
-        else: opts[:per_page]
-      opts = Keyword.put(opts, :per_page, per_page)
-
-      # calculate new offset after modifying per_page
-      offset = if thread_count <= opts[:offset] + opts[:per_page],
-        do: 0,
-        else: thread_count - opts[:offset] - opts[:per_page]
-      Keyword.put(opts, :offset, offset)
-    else
-      opts
-    end
-
-    IO.inspect opts
-
-    # base inner_query fetch thread and metadata thread
-    inner_query = inner_thread_query(board_id, false, opts)
-
-    %{threads: Repo.all(inner_query), normal_thread_count: normal_thread_count, sticky_thread_count: sticky_thread_count}
-  end
-
-  defp inner_thread_query(board_id, sticky, opts) do
-    query = Thread
-    |> join(:left, [t2], mt in MetadataThread, on: t2.id == mt.thread_id)
-    |> where([t2, mt], t2.board_id == ^board_id and t2.sticky == ^sticky and not is_nil(t2.updated_at))
-    |> select([t2, mt], %{id: t2.id, updated_at: t2.updated_at, views: mt.views, created_at: t2.created_at, post_count: t2.post_count})
-
-    query = if sticky,
-      do: query,
-      else: query |> limit(^opts[:per_page]) |> offset(^opts[:offset])
-
-    # handle sort field and direction
-    field = String.to_atom(opts[:field])
-    direction = if opts[:reversed], do: :desc, else: :asc
-
-    # sort by field in joined metadata thread table if sort field is 'view'
-    if field == :views,
-      do: query |> order_by([t, mt], [{^direction, mt.views}]),
-      else: query |> order_by([t], [{^direction, field(t, ^field)}])
+      |> order_by([tlist], [{^sort_order, field(tlist, ^field)}])
   end
 end

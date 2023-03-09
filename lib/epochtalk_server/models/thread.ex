@@ -82,7 +82,8 @@ defmodule EpochtalkServer.Models.Thread do
   end
 
   def page_by_board_id(board_id, page \\ 1, opts \\ []) do
-    user_id = Keyword.get(opts, :user_id)
+    user = Keyword.get(opts, :user)
+    user_id = if is_nil(user), do: nil, else: Map.get(user, :id)
     per_page = Keyword.get(opts, :per_page, 25)
     field = Keyword.get(opts, :field, "updated_at")
     reversed = Keyword.get(opts, :desc, false)

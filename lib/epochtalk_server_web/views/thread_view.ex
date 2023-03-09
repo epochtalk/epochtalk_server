@@ -33,6 +33,7 @@ defmodule EpochtalkServerWeb.ThreadView do
   Renders `Board` for find query.
   """
   def render("by_board.json", %{
+        threads: threads,
         board_moderators: board_moderators,
         board_mapping: board_mapping,
         board_id: board_id,
@@ -46,6 +47,7 @@ defmodule EpochtalkServerWeb.ThreadView do
       }) do
     board = BoardView.format_board_data_for_find(board_moderators, board_mapping, board_id, user_priority)
     result = %{
+      threads: threads,
       board: board,
       write_access: write_access,
       page: page,

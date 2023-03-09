@@ -44,13 +44,16 @@ defmodule EpochtalkServerWeb.ThreadController do
          field <- Validate.cast(attrs, "field", :string, default: "updated_at"),
          limit <- Validate.cast(attrs, "limit", :integer, default: 25),
          desc <- Validate.cast(attrs, "desc", :boolean, default: true),
-         {:auth, user} <- {:auth, Guardian.Plug.current_resource(conn)},
+         user <- Guardian.Plug.current_resource(conn),
+         user_id <- (if is_nil(user), do: nil, else: user.id),
          user_priority <- ACL.get_user_priority(conn),
          {:ok, write_access} <- Board.get_write_access_by_id(board_id, user_priority),
          {:ok, board_banned} <- BoardBan.is_banned_from_board(user, board_id: board_id),
          board_mapping <- BoardMapping.all(),
-         board_moderators <- BoardModerator.all() do
+         board_moderators <- BoardModerator.all(),
+         threads <- Thread.page_by_board_id(board_id, page, user_id: user_id, per_page: limit, field: field, desc: desc) do
       render(conn, "by_board.json", %{
+        threads: threads,
         write_access: !!(user && write_access && !board_banned),
         board_banned: board_banned,
         user_priority: user_priority,

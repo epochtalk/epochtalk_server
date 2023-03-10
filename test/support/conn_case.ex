@@ -15,6 +15,16 @@ defmodule EpochtalkServerWeb.ConnCase do
   this option is not recommended for other databases.
   """
 
+  # username/email/password from user seed in `mix test` (see mix.exs)
+  @test_username "test"
+  @test_email "test@test.com"
+  @test_password "password"
+  @test_user_attrs %{
+    username: @test_username,
+    email: @test_email,
+    password: @test_password
+  }
+
   use ExUnit.CaseTemplate
 
   using do
@@ -31,25 +41,56 @@ defmodule EpochtalkServerWeb.ConnCase do
     end
   end
 
-  setup tags do
+  setup context do
     alias EpochtalkServer.Session
     alias EpochtalkServer.Models.User
+    alias EpochtalkServer.Models.Ban
 
     :ok = Ecto.Adapters.SQL.Sandbox.checkout(EpochtalkServer.Repo)
 
-    unless tags[:async] do
+    unless context[:async] do
       Ecto.Adapters.SQL.Sandbox.mode(EpochtalkServer.Repo, {:shared, self()})
     end
 
-    if tags[:authenticated] do
-      {:ok, user} =
-        User.create(%{username: "authtest", email: "authtest@test.com", password: "password"})
+    {:ok, user} = User.by_username(@test_username)
+    conn = Phoenix.ConnTest.build_conn()
 
-      conn = Phoenix.ConnTest.build_conn()
-      {:ok, user, token, conn} = Session.create(user, false, conn)
-      {:ok, conn: conn, user: user, token: token}
-    else
-      {:ok, conn: Phoenix.ConnTest.build_conn()}
-    end
+    # log user in if necessary
+    context_updates =
+      case context[:authenticated] do
+        true ->
+          remember_me = false
+          {:ok, user, token, authed_conn} = Session.create(user, remember_me, conn)
+
+          {:ok,
+           conn: authed_conn, authed_user: user, token: token, authed_user_attrs: @test_user_attrs}
+
+        # :authenticated not set, return default conn
+        _ ->
+          {:ok, conn: conn, user: user, user_attrs: @test_user_attrs}
+      end
+
+    # ban user if necessary
+    context_updates =
+      if context[:banned] do
+        {:ok, banned_user_changeset} = Ban.ban(user)
+        {:ok, updates_keyword_list} = context_updates
+        {:ok, updates_keyword_list ++ [banned_user_changeset: banned_user_changeset]}
+      else
+        context_updates
+      end
+
+    # handle malicious score if necessary
+    context_updates =
+      if context[:malicious] do
+        # returns changeset from Ban.ban()
+        {:ok, malicious_user_changeset} = User.handle_malicious_user(user, conn.remote_ip)
+        {:ok, updates_keyword_list} = context_updates
+        {:ok, updates_keyword_list ++ [malicious_user_changeset: malicious_user_changeset]}
+      else
+        context_updates
+      end
+
+    context_updates
   end
 end

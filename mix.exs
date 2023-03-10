@@ -73,7 +73,7 @@ defmodule EpochtalkServer.MixProject do
       "db.migrate": ["ecto.migrate", "ecto.dump"],
       "db.rollback": ["ecto.rollback", "ecto.dump"],
       "seed.all": ["seed.prp", "seed.permissions", "seed.roles", "seed.rp", "seed.forum"],
-      "seed.banned_address": ["run priv/repo/seed_banned_address.exs"],
+      "seed.test_banned_address": ["run priv/repo/seed_test_banned_address.exs"],
       "seed.forum": ["run priv/repo/seed_forum.exs"],
       "seed.permissions": ["run priv/repo/seed_permissions.exs"],
       "seed.prp": ["run priv/repo/process_roles_permissions.exs"],
@@ -85,8 +85,9 @@ defmodule EpochtalkServer.MixProject do
         "ecto.drop",
         "ecto.create --quiet",
         "ecto.migrate --quiet",
-        "seed.banned_address",
+        "seed.test_banned_address",
         "seed.all",
+        "seed.user test test@test.com password",
         "test"
       ]
     ]

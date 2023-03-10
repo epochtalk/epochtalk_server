@@ -46,17 +46,18 @@ defmodule EpochtalkServerWeb.ThreadView do
         limit: limit,
         desc: desc
       }) do
-    user_id = if is_nil(user), do: nil, else: user.id
-
+    # format board data
     board = BoardView.format_board_data_for_find(board_moderators, board_mapping, board_id, user_priority)
 
-    threads = %{
-      normal: threads.normal |> Enum.map(&format_thread_data(&1, user_id)),
-      sticky: threads.sticky |> Enum.map(&format_thread_data(&1, user_id))
-    }
+    # format thread data
+    user_id = if is_nil(user), do: nil, else: user.id
+    normal = threads.normal |> Enum.map(&format_thread_data(&1, user_id))
+    sticky = threads.sticky |> Enum.map(&format_thread_data(&1, user_id))
 
+    # build by_board results
     result = %{
-      threads: threads,
+      normal: normal,
+      sticky: sticky,
       board: board,
       write_access: write_access,
       page: page,
@@ -64,6 +65,8 @@ defmodule EpochtalkServerWeb.ThreadView do
       limit: limit,
       desc: desc,
     }
+
+    # return results and append board_banned only if user is banned
     if board_banned, do: Map.put(result, :board_banned, board_banned), else: result
   end
 

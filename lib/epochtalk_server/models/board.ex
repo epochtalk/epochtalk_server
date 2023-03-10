@@ -152,4 +152,12 @@ defmodule EpochtalkServer.Models.Board do
       {:error, :board_does_not_exist}
     end
   end
+
+  def slug_to_id(slug) when is_binary(slug) do
+    query = from b in Board,
+      where: b.slug == ^slug,
+      select: b.id
+
+    Repo.one(query)
+  end
 end

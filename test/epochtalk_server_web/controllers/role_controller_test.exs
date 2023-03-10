@@ -42,8 +42,8 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
     end
   end
 
-  @tag :authenticated
   describe "update/2" do
+    @tag :authenticated
     test "modifies a role's permissions when authenticated", %{conn: conn} do
       initial_newbie_permissions = %{
         "ads" => %{

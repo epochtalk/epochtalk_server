@@ -37,6 +37,7 @@ defmodule EpochtalkServerWeb.ThreadView do
         board_moderators: board_moderators,
         board_mapping: board_mapping,
         board_id: board_id,
+        user: user,
         user_priority: user_priority,
         write_access: write_access,
         board_banned: board_banned,
@@ -45,7 +46,15 @@ defmodule EpochtalkServerWeb.ThreadView do
         limit: limit,
         desc: desc
       }) do
+    user_id = if is_nil(user), do: nil, else: user.id
+
     board = BoardView.format_board_data_for_find(board_moderators, board_mapping, board_id, user_priority)
+
+    threads = %{
+      normal: threads.normal |> Enum.map(&format_thread_data(&1, user_id)),
+      sticky: threads.sticky |> Enum.map(&format_thread_data(&1, user_id))
+    }
+
     result = %{
       threads: threads,
       board: board,
@@ -56,5 +65,63 @@ defmodule EpochtalkServerWeb.ThreadView do
       desc: desc,
     }
     if board_banned, do: Map.put(result, :board_banned, board_banned), else: result
+  end
+
+  defp format_thread_data(thread, user_id) do
+    # handle deleted user
+    thread = if thread.user_deleted,
+      do: thread |> Map.put(:user_id, '') |> Map.put(:username, ''),
+      else: thread
+
+    # format user output
+    thread = thread |> Map.put(:user, %{
+      id: thread.user_id,
+      username: thread.username,
+      deleted: thread.user_deleted
+    })
+
+    # clean up user data
+    thread = thread
+      |> Map.delete(:user_id)
+      |> Map.delete(:username)
+      |> Map.delete(:user_deleted)
+
+    # format last post data
+    thread = cond do
+      is_integer(user_id) and !thread.last_viewed ->
+        thread
+          |> Map.put(:has_new_post, true)
+          |> Map.put(:last_unread_position, 1)
+      is_integer(user_id) and user_id != thread.last_post_user_id and thread.last_viewed <= thread.last_post_created_at ->
+        thread
+          |> Map.put(:has_new_post, true)
+          |> Map.put(:last_unread_position, thread.post_position)
+          |> Map.put(:last_unread_post_id, thread.post_id)
+      true -> thread
+    end
+
+    # clean up last post data
+    thread = thread
+      |> Map.delete(:post_id)
+      |> Map.delete(:post_position)
+      |> Map.delete(:last_viewed)
+
+    # format last post user data
+    thread = if thread.last_post_deleted or thread.last_post_user_deleted do
+      thread
+        |> Map.put(:last_deleted, true)
+        |> Map.delete(:last_post_username)
+    else
+      thread
+    end
+
+    # clean up last post user data
+    thread = thread
+      |> Map.delete(:last_post_deleted)
+      |> Map.delete(:last_post_user_deleted)
+      |> Map.delete(:last_post_user_id)
+
+    # return formatted thread
+    thread
   end
 end

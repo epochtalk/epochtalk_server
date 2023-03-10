@@ -55,6 +55,7 @@ defmodule EpochtalkServerWeb.ThreadController do
         threads: threads,
         write_access: !!(user && write_access && !board_banned),
         board_banned: board_banned,
+        user: user,
         user_priority: user_priority,
         board_id: board_id,
         board_mapping: board_mapping,

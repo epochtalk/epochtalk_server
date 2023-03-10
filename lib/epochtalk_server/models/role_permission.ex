@@ -104,15 +104,6 @@ defmodule EpochtalkServer.Models.RolePermission do
     {:ok, :success}
   end
 
-  # def modify_by_role(role, %RolePermission{} = permission) do
-  #   # change role permission
-  #     # check default value
-  #     # check new value
-  #     # if new value is different, set modified true
-  #     # if new value is same, set modified false
-  #   # update roles table
-  # end
-
   # Used to update the modified field of a `RolePermission` in the database (should already exist)
   defp upsert_modified([]), do: {:error, "Role permission list is empty"}
 

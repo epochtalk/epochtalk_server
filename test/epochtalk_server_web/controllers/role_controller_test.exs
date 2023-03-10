@@ -131,7 +131,8 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
               bannedAddresses: true
             }
           }
-        }
+        },
+        priority_restrictions: []
       }
 
       modified_newbie_permissions = %{

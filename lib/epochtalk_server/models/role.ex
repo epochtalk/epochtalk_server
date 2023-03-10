@@ -159,6 +159,7 @@ defmodule EpochtalkServer.Models.Role do
   """
   @spec set_priority_restrictions(id :: integer, priority_restrictions :: list()) ::
           {:ok, role :: t()} | {:error, Ecto.Changeset.t()}
+  def set_priority_restrictions(id, []), do: set_priority_restrictions(id, nil)
   def set_priority_restrictions(id, priority_restrictions) do
     Role
     |> Repo.get(id)

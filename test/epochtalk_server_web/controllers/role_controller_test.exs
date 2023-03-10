@@ -52,6 +52,29 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
 
       newbie = roles |> Enum.at(6)
       assert initial_newbie_priority_restrictions == newbie["priority_restrictions"]
+
+      modified_newbie_priority_restrictions = [1, 2, 3]
+      new_newbie_permissions_attrs = %{
+        id: 7,
+        permissions: %{
+          adminAccess: %{
+            management: %{
+              bannedAddresses: true
+            }
+          }
+        },
+        priority_restrictions: modified_newbie_priority_restrictions
+      }
+
+      update_conn = put(conn, Routes.role_path(conn, :update, new_newbie_permissions_attrs))
+
+      assert "success" = json_response(update_conn, 200)
+
+      modified_all_conn = get(conn, Routes.role_path(conn, :all))
+      modified_roles = json_response(modified_all_conn, 200)
+
+      modified_newbie = modified_roles |> Enum.at(6)
+      assert modified_newbie_priority_restrictions == modified_newbie["priority_restrictions"]
     end
 
     @tag :authenticated

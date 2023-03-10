@@ -19,7 +19,12 @@ defmodule EpochtalkServerWeb.RoleController do
          priority_restrictions <- Validate.sanitize_list(attrs, "priority_restrictions"),
          permissions <- attrs["permissions"],
          {:auth, _user} <- {:auth, Guardian.Plug.current_resource(conn)},
-         {:ok, data} <- RolePermission.modify_by_role(%Role{id: id, permissions: permissions, priority_restrictions: priority_restrictions}) do
+         {:ok, data} <-
+           RolePermission.modify_by_role(%Role{
+             id: id,
+             permissions: permissions,
+             priority_restrictions: priority_restrictions
+           }) do
       render(conn, "update.json", data: data)
     else
       {:auth, nil} ->

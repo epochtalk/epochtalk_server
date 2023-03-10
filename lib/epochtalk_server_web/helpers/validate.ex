@@ -7,6 +7,16 @@ defmodule EpochtalkServerWeb.Helpers.Validate do
   alias EpochtalkServerWeb.CustomErrors.InvalidPayload
 
   @doc """
+  Helper used to default a list request parameter.  If the list is valid, returns the list
+  otherwise, defaults to empty list
+  """
+  @spec sanitize_list(attrs :: map, key :: String.t()) :: List.t()
+  def sanitize_list(attrs, key)
+      when is_map(attrs) and is_binary(key),
+      do:
+        if is_list(attrs[key]), do: attrs[key], else: []
+
+  @doc """
   Helper used to validate and cast request parameters directly out of the incoming
   paylod map (usually a controller function's `attrs` parameter) to the specified type.
   Will raise an `EpochtalkServerWeb.CustomErrors.InvalidPayload` exception if map value does

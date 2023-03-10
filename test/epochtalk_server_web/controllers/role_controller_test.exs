@@ -44,6 +44,17 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
 
   describe "update/2" do
     @tag :authenticated
+    test "modifies a role's priority_restrictions when authenticated", %{conn: conn} do
+      initial_newbie_priority_restrictions = nil
+
+      all_conn = get(conn, Routes.role_path(conn, :all))
+      roles = json_response(all_conn, 200)
+
+      newbie = roles |> Enum.at(6)
+      assert initial_newbie_priority_restrictions == newbie["priority_restrictions"]
+    end
+
+    @tag :authenticated
     test "modifies a role's permissions when authenticated", %{conn: conn} do
       initial_newbie_permissions = %{
         "ads" => %{

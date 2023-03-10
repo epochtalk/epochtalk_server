@@ -66,7 +66,7 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
         priority_restrictions: modified_newbie_priority_restrictions
       }
 
-      update_conn = put(conn, Routes.role_path(conn, :update, new_newbie_permissions_attrs))
+      update_conn = put(conn, Routes.role_path(conn, :update), new_newbie_permissions_attrs)
 
       assert "success" = json_response(update_conn, 200)
 

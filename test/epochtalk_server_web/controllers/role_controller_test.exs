@@ -54,6 +54,7 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
       assert initial_newbie_priority_restrictions == newbie["priority_restrictions"]
 
       modified_newbie_priority_restrictions = [1, 2, 3]
+
       new_newbie_permissions_attrs = %{
         id: 7,
         permissions: %{
@@ -77,6 +78,7 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
       assert modified_newbie_priority_restrictions == modified_newbie["priority_restrictions"]
 
       re_modified_newbie_priority_restrictions = []
+
       new_newbie_permissions_attrs = %{
         id: 7,
         permissions: %{

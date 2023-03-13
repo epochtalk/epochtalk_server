@@ -7,6 +7,7 @@ defmodule EpochtalkServerWeb.BoardController do
   alias EpochtalkServer.Models.BoardModerator
   alias EpochtalkServer.Models.BoardMapping
   alias EpochtalkServer.Models.Category
+  alias EpochtalkServer.Models.Board
   alias EpochtalkServerWeb.ErrorHelpers
   alias EpochtalkServerWeb.Helpers.Validate
   alias EpochtalkServerWeb.Helpers.ACL
@@ -50,6 +51,18 @@ defmodule EpochtalkServerWeb.BoardController do
     else
       {:board, []} -> ErrorHelpers.render_json_error(conn, 400, "Error, board does not exist")
       _ -> ErrorHelpers.render_json_error(conn, 400, "Error, cannot fetch boards")
+    end
+  end
+
+  @doc """
+  Used to convert `Board` slug to id
+  """
+  def slug_to_id(conn, attrs) do
+     with slug <- Validate.cast(attrs, "slug", :string, required: true),
+          id <- Board.slug_to_id(slug) do
+      render(conn, "slug_to_id.json", data: %{id: id})
+    else
+      _ -> ErrorHelpers.render_json_error(conn, 400, "Error, cannot convert board slug to id")
     end
   end
 end

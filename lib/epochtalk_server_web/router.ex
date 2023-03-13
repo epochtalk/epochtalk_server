@@ -43,6 +43,7 @@ defmodule EpochtalkServerWeb.Router do
     get "/register/email/:email", UserController, :email
     get "/boards", BoardController, :by_category
     get "/boards/:id", BoardController, :find
+    get "/boards/:slug/id", BoardController, :slug_to_id
     get "/threads", ThreadController, :by_board
     get "/threads/recent", ThreadController, :recent
     post "/register", UserController, :register

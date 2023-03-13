@@ -92,8 +92,8 @@ defmodule EpochtalkServerWeb.BoardView do
     # flatten needed boards data
     board =
       board
-      |> Map.merge(board.board || %{})
       |> Map.merge(board.stats || %{})
+      |> Map.merge(board.board || %{})
       |> Map.merge(board.thread || %{})
 
     # delete unneeded properties

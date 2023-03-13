@@ -86,7 +86,7 @@ defmodule EpochtalkServer.Models.Thread do
     user_id = if is_nil(user), do: nil, else: Map.get(user, :id)
     per_page = Keyword.get(opts, :per_page, 25)
     field = Keyword.get(opts, :field, "updated_at")
-    reversed = Keyword.get(opts, :desc, false)
+    reversed = Keyword.get(opts, :desc, true)
     offset = (page * per_page) - per_page
 
     opts = opts
@@ -153,7 +153,7 @@ defmodule EpochtalkServer.Models.Thread do
 
     # handle sort field and direction
     field = String.to_atom(opts[:field])
-    direction = if opts[:reversed], do: :desc, else: :asc
+    direction = if opts[:reversed], do: :asc, else: :desc
 
     # sort by field in joined metadata thread table if sort field is 'view'
     inner_query = if field == :views,
@@ -161,7 +161,7 @@ defmodule EpochtalkServer.Models.Thread do
       else: inner_query |> order_by([t], [{^direction, field(t, ^field)}])
 
     # outer query
-    sort_order = if opts[:sort_order], do: :desc, else: :asc
+    sort_order = if opts[:sort_order], do: :asc, else: :desc
 
     from(tlist in subquery(inner_query))
       # join thread info

@@ -50,7 +50,7 @@ defmodule EpochtalkServerWeb.ThreadController do
          threads <- Thread.page_by_board_id(board_id, page, user: user, per_page: limit, field: field, desc: desc) do
       render(conn, "by_board.json", %{
         threads: threads,
-        write_access: !!(user && write_access && !board_banned),
+        write_access: write_access && is_map(user) && !board_banned,
         board_banned: board_banned,
         user: user,
         user_priority: user_priority,

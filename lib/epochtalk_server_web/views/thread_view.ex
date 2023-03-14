@@ -71,6 +71,13 @@ defmodule EpochtalkServerWeb.ThreadView do
   end
 
   defp format_thread_data(thread, user_id) do
+    thread
+    |> format_user_data(user_id)
+    |> format_last_post_data(user_id)
+    |> format_last_post_user_data()
+  end
+
+  defp format_user_data(thread, user_id) do
     # handle deleted user
     thread = if thread.user_deleted,
       do: thread |> Map.put(:user_id, '') |> Map.put(:username, ''),
@@ -84,12 +91,13 @@ defmodule EpochtalkServerWeb.ThreadView do
     })
 
     # clean up user data
-    thread = thread
+    thread
       |> Map.delete(:user_id)
       |> Map.delete(:username)
       |> Map.delete(:user_deleted)
+  end
 
-    # format last post data
+  defp format_last_post_data(thread, user_id) do
     thread = cond do
       is_integer(user_id) and !thread.last_viewed ->
         thread
@@ -104,27 +112,25 @@ defmodule EpochtalkServerWeb.ThreadView do
     end
 
     # clean up last post data
-    thread = thread
+    thread
       |> Map.delete(:post_id)
       |> Map.delete(:post_position)
       |> Map.delete(:last_viewed)
+  end
 
-    # format last post user data
+  defp format_last_post_user_data(thread) do
     thread = if thread.last_post_deleted or thread.last_post_user_deleted do
-      thread
-        |> Map.put(:last_deleted, true)
-        |> Map.delete(:last_post_username)
-    else
-      thread
-    end
+        thread
+          |> Map.put(:last_deleted, true)
+          |> Map.delete(:last_post_username)
+      else
+        thread
+      end
 
     # clean up last post user data
-    thread = thread
+    thread
       |> Map.delete(:last_post_deleted)
       |> Map.delete(:last_post_user_deleted)
       |> Map.delete(:last_post_user_id)
-
-    # return formatted thread
-    thread
   end
 end

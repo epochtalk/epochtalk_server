@@ -81,6 +81,10 @@ defmodule EpochtalkServer.Models.Thread do
     Repo.all(query)
   end
 
+  @doc """
+  Returns paged threads by `Board` given a `board_id`
+  """
+  @spec page_by_board_id(board_id :: non_neg_integer, page :: non_neg_integer | nil, opts :: list() | nil) :: %{normal: [map()] | [], sticky: [map()] | []}
   def page_by_board_id(board_id, page \\ 1, opts \\ []) do
     user = Keyword.get(opts, :user)
     user_id = if is_nil(user), do: nil, else: Map.get(user, :id)

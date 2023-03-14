@@ -153,6 +153,11 @@ defmodule EpochtalkServer.Models.Board do
     end
   end
 
+  @doc """
+  Converts a board's `slug` to `id`
+  """
+  @spec slug_to_id(slug :: String.t()) ::
+          {:ok, id :: non_neg_integer} | {:error, :board_does_not_exist}
   def slug_to_id(slug) when is_binary(slug) do
     query = from b in Board,
       where: b.slug == ^slug,

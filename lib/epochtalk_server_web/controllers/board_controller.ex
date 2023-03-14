@@ -59,9 +59,10 @@ defmodule EpochtalkServerWeb.BoardController do
   """
   def slug_to_id(conn, attrs) do
      with slug <- Validate.cast(attrs, "slug", :string, required: true),
-          id <- Board.slug_to_id(slug) do
+          {:ok, id} <- Board.slug_to_id(slug) do
       render(conn, "slug_to_id.json", data: %{id: id})
     else
+      {:error, :board_does_not_exist} -> ErrorHelpers.render_json_error(conn, 400, "Error, cannot board does not exist")
       _ -> ErrorHelpers.render_json_error(conn, 400, "Error, cannot convert board slug to id")
     end
   end

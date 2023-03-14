@@ -158,6 +158,10 @@ defmodule EpochtalkServer.Models.Board do
       where: b.slug == ^slug,
       select: b.id
 
-    Repo.one(query)
+    id = Repo.one(query)
+
+    if id,
+      do: {:ok, id},
+      else: {:error, :board_does_not_exist}
   end
 end

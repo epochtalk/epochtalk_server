@@ -154,6 +154,21 @@ defmodule EpochtalkServer.Models.Board do
   end
 
   @doc """
+  Determines if the provided `user_priority` has read access to the board with the specified `id`
+
+  TODO(akinsey): Should this check against banned user_priority?
+  """
+  @spec get_read_access_by_id(id :: non_neg_integer, user_priority :: non_neg_integer) ::
+          {:ok, can_read :: boolean} | {:error, :board_does_not_exist}
+  def get_read_access_by_id(id, user_priority) do
+    find_parent_initial_query = BoardMapping
+      |> where([bm], bm.board_id == ^id)
+      |> select([bm], %{board_id: bm.board_id, parent_id: bm.parent_id, category_id: bm.category_id})
+
+    Repo.all(find_parent_initial_query)
+  end
+
+  @doc """
   Converts a board's `slug` to `id`
   """
   @spec slug_to_id(slug :: String.t()) ::

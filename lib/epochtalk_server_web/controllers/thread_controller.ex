@@ -34,9 +34,12 @@ defmodule EpochtalkServerWeb.ThreadController do
 
   @doc """
   Used to retrieve threads by board
+
+  TODO: implement board in board mapping authorization function
   """
   def by_board(conn, attrs) do
-    with board_id <- Validate.cast(attrs, "board_id", :integer, required: true),
+    with :ok <- ACL.allow!(conn, "threads.byBoard"),
+         board_id <- Validate.cast(attrs, "board_id", :integer, required: true),
          page <- Validate.cast(attrs, "page", :integer, default: 1),
          field <- Validate.cast(attrs, "field", :string, default: "updated_at"),
          limit <- Validate.cast(attrs, "limit", :integer, default: 25),

@@ -43,7 +43,7 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
   end
 
   describe "update/2" do
-    @tag :authenticated
+    @tag authenticated: :admin
     test "modifies a role's priority_restrictions when authenticated", %{conn: conn} do
       initial_newbie_priority_restrictions = nil
 
@@ -102,7 +102,7 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
       assert nil == modified_newbie["priority_restrictions"]
     end
 
-    @tag :authenticated
+    @tag authenticated: :admin
     test "modifies a role's permissions when authenticated", %{conn: conn} do
       initial_newbie_permissions = %{
         "ads" => %{

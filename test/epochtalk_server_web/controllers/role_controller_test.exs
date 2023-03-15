@@ -43,6 +43,26 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
   end
 
   describe "update/2" do
+    test "errors with unauthorized when not logged", %{conn: conn} do
+      modified_newbie_priority_restrictions = [1, 2, 3]
+
+      new_newbie_permissions_attrs = %{
+        id: 7,
+        permissions: %{
+          adminAccess: %{
+            management: %{
+              bannedAddresses: true
+            }
+          }
+        },
+        priority_restrictions: modified_newbie_priority_restrictions
+      }
+
+      update_conn = put(conn, Routes.role_path(conn, :update), new_newbie_permissions_attrs)
+
+      assert %{"error" => "Unauthorized", "message" => "No resource found", "status" => 401} == json_response(update_conn, 401)
+    end
+
     @tag authenticated: :admin
     test "modifies a role's priority_restrictions when authenticated", %{conn: conn} do
       initial_newbie_priority_restrictions = nil

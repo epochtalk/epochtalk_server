@@ -9,16 +9,18 @@ defmodule EpochtalkServerWeb.RoleController do
   alias EpochtalkServerWeb.Helpers.Validate
   alias EpochtalkServer.Models.Role
   alias EpochtalkServer.Models.RolePermission
+  alias EpochtalkServerWeb.Helpers.ACL
 
   @doc """
   Used to update a specific `Role`
   """
   def update(conn, attrs) do
-    with id <- Validate.cast(attrs, "id", :integer, min: 1),
+    with {:auth, _user} <- {:auth, Guardian.Plug.current_resource(conn)},
+         :ok <- ACL.allow!(conn, "roles.update"),
+         id <- Validate.cast(attrs, "id", :integer, min: 1),
          # TODO(boka): implement validators
          priority_restrictions <- Validate.sanitize_list(attrs, "priority_restrictions"),
          permissions <- attrs["permissions"],
-         {:auth, _user} <- {:auth, Guardian.Plug.current_resource(conn)},
          {:ok, data} <-
            RolePermission.modify_by_role(%Role{
              id: id,

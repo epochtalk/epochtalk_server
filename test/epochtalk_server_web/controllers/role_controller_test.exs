@@ -1,5 +1,6 @@
 defmodule EpochtalkServerWeb.RoleControllerTest do
   use EpochtalkServerWeb.ConnCase, async: false
+  alias EpochtalkServerWeb.CustomErrors.InvalidPermission
 
   describe "all/2" do
     @tag :authenticated
@@ -43,7 +44,51 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
   end
 
   describe "update/2" do
+    test "errors with unauthorized when not logged", %{conn: conn} do
+      modified_newbie_priority_restrictions = [1, 2, 3]
+
+      new_newbie_permissions_attrs = %{
+        id: 7,
+        permissions: %{
+          adminAccess: %{
+            management: %{
+              bannedAddresses: true
+            }
+          }
+        },
+        priority_restrictions: modified_newbie_priority_restrictions
+      }
+
+      update_conn = put(conn, Routes.role_path(conn, :update), new_newbie_permissions_attrs)
+
+      assert %{"error" => "Unauthorized", "message" => "No resource found", "status" => 401} ==
+               json_response(update_conn, 401)
+    end
+
     @tag :authenticated
+    test "errors with unauthorized when logged in but without correct ACL", %{conn: conn} do
+      modified_newbie_priority_restrictions = [1, 2, 3]
+
+      new_newbie_permissions_attrs = %{
+        id: 7,
+        permissions: %{
+          adminAccess: %{
+            management: %{
+              bannedAddresses: true
+            }
+          }
+        },
+        priority_restrictions: modified_newbie_priority_restrictions
+      }
+
+      assert_raise InvalidPermission,
+                   ~r/^Forbidden, invalid permissions to perform this action/,
+                   fn ->
+                     put(conn, Routes.role_path(conn, :update), new_newbie_permissions_attrs)
+                   end
+    end
+
+    @tag authenticated: :admin
     test "modifies a role's priority_restrictions when authenticated", %{conn: conn} do
       initial_newbie_priority_restrictions = nil
 
@@ -102,7 +147,7 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
       assert nil == modified_newbie["priority_restrictions"]
     end
 
-    @tag :authenticated
+    @tag authenticated: :admin
     test "modifies a role's permissions when authenticated", %{conn: conn} do
       initial_newbie_permissions = %{
         "ads" => %{

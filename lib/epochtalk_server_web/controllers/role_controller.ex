@@ -16,7 +16,7 @@ defmodule EpochtalkServerWeb.RoleController do
   """
   def update(conn, attrs) do
     with {:auth, _user} <- {:auth, Guardian.Plug.current_resource(conn)},
-         :ok <- ACL.allow!(conn, "roles.update.allow"),
+         :ok <- ACL.allow!(conn, "roles.update"),
          id <- Validate.cast(attrs, "id", :integer, min: 1),
          # TODO(boka): implement validators
          priority_restrictions <- Validate.sanitize_list(attrs, "priority_restrictions"),

@@ -30,6 +30,8 @@ defmodule EpochtalkServerWeb.Router do
     get "/mentions", MentionController, :page
     get "/notifications/counts", NotificationController, :counts
     post "/notifications/dismiss", NotificationController, :dismiss
+    get "/admin/roles/all", RoleController, :all
+    put "/admin/roles/update", RoleController, :update
     get "/authenticate", UserController, :authenticate
   end
 

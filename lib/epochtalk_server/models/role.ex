@@ -154,6 +154,20 @@ defmodule EpochtalkServer.Models.Role do
     |> Repo.update()
   end
 
+  @doc """
+  Updates the priority_restrictions of an existing `Role` in the database
+  """
+  @spec set_priority_restrictions(id :: integer, priority_restrictions :: list()) ::
+          {:ok, role :: t()} | {:error, Ecto.Changeset.t()}
+  def set_priority_restrictions(id, []), do: set_priority_restrictions(id, nil)
+
+  def set_priority_restrictions(id, priority_restrictions) do
+    Role
+    |> Repo.get(id)
+    |> change(%{priority_restrictions: priority_restrictions})
+    |> Repo.update()
+  end
+
   ## === External Helper Functions ===
 
   @doc """

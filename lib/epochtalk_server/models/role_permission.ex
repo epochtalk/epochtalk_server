@@ -59,27 +59,73 @@ defmodule EpochtalkServer.Models.RolePermission do
     do: Repo.insert_all(RolePermission, roles_permissions)
 
   ## for admin api use, modifying permissions for a role
-  # no permissions to modify
-  # def modify_by_role(role, []), do: {:error, "No permissions to modify"}
-  # def modify_by_role(role, [%Permission{}|_] = permissions) do
-  #   # change role permission for each permission
-  #     # check default value
-  #     # check new value
-  #     # if new value is different, set modified true
-  #     # if new value is same, set modified false
-  #   # update roles table
-  # end
-  # def modify_by_role(role, %RolePermission{} = permission) do
-  #   # change role permission
-  #     # check default value
-  #     # check new value
-  #     # if new value is different, set modified true
-  #     # if new value is same, set modified false
-  #   # update roles table
-  # end
+  def modify_by_role(
+        %Role{
+          id: role_id,
+          permissions: new_permissions,
+          priority_restrictions: priority_restrictions
+        } = _new_role
+      ) do
+    # if a permission is false, they're not included in the permissions
+    # if they're all false, permissions can be empty
+    old_role_permissions =
+      from(rp in RolePermission,
+        where: rp.role_id == ^role_id
+      )
+      |> Repo.all()
+
+    new_permissions = new_permissions |> Iteraptor.to_flatmap()
+
+    # change a permission if it's different
+    new_role_permissions =
+      Enum.reduce(old_role_permissions, [], fn %{
+                                                 permission_path: permission_path,
+                                                 value: old_value
+                                               } = _old_role_permission,
+                                               acc ->
+        # check new value for permission_path
+        # if value is not there, set it to false
+        new_value = new_permissions[permission_path] || false
+        # if new value is different
+        new_role_permission =
+          if old_value != new_value do
+            # set modified true
+            %{role_id: role_id, permission_path: permission_path, modified: true}
+            # if new value is same, set modified false
+          else
+            %{role_id: role_id, permission_path: permission_path, modified: false}
+          end
+
+        [new_role_permission | acc]
+      end)
+
+    # update role permissions for this role
+    upsert_modified(new_role_permissions)
+
+    # update role's permissions
+    permissions = RolePermission.permissions_map_by_role_id(role_id)
+    Role.set_permissions(role_id, permissions)
+
+    # update role's priority_restrictions
+    Role.set_priority_restrictions(role_id, priority_restrictions)
+
+    # return success
+    {:ok, :success}
+  end
+
+  defp upsert_modified([%{} | _] = roles_permissions) do
+    Repo.insert_all(
+      RolePermission,
+      roles_permissions,
+      # only replace modified value, :modified
+      on_conflict: {:replace, [:modified]},
+      # check conflicts on unique index keys
+      conflict_target: [:role_id, :permission_path]
+    )
+  end
 
   @doc """
-  Used to update the value of a `RolePermission` in the database, if it exists or created it, if it doesnt
+  Used to update the value of a `RolePermission` in the database, if it exists or create it, if it doesnt
   """
   @spec upsert_value(role_permissions :: [%{}]) :: {non_neg_integer(), nil | [term()]}
   # change the default values of roles permissions
@@ -110,8 +156,8 @@ defmodule EpochtalkServer.Models.RolePermission do
       (value || modified) && !(value && modified)
     end)
     # convert results to map; keyed by permissions_path
-    |> Enum.reduce(%{}, fn %{permission_path: permission_path, value: value}, acc ->
-      Map.put(acc, permission_path, value)
+    |> Enum.reduce(%{}, fn %{permission_path: permission_path}, acc ->
+      Map.put(acc, permission_path, true)
     end)
     |> Iteraptor.from_flatmap()
   end

@@ -61,7 +61,8 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
 
       update_conn = put(conn, Routes.role_path(conn, :update), new_newbie_permissions_attrs)
 
-      assert %{"error" => "Unauthorized", "message" => "No resource found", "status" => 401} == json_response(update_conn, 401)
+      assert %{"error" => "Unauthorized", "message" => "No resource found", "status" => 401} ==
+               json_response(update_conn, 401)
     end
 
     @tag :authenticated

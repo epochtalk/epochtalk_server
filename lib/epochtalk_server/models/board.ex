@@ -154,18 +154,44 @@ defmodule EpochtalkServer.Models.Board do
   end
 
   @doc """
-  Determines if the provided `user_priority` has read access to the board with the specified `id`
+  Determines if the provided `user_priority` has read access to the `Board` with the specified `id`.
+  If the user doesn't have read access to the parent of the specified `Board`, the user does not have
+  read access to the `Board` either.
 
   TODO(akinsey): Should this check against banned user_priority?
   """
   @spec get_read_access_by_id(id :: non_neg_integer, user_priority :: non_neg_integer) ::
           {:ok, can_read :: boolean} | {:error, :board_does_not_exist}
   def get_read_access_by_id(id, user_priority) do
-    find_parent_initial_query = BoardMapping
+    find_parent_initial_query =
+      BoardMapping
       |> where([bm], bm.board_id == ^id)
       |> select([bm], %{board_id: bm.board_id, parent_id: bm.parent_id, category_id: bm.category_id})
 
-    Repo.all(find_parent_initial_query)
+    find_parent_recursion_query =
+      BoardMapping
+      |> join(:inner, [bm], fp in "find_parent", on: bm.board_id == fp.parent_id)
+      |> select([bm], %{board_id: bm.board_id, parent_id: bm.parent_id, category_id: bm.category_id})
+
+    find_parent_query =
+      find_parent_initial_query
+      |> union(^find_parent_recursion_query)
+
+    board_and_parents = Board
+    |> recursive_ctes(true)
+    |> with_cte("find_parent", as: ^find_parent_query)
+    |> join(:inner, [b], fp in "find_parent", on: b.id == fp.board_id)
+    |> join(:left, [b, fp], c in Category, on: c.id == fp.category_id)
+    |> select([b, fp, c], %{
+        board_id: fp.board_id,
+        parent_id: fp.parent_id,
+        category_id: fp.category_id,
+        cat_viewable_by: c.viewable_by,
+        board_viewable_by: b.viewable_by
+      })
+    |> Repo.all()
+
+    board_and_parents
   end
 
   @doc """

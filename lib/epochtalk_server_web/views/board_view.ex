@@ -133,9 +133,12 @@ defmodule EpochtalkServerWeb.BoardView do
          parent,
          user_priority
        ) do
+    # get id of parent object could be board or category
+    parent_id = if !!Map.get(parent, :board_id), do: parent.board_id, else: parent.id
+
     # look through board mapping, filter boards belonging to parent
     boards =
-      Enum.filter(board_mapping, fn board -> Map.get(board, board_mapping_key) == parent.id end)
+      Enum.filter(board_mapping, fn board -> Map.get(board, board_mapping_key) == parent_id end)
 
     # filter out boards not matching user priority
     boards =

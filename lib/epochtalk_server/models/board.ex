@@ -191,7 +191,23 @@ defmodule EpochtalkServer.Models.Board do
       })
     |> Repo.all()
 
-    board_and_parents
+    boards_viewable = Enum.reduce(board_and_parents, true, fn (i, acc) ->
+      # board is viewable if viewable_by is nil, otherwise check against user priority
+      viewable = not(is_integer(i.board_viewable_by) && user_priority > i.board_viewable_by)
+      acc && viewable
+    end)
+
+    cat_viewable = Enum.reduce(board_and_parents, true, fn (i, acc) ->
+      # cat is viewable if viewable_by is nil, otherwise check viewable_by against user priority
+      viewable = not(is_integer(i.cat_viewable_by) && user_priority > i.cat_viewable_by)
+      acc && viewable
+    end)
+
+    can_read = if board_and_parents == [],
+      do: false,
+      else: cat_viewable && boards_viewable
+
+    {:ok, can_read}
   end
 
   @doc """

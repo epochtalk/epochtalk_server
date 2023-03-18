@@ -38,14 +38,15 @@ defmodule EpochtalkServerWeb.ThreadController do
   TODO: implement board in board mapping authorization function
   """
   def by_board(conn, attrs) do
-    with :ok <- ACL.allow!(conn, "threads.byBoard"),
-         board_id <- Validate.cast(attrs, "board_id", :integer, required: true),
+    with board_id <- Validate.cast(attrs, "board_id", :integer, required: true),
          page <- Validate.cast(attrs, "page", :integer, default: 1),
          field <- Validate.cast(attrs, "field", :string, default: "updated_at"),
          limit <- Validate.cast(attrs, "limit", :integer, default: 25),
          desc <- Validate.cast(attrs, "desc", :boolean, default: true),
          user <- Guardian.Plug.current_resource(conn),
          user_priority <- ACL.get_user_priority(conn),
+         :ok <- ACL.allow!(conn, "threads.byBoard"),
+         {:can_read, {:ok, true}} <- {:can_read, Board.get_read_access_by_id(board_id, user_priority)},
          {:ok, write_access} <- Board.get_write_access_by_id(board_id, user_priority),
          {:ok, board_banned} <- BoardBan.is_banned_from_board(user, board_id: board_id),
          board_mapping <- BoardMapping.all(),
@@ -67,6 +68,7 @@ defmodule EpochtalkServerWeb.ThreadController do
       })
     else
       {:error, :board_does_not_exist} -> ErrorHelpers.render_json_error(conn, 400, "Error, board does not exist")
+      {:can_read, {:ok, false}} -> ErrorHelpers.render_json_error(conn, 403, "Unauthorized, you do not have permission")
       _ -> ErrorHelpers.render_json_error(conn, 400, "Error, cannot get threads by board")
     end
   end

@@ -134,7 +134,7 @@ defmodule EpochtalkServerWeb.BoardView do
          user_priority
        ) do
     # get id of parent object could be board or category
-    parent_id = if !!Map.get(parent, :board_id), do: parent.board_id, else: parent.id
+    parent_id = if is_integer(Map.get(parent, :board_id)), do: parent.board_id, else: parent.id
 
     # look through board mapping, filter boards belonging to parent
     boards =

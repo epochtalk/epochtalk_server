@@ -90,6 +90,7 @@ defmodule EpochtalkServer.Models.BoardBan do
     result = if query, do: is_integer(Repo.one(query)), else: false
     {:ok, result}
   end
+
   def is_banned_from_board(nil, _opts), do: {:ok, false}
 
   @doc """
@@ -101,9 +102,11 @@ defmodule EpochtalkServer.Models.BoardBan do
   """
   @spec is_not_banned_from_board(user :: User.t(), opts :: list) :: {:ok, not_banned :: boolean}
   def is_not_banned_from_board(user, opts \\ [])
+
   def is_not_banned_from_board(%{id: user_id} = user, opts) when is_integer(user_id) do
-   {:ok, banned} = is_banned_from_board(user, opts)
-   {:ok, !banned}
+    {:ok, banned} = is_banned_from_board(user, opts)
+    {:ok, !banned}
   end
+
   def is_not_banned_from_board(nil, _opts), do: {:ok, true}
 end

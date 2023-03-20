@@ -166,37 +166,49 @@ defmodule EpochtalkServer.Models.Board do
     find_parent_initial_query =
       BoardMapping
       |> where([bm], bm.board_id == ^id)
-      |> select([bm], %{board_id: bm.board_id, parent_id: bm.parent_id, category_id: bm.category_id})
+      |> select([bm], %{
+        board_id: bm.board_id,
+        parent_id: bm.parent_id,
+        category_id: bm.category_id
+      })
 
     find_parent_recursion_query =
       BoardMapping
       |> join(:inner, [bm], fp in "find_parent", on: bm.board_id == fp.parent_id)
-      |> select([bm], %{board_id: bm.board_id, parent_id: bm.parent_id, category_id: bm.category_id})
+      |> select([bm], %{
+        board_id: bm.board_id,
+        parent_id: bm.parent_id,
+        category_id: bm.category_id
+      })
 
     find_parent_query =
       find_parent_initial_query
       |> union(^find_parent_recursion_query)
 
-    board_and_parents = Board
-    |> recursive_ctes(true)
-    |> with_cte("find_parent", as: ^find_parent_query)
-    |> join(:inner, [b], fp in "find_parent", on: b.id == fp.board_id)
-    |> join(:left, [b, fp], c in Category, on: c.id == fp.category_id)
-    |> select([b, fp, c], %{
+    board_and_parents =
+      Board
+      |> recursive_ctes(true)
+      |> with_cte("find_parent", as: ^find_parent_query)
+      |> join(:inner, [b], fp in "find_parent", on: b.id == fp.board_id)
+      |> join(:left, [b, fp], c in Category, on: c.id == fp.category_id)
+      |> select([b, fp, c], %{
         board_id: fp.board_id,
         parent_id: fp.parent_id,
         category_id: fp.category_id,
         cat_viewable_by: c.viewable_by,
         board_viewable_by: b.viewable_by
       })
-    |> Repo.all()
+      |> Repo.all()
 
     # not readable if nothing in list, readable if viewable_by is nil, otherwise check viewable_by against user priority
-    can_read = Enum.reduce(board_and_parents, length(board_and_parents) > 0, fn (i, acc) ->
-      boards_viewable = not(is_integer(i.board_viewable_by) && user_priority > i.board_viewable_by)
-      cats_viewable = not(is_integer(i.cat_viewable_by) && user_priority > i.cat_viewable_by)
-      acc && boards_viewable && cats_viewable
-    end)
+    can_read =
+      Enum.reduce(board_and_parents, length(board_and_parents) > 0, fn i, acc ->
+        boards_viewable =
+          not (is_integer(i.board_viewable_by) && user_priority > i.board_viewable_by)
+
+        cats_viewable = not (is_integer(i.cat_viewable_by) && user_priority > i.cat_viewable_by)
+        acc && boards_viewable && cats_viewable
+      end)
 
     {:ok, can_read}
   end
@@ -207,9 +219,10 @@ defmodule EpochtalkServer.Models.Board do
   @spec slug_to_id(slug :: String.t()) ::
           {:ok, id :: non_neg_integer} | {:error, :board_does_not_exist}
   def slug_to_id(slug) when is_binary(slug) do
-    query = from b in Board,
-      where: b.slug == ^slug,
-      select: b.id
+    query =
+      from b in Board,
+        where: b.slug == ^slug,
+        select: b.id
 
     id = Repo.one(query)
 

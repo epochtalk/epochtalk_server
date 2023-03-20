@@ -87,6 +87,7 @@ defmodule EpochtalkServerWeb.BoardView do
       board_moderators
       |> Enum.filter(fn mod -> Map.get(mod, :board_id) == Map.get(board, :board_id) end)
       |> Enum.map(fn mod -> %{id: mod.user_id, username: mod.user.username} end)
+
     board = Map.put(board, :moderators, moderators)
 
     # flatten needed boards data

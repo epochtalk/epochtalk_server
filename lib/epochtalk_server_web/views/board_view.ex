@@ -155,9 +155,9 @@ defmodule EpochtalkServerWeb.BoardView do
         # flatten needed boards data
         board =
           board
-          |> Map.merge(board.board || %{})
-          |> Map.merge(board.stats || %{})
-          |> Map.merge(board.thread || %{})
+          |> Map.merge(to_map_remove_nil(board.board))
+          |> Map.merge(to_map_remove_nil(board.stats))
+          |> Map.merge(to_map_remove_nil(board.thread))
 
         # delete unneeded properties
         board =
@@ -200,5 +200,13 @@ defmodule EpochtalkServerWeb.BoardView do
 
     # return parent with filtered children
     parent
+  end
+
+  defp to_map_remove_nil(nil), do: %{}
+  defp to_map_remove_nil(struct) do
+    struct
+    |> Map.from_struct
+    |> Enum.reject(fn {_, v} -> is_nil(v) end)
+    |> Map.new
   end
 end

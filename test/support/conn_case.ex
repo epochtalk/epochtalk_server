@@ -25,6 +25,16 @@ defmodule EpochtalkServerWeb.ConnCase do
     password: @test_password
   }
 
+  # admin username/email/password from user seed in `mix test` (see mix.exs)
+  @test_admin_username "admin"
+  @test_admin_email "admin@test.com"
+  @test_admin_password "password"
+  @test_admin_user_attrs %{
+    username: @test_admin_username,
+    email: @test_admin_email,
+    password: @test_admin_password
+  }
+
   use ExUnit.CaseTemplate
 
   using do
@@ -53,6 +63,7 @@ defmodule EpochtalkServerWeb.ConnCase do
     end
 
     {:ok, user} = User.by_username(@test_username)
+    {:ok, admin_user} = User.by_username(@test_admin_username)
     conn = Phoenix.ConnTest.build_conn()
 
     # log user in if necessary
@@ -64,6 +75,16 @@ defmodule EpochtalkServerWeb.ConnCase do
 
           {:ok,
            conn: authed_conn, authed_user: user, token: token, authed_user_attrs: @test_user_attrs}
+
+        :admin ->
+          remember_me = false
+          {:ok, admin_user, token, authed_conn} = Session.create(admin_user, remember_me, conn)
+
+          {:ok,
+           conn: authed_conn,
+           authed_user: admin_user,
+           token: token,
+           authed_user_attrs: @test_admin_user_attrs}
 
         # :authenticated not set, return default conn
         _ ->

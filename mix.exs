@@ -80,7 +80,7 @@ defmodule EpochtalkServer.MixProject do
       "seed.roles": ["run priv/repo/seed_roles.exs"],
       "seed.rp": ["run priv/repo/seed_roles_permissions.exs"],
       "seed.user": ["run priv/repo/seed_user.exs"],
-      "seed.moderation_log": ["run priv/repo/seed_moderation_log.exs"],
+      "seed.test_moderation_logs": ["run priv/repo/seed_test_moderation_log.exs"],
       "seed.test_users": ["run priv/repo/seed_test_users.exs"],
       test: [
         "ecto.drop",
@@ -88,6 +88,7 @@ defmodule EpochtalkServer.MixProject do
         "ecto.migrate --quiet",
         "seed.test_banned_address",
         "seed.all",
+        "seed.test_moderation_logs",
         "seed.test_users",
         "test"
       ]

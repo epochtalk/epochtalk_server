@@ -86,20 +86,20 @@ logs = [
   }
 ]
 try do
-logs
-|> Enum.with_index
-|> Enum.filter(fn({log, index}) ->
-    ModerationLog.create(log)
-    |> case do
-      {:ok, _} ->
-        if index+1 == length(logs) do
-          IO.puts("Successfully Seeded Moderation Log Entries")
-        end
-      {:error, error} ->
-        IO.puts("Error Seeding Moderation Log Entry #{index + 1}")
-        IO.inspect(error)
-    end
-  end)
+  logs
+  |> Enum.with_index
+  |> Enum.filter(fn({log, index}) ->
+      ModerationLog.create(log)
+      |> case do
+        {:ok, _} ->
+          if index+1 == length(logs) do
+            IO.puts("Successfully Seeded Moderation Log Entries")
+          end
+        {:error, error} ->
+          IO.puts("Error Seeding Moderation Log Entry #{index + 1}")
+          IO.inspect(error)
+      end
+    end)
 rescue
   Postgrex.Error -> IO.puts("Error seeding Moderation Log. Moderation Log may already be seeded.")
 end

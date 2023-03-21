@@ -203,10 +203,11 @@ defmodule EpochtalkServerWeb.BoardView do
   end
 
   defp to_map_remove_nil(nil), do: %{}
+
   defp to_map_remove_nil(struct) do
     struct
-    |> Map.from_struct
+    |> Map.from_struct()
     |> Enum.reject(fn {_, v} -> is_nil(v) end)
-    |> Map.new
+    |> Map.new()
   end
 end

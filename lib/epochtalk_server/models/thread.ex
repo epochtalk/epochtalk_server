@@ -63,7 +63,54 @@ defmodule EpochtalkServer.Models.Thread do
     |> foreign_key_constraint(:board_id, name: :threads_board_id_fkey)
   end
 
+  @doc """
+  Create changeset for creation of `Board` model
+  """
+  @spec create_changeset(board :: t(), attrs :: map() | nil) :: Ecto.Changeset.t()
+  def create_changeset(board, attrs) do
+    now = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
+
+    attrs =
+      attrs
+      |> Map.put(:created_at, now)
+      |> Map.put(:updated_at, now)
+
+    board
+    |> cast(attrs, [
+      :board_id,
+      :locked,
+      :sticky,
+      :slug,
+      :moderated,
+      :post_count,
+      :created_at,
+      :imported_at,
+      :updated_at
+    ])
+    |> unique_constraint(:id, name: :threads_pkey)
+    |> unique_constraint(:slug, name: :threads_slug_index)
+    |> foreign_key_constraint(:board_id, name: :threads_board_id_fkey)
+  end
   ## === Database Functions ===
+
+  @doc """
+  Creates a new `Thread` in the database
+  """
+  @spec create(thread_attrs :: map()) :: {:ok, thread :: t()} | {:error, Ecto.Changeset.t()}
+  def create(thread) do
+    thread_cs = create_changeset(%Thread{}, thread)
+
+    case Repo.insert(thread_cs) do
+      {:ok, db_thread} ->
+        case MetadataThread.insert(%MetadataThread{thread_id: db_thread.id, views: 0}) do
+          {:ok, _} -> {:ok, db_thread}
+          {:error, cs} -> {:error, cs}
+        end
+
+      {:error, cs} ->
+        {:error, cs}
+    end
+  end
 
   @doc """
   Returns recent threads accounting for user priority and user's ignored boards

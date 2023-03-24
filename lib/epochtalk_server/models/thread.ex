@@ -72,8 +72,7 @@ defmodule EpochtalkServer.Models.Thread do
 
     attrs =
       attrs
-      |> Map.put(:created_at, now)
-      |> Map.put(:updated_at, now)
+      |> Map.put("created_at", now)
 
     board
     |> cast(attrs, [
@@ -84,8 +83,6 @@ defmodule EpochtalkServer.Models.Thread do
       :moderated,
       :post_count,
       :created_at,
-      :imported_at,
-      :updated_at
     ])
     |> unique_constraint(:id, name: :threads_pkey)
     |> unique_constraint(:slug, name: :threads_slug_index)

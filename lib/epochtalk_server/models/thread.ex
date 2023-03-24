@@ -104,6 +104,12 @@ defmodule EpochtalkServer.Models.Thread do
           {:error, cs} -> {:error, cs}
         end
 
+      {:error, %Ecto.Changeset{errors: [slug: _]} = cs} ->
+        hash = :crypto.strong_rand_bytes(3) |> Base.url_encode64 |> binary_part(0, 3)
+        hashed_slug = "#{Map.get(thread, "slug")}-#{hash}"
+        thread = thread |> Map.put("slug", hashed_slug)
+        create(thread)
+
       {:error, cs} ->
         {:error, cs}
     end

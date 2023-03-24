@@ -60,4 +60,30 @@ defmodule EpochtalkServer.Models.Post do
     |> unique_constraint(:id, name: :posts_pkey)
     |> foreign_key_constraint(:thread_id, name: :posts_thread_id_fkey)
   end
+
+  @doc """
+  Create changeset for `Post` model
+  """
+  @spec create_changeset(post :: t(), attrs :: map() | nil) :: Ecto.Changeset.t()
+  def create_changeset(post, attrs) do
+    now = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
+
+    attrs =
+      attrs
+      |> Map.put("created_at", now)
+      |> Map.put("updated_at", now)
+
+    post
+    |> cast(attrs, [
+      :thread_id,
+      :user_id,
+      :locked,
+      :deleted,
+      :content,
+      :created_at,
+      :updated_at
+    ])
+    |> unique_constraint(:id, name: :posts_pkey)
+    |> foreign_key_constraint(:thread_id, name: :posts_thread_id_fkey)
+  end
 end

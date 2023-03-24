@@ -123,7 +123,7 @@ defmodule EpochtalkServer.Auth.Guardian do
   **Note:** Copied from [Guardian Docs](https://github.com/ueberauth/guardian)
   """
   use Guardian, otp_app: :epochtalk_server
-  alias EpochtalkServer.Models.Role
+  alias EpochtalkServer.Session
 
   @doc """
   Fetches the subject for a token for the provided resource and claims
@@ -145,8 +145,6 @@ defmodule EpochtalkServer.Auth.Guardian do
   @doc """
   Fetches the resource that is represented by claims.
   For JWT this would normally be found in the `sub` field.
-
-  TODO(boka): refactor fetching of user session (L 161-202) into session.ex
   """
   def resource_from_claims(%{"sub" => sub, "jti" => jti} = _claims) do
     # Here we'll look up our resource from the claims, the subject can be
@@ -157,49 +155,8 @@ defmodule EpochtalkServer.Auth.Guardian do
     user_id = String.to_integer(sub)
     # we are using the jti for sessions_id since it's unique
     session_id = jti
-    # check if session is active in redis
-    Redix.command!(:redix, ["SISMEMBER", "user:#{user_id}:sessions", session_id])
-    |> case do
-      0 ->
-        # session is not active, return error
-        {:error, "No session with id #{session_id}"}
-
-      1 ->
-        # session is active, populate data
-        resource = %{
-          id: user_id,
-          session_id: session_id,
-          username: Redix.command!(:redix, ["HGET", "user:#{user_id}", "username"]),
-          avatar: Redix.command!(:redix, ["HGET", "user:#{user_id}", "avatar"]),
-          roles: Redix.command!(:redix, ["SMEMBERS", "user:#{user_id}:roles"]) |> Role.by_lookup()
-        }
-
-        # only append moderating, ban_expiration and malicious_score if present
-        moderating = Redix.command!(:redix, ["SMEMBERS", "user:#{user_id}:moderating"])
-
-        resource =
-          if moderating && length(moderating) != 0,
-            do: Map.put(resource, :moderating, moderating),
-            else: resource
-
-        ban_expiration =
-          Redix.command!(:redix, ["HEXISTS", "user:#{user_id}:ban_info", "ban_expiration"])
-
-        resource =
-          if ban_expiration != 0,
-            do: Map.put(resource, :ban_expiration, ban_expiration),
-            else: resource
-
-        malicious_score =
-          Redix.command!(:redix, ["HEXISTS", "user:#{user_id}:ban_info", "malicious_score"])
-
-        resource =
-          if malicious_score != 0,
-            do: Map.put(resource, :malicious_score, malicious_score),
-            else: resource
-
-        {:ok, resource}
-    end
+    # get resource from Session
+    Session.get_resource(user_id, session_id)
   end
 
   def resource_from_claims(_claims), do: {:error, :reason_for_error}

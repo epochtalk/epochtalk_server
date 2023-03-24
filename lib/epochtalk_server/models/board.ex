@@ -1,6 +1,7 @@
 defmodule EpochtalkServer.Models.Board do
   use Ecto.Schema
   import Ecto.Changeset
+  import Ecto.Query
   alias EpochtalkServer.Repo
   alias EpochtalkServer.Models.Category
   alias EpochtalkServer.Models.BoardMapping
@@ -120,5 +121,113 @@ defmodule EpochtalkServer.Models.Board do
       {:error, cs} ->
         {:error, cs}
     end
+  end
+
+  @doc """
+  Determines if the provided `user_priority` has write access to the board with the specified `id`
+
+  TODO(akinsey): Should this check against banned user_priority?
+  """
+  @spec get_write_access_by_id(id :: non_neg_integer, user_priority :: non_neg_integer) ::
+          {:ok, can_write :: boolean} | {:error, :board_does_not_exist}
+  def get_write_access_by_id(id, user_priority) do
+    query =
+      from b in Board,
+        where: b.id == ^id,
+        select: %{postable_by: b.postable_by}
+
+    board = Repo.one(query)
+
+    if board do
+      # allow write if postable_by is nil
+      can_write = is_nil(board.postable_by)
+      # if postable_by is an integer, check against user priority
+      can_write =
+        if is_integer(board.postable_by),
+          do: user_priority <= board.postable_by,
+          else: can_write
+
+      {:ok, can_write}
+    else
+      {:error, :board_does_not_exist}
+    end
+  end
+
+  @doc """
+  Determines if the provided `user_priority` has read access to the `Board` with the specified `id`.
+  If the user doesn't have read access to the parent of the specified `Board`, the user does not have
+  read access to the `Board` either.
+
+  TODO(akinsey): Should this check against banned user_priority?
+  """
+  @spec get_read_access_by_id(id :: non_neg_integer, user_priority :: non_neg_integer) ::
+          {:ok, can_read :: boolean} | {:error, :board_does_not_exist}
+  def get_read_access_by_id(id, user_priority) do
+    find_parent_initial_query =
+      BoardMapping
+      |> where([bm], bm.board_id == ^id)
+      |> select([bm], %{
+        board_id: bm.board_id,
+        parent_id: bm.parent_id,
+        category_id: bm.category_id
+      })
+
+    find_parent_recursion_query =
+      BoardMapping
+      |> join(:inner, [bm], fp in "find_parent", on: bm.board_id == fp.parent_id)
+      |> select([bm], %{
+        board_id: bm.board_id,
+        parent_id: bm.parent_id,
+        category_id: bm.category_id
+      })
+
+    find_parent_query =
+      find_parent_initial_query
+      |> union(^find_parent_recursion_query)
+
+    board_and_parents =
+      Board
+      |> recursive_ctes(true)
+      |> with_cte("find_parent", as: ^find_parent_query)
+      |> join(:inner, [b], fp in "find_parent", on: b.id == fp.board_id)
+      |> join(:left, [b, fp], c in Category, on: c.id == fp.category_id)
+      |> select([b, fp, c], %{
+        board_id: fp.board_id,
+        parent_id: fp.parent_id,
+        category_id: fp.category_id,
+        cat_viewable_by: c.viewable_by,
+        board_viewable_by: b.viewable_by
+      })
+      |> Repo.all()
+
+    # not readable if nothing in list, readable if viewable_by is nil, otherwise check viewable_by against user priority
+    can_read =
+      Enum.reduce(board_and_parents, length(board_and_parents) > 0, fn i, acc ->
+        boards_viewable =
+          not (is_integer(i.board_viewable_by) && user_priority > i.board_viewable_by)
+
+        cats_viewable = not (is_integer(i.cat_viewable_by) && user_priority > i.cat_viewable_by)
+        acc && boards_viewable && cats_viewable
+      end)
+
+    {:ok, can_read}
+  end
+
+  @doc """
+  Converts a board's `slug` to `id`
+  """
+  @spec slug_to_id(slug :: String.t()) ::
+          {:ok, id :: non_neg_integer} | {:error, :board_does_not_exist}
+  def slug_to_id(slug) when is_binary(slug) do
+    query =
+      from b in Board,
+        where: b.slug == ^slug,
+        select: b.id
+
+    id = Repo.one(query)
+
+    if id,
+      do: {:ok, id},
+      else: {:error, :board_does_not_exist}
   end
 end

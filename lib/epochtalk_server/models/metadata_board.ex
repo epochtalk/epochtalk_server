@@ -22,6 +22,20 @@ defmodule EpochtalkServer.Models.MetadataBoard do
           last_thread_title: String.t() | nil,
           last_post_position: non_neg_integer | nil
         }
+  @derive {Jason.Encoder,
+           only: [
+             :id,
+             :board_id,
+             :post_count,
+             :thread_count,
+             :total_post,
+             :total_thread_count,
+             :last_post_username,
+             :last_post_created_at,
+             :last_thread_id,
+             :last_thread_title,
+             :last_post_position
+           ]}
   @schema_prefix "metadata"
   schema "boards" do
     belongs_to :board, Board

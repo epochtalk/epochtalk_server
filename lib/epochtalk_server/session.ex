@@ -46,7 +46,7 @@ defmodule EpochtalkServer.Session do
   Get the resource for a specified user_id and session_id if available
   Otherwise, return an error
   """
-  @spec get_resource(user_id :: String.t(), session_id :: String.t()) ::
+  @spec get_resource(user_id :: non_neg_integer, session_id :: String.t()) ::
           {:ok, resource :: map()}
           | {:error, reason :: String.t() | Redix.Error.t() | Redix.ConnectionError.t()}
   def get_resource(user_id, session_id) do

@@ -54,7 +54,12 @@ defmodule EpochtalkServer.Models.Profile do
     |> validate_required([:id, :user_id])
   end
 
-  @spec increment_post_count(user_id :: non_neg_integer) :: {non_neg_integer, nil}
+  ## === Database Functions ===
+
+  @doc """
+  Increments the `post_count` field given a `User` id
+  """
+  @spec increment_post_count(user_id :: non_neg_integer) :: {:ok, nil}
   def increment_post_count(user_id) do
     query = from p in Profile, where: p.user_id == ^user_id
     Repo.update_all(query, inc: [post_count: 1])

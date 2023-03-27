@@ -1,7 +1,10 @@
 defmodule EpochtalkServer.Models.Profile do
   use Ecto.Schema
   import Ecto.Changeset
+  import Ecto.Query
+  alias EpochtalkServer.Repo
   alias EpochtalkServer.Models.User
+  alias EpochtalkServer.Models.Profile
 
   @moduledoc """
   `Profile` model, for performing actions relating a user's profile
@@ -49,5 +52,11 @@ defmodule EpochtalkServer.Models.Profile do
       :last_active
     ])
     |> validate_required([:id, :user_id])
+  end
+
+  @spec increment_post_count(user_id :: non_neg_integer) :: {non_neg_integer, nil}
+  def increment_post_count(user_id) do
+    query = from p in Profile, where: p.user_id == ^user_id
+    Repo.update_all(query, inc: [post_count: 1])
   end
 end

@@ -35,23 +35,25 @@ defmodule EpochtalkServer.Models.Profile do
   ## === Changesets Functions ===
 
   @doc """
-  Creates a generic changeset for `Profile` model
+  Creates a create changeset for `Profile` model
   """
-  @spec changeset(profile :: t(), attrs :: map() | nil) :: Ecto.Changeset.t()
-  def changeset(profile, attrs \\ %{}) do
+  @spec create_changeset(profile :: t(), attrs :: map() | nil) :: Ecto.Changeset.t()
+  def create_changeset(profile, attrs \\ %{}) do
+    attrs =
+      attrs
+      |> Map.put("user_id", Map.get(attrs, "id"))
+      |> Map.delete("id")
+
     profile
     |> cast(attrs, [
-      :id,
       :user_id,
       :avatar,
       :position,
       :signature,
       :raw_signature,
-      :post_count,
-      :field,
-      :last_active
+      :fields
     ])
-    |> validate_required([:id, :user_id])
+    |> validate_required([:user_id])
   end
 
   ## === Database Functions ===

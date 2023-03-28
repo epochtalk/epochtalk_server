@@ -66,4 +66,10 @@ defmodule EpochtalkServer.Models.Profile do
     query = from p in Profile, where: p.user_id == ^user_id
     Repo.update_all(query, inc: [post_count: 1])
   end
+
+  @doc """
+  Creates `Profile` record for a `User`
+  """
+  @spec create(user :: map) :: {:ok, profile :: t()} | {:error, Ecto.Changeset.t()}
+  def create(user), do: create_changeset(%Profile{}, user) |> Repo.insert()
 end

@@ -1,6 +1,7 @@
 defmodule EpochtalkServer.Models.Preference do
   use Ecto.Schema
   import Ecto.Changeset
+  import Ecto.Query
   alias EpochtalkServer.Repo
   alias EpochtalkServer.Models.Preference
   alias EpochtalkServer.Models.User
@@ -40,10 +41,10 @@ defmodule EpochtalkServer.Models.Preference do
   ## === Changesets Functions ===
 
   @doc """
-  Creates a generic changeset for `Preference` model
+  Creates a create changeset for `Preference` model
   """
-  @spec changeset(preference :: t(), attrs :: map() | nil) :: Ecto.Changeset.t()
-  def changeset(preference, attrs \\ %{}) do
+  @spec create_changeset(preference :: t(), attrs :: map() | nil) :: Ecto.Changeset.t()
+  def create_changeset(preference, attrs \\ %{}) do
     attrs =
       attrs
       |> Map.put("user_id", Map.get(attrs, "id"))
@@ -66,25 +67,81 @@ defmodule EpochtalkServer.Models.Preference do
     |> validate_required([:user_id])
   end
 
+  @doc """
+  Creates a create changeset for `Preference` model
+  """
+  @spec update_changeset(preference :: t(), attrs :: map() | nil) :: Ecto.Changeset.t()
+  def update_changeset(preference, attrs \\ %{}) do
+    preference
+    |> cast(attrs, [
+      :user_id,
+      :posts_per_page,
+      :threads_per_page,
+      :collapsed_categories,
+      :ignored_boards,
+      :timezone_offset,
+      :notify_replied_threads,
+      :ignore_newbies,
+      :patroller_view,
+      :email_mentions,
+      :email_messages
+    ])
+    |> validate_required([
+      :user_id,
+      :posts_per_page,
+      :threads_per_page,
+      :collapsed_categories,
+      :ignored_boards,
+      :timezone_offset,
+      :notify_replied_threads,
+      :ignore_newbies,
+      :patroller_view,
+      :email_mentions,
+      :email_messages
+    ])
+  end
+
   ## === Database Functions ===
 
   @doc """
   Creates `Preference` record for a specific `User`
   """
   @spec create(attrs :: map) :: {:ok, preference :: t()} | {:error, Ecto.Changeset.t()}
-  def create(attrs), do: changeset(%Preference{}, attrs) |> Repo.insert(returning: true)
+  def create(attrs), do: create_changeset(%Preference{}, attrs) |> Repo.insert(returning: true)
 
   @doc """
   Updates `Preference` record for a specific `User`
   """
   @spec update(attrs :: map) :: {:ok, preference :: t()} | {:error, :preference_does_not_exist | Ecto.Changeset.t()}
   def update(attrs) do
-    db_preference = Preference
-    |> Repo.get_by(user_id: Map.get(attrs, "id"))
+    # attrs comes from route where attrs is the user.
+    user_id = Map.get(attrs, "id")
 
-    if is_nil(db_preference),
-      do: {:error, :preference_does_not_exist},
-      else: db_preference |> changeset(attrs) |> Repo.update()
+    # get existing preference row for user
+    if db_preference = Repo.get_by(Preference, user_id: user_id) do
+      cs_data = update_changeset(db_preference, attrs)
+
+      updated_cs = Map.merge(cs_data.data, cs_data.changes)
+
+      from(p in Preference, where: p.user_id == ^user_id)
+      |> Repo.update_all(
+        set: [
+          posts_per_page: Map.get(updated_cs, :posts_per_page),
+          threads_per_page: Map.get(updated_cs, :threads_per_page),
+          collapsed_categories: Map.get(updated_cs, :collapsed_categories),
+          ignored_boards: Map.get(updated_cs, :ignored_boards),
+          timezone_offset: Map.get(updated_cs, :timezone_offset),
+          notify_replied_threads: Map.get(updated_cs, :notify_replied_threads),
+          ignore_newbies: Map.get(updated_cs, :ignore_newbies),
+          patroller_view: Map.get(updated_cs, :patroller_view),
+          email_mentions: Map.get(updated_cs, :email_mentions),
+          email_messages: Map.get(updated_cs, :email_messages)
+        ]
+      )
+      {:ok, updated_cs}
+    else
+      {:error, :preference_does_not_exist}
+    end
   end
 
   @doc """

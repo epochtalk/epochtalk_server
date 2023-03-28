@@ -68,7 +68,7 @@ defmodule EpochtalkServer.Models.Profile do
   end
 
   @doc """
-  Creates `Profile` record for a `User`
+  Creates `Profile` record for a specific `User`
   """
   @spec create(attrs :: map) :: {:ok, profile :: t()} | {:error, Ecto.Changeset.t()}
   def create(attrs), do: changeset(%Profile{}, attrs) |> Repo.insert()

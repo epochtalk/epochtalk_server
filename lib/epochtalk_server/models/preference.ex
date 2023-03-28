@@ -44,6 +44,11 @@ defmodule EpochtalkServer.Models.Preference do
   """
   @spec changeset(preference :: t(), attrs :: map() | nil) :: Ecto.Changeset.t()
   def changeset(preference, attrs \\ %{}) do
+    attrs =
+      attrs
+      |> Map.put("user_id", Map.get(attrs, "id"))
+      |> Map.delete("id")
+
     preference
     |> cast(attrs, [
       :user_id,
@@ -59,6 +64,27 @@ defmodule EpochtalkServer.Models.Preference do
       :email_messages
     ])
     |> validate_required([:user_id])
+  end
+
+  ## === Database Functions ===
+
+  @doc """
+  Creates `Preference` record for a specific `User`
+  """
+  @spec create(attrs :: map) :: {:ok, preference :: t()} | {:error, Ecto.Changeset.t()}
+  def create(attrs), do: changeset(%Preference{}, attrs) |> Repo.insert()
+
+  @doc """
+  Updates `Preference` record for a specific `User`
+  """
+  @spec update(attrs :: map) :: {:ok, preference :: t()} | {:error, :preference_does_not_exist | Ecto.Changeset.t()}
+  def update(attrs) do
+    db_preference = Preference
+    |> Repo.get_by(user_id: Map.get(attrs, "id"))
+
+    if is_nil(db_preference),
+      do: {:error, :preference_does_not_exist},
+      else: db_preference |> changeset(attrs) |> Repo.update()
   end
 
   @doc """

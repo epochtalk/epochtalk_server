@@ -35,10 +35,10 @@ defmodule EpochtalkServer.Models.Profile do
   ## === Changesets Functions ===
 
   @doc """
-  Creates a create changeset for `Profile` model
+  Creates a changeset for `Profile` model
   """
-  @spec create_changeset(profile :: t(), attrs :: map() | nil) :: Ecto.Changeset.t()
-  def create_changeset(profile, attrs \\ %{}) do
+  @spec changeset(profile :: t(), attrs :: map() | nil) :: Ecto.Changeset.t()
+  def changeset(profile, attrs \\ %{}) do
     attrs =
       attrs
       |> Map.put("user_id", Map.get(attrs, "id"))
@@ -61,7 +61,7 @@ defmodule EpochtalkServer.Models.Profile do
   @doc """
   Increments the `post_count` field given a `User` id
   """
-  @spec increment_post_count(user_id :: non_neg_integer) :: {:ok, nil}
+  @spec increment_post_count(user_id :: non_neg_integer) :: {non_neg_integer(), nil}
   def increment_post_count(user_id) do
     query = from p in Profile, where: p.user_id == ^user_id
     Repo.update_all(query, inc: [post_count: 1])
@@ -70,6 +70,19 @@ defmodule EpochtalkServer.Models.Profile do
   @doc """
   Creates `Profile` record for a `User`
   """
-  @spec create(user :: map) :: {:ok, profile :: t()} | {:error, Ecto.Changeset.t()}
-  def create(user), do: create_changeset(%Profile{}, user) |> Repo.insert()
+  @spec create(attrs :: map) :: {:ok, profile :: t()} | {:error, Ecto.Changeset.t()}
+  def create(attrs), do: changeset(%Profile{}, attrs) |> Repo.insert()
+
+  @doc """
+  Updates `Profile` record for a specific `User`
+  """
+  @spec update(attrs :: map) :: {:ok, profile :: t()} | {:error, :profile_does_not_exist | Ecto.Changeset.t()}
+  def update(attrs) do
+    db_profile = Profile
+    |> Repo.get_by(user_id: Map.get(attrs, "id"))
+
+    if is_nil(db_profile),
+      do: {:error, :profile_does_not_exist},
+      else: db_profile |> changeset(attrs) |> Repo.update()
+  end
 end

@@ -72,7 +72,7 @@ defmodule EpochtalkServer.Models.Preference do
   Creates `Preference` record for a specific `User`
   """
   @spec create(attrs :: map) :: {:ok, preference :: t()} | {:error, Ecto.Changeset.t()}
-  def create(attrs), do: changeset(%Preference{}, attrs) |> Repo.insert()
+  def create(attrs), do: changeset(%Preference{}, attrs) |> Repo.insert(returning: true)
 
   @doc """
   Updates `Preference` record for a specific `User`

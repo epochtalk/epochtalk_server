@@ -45,11 +45,6 @@ defmodule EpochtalkServer.Models.Preference do
   """
   @spec create_changeset(preference :: t(), attrs :: map() | nil) :: Ecto.Changeset.t()
   def create_changeset(preference, attrs \\ %{}) do
-    attrs =
-      attrs
-      |> Map.put("user_id", Map.get(attrs, "id"))
-      |> Map.delete("id")
-
     preference
     |> cast(attrs, [
       :user_id,
@@ -106,17 +101,14 @@ defmodule EpochtalkServer.Models.Preference do
   @doc """
   Creates `Preference` record for a specific `User`
   """
-  @spec create(attrs :: map) :: {:ok, preference :: t()} | {:error, Ecto.Changeset.t()}
-  def create(attrs), do: create_changeset(%Preference{}, attrs) |> Repo.insert(returning: true)
+  @spec create(user_id :: non_neg_integer, attrs :: map | nil) :: {:ok, preference :: t()} | {:error, Ecto.Changeset.t()}
+  def create(user_id, attrs \\ %{}), do: create_changeset(%Preference{user_id: user_id}, attrs) |> Repo.insert(returning: true)
 
   @doc """
-  Updates `Preference` record for a specific `User`
+  Upserts `Preference` record for a specific `User`
   """
-  @spec update(attrs :: map) :: {:ok, preference :: t()} | {:error, :preference_does_not_exist | Ecto.Changeset.t()}
-  def update(attrs) do
-    # attrs comes from route where attrs is the user.
-    user_id = Map.get(attrs, "id")
-
+  @spec upsert(user_id :: non_neg_integer, attrs :: map | nil) :: {:ok, preference :: t()} | {:error, :preference_does_not_exist | Ecto.Changeset.t()}
+  def upsert(user_id, attrs \\ %{}) do
     # get existing preference row for user
     if db_preference = Repo.get_by(Preference, user_id: user_id) do
       cs_data = update_changeset(db_preference, attrs)
@@ -140,7 +132,7 @@ defmodule EpochtalkServer.Models.Preference do
       )
       {:ok, updated_cs}
     else
-      {:error, :preference_does_not_exist}
+      create(user_id, attrs)
     end
   end
 

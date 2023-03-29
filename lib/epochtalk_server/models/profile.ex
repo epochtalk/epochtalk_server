@@ -39,20 +39,15 @@ defmodule EpochtalkServer.Models.Profile do
   """
   @spec changeset(profile :: t(), attrs :: map() | nil) :: Ecto.Changeset.t()
   def changeset(profile, attrs \\ %{}) do
-    attrs =
-      attrs
-      |> Map.put("user_id", Map.get(attrs, "id"))
-      |> Map.delete("id")
-
     profile
     |> cast(attrs, [
-      :user_id,
-      :avatar,
-      :position,
-      :signature,
-      :raw_signature,
-      :fields
-    ])
+        :user_id,
+        :avatar,
+        :position,
+        :signature,
+        :raw_signature,
+        :fields
+      ])
     |> validate_required([:user_id])
   end
 
@@ -70,19 +65,16 @@ defmodule EpochtalkServer.Models.Profile do
   @doc """
   Creates `Profile` record for a specific `User`
   """
-  @spec create(attrs :: map) :: {:ok, profile :: t()} | {:error, Ecto.Changeset.t()}
-  def create(attrs), do: changeset(%Profile{}, attrs) |> Repo.insert(returning: true)
+  @spec create(user_id :: non_neg_integer, attrs :: map | nil) :: {:ok, profile :: t()} | {:error, Ecto.Changeset.t()}
+  def create(user_id, attrs \\ %{}), do: changeset(%Profile{user_id: user_id}, attrs) |> Repo.insert(returning: true)
 
   @doc """
-  Updates `Profile` record for a specific `User`
+  Upserts `Profile` record for a specific `User`
   """
-  @spec update(attrs :: map) :: {:ok, profile :: t()} | {:error, :profile_does_not_exist | Ecto.Changeset.t()}
-  def update(attrs) do
-    db_profile = Profile
-    |> Repo.get_by(user_id: Map.get(attrs, "id"))
-
-    if is_nil(db_profile),
-      do: {:error, :profile_does_not_exist},
-      else: db_profile |> changeset(attrs) |> Repo.update()
+  @spec upsert(user_id :: non_neg_integer, attrs :: map | nil) :: {:ok, profile :: t()} | {:error, Ecto.Changeset.t()}
+  def upsert(user_id, attrs \\ %{}) do
+    if db_profile = Repo.get_by(Profile, user_id: user_id),
+      do: db_profile |> changeset(attrs) |> Repo.update(),
+      else: create(user_id, attrs)
   end
 end

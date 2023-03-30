@@ -124,6 +124,15 @@ defmodule EpochtalkServer.Models.Thread do
     end
   end
 
+  @doc """
+  Increments the `post_count` field given a `Thread` id
+  """
+  @spec increment_post_count(id :: non_neg_integer) :: {non_neg_integer(), nil}
+  def increment_post_count(id) do
+    query = from t in Thread, where: t.id == ^id
+    Repo.update_all(query, inc: [post_count: 1])
+  end
+
 
   @doc """
   Sets the `created_at` and `updated_at` of a new `Thread` by querying it's posts.

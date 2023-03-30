@@ -102,5 +102,4 @@ defmodule EpochtalkServer.Models.Post do
     from(p in Post, where: p.id == ^id)
     |> Repo.update_all(set: [position: thread_post_count + 1])
   end
-
 end

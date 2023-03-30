@@ -86,4 +86,21 @@ defmodule EpochtalkServer.Models.Post do
     |> unique_constraint(:id, name: :posts_pkey)
     |> foreign_key_constraint(:thread_id, name: :posts_thread_id_fkey)
   end
+
+  @doc """
+  Sets the `post_position` of a new `Post`, by querying the `post_count` of the
+  parent `Thread` and adding one
+  """
+  @spec set_position_using_thread(id :: non_neg_integer, thread_id :: non_neg_integer) :: {non_neg_integer(), nil}
+  def set_position_using_thread(id, thread_id) do
+    thread_post_count_query = from t in Thread,
+      select: t.post_count,
+      where: t.id == ^thread_id
+
+    thread_post_count = Repo.one(thread_post_count_query)
+
+    from(p in Post, where: p.id == ^id)
+    |> Repo.update_all(set: [position: thread_post_count + 1])
+  end
+
 end

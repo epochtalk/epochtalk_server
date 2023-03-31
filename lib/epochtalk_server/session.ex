@@ -332,13 +332,14 @@ defmodule EpochtalkServer.Session do
   end
 
   defp maybe_extend_ttl(key, new_ttl, old_ttl) do
-    # re-set old expiry only if old expiry was valid and key has no expiry
     if old_ttl > -1 do
+      # re-set old expiry only if old expiry was valid and key has no expiry
       Redix.command(:redix, ["EXPIRE", key, old_ttl, "NX"])
-    # if old expiry was invalid, set new expiry only if key has no expiry
     else
+      # if old expiry was invalid, set new expiry only if key has no expiry
       Redix.command(:redix, ["EXPIRE", key, new_ttl, "NX"])
     end
+
     # set expiry only if new expiry is greater than current (GT)
     Redix.command(:redix, ["EXPIRE", key, new_ttl, "GT"])
   end

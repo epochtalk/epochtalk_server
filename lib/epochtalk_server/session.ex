@@ -293,12 +293,7 @@ defmodule EpochtalkServer.Session do
     unix_expiration = current_time() + ttl
 
     # add new session, noting unix expiration
-    result =
-      Redix.command(:redix, [
-        "SADD",
-        session_key,
-        session_id <> ":" <> Integer.to_string(unix_expiration)
-      ])
+    result = Redix.command(:redix, ["ZADD", session_key, unix_expiration, session_id])
 
     # set ttl
     maybe_extend_ttl(session_key, ttl)

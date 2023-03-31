@@ -289,10 +289,8 @@ defmodule EpochtalkServer.Session do
     delete_expired_sessions(user_id)
     # save session id to redis under "user:{user_id}:sessions"
     session_key = generate_key(user_id, "sessions")
-    # current unix time (default :seconds)
-    now = DateTime.utc_now() |> DateTime.to_unix()
     # intended unix expiration of this session
-    unix_expiration = now + ttl
+    unix_expiration = current_time() + ttl
 
     # add new session, noting unix expiration
     result =

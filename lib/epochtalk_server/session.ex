@@ -327,18 +327,19 @@ defmodule EpochtalkServer.Session do
   defp generate_key(user_id, type), do: "user:#{user_id}:#{type}"
 
   defp maybe_extend_ttl(key, ttl) do
-    # get old ttl
-    {:ok, old_ttl} = Redix.command(:redix, ["TTL", key])
-    maybe_extend_ttl(key, ttl, old_ttl)
+    # use new/old extend, where new == old
+    maybe_extend_ttl(key, ttl, ttl)
   end
 
-  defp maybe_extend_ttl(key, ttl, old_ttl) do
-    if ttl > old_ttl do
-      # extend ttl if new one is further out
-      Redix.command(:redix, ["EXPIRE", key, ttl])
+  defp maybe_extend_ttl(key, new_ttl, old_ttl) do
+    # re-set old expiry only if old expiry was valid and key has no expiry
+    if old_ttl > -1 do
+      Redix.command(:redix, ["EXPIRE", key, old_ttl, "NX"])
+    # if old expiry was invalid, set new expiry only if key has no expiry
     else
-      # re-set old_ttl (necessary when old ttl has been dropped)
-      Redix.command(:redix, ["EXPIRE", key, old_ttl])
+      Redix.command(:redix, ["EXPIRE", key, new_ttl, "NX"])
     end
+    # set expiry only if new expiry is greater than current (GT)
+    Redix.command(:redix, ["EXPIRE", key, new_ttl, "GT"])
   end
 end

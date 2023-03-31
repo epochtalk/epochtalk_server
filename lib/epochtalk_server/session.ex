@@ -311,6 +311,17 @@ defmodule EpochtalkServer.Session do
     result
   end
 
+  defp delete_expired_sessions(user_id) do
+    get_sessions_by_user_id(user_id)
+    |> Enum.each(fn session ->
+      [_session_id, expiration] = String.split(session, ":")
+
+      if String.to_integer(expiration) < now do
+        delete_session_by_user_id(user_id, session)
+      end
+    end)
+  end
+
   defp generate_key(user_id, "user"), do: "user:#{user_id}"
   defp generate_key(user_id, type), do: "user:#{user_id}:#{type}"
 

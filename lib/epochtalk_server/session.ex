@@ -160,12 +160,7 @@ defmodule EpochtalkServer.Session do
   def delete_sessions(%User{} = user) do
     # delete session id from redis under "user:{user_id}:sessions"
     session_key = generate_key(user.id, "sessions")
-
-    case Redix.command(:redix, ["SPOP", session_key]) do
-      {:ok, nil} -> :ok
-      # repeat until redix returns nil
-      _ -> delete_sessions(user)
-    end
+    Redix.command(:redix, ["DEL", session_key])
   end
 
   defp save(%User{} = user, session_id, ttl) do

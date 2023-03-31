@@ -282,21 +282,14 @@ defmodule EpochtalkServer.Session do
   #   clean (delete) expired sessions
   #   ttl expiry for this key will delete all sessions in the set
   defp add_session(user_id, session_id, ttl) do
+    # delete expired sessions
+    delete_expired_sessions(user_id)
     # save session id to redis under "user:{user_id}:sessions"
     session_key = generate_key(user_id, "sessions")
     # current unix time (default :seconds)
     now = DateTime.utc_now() |> DateTime.to_unix()
     # intended unix expiration of this session
     unix_expiration = now + ttl
-    # delete expired sessions
-    get_sessions_by_user_id(user_id)
-    |> Enum.each(fn session ->
-      [_session_id, expiration] = String.split(session, ":")
-
-      if String.to_integer(expiration) < now do
-        delete_session_by_user_id(user_id, session)
-      end
-    end)
 
     # add new session, noting unix expiration
     result =

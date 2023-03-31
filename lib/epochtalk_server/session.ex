@@ -318,6 +318,11 @@ defmodule EpochtalkServer.Session do
     end)
   end
 
+  # current unix time (default :seconds)
+  defp current_time() do
+    DateTime.utc_now() |> DateTime.to_unix()
+  end
+
   defp generate_key(user_id, "user"), do: "user:#{user_id}"
   defp generate_key(user_id, type), do: "user:#{user_id}:#{type}"
 

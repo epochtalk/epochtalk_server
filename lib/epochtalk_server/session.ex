@@ -119,29 +119,12 @@ defmodule EpochtalkServer.Session do
   end
 
   defp is_active_for_user_id(session_id, user_id) do
-    case get_session_ids_by_user_id(user_id) do
+    case get_sessions(%User{user_id: user_id}) do
       {:error, error} ->
         {:error, error}
 
       session_ids ->
         Enum.member?(session_ids, session_id)
-    end
-  end
-
-  defp get_sessions_by_user_id(user_id) do
-    # get session id's from redis under "user:{user_id}:sessions"
-    session_key = generate_key(user_id, "sessions")
-
-    case Redix.command(:redix, ["SMEMBERS", session_key]) do
-      {:ok, sessions} -> sessions
-      {:error, error} -> {:error, error}
-    end
-  end
-
-  defp get_session_ids_by_user_id(user_id) do
-    case get_sessions_by_user_id(user_id) do
-      {:error, error} -> {:error, error}
-      sessions -> Enum.map(sessions, &(String.split(&1, ":") |> List.first()))
     end
   end
 

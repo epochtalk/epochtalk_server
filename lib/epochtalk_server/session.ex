@@ -106,10 +106,10 @@ defmodule EpochtalkServer.Session do
   end
 
   @doc """
-  Gets all sessions for a specific user_id
+  Gets all session ids for a specific user_id
   """
   @spec get_sessions(user_id :: String.t()) ::
-          {:ok, user :: User.t(), sessions :: [String.t()]}
+          {:ok, sessions_ids :: [String.t()]}
           | {:error, atom() | Redix.Error.t() | Redix.ConnectionError.t()}
   def get_sessions(user_id) do
     # get session id's from redis under "user:{user_id}:sessions"
@@ -121,7 +121,7 @@ defmodule EpochtalkServer.Session do
   defp is_active_for_user_id(session_id, user_id) do
     case get_sessions(user_id) do
       {:error, error} -> {:error, error}
-      session_ids -> Enum.member?(session_ids, session_id)
+      {:ok, session_ids} -> Enum.member?(session_ids, session_id)
     end
   end
 

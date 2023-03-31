@@ -113,7 +113,7 @@ defmodule EpochtalkServer.Session do
           | {:error, atom() | Redix.Error.t() | Redix.ConnectionError.t()}
   def get_sessions(user_id) do
     # get session id's from redis under "user:{user_id}:sessions"
-    session_key = generate_key(user.id, "sessions")
+    session_key = generate_key(user_id, "sessions")
 
     Redix.command(:redix, ["ZRANGE", session_key, 0, -1])
   end

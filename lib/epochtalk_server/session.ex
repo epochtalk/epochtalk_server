@@ -305,15 +305,9 @@ defmodule EpochtalkServer.Session do
     result
   end
 
+  # delete expired sessions by expiration (sorted set score)
   defp delete_expired_sessions(user_id) do
-    get_sessions_by_user_id(user_id)
-    |> Enum.each(fn session ->
-      [_session_id, expiration] = String.split(session, ":")
-
-      if String.to_integer(expiration) < now do
-        delete_session_by_user_id(user_id, session)
-      end
-    end)
+    Redix.command(:redix, ["ZREMRANGEBYSCORE", "-inf", current_time()])
   end
 
   # current unix time (default :seconds)

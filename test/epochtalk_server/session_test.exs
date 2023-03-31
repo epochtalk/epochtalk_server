@@ -33,6 +33,20 @@ defmodule EpochtalkServerWeb.SessionTest do
     end
   end
 
+  describe "delete/1" do
+    test "deletes authenticated user's session", %{conn: conn, user: user} do
+      # create a new user session (don't use :authenticated)
+      remember_me = false
+      {:ok, authed_user, _token, authed_con} = Session.create(user, remember_me, conn)
+      assert Guardian.Plug.authenticated?(authed_con) == true
+      session_id = authed_con.private.guardian_default_claims["jti"]
+      {:ok, resource} = Session.get_resource(authed_user.id, session_id)
+      %{id: session_user_id, username: session_user_username} = resource
+      assert session_user_id == authed_user.id
+      assert session_user_username == authed_user.username
+    end
+  end
+
   describe "create/3 expiration/ttl" do
     setup [:flush_redis]
 

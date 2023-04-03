@@ -133,27 +133,28 @@ defmodule EpochtalkServer.Models.Thread do
     Repo.update_all(query, inc: [post_count: 1])
   end
 
-
   @doc """
   Sets the `created_at` and `updated_at` of a new `Thread` by querying it's posts.
   """
   @spec set_timestamps(id :: non_neg_integer) :: {non_neg_integer(), nil}
   def set_timestamps(id) do
     # get created_at of first post in thread
-    created_at_query = from p in Post,
-      where: p.thread_id == ^id,
-      order_by: [p.created_at],
-      limit: 1,
-      select: p.created_at
+    created_at_query =
+      from p in Post,
+        where: p.thread_id == ^id,
+        order_by: [p.created_at],
+        limit: 1,
+        select: p.created_at
 
     created_at = Repo.one(created_at_query)
 
     # get created_at of last post in thread
-    updated_at_query = from p in Post,
-      where: p.thread_id == ^id,
-      order_by: [desc: p.created_at],
-      limit: 1,
-      select: p.created_at
+    updated_at_query =
+      from p in Post,
+        where: p.thread_id == ^id,
+        order_by: [desc: p.created_at],
+        limit: 1,
+        select: p.created_at
 
     updated_at = Repo.one(updated_at_query)
 

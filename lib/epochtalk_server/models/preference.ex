@@ -101,13 +101,16 @@ defmodule EpochtalkServer.Models.Preference do
   @doc """
   Creates `Preference` record for a specific `User`
   """
-  @spec create(user_id :: non_neg_integer, attrs :: map | nil) :: {:ok, preference :: t()} | {:error, Ecto.Changeset.t()}
-  def create(user_id, attrs \\ %{}), do: create_changeset(%Preference{user_id: user_id}, attrs) |> Repo.insert(returning: true)
+  @spec create(user_id :: non_neg_integer, attrs :: map | nil) ::
+          {:ok, preference :: t()} | {:error, Ecto.Changeset.t()}
+  def create(user_id, attrs \\ %{}),
+    do: create_changeset(%Preference{user_id: user_id}, attrs) |> Repo.insert(returning: true)
 
   @doc """
   Upserts `Preference` record for a specific `User`
   """
-  @spec upsert(user_id :: non_neg_integer, attrs :: map | nil) :: {:ok, preference :: t()} | {:error, :preference_does_not_exist | Ecto.Changeset.t()}
+  @spec upsert(user_id :: non_neg_integer, attrs :: map | nil) ::
+          {:ok, preference :: t()} | {:error, :preference_does_not_exist | Ecto.Changeset.t()}
   def upsert(user_id, attrs \\ %{}) do
     # get existing preference row for user
     if db_preference = Repo.get_by(Preference, user_id: user_id) do
@@ -130,6 +133,7 @@ defmodule EpochtalkServer.Models.Preference do
           email_messages: Map.get(updated_cs, :email_messages)
         ]
       )
+
       {:ok, updated_cs}
     else
       create(user_id, attrs)

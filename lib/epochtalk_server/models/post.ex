@@ -106,7 +106,6 @@ defmodule EpochtalkServer.Models.Post do
       case Repo.insert(post_cs) do
         # changeset valid, insert success, update metadata threads and return thread
         {:ok, db_post} ->
-
           # Increment user post count
           Profile.increment_post_count(db_post.user_id)
 
@@ -133,11 +132,13 @@ defmodule EpochtalkServer.Models.Post do
   Sets the `post_position` of a new `Post`, by querying the `post_count` of the
   parent `Thread` and adding one
   """
-  @spec set_position_using_thread(id :: non_neg_integer, thread_id :: non_neg_integer) :: {non_neg_integer(), nil}
+  @spec set_position_using_thread(id :: non_neg_integer, thread_id :: non_neg_integer) ::
+          {non_neg_integer(), nil}
   def set_position_using_thread(id, thread_id) do
-    thread_post_count_query = from t in Thread,
-      select: t.post_count,
-      where: t.id == ^thread_id
+    thread_post_count_query =
+      from t in Thread,
+        select: t.post_count,
+        where: t.id == ^thread_id
 
     thread_post_count = Repo.one(thread_post_count_query)
 

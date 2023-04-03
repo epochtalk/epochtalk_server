@@ -253,7 +253,8 @@ defmodule EpochtalkServer.Models.BannedAddress do
     |> calculate_score_decay
   end
 
-  defp calculate_ip32_score({ip1, ip2, ip3, ip4, _, _, _, _}), do: calculate_ip32_score({ip1, ip2, ip3, ip4})
+  defp calculate_ip32_score({ip1, ip2, ip3, ip4, _, _, _, _}),
+    do: calculate_ip32_score({ip1, ip2, ip3, ip4})
 
   defp calculate_ip32_score({ip1, ip2, ip3, ip4}) do
     from(ba in BannedAddress,
@@ -269,7 +270,8 @@ defmodule EpochtalkServer.Models.BannedAddress do
     |> calculate_score_decay
   end
 
-  defp calculate_ip24_score({ip1, ip2, ip3, ip4, _, _, _, _}), do: calculate_ip24_score({ip1, ip2, ip3, ip4})
+  defp calculate_ip24_score({ip1, ip2, ip3, ip4, _, _, _, _}),
+    do: calculate_ip24_score({ip1, ip2, ip3, ip4})
 
   defp calculate_ip24_score({ip1, ip2, ip3, _}) do
     from(ba in BannedAddress,
@@ -285,7 +287,8 @@ defmodule EpochtalkServer.Models.BannedAddress do
     |> calculate_score_decay
   end
 
-  defp calculate_ip16_score({ip1, ip2, ip3, ip4, _, _, _, _}), do: calculate_ip16_score({ip1, ip2, ip3, ip4})
+  defp calculate_ip16_score({ip1, ip2, ip3, ip4, _, _, _, _}),
+    do: calculate_ip16_score({ip1, ip2, ip3, ip4})
 
   defp calculate_ip16_score({ip1, ip2, _, _}) do
     from(ba in BannedAddress,

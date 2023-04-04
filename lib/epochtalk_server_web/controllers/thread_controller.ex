@@ -33,6 +33,28 @@ defmodule EpochtalkServerWeb.ThreadController do
   end
 
   @doc """
+  Used to create threads
+
+  TODO(akinsey): Regex validation for slug, length check for strings, implement poll validation
+  """
+  def create(conn, attrs) do
+    with locked <- Validate.cast(attrs, "locked", :boolean, default: false),
+         sticky <- Validate.cast(attrs, "sticky", :boolean, default: false),
+         moderated <- Validate.cast(attrs, "moderated", :boolean, default: false),
+         title <- Validate.cast(attrs, "title", :string, required: true),
+         slug <- Validate.cast(attrs, "slug", :string, required: true),
+         body <- Validate.cast(attrs, "body", :string, required: true),
+         board_id <- Validate.cast(attrs, "board_id", :integer, required: true),
+         user <- Guardian.Plug.current_resource(conn) do
+      render(conn, "create.json", %{
+        data: attrs
+      })
+    else
+      _ -> ErrorHelpers.render_json_error(conn, 400, "Error, cannot fetch create thread")
+    end
+  end
+
+  @doc """
   Used to retrieve threads by board
   """
   def by_board(conn, attrs) do

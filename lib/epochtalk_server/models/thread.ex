@@ -24,6 +24,7 @@ defmodule EpochtalkServer.Models.Thread do
           imported_at: NaiveDateTime.t() | nil,
           updated_at: NaiveDateTime.t() | nil
         }
+  @derive {Jason.Encoder, only: [:board_id, :locked, :sticky, :slug, :moderated, :post_count, :created_at, :updated_at, :imported_at]}
   schema "threads" do
     belongs_to :board, Board
     field :locked, :boolean

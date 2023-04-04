@@ -102,7 +102,21 @@ defmodule EpochtalkServer.Models.BoardMapping do
           on: bm.board_id == mb.board_id,
           left_join: t in Thread,
           on: mb.last_thread_id == t.id,
-          select_merge: %{stats: mb, thread: t},
+          select_merge: %{
+            stats: mb,
+            thread: %{
+              id: t.id,
+              board_id: t.board_id,
+              locked: t.locked,
+              sticky: t.sticky,
+              moderated: t.moderated,
+              slug: t.slug,
+              post_count: t.post_count,
+              created_at: t.created_at,
+              updated_at: t.updated_at,
+              imported_at: t.imported_at
+            }
+          },
           preload: [:board]
       end
 

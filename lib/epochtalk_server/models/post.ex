@@ -24,7 +24,7 @@ defmodule EpochtalkServer.Models.Post do
           imported_at: NaiveDateTime.t() | nil,
           updated_at: NaiveDateTime.t() | nil
         }
-  @derive {Jason.Encoder, only: [:thread_id, :user_id, :locked, :deleted, :position, :content, :metadata, :created_at, :updated_at, :imported_at]}
+  @derive {Jason.Encoder, only: [:thread_id, :thread, :user_id, :locked, :deleted, :position, :content, :metadata, :created_at, :updated_at, :imported_at]}
   schema "posts" do
     belongs_to :thread, Thread
     belongs_to :user, User

@@ -159,7 +159,6 @@ defmodule EpochtalkServerWeb.UserController do
   Logs out the logged in `User`
 
   - TODO(boka): check if user is on page that requires auth
-  - TODO(boka): Delete users session
   """
   def logout(conn, _attrs) do
     with {:auth, true} <- {:auth, Guardian.Plug.authenticated?(conn)},

@@ -260,10 +260,10 @@ defmodule EpochtalkServer.Session do
   #   add the new session, with expiry
   #   ttl expiry for this key will delete all sessions in the set
   defp add_session(user_id, session_id, ttl) do
-    # delete expired sessions
-    delete_expired_sessions(user_id)
     # save session id to redis under "user:{user_id}:sessions"
     session_key = generate_key(user_id, "sessions")
+    # delete expired sessions
+    delete_expired_sessions(session_key)
     # intended unix expiration of this session
     unix_expiration = current_time() + ttl
 
@@ -276,8 +276,8 @@ defmodule EpochtalkServer.Session do
   end
 
   # delete expired sessions by expiration (sorted set score)
-  defp delete_expired_sessions(user_id) do
-    Redix.command(:redix, ["ZREMRANGEBYSCORE", "-inf", current_time()])
+  defp delete_expired_sessions(session_key) do
+    Redix.command(:redix, ["ZREMRANGEBYSCORE", session_key, "-inf", current_time()])
   end
 
   # current unix time (default :seconds)

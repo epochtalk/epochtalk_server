@@ -156,7 +156,7 @@ defmodule EpochtalkServer.Session do
   @doc """
   Deletes every session instance for the specified `User`
   """
-  @spec delete_sessions(user :: User.t()) :: :ok
+  @spec delete_sessions(user :: User.t()) :: {:ok, non_neg_integer} | Redix.ConnectionError.t()
   def delete_sessions(%User{} = user) do
     # delete session id from redis under "user:{user_id}:sessions"
     session_key = generate_key(user.id, "sessions")

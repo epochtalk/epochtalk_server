@@ -126,25 +126,15 @@ defmodule EpochtalkServer.Session do
   end
 
   @doc """
-  Deletes a specific `User` session
+  Deletes the session specified in conn
   """
-  @spec delete_session(
-          user :: User.t(),
-          session_id :: String.t()
-        ) ::
-          {:ok, user :: User.t()} | {:error, atom() | Redix.Error.t() | Redix.ConnectionError.t()}
-  def delete_session(%User{} = user, session_id) do
+  @spec delete(conn :: Plug.Conn.t()) ::
+          {:ok, conn :: Plug.Conn.t()} | {:error, atom() | Redix.Error.t() | Redix.ConnectionError.t()}
+  def delete(conn) do
+    # get user from guardian resource
+    %{ id: user_id } = Guardian.Plug.current_resource(conn)
+
     # delete session id from redis under "user:{user_id}:sessions"
-    session_key = generate_key(user.id, "sessions")
-
-    case Redix.command(:redix, ["SREM", session_key, session_id]) do
-      {:ok, _} -> {:ok, user}
-      {:error, error} -> {:error, error}
-    end
-  end
-
-  defp delete_session_by_user_id(user_id, session) do
-    # delete session from redis under "user:{user_id}:sessions"
     session_key = generate_key(user_id, "sessions")
 
     case Redix.command(:redix, ["SREM", session_key, session]) do

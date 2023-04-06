@@ -65,17 +65,21 @@ defmodule EpochtalkServer.Models.Thread do
   end
 
   @doc """
-  Create changeset for creation of `Board` model
+  Create changeset for creation of `Thread` model
   """
-  @spec create_changeset(board :: t(), attrs :: map() | nil) :: Ecto.Changeset.t()
-  def create_changeset(board, attrs) do
+  @spec create_changeset(thread :: t(), attrs :: map() | nil) :: Ecto.Changeset.t()
+  def create_changeset(thread, attrs) do
     now = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
 
+    # set default values and timestamps
     attrs =
       attrs
-      |> Map.put("created_at", now)
+      |> Map.put(:locked, false)
+      |> Map.put(:sticky, false)
+      |> Map.put(:moderated, false)
+      |> Map.put(:created_at, now)
 
-    board
+    thread
     |> cast(attrs, [
       :board_id,
       :locked,
@@ -85,6 +89,7 @@ defmodule EpochtalkServer.Models.Thread do
       :post_count,
       :created_at
     ])
+    |> validate_required([:board_id, :locked, :sticky, :slug, :moderated, :created_at])
     |> unique_constraint(:id, name: :threads_pkey)
     |> unique_constraint(:slug, name: :threads_slug_index)
     |> foreign_key_constraint(:board_id, name: :threads_board_id_fkey)
@@ -115,8 +120,8 @@ defmodule EpochtalkServer.Models.Thread do
           |> binary_part(0, 3)
           |> String.downcase()
 
-        hashed_slug = "#{Map.get(thread, "slug")}-#{hash}"
-        thread = thread |> Map.put("slug", hashed_slug)
+        hashed_slug = "#{Map.get(thread, :slug)}-#{hash}"
+        thread = thread |> Map.put(:slug, hashed_slug)
         create(thread)
 
       # some other error

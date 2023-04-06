@@ -140,8 +140,11 @@ defmodule EpochtalkServer.Session do
     # delete session id from redis under "user:{user_id}:sessions"
     session_key = generate_key(user_id, "sessions")
 
-    case Redix.command(:redix, ["SREM", session_key, session]) do
-      {:ok, _} -> {:ok, user_id}
+    case Redix.command(:redix, ["ZREM", session_key, session_id]) do
+      {:ok, _} ->
+        # sign user out
+        conn = Guardian.Plug.sign_out(conn)
+        {:ok, conn}
       {:error, error} -> {:error, error}
     end
   end

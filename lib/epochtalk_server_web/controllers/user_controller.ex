@@ -164,9 +164,8 @@ defmodule EpochtalkServerWeb.UserController do
     with {:auth, true} <- {:auth, Guardian.Plug.authenticated?(conn)},
          user <- Guardian.Plug.current_resource(conn),
          token <- Guardian.Plug.current_token(conn),
-         result <-
-           EpochtalkServerWeb.Endpoint.broadcast("user:#{user.id}", "logout", %{token: token}),
          {:ok, conn} <- Session.delete(conn) do
+      EpochtalkServerWeb.Endpoint.broadcast("user:#{user.id}", "logout", %{token: token})
       render(conn, "logout.json", data: %{success: true})
     else
       {:auth, false} -> ErrorHelpers.render_json_error(conn, 400, "Not logged in")

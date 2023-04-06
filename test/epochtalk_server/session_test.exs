@@ -34,16 +34,22 @@ defmodule EpochtalkServerWeb.SessionTest do
   end
 
   describe "delete/1" do
-    test "deletes authenticated user's session", %{conn: conn, user: user} do
-      # create a new user session (don't use :authenticated)
-      remember_me = false
-      {:ok, authed_user, _token, authed_con} = Session.create(user, remember_me, conn)
-      assert Guardian.Plug.authenticated?(authed_con) == true
-      session_id = authed_con.private.guardian_default_claims["jti"]
+    @tag :authenticated
+    test "deletes authenticated user's session", %{conn: conn, authed_user: authed_user} do
+      session_id = conn.private.guardian_default_claims["jti"]
       {:ok, resource} = Session.get_resource(authed_user.id, session_id)
       %{id: session_user_id, username: session_user_username} = resource
       assert session_user_id == authed_user.id
       assert session_user_username == authed_user.username
+
+      # delete user session indirectly via logout route
+      #   this is done rather than calling Session.delete
+      #   because guardian does not load the resource
+      #   when calling Session.delete directly
+      unauthed_conn = delete(conn, Routes.user_path(conn, :logout))
+      assert Guardian.Plug.authenticated?(unauthed_conn) == false
+      unauthed_resource = Session.get_resource(authed_user.id, session_id)
+      assert unauthed_resource == {:error, "No session for user_id #{authed_user.id} with id #{session_id}"}
     end
   end
 

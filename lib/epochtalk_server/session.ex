@@ -129,13 +129,15 @@ defmodule EpochtalkServer.Session do
   Deletes the session specified in conn
   """
   @spec delete(conn :: Plug.Conn.t()) ::
-          {:ok, conn :: Plug.Conn.t()} | {:error, atom() | Redix.Error.t() | Redix.ConnectionError.t()}
+          {:ok, conn :: Plug.Conn.t()}
+          | {:error, atom() | Redix.Error.t() | Redix.ConnectionError.t()}
   def delete(conn) do
     # get user from guardian resource
-    %{ id: user_id } = Guardian.Plug.current_resource(conn)
+    %{id: user_id} = Guardian.Plug.current_resource(conn)
     # get session_id from jti in jwt token
-    %{claims: %{"jti" => session_id}} = Guardian.Plug.current_token(conn)
-                                        |> Guardian.peek
+    %{claims: %{"jti" => session_id}} =
+      Guardian.Plug.current_token(conn)
+      |> Guardian.peek()
 
     # delete session id from redis under "user:{user_id}:sessions"
     session_key = generate_key(user_id, "sessions")
@@ -145,7 +147,9 @@ defmodule EpochtalkServer.Session do
         # sign user out
         conn = Guardian.Plug.sign_out(conn)
         {:ok, conn}
-      {:error, error} -> {:error, error}
+
+      {:error, error} ->
+        {:error, error}
     end
   end
 

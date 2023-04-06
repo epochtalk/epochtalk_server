@@ -49,7 +49,9 @@ defmodule EpochtalkServerWeb.SessionTest do
       unauthed_conn = delete(conn, Routes.user_path(conn, :logout))
       assert Guardian.Plug.authenticated?(unauthed_conn) == false
       unauthed_resource = Session.get_resource(authed_user.id, session_id)
-      assert unauthed_resource == {:error, "No session for user_id #{authed_user.id} with id #{session_id}"}
+
+      assert unauthed_resource ==
+               {:error, "No session for user_id #{authed_user.id} with id #{session_id}"}
     end
   end
 

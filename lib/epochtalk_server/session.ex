@@ -133,6 +133,9 @@ defmodule EpochtalkServer.Session do
   def delete(conn) do
     # get user from guardian resource
     %{ id: user_id } = Guardian.Plug.current_resource(conn)
+    # get session_id from jti in jwt token
+    %{claims: %{"jti" => session_id}} = Guardian.Plug.current_token(conn)
+                                        |> Guardian.peek
 
     # delete session id from redis under "user:{user_id}:sessions"
     session_key = generate_key(user_id, "sessions")

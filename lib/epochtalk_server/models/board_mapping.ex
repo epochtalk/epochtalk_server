@@ -108,7 +108,7 @@ defmodule EpochtalkServer.Models.BoardMapping do
               last_thread_slug: t.slug,
               last_thread_post_count: t.post_count,
               last_thread_created_at: t.created_at,
-              last_thread_updated_at: t.updated_at,
+              last_thread_updated_at: t.updated_at
             }
           },
           preload: [:board]

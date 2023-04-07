@@ -49,18 +49,20 @@ defmodule EpochtalkServerWeb.ThreadController do
          body <- Validate.cast(attrs, "body", :string, required: true),
          board_id <- Validate.cast(attrs, "board_id", :integer, required: true),
          user <- Guardian.Plug.current_resource(conn),
-         {:ok, thread} <- Thread.create(%{
-           board_id: board_id,
-           locked: locked,
-           sticky: sticky,
-           moderated: moderated,
-           slug: slug
-         }),
-         {:ok, post} <- Post.create(%{
-          thread_id: thread.id,
-          user_id: user.id,
-          content: %{title: title, body: body}
-         }) do
+         {:ok, thread} <-
+           Thread.create(%{
+             board_id: board_id,
+             locked: locked,
+             sticky: sticky,
+             moderated: moderated,
+             slug: slug
+           }),
+         {:ok, post} <-
+           Post.create(%{
+             thread_id: thread.id,
+             user_id: user.id,
+             content: %{title: title, body: body}
+           }) do
       render(conn, "create.json", %{
         data: post
       })

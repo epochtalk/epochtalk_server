@@ -9,6 +9,7 @@ defmodule EpochtalkServerWeb.ThreadController do
   alias EpochtalkServerWeb.Helpers.Validate
   alias EpochtalkServerWeb.Helpers.ACL
   alias EpochtalkServer.Models.Thread
+  alias EpochtalkServer.Models.Post
   alias EpochtalkServer.Models.Board
   alias EpochtalkServer.Models.BoardBan
   alias EpochtalkServer.Models.BoardMapping
@@ -35,7 +36,9 @@ defmodule EpochtalkServerWeb.ThreadController do
   @doc """
   Used to create threads
 
-  TODO(akinsey): Regex validation for slug, length check for strings, implement poll validation
+  TODO(akinsey): Regex validation for slug, length check for strings, implement poll validation (use model validation)
+  TODO(akinsey): implement polls
+  TODO(akinsey): Post pre processing, image processing, hooks
   """
   def create(conn, attrs) do
     with locked <- Validate.cast(attrs, "locked", :boolean, default: false),
@@ -45,12 +48,24 @@ defmodule EpochtalkServerWeb.ThreadController do
          slug <- Validate.cast(attrs, "slug", :string, required: true),
          body <- Validate.cast(attrs, "body", :string, required: true),
          board_id <- Validate.cast(attrs, "board_id", :integer, required: true),
-         user <- Guardian.Plug.current_resource(conn) do
+         user <- Guardian.Plug.current_resource(conn),
+         {:ok, thread} <- Thread.create(%{
+           board_id: board_id,
+           locked: locked,
+           sticky: sticky,
+           moderated: moderated,
+           slug: slug
+         }),
+         {:ok, post} <- Post.create(%{
+          thread_id: thread.id,
+          user_id: user.id,
+          content: %{title: title, body: body}
+         }) do
       render(conn, "create.json", %{
-        data: attrs
+        data: post
       })
     else
-      _ -> ErrorHelpers.render_json_error(conn, 400, "Error, cannot fetch create thread")
+      _ -> ErrorHelpers.render_json_error(conn, 400, "Error, cannot create thread")
     end
   end
 

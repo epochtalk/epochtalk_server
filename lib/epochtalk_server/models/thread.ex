@@ -85,10 +85,10 @@ defmodule EpochtalkServer.Models.Thread do
     # set default values and timestamps
     attrs =
       attrs
-      |> Map.put(:locked, false)
-      |> Map.put(:sticky, false)
-      |> Map.put(:moderated, false)
-      |> Map.put(:created_at, now)
+      |> Map.put("locked", false)
+      |> Map.put("sticky", false)
+      |> Map.put("moderated", false)
+      |> Map.put("created_at", now)
 
     thread
     |> cast(attrs, [
@@ -111,33 +111,40 @@ defmodule EpochtalkServer.Models.Thread do
   @doc """
   Creates a new `Thread` in the database
   """
-  @spec create(thread_attrs :: map()) :: {:ok, thread :: t()} | {:error, Ecto.Changeset.t()}
-  def create(thread) do
+  @spec create(thread_attrs :: map(), user_id :: non_neg_integer) :: {:ok, thread :: t()} | {:error, Ecto.Changeset.t()}
+  def create(thread, user_id) do
     thread_cs = create_changeset(%Thread{}, thread)
 
-    case Repo.insert(thread_cs) do
-      # changeset valid, insert success, update metadata threads and return thread
-      {:ok, db_thread} ->
-        case MetadataThread.insert(%MetadataThread{thread_id: db_thread.id, views: 0}) do
-          {:ok, _} -> {:ok, db_thread}
-          {:error, cs} -> {:error, cs}
-        end
+    case Repo.transaction(fn ->
+      case Repo.insert(thread_cs) do
+        # changeset valid, insert success, update metadata threads and return thread
+        {:ok, db_thread} ->
+          MetadataThread.insert(%MetadataThread{thread_id: db_thread.id, views: 0})
+          Post.create(%{
+             thread_id: db_thread.id,
+             user_id: user_id,
+             content: %{title: thread["title"], body: thread["body"]}
+           })
 
-      # handle slug conflict, add hash to slug, try to insert again
-      {:error, %Ecto.Changeset{errors: [slug: _]} = _cs} ->
-        hash =
-          :crypto.strong_rand_bytes(3)
-          |> Base.url_encode64()
-          |> binary_part(0, 3)
-          |> String.downcase()
+        # handle slug conflict, add hash to slug, try to insert again
+        {:error, %Ecto.Changeset{errors: [slug: _]} = _cs} ->
+          hash =
+            :crypto.strong_rand_bytes(3)
+            |> Base.url_encode64()
+            |> binary_part(0, 3)
+            |> String.downcase()
 
-        hashed_slug = "#{Map.get(thread, :slug)}-#{hash}"
-        thread = thread |> Map.put(:slug, hashed_slug)
-        create(thread)
+          hashed_slug = "#{Map.get(thread, "slug")}-#{hash}"
+          thread = thread |> Map.put("slug", hashed_slug)
+          create(thread, user_id)
 
-      # some other error
-      {:error, cs} ->
-        {:error, cs}
+        # some other error
+        {:error, cs} ->
+          {:error, cs}
+      end
+    end) do
+      {:ok, thread_data} -> thread_data
+      {:error, cs} -> {:error, cs}
     end
   end
 

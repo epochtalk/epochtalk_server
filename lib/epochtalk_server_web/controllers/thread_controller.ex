@@ -41,30 +41,10 @@ defmodule EpochtalkServerWeb.ThreadController do
   TODO(akinsey): Post pre processing, image processing, hooks
   """
   def create(conn, attrs) do
-    with locked <- Validate.cast(attrs, "locked", :boolean, default: false),
-         sticky <- Validate.cast(attrs, "sticky", :boolean, default: false),
-         moderated <- Validate.cast(attrs, "moderated", :boolean, default: false),
-         title <- Validate.cast(attrs, "title", :string, required: true),
-         slug <- Validate.cast(attrs, "slug", :string, required: true),
-         body <- Validate.cast(attrs, "body", :string, required: true),
-         board_id <- Validate.cast(attrs, "board_id", :integer, required: true),
-         user <- Guardian.Plug.current_resource(conn),
-         {:ok, thread} <-
-           Thread.create(%{
-             board_id: board_id,
-             locked: locked,
-             sticky: sticky,
-             moderated: moderated,
-             slug: slug
-           }),
-         {:ok, post} <-
-           Post.create(%{
-             thread_id: thread.id,
-             user_id: user.id,
-             content: %{title: title, body: body}
-           }) do
+    with user <- Guardian.Plug.current_resource(conn),
+         {:ok, thread_data} <- Thread.create(attrs, user.id) do
       render(conn, "create.json", %{
-        data: post
+        data: thread_data
       })
     else
       _ -> ErrorHelpers.render_json_error(conn, 400, "Error, cannot create thread")

@@ -119,9 +119,14 @@ defmodule EpochtalkServer.Session do
   end
 
   defp is_active_for_user_id(session_id, user_id) do
-    case get_sessions(user_id) do
+    session_key = generate_key(user_id, "sessions")
+    # check ZSCORE for user_id:session_id pair
+    # returns score if it is a member of the set
+    # returns nil if not a member
+    case Redix.command(:redix, ["ZSCORE", session_key, session_id]) do
       {:error, error} -> {:error, error}
-      {:ok, session_ids} -> Enum.member?(session_ids, session_id)
+      {:ok, nil} -> false
+      {:ok, _score} -> true
     end
   end
 

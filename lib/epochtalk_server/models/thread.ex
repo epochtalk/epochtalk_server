@@ -83,12 +83,12 @@ defmodule EpochtalkServer.Models.Thread do
     now = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
 
     # set default values and timestamps
-    attrs =
-      attrs
-      |> Map.put("locked", false)
-      |> Map.put("sticky", false)
-      |> Map.put("moderated", false)
-      |> Map.put("created_at", now)
+    thread =
+      thread
+      |> Map.put(:locked, false)
+      |> Map.put(:sticky, false)
+      |> Map.put(:moderated, false)
+      |> Map.put(:created_at, now)
 
     thread
     |> cast(attrs, [
@@ -117,33 +117,34 @@ defmodule EpochtalkServer.Models.Thread do
 
     case Repo.transaction(fn ->
       case Repo.insert(thread_cs) do
-        # changeset valid, insert success, update metadata threads and return thread
         {:ok, db_thread} ->
           MetadataThread.insert(%MetadataThread{thread_id: db_thread.id, views: 0})
           Post.create(%{
-             thread_id: db_thread.id,
-             user_id: user_id,
-             content: %{title: thread["title"], body: thread["body"]}
-           })
+            thread_id: db_thread.id,
+            user_id: user_id,
+            content: %{title: thread["title"], body: thread["body"]}
+          })
 
-        # handle slug conflict, add hash to slug, try to insert again
-        {:error, %Ecto.Changeset{errors: [slug: _]} = _cs} ->
-          hash =
-            :crypto.strong_rand_bytes(3)
-            |> Base.url_encode64()
-            |> binary_part(0, 3)
-            |> String.downcase()
-
-          hashed_slug = "#{Map.get(thread, "slug")}-#{hash}"
-          thread = thread |> Map.put("slug", hashed_slug)
-          create(thread, user_id)
-
-        # some other error
-        {:error, cs} ->
-          {:error, cs}
+        # rollback and bubble up changeset error
+        {:error, cs} -> Repo.rollback(cs)
       end
     end) do
-      {:ok, thread_data} -> thread_data
+      # transaction success return post with preloaded thread
+      {:ok, {:ok, _post} = thread_data} -> thread_data
+
+      # handle slug conflict, add hash to slug, try to insert again
+      {:error, %Ecto.Changeset{errors: [slug: _]} = _cs} ->
+        hash =
+          :crypto.strong_rand_bytes(3)
+          |> Base.url_encode64()
+          |> binary_part(0, 3)
+          |> String.downcase()
+
+        hashed_slug = "#{Map.get(thread, "slug")}-#{hash}"
+        thread = thread |> Map.put("slug", hashed_slug)
+        create(thread, user_id)
+
+      # some other error
       {:error, cs} -> {:error, cs}
     end
   end

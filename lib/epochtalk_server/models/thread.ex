@@ -101,6 +101,8 @@ defmodule EpochtalkServer.Models.Thread do
       :created_at
     ])
     |> validate_required([:board_id, :locked, :sticky, :slug, :moderated, :created_at])
+    |> validate_length(:slug, min: 1, max: 100)
+    |> validate_format(:slug, ~r/^[a-zA-Z0-9-_](-?[a-zA-Z0-9-_])*$/)
     |> unique_constraint(:id, name: :threads_pkey)
     |> unique_constraint(:slug, name: :threads_slug_index)
     |> foreign_key_constraint(:board_id, name: :threads_board_id_fkey)

@@ -108,7 +108,7 @@ defmodule EpochtalkServer.Session do
   @doc """
   Gets all session ids for a specific user_id
   """
-  @spec get_sessions(user_id :: String.t()) ::
+  @spec get_sessions(user_id :: non_neg_integer) ::
           {:ok, sessions_ids :: [String.t()]}
           | {:error, atom() | Redix.Error.t() | Redix.ConnectionError.t()}
   def get_sessions(user_id) do

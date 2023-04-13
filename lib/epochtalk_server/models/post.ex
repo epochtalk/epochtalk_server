@@ -26,6 +26,7 @@ defmodule EpochtalkServer.Models.Post do
         }
   @derive {Jason.Encoder,
            only: [
+             :id,
              :thread_id,
              :thread,
              :user_id,

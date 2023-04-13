@@ -26,6 +26,7 @@ defmodule EpochtalkServer.Models.Thread do
         }
   @derive {Jason.Encoder,
            only: [
+             :id,
              :board_id,
              :locked,
              :sticky,

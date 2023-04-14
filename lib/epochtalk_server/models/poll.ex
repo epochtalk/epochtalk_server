@@ -71,4 +71,35 @@ defmodule EpochtalkServer.Models.Poll do
       :display_mode
     ])
   end
+
+  @doc """
+  Create changeset for `Poll` model
+  """
+  @spec create_changeset(
+          poll :: t(),
+          attrs :: map() | nil
+        ) :: Ecto.Changeset.t()
+  def create_changeset(poll, attrs \\ %{}) do
+    poll
+    |> cast(attrs, [
+      :thread_id,
+      :question,
+      :locked,
+      :max_answers,
+      :expiration,
+      :change_vote,
+      :display_mode
+    ])
+    |> validate_required([
+      :thread_id,
+      :question,
+      :locked,
+      :max_answers,
+      :change_vote,
+      :display_mode
+    ])
+    |> unique_constraint(:id, name: :polls_pkey)
+    |> unique_constraint(:thread_id, name: :polls_thread_id_index)
+    |> foreign_key_constraint(:thread_id, name: :polls_thread_id_fkey)
+  end
 end

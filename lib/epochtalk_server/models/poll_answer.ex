@@ -26,12 +26,27 @@ defmodule EpochtalkServer.Models.PollAnswer do
   Generic changeset for `PollAnswer` model
   """
   @spec changeset(
-          poll :: t(),
+          poll_answers :: t(),
           attrs :: map() | nil
         ) :: Ecto.Changeset.t()
-  def changeset(poll, attrs \\ %{}) do
-    poll
+  def changeset(poll_answers, attrs \\ %{}) do
+    poll_answers
     |> cast(attrs, [:id, :poll_id, :answer])
     |> validate_required([:poll_id, :answer])
+  end
+
+  @doc """
+  Create changeset for `PollAnswer` model
+  """
+  @spec create_changeset(
+          poll_answers :: t(),
+          attrs :: map() | nil
+        ) :: Ecto.Changeset.t()
+  def create_changeset(poll_answers, attrs \\ %{}) do
+    poll_answers
+    |> cast(attrs, [:poll_id, :answer])
+    |> validate_required([:poll_id, :answer])
+    |> unique_constraint(:id, name: :poll_answers_pkey)
+    |> foreign_key_constraint(:poll_id, name: :poll_answers_poll_id_fkey)
   end
 end

@@ -4,6 +4,7 @@ defmodule EpochtalkServer.Models.Poll do
   # import Ecto.Query
   # alias EpochtalkServer.Repo
   # alias EpochtalkServer.Models.Poll
+  alias EpochtalkServer.Models.PollAnswer
   alias EpochtalkServer.Models.Thread
 
   @moduledoc """
@@ -37,6 +38,7 @@ defmodule EpochtalkServer.Models.Poll do
     field :expiration, :naive_datetime
     field :change_vote, :boolean
     field :display_mode, Ecto.Enum, values: [:always, :voted, :expired]
+    has_many :poll_answers, PollAnswer
   end
 
   ## === Changesets Functions ===

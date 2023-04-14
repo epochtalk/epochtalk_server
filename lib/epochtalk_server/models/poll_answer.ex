@@ -5,6 +5,7 @@ defmodule EpochtalkServer.Models.PollAnswer do
   # alias EpochtalkServer.Repo
   # alias EpochtalkServer.Models.PollAnswer
   alias EpochtalkServer.Models.Poll
+  alias EpochtalkServer.Models.PollResponse
 
   @moduledoc """
   `PollAnswer` model, for performing actions relating to `Poll` answers
@@ -18,6 +19,7 @@ defmodule EpochtalkServer.Models.PollAnswer do
   schema "poll_answers" do
     belongs_to :poll, Poll
     field :answer, :string
+    has_many :poll_responses, PollResponse
   end
 
   ## === Changesets Functions ===

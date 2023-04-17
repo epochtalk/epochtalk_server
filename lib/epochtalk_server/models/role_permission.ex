@@ -90,7 +90,7 @@ defmodule EpochtalkServer.Models.RolePermission do
     new_role_permissions =
       Enum.reduce(current_role_permissions, [], fn %{
                                                  permission_path: permission_path,
-                                                 value: old_value
+                                                 value: default_value
                                                } = _current_role_permission,
                                                acc ->
         # check new value for permission_path
@@ -98,7 +98,7 @@ defmodule EpochtalkServer.Models.RolePermission do
         new_value = new_permissions_paths[permission_path] || false
         # if new value is different
         new_role_permission =
-          if old_value != new_value do
+          if default_value != new_value do
             # set modified true
             %{role_id: role_id, permission_path: permission_path, modified: true}
             # if new value is same, set modified false

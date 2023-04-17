@@ -59,8 +59,14 @@ defmodule EpochtalkServer.Models.RolePermission do
     do: Repo.insert_all(RolePermission, roles_permissions)
 
   @doc """
-  For admin api use, modify `RolePermission`s for a `Role`
-  and update the `Role`'s permissions and priority restrictions
+  For admin api use.
+
+  Updates the `modified` value of `RolePermission`s for a `Role`
+  and updates the `Role`'s permissions and priority restrictions
+
+  This method sets any permissions not specified in `new_permissions`
+  to `false`. If all permissions should be set to `false`, `new_permissions`
+  may be an empty list.
   """
   def modify_by_role(
         %Role{
@@ -69,8 +75,6 @@ defmodule EpochtalkServer.Models.RolePermission do
           priority_restrictions: priority_restrictions
         } = _new_role
       ) do
-    # if a permission is false, they're not included in the permissions
-    # if they're all false, permissions can be empty
     old_role_permissions =
       from(rp in RolePermission,
         where: rp.role_id == ^role_id

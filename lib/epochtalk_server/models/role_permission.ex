@@ -71,6 +71,21 @@ defmodule EpochtalkServer.Models.RolePermission do
   Any permissions in `new_permissions` which are not valid will be ignored.
   """
   @spec modify_by_role(role :: Role.t()) :: {:ok, :success}
+  def modify_by_role( %Role{ id: role_id, permissions: new_permissions, priority_restrictions: priority_restrictions } = _new_role) when not is_nil(new_permissions) and not is_map(new_permissions) do
+    modify_by_role(%Role{
+      id: role_id,
+      permissions: nil,
+      priority_restrictions: priority_restrictions
+    })
+  end
+  @spec modify_by_role(role :: Role.t()) :: {:ok, :success}
+  def modify_by_role( %Role{ id: role_id, permissions: new_permissions, priority_restrictions: priority_restrictions } = _new_role) when not is_nil(priority_restrictions) and not is_list(priority_restrictions) do
+    modify_by_role(%Role{
+      id: role_id,
+      permissions: new_permissions,
+      priority_restrictions: nil
+    })
+  end
   def modify_by_role(
         %Role{
           id: role_id,
@@ -78,47 +93,51 @@ defmodule EpochtalkServer.Models.RolePermission do
           priority_restrictions: priority_restrictions
         } = _new_role
       ) do
-    # get current set of role permissions
-    current_role_permissions =
-      from(rp in RolePermission,
-        where: rp.role_id == ^role_id
-      )
-      |> Repo.all()
+    if !is_nil(new_permissions) do
+      # get current set of role permissions
+      current_role_permissions =
+        from(rp in RolePermission,
+          where: rp.role_id == ^role_id
+        )
+        |> Repo.all()
 
-    # flat map the new permissions into permissions paths
-    new_permissions_paths = new_permissions |> Iteraptor.to_flatmap()
+      # flat map the new permissions into permissions paths
+      new_permissions_paths = new_permissions |> Iteraptor.to_flatmap()
 
-    # calculate updated role permissions based on default values
-    new_role_permissions =
-      Enum.reduce(current_role_permissions, [], fn %{
-                                                 permission_path: permission_path,
-                                                 value: default_value
-                                               } = _current_role_permission,
-                                               acc ->
-        # get new value for permission_path if it exists
-        # otherwise, set it to false
-        new_value = new_permissions_paths[permission_path] || false
-        new_role_permission =
-          if default_value != new_value do
-            # if new value is different from default value, set modified true
-            %{role_id: role_id, permission_path: permission_path, modified: true}
-          else
-            # if new value is same as default value, set modified false
-            %{role_id: role_id, permission_path: permission_path, modified: false}
-          end
+      # calculate updated role permissions based on default values
+      new_role_permissions =
+        Enum.reduce(current_role_permissions, [], fn %{
+                                                  permission_path: permission_path,
+                                                  value: default_value
+                                                } = _current_role_permission,
+                                                acc ->
+          # get new value for permission_path if it exists
+          # otherwise, set it to false
+          new_value = new_permissions_paths[permission_path] || false
+          new_role_permission =
+            if default_value != new_value do
+              # if new value is different from default value, set modified true
+              %{role_id: role_id, permission_path: permission_path, modified: true}
+            else
+              # if new value is same as default value, set modified false
+              %{role_id: role_id, permission_path: permission_path, modified: false}
+            end
 
-        [new_role_permission | acc]
-      end)
+          [new_role_permission | acc]
+        end)
 
-    # update role permissions for this role
-    upsert_modified(new_role_permissions)
+      # update role permissions for this role
+      upsert_modified(new_role_permissions)
 
-    # update role's permissions
-    permissions = RolePermission.permissions_map_by_role_id(role_id)
-    Role.set_permissions(role_id, permissions)
+      # update role's permissions
+      permissions = RolePermission.permissions_map_by_role_id(role_id)
+      Role.set_permissions(role_id, permissions)
+    end
 
-    # update role's priority_restrictions
-    Role.set_priority_restrictions(role_id, priority_restrictions)
+    if !is_nil(priority_restrictions) do
+      # update role's priority_restrictions
+      Role.set_priority_restrictions(role_id, priority_restrictions)
+    end
 
     # return success
     {:ok, :success}

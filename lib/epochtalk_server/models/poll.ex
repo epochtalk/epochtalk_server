@@ -80,11 +80,14 @@ defmodule EpochtalkServer.Models.Poll do
           attrs :: map() | nil
         ) :: Ecto.Changeset.t()
   def create_changeset(poll, attrs \\ %{}) do
+    poll = poll
+      |> Map.put(:max_answers, 1)
+      |> Map.put(:change_vote, false)
+
     poll
     |> cast(attrs, [
       :thread_id,
       :question,
-      :locked,
       :max_answers,
       :expiration,
       :change_vote,
@@ -93,7 +96,7 @@ defmodule EpochtalkServer.Models.Poll do
     |> validate_required([
       :thread_id,
       :question,
-      :locked,
+      :expiration,
       :max_answers,
       :change_vote,
       :display_mode

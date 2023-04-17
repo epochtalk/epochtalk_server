@@ -76,7 +76,8 @@ defmodule EpochtalkServer.Models.RolePermission do
           priority_restrictions: priority_restrictions
         } = _new_role
       ) do
-    old_role_permissions =
+    # get current set of role permissions
+    current_role_permissions =
       from(rp in RolePermission,
         where: rp.role_id == ^role_id
       )
@@ -86,10 +87,10 @@ defmodule EpochtalkServer.Models.RolePermission do
 
     # change a permission if it's different
     new_role_permissions =
-      Enum.reduce(old_role_permissions, [], fn %{
+      Enum.reduce(current_role_permissions, [], fn %{
                                                  permission_path: permission_path,
                                                  value: old_value
-                                               } = _old_role_permission,
+                                               } = _current_role_permission,
                                                acc ->
         # check new value for permission_path
         # if value is not there, set it to false

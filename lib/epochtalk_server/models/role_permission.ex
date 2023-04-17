@@ -86,23 +86,22 @@ defmodule EpochtalkServer.Models.RolePermission do
     # flat map the new permissions into permissions paths
     new_permissions_paths = new_permissions |> Iteraptor.to_flatmap()
 
-    # change a permission if it's different
+    # calculate updated role permissions based on default values
     new_role_permissions =
       Enum.reduce(current_role_permissions, [], fn %{
                                                  permission_path: permission_path,
                                                  value: default_value
                                                } = _current_role_permission,
                                                acc ->
-        # check new value for permission_path
-        # if value is not there, set it to false
+        # get new value for permission_path if it exists
+        # otherwise, set it to false
         new_value = new_permissions_paths[permission_path] || false
-        # if new value is different
         new_role_permission =
           if default_value != new_value do
-            # set modified true
+            # if new value is different from default value, set modified true
             %{role_id: role_id, permission_path: permission_path, modified: true}
-            # if new value is same, set modified false
           else
+            # if new value is same as default value, set modified false
             %{role_id: role_id, permission_path: permission_path, modified: false}
           end
 

@@ -64,9 +64,11 @@ defmodule EpochtalkServer.Models.RolePermission do
   Updates the `modified` value of `RolePermission`s for a `Role`
   and updates the `Role`'s permissions and priority restrictions
 
-  This method sets any permissions not specified in `new_permissions`
-  to `false`. If all permissions should be set to `false`, `new_permissions`
-  may be an empty list.
+  If a permission is not included in `new_permissions`, it will be set to
+  `false`.  `new_permissions` may be an empty list - in which case, all
+  permissions will be set to `false`.
+
+  Any permissions in `new_permissions` which are not valid will be ignored.
   """
   @spec modify_by_role(role :: Role.t()) :: {:ok, :success}
   def modify_by_role(

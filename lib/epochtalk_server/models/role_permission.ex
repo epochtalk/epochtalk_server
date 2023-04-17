@@ -83,7 +83,8 @@ defmodule EpochtalkServer.Models.RolePermission do
       )
       |> Repo.all()
 
-    new_permissions = new_permissions |> Iteraptor.to_flatmap()
+    # flat map the new permissions into permissions paths
+    new_permissions_paths = new_permissions |> Iteraptor.to_flatmap()
 
     # change a permission if it's different
     new_role_permissions =
@@ -94,7 +95,7 @@ defmodule EpochtalkServer.Models.RolePermission do
                                                acc ->
         # check new value for permission_path
         # if value is not there, set it to false
-        new_value = new_permissions[permission_path] || false
+        new_value = new_permissions_paths[permission_path] || false
         # if new value is different
         new_role_permission =
           if old_value != new_value do

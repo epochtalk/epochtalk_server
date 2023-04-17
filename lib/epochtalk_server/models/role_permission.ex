@@ -58,7 +58,10 @@ defmodule EpochtalkServer.Models.RolePermission do
   def insert([%{} | _] = roles_permissions),
     do: Repo.insert_all(RolePermission, roles_permissions)
 
-  ## for admin api use, modifying permissions for a role
+  @doc """
+  For admin api use, modify `RolePermission`s for a `Role`
+  and update the `Role`'s permissions and priority restrictions
+  """
   def modify_by_role(
         %Role{
           id: role_id,

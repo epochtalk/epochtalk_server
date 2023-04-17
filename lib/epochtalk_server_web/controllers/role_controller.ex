@@ -19,7 +19,7 @@ defmodule EpochtalkServerWeb.RoleController do
          :ok <- ACL.allow!(conn, "roles.update"),
          id <- Validate.cast(attrs, "id", :integer, min: 1),
          # TODO(boka): implement validators
-         priority_restrictions <- Validate.sanitize_list(attrs, "priority_restrictions"),
+         priority_restrictions <- attrs["priority_restrictions"],
          permissions <- attrs["permissions"],
          {:ok, data} <-
            RolePermission.modify_by_role(%Role{

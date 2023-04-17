@@ -68,6 +68,7 @@ defmodule EpochtalkServer.Models.RolePermission do
   to `false`. If all permissions should be set to `false`, `new_permissions`
   may be an empty list.
   """
+  @spec modify_by_role(role :: Role.t()) :: {:ok, :success}
   def modify_by_role(
         %Role{
           id: role_id,

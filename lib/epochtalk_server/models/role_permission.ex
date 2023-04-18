@@ -77,39 +77,8 @@ defmodule EpochtalkServer.Models.RolePermission do
           permissions: new_permissions,
           priority_restrictions: priority_restrictions
         } = _new_role
-      )
-      when not is_nil(new_permissions) and not is_map(new_permissions) do
-    modify_by_role(%Role{
-      id: role_id,
-      permissions: nil,
-      priority_restrictions: priority_restrictions
-    })
-  end
-
-  @spec modify_by_role(role :: Role.t()) :: {:ok, :success}
-  def modify_by_role(
-        %Role{
-          id: role_id,
-          permissions: new_permissions,
-          priority_restrictions: priority_restrictions
-        } = _new_role
-      )
-      when not is_nil(priority_restrictions) and not is_list(priority_restrictions) do
-    modify_by_role(%Role{
-      id: role_id,
-      permissions: new_permissions,
-      priority_restrictions: nil
-    })
-  end
-
-  def modify_by_role(
-        %Role{
-          id: role_id,
-          permissions: new_permissions,
-          priority_restrictions: priority_restrictions
-        } = _new_role
       ) do
-    if !is_nil(new_permissions) do
+    if is_map(new_permissions) do
       # get current set of role permissions
       current_role_permissions =
         from(rp in RolePermission,
@@ -151,7 +120,7 @@ defmodule EpochtalkServer.Models.RolePermission do
       Role.set_permissions(role_id, permissions)
     end
 
-    if !is_nil(priority_restrictions) do
+    if is_list(priority_restrictions) do
       # update role's priority_restrictions
       Role.set_priority_restrictions(role_id, priority_restrictions)
     end

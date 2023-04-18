@@ -3,8 +3,8 @@ defmodule EpochtalkServer.Models.Poll do
   import Ecto.Changeset
   import EpochtalkServer.Validators.NaiveDateTime
   # import Ecto.Query
-  # alias EpochtalkServer.Repo
-  # alias EpochtalkServer.Models.Poll
+  alias EpochtalkServer.Repo
+  alias EpochtalkServer.Models.Poll
   alias EpochtalkServer.Models.PollAnswer
   alias EpochtalkServer.Models.Thread
 
@@ -106,5 +106,19 @@ defmodule EpochtalkServer.Models.Poll do
     |> unique_constraint(:id, name: :polls_pkey)
     |> unique_constraint(:thread_id, name: :polls_thread_id_index)
     |> foreign_key_constraint(:thread_id, name: :polls_thread_id_fkey)
+  end
+
+  @doc """
+  Creates a new `Poll` in the database
+  """
+  @spec create(post_attrs :: map()) :: {:ok, post :: t()} | {:error, Ecto.Changeset.t()}
+  def create(poll_attrs) do
+    Repo.transaction(fn ->
+      post_cs = create_changeset(%Poll{}, poll_attrs)
+      case Repo.insert(post_cs) do
+        {:ok, db_poll} -> db_poll
+        {:error, err} -> err
+      end
+    end)
   end
 end

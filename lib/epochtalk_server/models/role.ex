@@ -96,6 +96,17 @@ defmodule EpochtalkServer.Models.Role do
   end
 
   @doc """
+  Returns default `Role`, for base installation this is the `user` role, if `:epochtalk_server[:frontend_config]["newbie_enabled"]`
+  configuration is set to true, then `newbie` is the default role.
+  """
+  @spec get_default_unauthenticated() :: t() | nil
+  def get_default_unauthenticated() do
+    config = Application.get_env(:epochtalk_server, :frontend_config)
+    login_required = config["login_required"]
+    by_lookup(if login_required, do: "private", else: "anonymous")
+  end
+
+  @doc """
   Returns a `Role` or list of roles, for specified lookup(s)
   """
   @spec by_lookup(lookup_or_lookups :: String.t() | [String.t()]) :: t() | [t()] | [] | nil
@@ -157,7 +168,7 @@ defmodule EpochtalkServer.Models.Role do
   @doc """
   Updates the priority_restrictions of an existing `Role` in the database
   """
-  @spec set_priority_restrictions(id :: integer, priority_restrictions :: list()) ::
+  @spec set_priority_restrictions(id :: integer, priority_restrictions :: list() | nil) ::
           {:ok, role :: t()} | {:error, Ecto.Changeset.t()}
   def set_priority_restrictions(id, []), do: set_priority_restrictions(id, nil)
 

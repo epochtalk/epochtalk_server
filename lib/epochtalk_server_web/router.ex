@@ -10,7 +10,11 @@ defmodule EpochtalkServerWeb.Router do
       module: EpochtalkServer.Auth.Guardian,
       error_handler: EpochtalkServerWeb.GuardianErrorHandler
 
+    # If there is a session token, validate it
+    plug Guardian.Plug.VerifySession, claims: %{"typ" => "access"}
+    # If there is an authorization header, validate it
     plug Guardian.Plug.VerifyHeader, claims: %{"typ" => "access"}
+    # Load the user if either of the verifications worked
     plug Guardian.Plug.LoadResource, allow_blank: true
   end
 
@@ -40,6 +44,11 @@ defmodule EpochtalkServerWeb.Router do
     pipe_through [:api, :maybe_auth]
     get "/register/username/:username", UserController, :username
     get "/register/email/:email", UserController, :email
+    get "/boards", BoardController, :by_category
+    get "/boards/:id", BoardController, :find
+    get "/boards/:slug/id", BoardController, :slug_to_id
+    get "/threads", ThreadController, :by_board
+    get "/threads/recent", ThreadController, :recent
     post "/register", UserController, :register
     post "/login", UserController, :login
     post "/confirm", UserController, :confirm

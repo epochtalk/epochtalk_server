@@ -10,7 +10,7 @@ defmodule EpochtalkServerWeb.Helpers.Validate do
   Helper used to default a list request parameter.  If the list is valid, returns the list
   otherwise, defaults to empty list
   """
-  @spec sanitize_list(attrs :: map, key :: String.t()) :: List.t()
+  @spec sanitize_list(attrs :: map, key :: String.t()) :: [any()] | []
   def sanitize_list(attrs, key)
       when is_map(attrs) and is_binary(key),
       do: if(is_list(attrs[key]), do: attrs[key], else: [])

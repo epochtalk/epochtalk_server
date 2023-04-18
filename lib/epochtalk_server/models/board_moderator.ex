@@ -1,8 +1,11 @@
 defmodule EpochtalkServer.Models.BoardModerator do
   use Ecto.Schema
   import Ecto.Changeset
+  import Ecto.Query
+  alias EpochtalkServer.Repo
   alias EpochtalkServer.Models.User
   alias EpochtalkServer.Models.Board
+  alias EpochtalkServer.Models.BoardModerator
 
   @moduledoc """
   `BoardModerator` model, for performing actions relating to `Board` moderators
@@ -11,6 +14,11 @@ defmodule EpochtalkServer.Models.BoardModerator do
           user_id: non_neg_integer,
           board_id: non_neg_integer
         }
+  @derive {Jason.Encoder,
+           only: [
+             :user_id,
+             :board_id
+           ]}
   @primary_key false
   schema "board_moderators" do
     belongs_to :user, User
@@ -31,4 +39,6 @@ defmodule EpochtalkServer.Models.BoardModerator do
     |> cast(attrs, [:user_id, :board_id])
     |> validate_required([:user_id, :board_id])
   end
+
+  def all(), do: Repo.all(from BoardModerator, preload: [user: ^from(User, select: [:username])])
 end

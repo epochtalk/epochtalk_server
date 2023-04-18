@@ -40,7 +40,7 @@ defmodule EpochtalkServerWeb.Helpers.ACL do
       when is_binary(permission_path) do
     # check if login is required to view forum
     config = Application.get_env(:epochtalk_server, :frontend_config)
-    login_required = config[:login_required]
+    login_required = config[:login_required] || config["login_required"]
     # default to user's roles > anonymous > private
     user_roles =
       if user == nil,
@@ -88,4 +88,28 @@ defmodule EpochtalkServerWeb.Helpers.ACL do
           permission_path,
           error_msg
         )
+
+  @doc """
+  Helper which returns the active User's priority.
+
+  Will return priorty of role with highest permissions if the user is authenticated, otherwise anonymous priority
+  is returned if `frontend_config.login_required` is false otherwise private role priority is returned. If
+  user is banned the Banned role priority is returned.
+
+  TODO(akinsey): review chain of authenticated user's roles. See if banned and user roles are being defaulted
+  prior to calling this function or if this function should handle defaulting the user's roles
+  """
+  @spec get_user_priority(Plug.Conn.t() | User.t()) :: non_neg_integer
+  def get_user_priority(%{id: id, roles: roles} = _user) when not is_nil(id) and is_list(roles),
+    do: Role.get_masked_permissions(roles).priority
+
+  def get_user_priority(%Plug.Conn{private: %{guardian_default_resource: user}} = _conn)
+      when not is_nil(user.id) and is_list(user.roles),
+      do: Role.get_masked_permissions(user.roles).priority
+
+  def get_user_priority(%Plug.Conn{} = _conn),
+    do: Role.get_default_unauthenticated().priority
+
+  def get_user_priority(nil),
+    do: Role.get_default_unauthenticated().priority
 end

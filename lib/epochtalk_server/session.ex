@@ -46,7 +46,7 @@ defmodule EpochtalkServer.Session do
   Get the resource for a specified user_id and session_id if available
   Otherwise, return an error
   """
-  @spec get_resource(user_id :: String.t(), session_id :: String.t()) ::
+  @spec get_resource(user_id :: non_neg_integer, session_id :: String.t()) ::
           {:ok, resource :: map()}
           | {:error, reason :: String.t() | Redix.Error.t() | Redix.ConnectionError.t()}
   def get_resource(user_id, session_id) do
@@ -106,99 +106,66 @@ defmodule EpochtalkServer.Session do
   end
 
   @doc """
-  Gets all sessions for a specific `User`
+  Gets all session ids for a specific user_id
   """
-  @spec get_sessions(user :: User.t()) ::
-          {:ok, user :: User.t(), sessions :: [String.t()]}
+  @spec get_sessions(user_id :: non_neg_integer) ::
+          {:ok, sessions_ids :: [String.t()]}
           | {:error, atom() | Redix.Error.t() | Redix.ConnectionError.t()}
-  def get_sessions(%User{} = user) do
-    # get session id's from redis under "user:{user_id}:sessions"
-    session_key = generate_key(user.id, "sessions")
-
-    case Redix.command(:redix, ["SMEMBERS", session_key]) do
-      {:ok, sessions} ->
-        session_ids =
-          sessions
-          |> Enum.map(fn session ->
-            [session_id, _expiration] = session |> String.split(":")
-            session_id
-          end)
-
-        {:ok, user, session_ids}
-
-      {:error, error} ->
-        {:error, error}
-    end
-  end
-
-  defp is_active_for_user_id(session_id, user_id) do
-    case get_session_ids_by_user_id(user_id) do
-      {:error, error} ->
-        {:error, error}
-
-      session_ids ->
-        Enum.member?(session_ids, session_id)
-    end
-  end
-
-  defp get_sessions_by_user_id(user_id) do
+  def get_sessions(user_id) do
     # get session id's from redis under "user:{user_id}:sessions"
     session_key = generate_key(user_id, "sessions")
 
-    case Redix.command(:redix, ["SMEMBERS", session_key]) do
-      {:ok, sessions} -> sessions
-      {:error, error} -> {:error, error}
-    end
+    Redix.command(:redix, ["ZRANGE", session_key, 0, -1])
   end
 
-  defp get_session_ids_by_user_id(user_id) do
-    case get_sessions_by_user_id(user_id) do
+  defp is_active_for_user_id(session_id, user_id) do
+    session_key = generate_key(user_id, "sessions")
+    # check ZSCORE for user_id:session_id pair
+    # returns score if it is a member of the set
+    # returns nil if not a member
+    case Redix.command(:redix, ["ZSCORE", session_key, session_id]) do
       {:error, error} -> {:error, error}
-      sessions -> Enum.map(sessions, &(String.split(&1, ":") |> List.first()))
+      {:ok, nil} -> false
+      {:ok, _score} -> true
     end
   end
 
   @doc """
-  Deletes a specific `User` session
+  Deletes the session specified in conn
   """
-  @spec delete_session(
-          user :: User.t(),
-          session_id :: String.t()
-        ) ::
-          {:ok, user :: User.t()} | {:error, atom() | Redix.Error.t() | Redix.ConnectionError.t()}
-  def delete_session(%User{} = user, session_id) do
+  @spec delete(conn :: Plug.Conn.t()) ::
+          {:ok, conn :: Plug.Conn.t()}
+          | {:error, atom() | Redix.Error.t() | Redix.ConnectionError.t()}
+  def delete(conn) do
+    # get user from guardian resource
+    %{id: user_id} = Guardian.Plug.current_resource(conn)
+    # get session_id from jti in jwt token
+    %{claims: %{"jti" => session_id}} =
+      Guardian.Plug.current_token(conn)
+      |> Guardian.peek()
+
     # delete session id from redis under "user:{user_id}:sessions"
-    session_key = generate_key(user.id, "sessions")
-
-    case Redix.command(:redix, ["SREM", session_key, session_id]) do
-      {:ok, _} -> {:ok, user}
-      {:error, error} -> {:error, error}
-    end
-  end
-
-  defp delete_session_by_user_id(user_id, session) do
-    # delete session from redis under "user:{user_id}:sessions"
     session_key = generate_key(user_id, "sessions")
 
-    case Redix.command(:redix, ["SREM", session_key, session]) do
-      {:ok, _} -> {:ok, user_id}
-      {:error, error} -> {:error, error}
+    case Redix.command(:redix, ["ZREM", session_key, session_id]) do
+      {:ok, _} ->
+        # sign user out
+        conn = Guardian.Plug.sign_out(conn)
+        {:ok, conn}
+
+      {:error, error} ->
+        {:error, error}
     end
   end
 
   @doc """
   Deletes every session instance for the specified `User`
   """
-  @spec delete_sessions(user :: User.t()) :: :ok
+  @spec delete_sessions(user :: User.t()) :: {:ok, non_neg_integer} | Redix.ConnectionError.t()
   def delete_sessions(%User{} = user) do
     # delete session id from redis under "user:{user_id}:sessions"
     session_key = generate_key(user.id, "sessions")
-
-    case Redix.command(:redix, ["SPOP", session_key]) do
-      {:ok, nil} -> :ok
-      # repeat until redix returns nil
-      _ -> delete_sessions(user)
-    end
+    Redix.command(:redix, ["DEL", session_key])
   end
 
   defp save(%User{} = user, session_id, ttl) do
@@ -290,55 +257,57 @@ defmodule EpochtalkServer.Session do
     maybe_extend_ttl(ban_key, ttl, old_ttl)
   end
 
-  # these two rules ensure that sessions will eventually be deleted:
-  # clean expired sessions and add a new one
-  # ttl expiry for this key will delete all sessions in the set
+  # session storage uses "pseudo-expiry" (via redis sorted-set score)
+  # these rules ensure that session storage will not grow indefinitely:
+  #
+  # on every new session add,
+  #   clean (delete) expired sessions by expiry
+  #   add the new session, with expiry
+  #   ttl expiry for this key will delete all sessions in the set
   defp add_session(user_id, session_id, ttl) do
     # save session id to redis under "user:{user_id}:sessions"
     session_key = generate_key(user_id, "sessions")
-    # current unix time (default :seconds)
-    now = DateTime.utc_now() |> DateTime.to_unix()
-    # intended unix expiration of this session
-    unix_expiration = now + ttl
     # delete expired sessions
-    get_sessions_by_user_id(user_id)
-    |> Enum.each(fn session ->
-      [_session_id, expiration] = String.split(session, ":")
-
-      if String.to_integer(expiration) < now do
-        delete_session_by_user_id(user_id, session)
-      end
-    end)
+    delete_expired_sessions(session_key)
+    # intended unix expiration of this session
+    unix_expiration = current_time() + ttl
 
     # add new session, noting unix expiration
-    result =
-      Redix.command(:redix, [
-        "SADD",
-        session_key,
-        session_id <> ":" <> Integer.to_string(unix_expiration)
-      ])
+    result = Redix.command(:redix, ["ZADD", session_key, unix_expiration, session_id])
 
     # set ttl
     maybe_extend_ttl(session_key, ttl)
     result
   end
 
+  # delete expired sessions by expiration (sorted set score)
+  defp delete_expired_sessions(session_key) do
+    Redix.command(:redix, ["ZREMRANGEBYSCORE", session_key, "-inf", current_time()])
+  end
+
+  # current unix time (default :seconds)
+  defp current_time() do
+    DateTime.utc_now() |> DateTime.to_unix()
+  end
+
   defp generate_key(user_id, "user"), do: "user:#{user_id}"
   defp generate_key(user_id, type), do: "user:#{user_id}:#{type}"
 
   defp maybe_extend_ttl(key, ttl) do
-    # get old ttl
-    {:ok, old_ttl} = Redix.command(:redix, ["TTL", key])
-    maybe_extend_ttl(key, ttl, old_ttl)
+    # use new/old extend, where new == old
+    maybe_extend_ttl(key, ttl, ttl)
   end
 
-  defp maybe_extend_ttl(key, ttl, old_ttl) do
-    if ttl > old_ttl do
-      # extend ttl if new one is further out
-      Redix.command(:redix, ["EXPIRE", key, ttl])
+  defp maybe_extend_ttl(key, new_ttl, old_ttl) do
+    if old_ttl > -1 do
+      # re-set old expiry only if old expiry was valid and key has no expiry
+      Redix.command(:redix, ["EXPIRE", key, old_ttl, "NX"])
     else
-      # re-set old_ttl (necessary when old ttl has been dropped)
-      Redix.command(:redix, ["EXPIRE", key, old_ttl])
+      # if old expiry was invalid, set new expiry only if key has no expiry
+      Redix.command(:redix, ["EXPIRE", key, new_ttl, "NX"])
     end
+
+    # set expiry only if new expiry is greater than current (GT)
+    Redix.command(:redix, ["EXPIRE", key, new_ttl, "GT"])
   end
 end

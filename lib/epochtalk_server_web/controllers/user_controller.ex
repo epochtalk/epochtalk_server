@@ -159,17 +159,17 @@ defmodule EpochtalkServerWeb.UserController do
   Logs out the logged in `User`
 
   - TODO(boka): check if user is on page that requires auth
-  - TODO(boka): Delete users session
   """
   def logout(conn, _attrs) do
-    with {:auth, true} <- {:auth, Guardian.Plug.authenticated?(conn)} do
-      user = Guardian.Plug.current_resource(conn)
-      token = Guardian.Plug.current_token(conn)
+    with {:auth, true} <- {:auth, Guardian.Plug.authenticated?(conn)},
+         user <- Guardian.Plug.current_resource(conn),
+         token <- Guardian.Plug.current_token(conn),
+         {:ok, conn} <- Session.delete(conn) do
       EpochtalkServerWeb.Endpoint.broadcast("user:#{user.id}", "logout", %{token: token})
-      Guardian.Plug.sign_out(conn)
       render(conn, "logout.json", data: %{success: true})
     else
       {:auth, false} -> ErrorHelpers.render_json_error(conn, 400, "Not logged in")
+      {:error, error} -> ErrorHelpers.render_json_error(conn, 500, error)
       _ -> ErrorHelpers.render_json_error(conn, 500, "There was an issue signing out")
     end
   end

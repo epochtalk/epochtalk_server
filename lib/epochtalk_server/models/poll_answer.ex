@@ -2,8 +2,8 @@ defmodule EpochtalkServer.Models.PollAnswer do
   use Ecto.Schema
   import Ecto.Changeset
   # import Ecto.Query
-  # alias EpochtalkServer.Repo
-  # alias EpochtalkServer.Models.PollAnswer
+  alias EpochtalkServer.Repo
+  alias EpochtalkServer.Models.PollAnswer
   alias EpochtalkServer.Models.Poll
   alias EpochtalkServer.Models.PollResponse
 
@@ -28,11 +28,11 @@ defmodule EpochtalkServer.Models.PollAnswer do
   Generic changeset for `PollAnswer` model
   """
   @spec changeset(
-          poll_answers :: t(),
+          poll_answer :: t(),
           attrs :: map() | nil
         ) :: Ecto.Changeset.t()
-  def changeset(poll_answers, attrs \\ %{}) do
-    poll_answers
+  def changeset(poll_answer, attrs \\ %{}) do
+    poll_answer
     |> cast(attrs, [:id, :poll_id, :answer])
     |> validate_required([:poll_id, :answer])
   end
@@ -41,14 +41,23 @@ defmodule EpochtalkServer.Models.PollAnswer do
   Create changeset for `PollAnswer` model
   """
   @spec create_changeset(
-          poll_answers :: t(),
+          poll_answer :: t(),
           attrs :: map() | nil
         ) :: Ecto.Changeset.t()
-  def create_changeset(poll_answers, attrs \\ %{}) do
-    poll_answers
+  def create_changeset(poll_answer, attrs \\ %{}) do
+    poll_answer
     |> cast(attrs, [:poll_id, :answer])
     |> validate_required([:poll_id, :answer])
     |> unique_constraint(:id, name: :poll_answers_pkey)
     |> foreign_key_constraint(:poll_id, name: :poll_answers_poll_id_fkey)
+  end
+
+  @doc """
+  Creates a new `PollAnswer` in the database
+  """
+  @spec create(post_attrs :: map()) :: {:ok, post :: t()} | {:error, Ecto.Changeset.t()}
+  def create(poll_answer_attrs) do
+    post_cs = create_changeset(%PollAnswer{}, poll_answer_attrs)
+    Repo.insert(post_cs)
   end
 end

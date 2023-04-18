@@ -148,6 +148,38 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
     end
 
     @tag authenticated: :admin
+    test "does not modify a role's priority_restrictions when input is invalid", %{conn: conn} do
+      initial_newbie_priority_restrictions = nil
+
+      all_conn = get(conn, Routes.role_path(conn, :all))
+      roles = json_response(all_conn, 200)
+
+      newbie = roles |> Enum.at(6)
+      assert initial_newbie_priority_restrictions == newbie["priority_restrictions"]
+
+      invalid_modified_newbie_priority_restrictions = ""
+
+      new_newbie_permissions_attrs = %{
+        id: 7,
+        priority_restrictions: invalid_modified_newbie_priority_restrictions
+      }
+
+      update_conn = put(conn, Routes.role_path(conn, :update), new_newbie_permissions_attrs)
+
+      assert "success" == json_response(update_conn, 200)
+
+      modified_all_conn = get(conn, Routes.role_path(conn, :all))
+      modified_roles = json_response(modified_all_conn, 200)
+
+      modified_newbie = modified_roles |> Enum.at(6)
+
+      assert invalid_modified_newbie_priority_restrictions !=
+               modified_newbie["priority_restrictions"]
+
+      assert initial_newbie_priority_restrictions == modified_newbie["priority_restrictions"]
+    end
+
+    @tag authenticated: :admin
     test "modifies a role's permissions when authenticated", %{conn: conn} do
       initial_newbie_permissions = %{
         "ads" => %{

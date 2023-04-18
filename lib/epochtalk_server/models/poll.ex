@@ -1,6 +1,7 @@
 defmodule EpochtalkServer.Models.Poll do
   use Ecto.Schema
   import Ecto.Changeset
+  import EpochtalkServer.Validators.NaiveDateTime
   # import Ecto.Query
   # alias EpochtalkServer.Repo
   # alias EpochtalkServer.Models.Poll
@@ -101,6 +102,7 @@ defmodule EpochtalkServer.Models.Poll do
       :change_vote,
       :display_mode
     ])
+    |> validate_naivedatetime(:expiration, after: :utc_now)
     |> unique_constraint(:id, name: :polls_pkey)
     |> unique_constraint(:thread_id, name: :polls_thread_id_index)
     |> foreign_key_constraint(:thread_id, name: :polls_thread_id_fkey)

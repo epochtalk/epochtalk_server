@@ -294,5 +294,34 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
       modified_newbie = modified_roles |> Enum.at(6)
       assert modified_newbie_permissions == modified_newbie["permissions"]
     end
+
+    @tag authenticated: :admin
+    test "does not modify a user's permissions when input is invalid", %{conn: conn} do
+      initial_newbie_permissions = get(conn, Routes.role_path(conn, :all))
+                 |> json_response(200)
+                 |> Enum.at(6)
+                 |> Map.get("permissions")
+
+      invalid_modified_newbie_permissions = ""
+
+      new_newbie_permissions_attrs = %{
+        id: 7,
+        permissions: invalid_modified_newbie_permissions
+      }
+
+      update_conn = put(conn, Routes.role_path(conn, :update), new_newbie_permissions_attrs)
+
+      assert "success" == json_response(update_conn, 200)
+
+      modified_all_conn = get(conn, Routes.role_path(conn, :all))
+      modified_roles = json_response(modified_all_conn, 200)
+
+      modified_newbie = modified_roles |> Enum.at(6)
+
+      assert invalid_modified_newbie_permissions !=
+               modified_newbie["permissions"]
+
+      assert initial_newbie_permissions == modified_newbie["permissions"]
+    end
   end
 end

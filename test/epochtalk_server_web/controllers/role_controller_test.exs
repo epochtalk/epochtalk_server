@@ -261,11 +261,6 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
 
     @tag authenticated: :admin
     test "modifies a role's permissions when authenticated", %{conn: conn} do
-      initial_newbie_permissions = get(conn, Routes.role_path(conn, :all))
-                 |> json_response(200)
-                 |> Enum.at(6)
-                 |> Map.get("permissions")
-
       new_newbie_permissions_attrs = %{
         id: 7,
         permissions: %{

@@ -97,7 +97,6 @@ defmodule EpochtalkServer.Models.Poll do
     |> validate_required([
       :thread_id,
       :question,
-      :expiration,
       :max_answers,
       :change_vote,
       :display_mode

@@ -7,6 +7,7 @@ defmodule EpochtalkServer.Models.Thread do
   alias EpochtalkServer.Models.Thread
   alias EpochtalkServer.Models.MetadataThread
   alias EpochtalkServer.Models.Board
+  alias EpochtalkServer.Models.Poll
   alias EpochtalkServer.Models.Post
 
   @moduledoc """
@@ -115,17 +116,18 @@ defmodule EpochtalkServer.Models.Thread do
   Creates a new `Thread` in the database
   """
   @spec create(thread_attrs :: map(), user_id :: non_neg_integer) :: {:ok, thread :: t()} | {:error, Ecto.Changeset.t()}
-  def create(thread, user_id) do
-    thread_cs = create_changeset(%Thread{}, thread)
+  def create(thread_attrs, user_id) do
+    thread_cs = create_changeset(%Thread{}, thread_attrs)
 
     case Repo.transaction(fn ->
       case Repo.insert(thread_cs) do
         {:ok, db_thread} ->
           MetadataThread.insert(%MetadataThread{thread_id: db_thread.id, views: 0})
+          Poll.create(thread_attrs["poll"])
           Post.create(%{
             thread_id: db_thread.id,
             user_id: user_id,
-            content: %{title: thread["title"], body: thread["body"]}
+            content: %{title: thread_attrs["title"], body: thread_attrs["body"]}
           })
 
         # rollback and bubble up changeset error
@@ -143,9 +145,9 @@ defmodule EpochtalkServer.Models.Thread do
           |> binary_part(0, 3)
           |> String.downcase()
 
-        hashed_slug = "#{Map.get(thread, "slug")}-#{hash}"
-        thread = thread |> Map.put("slug", hashed_slug)
-        create(thread, user_id)
+        hashed_slug = "#{Map.get(thread_attrs, "slug")}-#{hash}"
+        thread_attrs = thread_attrs |> Map.put("slug", hashed_slug)
+        create(thread_attrs, user_id)
 
       # some other error
       {:error, cs} -> {:error, cs}

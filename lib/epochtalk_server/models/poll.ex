@@ -117,9 +117,8 @@ defmodule EpochtalkServer.Models.Poll do
       post_cs = create_changeset(%Poll{}, poll_attrs)
       case Repo.insert(post_cs) do
         {:ok, db_poll} ->
-          answers = Map.get(poll_attrs, "answers")
           # iterate over each answer, create answer in db
-          Enum.map(answers, fn answer ->
+          Enum.map(poll_attrs["answers"], fn answer ->
             poll_answer_attrs = %{"poll_id" => db_poll.id, "answer" => answer}
             PollAnswer.create(poll_answer_attrs)
           end)
@@ -128,4 +127,6 @@ defmodule EpochtalkServer.Models.Poll do
       end
     end)
   end
+
+  def create(nil), do: nil
 end

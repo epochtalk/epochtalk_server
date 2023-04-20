@@ -59,12 +59,12 @@ defmodule EpochtalkServerWeb.SessionTest do
     test "deletes an expired user session when logging in", %{conn: conn, user: user} do
       remember_me = false
       # create session that should be deleted
-      {:ok, authed_user_to_delete, _token, authed_conn_to_delete} =
+      {:ok, _authed_user_to_delete, _token, authed_conn_to_delete} =
         Session.create(user, remember_me, conn)
 
       session_id_to_delete = authed_conn_to_delete.private.guardian_default_claims["jti"]
       # create session that shouldn't be deleted
-      {:ok, authed_user_to_persist, _token, authed_conn_to_persist} =
+      {:ok, _authed_user_to_persist, _token, authed_conn_to_persist} =
         Session.create(user, remember_me, conn)
 
       session_id_to_persist = authed_conn_to_persist.private.guardian_default_claims["jti"]
@@ -94,7 +94,7 @@ defmodule EpochtalkServerWeb.SessionTest do
       ])
 
       # create a new session (should delete expired sessions)
-      {:ok, new_authed_user, _token, new_authed_conn} = Session.create(user, remember_me, conn)
+      {:ok, _new_authed_user, _token, new_authed_conn} = Session.create(user, remember_me, conn)
       new_session_id = new_authed_conn.private.guardian_default_claims["jti"]
       # check that active sessions are still active
       {:ok, resource_to_persist} = Session.get_resource(user.id, session_id_to_persist)

@@ -85,6 +85,7 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
           "watchThread" => %{"allow" => true}
         }
       }
+
       initial_newbie_priority_restrictions = nil
 
       newbie_role = roles |> Enum.at(6)
@@ -232,10 +233,11 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
 
     @tag authenticated: :admin
     test "does not modify a role's priority_restrictions when input is invalid", %{conn: conn} do
-      initial_newbie_priority_restrictions = get(conn, Routes.role_path(conn, :all))
-                 |> json_response(200)
-                 |> Enum.at(6)
-                 |> Map.get("priority_restrictions")
+      initial_newbie_priority_restrictions =
+        get(conn, Routes.role_path(conn, :all))
+        |> json_response(200)
+        |> Enum.at(6)
+        |> Map.get("priority_restrictions")
 
       invalid_modified_newbie_priority_restrictions = ""
 
@@ -292,10 +294,11 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
 
     @tag authenticated: :admin
     test "does not modify a user's permissions when input is invalid", %{conn: conn} do
-      initial_newbie_permissions = get(conn, Routes.role_path(conn, :all))
-                 |> json_response(200)
-                 |> Enum.at(6)
-                 |> Map.get("permissions")
+      initial_newbie_permissions =
+        get(conn, Routes.role_path(conn, :all))
+        |> json_response(200)
+        |> Enum.at(6)
+        |> Map.get("permissions")
 
       invalid_modified_newbie_permissions = ""
 

@@ -85,7 +85,10 @@ defmodule EpochtalkServer.Models.Poll do
       |> Map.put(:max_answers, 1)
       |> Map.put(:change_vote, false)
 
-    poll
+    poll_answers = attrs["answers"]
+    poll_answers_len = length(poll_answers || [])
+
+    poll_cs = poll
     |> cast(attrs, [
       :thread_id,
       :question,
@@ -102,26 +105,27 @@ defmodule EpochtalkServer.Models.Poll do
       :display_mode
     ])
     |> validate_naivedatetime(:expiration, after: :utc_now)
+    |> validate_number(:max_answers, greater_than: 0, less_than_or_equal_to: poll_answers_len)
+    |> validate_length(:question, min: 1, max: 255)
     |> unique_constraint(:id, name: :polls_pkey)
     |> unique_constraint(:thread_id, name: :polls_thread_id_index)
     |> foreign_key_constraint(:thread_id, name: :polls_thread_id_fkey)
+
+    # validate answers
+    if poll_answers_len > 0, do: poll_cs, else: add_error(poll_cs, :answers, "can't be blank")
   end
 
   @doc """
   Creates a new `Poll` in the database
   """
   @spec create(post_attrs :: map()) :: {:ok, post :: t()} | {:error, Ecto.Changeset.t()}
-  def create(%{"thread_id" => _} = poll_attrs) when map_size(poll_attrs) == 1, do: nil
-
-  def create(poll_attrs) when map_size(poll_attrs) > 1 do
-    IO.inspect "CREATING POLL"
+  def create(poll_attrs) do
     Repo.transaction(fn ->
       post_cs = create_changeset(%Poll{}, poll_attrs)
       case Repo.insert(post_cs) do
         {:ok, db_poll} ->
-          IO.inspect "Insert answers"
           # iterate over each answer, create answer in db
-          Enum.each(poll_attrs["answers"] || [], fn answer ->
+          Enum.each(poll_attrs["answers"], fn answer ->
             poll_answer_attrs = %{"poll_id" => db_poll.id, "answer" => answer}
             PollAnswer.create(poll_answer_attrs)
           end)

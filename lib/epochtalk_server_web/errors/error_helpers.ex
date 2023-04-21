@@ -26,7 +26,12 @@ defmodule EpochtalkServerWeb.ErrorHelpers do
   def changeset_error_to_string(%Ecto.Changeset{} = changeset) do
     Ecto.Changeset.traverse_errors(changeset, fn {msg, opts} ->
       Enum.reduce(opts, msg, fn {key, value}, acc ->
-        String.replace(acc, "%{#{key}}", _to_string(value))
+        case value do
+          # special case, handle ecto enum type
+          {:parameterized, Ecto.Enum, _} -> acc
+          # otherwise process as normal
+          _ -> String.replace(acc, "%{#{key}}", _to_string(value))
+        end
       end)
     end)
     |> Enum.reduce("", fn {k, v}, acc ->

@@ -48,6 +48,7 @@ defmodule EpochtalkServer.Models.PollAnswer do
     poll_answer
     |> cast(attrs, [:poll_id, :answer])
     |> validate_required([:poll_id, :answer])
+    |> validate_length(:answer, min: 1, max: 255)
     |> unique_constraint(:id, name: :poll_answers_pkey)
     |> foreign_key_constraint(:poll_id, name: :poll_answers_poll_id_fkey)
   end

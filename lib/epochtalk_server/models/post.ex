@@ -137,8 +137,7 @@ defmodule EpochtalkServer.Models.Post do
           Repo.one(from p in Post, where: p.id == ^db_post.id, preload: [:thread])
 
         # changeset error
-        {:error, err} ->
-          err
+        {:error, cs} -> Repo.rollback(cs)
       end
     end)
   end

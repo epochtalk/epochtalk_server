@@ -123,7 +123,14 @@ defmodule EpochtalkServer.Models.Thread do
       case Repo.insert(thread_cs) do
         {:ok, db_thread} ->
           MetadataThread.insert(%MetadataThread{thread_id: db_thread.id, views: 0})
-          Poll.create(thread_attrs["poll"])
+          # strip nil poll attributes
+          poll = thread_attrs["poll"] || %{}
+            |> Enum.reject(fn {_, v} -> is_nil(v) end)
+            |> Map.new()
+          # append thread_id
+          poll = poll
+            |> Map.put("thread_id", db_thread.id)
+          Poll.create(poll)
           Post.create(%{
             thread_id: db_thread.id,
             user_id: user_id,

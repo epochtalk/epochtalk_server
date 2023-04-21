@@ -111,21 +111,23 @@ defmodule EpochtalkServer.Models.Poll do
   Creates a new `Poll` in the database
   """
   @spec create(post_attrs :: map()) :: {:ok, post :: t()} | {:error, Ecto.Changeset.t()}
-  def create(poll_attrs) when is_map(poll_attrs) do
+  def create(%{"thread_id" => _} = poll_attrs) when map_size(poll_attrs) == 1, do: nil
+
+  def create(poll_attrs) when map_size(poll_attrs) > 1 do
+    IO.inspect "CREATING POLL"
     Repo.transaction(fn ->
       post_cs = create_changeset(%Poll{}, poll_attrs)
       case Repo.insert(post_cs) do
         {:ok, db_poll} ->
+          IO.inspect "Insert answers"
           # iterate over each answer, create answer in db
-          Enum.map(poll_attrs["answers"] || [], fn answer ->
+          Enum.each(poll_attrs["answers"] || [], fn answer ->
             poll_answer_attrs = %{"poll_id" => db_poll.id, "answer" => answer}
             PollAnswer.create(poll_answer_attrs)
           end)
           db_poll
-        {:error, err} -> err
+        {:error, cs} -> Repo.rollback(cs)
       end
     end)
   end
-
-  def create(nil), do: nil
 end

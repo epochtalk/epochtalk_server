@@ -8,6 +8,90 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
       conn = get(conn, Routes.role_path(conn, :all))
       roles = json_response(conn, 200)
 
+      newbie_permissions = %{
+        "ads" => %{
+          "analyticsView" => %{"allow" => true},
+          "roundInfo" => %{"allow" => true},
+          "view" => %{"allow" => true}
+        },
+        "boards" => %{
+          "allCategories" => %{"allow" => true},
+          "find" => %{"allow" => true}
+        },
+        "conversations" => %{
+          "create" => %{"allow" => true},
+          "delete" => %{"allow" => true},
+          "messages" => %{"allow" => true}
+        },
+        "mentions" => %{
+          "create" => %{"allow" => true},
+          "delete" => %{"allow" => true},
+          "page" => %{"allow" => true}
+        },
+        "messages" => %{
+          "create" => %{"allow" => true},
+          "delete" => %{"allow" => true, "bypass" => %{"owner" => true}},
+          "latest" => %{"allow" => true}
+        },
+        "motd" => %{"get" => %{"allow" => true}},
+        "notifications" => %{
+          "counts" => %{"allow" => true},
+          "dismiss" => %{"allow" => true}
+        },
+        "portal" => %{"view" => %{"allow" => true}},
+        "posts" => %{
+          "byThread" => %{"allow" => true},
+          "create" => %{"allow" => true},
+          "delete" => %{"allow" => true},
+          "find" => %{"allow" => true},
+          "pageByUser" => %{"allow" => true},
+          "search" => %{"allow" => true},
+          "update" => %{"allow" => true}
+        },
+        "reports" => %{
+          "createMessageReport" => %{"allow" => true},
+          "createPostReport" => %{"allow" => true},
+          "createUserReport" => %{"allow" => true}
+        },
+        "threads" => %{
+          "byBoard" => %{"allow" => true},
+          "create" => %{"allow" => true},
+          "createPoll" => %{"allow" => true},
+          "editPoll" => %{"allow" => true},
+          "lockPoll" => %{"allow" => true},
+          "posted" => %{"allow" => true},
+          "removeVote" => %{"allow" => true},
+          "title" => %{"allow" => true},
+          "viewed" => %{"allow" => true},
+          "vote" => %{"allow" => true}
+        },
+        "userTrust" => %{"addTrustFeedback" => %{"allow" => true}},
+        "users" => %{
+          "deactivate" => %{"allow" => true},
+          "find" => %{"allow" => true},
+          "lookup" => %{"allow" => true},
+          "pagePublic" => %{"allow" => true},
+          "reactivate" => %{"allow" => true},
+          "update" => %{"allow" => true}
+        },
+        "watchlist" => %{
+          "edit" => %{"allow" => true},
+          "pageBoards" => %{"allow" => true},
+          "pageThreads" => %{"allow" => true},
+          "unread" => %{"allow" => true},
+          "unwatchBoard" => %{"allow" => true},
+          "unwatchThread" => %{"allow" => true},
+          "watchBoard" => %{"allow" => true},
+          "watchThread" => %{"allow" => true}
+        }
+      }
+
+      initial_newbie_priority_restrictions = nil
+
+      newbie_role = roles |> Enum.at(6)
+      assert newbie_permissions == newbie_role["permissions"]
+      assert initial_newbie_priority_restrictions == newbie_role["priority_restrictions"]
+
       assert [
                %{
                  "lookup" => "superAdministrator",
@@ -148,85 +232,37 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
     end
 
     @tag authenticated: :admin
-    test "modifies a role's permissions when authenticated", %{conn: conn} do
-      initial_newbie_permissions = %{
-        "ads" => %{
-          "analyticsView" => %{"allow" => true},
-          "roundInfo" => %{"allow" => true},
-          "view" => %{"allow" => true}
-        },
-        "boards" => %{
-          "allCategories" => %{"allow" => true},
-          "find" => %{"allow" => true}
-        },
-        "conversations" => %{
-          "create" => %{"allow" => true},
-          "delete" => %{"allow" => true},
-          "messages" => %{"allow" => true}
-        },
-        "mentions" => %{
-          "create" => %{"allow" => true},
-          "delete" => %{"allow" => true},
-          "page" => %{"allow" => true}
-        },
-        "messages" => %{
-          "create" => %{"allow" => true},
-          "delete" => %{"allow" => true, "bypass" => %{"owner" => true}},
-          "latest" => %{"allow" => true}
-        },
-        "motd" => %{"get" => %{"allow" => true}},
-        "notifications" => %{
-          "counts" => %{"allow" => true},
-          "dismiss" => %{"allow" => true}
-        },
-        "portal" => %{"view" => %{"allow" => true}},
-        "posts" => %{
-          "byThread" => %{"allow" => true},
-          "create" => %{"allow" => true},
-          "delete" => %{"allow" => true},
-          "find" => %{"allow" => true},
-          "pageByUser" => %{"allow" => true},
-          "search" => %{"allow" => true},
-          "update" => %{"allow" => true}
-        },
-        "reports" => %{
-          "createMessageReport" => %{"allow" => true},
-          "createPostReport" => %{"allow" => true},
-          "createUserReport" => %{"allow" => true}
-        },
-        "threads" => %{
-          "byBoard" => %{"allow" => true},
-          "create" => %{"allow" => true},
-          "createPoll" => %{"allow" => true},
-          "editPoll" => %{"allow" => true},
-          "lockPoll" => %{"allow" => true},
-          "posted" => %{"allow" => true},
-          "removeVote" => %{"allow" => true},
-          "title" => %{"allow" => true},
-          "viewed" => %{"allow" => true},
-          "vote" => %{"allow" => true}
-        },
-        "userTrust" => %{"addTrustFeedback" => %{"allow" => true}},
-        "users" => %{
-          "deactivate" => %{"allow" => true},
-          "find" => %{"allow" => true},
-          "lookup" => %{"allow" => true},
-          "pagePublic" => %{"allow" => true},
-          "reactivate" => %{"allow" => true},
-          "update" => %{"allow" => true}
-        },
-        "watchlist" => %{
-          "edit" => %{"allow" => true},
-          "pageBoards" => %{"allow" => true},
-          "pageThreads" => %{"allow" => true},
-          "unread" => %{"allow" => true},
-          "unwatchBoard" => %{"allow" => true},
-          "unwatchThread" => %{"allow" => true},
-          "watchBoard" => %{"allow" => true},
-          "watchThread" => %{"allow" => true}
-        }
+    test "does not modify a role's priority_restrictions when input is invalid", %{conn: conn} do
+      initial_newbie_priority_restrictions =
+        get(conn, Routes.role_path(conn, :all))
+        |> json_response(200)
+        |> Enum.at(6)
+        |> Map.get("priority_restrictions")
+
+      invalid_modified_newbie_priority_restrictions = ""
+
+      new_newbie_permissions_attrs = %{
+        id: 7,
+        priority_restrictions: invalid_modified_newbie_priority_restrictions
       }
 
+      update_conn = put(conn, Routes.role_path(conn, :update), new_newbie_permissions_attrs)
+
+      assert "success" == json_response(update_conn, 200)
+
+      modified_all_conn = get(conn, Routes.role_path(conn, :all))
+      modified_roles = json_response(modified_all_conn, 200)
+
+      modified_newbie = modified_roles |> Enum.at(6)
+
+      assert invalid_modified_newbie_priority_restrictions !=
+               modified_newbie["priority_restrictions"]
+
+      assert initial_newbie_priority_restrictions == modified_newbie["priority_restrictions"]
+    end
+
+    @tag authenticated: :admin
+    test "modifies a role's permissions when authenticated", %{conn: conn} do
       new_newbie_permissions_attrs = %{
         id: 7,
         permissions: %{
@@ -247,12 +283,6 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
         }
       }
 
-      all_conn = get(conn, Routes.role_path(conn, :all))
-      roles = json_response(all_conn, 200)
-
-      newbie = roles |> Enum.at(6)
-      assert initial_newbie_permissions == newbie["permissions"]
-
       update_conn = put(conn, Routes.role_path(conn, :update), new_newbie_permissions_attrs)
       assert "success" == json_response(update_conn, 200)
 
@@ -260,6 +290,36 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
       modified_roles = json_response(modified_all_conn, 200)
       modified_newbie = modified_roles |> Enum.at(6)
       assert modified_newbie_permissions == modified_newbie["permissions"]
+    end
+
+    @tag authenticated: :admin
+    test "does not modify a user's permissions when input is invalid", %{conn: conn} do
+      initial_newbie_permissions =
+        get(conn, Routes.role_path(conn, :all))
+        |> json_response(200)
+        |> Enum.at(6)
+        |> Map.get("permissions")
+
+      invalid_modified_newbie_permissions = ""
+
+      new_newbie_permissions_attrs = %{
+        id: 7,
+        permissions: invalid_modified_newbie_permissions
+      }
+
+      update_conn = put(conn, Routes.role_path(conn, :update), new_newbie_permissions_attrs)
+
+      assert "success" == json_response(update_conn, 200)
+
+      modified_all_conn = get(conn, Routes.role_path(conn, :all))
+      modified_roles = json_response(modified_all_conn, 200)
+
+      modified_newbie = modified_roles |> Enum.at(6)
+
+      assert invalid_modified_newbie_permissions !=
+               modified_newbie["permissions"]
+
+      assert initial_newbie_permissions == modified_newbie["permissions"]
     end
   end
 end

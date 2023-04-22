@@ -145,7 +145,8 @@ defmodule EpochtalkServer.Models.Thread do
       {:ok, {:ok, _post} = thread_data} -> thread_data
 
       # handle slug conflict, add hash to slug, try to insert again
-      {:error, %Ecto.Changeset{errors: [slug: _]} = _cs} ->
+      {:error, %Ecto.Changeset{errors: [slug: {"has already been taken",
+     [constraint: :unique, constraint_name: "threads_slug_index"]}]} = _cs} ->
         hash =
           :crypto.strong_rand_bytes(3)
           |> Base.url_encode64()

@@ -104,6 +104,16 @@ defmodule EpochtalkServer.Models.Post do
       :updated_at
     ])
     |> validate_required([:user_id, :thread_id, :content])
+    |> validate_change(:content, fn (_, content) ->
+      has_key = fn key ->
+        case String.trim(content[key] || "") do
+          "" -> [{key, "can't be blank"}]
+          _ -> []
+        end
+      end
+      # validate content map has :title and :body, and they're not blank
+      has_key.(:title) ++ has_key.(:body)
+    end)
     |> unique_constraint(:id, name: :posts_pkey)
     |> foreign_key_constraint(:thread_id, name: :posts_thread_id_fkey)
   end

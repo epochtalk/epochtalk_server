@@ -18,6 +18,11 @@ defmodule EpochtalkServerWeb.RoleController do
     with {:auth, _user} <- {:auth, Guardian.Plug.current_resource(conn)},
          :ok <- ACL.allow!(conn, "roles.update"),
          id <- Validate.cast(attrs, "id", :integer, min: 1),
+         name <- attrs["name"],
+         description <- attrs["description"],
+         priority <- attrs["priority"],
+         highlight_color <- attrs["highlight_color"],
+         lookup <- attrs["lookup"],
          # TODO(boka): implement validators
          priority_restrictions <- attrs["priority_restrictions"],
          permissions <- attrs["permissions"],

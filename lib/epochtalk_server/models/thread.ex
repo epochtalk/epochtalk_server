@@ -120,29 +120,22 @@ defmodule EpochtalkServer.Models.Thread do
     thread_cs = create_changeset(%Thread{}, thread_attrs)
 
     case Repo.transaction(fn ->
-      case Repo.insert(thread_cs) do
-        {:ok, db_thread} ->
-          MetadataThread.insert(%MetadataThread{thread_id: db_thread.id, views: 0})
-          # strip nil poll attributes
-          poll = thread_attrs["poll"] || %{}
-            |> Enum.reject(fn {_, v} -> is_nil(v) end)
-            |> Map.new()
-          # append thread_id
-          poll = poll
-            |> Map.put("thread_id", db_thread.id)
-          Poll.create(poll)
-          Post.create(%{
-            thread_id: db_thread.id,
-            user_id: user_id,
-            content: %{title: thread_attrs["title"], body: thread_attrs["body"]}
-          })
-
+      db_thread = case Repo.insert(thread_cs) do
+        {:ok, db_thread} -> db_thread
         # rollback and bubble up changeset error
         {:error, cs} -> Repo.rollback(cs)
       end
+      # create thread metadata
+      MetadataThread.insert(%MetadataThread{thread_id: db_thread.id, views: 0})
+      # create poll, if necessary
+      db_poll = handle_create_poll(db_thread.id, thread_attrs["poll"])
+      # create post
+      db_post = handle_create_post(db_thread.id, user_id, thread_attrs)
+      # return post (preloaded thread) and poll data
+      %{post: db_post, poll: db_poll}
     end) do
       # transaction success return post with preloaded thread
-      {:ok, {:ok, _post} = thread_data} -> thread_data
+      {:ok, thread_data} -> {:ok, thread_data}
 
       # handle slug conflict, add hash to slug, try to insert again
       {:error, %Ecto.Changeset{errors: [slug: {"has already been taken",
@@ -254,6 +247,8 @@ defmodule EpochtalkServer.Models.Thread do
       normal: normal_by_board_id(board_id, page, opts)
     }
   end
+
+  ## === Private Helper Functions ===
 
   defp sticky_by_board_id(board_id, page, opts) when page == 1,
     do: generate_thread_query(board_id, true, opts) |> Repo.all()
@@ -437,5 +432,31 @@ defmodule EpochtalkServer.Models.Thread do
       last_post_avatar: pl.avatar
     })
     |> order_by([tlist], [{^sort_order, field(tlist, ^field)}])
+  end
+
+  defp handle_create_poll(thread_id, nil), do: nil
+  defp handle_create_poll(thread_id, poll_attrs) when is_map(poll_attrs) do
+    # append thread_id
+    poll_attrs = Map.put(poll_attrs, "thread_id", thread_id)
+
+    # create poll, with modified poll data (thread_id added)
+    case Poll.create(poll_attrs) do
+      # create success
+      {:ok, poll} -> poll
+      # error creating poll
+      {:error, cs} -> Repo.rollback(cs)
+    end
+  end
+
+  defp handle_create_post(thread_id, user_id, thread_attrs) do
+    post_attrs = %{
+      thread_id: thread_id,
+      user_id: user_id,
+      content: %{title: thread_attrs["title"], body: thread_attrs["body"]}
+    }
+    case Post.create(post_attrs) do
+      {:ok, post} -> post
+      {:error, cs} -> Repo.rollback(cs)
+    end
   end
 end

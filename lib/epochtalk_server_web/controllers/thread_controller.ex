@@ -9,7 +9,6 @@ defmodule EpochtalkServerWeb.ThreadController do
   alias EpochtalkServerWeb.Helpers.Validate
   alias EpochtalkServerWeb.Helpers.ACL
   alias EpochtalkServer.Models.Thread
-  alias EpochtalkServer.Models.Post
   alias EpochtalkServer.Models.Board
   alias EpochtalkServer.Models.BoardBan
   alias EpochtalkServer.Models.BoardMapping
@@ -36,9 +35,10 @@ defmodule EpochtalkServerWeb.ThreadController do
   @doc """
   Used to create threads
 
-  TODO(akinsey): Regex validation for slug, length check for strings, implement poll validation (use model validation)
-  TODO(akinsey): implement polls
-  TODO(akinsey): Post pre processing, image processing, hooks
+  TODO(akinsey): Post pre processing, image processing, hooks. Things to consider:
+  - does html sanitizer need to run on the front end too
+  - how do we run the same parser/sanitizer on the elixir back end as the node frontend
+  - processing mentions
   """
   def create(conn, attrs) do
     with user <- Guardian.Plug.current_resource(conn),

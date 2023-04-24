@@ -7,6 +7,10 @@ defmodule EpochtalkServer.Models.Role do
   alias EpochtalkServer.Models.Role
   alias EpochtalkServer.Models.RoleUser
 
+  @postgres_integer_max 2147483647
+  @postgres_varchar255_max 255
+  @description_max 1000
+
   @moduledoc """
   `Role` model, for performing actions relating to user roles
   """
@@ -58,6 +62,29 @@ defmodule EpochtalkServer.Models.Role do
     role
     |> cast(attrs, [:name, :description, :lookup, :priority, :permissions])
     |> validate_required([:name, :description, :lookup, :priority, :permissions])
+  end
+
+  @doc """
+  Create a changeset for updating a `Role`
+  permissions and priority restrictions are not included in this changeset
+  """
+  @spec update_changeset(role :: t(), attrs :: map() | nil) :: Ecto.Changeset.t()
+  def update_changeset(role, attrs \\ %{}) do
+    updated_at = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
+
+    role =
+      role
+      |> Map.put(:updated_at, updated_at)
+
+    role
+    |> cast(attrs, [:id, :name, :description, :priority, :highlight_color, :lookup)
+    |> validate_required([:id, :name, :description, :priority, :lookup])
+    |> validate_length(:name, min: 1, max: @postgres_varchar255_max)
+    |> validate_length(:description, min: 1, max: @description_max)
+    |> validate_number(:priority, greater_than_or_equal_to: 1, less_than_or_equal_to: @postgres_integer_max)
+    |> validate_format(:highlight_color, ~r/^#([0-9a-f]{6})$/i)
+    |> validate_length(:lookup, min: 1, max: @postgres_varchar255_max)
+    |> unique_constraint(:lookup, name: :roles_lookup_index)
   end
 
   ## === Database Functions ===

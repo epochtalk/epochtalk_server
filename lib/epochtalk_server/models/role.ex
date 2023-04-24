@@ -184,7 +184,7 @@ defmodule EpochtalkServer.Models.Role do
   Updates the permissions of an existing `Role` in the database
   """
   @spec set_permissions(id :: integer, permissions_attrs :: map()) ::
-          {:ok, role :: t()} | {:error, Ecto.Changeset.t()}
+          {:ok, role :: Ecto.Schema.t()} | {:error, Ecto.Changeset.t()}
   def set_permissions(id, permissions) do
     Role
     |> Repo.get(id)
@@ -196,7 +196,7 @@ defmodule EpochtalkServer.Models.Role do
   Updates the priority_restrictions of an existing `Role` in the database
   """
   @spec set_priority_restrictions(id :: integer, priority_restrictions :: list() | nil) ::
-          {:ok, role :: t()} | {:error, Ecto.Changeset.t()}
+          {:ok, role :: Ecto.Schema.t()} | {:error, Ecto.Changeset.t()}
   def set_priority_restrictions(id, []), do: set_priority_restrictions(id, nil)
 
   def set_priority_restrictions(id, priority_restrictions) do

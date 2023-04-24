@@ -179,6 +179,17 @@ defmodule EpochtalkServer.Models.Role do
   def insert([%{} | _] = roles), do: Repo.insert_all(Role, roles)
 
   ## UPDATE OPERATIONS
+  @doc """
+  Updates an existing `Role` in the database
+  """
+  @spec update(attrs :: map()) ::
+          {:ok, role :: Ecto.Schema.t()} | {:error, Ecto.Changeset.t()}
+  def update(attrs) do
+    Role
+    |> Repo.get(id)
+    |> update_changeset(attrs)
+    |> Repo.update()
+  end
 
   @doc """
   Updates the permissions of an existing `Role` in the database

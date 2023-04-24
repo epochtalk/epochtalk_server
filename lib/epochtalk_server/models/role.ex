@@ -68,7 +68,7 @@ defmodule EpochtalkServer.Models.Role do
   Create a changeset for updating a `Role`
   permissions and priority restrictions are not included in this changeset
   """
-  @spec update_changeset(role :: t(), attrs :: map() | nil) :: Ecto.Changeset.t()
+  @spec update_changeset(role :: Role.t(), attrs :: map() | nil) :: Ecto.Changeset.t()
   def update_changeset(role, attrs \\ %{}) do
     updated_at = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
 

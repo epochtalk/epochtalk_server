@@ -35,7 +35,7 @@ defmodule EpochtalkServerWeb.RoleController do
              priority_restrictions: priority_restrictions
            }),
          {:ok, _role_data} <-
-           Role.update(%Role{
+           Role.update(%{
              id: id,
              name: name,
              description: description,

@@ -77,7 +77,7 @@ defmodule EpochtalkServer.Models.Role do
       |> Map.put(:updated_at, updated_at)
 
     role
-    |> cast(attrs, [:id, :name, :description, :priority, :highlight_color, :lookup)
+    |> cast(attrs, [:id, :name, :description, :priority, :highlight_color, :lookup])
     |> validate_required([:id, :name, :description, :priority, :lookup])
     |> validate_length(:name, min: 1, max: @postgres_varchar255_max)
     |> validate_length(:description, min: 1, max: @description_max)

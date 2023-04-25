@@ -12,7 +12,7 @@ defmodule EpochtalkServer.Models.PollResponse do
   """
   @type t :: %__MODULE__{
           poll_answer_id: non_neg_integer | nil,
-          user_id: non_neg_integer | nil,
+          user_id: non_neg_integer | nil
         }
   @derive {Jason.Encoder, only: [:poll_answer_id, :user_id]}
   @primary_key false

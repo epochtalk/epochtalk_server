@@ -115,31 +115,41 @@ defmodule EpochtalkServer.Models.Thread do
   @doc """
   Creates a new `Thread` in the database
   """
-  @spec create(thread_attrs :: map(), user_id :: non_neg_integer) :: {:ok, thread :: t()} | {:error, Ecto.Changeset.t()}
+  @spec create(thread_attrs :: map(), user_id :: non_neg_integer) ::
+          {:ok, thread :: t()} | {:error, Ecto.Changeset.t()}
   def create(thread_attrs, user_id) do
     thread_cs = create_changeset(%Thread{}, thread_attrs)
 
     case Repo.transaction(fn ->
-      db_thread = case Repo.insert(thread_cs) do
-        {:ok, db_thread} -> db_thread
-        # rollback and bubble up changeset error
-        {:error, cs} -> Repo.rollback(cs)
-      end
-      # create thread metadata
-      MetadataThread.insert(%MetadataThread{thread_id: db_thread.id, views: 0})
-      # create poll, if necessary
-      db_poll = handle_create_poll(db_thread.id, thread_attrs["poll"])
-      # create post
-      db_post = handle_create_post(db_thread.id, user_id, thread_attrs)
-      # return post (preloaded thread) and poll data
-      %{post: db_post, poll: db_poll}
-    end) do
+           db_thread =
+             case Repo.insert(thread_cs) do
+               {:ok, db_thread} -> db_thread
+               # rollback and bubble up changeset error
+               {:error, cs} -> Repo.rollback(cs)
+             end
+
+           # create thread metadata
+           MetadataThread.insert(%MetadataThread{thread_id: db_thread.id, views: 0})
+           # create poll, if necessary
+           db_poll = handle_create_poll(db_thread.id, thread_attrs["poll"])
+           # create post
+           db_post = handle_create_post(db_thread.id, user_id, thread_attrs)
+           # return post (preloaded thread) and poll data
+           %{post: db_post, poll: db_poll}
+         end) do
       # transaction success return post with preloaded thread
-      {:ok, thread_data} -> {:ok, thread_data}
+      {:ok, thread_data} ->
+        {:ok, thread_data}
 
       # handle slug conflict, add hash to slug, try to insert again
-      {:error, %Ecto.Changeset{errors: [slug: {"has already been taken",
-     [constraint: :unique, constraint_name: "threads_slug_index"]}]} = _cs} ->
+      {:error,
+       %Ecto.Changeset{
+         errors: [
+           slug:
+             {"has already been taken",
+              [constraint: :unique, constraint_name: "threads_slug_index"]}
+         ]
+       } = _cs} ->
         hash =
           :crypto.strong_rand_bytes(3)
           |> Base.url_encode64()
@@ -151,7 +161,8 @@ defmodule EpochtalkServer.Models.Thread do
         create(thread_attrs, user_id)
 
       # some other error
-      {:error, cs} -> {:error, cs}
+      {:error, cs} ->
+        {:error, cs}
     end
   end
 
@@ -435,6 +446,7 @@ defmodule EpochtalkServer.Models.Thread do
   end
 
   defp handle_create_poll(thread_id, nil), do: nil
+
   defp handle_create_poll(thread_id, poll_attrs) when is_map(poll_attrs) do
     # append thread_id
     poll_attrs = Map.put(poll_attrs, "thread_id", thread_id)
@@ -454,6 +466,7 @@ defmodule EpochtalkServer.Models.Thread do
       user_id: user_id,
       content: %{title: thread_attrs["title"], body: thread_attrs["body"]}
     }
+
     case Post.create(post_attrs) do
       {:ok, post} -> post
       {:error, cs} -> Repo.rollback(cs)

@@ -49,6 +49,7 @@ defmodule EpochtalkServerWeb.ThreadController do
     else
       {:error, %Ecto.Changeset{} = cs} ->
         ErrorHelpers.render_json_error(conn, 400, cs)
+
       _ ->
         ErrorHelpers.render_json_error(conn, 400, "Error, cannot create thread")
     end

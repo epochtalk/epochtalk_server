@@ -30,7 +30,7 @@ defmodule EpochtalkServerWeb.ThreadView do
     end)
   end
 
-    @doc """
+  @doc """
   Renders `Thread` for find query.
   """
   def render("create.json", %{
@@ -38,6 +38,7 @@ defmodule EpochtalkServerWeb.ThreadView do
       }) do
     post = thread_data.post
     thread = thread_data.post.thread
+
     %{
       body: post.content["body"],
       created_at: thread.created_at,

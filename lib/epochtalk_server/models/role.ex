@@ -186,7 +186,7 @@ defmodule EpochtalkServer.Models.Role do
           {:ok, role :: Ecto.Schema.t()} | {:error, Ecto.Changeset.t()}
   def update(attrs) do
     Role
-    |> Repo.get(id)
+    |> Repo.get(attrs.id)
     |> update_changeset(attrs)
     |> Repo.update()
   end

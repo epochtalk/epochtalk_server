@@ -30,8 +30,30 @@ defmodule EpochtalkServerWeb.ThreadView do
     end)
   end
 
+    @doc """
+  Renders `Thread` for find query.
+  """
+  def render("create.json", %{
+        thread_data: thread_data
+      }) do
+    post = thread_data.post
+    thread = thread_data.post.thread
+    %{
+      body: post.content["body"],
+      created_at: thread.created_at,
+      deleted: post.deleted,
+      id: post.id,
+      locked: thread.locked,
+      position: post.position,
+      slug: thread.slug,
+      thread_id: thread.id,
+      title: post.content["title"],
+      user_id: post.user_id
+    }
+  end
+
   @doc """
-  Renders `Board` for find query.
+  Renders `Thread` for by_board query.
   """
   def render("by_board.json", %{
         threads: threads,

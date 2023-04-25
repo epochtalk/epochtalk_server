@@ -44,7 +44,7 @@ defmodule EpochtalkServerWeb.ThreadController do
     with user <- Guardian.Plug.current_resource(conn),
          {:ok, thread_data} <- Thread.create(attrs, user.id) do
       render(conn, "create.json", %{
-        data: thread_data
+        thread_data: thread_data
       })
     else
       {:error, %Ecto.Changeset{} = cs} ->

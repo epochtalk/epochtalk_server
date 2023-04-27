@@ -445,7 +445,7 @@ defmodule EpochtalkServer.Models.Thread do
     |> order_by([tlist], [{^sort_order, field(tlist, ^field)}])
   end
 
-  defp handle_create_poll(thread_id, nil), do: nil
+  defp handle_create_poll(_thread_id, nil), do: nil
 
   defp handle_create_poll(thread_id, poll_attrs) when is_map(poll_attrs) do
     # append thread_id

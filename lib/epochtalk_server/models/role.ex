@@ -76,6 +76,10 @@ defmodule EpochtalkServer.Models.Role do
       role
       |> Map.put(:updated_at, updated_at)
 
+    # filter out nil attrs
+    attrs = attrs
+    |> Map.filter(fn {k, v} -> v != nil end)
+
     role
     |> cast(attrs, [:id, :name, :description, :priority, :highlight_color, :lookup])
     |> validate_required([:id, :name, :description, :priority, :lookup])

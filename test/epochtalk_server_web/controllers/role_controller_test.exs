@@ -198,7 +198,7 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
 
       update_conn = put(conn, Routes.role_path(conn, :update), new_newbie_permissions_attrs)
 
-      assert "success" == json_response(update_conn, 200)
+      assert new_newbie_permissions_attrs.id == json_response(update_conn, 200)
 
       modified_all_conn = get(conn, Routes.role_path(conn, :all))
       modified_roles = json_response(modified_all_conn, 200)
@@ -222,7 +222,7 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
 
       update_conn = put(conn, Routes.role_path(conn, :update), new_newbie_permissions_attrs)
 
-      assert "success" == json_response(update_conn, 200)
+      assert new_newbie_permissions_attrs.id == json_response(update_conn, 200)
 
       modified_all_conn = get(conn, Routes.role_path(conn, :all))
       modified_roles = json_response(modified_all_conn, 200)
@@ -248,7 +248,7 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
 
       update_conn = put(conn, Routes.role_path(conn, :update), new_newbie_permissions_attrs)
 
-      assert "success" == json_response(update_conn, 200)
+      assert new_newbie_permissions_attrs.id == json_response(update_conn, 200)
 
       modified_all_conn = get(conn, Routes.role_path(conn, :all))
       modified_roles = json_response(modified_all_conn, 200)
@@ -284,7 +284,7 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
       }
 
       update_conn = put(conn, Routes.role_path(conn, :update), new_newbie_permissions_attrs)
-      assert "success" == json_response(update_conn, 200)
+      assert new_newbie_permissions_attrs.id == json_response(update_conn, 200)
 
       modified_all_conn = get(conn, Routes.role_path(conn, :all))
       modified_roles = json_response(modified_all_conn, 200)
@@ -309,7 +309,7 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
 
       update_conn = put(conn, Routes.role_path(conn, :update), new_newbie_permissions_attrs)
 
-      assert "success" == json_response(update_conn, 200)
+      assert new_newbie_permissions_attrs.id == json_response(update_conn, 200)
 
       modified_all_conn = get(conn, Routes.role_path(conn, :all))
       modified_roles = json_response(modified_all_conn, 200)

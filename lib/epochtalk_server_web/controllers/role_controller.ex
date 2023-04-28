@@ -25,6 +25,7 @@ defmodule EpochtalkServerWeb.RoleController do
     else
       {:auth, nil} ->
         ErrorHelpers.render_json_error(conn, 400, "Not logged in, cannot update role")
+
       {:error, data} ->
         ErrorHelpers.render_json_error(conn, 400, data)
     end

@@ -7,7 +7,7 @@ defmodule EpochtalkServer.Models.Role do
   alias EpochtalkServer.Models.Role
   alias EpochtalkServer.Models.RoleUser
 
-  @postgres_integer_max 2147483647
+  @postgres_integer_max 2_147_483_647
   @postgres_varchar255_max 255
   @description_max 1000
 
@@ -77,15 +77,19 @@ defmodule EpochtalkServer.Models.Role do
       |> Map.put(:updated_at, updated_at)
 
     # filter out nil attrs
-    attrs = attrs
-    |> Map.filter(fn {k, v} -> v != nil end)
+    attrs =
+      attrs
+      |> Map.filter(fn {k, v} -> v != nil end)
 
     role
     |> cast(attrs, [:id, :name, :description, :priority, :highlight_color, :lookup])
     |> validate_required([:id, :name, :description, :priority, :lookup])
     |> validate_length(:name, min: 1, max: @postgres_varchar255_max)
     |> validate_length(:description, min: 1, max: @description_max)
-    |> validate_number(:priority, greater_than_or_equal_to: 1, less_than_or_equal_to: @postgres_integer_max)
+    |> validate_number(:priority,
+      greater_than_or_equal_to: 1,
+      less_than_or_equal_to: @postgres_integer_max
+    )
     |> validate_format(:highlight_color, ~r/^#([0-9a-f]{6})$/i)
     |> validate_length(:lookup, min: 1, max: @postgres_varchar255_max)
     |> unique_constraint(:lookup, name: :roles_lookup_index)

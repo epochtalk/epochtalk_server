@@ -186,10 +186,12 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
 
       assert new_newbie_permissions_attrs.id == json_response(update_conn, 200)
 
-      modified_newbie = conn
-                        |> get(Routes.role_path(conn, :all))
-                        |> json_response(200)
-                        |> Enum.at(6)
+      modified_newbie =
+        conn
+        |> get(Routes.role_path(conn, :all))
+        |> json_response(200)
+        |> Enum.at(6)
+
       assert new_newbie_permissions_attrs.name == modified_newbie["name"]
       assert new_newbie_permissions_attrs.description == modified_newbie["description"]
       assert new_newbie_permissions_attrs.priority == modified_newbie["priority"]
@@ -200,10 +202,12 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
     test "modifies a role's priority_restrictions when authenticated", %{conn: conn} do
       initial_newbie_priority_restrictions = nil
 
-      newbie = conn
-               |> get(Routes.role_path(conn, :all))
-               |> json_response(200)
-               |> Enum.at(6)
+      newbie =
+        conn
+        |> get(Routes.role_path(conn, :all))
+        |> json_response(200)
+        |> Enum.at(6)
+
       assert initial_newbie_priority_restrictions == newbie["priority_restrictions"]
 
       modified_newbie_priority_restrictions = [1, 2, 3]
@@ -220,16 +224,18 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
         priority_restrictions: modified_newbie_priority_restrictions
       }
 
-      update_response = conn
-                    |> put(Routes.role_path(conn, :update), new_newbie_permissions_attrs)
-                    |> json_response(200)
+      update_response =
+        conn
+        |> put(Routes.role_path(conn, :update), new_newbie_permissions_attrs)
+        |> json_response(200)
 
       assert new_newbie_permissions_attrs.id == update_response
 
-      modified_newbie = conn
-                        |> get(Routes.role_path(conn, :all))
-                        |> json_response(200)
-                        |> Enum.at(6)
+      modified_newbie =
+        conn
+        |> get(Routes.role_path(conn, :all))
+        |> json_response(200)
+        |> Enum.at(6)
 
       assert modified_newbie_priority_restrictions == modified_newbie["priority_restrictions"]
 
@@ -247,16 +253,18 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
         priority_restrictions: re_modified_newbie_priority_restrictions
       }
 
-      new_update_response = conn
-                            |> put(Routes.role_path(conn, :update), new_newbie_permissions_attrs)
-                            |> json_response(200)
+      new_update_response =
+        conn
+        |> put(Routes.role_path(conn, :update), new_newbie_permissions_attrs)
+        |> json_response(200)
 
       assert new_newbie_permissions_attrs.id == new_update_response
 
-      modified_newbie = conn
-                          |> get(Routes.role_path(conn, :all))
-                          |> json_response(200)
-                          |> Enum.at(6)
+      modified_newbie =
+        conn
+        |> get(Routes.role_path(conn, :all))
+        |> json_response(200)
+        |> Enum.at(6)
 
       assert nil == modified_newbie["priority_restrictions"]
     end
@@ -276,16 +284,18 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
         priority_restrictions: invalid_modified_newbie_priority_restrictions
       }
 
-      update_response = conn
-                        |> put(Routes.role_path(conn, :update), new_newbie_permissions_attrs)
-                        |> json_response(200)
+      update_response =
+        conn
+        |> put(Routes.role_path(conn, :update), new_newbie_permissions_attrs)
+        |> json_response(200)
 
       assert new_newbie_permissions_attrs.id == update_response
 
-      modified_newbie = conn
-                        |> get(Routes.role_path(conn, :all))
-                        |> json_response(200)
-                        |> Enum.at(6)
+      modified_newbie =
+        conn
+        |> get(Routes.role_path(conn, :all))
+        |> json_response(200)
+        |> Enum.at(6)
 
       assert invalid_modified_newbie_priority_restrictions !=
                modified_newbie["priority_restrictions"]
@@ -315,25 +325,30 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
         }
       }
 
-      update_response = conn
-                        |> put(Routes.role_path(conn, :update), new_newbie_permissions_attrs)
-                        |> json_response(200)
+      update_response =
+        conn
+        |> put(Routes.role_path(conn, :update), new_newbie_permissions_attrs)
+        |> json_response(200)
+
       assert new_newbie_permissions_attrs.id == update_response
 
-      modified_newbie = conn
-                        |> get(Routes.role_path(conn, :all))
-                        |> json_response(200)
-                        |> Enum.at(6)
+      modified_newbie =
+        conn
+        |> get(Routes.role_path(conn, :all))
+        |> json_response(200)
+        |> Enum.at(6)
+
       assert modified_newbie_permissions == modified_newbie["permissions"]
     end
 
     @tag authenticated: :admin
     test "does not modify a user's permissions when input is invalid", %{conn: conn} do
-      initial_newbie_permissions = conn
-                                   |> get(Routes.role_path(conn, :all))
-                                   |> json_response(200)
-                                   |> Enum.at(6)
-                                   |> Map.get("permissions")
+      initial_newbie_permissions =
+        conn
+        |> get(Routes.role_path(conn, :all))
+        |> json_response(200)
+        |> Enum.at(6)
+        |> Map.get("permissions")
 
       invalid_modified_newbie_permissions = ""
 
@@ -342,16 +357,18 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
         permissions: invalid_modified_newbie_permissions
       }
 
-      update_response = conn
-                        |> put(Routes.role_path(conn, :update), new_newbie_permissions_attrs)
-                        |> json_response(200)
+      update_response =
+        conn
+        |> put(Routes.role_path(conn, :update), new_newbie_permissions_attrs)
+        |> json_response(200)
 
       assert new_newbie_permissions_attrs.id == update_response
 
-      modified_newbie = conn
-                        |> get(Routes.role_path(conn, :all))
-                        |> json_response(200)
-                        |> Enum.at(6)
+      modified_newbie =
+        conn
+        |> get(Routes.role_path(conn, :all))
+        |> json_response(200)
+        |> Enum.at(6)
 
       assert invalid_modified_newbie_permissions !=
                modified_newbie["permissions"]

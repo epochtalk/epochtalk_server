@@ -75,6 +75,7 @@ defmodule EpochtalkServer.Models.RolePermission do
     role_id = attrs["id"]
     new_permissions = attrs["permissions"]
     priority_restrictions = attrs["priority_restrictions"]
+
     if is_map(new_permissions) do
       # get current set of role permissions
       current_role_permissions =

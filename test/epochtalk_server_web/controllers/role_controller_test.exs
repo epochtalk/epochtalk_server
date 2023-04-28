@@ -200,7 +200,8 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
 
     @tag authenticated: :admin
     test "does not modify a role's properties when not provided", %{conn: conn} do
-      new_newbie_permissions_attrs = %{ id: 7 }
+      new_newbie_permissions_attrs = %{id: 7}
+
       original_newbie =
         conn
         |> get(Routes.role_path(conn, :all))

@@ -124,6 +124,7 @@ defmodule EpochtalkServer.Models.Role do
     query =
       from ru in RoleUser,
         join: r in Role,
+        on: true,
         where: ru.user_id == ^user_id and r.id == ru.role_id,
         select: r,
         order_by: [asc: r.priority]

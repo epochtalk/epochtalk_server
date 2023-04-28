@@ -362,7 +362,8 @@ defmodule EpochtalkServer.Models.Thread do
         ^opts[:user_id],
         tlist.id,
         tlist.id
-      )
+      ),
+      on: true
     )
     # join thread title and author info
     |> join(
@@ -379,7 +380,8 @@ defmodule EpochtalkServer.Models.Thread do
           LIMIT 1
         """,
         tlist.id
-      )
+      ),
+      on: true
     )
     # join post id and post position
     |> join(
@@ -395,7 +397,8 @@ defmodule EpochtalkServer.Models.Thread do
         """,
         tlist.id,
         t.time
-      )
+      ),
+      on: true
     )
     # join last post info
     |> join(
@@ -413,7 +416,8 @@ defmodule EpochtalkServer.Models.Thread do
          LIMIT 1
         """,
         tlist.id
-      )
+      ),
+      on: true
     )
     |> select([tlist, t, p, tv, pl], %{
       id: tlist.id,

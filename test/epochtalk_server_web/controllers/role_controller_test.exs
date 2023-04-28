@@ -247,6 +247,7 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
       long_desc_attrs = %{id: 7, description: String.duplicate("a", @description_max + 1)}
       low_prio_attrs = %{id: 7, priority: -1}
       high_prio_attrs = %{id: 7, priority: @postgres_integer_max + 1}
+      bad_hc_attrs = %{id: 7, highlight_color: "lol"}
 
       short_name_resp =
         conn
@@ -293,6 +294,11 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
         |> put(Routes.role_path(conn, :update), high_prio_attrs)
         |> json_response(400)
 
+      bad_hc_resp =
+        conn
+        |> put(Routes.role_path(conn, :update), bad_hc_attrs)
+        |> json_response(400)
+
       assert %{"message" => "Name can't be blank"} = short_name_resp
       assert %{"message" => "Name should be at most 255 character(s)"} = long_name_resp
       assert %{"message" => "Lookup can't be blank"} = short_lu_resp
@@ -302,6 +308,7 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
       assert %{"message" => "Description should be at most 1000 character(s)"} = long_desc_resp
       assert %{"message" => "Priority must be greater than or equal to 1"} = low_prio_resp
       assert %{"message" => "Priority must be less than or equal to 2147483647"} = high_prio_resp
+      assert %{"message" => "Highlight_color has invalid format"} = bad_hc_resp
 
       modified_newbie =
         conn

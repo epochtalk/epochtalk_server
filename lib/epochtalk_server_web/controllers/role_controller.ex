@@ -6,7 +6,6 @@ defmodule EpochtalkServerWeb.RoleController do
   """
   alias EpochtalkServer.Auth.Guardian
   alias EpochtalkServerWeb.ErrorHelpers
-  alias EpochtalkServerWeb.Helpers.Validate
   alias EpochtalkServer.Models.Role
   alias EpochtalkServer.Models.RolePermission
   alias EpochtalkServerWeb.Helpers.ACL

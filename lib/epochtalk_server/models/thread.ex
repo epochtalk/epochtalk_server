@@ -362,7 +362,8 @@ defmodule EpochtalkServer.Models.Thread do
         ^opts[:user_id],
         tlist.id,
         tlist.id
-      )
+      ),
+      on: true
     )
     # join thread title and author info
     |> join(
@@ -379,7 +380,8 @@ defmodule EpochtalkServer.Models.Thread do
           LIMIT 1
         """,
         tlist.id
-      )
+      ),
+      on: true
     )
     # join post id and post position
     |> join(
@@ -395,7 +397,8 @@ defmodule EpochtalkServer.Models.Thread do
         """,
         tlist.id,
         t.time
-      )
+      ),
+      on: true
     )
     # join last post info
     |> join(
@@ -413,7 +416,8 @@ defmodule EpochtalkServer.Models.Thread do
          LIMIT 1
         """,
         tlist.id
-      )
+      ),
+      on: true
     )
     |> select([tlist, t, p, tv, pl], %{
       id: tlist.id,
@@ -445,7 +449,7 @@ defmodule EpochtalkServer.Models.Thread do
     |> order_by([tlist], [{^sort_order, field(tlist, ^field)}])
   end
 
-  defp handle_create_poll(thread_id, nil), do: nil
+  defp handle_create_poll(_thread_id, nil), do: nil
 
   defp handle_create_poll(thread_id, poll_attrs) when is_map(poll_attrs) do
     # append thread_id

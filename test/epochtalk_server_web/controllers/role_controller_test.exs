@@ -276,14 +276,16 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
         priority_restrictions: invalid_modified_newbie_priority_restrictions
       }
 
-      update_conn = put(conn, Routes.role_path(conn, :update), new_newbie_permissions_attrs)
+      update_response = conn
+                        |> put(conn, Routes.role_path(conn, :update), new_newbie_permissions_attrs)
+                        |> json_response(update_conn, 200)
 
-      assert new_newbie_permissions_attrs.id == json_response(update_conn, 200)
+      assert new_newbie_permissions_attrs.id == update_response
 
-      modified_all_conn = get(conn, Routes.role_path(conn, :all))
-      modified_roles = json_response(modified_all_conn, 200)
-
-      modified_newbie = modified_roles |> Enum.at(6)
+      modified_newbie = conn
+                        |> get(Routes.role_path(conn, :all))
+                        |> json_response(200)
+                        |> Enum.at(6)
 
       assert invalid_modified_newbie_priority_restrictions !=
                modified_newbie["priority_restrictions"]

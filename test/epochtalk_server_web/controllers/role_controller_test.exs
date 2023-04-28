@@ -1,6 +1,9 @@
 defmodule EpochtalkServerWeb.RoleControllerTest do
   use EpochtalkServerWeb.ConnCase, async: false
   alias EpochtalkServerWeb.CustomErrors.InvalidPermission
+  @postgres_integer_max 2_147_483_647
+  @postgres_varchar255_max 255
+  @description_max 1000
 
   describe "all/2" do
     @tag :authenticated
@@ -233,7 +236,11 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
         |> Enum.at(6)
 
       short_name_attrs = %{id: 7, name: ""}
-      long_name_attrs = %{id: 7, name: String.duplicate("a", 256)}
+      long_name_attrs = %{id: 7, name: String.duplicate("a", @postgres_varchar255_max + 1)}
+      short_desc_attrs = %{id: 7, description: ""}
+      long_desc_attrs = %{id: 7, description: String.duplicate("a", @description_max + 1)}
+      low_prio_attrs = %{id: 7, priority: -1}
+      high_prio_attrs = %{id: 7, priority: @postgres_integer_max + 1}
 
       short_name_resp =
         conn
@@ -245,9 +252,32 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
         |> put(Routes.role_path(conn, :update), long_name_attrs)
         |> json_response(400)
 
-      assert %{"message" => "Name can't be blank"} = short_name_resp
+      short_desc_resp =
+        conn
+        |> put(Routes.role_path(conn, :update), short_desc_attrs)
+        |> json_response(400)
 
+      long_desc_resp =
+        conn
+        |> put(Routes.role_path(conn, :update), long_desc_attrs)
+        |> json_response(400)
+
+      low_prio_resp =
+        conn
+        |> put(Routes.role_path(conn, :update), low_prio_attrs)
+        |> json_response(400)
+
+      high_prio_resp =
+        conn
+        |> put(Routes.role_path(conn, :update), high_prio_attrs)
+        |> json_response(400)
+
+      assert %{"message" => "Name can't be blank"} = short_name_resp
       assert %{"message" => "Name should be at most 255 character(s)"} = long_name_resp
+      assert %{"message" => "Description can't be blank"} = short_desc_resp
+      assert %{"message" => "Description should be at most 1000 character(s)"} = long_desc_resp
+      assert %{"message" => "Priority must be greater than or equal to 1"} = low_prio_resp
+      assert %{"message" => "Priority must be less than or equal to 2147483647"} = high_prio_resp
 
       modified_newbie =
         conn

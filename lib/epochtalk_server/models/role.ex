@@ -79,7 +79,7 @@ defmodule EpochtalkServer.Models.Role do
     # filter out nil attrs
     attrs =
       attrs
-      |> Map.filter(fn {k, v} -> v != nil end)
+      |> Map.filter(fn {_k, v} -> v != nil end)
 
     role
     |> cast(attrs, [:id, :name, :description, :priority, :highlight_color, :lookup])

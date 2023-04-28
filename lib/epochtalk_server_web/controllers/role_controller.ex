@@ -19,31 +19,9 @@ defmodule EpochtalkServerWeb.RoleController do
   def update(conn, attrs) do
     with {:auth, _user} <- {:auth, Guardian.Plug.current_resource(conn)},
          :ok <- ACL.allow!(conn, "roles.update"),
-         id <- Validate.cast(attrs, "id", :integer, min: 1),
-         name <- attrs["name"],
-         description <- attrs["description"],
-         priority <- attrs["priority"],
-         highlight_color <- attrs["highlight_color"],
-         lookup <- attrs["lookup"],
-         # TODO(boka): implement validators
-         priority_restrictions <- attrs["priority_restrictions"],
-         permissions <- attrs["permissions"],
-         {:ok, _role_permission_data} <-
-           RolePermission.modify_by_role(%Role{
-             id: id,
-             permissions: permissions,
-             priority_restrictions: priority_restrictions
-           }),
-         {:ok, _role_data} <-
-           Role.update(%{
-             id: id,
-             name: name,
-             description: description,
-             priority: priority,
-             highlight_color: highlight_color,
-             lookup: lookup
-           }) do
-      render(conn, "update.json", data: id)
+         {:ok, _role_permission_data} <- RolePermission.modify_by_role(attrs),
+         {:ok, _role_data} <- Role.update(attrs) do
+      render(conn, "update.json", data: attrs["id"])
     else
       {:auth, nil} ->
         ErrorHelpers.render_json_error(conn, 400, "Not logged in, cannot update role")

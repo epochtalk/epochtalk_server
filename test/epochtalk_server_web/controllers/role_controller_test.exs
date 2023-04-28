@@ -237,6 +237,8 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
 
       short_name_attrs = %{id: 7, name: ""}
       long_name_attrs = %{id: 7, name: String.duplicate("a", @postgres_varchar255_max + 1)}
+      short_lu_attrs = %{id: 7, lookup: ""}
+      long_lu_attrs = %{id: 7, lookup: String.duplicate("a", @postgres_varchar255_max + 1)}
       short_desc_attrs = %{id: 7, description: ""}
       long_desc_attrs = %{id: 7, description: String.duplicate("a", @description_max + 1)}
       low_prio_attrs = %{id: 7, priority: -1}
@@ -250,6 +252,16 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
       long_name_resp =
         conn
         |> put(Routes.role_path(conn, :update), long_name_attrs)
+        |> json_response(400)
+
+      short_lu_resp =
+        conn
+        |> put(Routes.role_path(conn, :update), short_lu_attrs)
+        |> json_response(400)
+
+      long_lu_resp =
+        conn
+        |> put(Routes.role_path(conn, :update), long_lu_attrs)
         |> json_response(400)
 
       short_desc_resp =
@@ -274,6 +286,8 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
 
       assert %{"message" => "Name can't be blank"} = short_name_resp
       assert %{"message" => "Name should be at most 255 character(s)"} = long_name_resp
+      assert %{"message" => "Lookup can't be blank"} = short_lu_resp
+      assert %{"message" => "Lookup should be at most 255 character(s)"} = long_lu_resp
       assert %{"message" => "Description can't be blank"} = short_desc_resp
       assert %{"message" => "Description should be at most 1000 character(s)"} = long_desc_resp
       assert %{"message" => "Priority must be greater than or equal to 1"} = low_prio_resp

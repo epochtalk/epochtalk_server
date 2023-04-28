@@ -113,6 +113,9 @@ defmodule EpochtalkServer.Models.User do
 
     case Repo.insert(user_cs) do
       {:ok, user} ->
+        # create Profile model for new User
+        Profile.create(user.id)
+        # preload associations, handle empty role, return user
         user =
           user
           # load associations

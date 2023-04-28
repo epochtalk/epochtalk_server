@@ -7,6 +7,7 @@ defmodule EpochtalkServer.Models.Thread do
   alias EpochtalkServer.Models.Thread
   alias EpochtalkServer.Models.MetadataThread
   alias EpochtalkServer.Models.Board
+  alias EpochtalkServer.Models.Poll
   alias EpochtalkServer.Models.Post
 
   @moduledoc """
@@ -24,6 +25,19 @@ defmodule EpochtalkServer.Models.Thread do
           imported_at: NaiveDateTime.t() | nil,
           updated_at: NaiveDateTime.t() | nil
         }
+  @derive {Jason.Encoder,
+           only: [
+             :id,
+             :board_id,
+             :locked,
+             :sticky,
+             :slug,
+             :moderated,
+             :post_count,
+             :created_at,
+             :updated_at,
+             :imported_at
+           ]}
   schema "threads" do
     belongs_to :board, Board
     field :locked, :boolean
@@ -63,7 +77,138 @@ defmodule EpochtalkServer.Models.Thread do
     |> foreign_key_constraint(:board_id, name: :threads_board_id_fkey)
   end
 
+  @doc """
+  Create changeset for creation of `Thread` model
+  """
+  @spec create_changeset(thread :: t(), attrs :: map() | nil) :: Ecto.Changeset.t()
+  def create_changeset(thread, attrs) do
+    now = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
+
+    # set default values and timestamps
+    thread =
+      thread
+      |> Map.put(:locked, false)
+      |> Map.put(:sticky, false)
+      |> Map.put(:moderated, false)
+      |> Map.put(:created_at, now)
+
+    thread
+    |> cast(attrs, [
+      :board_id,
+      :locked,
+      :sticky,
+      :slug,
+      :moderated,
+      :post_count,
+      :created_at
+    ])
+    |> validate_required([:board_id, :locked, :sticky, :slug, :moderated, :created_at])
+    |> validate_length(:slug, min: 1, max: 100)
+    |> validate_format(:slug, ~r/^[a-zA-Z0-9-_](-?[a-zA-Z0-9-_])*$/)
+    |> unique_constraint(:id, name: :threads_pkey)
+    |> unique_constraint(:slug, name: :threads_slug_index)
+    |> foreign_key_constraint(:board_id, name: :threads_board_id_fkey)
+  end
+
   ## === Database Functions ===
+
+  @doc """
+  Creates a new `Thread` in the database
+  """
+  @spec create(thread_attrs :: map(), user_id :: non_neg_integer) ::
+          {:ok, thread :: t()} | {:error, Ecto.Changeset.t()}
+  def create(thread_attrs, user_id) do
+    thread_cs = create_changeset(%Thread{}, thread_attrs)
+
+    case Repo.transaction(fn ->
+           db_thread =
+             case Repo.insert(thread_cs) do
+               {:ok, db_thread} -> db_thread
+               # rollback and bubble up changeset error
+               {:error, cs} -> Repo.rollback(cs)
+             end
+
+           # create thread metadata
+           MetadataThread.insert(%MetadataThread{thread_id: db_thread.id, views: 0})
+           # create poll, if necessary
+           db_poll = handle_create_poll(db_thread.id, thread_attrs["poll"])
+           # create post
+           db_post = handle_create_post(db_thread.id, user_id, thread_attrs)
+           # return post (preloaded thread) and poll data
+           %{post: db_post, poll: db_poll}
+         end) do
+      # transaction success return post with preloaded thread
+      {:ok, thread_data} ->
+        {:ok, thread_data}
+
+      # handle slug conflict, add hash to slug, try to insert again
+      {:error,
+       %Ecto.Changeset{
+         errors: [
+           slug:
+             {"has already been taken",
+              [constraint: :unique, constraint_name: "threads_slug_index"]}
+         ]
+       } = _cs} ->
+        hash =
+          :crypto.strong_rand_bytes(3)
+          |> Base.url_encode64()
+          |> binary_part(0, 3)
+          |> String.downcase()
+
+        hashed_slug = "#{Map.get(thread_attrs, "slug")}-#{hash}"
+        thread_attrs = thread_attrs |> Map.put("slug", hashed_slug)
+        create(thread_attrs, user_id)
+
+      # some other error
+      {:error, cs} ->
+        {:error, cs}
+    end
+  end
+
+  @doc """
+  Increments the `post_count` field given a `Thread` id
+  """
+  @spec increment_post_count(id :: non_neg_integer) :: {non_neg_integer(), nil}
+  def increment_post_count(id) do
+    query = from t in Thread, where: t.id == ^id
+    Repo.update_all(query, inc: [post_count: 1])
+  end
+
+  @doc """
+  Sets the `created_at` and `updated_at` of a new `Thread` by querying it's posts.
+  """
+  @spec set_timestamps(id :: non_neg_integer) :: {non_neg_integer(), nil}
+  def set_timestamps(id) do
+    # get created_at of first post in thread
+    created_at_query =
+      from p in Post,
+        where: p.thread_id == ^id,
+        order_by: [p.created_at],
+        limit: 1,
+        select: p.created_at
+
+    created_at = Repo.one(created_at_query)
+
+    # get created_at of last post in thread
+    updated_at_query =
+      from p in Post,
+        where: p.thread_id == ^id,
+        order_by: [desc: p.created_at],
+        limit: 1,
+        select: p.created_at
+
+    updated_at = Repo.one(updated_at_query)
+
+    # set created_at and updated_at of thread
+    from(t in Thread, where: t.id == ^id)
+    |> Repo.update_all(
+      set: [
+        created_at: created_at,
+        updated_at: updated_at
+      ]
+    )
+  end
 
   @doc """
   Returns recent threads accounting for user priority and user's ignored boards
@@ -95,7 +240,7 @@ defmodule EpochtalkServer.Models.Thread do
     user_id = if is_nil(user), do: nil, else: Map.get(user, :id)
     per_page = Keyword.get(opts, :per_page, 25)
     field = Keyword.get(opts, :field, "updated_at")
-    reversed = Keyword.get(opts, :desc, true)
+    reversed = Keyword.get(opts, :desc, false)
     offset = page * per_page - per_page
 
     opts =
@@ -113,6 +258,8 @@ defmodule EpochtalkServer.Models.Thread do
       normal: normal_by_board_id(board_id, page, opts)
     }
   end
+
+  ## === Private Helper Functions ===
 
   defp sticky_by_board_id(board_id, page, opts) when page == 1,
     do: generate_thread_query(board_id, true, opts) |> Repo.all()
@@ -184,7 +331,7 @@ defmodule EpochtalkServer.Models.Thread do
 
     # handle sort field and direction
     field = String.to_atom(opts[:field])
-    direction = if opts[:reversed], do: :asc, else: :desc
+    direction = if opts[:reversed], do: :desc, else: :asc
 
     # sort by field in joined metadata thread table if sort field is 'view'
     inner_query =
@@ -193,7 +340,7 @@ defmodule EpochtalkServer.Models.Thread do
         else: inner_query |> order_by([t], [{^direction, field(t, ^field)}])
 
     # outer query
-    sort_order = if opts[:sort_order], do: :asc, else: :desc
+    sort_order = if opts[:sort_order], do: :desc, else: :asc
 
     from(tlist in subquery(inner_query))
     # join thread info
@@ -296,5 +443,33 @@ defmodule EpochtalkServer.Models.Thread do
       last_post_avatar: pl.avatar
     })
     |> order_by([tlist], [{^sort_order, field(tlist, ^field)}])
+  end
+
+  defp handle_create_poll(thread_id, nil), do: nil
+
+  defp handle_create_poll(thread_id, poll_attrs) when is_map(poll_attrs) do
+    # append thread_id
+    poll_attrs = Map.put(poll_attrs, "thread_id", thread_id)
+
+    # create poll, with modified poll data (thread_id added)
+    case Poll.create(poll_attrs) do
+      # create success
+      {:ok, poll} -> poll
+      # error creating poll
+      {:error, cs} -> Repo.rollback(cs)
+    end
+  end
+
+  defp handle_create_post(thread_id, user_id, thread_attrs) do
+    post_attrs = %{
+      thread_id: thread_id,
+      user_id: user_id,
+      content: %{title: thread_attrs["title"], body: thread_attrs["body"]}
+    }
+
+    case Post.create(post_attrs) do
+      {:ok, post} -> post
+      {:error, cs} -> Repo.rollback(cs)
+    end
   end
 end

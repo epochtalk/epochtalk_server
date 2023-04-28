@@ -33,6 +33,29 @@ defmodule EpochtalkServerWeb.ThreadController do
   end
 
   @doc """
+  Used to create threads
+
+  TODO(akinsey): Post pre processing, image processing, hooks. Things to consider:
+  - does html sanitizer need to run on the front end too
+  - how do we run the same parser/sanitizer on the elixir back end as the node frontend
+  - processing mentions
+  """
+  def create(conn, attrs) do
+    with user <- Guardian.Plug.current_resource(conn),
+         {:ok, thread_data} <- Thread.create(attrs, user.id) do
+      render(conn, "create.json", %{
+        thread_data: thread_data
+      })
+    else
+      {:error, %Ecto.Changeset{} = cs} ->
+        ErrorHelpers.render_json_error(conn, 400, cs)
+
+      _ ->
+        ErrorHelpers.render_json_error(conn, 400, "Error, cannot create thread")
+    end
+  end
+
+  @doc """
   Used to retrieve threads by board
   """
   def by_board(conn, attrs) do

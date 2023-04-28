@@ -277,8 +277,8 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
       }
 
       update_response = conn
-                        |> put(conn, Routes.role_path(conn, :update), new_newbie_permissions_attrs)
-                        |> json_response(update_conn, 200)
+                        |> put(Routes.role_path(conn, :update), new_newbie_permissions_attrs)
+                        |> json_response(200)
 
       assert new_newbie_permissions_attrs.id == update_response
 
@@ -315,12 +315,15 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
         }
       }
 
-      update_conn = put(conn, Routes.role_path(conn, :update), new_newbie_permissions_attrs)
-      assert new_newbie_permissions_attrs.id == json_response(update_conn, 200)
+      update_response = conn
+                        |> put(Routes.role_path(conn, :update), new_newbie_permissions_attrs)
+                        |> json_response(200)
+      assert new_newbie_permissions_attrs.id == update_response
 
-      modified_all_conn = get(conn, Routes.role_path(conn, :all))
-      modified_roles = json_response(modified_all_conn, 200)
-      modified_newbie = modified_roles |> Enum.at(6)
+      modified_newbie = conn
+                        |> get(Routes.role_path(conn, :all))
+                        |> json_response(200)
+                        |> Enum.at(6)
       assert modified_newbie_permissions == modified_newbie["permissions"]
     end
 

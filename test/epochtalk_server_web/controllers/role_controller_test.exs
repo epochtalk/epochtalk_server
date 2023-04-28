@@ -329,11 +329,11 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
 
     @tag authenticated: :admin
     test "does not modify a user's permissions when input is invalid", %{conn: conn} do
-      initial_newbie_permissions =
-        get(conn, Routes.role_path(conn, :all))
-        |> json_response(200)
-        |> Enum.at(6)
-        |> Map.get("permissions")
+      initial_newbie_permissions = conn
+                                   |> get(Routes.role_path(conn, :all))
+                                   |> json_response(200)
+                                   |> Enum.at(6)
+                                   |> Map.get("permissions")
 
       invalid_modified_newbie_permissions = ""
 
@@ -342,14 +342,16 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
         permissions: invalid_modified_newbie_permissions
       }
 
-      update_conn = put(conn, Routes.role_path(conn, :update), new_newbie_permissions_attrs)
+      update_response = conn
+                        |> put(Routes.role_path(conn, :update), new_newbie_permissions_attrs)
+                        |> json_response(200)
 
-      assert new_newbie_permissions_attrs.id == json_response(update_conn, 200)
+      assert new_newbie_permissions_attrs.id == update_response
 
-      modified_all_conn = get(conn, Routes.role_path(conn, :all))
-      modified_roles = json_response(modified_all_conn, 200)
-
-      modified_newbie = modified_roles |> Enum.at(6)
+      modified_newbie = conn
+                        |> get(Routes.role_path(conn, :all))
+                        |> json_response(200)
+                        |> Enum.at(6)
 
       assert invalid_modified_newbie_permissions !=
                modified_newbie["permissions"]

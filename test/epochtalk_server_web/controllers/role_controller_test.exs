@@ -227,6 +227,7 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
       assert modified_newbie["description"] == original_newbie["description"]
       assert modified_newbie["priority"] == original_newbie["priority"]
       assert modified_newbie["lookup"] == original_newbie["lookup"]
+      assert modified_newbie["highlight_color"] == original_newbie["highlight_color"]
     end
 
     @tag authenticated: :admin

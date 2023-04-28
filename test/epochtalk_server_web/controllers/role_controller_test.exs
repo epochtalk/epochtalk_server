@@ -182,7 +182,8 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
         name: "Changed Name",
         description: "Changed Description",
         priority: 100,
-        lookup: "Changed Lookup"
+        lookup: "Changed Lookup",
+        highlight_color: "#00FF00"
       }
 
       update_conn = put(conn, Routes.role_path(conn, :update), new_newbie_permissions_attrs)
@@ -199,6 +200,7 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
       assert new_newbie_permissions_attrs.description == modified_newbie["description"]
       assert new_newbie_permissions_attrs.priority == modified_newbie["priority"]
       assert new_newbie_permissions_attrs.lookup == modified_newbie["lookup"]
+      assert new_newbie_permissions_attrs.highlight_color == modified_newbie["highlight_color"]
     end
 
     @tag authenticated: :admin

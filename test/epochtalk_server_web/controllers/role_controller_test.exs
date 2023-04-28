@@ -199,6 +199,31 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
     end
 
     @tag authenticated: :admin
+    test "does not modify a role's properties when not provided", %{conn: conn} do
+      new_newbie_permissions_attrs = %{ id: 7 }
+      original_newbie =
+        conn
+        |> get(Routes.role_path(conn, :all))
+        |> json_response(200)
+        |> Enum.at(6)
+
+      update_conn = put(conn, Routes.role_path(conn, :update), new_newbie_permissions_attrs)
+
+      assert new_newbie_permissions_attrs.id == json_response(update_conn, 200)
+
+      modified_newbie =
+        conn
+        |> get(Routes.role_path(conn, :all))
+        |> json_response(200)
+        |> Enum.at(6)
+
+      assert modified_newbie["name"] == original_newbie["name"]
+      assert modified_newbie["description"] == original_newbie["description"]
+      assert modified_newbie["priority"] == original_newbie["priority"]
+      assert modified_newbie["lookup"] == original_newbie["lookup"]
+    end
+
+    @tag authenticated: :admin
     test "modifies a role's priority_restrictions when authenticated", %{conn: conn} do
       initial_newbie_priority_restrictions = nil
 

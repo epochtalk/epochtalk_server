@@ -201,6 +201,19 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
       assert new_newbie_permissions_attrs.priority == modified_newbie["priority"]
       assert new_newbie_permissions_attrs.lookup == modified_newbie["lookup"]
       assert new_newbie_permissions_attrs.highlight_color == modified_newbie["highlight_color"]
+
+      blank_hc_attrs = %{id: 7, highlight_color: ""}
+      blank_hc_resp =
+        conn
+        |> put(Routes.role_path(conn, :update), blank_hc_attrs)
+        |> json_response(200)
+      assert blank_hc_attrs.id == blank_hc_resp
+      blank_hc_newbie =
+        conn
+        |> get(Routes.role_path(conn, :all))
+        |> json_response(200)
+        |> Enum.at(6)
+      assert nil == blank_hc_newbie["highlight_color"]
     end
 
     @tag authenticated: :admin

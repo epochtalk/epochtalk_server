@@ -230,9 +230,12 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
         |> json_response(200)
         |> Enum.at(6)
 
-      update_conn = put(conn, Routes.role_path(conn, :update), new_newbie_permissions_attrs)
+      update_resp =
+        conn
+        |> put(Routes.role_path(conn, :update), new_newbie_permissions_attrs)
+        |> json_response(200)
 
-      assert new_newbie_permissions_attrs.id == json_response(update_conn, 200)
+      assert new_newbie_permissions_attrs.id == update_resp
 
       modified_newbie =
         conn

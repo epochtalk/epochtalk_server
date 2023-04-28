@@ -186,10 +186,10 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
 
       assert new_newbie_permissions_attrs.id == json_response(update_conn, 200)
 
-      modified_all_conn = get(conn, Routes.role_path(conn, :all))
-      modified_roles = json_response(modified_all_conn, 200)
-
-      modified_newbie = modified_roles |> Enum.at(6)
+      modified_newbie = conn
+                        |> get(Routes.role_path(conn, :all))
+                        |> json_response(200)
+                        |> Enum.at(6)
       assert new_newbie_permissions_attrs.name == modified_newbie["name"]
       assert new_newbie_permissions_attrs.description == modified_newbie["description"]
       assert new_newbie_permissions_attrs.priority == modified_newbie["priority"]

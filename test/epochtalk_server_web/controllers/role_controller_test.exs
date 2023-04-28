@@ -226,20 +226,28 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
 
     @tag authenticated: :admin
     test "errors when fields are not properly formatted", %{conn: conn} do
-      new_newbie_permissions_attrs = %{
-        id: 7,
-        name: ""
-      }
-
       original_newbie =
         conn
         |> get(Routes.role_path(conn, :all))
         |> json_response(200)
         |> Enum.at(6)
 
-      update_conn = put(conn, Routes.role_path(conn, :update), new_newbie_permissions_attrs)
+      short_name_attrs = %{id: 7, name: ""}
+      long_name_attrs = %{id: 7, name: String.duplicate("a", 256)}
 
-      assert %{"error" => "Bad Request", "message" => "Name can't be blank", "status" => 400} == json_response(update_conn, 400)
+      short_name_resp =
+        conn
+        |> put(Routes.role_path(conn, :update), short_name_attrs)
+        |> json_response(400)
+
+      long_name_resp =
+        conn
+        |> put(Routes.role_path(conn, :update), long_name_attrs)
+        |> json_response(400)
+
+      assert %{"message" => "Name can't be blank"} = short_name_resp
+
+      assert %{"message" => "Name should be at most 255 character(s)"} = long_name_resp
 
       modified_newbie =
         conn

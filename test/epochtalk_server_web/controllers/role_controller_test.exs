@@ -183,7 +183,7 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
         description: "Changed Description",
         priority: 100,
         lookup: "Changed Lookup",
-        highlight_color: "#00FF00"
+        highlight_color: "#00Ff00"
       }
 
       update_conn = put(conn, Routes.role_path(conn, :update), new_newbie_permissions_attrs)

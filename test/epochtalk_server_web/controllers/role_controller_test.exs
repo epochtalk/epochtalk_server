@@ -225,6 +225,35 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
     end
 
     @tag authenticated: :admin
+    test "errors when fields are not properly formatted", %{conn: conn} do
+      new_newbie_permissions_attrs = %{
+        id: 7,
+        name: ""
+      }
+
+      original_newbie =
+        conn
+        |> get(Routes.role_path(conn, :all))
+        |> json_response(200)
+        |> Enum.at(6)
+
+      update_conn = put(conn, Routes.role_path(conn, :update), new_newbie_permissions_attrs)
+
+      assert %{"error" => "Bad Request", "message" => "Name can't be blank", "status" => 400} == json_response(update_conn, 400)
+
+      modified_newbie =
+        conn
+        |> get(Routes.role_path(conn, :all))
+        |> json_response(200)
+        |> Enum.at(6)
+
+      assert modified_newbie["name"] == original_newbie["name"]
+      assert modified_newbie["description"] == original_newbie["description"]
+      assert modified_newbie["priority"] == original_newbie["priority"]
+      assert modified_newbie["lookup"] == original_newbie["lookup"]
+    end
+
+    @tag authenticated: :admin
     test "modifies a role's priority_restrictions when authenticated", %{conn: conn} do
       initial_newbie_priority_restrictions = nil
 

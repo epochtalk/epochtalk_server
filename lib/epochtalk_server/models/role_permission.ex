@@ -70,14 +70,12 @@ defmodule EpochtalkServer.Models.RolePermission do
 
   Any permissions in `new_permissions` which are not valid will be ignored.
   """
-  @spec modify_by_role(role :: Role.t()) :: {:ok, :success}
-  def modify_by_role(
-        %Role{
-          id: role_id,
-          permissions: new_permissions,
-          priority_restrictions: priority_restrictions
-        } = _new_role
-      ) do
+  @spec modify_by_role(role :: map()) :: {:ok, :success}
+  def modify_by_role(attrs) do
+    role_id = attrs["id"]
+    new_permissions = attrs["permissions"]
+    priority_restrictions = attrs["priority_restrictions"]
+
     if is_map(new_permissions) do
       # get current set of role permissions
       current_role_permissions =

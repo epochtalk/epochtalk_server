@@ -7,6 +7,10 @@ defmodule EpochtalkServer.Models.Role do
   alias EpochtalkServer.Models.Role
   alias EpochtalkServer.Models.RoleUser
 
+  @postgres_integer_max 2_147_483_647
+  @postgres_varchar255_max 255
+  @description_max 1000
+
   @moduledoc """
   `Role` model, for performing actions relating to user roles
   """
@@ -58,6 +62,37 @@ defmodule EpochtalkServer.Models.Role do
     role
     |> cast(attrs, [:name, :description, :lookup, :priority, :permissions])
     |> validate_required([:name, :description, :lookup, :priority, :permissions])
+  end
+
+  @doc """
+  Create a changeset for updating a `Role`
+  permissions and priority restrictions are not included in this changeset
+  """
+  @spec update_changeset(role :: Role.t(), attrs :: map() | nil) :: Ecto.Changeset.t()
+  def update_changeset(role, attrs \\ %{}) do
+    updated_at = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
+
+    role =
+      role
+      |> Map.put(:updated_at, updated_at)
+
+    # filter out nil attrs
+    attrs =
+      attrs
+      |> Map.filter(fn {_k, v} -> v != nil end)
+
+    role
+    |> cast(attrs, [:id, :name, :description, :priority, :highlight_color, :lookup])
+    |> validate_required([:id, :name, :description, :priority, :lookup])
+    |> validate_length(:name, min: 1, max: @postgres_varchar255_max)
+    |> validate_length(:description, min: 1, max: @description_max)
+    |> validate_number(:priority,
+      greater_than_or_equal_to: 1,
+      less_than_or_equal_to: @postgres_integer_max
+    )
+    |> validate_format(:highlight_color, ~r/^#([0-9a-f]{6})$/i)
+    |> validate_length(:lookup, min: 1, max: @postgres_varchar255_max)
+    |> unique_constraint(:lookup, name: :roles_lookup_index)
   end
 
   ## === Database Functions ===
@@ -152,12 +187,23 @@ defmodule EpochtalkServer.Models.Role do
   def insert([%{} | _] = roles), do: Repo.insert_all(Role, roles)
 
   ## UPDATE OPERATIONS
+  @doc """
+  Updates an existing `Role` in the database
+  """
+  @spec update(attrs :: map()) ::
+          {:ok, role :: Ecto.Schema.t()} | {:error, Ecto.Changeset.t()}
+  def update(attrs) do
+    Role
+    |> Repo.get(attrs["id"])
+    |> update_changeset(attrs)
+    |> Repo.update()
+  end
 
   @doc """
   Updates the permissions of an existing `Role` in the database
   """
   @spec set_permissions(id :: integer, permissions_attrs :: map()) ::
-          {:ok, role :: t()} | {:error, Ecto.Changeset.t()}
+          {:ok, role :: Ecto.Schema.t()} | {:error, Ecto.Changeset.t()}
   def set_permissions(id, permissions) do
     Role
     |> Repo.get(id)
@@ -169,7 +215,7 @@ defmodule EpochtalkServer.Models.Role do
   Updates the priority_restrictions of an existing `Role` in the database
   """
   @spec set_priority_restrictions(id :: integer, priority_restrictions :: list() | nil) ::
-          {:ok, role :: t()} | {:error, Ecto.Changeset.t()}
+          {:ok, role :: Ecto.Schema.t()} | {:error, Ecto.Changeset.t()}
   def set_priority_restrictions(id, []), do: set_priority_restrictions(id, nil)
 
   def set_priority_restrictions(id, priority_restrictions) do

@@ -67,6 +67,8 @@ defmodule EpochtalkServerWeb do
 
       import EpochtalkServerWeb.ErrorHelpers
       alias EpochtalkServerWeb.Router.Helpers, as: Routes
+
+      unquote(verified_routes())
     end
   end
 

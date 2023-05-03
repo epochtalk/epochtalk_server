@@ -46,6 +46,8 @@ defmodule EpochtalkServerWeb.ConnCase do
 
       alias EpochtalkServerWeb.Router.Helpers, as: Routes
 
+      use EpochtalkServerWeb, :verified_routes
+
       # The default endpoint for testing
       @endpoint EpochtalkServerWeb.Endpoint
     end

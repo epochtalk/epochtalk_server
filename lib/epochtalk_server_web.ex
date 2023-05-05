@@ -21,6 +21,19 @@ defmodule EpochtalkServerWeb do
 
   def controller do
     quote do
+      use Phoenix.Controller,
+        formats: [:html, :json],
+        layouts: [html: EpochtalkServerWeb.Layouts]
+
+      import Plug.Conn
+
+      unquote(verified_routes())
+    end
+  end
+
+
+  def controller_old do
+    quote do
       use Phoenix.Controller, namespace: EpochtalkServerWeb
 
       import Plug.Conn

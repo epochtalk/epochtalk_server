@@ -12,8 +12,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        elixir: ['1.14.0']
-        otp: ['25.0.4']
+        elixir: ['1.14.4']
+        otp: ['25.3.1']
     steps:
       - name: Cancel previous runs
         uses: styfle/cancel-workflow-action@0.11.0
@@ -27,7 +27,7 @@ jobs:
         with:
           ref: ${{ github.event.client_payload.branch }}
       - name: Sets up an Erlang/OTP environment
-        uses: erlef/setup-beam@v1.14.0
+        uses: erlef/setup-beam@v1
         with:
           elixir-version: ${{ matrix.elixir }}
           otp-version: ${{ matrix.otp }}
@@ -51,8 +51,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        elixir: ['1.14.0']
-        otp: ['25.0.4']
+        elixir: ['1.14.4']
+        otp: ['25.3.1']
     steps:
       - name: Cancel previous runs
         uses: styfle/cancel-workflow-action@0.11.0
@@ -63,7 +63,7 @@ jobs:
         with:
           ref: ${{ github.event.client_payload.branch }}
       - name: Sets up an Erlang/OTP environment
-        uses: erlef/setup-beam@v1.14.0
+        uses: erlef/setup-beam@v1
         with:
           elixir-version: ${{ matrix.elixir }}
           otp-version: ${{ matrix.otp }}
@@ -113,8 +113,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        elixir: ['1.14.0']
-        otp: ['25.0.4']
+        elixir: ['1.14.4']
+        otp: ['25.3.1']
     services:
       postgres:
         image: postgres:14.2
@@ -153,7 +153,7 @@ jobs:
         with:
           ref: ${{ github.event.client_payload.branch }}
       - name: Sets up an Erlang/OTP environment
-        uses: erlef/setup-beam@v1.14.0
+        uses: erlef/setup-beam@v1
         with:
           elixir-version: ${{ matrix.elixir }}
           otp-version: ${{ matrix.otp }}
@@ -208,13 +208,13 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        elixir: ['1.14.0']
-        otp: ['25.0.4']
+        elixir: ['1.14.4']
+        otp: ['25.3.1']
     steps:
       - name: Checkout
         uses: actions/checkout@v3.1.0
       - name: Sets up an Erlang/OTP environment
-        uses: erlef/setup-beam@v1.14.0
+        uses: erlef/setup-beam@v1
         with:
           elixir-version: ${{ matrix.elixir }}
           otp-version: ${{ matrix.otp }}

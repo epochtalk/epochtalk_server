@@ -35,6 +35,7 @@ defmodule EpochtalkServerWeb.Router do
     get "/notifications/counts", NotificationController, :counts
     post "/notifications/dismiss", NotificationController, :dismiss
     get "/admin/modlog", ModerationLogController, :page
+    post "/threads", ThreadController, :create
     get "/admin/roles/all", RoleController, :all
     put "/admin/roles/update", RoleController, :update
     get "/authenticate", UserController, :authenticate

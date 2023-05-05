@@ -253,6 +253,9 @@ defmodule EpochtalkServer.Models.BannedAddress do
     |> calculate_score_decay
   end
 
+  defp calculate_ip32_score({ip1, ip2, ip3, ip4, _, _, _, _}),
+    do: calculate_ip32_score({ip1, ip2, ip3, ip4})
+
   defp calculate_ip32_score({ip1, ip2, ip3, ip4}) do
     from(ba in BannedAddress,
       where: ba.ip1 == ^ip1 and ba.ip2 == ^ip2 and ba.ip3 == ^ip3 and ba.ip4 == ^ip4,
@@ -267,6 +270,9 @@ defmodule EpochtalkServer.Models.BannedAddress do
     |> calculate_score_decay
   end
 
+  defp calculate_ip24_score({ip1, ip2, ip3, ip4, _, _, _, _}),
+    do: calculate_ip24_score({ip1, ip2, ip3, ip4})
+
   defp calculate_ip24_score({ip1, ip2, ip3, _}) do
     from(ba in BannedAddress,
       where: ba.ip1 == ^ip1 and ba.ip2 == ^ip2 and ba.ip3 == ^ip3,
@@ -280,6 +286,9 @@ defmodule EpochtalkServer.Models.BannedAddress do
     |> Repo.one()
     |> calculate_score_decay
   end
+
+  defp calculate_ip16_score({ip1, ip2, ip3, ip4, _, _, _, _}),
+    do: calculate_ip16_score({ip1, ip2, ip3, ip4})
 
   defp calculate_ip16_score({ip1, ip2, _, _}) do
     from(ba in BannedAddress,

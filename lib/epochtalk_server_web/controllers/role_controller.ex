@@ -6,31 +6,27 @@ defmodule EpochtalkServerWeb.RoleController do
   """
   alias EpochtalkServer.Auth.Guardian
   alias EpochtalkServerWeb.ErrorHelpers
-  alias EpochtalkServerWeb.Helpers.Validate
   alias EpochtalkServer.Models.Role
   alias EpochtalkServer.Models.RolePermission
   alias EpochtalkServerWeb.Helpers.ACL
 
   @doc """
   Used to update a specific `Role`
+
+  Returns id of `Role` on success
   """
   def update(conn, attrs) do
     with {:auth, _user} <- {:auth, Guardian.Plug.current_resource(conn)},
          :ok <- ACL.allow!(conn, "roles.update"),
-         id <- Validate.cast(attrs, "id", :integer, min: 1),
-         # TODO(boka): implement validators
-         priority_restrictions <- Validate.sanitize_list(attrs, "priority_restrictions"),
-         permissions <- attrs["permissions"],
-         {:ok, data} <-
-           RolePermission.modify_by_role(%Role{
-             id: id,
-             permissions: permissions,
-             priority_restrictions: priority_restrictions
-           }) do
-      render(conn, "update.json", data: data)
+         {:ok, _role_permission_data} <- RolePermission.modify_by_role(attrs),
+         {:ok, _role_data} <- Role.update(attrs) do
+      render(conn, "update.json", data: attrs["id"])
     else
       {:auth, nil} ->
         ErrorHelpers.render_json_error(conn, 400, "Not logged in, cannot update role")
+
+      {:error, data} ->
+        ErrorHelpers.render_json_error(conn, 400, data)
     end
   end
 

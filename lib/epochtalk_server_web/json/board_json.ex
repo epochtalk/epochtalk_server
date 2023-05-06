@@ -11,7 +11,7 @@ defmodule EpochtalkServerWeb.BoardJSON do
   @doc """
   Renders `Board` data by `Category`.
   """
-  def render("by_category.json", %{
+  def by_category(%{
         categories: categories,
         board_moderators: board_moderators,
         board_mapping: board_mapping,

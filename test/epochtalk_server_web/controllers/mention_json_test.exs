@@ -1,8 +1,7 @@
-defmodule EpochtalkServerWeb.MentionViewTest do
+defmodule EpochtalkServerWeb.MentionJSONTest do
   use EpochtalkServerWeb.ConnCase, async: true
   # Bring render/3 and render_to_string/3 for testing custom views
-  import Phoenix.View
-  alias EpochtalkServerWeb.MentionView
+  alias EpochtalkServerWeb.MentionJSON
   alias EpochtalkServer.Models.{User, Mention, Thread, Post, Board}
 
   # this was too long to be a doctest, we still need to test with Sandbox db connection
@@ -110,7 +109,7 @@ defmodule EpochtalkServerWeb.MentionViewTest do
     }
 
     assert result ==
-             render(MentionView, "page.json", %{
+             MentionJSON.page(%{
                mentions: mentions,
                pagination_data: pagination_data,
                extended: false
@@ -225,7 +224,7 @@ defmodule EpochtalkServerWeb.MentionViewTest do
     }
 
     assert result ==
-             render(MentionView, "page.json", %{
+             MentionJSON.page(%{
                mentions: mentions,
                pagination_data: pagination_data,
                extended: true

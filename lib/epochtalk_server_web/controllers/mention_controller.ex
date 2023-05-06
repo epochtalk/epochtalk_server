@@ -1,5 +1,5 @@
 defmodule EpochtalkServerWeb.MentionController do
-  use EpochtalkServerWeb, :controller
+  use EpochtalkServerWeb, :controller_old
 
   @moduledoc """
   Controller For `Mention` related API requests

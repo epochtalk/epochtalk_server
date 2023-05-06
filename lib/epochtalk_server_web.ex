@@ -31,7 +31,6 @@ defmodule EpochtalkServerWeb do
     end
   end
 
-
   def controller_old do
     quote do
       use Phoenix.Controller, namespace: EpochtalkServerWeb

@@ -1,7 +1,7 @@
 defmodule EpochtalkServerWeb.ThreadView do
   use EpochtalkServerWeb, :view
 
-  alias EpochtalkServerWeb.BoardView
+  alias EpochtalkServerWeb.BoardJSON
 
   @moduledoc """
   Renders and formats `Thread` data, in JSON format for frontend
@@ -72,7 +72,7 @@ defmodule EpochtalkServerWeb.ThreadView do
       }) do
     # format board data
     board =
-      BoardView.format_board_data_for_find(
+      BoardJSON.format_board_data_for_find(
         board_moderators,
         board_mapping,
         board_id,

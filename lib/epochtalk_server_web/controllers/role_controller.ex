@@ -1,5 +1,5 @@
 defmodule EpochtalkServerWeb.RoleController do
-  use EpochtalkServerWeb, :controller
+  use EpochtalkServerWeb, :controller_old
 
   @moduledoc """
   Controller For `Role` related API requests

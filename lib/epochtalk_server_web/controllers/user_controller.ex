@@ -1,5 +1,5 @@
 defmodule EpochtalkServerWeb.UserController do
-  use EpochtalkServerWeb, :controller
+  use EpochtalkServerWeb, :controller_old
 
   @moduledoc """
   Controller For `User` related API requests

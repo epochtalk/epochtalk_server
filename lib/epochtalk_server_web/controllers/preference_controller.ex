@@ -1,5 +1,5 @@
 defmodule EpochtalkServerWeb.PreferenceController do
-  use EpochtalkServerWeb, :controller
+  use EpochtalkServerWeb, :controller_old
 
   @moduledoc """
   Controller For `Preference` related API requests

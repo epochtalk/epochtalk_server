@@ -1,5 +1,5 @@
 defmodule EpochtalkServerWeb.NotificationController do
-  use EpochtalkServerWeb, :controller
+  use EpochtalkServerWeb, :controller_old
 
   @moduledoc """
   Controller For `Notification` related API requests

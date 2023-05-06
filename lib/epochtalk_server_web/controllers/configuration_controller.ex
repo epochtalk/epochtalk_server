@@ -1,5 +1,5 @@
 defmodule EpochtalkServerWeb.ConfigurationController do
-  use EpochtalkServerWeb, :controller
+  use EpochtalkServerWeb, :controller_old
 
   @moduledoc """
   Controller For `Configuration` related API requests

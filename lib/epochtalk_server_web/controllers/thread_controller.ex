@@ -1,5 +1,5 @@
 defmodule EpochtalkServerWeb.ThreadController do
-  use EpochtalkServerWeb, :controller
+  use EpochtalkServerWeb, :controller_old
 
   @moduledoc """
   Controller For `Thread` related API requests

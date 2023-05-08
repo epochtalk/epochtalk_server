@@ -6,6 +6,7 @@ defmodule EpochtalkServer.Models.Role do
   alias EpochtalkServer.Models.User
   alias EpochtalkServer.Models.Role
   alias EpochtalkServer.Models.RoleUser
+  alias EpochtalkServer.Cache.Role, as: RoleCache
 
   @postgres_integer_max 2_147_483_647
   @postgres_varchar255_max 255
@@ -145,11 +146,9 @@ defmodule EpochtalkServer.Models.Role do
   Returns a `Role` or list of roles, for specified lookup(s)
   """
   @spec by_lookup(lookup_or_lookups :: String.t() | [String.t()]) :: t() | [t()] | [] | nil
-  def by_lookup(lookups) when is_list(lookups) do
-    from(r in Role, where: r.lookup in ^lookups) |> Repo.all()
+  def by_lookup(lookup_or_lookups) do
+    lookup_or_lookups |> RoleCache.by_lookup
   end
-
-  def by_lookup(lookup), do: Repo.get_by(Role, lookup: lookup)
 
   @doc """
   Returns a list containing a user's roles

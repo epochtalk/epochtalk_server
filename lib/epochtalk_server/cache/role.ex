@@ -72,7 +72,7 @@ defmodule EpochtalkServer.Cache.Role do
 
   # returns loaded role cache
   defp load() do
-    all_roles = Role.all()
+    all_roles = Role.all_repo()
 
     lookup_cache = map_by_keyname(all_roles, :lookup)
 

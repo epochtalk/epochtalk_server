@@ -104,8 +104,8 @@ defmodule EpochtalkServer.Models.Role do
   Returns every `Role` record in the database
   WARNING: Only use for startup/seeding; use RoleCache.all elsewhere
   """
-  @spec all() :: [t()] | []
-  def all, do: from(r in Role, order_by: r.id) |> Repo.all()
+  @spec all_repo() :: [t()] | []
+  def all_repo, do: from(r in Role, order_by: r.id) |> Repo.all()
 
   @doc """
   Returns id for the `banned` `Role`
@@ -147,8 +147,8 @@ defmodule EpochtalkServer.Models.Role do
   Returns a `Role` for specified lookup
   WARNING: Only used for startup/seeding; use RoleCache.by_lookup elsewhere
   """
-  @spec by_lookup(lookup :: String.t() | [String.t()]) :: t() | nil
-  def by_lookup(lookup), do: Repo.get_by(Role, lookup: lookup)
+  @spec by_lookup_repo(lookup :: String.t() | [String.t()]) :: t() | nil
+  def by_lookup_repo(lookup), do: Repo.get_by(Role, lookup: lookup)
 
   @doc """
   Returns a list containing a user's roles

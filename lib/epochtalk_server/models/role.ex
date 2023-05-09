@@ -102,6 +102,7 @@ defmodule EpochtalkServer.Models.Role do
 
   @doc """
   Returns every `Role` record in the database
+  WARNING: Only use for startup/seeding; use RoleCache.all elsewhere
   """
   @spec all() :: [t()] | []
   def all, do: from(r in Role, order_by: r.id) |> Repo.all()
@@ -144,7 +145,7 @@ defmodule EpochtalkServer.Models.Role do
 
   @doc """
   Returns a `Role` for specified lookup
-  Only used on startup for test seeding; use RoleCache.by_lookup for anything else
+  WARNING: Only used for startup/seeding; use RoleCache.by_lookup elsewhere
   """
   @spec by_lookup(lookup :: String.t() | [String.t()]) :: t() | nil
   def by_lookup(lookup), do: Repo.get_by(Role, lookup: lookup)

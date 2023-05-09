@@ -46,7 +46,10 @@ defmodule EpochtalkServerWeb.Helpers.ACL do
     user_roles =
       if user == nil,
         do:
-          if(login_required, do: [RoleCache.by_lookup("private")], else: [RoleCache.by_lookup("anonymous")]),
+          if(login_required,
+            do: [RoleCache.by_lookup("private")],
+            else: [RoleCache.by_lookup("anonymous")]
+          ),
         else: user.roles
 
     authed_permissions = Role.get_masked_permissions(user_roles)

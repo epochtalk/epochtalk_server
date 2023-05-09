@@ -40,7 +40,8 @@ defmodule EpochtalkServer.Cache.Role do
   @doc """
   Returns a `Role` or list of `Role`s for specified lookup or list of lookups
   """
-  @spec by_lookup(lookup_or_lookups :: String.t() | [String.t()]) :: Role.t() | [Role.t()] | [] | nil
+  @spec by_lookup(lookup_or_lookups :: String.t() | [String.t()]) ::
+          Role.t() | [Role.t()] | [] | nil
   def by_lookup(lookup_or_lookups) do
     GenServer.call(__MODULE__, {:lookup, lookup_or_lookups})
   end

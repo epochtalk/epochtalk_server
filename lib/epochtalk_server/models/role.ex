@@ -143,10 +143,16 @@ defmodule EpochtalkServer.Models.Role do
 
   @doc """
   Returns a `Role` for specified lookup
-  WARNING: Only used for startup/seeding; use RoleCache.by_lookup elsewhere
+  WARNING: Only used for startup/seeding; use Role.by_lookup elsewhere
   """
   @spec by_lookup_repo(lookup :: String.t() | [String.t()]) :: t() | nil
   def by_lookup_repo(lookup), do: Repo.get_by(Role, lookup: lookup)
+
+  @doc """
+  Uses role cache to return `Role` or list of `Role`s for specified lookup(s)
+  """
+  @spec by_lookup(lookup_or_lookups :: String.t() | [String.t()]) :: t() | [t()] | [] | nil
+  def by_lookup(lookup_or_lookups), do: RoleCache.by_lookup(lookup_or_lookups)
 
   @doc """
   Returns a list containing a user's roles

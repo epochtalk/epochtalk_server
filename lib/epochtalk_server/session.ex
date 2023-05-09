@@ -7,7 +7,7 @@ defmodule EpochtalkServer.Session do
   """
   alias EpochtalkServer.Auth.Guardian
   alias EpochtalkServer.Models.User
-  alias EpochtalkServer.Cache.Role, as: RoleCache
+  alias EpochtalkServer.Models.Role
 
   @doc """
   Create session performs the following actions:
@@ -65,7 +65,7 @@ defmodule EpochtalkServer.Session do
         username = Redix.command!(:redix, ["HGET", user_key, "username"])
         avatar = Redix.command!(:redix, ["HGET", user_key, "avatar"])
         role_key = generate_key(user_id, "roles")
-        roles = Redix.command!(:redix, ["SMEMBERS", role_key]) |> RoleCache.by_lookup()
+        roles = Redix.command!(:redix, ["SMEMBERS", role_key]) |> Role.by_lookup()
 
         # session is active, populate data
         resource = %{

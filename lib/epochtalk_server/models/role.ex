@@ -297,13 +297,11 @@ defmodule EpochtalkServer.Models.Role do
 
   defp reload_role_cache_on_success(result) do
     case result do
-      {:ok, role} ->
+      {:error, error} -> {:error, error}
+      success ->
         # reload cache on success
         RoleCache.reload()
-        {:ok, role}
-
-      default ->
-        default
+        success
     end
   end
 

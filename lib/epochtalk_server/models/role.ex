@@ -150,6 +150,8 @@ defmodule EpochtalkServer.Models.Role do
     lookup_or_lookups |> RoleCache.by_lookup
   end
 
+  def by_lookup_repo(lookup), do: Repo.get_by(Role, lookup: lookup)
+
   @doc """
   Returns a list containing a user's roles
   """

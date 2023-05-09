@@ -186,7 +186,7 @@ defmodule EpochtalkServer.Models.Role do
 
   ## UPDATE OPERATIONS
   @doc """
-  Updates an existing `Role` in the database
+  Updates an existing `Role` in the database and reloads role cache
   """
   @spec update(attrs :: map()) ::
           {:ok, role :: Ecto.Schema.t()} | {:error, Ecto.Changeset.t()}
@@ -206,6 +206,7 @@ defmodule EpochtalkServer.Models.Role do
 
   @doc """
   Updates the permissions of an existing `Role` in the database
+  and reloads role cache
   """
   @spec set_permissions(id :: integer, permissions_attrs :: map()) ::
           {:ok, role :: Ecto.Schema.t()} | {:error, Ecto.Changeset.t()}
@@ -225,6 +226,7 @@ defmodule EpochtalkServer.Models.Role do
 
   @doc """
   Updates the priority_restrictions of an existing `Role` in the database
+  and reloads role cache
   """
   @spec set_priority_restrictions(id :: integer, priority_restrictions :: list() | nil) ::
           {:ok, role :: Ecto.Schema.t()} | {:error, Ecto.Changeset.t()}

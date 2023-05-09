@@ -70,6 +70,8 @@ defmodule EpochtalkServer.Cache.Role do
     GenServer.cast(__MODULE__, :reload)
   end
 
+  ## === private functions ====
+
   # returns loaded role cache
   defp load() do
     all_roles = Role.all_repo()

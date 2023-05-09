@@ -143,7 +143,8 @@ defmodule EpochtalkServer.Models.Role do
   end
 
   @doc """
-  Returns a `Role` or list of roles, for specified lookup(s)
+  Returns a `Role` for specified lookup
+  Only used on startup for test seeding; use RoleCache.by_lookup for anything else
   """
   @spec by_lookup(lookup :: String.t() | [String.t()]) :: t() | nil
   def by_lookup(lookup), do: Repo.get_by(Role, lookup: lookup)

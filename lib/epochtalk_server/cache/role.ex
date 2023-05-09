@@ -14,7 +14,8 @@ defmodule EpochtalkServer.Cache.Role do
   def init(:ok), do: {:ok, load()}
 
   @impl true
-  def handle_call(:all, _from, {all_roles, lookup_cache}), do: {:reply, all_roles, {all_roles, lookup_cache}}
+  def handle_call(:all, _from, {all_roles, lookup_cache}),
+    do: {:reply, all_roles, {all_roles, lookup_cache}}
 
   @impl true
   def handle_call({:lookup, lookups}, _from, {all_roles, lookup_cache}) when is_list(lookups) do

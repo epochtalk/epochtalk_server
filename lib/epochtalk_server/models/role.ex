@@ -145,12 +145,8 @@ defmodule EpochtalkServer.Models.Role do
   @doc """
   Returns a `Role` or list of roles, for specified lookup(s)
   """
-  @spec by_lookup(lookup_or_lookups :: String.t() | [String.t()]) :: t() | [t()] | [] | nil
-  def by_lookup(lookup_or_lookups) do
-    lookup_or_lookups |> RoleCache.by_lookup()
-  end
-
-  def by_lookup_repo(lookup), do: Repo.get_by(Role, lookup: lookup)
+  @spec by_lookup(lookup :: String.t() | [String.t()]) :: t() | nil
+  def by_lookup(lookup), do: Repo.get_by(Role, lookup: lookup)
 
   @doc """
   Returns a list containing a user's roles

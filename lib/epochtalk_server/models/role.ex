@@ -301,7 +301,9 @@ defmodule EpochtalkServer.Models.Role do
         # reload cache on success
         RoleCache.reload()
         {:ok, role}
-      default -> default
+
+      default ->
+        default
     end
   end
 

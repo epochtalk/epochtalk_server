@@ -6,7 +6,7 @@ alias EpochtalkServer.Repo
 
 # helper function to create role permissions changeset before upsert
 create_role_permission_changeset = fn({role_lookup, permissions}) ->
-  role = Role.by_lookup_repo(role_lookup)
+  role = Role.by_lookup(role_lookup)
   permissions
   |> Iteraptor.to_flatmap
   |> Enum.map(fn {permission_path, value} ->

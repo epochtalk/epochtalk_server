@@ -192,8 +192,8 @@ defmodule EpochtalkServer.Models.Role do
   @spec insert(role_or_roles :: t() | [%{}]) ::
           {:ok, role :: t()} | {non_neg_integer(), nil | [term()]} | {:error, Ecto.Changeset.t()}
   def insert([]), do: {:error, "Role list is empty"}
-  def insert(%Role{} = role), do: Repo.insert(role)
-  def insert([%{} | _] = roles), do: Repo.insert_all(Role, roles)
+  def insert(%Role{} = role), do: Repo.insert(role) |> reload_role_cache_on_success()
+  def insert([%{} | _] = roles), do: Repo.insert_all(Role, roles) |> reload_role_cache_on_success()
 
   ## UPDATE OPERATIONS
   @doc """

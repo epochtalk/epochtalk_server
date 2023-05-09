@@ -14,6 +14,9 @@ defmodule EpochtalkServer.Cache.Role do
   def init(:ok), do: {:ok, load()}
 
   @impl true
+  def handle_call(:all, _from, {all_roles, lookup_cache}), do: {:reply, all_roles, {all_roles, lookup_cache}}
+
+  @impl true
   def handle_call({:lookup, lookups}, _from, {all_roles, lookup_cache}) when is_list(lookups) do
     roles =
       Map.take(lookup_cache, lookups)
@@ -39,6 +42,14 @@ defmodule EpochtalkServer.Cache.Role do
   """
   def start_link(_opts) do
     GenServer.start_link(__MODULE__, :ok, name: __MODULE__)
+  end
+
+  @doc """
+  Returns all `Role`s
+  """
+  @spec all() :: [Role.t()]
+  def all() do
+    GenServer.call(__MODULE__, :all)
   end
 
   @doc """

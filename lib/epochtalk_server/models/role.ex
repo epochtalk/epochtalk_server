@@ -195,6 +195,13 @@ defmodule EpochtalkServer.Models.Role do
     |> Repo.get(attrs["id"])
     |> update_changeset(attrs)
     |> Repo.update()
+    |> case do
+      {:ok, role} ->
+        # reload cache on success
+        RoleCache.reload()
+        {:ok, role}
+      result -> result
+    end
   end
 
   @doc """
@@ -207,6 +214,13 @@ defmodule EpochtalkServer.Models.Role do
     |> Repo.get(id)
     |> change(%{permissions: permissions})
     |> Repo.update()
+    |> case do
+      {:ok, role} ->
+        # reload cache on success
+        RoleCache.reload()
+        {:ok, role}
+      result -> result
+    end
   end
 
   @doc """
@@ -214,13 +228,30 @@ defmodule EpochtalkServer.Models.Role do
   """
   @spec set_priority_restrictions(id :: integer, priority_restrictions :: list() | nil) ::
           {:ok, role :: Ecto.Schema.t()} | {:error, Ecto.Changeset.t()}
-  def set_priority_restrictions(id, []), do: set_priority_restrictions(id, nil)
+  def set_priority_restrictions(id, []) do
+    id
+    |> set_priority_restrictions(nil)
+    |> case do
+      {:ok, role} ->
+        # reload cache on success
+        RoleCache.reload()
+        {:ok, role}
+      result -> result
+    end
+  end
 
   def set_priority_restrictions(id, priority_restrictions) do
     Role
     |> Repo.get(id)
     |> change(%{priority_restrictions: priority_restrictions})
     |> Repo.update()
+    |> case do
+      {:ok, role} ->
+        # reload cache on success
+        RoleCache.reload()
+        {:ok, role}
+      result -> result
+    end
   end
 
   ## === External Helper Functions ===

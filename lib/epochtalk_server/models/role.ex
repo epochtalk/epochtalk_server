@@ -5,7 +5,6 @@ defmodule EpochtalkServer.Models.Role do
   alias EpochtalkServer.Repo
   alias EpochtalkServer.Models.User
   alias EpochtalkServer.Models.Role
-  alias EpochtalkServer.Models.RoleUser
   alias EpochtalkServer.Cache.Role, as: RoleCache
 
   @postgres_integer_max 2_147_483_647
@@ -160,28 +159,28 @@ defmodule EpochtalkServer.Models.Role do
   @spec by_lookup(lookup_or_lookups :: String.t() | [String.t()]) :: t() | [t()] | [] | nil
   def by_lookup(lookup_or_lookups), do: RoleCache.by_lookup(lookup_or_lookups)
 
-  @doc """
-  Returns a list containing a user's roles
-  """
-  @spec by_user_id(user_id :: integer) :: [t()]
-  def by_user_id(user_id) do
-    query =
-      from ru in RoleUser,
-        join: r in Role,
-        on: true,
-        where: ru.user_id == ^user_id and r.id == ru.role_id,
-        select: r,
-        order_by: [asc: r.priority]
-
-    case Repo.all(query) do
-      # user has no roles, return default role
-      [] -> [get_default()]
-      # user has roles, return them
-      users_roles -> users_roles
-    end
-    # if banned, only [ banned ] is returned for roles
-    |> Role.handle_banned_user_role()
-  end
+  # @doc """
+  # Returns a list containing a user's roles
+  # """
+  # @spec by_user_id(user_id :: integer) :: [t()]
+  # def by_user_id(user_id) do
+  #   query =
+  #     from ru in RoleUser,
+  #       join: r in Role,
+  #       on: true,
+  #       where: ru.user_id == ^user_id and r.id == ru.role_id,
+  #       select: r,
+  #       order_by: [asc: r.priority]
+  #
+  #   case Repo.all(query) do
+  #     # user has no roles, return default role
+  #     [] -> [get_default()]
+  #     # user has roles, return them
+  #     users_roles -> users_roles
+  #   end
+  #   # if banned, only [ banned ] is returned for roles
+  #   |> Role.handle_banned_user_role()
+  # end
 
   ## CREATE OPERATIONS
 

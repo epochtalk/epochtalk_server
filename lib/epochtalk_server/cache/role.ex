@@ -1,7 +1,6 @@
 defmodule EpochtalkServer.Cache.Role do
   use GenServer
   use Ecto.Schema
-  alias EpochtalkServer.Repo
   alias EpochtalkServer.Models.Role
 
   @moduledoc """
@@ -73,7 +72,7 @@ defmodule EpochtalkServer.Cache.Role do
 
   # returns loaded role cache
   defp load() do
-    all_roles = Role |> Repo.all()
+    all_roles = Role.all()
 
     lookup_cache = map_by_keyname(all_roles, :lookup)
 

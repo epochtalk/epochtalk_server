@@ -6,7 +6,7 @@ defmodule EpochtalkServer.Cache.Role do
 
   @impl true
   def init(:ok) do
-    role_cache = Role |> Repo.all() |> Enum.reduce( %{}, fn role, role_cache -> role_cache |> Map.put(role.lookup, role) end)
+    role_cache = load()
     {:ok, role_cache}
   end
 
@@ -26,5 +26,10 @@ defmodule EpochtalkServer.Cache.Role do
 
   def by_lookup(lookup_or_lookups) do
     GenServer.call(__MODULE__, {:lookup, lookup_or_lookups})
+  end
+
+  # returns loaded role cache
+  defp load() do
+    Role |> Repo.all() |> Enum.reduce( %{}, fn role, role_cache -> role_cache |> Map.put(role.lookup, role) end)
   end
 end

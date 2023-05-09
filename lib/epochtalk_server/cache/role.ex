@@ -13,15 +13,11 @@ defmodule EpochtalkServer.Cache.Role do
 
   @impl true
   def handle_call({:lookup, lookups}, _from, role_cache) when is_list(lookups) do
-    # load cache if not loaded (necessary for tests)
-    role_cache = if role_cache == %{}, do: load(), else: role_cache
     {:reply, Map.take(role_cache, lookups) |> Enum.map(fn {_k, v} -> v end) |> Enum.sort(&(&1.id < &2.id)), role_cache}
   end
 
   @impl true
   def handle_call({:lookup, lookup}, _from, role_cache) do
-    # load cache if not loaded (necessary for tests)
-    role_cache = if role_cache == %{}, do: load(), else: role_cache
     {:reply, Map.get(role_cache, lookup), role_cache}
   end
 

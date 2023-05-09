@@ -63,10 +63,15 @@ defmodule EpochtalkServer.Cache.Role do
   defp load() do
     all_roles = Role |> Repo.all()
 
-    lookup_cache =
-      all_roles
-      |> Enum.reduce(%{}, fn role, lookup_cache -> lookup_cache |> Map.put(role.lookup, role) end)
+    lookup_cache = map_by_keyname(all_roles, :lookup)
 
     {all_roles, lookup_cache}
+  end
+
+  defp map_by_keyname(roles, keyname) do
+    roles
+    |> Enum.reduce(%{}, fn role, lookup_cache ->
+      lookup_cache |> Map.put(Map.get(role, keyname), role)
+    end)
   end
 end

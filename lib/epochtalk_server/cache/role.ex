@@ -9,7 +9,10 @@ defmodule EpochtalkServer.Cache.Role do
 
   @impl true
   def handle_call({:lookup, lookups}, _from, role_cache) when is_list(lookups) do
-    {:reply, Map.take(role_cache, lookups) |> Enum.map(fn {_k, v} -> v end) |> Enum.sort(&(&1.id < &2.id)), role_cache}
+    {:reply,
+     Map.take(role_cache, lookups)
+     |> Enum.map(fn {_k, v} -> v end)
+     |> Enum.sort(&(&1.id < &2.id)), role_cache}
   end
 
   @impl true
@@ -35,6 +38,8 @@ defmodule EpochtalkServer.Cache.Role do
 
   # returns loaded role cache
   defp load() do
-    Role |> Repo.all() |> Enum.reduce( %{}, fn role, role_cache -> role_cache |> Map.put(role.lookup, role) end)
+    Role
+    |> Repo.all()
+    |> Enum.reduce(%{}, fn role, role_cache -> role_cache |> Map.put(role.lookup, role) end)
   end
 end

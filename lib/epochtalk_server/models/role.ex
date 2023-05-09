@@ -147,7 +147,7 @@ defmodule EpochtalkServer.Models.Role do
   """
   @spec by_lookup(lookup_or_lookups :: String.t() | [String.t()]) :: t() | [t()] | [] | nil
   def by_lookup(lookup_or_lookups) do
-    lookup_or_lookups |> RoleCache.by_lookup
+    lookup_or_lookups |> RoleCache.by_lookup()
   end
 
   def by_lookup_repo(lookup), do: Repo.get_by(Role, lookup: lookup)

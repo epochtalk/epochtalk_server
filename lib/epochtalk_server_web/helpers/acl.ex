@@ -1,5 +1,6 @@
 defmodule EpochtalkServerWeb.Helpers.ACL do
   alias EpochtalkServer.Models.Role
+  alias EpochtalkServer.Cache.Role, as: RoleCache
   alias EpochtalkServer.Models.User
   alias EpochtalkServerWeb.CustomErrors.InvalidPermission
 
@@ -45,7 +46,7 @@ defmodule EpochtalkServerWeb.Helpers.ACL do
     user_roles =
       if user == nil,
         do:
-          if(login_required, do: [Role.by_lookup("private")], else: [Role.by_lookup("anonymous")]),
+          if(login_required, do: [RoleCache.by_lookup("private")], else: [RoleCache.by_lookup("anonymous")]),
         else: user.roles
 
     authed_permissions = Role.get_masked_permissions(user_roles)

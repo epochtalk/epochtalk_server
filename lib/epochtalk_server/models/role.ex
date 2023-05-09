@@ -128,7 +128,7 @@ defmodule EpochtalkServer.Models.Role do
   def get_default() do
     config = Application.get_env(:epochtalk_server, :frontend_config)
     newbie_enabled = config["newbie_enabled"]
-    by_lookup(if newbie_enabled, do: "newbie", else: "user")
+    RoleCache.by_lookup(if newbie_enabled, do: "newbie", else: "user")
   end
 
   @doc """
@@ -139,7 +139,7 @@ defmodule EpochtalkServer.Models.Role do
   def get_default_unauthenticated() do
     config = Application.get_env(:epochtalk_server, :frontend_config)
     login_required = config["login_required"]
-    by_lookup(if login_required, do: "private", else: "anonymous")
+    RoleCache.by_lookup(if login_required, do: "private", else: "anonymous")
   end
 
   @doc """

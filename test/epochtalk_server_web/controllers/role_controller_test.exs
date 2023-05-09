@@ -1,6 +1,7 @@
 defmodule EpochtalkServerWeb.RoleControllerTest do
   use EpochtalkServerWeb.ConnCase, async: false
   alias EpochtalkServerWeb.CustomErrors.InvalidPermission
+  alias EpochtalkServer.Cache.Role, as: RoleCache
   @postgres_integer_max 2_147_483_647
   @postgres_varchar255_max 255
   @description_max 1000
@@ -8,6 +9,7 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
   describe "all/2" do
     @tag :authenticated
     test "gets all roles when authenticated", %{conn: conn} do
+      RoleCache.reload()
       conn = get(conn, Routes.role_path(conn, :all))
       roles = json_response(conn, 200)
 
@@ -177,6 +179,7 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
 
     @tag authenticated: :admin
     test "modifies a role's properties when provided", %{conn: conn} do
+      RoleCache.reload()
       new_newbie_permissions_attrs = %{
         id: 7,
         name: "Changed Name",
@@ -222,6 +225,7 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
 
     @tag authenticated: :admin
     test "does not modify a role's properties when not provided", %{conn: conn} do
+      RoleCache.reload()
       new_newbie_permissions_attrs = %{id: 7}
 
       original_newbie =
@@ -344,6 +348,7 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
 
     @tag authenticated: :admin
     test "modifies a role's priority_restrictions when authenticated", %{conn: conn} do
+      RoleCache.reload()
       initial_newbie_priority_restrictions = nil
 
       newbie =
@@ -415,6 +420,7 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
 
     @tag authenticated: :admin
     test "does not modify a role's priority_restrictions when input is invalid", %{conn: conn} do
+      RoleCache.reload()
       initial_newbie_priority_restrictions =
         get(conn, Routes.role_path(conn, :all))
         |> json_response(200)
@@ -449,6 +455,7 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
 
     @tag authenticated: :admin
     test "modifies a role's permissions when authenticated", %{conn: conn} do
+      RoleCache.reload()
       new_newbie_permissions_attrs = %{
         id: 7,
         permissions: %{
@@ -487,6 +494,7 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
 
     @tag authenticated: :admin
     test "does not modify a user's permissions when input is invalid", %{conn: conn} do
+      RoleCache.reload()
       initial_newbie_permissions =
         conn
         |> get(Routes.role_path(conn, :all))

@@ -14,20 +14,23 @@ defmodule EpochtalkServer.Cache.Role do
   def init(:ok), do: {:ok, load()}
 
   @impl true
-  def handle_call({:lookup, lookups}, _from, role_cache) when is_list(lookups) do
-    {:reply,
-     Map.take(role_cache, lookups)
-     |> Enum.map(fn {_k, v} -> v end)
-     |> Enum.sort(&(&1.id < &2.id)), role_cache}
+  def handle_call({:lookup, lookups}, _from, {all_roles, lookup_cache}) when is_list(lookups) do
+    roles =
+      Map.take(lookup_cache, lookups)
+      |> Enum.map(fn {_k, v} -> v end)
+      |> Enum.sort(&(&1.id < &2.id))
+
+    {:reply, roles, {all_roles, lookup_cache}}
   end
 
   @impl true
-  def handle_call({:lookup, lookup}, _from, role_cache) do
-    {:reply, Map.get(role_cache, lookup), role_cache}
+  def handle_call({:lookup, lookup}, _from, {all_roles, lookup_cache}) do
+    role = Map.get(lookup_cache, lookup)
+    {:reply, role, {all_roles, lookup_cache}}
   end
 
   @impl true
-  def handle_cast(:reload, _role_cache), do: {:noreply, load()}
+  def handle_cast(:reload, {_all_roles, _lookup_cache}), do: {:noreply, load()}
 
   ## === cache api functions ====
 
@@ -58,8 +61,12 @@ defmodule EpochtalkServer.Cache.Role do
 
   # returns loaded role cache
   defp load() do
-    Role
-    |> Repo.all()
-    |> Enum.reduce(%{}, fn role, role_cache -> role_cache |> Map.put(role.lookup, role) end)
+    all_roles = Role |> Repo.all()
+
+    lookup_cache =
+      all_roles
+      |> Enum.reduce(%{}, fn role, lookup_cache -> lookup_cache |> Map.put(role.lookup, role) end)
+
+    {all_roles, lookup_cache}
   end
 end

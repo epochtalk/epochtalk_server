@@ -1,5 +1,5 @@
 defmodule EpochtalkServerWeb.PreferenceController do
-  use EpochtalkServerWeb, :controller_old
+  use EpochtalkServerWeb, :controller
 
   @moduledoc """
   Controller For `Preference` related API requests
@@ -13,7 +13,7 @@ defmodule EpochtalkServerWeb.PreferenceController do
   """
   def preferences(conn, _attrs) do
     with {:auth, user} <- {:auth, Guardian.Plug.current_resource(conn)},
-         do: render(conn, "preferences.json", preferences: Preference.by_user_id(user.id)),
+         do: render(conn, :preferences, preferences: Preference.by_user_id(user.id)),
          else:
            ({:auth, nil} ->
               ErrorHelpers.render_json_error(conn, 400, "Not logged in, cannot fetch preferences"))

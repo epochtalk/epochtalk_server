@@ -6,6 +6,7 @@ defmodule EpochtalkServer.Cache.Role do
 
   @impl true
   def init(:ok) do
+    # TODO(boka): don't need to use role_cache
     role_cache = load()
     {:ok, role_cache}
   end

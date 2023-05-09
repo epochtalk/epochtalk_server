@@ -7,7 +7,6 @@ defmodule EpochtalkServerWeb.RoleController do
   alias EpochtalkServer.Auth.Guardian
   alias EpochtalkServerWeb.ErrorHelpers
   alias EpochtalkServer.Models.Role
-  alias EpochtalkServer.Cache.Role, as: RoleCache
   alias EpochtalkServer.Models.RolePermission
   alias EpochtalkServerWeb.Helpers.ACL
 
@@ -36,7 +35,7 @@ defmodule EpochtalkServerWeb.RoleController do
   """
   def all(conn, _) do
     with {:auth, _user} <- {:auth, Guardian.Plug.current_resource(conn)},
-         data <- RoleCache.all() do
+         data <- Role.all() do
       render(conn, "roles.json", data: data)
     else
       {:auth, nil} ->

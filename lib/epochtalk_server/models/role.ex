@@ -102,10 +102,16 @@ defmodule EpochtalkServer.Models.Role do
 
   @doc """
   Returns every `Role` record in the database
-  WARNING: Only use for startup/seeding; use RoleCache.all elsewhere
+  WARNING: Only use for startup/seeding; use Role.all elsewhere
   """
   @spec all_repo() :: [t()] | []
   def all_repo, do: from(r in Role, order_by: r.id) |> Repo.all()
+
+  @doc """
+  Uses role cache to returns every `Role` record
+  """
+  @spec all() :: [t()]
+  def all(), do: RoleCache.all()
 
   @doc """
   Returns id for the `banned` `Role`

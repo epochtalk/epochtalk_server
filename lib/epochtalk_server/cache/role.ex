@@ -5,11 +5,7 @@ defmodule EpochtalkServer.Cache.Role do
   alias EpochtalkServer.Models.Role
 
   @impl true
-  def init(:ok) do
-    # TODO(boka): don't need to use role_cache
-    role_cache = load()
-    {:ok, role_cache}
-  end
+  def init(:ok), do: {:ok, load()}
 
   @impl true
   def handle_call({:lookup, lookups}, _from, role_cache) when is_list(lookups) do
@@ -22,10 +18,7 @@ defmodule EpochtalkServer.Cache.Role do
   end
 
   @impl true
-  def handle_cast(:reload, _role_cache) do
-    role_cache = load()
-    {:noreply, role_cache}
-  end
+  def handle_cast(:reload, _role_cache), do: {:noreply, load()}
 
   def start_link(_opts) do
     GenServer.start_link(__MODULE__, :ok, name: __MODULE__)

@@ -195,13 +195,7 @@ defmodule EpochtalkServer.Models.Role do
     |> Repo.get(attrs["id"])
     |> update_changeset(attrs)
     |> Repo.update()
-    |> case do
-      {:ok, role} ->
-        # reload cache on success
-        RoleCache.reload()
-        {:ok, role}
-      result -> result
-    end
+    |> reload_role_cache_on_success()
   end
 
   @doc """
@@ -215,13 +209,7 @@ defmodule EpochtalkServer.Models.Role do
     |> Repo.get(id)
     |> change(%{permissions: permissions})
     |> Repo.update()
-    |> case do
-      {:ok, role} ->
-        # reload cache on success
-        RoleCache.reload()
-        {:ok, role}
-      result -> result
-    end
+    |> reload_role_cache_on_success()
   end
 
   @doc """
@@ -233,13 +221,7 @@ defmodule EpochtalkServer.Models.Role do
   def set_priority_restrictions(id, []) do
     id
     |> set_priority_restrictions(nil)
-    |> case do
-      {:ok, role} ->
-        # reload cache on success
-        RoleCache.reload()
-        {:ok, role}
-      result -> result
-    end
+    |> reload_role_cache_on_success()
   end
 
   def set_priority_restrictions(id, priority_restrictions) do
@@ -247,13 +229,7 @@ defmodule EpochtalkServer.Models.Role do
     |> Repo.get(id)
     |> change(%{priority_restrictions: priority_restrictions})
     |> Repo.update()
-    |> case do
-      {:ok, role} ->
-        # reload cache on success
-        RoleCache.reload()
-        {:ok, role}
-      result -> result
-    end
+    |> reload_role_cache_on_success()
   end
 
   ## === External Helper Functions ===
@@ -307,6 +283,16 @@ defmodule EpochtalkServer.Models.Role do
   end
 
   ## === Private Helper Functions ===
+
+  defp reload_role_cache_on_success(result) do
+    case result do
+      {:ok, role} ->
+        # reload cache on success
+        RoleCache.reload()
+        {:ok, role}
+      default -> default
+    end
+  end
 
   defp mask_permissions(target, source) do
     merge_keys = [:highlight_color, :permissions, :priority, :priority_restrictions]

@@ -111,15 +111,13 @@ defmodule EpochtalkServer.Models.Role do
   Returns id for the `banned` `Role`
   """
   @spec get_banned_role_id() :: integer | nil
-  def get_banned_role_id(),
-    do: Repo.one(from(r in Role, select: r.id, where: r.lookup == "banned"))
+  def get_banned_role_id(), do: RoleCache.by_lookup("banned").id
 
   @doc """
   Returns id for the `newbie` `Role`
   """
   @spec get_newbie_role_id() :: integer | nil
-  def get_newbie_role_id(),
-    do: Repo.one(from(r in Role, select: r.id, where: r.lookup == "newbie"))
+  def get_newbie_role_id(), do: RoleCache.by_lookup("newbie").id
 
   @doc """
   Returns default `Role`, for base installation this is the `user` role, if `:epochtalk_server[:frontend_config]["newbie_enabled"]`

@@ -1,5 +1,5 @@
 defmodule EpochtalkServerWeb.RoleController do
-  use EpochtalkServerWeb, :controller_old
+  use EpochtalkServerWeb, :controller
 
   @moduledoc """
   Controller For `Role` related API requests
@@ -20,7 +20,7 @@ defmodule EpochtalkServerWeb.RoleController do
          :ok <- ACL.allow!(conn, "roles.update"),
          {:ok, _role_permission_data} <- RolePermission.modify_by_role(attrs),
          {:ok, _role_data} <- Role.update(attrs) do
-      render(conn, "update.json", data: attrs["id"])
+      render(conn, :update, id: attrs["id"])
     else
       {:auth, nil} ->
         ErrorHelpers.render_json_error(conn, 400, "Not logged in, cannot update role")
@@ -35,8 +35,8 @@ defmodule EpochtalkServerWeb.RoleController do
   """
   def all(conn, _) do
     with {:auth, _user} <- {:auth, Guardian.Plug.current_resource(conn)},
-         data <- Role.all() do
-      render(conn, "roles.json", data: data)
+         roles <- Role.all() do
+      render(conn, :all, roles: roles)
     else
       {:auth, nil} ->
         ErrorHelpers.render_json_error(conn, 400, "Not logged in, cannot get roles")

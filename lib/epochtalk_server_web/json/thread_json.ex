@@ -1,27 +1,13 @@
-defmodule EpochtalkServerWeb.ThreadView do
-  use EpochtalkServerWeb, :view
-
+defmodule EpochtalkServerWeb.ThreadJSON do
   alias EpochtalkServerWeb.BoardJSON
-
   @moduledoc """
   Renders and formats `Thread` data, in JSON format for frontend
   """
 
   @doc """
-  Renders whatever data it is passed when template not found. Data pass through
-  for rendering misc responses (ex: {found: true} or {success: true})
-  ## Example
-      iex> EpochtalkServerWeb.ThreadView.render("DoesNotExist.json", data: %{anything: "abc"})
-      %{anything: "abc"}
-      iex> EpochtalkServerWeb.ThreadView.render("DoesNotExist.json", data: %{success: true})
-      %{success: true}
-  """
-  def template_not_found(_template, %{data: data}), do: data
-
-  @doc """
   Renders recent `Thread` data.
   """
-  def render("recent.json", %{
+  def recent(%{
         threads: threads
       }) do
     threads
@@ -33,7 +19,7 @@ defmodule EpochtalkServerWeb.ThreadView do
   @doc """
   Renders `Thread` for find query.
   """
-  def render("create.json", %{
+  def create(%{
         thread_data: thread_data
       }) do
     post = thread_data.post
@@ -56,7 +42,7 @@ defmodule EpochtalkServerWeb.ThreadView do
   @doc """
   Renders `Thread` for by_board query.
   """
-  def render("by_board.json", %{
+  def by_board(%{
         threads: threads,
         board_moderators: board_moderators,
         board_mapping: board_mapping,

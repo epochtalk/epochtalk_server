@@ -5,23 +5,13 @@ defmodule EpochtalkServerWeb.Helpers.QueryHelper do
 
   import Ecto.Query
 
-  @spec build_and(any, any, nil | binary | number | map) :: %Ecto.Query.DynamicExpr{
-          binding: [{any, any, any}, ...],
-          file: <<_::832>>,
-          fun: (any -> {any, any, any, any}),
-          line: 16
-        }
+  @spec build_and(any, any, nil | binary | number | map) :: any()
   def build_and(conditions, field, value) do
     condition = build_condition(field, value)
     dynamic([c], ^condition and ^conditions)
   end
 
-  @spec build_or(any, any, nil | binary | number | map) :: %Ecto.Query.DynamicExpr{
-          binding: [{any, any, any}, ...],
-          file: <<_::832>>,
-          fun: (any -> {any, any, any, any}),
-          line: 27
-        }
+  @spec build_or(any, any, nil | binary | number | map) :: any()
   def build_or(conditions, field, value) do
     condition = build_condition(field, value)
     dynamic([c], ^condition or ^conditions)

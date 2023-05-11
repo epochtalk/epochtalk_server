@@ -1,5 +1,5 @@
 defmodule EpochtalkServerWeb.UserController do
-  use EpochtalkServerWeb, :controller_old
+  use EpochtalkServerWeb, :controller
 
   @moduledoc """
   Controller For `User` related API requests
@@ -18,13 +18,13 @@ defmodule EpochtalkServerWeb.UserController do
   Used to check if a username has already been taken
   """
   def username(conn, %{"username" => username}),
-    do: render(conn, "username.json", data: %{found: User.with_username_exists?(username)})
+    do: render(conn, :data, data: %{found: User.with_username_exists?(username)})
 
   @doc """
   Used to check if an email has already been taken
   """
   def email(conn, %{"email" => email}),
-    do: render(conn, "email.json", data: %{found: User.with_email_exists?(email)})
+    do: render(conn, :data, data: %{found: User.with_email_exists?(email)})
 
   @doc """
   Registers a new `User`
@@ -43,7 +43,7 @@ defmodule EpochtalkServerWeb.UserController do
          {:ok, user} <- User.handle_malicious_user(user, conn.remote_ip),
          # create session
          {:ok, user, token, conn} <- Session.create(user, false, conn) do
-      render(conn, "user.json", %{user: user, token: token})
+      render(conn, :user, %{user: user, token: token})
     else
       # user already authenticated
       {:auth, true} ->
@@ -88,7 +88,7 @@ defmodule EpochtalkServerWeb.UserController do
          {_count, nil} <- Invitation.delete(user.email),
          # send confirm account email
          {:ok, _email} <- Mailer.send_confirm_account(user) do
-      render(conn, "register_with_verify.json", user: user)
+      render(conn, :register_with_verify, user: user)
     else
       # error in user.create
       {:error, data} ->
@@ -121,7 +121,7 @@ defmodule EpochtalkServerWeb.UserController do
          {:ok, user} <- User.handle_malicious_user(user, conn.remote_ip),
          # create session
          {:ok, user, token, conn} <- Session.create(user, false, conn) do
-      render(conn, "user.json", %{user: user, token: token})
+      render(conn, :user, %{user: user, token: token})
     else
       {:error, :user_not_found} ->
         ErrorHelpers.render_json_error(conn, 400, "Confirmation error, account not found")
@@ -152,7 +152,7 @@ defmodule EpochtalkServerWeb.UserController do
   def authenticate(conn, _attrs) do
     token = Guardian.Plug.current_token(conn)
     user = Guardian.Plug.current_resource(conn)
-    render(conn, "user.json", %{user: user, token: token})
+    render(conn, :user, %{user: user, token: token})
   end
 
   @doc """
@@ -166,7 +166,7 @@ defmodule EpochtalkServerWeb.UserController do
          token <- Guardian.Plug.current_token(conn),
          {:ok, conn} <- Session.delete(conn) do
       EpochtalkServerWeb.Endpoint.broadcast("user:#{user.id}", "logout", %{token: token})
-      render(conn, "logout.json", data: %{success: true})
+      render(conn, :data, data: %{success: true})
     else
       {:auth, false} -> ErrorHelpers.render_json_error(conn, 400, "Not logged in")
       {:error, error} -> ErrorHelpers.render_json_error(conn, 500, error)
@@ -192,7 +192,7 @@ defmodule EpochtalkServerWeb.UserController do
          {:valid_password, true} <- {:valid_password, User.valid_password?(user, password)},
          {:ok, user} <- Ban.unban(user),
          {:ok, user, token, conn} <- Session.create(user, remember_me, conn) do
-      render(conn, "user.json", %{user: user, token: token})
+      render(conn, :user, %{user: user, token: token})
     else
       {:auth, true} ->
         ErrorHelpers.render_json_error(conn, 400, "Already logged in")

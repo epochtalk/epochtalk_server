@@ -1,8 +1,6 @@
-defmodule EpochtalkServerWeb.UserViewTest do
+defmodule EpochtalkServerWeb.UserJSONTest do
   use EpochtalkServerWeb.ConnCase, async: true
-  # Bring render/3 and render_to_string/3 for testing custom views
-  import Phoenix.View
-  alias EpochtalkServerWeb.UserView
+  alias EpochtalkServerWeb.UserJSON
   alias EpochtalkServer.Models.User
   alias EpochtalkServer.Models.Preference
   alias EpochtalkServer.Models.Profile
@@ -11,7 +9,7 @@ defmodule EpochtalkServerWeb.UserViewTest do
   alias EpochtalkServer.Models.BoardModerator
 
   # Specify that we want to use doctests:
-  doctest UserView
+  doctest UserJSON
 
   # this was too long to be a doctest, we still need to test with Sandbox db connection
   test "renders user.json" do
@@ -179,7 +177,7 @@ defmodule EpochtalkServerWeb.UserViewTest do
 
     token = "********"
 
-    assert render(UserView, "user.json", %{user: user, token: token}) == %{
+    assert UserJSON.user(%{user: user, token: token}) == %{
              avatar: "",
              ban_expiration: ~N[2022-10-01 06:21:52],
              id: 1,

@@ -62,8 +62,8 @@ defmodule EpochtalkServer.Models.ModerationLog do
     display_data = ModerationLogHelper.get_display_data(get_in(attrs, [:action, :type]))
 
     action_obj =
-      if Map.has_key?(display_data, :dataQuery) do
-        display_data.dataQuery.(get_in(attrs, [:action, :obj]))
+      if Map.has_key?(display_data, :data_query) do
+        display_data.data_query.(get_in(attrs, [:action, :obj]))
       else
         get_in(attrs, [:action, :obj])
       end

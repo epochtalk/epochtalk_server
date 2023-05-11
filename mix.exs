@@ -39,6 +39,7 @@ defmodule EpochtalkServer.MixProject do
       {:dialyxir, "~> 1.2", only: [:dev], runtime: false},
       {:ecto_sql, "~> 3.6"},
       {:ex_doc, "~> 0.29.4"},
+      {:finch, "~> 0.13"},
       {:gen_smtp, "~> 1.2"},
       {:guardian, "~> 2.2"},
       {:guardian_phoenix, "~> 2.0"},

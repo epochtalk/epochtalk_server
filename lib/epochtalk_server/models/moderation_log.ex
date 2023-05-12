@@ -103,7 +103,7 @@ defmodule EpochtalkServer.Models.ModerationLog do
   """
   @spec create(attrs :: map()) :: {:ok, moderation_log :: t()} | {:error, Ecto.Changeset.t()}
   def create(attrs) do
-    moderation_log_cs = ModerationLog.changeset(%ModerationLog{}, attrs)
+    moderation_log_cs = ModerationLog.create_changeset(%ModerationLog{}, attrs)
 
     case Repo.insert(moderation_log_cs) do
       {:ok, moderation_log} ->

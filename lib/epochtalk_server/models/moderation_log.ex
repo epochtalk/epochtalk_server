@@ -55,8 +55,8 @@ defmodule EpochtalkServer.Models.ModerationLog do
   @doc """
   Create generic changeset for `ModerationLog` model
   """
-  @spec changeset(moderation_log :: t(), attrs :: map() | nil) :: Ecto.Changeset.t()
-  def changeset(moderation_log, attrs) do
+  @spec create_changeset(moderation_log :: t(), attrs :: map() | nil) :: Ecto.Changeset.t()
+  def create_changeset(moderation_log, attrs) do
     now = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
 
     display_data = ModerationLogHelper.get_display_data(get_in(attrs, [:action, :type]))

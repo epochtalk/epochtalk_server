@@ -1220,6 +1220,14 @@ defmodule EpochtalkServerWeb.ModerationLogControllerTest do
     end
 
     @tag :authenticated
+    test "success if 'mod' query param as an integer returns an empty list for an invalid id",
+         %{conn: conn} do
+      conn = get(conn, Routes.moderation_log_path(conn, :page, %{"mod" => 999}))
+      moderation_logs = json_response(conn, 200)["moderation_logs"]
+      assert Enum.empty?(moderation_logs) == true
+    end
+
+    @tag :authenticated
     test "success if 'mod' query param as a string returns correct moderation_log entry by username",
          %{conn: conn} do
       conn =
@@ -1230,6 +1238,19 @@ defmodule EpochtalkServerWeb.ModerationLogControllerTest do
 
       moderation_logs = json_response(conn, 200)["moderation_logs"]
       assert List.first(moderation_logs)["mod_username"] == "one.adminBoards.updateCategories"
+    end
+
+    @tag :authenticated
+    test "success if 'mod' query param as a string returns an empty list for an invalid username",
+         %{conn: conn} do
+      conn =
+        get(
+          conn,
+          Routes.moderation_log_path(conn, :page, %{"mod" => "test_username"})
+        )
+
+      moderation_logs = json_response(conn, 200)["moderation_logs"]
+      assert Enum.empty?(moderation_logs) == true
     end
 
     @tag :authenticated
@@ -1257,6 +1278,19 @@ defmodule EpochtalkServerWeb.ModerationLogControllerTest do
       moderation_logs = json_response(conn, 200)["moderation_logs"]
       assert List.first(moderation_logs)["action_type"] == "adminSettings.setTheme"
       assert List.first(moderation_logs)["action_display_text"] == "updated the forum theme"
+    end
+
+    @tag :authenticated
+    test "success if 'keyword' query param returns an empty list for an invalid keyword",
+         %{conn: conn} do
+      conn =
+        get(
+          conn,
+          Routes.moderation_log_path(conn, :page, %{"keyword" => "invalid_keyword"})
+        )
+
+      moderation_logs = json_response(conn, 200)["moderation_logs"]
+      assert Enum.empty?(moderation_logs) == true
     end
 
     @tag :authenticated
@@ -1294,9 +1328,7 @@ defmodule EpochtalkServerWeb.ModerationLogControllerTest do
             conn,
             :page,
             %{
-              "bdate" => List.first(String.split(datetime)),
-              "page" => 1,
-              "limit" => 100
+              "bdate" => List.first(String.split(datetime))
             }
           )
         )
@@ -1340,9 +1372,7 @@ defmodule EpochtalkServerWeb.ModerationLogControllerTest do
             conn,
             :page,
             %{
-              "adate" => List.first(String.split(datetime)),
-              "page" => 1,
-              "limit" => 100
+              "adate" => List.first(String.split(datetime))
             }
           )
         )
@@ -1394,15 +1424,65 @@ defmodule EpochtalkServerWeb.ModerationLogControllerTest do
             :page,
             %{
               "sdate" => List.first(String.split(start_datetime)),
-              "edate" => List.first(String.split(end_datetime)),
-              "page" => 1,
-              "limit" => 100
+              "edate" => List.first(String.split(end_datetime))
             }
           )
         )
 
       moderation_logs = json_response(conn, 200)["moderation_logs"]
       assert Enum.empty?(moderation_logs) == true
+    end
+
+    @tag :authenticated
+    test "success if id and date range query param returns correct moderation_log for a valid date range",
+         %{conn: conn} do
+      start_datetime =
+        NaiveDateTime.to_string(NaiveDateTime.add(NaiveDateTime.utc_now(), -2, :day))
+
+      end_datetime = NaiveDateTime.to_string(NaiveDateTime.add(NaiveDateTime.utc_now(), 2, :day))
+
+      conn =
+        get(
+          conn,
+          Routes.moderation_log_path(
+            conn,
+            :page,
+            %{
+              "mod" => 5,
+              "sdate" => List.first(String.split(start_datetime)),
+              "edate" => List.first(String.split(end_datetime))
+            }
+          )
+        )
+
+      moderation_logs = json_response(conn, 200)["moderation_logs"]
+      assert List.first(moderation_logs)["mod_id"] == 5
+    end
+
+    @tag :authenticated
+    test "success if username and date range query param returns correct moderation_log for a valid date range",
+         %{conn: conn} do
+      start_datetime =
+        NaiveDateTime.to_string(NaiveDateTime.add(NaiveDateTime.utc_now(), -2, :day))
+
+      end_datetime = NaiveDateTime.to_string(NaiveDateTime.add(NaiveDateTime.utc_now(), 2, :day))
+
+      conn =
+        get(
+          conn,
+          Routes.moderation_log_path(
+            conn,
+            :page,
+            %{
+              "mod" => "one.adminBoards.updateCategories",
+              "sdate" => List.first(String.split(start_datetime)),
+              "edate" => List.first(String.split(end_datetime))
+            }
+          )
+        )
+
+      moderation_logs = json_response(conn, 200)["moderation_logs"]
+      assert List.first(moderation_logs)["mod_username"] == "one.adminBoards.updateCategories"
     end
   end
 

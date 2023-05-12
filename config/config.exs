@@ -63,9 +63,7 @@ config :epochtalk_server, :redix,
 config :epochtalk_server, EpochtalkServerWeb.Endpoint,
   url: [host: "localhost"],
   render_errors: [
-    view: EpochtalkServerWeb.ErrorView,
-    format: "json",
-    accepts: ~w(json),
+    formats: [json: EpochtalkServerWeb.ErrorJSON],
     layout: false
   ],
   pubsub_server: EpochtalkServer.PubSub,

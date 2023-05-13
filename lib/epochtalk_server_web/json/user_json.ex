@@ -1,5 +1,4 @@
 defmodule EpochtalkServerWeb.UserJSON do
-  use EpochtalkServerWeb, :view
   alias EpochtalkServer.Models.Role
   alias EpochtalkServer.Models.User
 

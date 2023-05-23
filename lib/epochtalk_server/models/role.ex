@@ -5,7 +5,7 @@ defmodule EpochtalkServer.Models.Role do
   alias EpochtalkServer.Repo
   alias EpochtalkServer.Models.User
   alias EpochtalkServer.Models.Role
-  alias EpochtalkServer.Models.RoleUser
+  alias EpochtalkServer.Cache.Role, as: RoleCache
 
   @postgres_integer_max 2_147_483_647
   @postgres_varchar255_max 255
@@ -101,23 +101,28 @@ defmodule EpochtalkServer.Models.Role do
 
   @doc """
   Returns every `Role` record in the database
+  WARNING: Only use for startup/seeding; use Role.all elsewhere
   """
-  @spec all() :: [t()] | []
-  def all, do: from(r in Role, order_by: r.id) |> Repo.all()
+  @spec all_repo() :: [t()] | []
+  def all_repo, do: from(r in Role, order_by: r.id) |> Repo.all()
+
+  @doc """
+  Uses role cache to returns every `Role` record
+  """
+  @spec all() :: [t()]
+  def all(), do: RoleCache.all()
 
   @doc """
   Returns id for the `banned` `Role`
   """
   @spec get_banned_role_id() :: integer | nil
-  def get_banned_role_id(),
-    do: Repo.one(from(r in Role, select: r.id, where: r.lookup == "banned"))
+  def get_banned_role_id(), do: RoleCache.by_lookup("banned").id
 
   @doc """
   Returns id for the `newbie` `Role`
   """
   @spec get_newbie_role_id() :: integer | nil
-  def get_newbie_role_id(),
-    do: Repo.one(from(r in Role, select: r.id, where: r.lookup == "newbie"))
+  def get_newbie_role_id(), do: RoleCache.by_lookup("newbie").id
 
   @doc """
   Returns default `Role`, for base installation this is the `user` role, if `:epochtalk_server[:frontend_config]["newbie_enabled"]`
@@ -127,7 +132,7 @@ defmodule EpochtalkServer.Models.Role do
   def get_default() do
     config = Application.get_env(:epochtalk_server, :frontend_config)
     newbie_enabled = config["newbie_enabled"]
-    by_lookup(if newbie_enabled, do: "newbie", else: "user")
+    RoleCache.by_lookup(if newbie_enabled, do: "newbie", else: "user")
   end
 
   @doc """
@@ -138,41 +143,44 @@ defmodule EpochtalkServer.Models.Role do
   def get_default_unauthenticated() do
     config = Application.get_env(:epochtalk_server, :frontend_config)
     login_required = config["login_required"]
-    by_lookup(if login_required, do: "private", else: "anonymous")
+    RoleCache.by_lookup(if login_required, do: "private", else: "anonymous")
   end
 
   @doc """
-  Returns a `Role` or list of roles, for specified lookup(s)
+  Returns a `Role` for specified lookup
+  WARNING: Only used for startup/seeding; use Role.by_lookup elsewhere
+  """
+  @spec by_lookup_repo(lookup :: String.t() | [String.t()]) :: t() | nil
+  def by_lookup_repo(lookup), do: Repo.get_by(Role, lookup: lookup)
+
+  @doc """
+  Uses role cache to return `Role` or list of `Role`s for specified lookup(s)
   """
   @spec by_lookup(lookup_or_lookups :: String.t() | [String.t()]) :: t() | [t()] | [] | nil
-  def by_lookup(lookups) when is_list(lookups) do
-    from(r in Role, where: r.lookup in ^lookups) |> Repo.all()
-  end
+  def by_lookup(lookup_or_lookups), do: RoleCache.by_lookup(lookup_or_lookups)
 
-  def by_lookup(lookup), do: Repo.get_by(Role, lookup: lookup)
-
-  @doc """
-  Returns a list containing a user's roles
-  """
-  @spec by_user_id(user_id :: integer) :: [t()]
-  def by_user_id(user_id) do
-    query =
-      from ru in RoleUser,
-        join: r in Role,
-        on: true,
-        where: ru.user_id == ^user_id and r.id == ru.role_id,
-        select: r,
-        order_by: [asc: r.priority]
-
-    case Repo.all(query) do
-      # user has no roles, return default role
-      [] -> [get_default()]
-      # user has roles, return them
-      users_roles -> users_roles
-    end
-    # if banned, only [ banned ] is returned for roles
-    |> Role.handle_banned_user_role()
-  end
+  # @doc """
+  # Returns a list containing a user's roles
+  # """
+  # @spec by_user_id(user_id :: integer) :: [t()]
+  # def by_user_id(user_id) do
+  #   query =
+  #     from ru in RoleUser,
+  #       join: r in Role,
+  #       on: true,
+  #       where: ru.user_id == ^user_id and r.id == ru.role_id,
+  #       select: r,
+  #       order_by: [asc: r.priority]
+  #
+  #   case Repo.all(query) do
+  #     # user has no roles, return default role
+  #     [] -> [get_default()]
+  #     # user has roles, return them
+  #     users_roles -> users_roles
+  #   end
+  #   # if banned, only [ banned ] is returned for roles
+  #   |> Role.handle_banned_user_role()
+  # end
 
   ## CREATE OPERATIONS
 
@@ -189,7 +197,7 @@ defmodule EpochtalkServer.Models.Role do
 
   ## UPDATE OPERATIONS
   @doc """
-  Updates an existing `Role` in the database
+  Updates an existing `Role` in the database and reloads role cache
   """
   @spec update(attrs :: map()) ::
           {:ok, role :: Ecto.Schema.t()} | {:error, Ecto.Changeset.t()}
@@ -198,10 +206,12 @@ defmodule EpochtalkServer.Models.Role do
     |> Repo.get(attrs["id"])
     |> update_changeset(attrs)
     |> Repo.update()
+    |> reload_role_cache_on_success()
   end
 
   @doc """
   Updates the permissions of an existing `Role` in the database
+  and reloads role cache
   """
   @spec set_permissions(id :: integer, permissions_attrs :: map()) ::
           {:ok, role :: Ecto.Schema.t()} | {:error, Ecto.Changeset.t()}
@@ -210,20 +220,27 @@ defmodule EpochtalkServer.Models.Role do
     |> Repo.get(id)
     |> change(%{permissions: permissions})
     |> Repo.update()
+    |> reload_role_cache_on_success()
   end
 
   @doc """
   Updates the priority_restrictions of an existing `Role` in the database
+  and reloads role cache
   """
   @spec set_priority_restrictions(id :: integer, priority_restrictions :: list() | nil) ::
           {:ok, role :: Ecto.Schema.t()} | {:error, Ecto.Changeset.t()}
-  def set_priority_restrictions(id, []), do: set_priority_restrictions(id, nil)
+  def set_priority_restrictions(id, []) do
+    id
+    |> set_priority_restrictions(nil)
+    |> reload_role_cache_on_success()
+  end
 
   def set_priority_restrictions(id, priority_restrictions) do
     Role
     |> Repo.get(id)
     |> change(%{priority_restrictions: priority_restrictions})
     |> Repo.update()
+    |> reload_role_cache_on_success()
   end
 
   ## === External Helper Functions ===
@@ -277,6 +294,18 @@ defmodule EpochtalkServer.Models.Role do
   end
 
   ## === Private Helper Functions ===
+
+  defp reload_role_cache_on_success(result) do
+    case result do
+      {:ok, role} ->
+        # reload cache on success
+        RoleCache.reload()
+        {:ok, role}
+
+      default ->
+        default
+    end
+  end
 
   defp mask_permissions(target, source) do
     merge_keys = [:highlight_color, :permissions, :priority, :priority_restrictions]

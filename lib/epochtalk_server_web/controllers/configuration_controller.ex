@@ -10,7 +10,8 @@ defmodule EpochtalkServerWeb.ConfigurationController do
   """
   def config(conn, _attrs) do
     conn
-    |> put_resp_header("content-type", "text/javascript")
-    |> render("config.js", config: Application.get_env(:epochtalk_server, :frontend_config))
+    |> Phoenix.Controller.put_format(:js)
+    |> put_resp_content_type("content-type", "text/javascript")
+    |> render(:config, config: Application.get_env(:epochtalk_server, :frontend_config))
   end
 end

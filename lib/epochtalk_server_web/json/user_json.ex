@@ -1,5 +1,4 @@
-defmodule EpochtalkServerWeb.UserView do
-  use EpochtalkServerWeb, :view
+defmodule EpochtalkServerWeb.UserJSON do
   alias EpochtalkServer.Models.Role
   alias EpochtalkServer.Models.User
 
@@ -12,19 +11,19 @@ defmodule EpochtalkServerWeb.UserView do
   and outputs formatted user json used for auth. Masks all user's roles to generate
   correct permissions set.
   """
-  def render("user.json", %{user: user, token: token}), do: format_user_reply(user, token)
+  def user(%{user: user, token: token}), do: format_user_reply(user, token)
 
   @doc """
   Renders formatted JSON response for registration confirmation.
   ## Example
-    iex> EpochtalkServerWeb.UserView.render("register_with_verify.json", %{user: %User{ username: "Test" }})
+    iex> EpochtalkServerWeb.UserJSON.register_with_verify(%{user: %User{ username: "Test" }})
     %{
       username: "Test",
       confirm_token: true,
       message: "Successfully registered, please confirm account to login."
     }
   """
-  def render("register_with_verify.json", %{user: user}) do
+  def register_with_verify(%{user: user}) do
     %{
       username: user.username,
       confirm_token: true,
@@ -36,13 +35,13 @@ defmodule EpochtalkServerWeb.UserView do
   Renders whatever data it is passed when template not found. Data pass through
   for rendering misc responses (ex: {found: true} or {success: true})
   ## Example
-      iex> EpochtalkServerWeb.UserView.render("DoesNotExist.json", data: %{found: true})
+      iex> EpochtalkServerWeb.UserJSON.data(%{data: %{found: true}})
       %{found: true}
-      iex> EpochtalkServerWeb.UserView.render("DoesNotExist.json", data: %{success: true})
+      iex> EpochtalkServerWeb.UserJSON.data(%{data: %{success: true}})
       %{success: true}
   """
-  def template_not_found(_template, %{conn: %{assigns: %{data: data}}}), do: data
-  def template_not_found(_template, %{data: data}), do: data
+  def data(%{conn: %{assigns: %{data: data}}}), do: data
+  def data(%{data: data}), do: data
 
   # Format reply - from Models.User (login, register)
   defp format_user_reply(%User{} = user, token) do

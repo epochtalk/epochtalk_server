@@ -1,6 +1,4 @@
-defmodule EpochtalkServerWeb.ModerationLogView do
-  use EpochtalkServerWeb, :view
-
+defmodule EpochtalkServerWeb.ModerationLogJSON do
   @moduledoc """
   Renders and formats `ModerationLog` data, in JSON format for frontend
   """
@@ -8,7 +6,7 @@ defmodule EpochtalkServerWeb.ModerationLogView do
   @doc """
   Renders paginated `ModerationLog` entries.
   """
-  def render("page.json", %{moderation_logs: moderation_logs, pagination_data: pagination_data}) do
+  def page(%{moderation_logs: moderation_logs, pagination_data: pagination_data}) do
     %{
       moderation_logs: moderation_logs,
       pagination_data: pagination_data

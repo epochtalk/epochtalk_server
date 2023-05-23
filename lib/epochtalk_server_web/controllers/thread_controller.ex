@@ -24,9 +24,7 @@ defmodule EpochtalkServerWeb.ThreadController do
          user <- Guardian.Plug.current_resource(conn),
          user_priority <- ACL.get_user_priority(conn),
          threads <- Thread.recent(user, user_priority, limit: limit) do
-      render(conn, "recent.json", %{
-        threads: threads
-      })
+      render(conn, :recent, %{threads: threads})
     else
       _ -> ErrorHelpers.render_json_error(conn, 400, "Error, cannot fetch recent threads")
     end
@@ -43,9 +41,7 @@ defmodule EpochtalkServerWeb.ThreadController do
   def create(conn, attrs) do
     with user <- Guardian.Plug.current_resource(conn),
          {:ok, thread_data} <- Thread.create(attrs, user.id) do
-      render(conn, "create.json", %{
-        thread_data: thread_data
-      })
+      render(conn, :create, %{thread_data: thread_data})
     else
       {:error, %Ecto.Changeset{} = cs} ->
         ErrorHelpers.render_json_error(conn, 400, cs)
@@ -80,7 +76,7 @@ defmodule EpochtalkServerWeb.ThreadController do
              field: field,
              desc: desc
            ) do
-      render(conn, "by_board.json", %{
+      render(conn, :by_board, %{
         threads: threads,
         write_access: write_access && is_map(user) && !board_banned,
         board_banned: board_banned,

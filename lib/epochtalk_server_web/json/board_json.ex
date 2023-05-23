@@ -1,25 +1,17 @@
-defmodule EpochtalkServerWeb.BoardView do
-  use EpochtalkServerWeb, :view
-
+defmodule EpochtalkServerWeb.BoardJSON do
   @moduledoc """
-  Renders and formats `Board` data, in JSON format for frontend
+  Renders and formats `BoardController` data, in JSON format for frontend
   """
 
   @doc """
-  Renders whatever data it is passed when template not found. Data pass through
-  for rendering misc responses (ex: {found: true} or {success: true})
-  ## Example
-      iex> EpochtalkServerWeb.BoardView.render("DoesNotExist.json", data: %{anything: "abc"})
-      %{anything: "abc"}
-      iex> EpochtalkServerWeb.BoardView.render("DoesNotExist.json", data: %{success: true})
-      %{success: true}
+  Renders `Board` id for slug to id route.
   """
-  def template_not_found(_template, %{data: data}), do: data
+  def slug_to_id(%{id: id}), do: %{id: id}
 
   @doc """
   Renders `Board` data by `Category`.
   """
-  def render("by_category.json", %{
+  def by_category(%{
         categories: categories,
         board_moderators: board_moderators,
         board_mapping: board_mapping,
@@ -66,7 +58,7 @@ defmodule EpochtalkServerWeb.BoardView do
   @doc """
   Renders `Board` for find query.
   """
-  def render("find.json", %{
+  def find(%{
         board_moderators: board_moderators,
         board_mapping: board_mapping,
         board_id: board_id,

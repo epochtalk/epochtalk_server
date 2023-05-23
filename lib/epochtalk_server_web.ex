@@ -17,27 +17,26 @@ defmodule EpochtalkServerWeb do
   and import those modules here.
   """
 
+  def static_paths, do: ~w(assets fonts images favicon.ico robots.txt)
+
   def controller do
     quote do
-      use Phoenix.Controller, namespace: EpochtalkServerWeb
+      use Phoenix.Controller,
+        formats: [:html, :json, :js],
+        layouts: [html: EpochtalkServerWeb.Layouts]
 
       import Plug.Conn
-      alias EpochtalkServerWeb.Router.Helpers, as: Routes
+
+      unquote(verified_routes())
     end
   end
 
-  def view do
+  def js do
     quote do
-      use Phoenix.View,
-        root: "lib/epochtalk_server_web/templates",
-        namespace: EpochtalkServerWeb
+      import EpochtalkServerWeb, only: [embed_templates: 2]
 
-      # Import convenience functions from controllers
-      import Phoenix.Controller,
-        only: [get_flash: 1, get_flash: 2, view_module: 1, view_template: 1]
-
-      # Include shared imports and aliases for views
-      unquote(view_helpers())
+      # Routes generation with the ~p sigil
+      unquote(verified_routes())
     end
   end
 
@@ -56,13 +55,12 @@ defmodule EpochtalkServerWeb do
     end
   end
 
-  defp view_helpers do
+  def verified_routes do
     quote do
-      # Import basic rendering functionality (render, render_layout, etc)
-      import Phoenix.View
-
-      import EpochtalkServerWeb.ErrorHelpers
-      alias EpochtalkServerWeb.Router.Helpers, as: Routes
+      use Phoenix.VerifiedRoutes,
+        endpoint: EpochtalkServerWeb.Endpoint,
+        router: EpochtalkServerWeb.Router,
+        statics: EpochtalkServerWeb.static_paths()
     end
   end
 
@@ -71,5 +69,17 @@ defmodule EpochtalkServerWeb do
   """
   defmacro __using__(which) when is_atom(which) do
     apply(__MODULE__, which, [])
+  end
+
+  defmacro embed_templates(pattern, opts) do
+    quote do
+      require Phoenix.Template
+
+      Phoenix.Template.compile_all(
+        &(&1 |> Path.basename() |> Path.rootname() |> Path.rootname()),
+        Path.expand(unquote(opts)[:root] || __DIR__, __DIR__),
+        unquote(pattern) <> unquote(opts)[:ext]
+      )
+    end
   end
 end

@@ -22,7 +22,7 @@ defmodule EpochtalkServerWeb.MentionController do
          {:ok, mentions, data} <-
            Mention.page_by_user_id(user.id, page, per_page: limit, extended: extended),
          do:
-           render(conn, "page.json", %{
+           render(conn, :page, %{
              mentions: mentions,
              pagination_data: data,
              extended: extended

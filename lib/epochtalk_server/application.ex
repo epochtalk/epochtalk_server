@@ -28,6 +28,8 @@ defmodule EpochtalkServer.Application do
       EpochtalkServerWeb.Telemetry,
       # Start the PubSub system
       {Phoenix.PubSub, name: EpochtalkServer.PubSub},
+      # Start Finch
+      {Finch, name: EpochtalkServer.Finch},
       # Start Presence for Phoenix channel tracking
       EpochtalkServerWeb.Presence,
       # Start the Endpoint (http/https)

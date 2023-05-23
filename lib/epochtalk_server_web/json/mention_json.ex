@@ -1,6 +1,4 @@
-defmodule EpochtalkServerWeb.MentionView do
-  use EpochtalkServerWeb, :view
-
+defmodule EpochtalkServerWeb.MentionJSON do
   @moduledoc """
   Renders and formats `User` data, in JSON format for frontend
   """
@@ -8,7 +6,7 @@ defmodule EpochtalkServerWeb.MentionView do
   @doc """
   Renders paginated `User` mentions. If extended is true returns additional `Board` and `Post` details.
   """
-  def render("page.json", %{
+  def page(%{
         mentions: mentions,
         pagination_data: %{page: page, limit: limit, next: next, prev: prev},
         extended: extended

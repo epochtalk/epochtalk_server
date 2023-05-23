@@ -18,7 +18,7 @@ defmodule EpochtalkServerWeb.NotificationController do
          :ok <- ACL.allow!(conn, "notifications.counts"),
          # {:ok, :allow} <- Authorization.grant(conn, counts_auth),
          max <- Validate.cast(attrs, "max", :integer, min: 1) do
-      render(conn, "counts.json", data: Notification.counts_by_user_id(user.id, max: max || 99))
+      render(conn, :counts, data: Notification.counts_by_user_id(user.id, max: max || 99))
     else
       {:auth, nil} ->
         ErrorHelpers.render_json_error(
@@ -54,7 +54,7 @@ defmodule EpochtalkServerWeb.NotificationController do
          :ok <- ACL.allow!(conn, "notifications.dismiss"),
          {_count, nil} <- Notification.dismiss(id) do
       EpochtalkServerWeb.Endpoint.broadcast("user:#{user.id}", "refreshMentions", %{})
-      render(conn, "dismiss.json", data: %{success: true})
+      render(conn, :dismiss, success: true)
     else
       {:auth, nil} ->
         ErrorHelpers.render_json_error(
@@ -76,7 +76,7 @@ defmodule EpochtalkServerWeb.NotificationController do
     with {:auth, user} <- {:auth, Guardian.Plug.current_resource(conn)},
          {_count, nil} <- Notification.dismiss_type_by_user_id(user.id, type) do
       EpochtalkServerWeb.Endpoint.broadcast("user:#{user.id}", "refreshMentions", %{})
-      render(conn, "dismiss.json", data: %{success: true})
+      render(conn, :dismiss, success: true)
     else
       {:auth, nil} ->
         ErrorHelpers.render_json_error(

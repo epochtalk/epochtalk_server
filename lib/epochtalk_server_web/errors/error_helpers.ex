@@ -1,6 +1,6 @@
 defmodule EpochtalkServerWeb.ErrorHelpers do
   use Phoenix.Controller
-  alias EpochtalkServerWeb.ErrorView
+  alias EpochtalkServerWeb.ErrorJSON
 
   @moduledoc """
   Conveniences for translating and building error messages.
@@ -16,8 +16,8 @@ defmodule EpochtalkServerWeb.ErrorHelpers do
   def render_json_error(conn, status, message) do
     conn
     |> put_status(status)
-    |> put_view(ErrorView)
-    |> render("#{status}.json", message: message)
+    |> put_view(json: ErrorJSON)
+    |> render("#{status}.json", %{message: message})
   end
 
   @doc """

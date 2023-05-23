@@ -17,7 +17,7 @@ defmodule EpochtalkServerWeb.ModerationLogController do
          page <- Validate.cast(attrs, "page", :integer, min: 1),
          limit <- Validate.cast(attrs, "limit", :integer, min: 1),
          {:ok, moderation_logs, data} <- ModerationLog.page(attrs, page, per_page: limit) do
-      render(conn, "page.json", moderation_logs: moderation_logs, pagination_data: data)
+      render(conn, :page, %{moderation_logs: moderation_logs, pagination_data: data})
     else
       {:auth, false} ->
         ErrorHelpers.render_json_error(conn, 400, "Not logged in, cannot page moderation log")

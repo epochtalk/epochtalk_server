@@ -21,7 +21,7 @@ defmodule EpochtalkServerWeb.BoardController do
          board_mapping <- BoardMapping.all(stripped: stripped),
          board_moderators <- BoardModerator.all(),
          categories <- Category.all() do
-      render(conn, "by_category.json", %{
+      render(conn, :by_category, %{
         categories: categories,
         board_moderators: board_moderators,
         board_mapping: board_mapping,
@@ -42,7 +42,7 @@ defmodule EpochtalkServerWeb.BoardController do
          board_moderators <- BoardModerator.all(),
          {:board, [_board]} <-
            {:board, Enum.filter(board_mapping, fn bm -> bm.board_id == id end)} do
-      render(conn, "find.json", %{
+      render(conn, :find, %{
         board_moderators: board_moderators,
         board_mapping: board_mapping,
         board_id: id,
@@ -60,7 +60,7 @@ defmodule EpochtalkServerWeb.BoardController do
   def slug_to_id(conn, attrs) do
     with slug <- Validate.cast(attrs, "slug", :string, required: true),
          {:ok, id} <- Board.slug_to_id(slug) do
-      render(conn, "slug_to_id.json", data: %{id: id})
+      render(conn, :slug_to_id, id: id)
     else
       {:error, :board_does_not_exist} ->
         ErrorHelpers.render_json_error(conn, 400, "Error, cannot board does not exist")

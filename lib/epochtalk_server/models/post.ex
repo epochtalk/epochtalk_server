@@ -171,4 +171,17 @@ defmodule EpochtalkServer.Models.Post do
     from(p in Post, where: p.id == ^id)
     |> Repo.update_all(set: [position: thread_post_count + 1])
   end
+
+
+  @doc """
+  Paginates `Post` records for a given a `Thread`
+  """
+  @spec page_by_thread_id(
+          thread_id :: non_neg_integer,
+          page :: non_neg_integer | nil,
+          opts :: list() | nil
+        ) :: [map()] | []
+  def page_by_thread_id(thread_id, page \\ 1, opts \\ []) do
+    []
+  end
 end

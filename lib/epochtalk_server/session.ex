@@ -65,7 +65,6 @@ defmodule EpochtalkServer.Session do
         username = Redix.command!(:redix, ["HGET", user_key, "username"])
         avatar = Redix.command!(:redix, ["HGET", user_key, "avatar"])
         role_key = generate_key(user_id, "roles")
-        # TODO(boka): store and look up roles from redis instead of postgres
         roles = Redix.command!(:redix, ["SMEMBERS", role_key]) |> Role.by_lookup()
 
         # session is active, populate data

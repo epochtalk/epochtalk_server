@@ -128,7 +128,7 @@ defmodule EpochtalkServer.Models.Configuration do
 
     # TODO(boka): directory release version
 
-    # tag takes precidence over revision
+    # tag takes precedence over revision
     revision = if tag == "", do: hash, else: tag
 
     frontend_config =

@@ -185,7 +185,7 @@ defmodule EpochtalkServer.Models.RolePermission do
   def maybe_init!() do
     if Repo.one(from rp in RolePermission, select: count(rp.value)) == 0,
       do:
-        Enum.each(Role.all(), fn role ->
+        Enum.each(Role.all_repo(), fn role ->
           Enum.each(Permission.all(), fn permission ->
             %RolePermission{}
             |> changeset(%{

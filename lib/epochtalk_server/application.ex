@@ -19,6 +19,8 @@ defmodule EpochtalkServer.Application do
       {Redix, host: redix_config()[:host], name: redix_config()[:name]},
       # Start the Ecto repository
       EpochtalkServer.Repo,
+      # Start Role Cache
+      EpochtalkServer.Cache.Role,
       # Warm frontend_config variable (referenced by api controllers)
       # This task starts, does its thing and dies
       {Task, &EpochtalkServer.Models.Configuration.warm_frontend_config/0},

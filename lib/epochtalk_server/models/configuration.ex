@@ -126,7 +126,9 @@ defmodule EpochtalkServer.Models.Configuration do
     {hash, _} = System.cmd("git", ["rev-parse", "--short", "HEAD"])
     [hash | _] = hash |> String.split("\n")
 
-    # tag takes precedence over revision
+    # TODO(boka): directory release version
+
+    # tag takes precidence over revision
     revision = if tag == "", do: hash, else: tag
 
     frontend_config =

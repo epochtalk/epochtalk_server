@@ -182,6 +182,17 @@ defmodule EpochtalkServer.Models.Post do
           opts :: list() | nil
         ) :: [map()] | []
   def page_by_thread_id(thread_id, page \\ 1, opts \\ []) do
-    []
+    # TODO(akinsey): calculate defaults for opts
+    start = Keyword.get(opts, :start)
+    limit = Keyword.get(opts, :per_page)
+
+    inner_query =
+      Post
+      |> where([p], p.thread_id == ^thread_id and p.position > ^start)
+      |> order_by([p], p.position)
+      |> limit(^limit)
+      |> select([p], %{id: p.id, position: p.position})
+
+    Repo.all(inner_query)
   end
 end

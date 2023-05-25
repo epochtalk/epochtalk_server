@@ -14,7 +14,7 @@ defmodule EpochtalkServerWeb.BoardControllerTest do
         postable_by: 10,
         right_to_left: false
       }
-      new_board = Board.create(board)
+      {:ok, new_board} = Board.create(board)
       {:ok, conn: conn, board: new_board, board_attrs: board}
     end
 

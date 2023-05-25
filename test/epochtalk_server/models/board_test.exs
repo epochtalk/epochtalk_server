@@ -19,7 +19,13 @@ defmodule EpochtalkServerWeb.BoardTest do
         postable_by: 10,
         right_to_left: false
       }
-      Board.create(board)
+      assert {:ok, new_board} = Board.create(board)
+      assert board.name == new_board.name
+      assert board.slug == new_board.slug
+      assert board.description == new_board.description
+      assert board.viewable_by == new_board.viewable_by
+      assert board.postable_by == new_board.postable_by
+      assert board.right_to_left == new_board.right_to_left
     end
   end
 end

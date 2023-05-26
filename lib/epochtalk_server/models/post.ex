@@ -208,7 +208,7 @@ defmodule EpochtalkServer.Models.Post do
               WHERE rp.offender_post_id = p.id AND rp.reporter_user_id = $4
             )
             THEN \'TRUE\'::boolean ELSE \'FALSE\'::boolean END AS reported,
-            CASE WHEN EXISTS (a
+            CASE WHEN EXISTS (
               SELECT ru.id
               FROM administration.reports_users ru
               WHERE ru.offender_user_id = p.user_id AND ru.reporter_user_id = $4 AND ru.status = \'Pending\'
@@ -230,6 +230,21 @@ defmodule EpochtalkServer.Models.Post do
           WHERE p.id = ?
         """,
         plist.id
+      ),
+      on: true
+    )
+    |> join(
+      :left_lateral,
+      [plist, p1],
+      p2 in fragment(
+        """
+          SELECT r.priority, r.highlight_color, r.name as role_name
+          FROM roles_users ru
+          LEFT JOIN roles r ON ru.role_id = r.id
+          WHERE ? = ru.user_id
+          ORDER BY r.priority limit 1
+        """,
+        p1.user_id
       ),
       on: true
     )
@@ -261,8 +276,8 @@ defmodule EpochtalkServer.Models.Post do
       priority: p2.priority,
       highlight_color: p2.highlight_color,
       role_name: p2.role_name
-      # TODO(akinsey): implement default_priority (see old node server code (PostsByThread))
     })
-    Repo.all(inner_query)
+    |> order_by([plist], [plist.position])
+    |> Repo.all()
   end
 end

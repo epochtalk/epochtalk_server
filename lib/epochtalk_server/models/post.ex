@@ -251,7 +251,17 @@ defmodule EpochtalkServer.Models.Post do
       ),
       on: true
     )
-    |> select([plist, p1, p2], %{
+    |> join(
+      :left_lateral,
+      [],
+      p3 in fragment(
+        """
+          SELECT priority FROM roles WHERE lookup =\'user\'
+        """
+        ),
+      on: true
+    )
+    |> select([plist, p1, p2, p3], %{
       id: plist.id,
       position: plist.position,
       thread_id: p1.thread_id,
@@ -278,9 +288,10 @@ defmodule EpochtalkServer.Models.Post do
       name: p1.name,
       priority: p2.priority,
       highlight_color: p2.highlight_color,
-      role_name: p2.role_name
+      role_name: p2.role_name,
+      default_priority: p3.priority
     })
-    |> order_by([plist], [plist.position])
+    |> order_by([plist], plist.position)
     |> Repo.all()
   end
 end

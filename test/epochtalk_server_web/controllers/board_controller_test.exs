@@ -38,4 +38,14 @@ defmodule EpochtalkServerWeb.BoardControllerTest do
       assert result["right_to_left"] == board["right_to_left"]
     end
   end
+
+  describe "slug_to_id/2" do
+    test "does not deslugify a board that doesn't exit", %{conn: conn} do
+      result = conn
+      |> get(Routes.board_path(conn, :slug_to_id, "bad-slug"))
+      |> json_response(400)
+      assert %{"error" => "Bad Request"} = result
+      assert %{"message" => "Error, cannot board does not exist"} = result
+    end
+  end
 end

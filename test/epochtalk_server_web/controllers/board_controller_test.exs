@@ -17,6 +17,19 @@ defmodule EpochtalkServerWeb.BoardControllerTest do
     {:ok, conn: conn, board: new_board, board_attrs: board}
   end
 
+  describe "by_category/2" do
+    test "finds all active boards", %{conn: conn} do
+      result = conn
+      |> get(Routes.board_path(conn, :by_category))
+      |> json_response(200)
+      |> case do
+        %{"boards" => boards} -> boards
+      end
+
+      assert Enum.count(result) == 1
+    end
+  end
+
   describe "find/2" do
     test "does not find a board that doesn't exit", %{conn: conn} do
       result = conn

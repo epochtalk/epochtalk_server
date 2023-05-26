@@ -185,6 +185,7 @@ defmodule EpochtalkServer.Models.Post do
     # TODO(akinsey): calculate defaults for opts
     start = Keyword.get(opts, :start)
     limit = Keyword.get(opts, :per_page)
+    user_id = Keyword.get(opts, :user_id)
 
     inner_query =
       Post
@@ -205,13 +206,13 @@ defmodule EpochtalkServer.Models.Post do
             p.updated_at, p.imported_at, CASE WHEN EXISTS (
               SELECT rp.id
               FROM administration.reports_posts rp
-              WHERE rp.offender_post_id = p.id AND rp.reporter_user_id = $4
+              WHERE rp.offender_post_id = p.id AND rp.reporter_user_id = ?
             )
             THEN \'TRUE\'::boolean ELSE \'FALSE\'::boolean END AS reported,
             CASE WHEN EXISTS (
               SELECT ru.id
               FROM administration.reports_users ru
-              WHERE ru.offender_user_id = p.user_id AND ru.reporter_user_id = $4 AND ru.status = \'Pending\'
+              WHERE ru.offender_user_id = p.user_id AND ru.reporter_user_id = ? AND ru.status = \'Pending\'
             )
             THEN \'TRUE\'::boolean ELSE \'FALSE\'::boolean END AS reported_author,
             CASE WHEN p.user_id = (
@@ -229,6 +230,8 @@ defmodule EpochtalkServer.Models.Post do
           LEFT JOIN boards b ON t.board_id = b.id
           WHERE p.id = ?
         """,
+        ^user_id,
+        ^user_id,
         plist.id
       ),
       on: true

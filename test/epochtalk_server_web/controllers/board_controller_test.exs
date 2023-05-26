@@ -47,5 +47,12 @@ defmodule EpochtalkServerWeb.BoardControllerTest do
       assert %{"error" => "Bad Request"} = result
       assert %{"message" => "Error, cannot board does not exist"} = result
     end
+
+    test "deslugifies a board that exits", %{conn: conn, board: board} do
+      result = conn
+      |> get(Routes.board_path(conn, :slug_to_id, board.slug))
+      |> json_response(200)
+      assert result["id"] == board.id
+    end
   end
 end

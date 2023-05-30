@@ -63,4 +63,17 @@ defmodule EpochtalkServer.BoardMappingTest do
       assert board_mappings_count == 2
     end
   end
+
+  describe "delete_board_by_id/1" do
+    test "deletes a board mapping" do
+      initial_board_mappings_count = BoardMapping.all() |> Enum.count
+      assert initial_board_mappings_count == 1
+
+      board_id = 1
+      BoardMapping.delete_board_by_id(board_id)
+
+      board_mappings_count = BoardMapping.all() |> Enum.count
+      assert board_mappings_count == 0
+    end
+  end
 end

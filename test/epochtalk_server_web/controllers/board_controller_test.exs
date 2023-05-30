@@ -1,11 +1,18 @@
 defmodule EpochtalkServerWeb.BoardControllerTest do
   use EpochtalkServerWeb.ConnCase, async: false
+  alias EpochtalkServer.Models.Category
   alias EpochtalkServer.Models.Board
-  alias EpochtalkServer.Repo
+  alias EpochtalkServer.Models.BoardMapping
 
   setup %{conn: conn} do
+    # create category for testing
+    category_attrs = %{
+      name: "test category"
+    }
+    {:ok, category} = Category.create(category_attrs)
+
     # create board for testing
-    board = %{
+    board_attrs = %{
       name: "test board",
       slug: "test-board",
       description: "test board description",
@@ -13,8 +20,27 @@ defmodule EpochtalkServerWeb.BoardControllerTest do
       postable_by: 10,
       right_to_left: false
     }
-    {:ok, new_board} = Board.create(board)
-    {:ok, conn: conn, board: new_board, board_attrs: board}
+    {:ok, board} = Board.create(board_attrs)
+
+    # create board mapping for testing
+    board_mapping = [
+      %{
+        id: category.id,
+        name: category.name,
+        type: "category",
+        view_order: 0
+      },
+      %{
+        id: board.id,
+        name: board.name,
+        type: "board",
+        category_id: category.id,
+        view_order: 1
+      }
+    ]
+    BoardMapping.update(board_mapping)
+
+    {:ok, conn: conn, board: board, board_attrs: board_attrs, category: category, category_attrs: category_attrs}
   end
 
   describe "by_category/2" do

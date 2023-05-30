@@ -70,12 +70,12 @@ defmodule EpochtalkServerWeb.BoardControllerTest do
       result = conn
       |> get(Routes.board_path(conn, :find, board.id))
       |> json_response(200)
-      assert result["name"] == board["name"]
-      assert result["slug"] == board["slug"]
-      assert result["description"] == board["description"]
-      assert result["viewable_by"] == board["viewable_by"]
-      assert result["postable_by"] == board["postable_by"]
-      assert result["right_to_left"] == board["right_to_left"]
+      assert result["name"] == board.name
+      assert result["slug"] == board.slug
+      assert result["description"] == board.description
+      assert result["viewable_by"] == board.viewable_by
+      assert result["postable_by"] == board.postable_by
+      assert result["right_to_left"] == board.right_to_left
     end
   end
 

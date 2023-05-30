@@ -9,6 +9,7 @@ defmodule EpochtalkServerWeb.BoardControllerTest do
     category_attrs = %{
       name: "test category"
     }
+
     {:ok, category} = Category.create(category_attrs)
 
     # create board for testing
@@ -20,6 +21,7 @@ defmodule EpochtalkServerWeb.BoardControllerTest do
       postable_by: 10,
       right_to_left: false
     }
+
     {:ok, board} = Board.create(board_attrs)
 
     # create board mapping for testing
@@ -38,19 +40,26 @@ defmodule EpochtalkServerWeb.BoardControllerTest do
         view_order: 1
       }
     ]
+
     BoardMapping.update(board_mapping)
 
-    {:ok, conn: conn, board: board, board_attrs: board_attrs, category: category, category_attrs: category_attrs}
+    {:ok,
+     conn: conn,
+     board: board,
+     board_attrs: board_attrs,
+     category: category,
+     category_attrs: category_attrs}
   end
 
   describe "by_category/2" do
     test "finds all active boards", %{conn: conn} do
-      result = conn
-      |> get(Routes.board_path(conn, :by_category))
-      |> json_response(200)
-      |> case do
-        %{"boards" => boards} -> boards
-      end
+      result =
+        conn
+        |> get(Routes.board_path(conn, :by_category))
+        |> json_response(200)
+        |> case do
+          %{"boards" => boards} -> boards
+        end
 
       # two boards: one from seed, one from setup
       assert Enum.count(result) == 2
@@ -59,17 +68,21 @@ defmodule EpochtalkServerWeb.BoardControllerTest do
 
   describe "find/2" do
     test "does not find a board that doesn't exit", %{conn: conn} do
-      result = conn
-      |> get(Routes.board_path(conn, :find, 0))
-      |> json_response(400)
+      result =
+        conn
+        |> get(Routes.board_path(conn, :find, 0))
+        |> json_response(400)
+
       assert %{"error" => "Bad Request"} = result
       assert %{"message" => "Error, board does not exist"} = result
     end
 
     test "finds a board that exits", %{conn: conn, board: board} do
-      result = conn
-      |> get(Routes.board_path(conn, :find, board.id))
-      |> json_response(200)
+      result =
+        conn
+        |> get(Routes.board_path(conn, :find, board.id))
+        |> json_response(200)
+
       assert result["name"] == board.name
       assert result["slug"] == board.slug
       assert result["description"] == board.description
@@ -81,17 +94,21 @@ defmodule EpochtalkServerWeb.BoardControllerTest do
 
   describe "slug_to_id/2" do
     test "does not deslugify a board that doesn't exit", %{conn: conn} do
-      result = conn
-      |> get(Routes.board_path(conn, :slug_to_id, "bad-slug"))
-      |> json_response(400)
+      result =
+        conn
+        |> get(Routes.board_path(conn, :slug_to_id, "bad-slug"))
+        |> json_response(400)
+
       assert %{"error" => "Bad Request"} = result
       assert %{"message" => "Error, cannot board does not exist"} = result
     end
 
     test "deslugifies a board that exits", %{conn: conn, board: board} do
-      result = conn
-      |> get(Routes.board_path(conn, :slug_to_id, board.slug))
-      |> json_response(200)
+      result =
+        conn
+        |> get(Routes.board_path(conn, :slug_to_id, board.slug))
+        |> json_response(200)
+
       assert result["id"] == board.id
     end
   end

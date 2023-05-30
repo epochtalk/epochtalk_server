@@ -10,6 +10,7 @@ defmodule EpochtalkServerWeb.BoardTest do
                      Board.create("")
                    end
     end
+
     test "creates a board with valid parameters", _ do
       board = %{
         name: "test board",
@@ -19,6 +20,7 @@ defmodule EpochtalkServerWeb.BoardTest do
         postable_by: 10,
         right_to_left: false
       }
+
       assert {:ok, new_board} = Board.create(board)
       assert board.name == new_board.name
       assert board.slug == new_board.slug

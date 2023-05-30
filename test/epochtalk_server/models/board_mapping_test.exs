@@ -39,7 +39,7 @@ defmodule EpochtalkServer.BoardMappingTest do
   end
 
   describe "update/1" do
-    test "updates the board mapping", %{category: category, board: board} do
+    test "updates a board mapping", %{category: category, board: board} do
       board_mapping_attrs = [
         %{
           id: category.id,

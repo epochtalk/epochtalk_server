@@ -31,6 +31,13 @@ defmodule EpochtalkServer.BoardMappingTest do
      category_attrs: category_attrs}
   end
 
+  describe "all/1" do
+    test "gets all board mappings" do
+      result = BoardMapping.all()
+      assert Enum.count(result) == 1
+    end
+  end
+
   describe "update/1" do
     test "updates the board mapping", %{category: category, board: board} do
       board_mapping_attrs = [

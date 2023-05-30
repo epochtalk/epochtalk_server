@@ -58,6 +58,9 @@ defmodule EpochtalkServer.BoardMappingTest do
 
       result = BoardMapping.update(board_mapping_attrs)
       assert result == {:ok, :ok}
+
+      board_mappings_count = BoardMapping.all() |> Enum.count
+      assert board_mappings_count == 2
     end
   end
 end

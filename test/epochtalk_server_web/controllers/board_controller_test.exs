@@ -52,7 +52,7 @@ defmodule EpochtalkServerWeb.BoardControllerTest do
   end
 
   describe "by_category/2" do
-    test "finds all active boards", %{conn: conn} do
+    test "finds all active boards", %{conn: conn, category: category, board: board} do
       result =
         conn
         |> get(Routes.board_path(conn, :by_category))
@@ -63,6 +63,42 @@ defmodule EpochtalkServerWeb.BoardControllerTest do
 
       # two boards: one from seed, one from setup
       assert Enum.count(result) == 2
+
+      %{
+        "id" => result_category_id,
+        "name" => result_category_name,
+        "view_order" => result_category_view_order,
+        "boards" => [
+          %{
+            "id" => result_board_id,
+            "board_id" => result_board_board_id,
+            "name" => result_board_name,
+            "category_id" => result_board_category_id,
+            "children" => result_board_children,
+            "description" => result_board_description,
+            "view_order" => result_board_view_order,
+            "slug" => result_board_slug,
+            "viewable_by" => result_board_viewable_by,
+            "postable_by" => result_board_postable_by,
+            "right_to_left" => result_board_right_to_left
+          }
+        ]
+      } = result |> Enum.at(1)
+      assert result_category_id == category.id
+      assert result_category_name == category.name
+      assert result_category_view_order == 0
+      assert result_board_id == board.id
+      assert result_board_board_id == board.id
+      assert result_board_name == board.name
+      assert result_board_category_id == category.id
+      assert result_board_children |> Enum.count == 0
+      assert result_board_description == board.description
+      assert result_board_name == board.name
+      assert result_board_view_order == 1
+      assert result_board_slug == board.slug
+      assert result_board_viewable_by == board.viewable_by
+      assert result_board_postable_by == board.postable_by
+      assert result_board_right_to_left == board.right_to_left
     end
   end
 

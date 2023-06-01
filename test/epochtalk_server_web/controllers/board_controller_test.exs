@@ -67,7 +67,7 @@ defmodule EpochtalkServerWeb.BoardControllerTest do
   end
 
   describe "find/2" do
-    test "does not find a board that doesn't exit", %{conn: conn} do
+    test "does not find a board that doesn't exist", %{conn: conn} do
       result =
         conn
         |> get(Routes.board_path(conn, :find, 0))

@@ -113,7 +113,7 @@ defmodule EpochtalkServerWeb.BoardControllerTest do
       assert %{"message" => "Error, board does not exist"} = result
     end
 
-    test "finds a board that exits", %{conn: conn, board: board} do
+    test "finds a board that exist", %{conn: conn, board: board} do
       result =
         conn
         |> get(Routes.board_path(conn, :find, board.id))
@@ -129,7 +129,7 @@ defmodule EpochtalkServerWeb.BoardControllerTest do
   end
 
   describe "slug_to_id/2" do
-    test "does not deslugify a board that doesn't exit", %{conn: conn} do
+    test "does not deslugify a board that doesn't exist", %{conn: conn} do
       result =
         conn
         |> get(Routes.board_path(conn, :slug_to_id, "bad-slug"))
@@ -139,7 +139,7 @@ defmodule EpochtalkServerWeb.BoardControllerTest do
       assert %{"message" => "Error, cannot board does not exist"} = result
     end
 
-    test "deslugifies a board that exits", %{conn: conn, board: board} do
+    test "deslugifies a board that exist", %{conn: conn, board: board} do
       result =
         conn
         |> get(Routes.board_path(conn, :slug_to_id, board.slug))

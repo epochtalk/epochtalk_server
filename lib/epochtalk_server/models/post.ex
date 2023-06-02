@@ -172,7 +172,6 @@ defmodule EpochtalkServer.Models.Post do
     |> Repo.update_all(set: [position: thread_post_count + 1])
   end
 
-
   @doc """
   Paginates `Post` records for a given a `Thread`
   """
@@ -184,8 +183,8 @@ defmodule EpochtalkServer.Models.Post do
   def page_by_thread_id(thread_id, page \\ 1, opts \\ []) do
     per_page = Keyword.get(opts, :per_page, 25)
     user_id = Keyword.get(opts, :user_id)
-    page = if start = Keyword.get(opts, :start), do: ceil(start/per_page)
-    start = (page*per_page)-per_page
+    page = if start = Keyword.get(opts, :start), do: ceil(start / per_page)
+    start = page * per_page - per_page
     start = if start < 0, do: 0, else: start
 
     inner_query =
@@ -255,11 +254,9 @@ defmodule EpochtalkServer.Models.Post do
     |> join(
       :left_lateral,
       [],
-      p3 in fragment(
-        """
-          SELECT priority FROM roles WHERE lookup =\'user\'
-        """
-        ),
+      p3 in fragment("""
+        SELECT priority FROM roles WHERE lookup =\'user\'
+      """),
       on: true
     )
     |> select([plist, p1, p2, p3], %{

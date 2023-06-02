@@ -6,7 +6,7 @@ defmodule EpochtalkServerWeb.ThreadControllerTest do
     test "does not get threads for board that does not exist", %{conn: conn} do
       result =
         conn
-        |> get(Routes.thread_path(conn, :by_board), %{board_id: 3})
+        |> get(Routes.thread_path(conn, :by_board), %{board_id: -1})
         |> json_response(400)
 
       assert %{"error" => "Bad Request"} = result

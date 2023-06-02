@@ -49,12 +49,12 @@ defmodule EpochtalkServerWeb.PostController do
          {:ok, board_banned} <- BoardBan.is_banned_from_board(user, thread_id: thread_id),
          board_mapping <- BoardMapping.all(),
          board_moderators <- BoardModerator.all(),
-         threads <-
+         thread <- Thread.find(thread_id),
+         posts <-
            Post.page_by_thread_id(thread_id, page,
              user: user,
-             per_page: limit,
-             field: field,
-             desc: desc
+             start: start,
+             per_page: limit
            ) do
       # render(conn, :by_thread, %{
       #   posts: posts,

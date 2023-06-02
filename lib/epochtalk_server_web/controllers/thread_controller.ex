@@ -91,6 +91,9 @@ defmodule EpochtalkServerWeb.ThreadController do
         desc: desc
       })
     else
+      {:can_read, {:error, :board_does_not_exist}} ->
+        ErrorHelpers.render_json_error(conn, 400, "Read error, board does not exist")
+
       {:error, :board_does_not_exist} ->
         ErrorHelpers.render_json_error(conn, 400, "Error, board does not exist")
 

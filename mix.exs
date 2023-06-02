@@ -84,7 +84,8 @@ defmodule EpochtalkServer.MixProject do
       "seed.forum": ["run priv/repo/seed_forum.exs"],
       "seed.user": ["run priv/repo/seed_user.exs"],
       # test seeds
-      "seed.test": ["seed.required", "seed.forum", "seed.test_banned_address", "seed.test_users", "seed.test_thread", "seed.test_moderation_logs"],
+      "seed.test": ["seed.required", "seed.test_boards", "seed.test_banned_address", "seed.test_users", "seed.test_thread", "seed.test_moderation_logs"],
+      "seed.test_boards": ["run priv/repo/test/seed_boards.exs"],
       "seed.test_banned_address": ["run priv/repo/test/seed_banned_address.exs"],
       "seed.test_users": ["run priv/repo/test/seed_users.exs"],
       "seed.test_thread": ["run priv/repo/test/seed_thread.exs"],

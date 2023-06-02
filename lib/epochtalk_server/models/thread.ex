@@ -259,7 +259,88 @@ defmodule EpochtalkServer.Models.Thread do
     }
   end
 
+  @doc """
+  Returns paged threads by `Board` given a `board_id`
+  """
+  @spec find(id_or_slug :: non_neg_integer | String.t()) :: map() | nil
+  def find(id) when is_integer(id) do
+    initial_query =
+      from t in Thread,
+        where: t.id == ^id,
+        select: %{
+          id: t.id,
+          board_id: t.board_id,
+          slug: t.slug,
+          locked: t.locked,
+          sticky: t.sticky,
+          moderated: t.moderated,
+          post_count: t.post_count,
+          created_at: t.created_at,
+          updated_at: t.updated_at
+        }
+
+    find_shared(initial_query)
+  end
+
+  def find(slug) when is_binary(slug) do
+    initial_query =
+      from t in Thread,
+        where: t.slug == ^slug,
+        select: %{
+          id: t.id,
+          board_id: t.board_id,
+          slug: t.slug,
+          locked: t.locked,
+          sticky: t.sticky,
+          moderated: t.moderated,
+          post_count: t.post_count,
+          created_at: t.created_at,
+          updated_at: t.updated_at
+        }
+
+    find_shared(initial_query)
+  end
+
   ## === Private Helper Functions ===
+
+  defp find_shared(initial_query) do
+    query =
+      from(t in subquery(initial_query))
+      |> join(
+        :left_lateral,
+        [t],
+        p in fragment(
+          """
+            SELECT
+              p1.user_id, p1.content ->> \'title\' as title, u.username, u.deleted as user_deleted
+              FROM posts p1
+              LEFT JOIN users u on p1.user_id = u.id
+              WHERE p1.thread_id = ?
+              ORDER BY p1.created_at
+              LIMIT 1
+          """,
+          t.id
+        ),
+        on: true
+      )
+      |> select([t, p], %{
+        id: t.id,
+        board_id: t.board_id,
+        slug: t.slug,
+        locked: t.locked,
+        sticky: t.sticky,
+        moderated: t.moderated,
+        created_at: t.created_at,
+        updated_at: t.updated_at,
+        post_count: t.post_count,
+        user_id: p.user_id,
+        title: p.title,
+        username: p.username,
+        user_deleted: p.user_deleted
+      })
+
+    Repo.one(query)
+  end
 
   defp sticky_by_board_id(board_id, page, opts) when page == 1,
     do: generate_thread_query(board_id, true, opts) |> Repo.all()

@@ -84,6 +84,7 @@ defmodule EpochtalkServerWeb.BoardControllerTest do
           }
         ]
       } = result |> Enum.at(1)
+
       assert result_category_id == category.id
       assert result_category_name == category.name
       assert result_category_view_order == 0
@@ -91,7 +92,7 @@ defmodule EpochtalkServerWeb.BoardControllerTest do
       assert result_board_board_id == board.id
       assert result_board_name == board.name
       assert result_board_category_id == category.id
-      assert result_board_children |> Enum.count == 0
+      assert result_board_children |> Enum.count() == 0
       assert result_board_description == board.description
       assert result_board_name == board.name
       assert result_board_view_order == 1

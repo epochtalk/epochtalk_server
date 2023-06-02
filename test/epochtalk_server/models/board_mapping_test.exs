@@ -25,10 +25,7 @@ defmodule EpochtalkServer.BoardMappingTest do
     {:ok, board} = Board.create(board_attrs)
 
     {:ok,
-     board: board,
-     board_attrs: board_attrs,
-     category: category,
-     category_attrs: category_attrs}
+     board: board, board_attrs: board_attrs, category: category, category_attrs: category_attrs}
   end
 
   describe "all/1" do
@@ -59,20 +56,20 @@ defmodule EpochtalkServer.BoardMappingTest do
       result = BoardMapping.update(board_mapping_attrs)
       assert result == {:ok, :ok}
 
-      board_mappings_count = BoardMapping.all() |> Enum.count
+      board_mappings_count = BoardMapping.all() |> Enum.count()
       assert board_mappings_count == 2
     end
   end
 
   describe "delete_board_by_id/1" do
     test "deletes a board mapping" do
-      initial_board_mappings_count = BoardMapping.all() |> Enum.count
+      initial_board_mappings_count = BoardMapping.all() |> Enum.count()
       assert initial_board_mappings_count == 1
 
       board_id = 1
       BoardMapping.delete_board_by_id(board_id)
 
-      board_mappings_count = BoardMapping.all() |> Enum.count
+      board_mappings_count = BoardMapping.all() |> Enum.count()
       assert board_mappings_count == 0
     end
   end

@@ -15,7 +15,6 @@ defmodule EpochtalkServerWeb.PostController do
   alias EpochtalkServer.Models.BoardMapping
   alias EpochtalkServer.Models.BoardModerator
 
-
   # @doc """
   # Used to create posts
   # """

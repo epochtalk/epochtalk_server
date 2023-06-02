@@ -124,17 +124,19 @@ defmodule EpochtalkServer.Models.Board do
     end
   end
 
-
   @doc """
   Determines if the provided `user_priority` has write access to the board that contains the thread
   the specified `thread_idid`
 
   TODO(akinsey): Should this check against banned user_priority?
   """
-  @spec get_write_access_by_thread_id(thread_id :: non_neg_integer, user_priority :: non_neg_integer) ::
+  @spec get_write_access_by_thread_id(
+          thread_id :: non_neg_integer,
+          user_priority :: non_neg_integer
+        ) ::
           {:ok, can_write :: boolean} | {:error, :board_does_not_exist}
   def get_write_access_by_thread_id(thread_id, user_priority) do
-        query =
+    query =
       from b in Board,
         left_join: t in Thread,
         on: t.board_id == b.id,
@@ -171,7 +173,10 @@ defmodule EpochtalkServer.Models.Board do
 
   TODO(akinsey): Should this check against banned user_priority?
   """
-  @spec get_read_access_by_id(thread_id :: non_neg_integer, user_priority :: non_neg_integer) ::
+  @spec get_read_access_by_thread_id(
+          thread_id :: non_neg_integer,
+          user_priority :: non_neg_integer
+        ) ::
           {:ok, can_read :: boolean} | {:error, :board_does_not_exist}
   def get_read_access_by_thread_id(thread_id, user_priority) do
     query =

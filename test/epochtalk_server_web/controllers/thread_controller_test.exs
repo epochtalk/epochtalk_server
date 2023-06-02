@@ -10,7 +10,7 @@ defmodule EpochtalkServerWeb.ThreadControllerTest do
         |> json_response(400)
 
       assert %{"error" => "Bad Request"} = result
-      assert %{"message" => "Error, board does not exist"} = result
+      assert %{"message" => "Read error, board does not exist"} = result
     end
   end
 end

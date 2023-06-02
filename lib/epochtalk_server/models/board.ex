@@ -199,7 +199,9 @@ defmodule EpochtalkServer.Models.Board do
     })
     |> Repo.all()
     |> case do
-      [] -> {:error, :board_does_not_exist}
+      [] ->
+        {:error, :board_does_not_exist}
+
       board_and_parents ->
         # not readable if nothing in list, readable if viewable_by is nil, otherwise check viewable_by against user priority
         can_read =
@@ -207,7 +209,9 @@ defmodule EpochtalkServer.Models.Board do
             boards_viewable =
               not (is_integer(i.board_viewable_by) && user_priority > i.board_viewable_by)
 
-            cats_viewable = not (is_integer(i.cat_viewable_by) && user_priority > i.cat_viewable_by)
+            cats_viewable =
+              not (is_integer(i.cat_viewable_by) && user_priority > i.cat_viewable_by)
+
             acc && boards_viewable && cats_viewable
           end)
 

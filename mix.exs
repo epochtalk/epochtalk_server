@@ -84,11 +84,12 @@ defmodule EpochtalkServer.MixProject do
       "seed.forum": ["run priv/repo/seed_forum.exs"],
       "seed.user": ["run priv/repo/seed_user.exs"],
       # test seeds
-      "seed.test": ["seed.required", "seed.forum", "seed.test_banned_address", "seed.test_users", "seed.test_thread", "seed.test_moderation_logs"],
-      "seed.test_banned_address": ["run priv/repo/seed_test_banned_address.exs"],
-      "seed.test_users": ["run priv/repo/seed_test_users.exs"],
-      "seed.test_thread": ["run priv/repo/seed_test_thread.exs"],
-      "seed.test_moderation_logs": ["run priv/repo/seed_test_moderation_log.exs"],
+      "seed.test": ["seed.required", "seed.test_boards", "seed.test_banned_address", "seed.test_users", "seed.test_thread", "seed.test_moderation_logs"],
+      "seed.test_boards": ["run test/seed/boards.exs"],
+      "seed.test_banned_address": ["run test/seed/banned_address.exs"],
+      "seed.test_users": ["run test/seed/users.exs"],
+      "seed.test_thread": ["run test/seed/thread.exs"],
+      "seed.test_moderation_logs": ["run test/seed/moderation_log.exs"],
       test: [
         "ecto.drop",
         "ecto.create --quiet",

@@ -2,7 +2,7 @@ defmodule EpochtalkServer.Models.Poll do
   use Ecto.Schema
   import Ecto.Changeset
   import EpochtalkServer.Validators.NaiveDateTime
-  # import Ecto.Query
+  import Ecto.Query
   alias EpochtalkServer.Repo
   alias EpochtalkServer.Models.Poll
   alias EpochtalkServer.Models.PollAnswer
@@ -139,5 +139,16 @@ defmodule EpochtalkServer.Models.Poll do
           Repo.rollback(cs)
       end
     end)
+  end
+
+  @doc """
+  Queries `Poll` Data by thread
+  """
+  def by_thread(thread_id) do
+    query =
+      from p in Poll,
+      where: p.thread_id == ^thread_id,
+      preload: [poll_answers: :poll_responses]
+    Repo.one(query)
   end
 end

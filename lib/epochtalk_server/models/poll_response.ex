@@ -11,13 +11,13 @@ defmodule EpochtalkServer.Models.PollResponse do
   `PollResponse` model, for performing actions relating to `Poll` answers
   """
   @type t :: %__MODULE__{
-          poll_answer_id: non_neg_integer | nil,
+          answer_id: non_neg_integer | nil,
           user_id: non_neg_integer | nil
         }
-  @derive {Jason.Encoder, only: [:poll_answer_id, :user_id]}
+  @derive {Jason.Encoder, only: [:answer_id, :user_id]}
   @primary_key false
-  schema "poll_response" do
-    belongs_to :poll_answer, PollAnswer
+  schema "poll_responses" do
+    belongs_to :answer, PollAnswer
     belongs_to :user, User
   end
 
@@ -32,8 +32,8 @@ defmodule EpochtalkServer.Models.PollResponse do
         ) :: Ecto.Changeset.t()
   def changeset(poll_response, attrs \\ %{}) do
     poll_response
-    |> cast(attrs, [:poll_answer_id, :user_id])
-    |> validate_required([:poll_answer_id, :user_id])
+    |> cast(attrs, [:answer_id, :user_id])
+    |> validate_required([:answer_id, :user_id])
   end
 
   @doc """
@@ -45,9 +45,9 @@ defmodule EpochtalkServer.Models.PollResponse do
         ) :: Ecto.Changeset.t()
   def create_changeset(poll_response, attrs \\ %{}) do
     poll_response
-    |> cast(attrs, [:poll_answer_id, :user_id])
-    |> validate_required([:poll_answer_id, :user_id])
-    |> foreign_key_constraint(:poll_answer_id, name: :poll_responses_answer_id_fkey)
+    |> cast(attrs, [:answer_id, :user_id])
+    |> validate_required([:answer_id, :user_id])
+    |> foreign_key_constraint(:answer_id, name: :poll_responses_answer_id_fkey)
     |> foreign_key_constraint(:user_id, name: :poll_responses_user_id_fkey)
   end
 end

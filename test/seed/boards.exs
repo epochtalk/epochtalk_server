@@ -3,40 +3,53 @@ alias EpochtalkServer.Models.Board
 alias EpochtalkServer.Models.BoardMapping
 alias EpochtalkServer.Repo
 
-category_name = "General"
-category = %{
-  name: category_name
+general_category = %{
+  name: "General"
 }
 
-board_name = "General Discussion"
-board_description = "Every forum's got one; talk about anything here"
-board_slug = "general-discussion"
-board = %{
-  name: board_name,
-  description: board_description,
-  slug: board_slug
+general_board = %{
+  name: "General Discussion",
+  description: "Every forum's got one; talk about anything here",
+  slug: "general-discussion"
+}
+
+private_board = %{
+  name: "Private Board",
+  description: "this board is private",
+  slug: "private-board"
 }
 
 Repo.transaction(fn ->
-  category_id = Category.create(category)
+  general_category_id = Category.create(general_category)
   |> case do {:ok, c} -> c.id end
 
-  board_id = Board.create(board)
+  general_board_id = Board.create(general_board)
+  |> case do {:ok, b} -> b.id end
+
+  private_board_id = Board.create(private_board)
   |> case do {:ok, b} -> b.id end
 
   board_mapping = [
     %{
-      id: category_id,
-      name: category_name,
+      id: general_category_id,
+      name: general_category.name,
       type: "category",
       view_order: 0
     },
     %{
-      id: board_id,
-      name: board_name,
+      id: general_board_id,
+      name: general_board.name,
       type: "board",
-      category_id: category_id,
+      category_id: general_category_id,
       view_order: 1
+    },
+    %{
+      id: private_board_id,
+      name: private_board.name,
+      type: "board",
+      category_id: general_category_id,
+      viewable_by: 1,
+      view_order: 2
     }
   ]
 

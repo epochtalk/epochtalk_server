@@ -16,6 +16,7 @@ general_board = %{
 private_board = %{
   name: "Private Board",
   description: "this board is private",
+  viewable_by: 1,
   slug: "private-board"
 }
 
@@ -48,7 +49,6 @@ Repo.transaction(fn ->
       name: private_board.name,
       type: "board",
       category_id: general_category_id,
-      viewable_by: 1,
       view_order: 2
     }
   ]

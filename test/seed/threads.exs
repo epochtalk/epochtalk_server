@@ -13,16 +13,16 @@ thread = %{
   "slug" => "test_slug"
 }
 
-private_board_thread = %{
-  "title" => "private thread test",
-  "body" => "testing private thread",
+admin_board_thread = %{
+  "title" => "admin board thread test",
+  "body" => "testing admin board thread",
   "board_id" => 2,
   "sticky" => false,
   "locked" => false,
   "moderated" => false,
   "addPoll" => false,
   "pollValid" => false,
-  "slug" => "private_test_slug"
+  "slug" => "admin_board_test_slug"
 }
 
 Repo.transaction(fn ->
@@ -38,13 +38,13 @@ Repo.transaction(fn ->
 end)
 
 Repo.transaction(fn ->
-  Thread.create(private_board_thread, 1)
+  Thread.create(admin_board_thread, 1)
   |> case do
     {:ok, _} ->
-      IO.puts("Successfully seeded private test thread")
+      IO.puts("Successfully seeded admin board test thread")
 
     {:error, error} ->
-      IO.puts("Error seeding private test thread")
+      IO.puts("Error seeding admin board test thread")
       IO.inspect(error)
   end
 end)

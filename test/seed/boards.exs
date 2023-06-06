@@ -13,11 +13,11 @@ general_board = %{
   slug: "general-discussion"
 }
 
-private_board = %{
-  name: "Private Board",
-  description: "this board is private",
+admin_board = %{
+  name: "Admin Board",
+  description: "this board is for admins",
   viewable_by: 1,
-  slug: "private-board"
+  slug: "admin-board"
 }
 
 Repo.transaction(fn ->
@@ -27,7 +27,7 @@ Repo.transaction(fn ->
   general_board_id = Board.create(general_board)
   |> case do {:ok, b} -> b.id end
 
-  private_board_id = Board.create(private_board)
+  admin_board_id = Board.create(admin_board)
   |> case do {:ok, b} -> b.id end
 
   board_mapping = [
@@ -45,8 +45,8 @@ Repo.transaction(fn ->
       view_order: 1
     },
     %{
-      id: private_board_id,
-      name: private_board.name,
+      id: admin_board_id,
+      name: admin_board.name,
       type: "board",
       category_id: general_category_id,
       view_order: 2

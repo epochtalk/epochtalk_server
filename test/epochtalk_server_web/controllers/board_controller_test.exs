@@ -64,6 +64,9 @@ defmodule EpochtalkServerWeb.BoardControllerTest do
       # two categories: one from seed, one from setup
       assert Enum.count(result) == 2
 
+      seeded_category = result |> Enum.at(0)
+      assert seeded_category |> Map.get("boards") |> Enum.count == 2
+
       %{
         "id" => result_category_id,
         "name" => result_category_name,

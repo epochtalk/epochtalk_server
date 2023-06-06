@@ -58,20 +58,21 @@ defmodule EpochtalkServerWeb.PostController do
              start: start,
              per_page: limit
            ) do
-      # render(conn, :by_thread, %{
-      #   posts: posts,
-      #   write_access: write_access && is_map(user) && !board_banned,
-      #   board_banned: board_banned,
-      #   user: user,
-      #   user_priority: user_priority,
-      #   board_id: board_id,
-      #   board_mapping: board_mapping,
-      #   board_moderators: board_moderators,
-      #   page: page,
-      #   field: field,
-      #   limit: limit,
-      #   desc: desc
-      # })
+      render(conn, :by_thread, %{
+        posts: posts,
+        poll: poll,
+        thread: thread,
+        write_access: write_access && is_map(user) && !board_banned,
+        board_banned: board_banned,
+        user: user,
+        user_priority: user_priority,
+        board_mapping: board_mapping,
+        board_moderators: board_moderators,
+        page: page,
+        start: start,
+        limit: limit,
+        desc: desc
+      })
     else
       {:error, :board_does_not_exist} ->
         ErrorHelpers.render_json_error(conn, 400, "Error, thread does not exist")

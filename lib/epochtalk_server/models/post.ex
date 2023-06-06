@@ -183,7 +183,7 @@ defmodule EpochtalkServer.Models.Post do
   def page_by_thread_id(thread_id, page \\ 1, opts \\ []) do
     per_page = Keyword.get(opts, :per_page, 25)
     user_id = Keyword.get(opts, :user_id)
-    page = if start = Keyword.get(opts, :start), do: ceil(start / per_page)
+    page = if start = Keyword.get(opts, :start), do: ceil(start / per_page), else: page
     start = page * per_page - per_page
     start = if start < 0, do: 0, else: start
 

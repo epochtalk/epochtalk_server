@@ -21,6 +21,32 @@ defmodule EpochtalkServerWeb.ThreadControllerTest do
 
       assert Map.has_key?(result, "normal") == true
       assert Map.has_key?(result, "sticky") == true
+
+      normal_threads = result["normal"]
+      first_thread = normal_threads |> List.first
+      assert Map.has_key?(first_thread, "created_at") == true
+      assert Map.has_key?(first_thread, "id") == true
+      assert Map.has_key?(first_thread, "last_post_avatar") == true
+      assert Map.has_key?(first_thread, "last_post_created_at") == true
+      assert Map.has_key?(first_thread, "last_post_id") == true
+      assert Map.has_key?(first_thread, "last_post_position") == true
+      assert Map.has_key?(first_thread, "last_post_username") == true
+      assert Map.has_key?(first_thread, "locked") == true
+      assert Map.has_key?(first_thread, "moderated") == true
+      assert Map.has_key?(first_thread, "poll") == true
+      assert Map.has_key?(first_thread, "post_count") == true
+      assert Map.has_key?(first_thread, "slug") == true
+      assert Map.has_key?(first_thread, "sticky") == true
+      assert Map.has_key?(first_thread, "title") == true
+      assert Map.has_key?(first_thread, "updated_at") == true
+      assert Map.has_key?(first_thread, "user") == true
+      assert Map.has_key?(first_thread, "view_count") == true
+
+      assert Map.get(first_thread, "locked") == false
+      assert Map.get(first_thread, "moderated") == false
+      assert Map.get(first_thread, "slug") == "test_slug"
+      assert Map.get(first_thread, "sticky") == false
+      assert Map.get(first_thread, "title") == "test"
     end
   end
 end

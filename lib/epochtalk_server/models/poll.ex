@@ -144,11 +144,13 @@ defmodule EpochtalkServer.Models.Poll do
   @doc """
   Queries `Poll` Data by thread
   """
+  @spec by_thread(thread_id :: integer) :: t() | nil
   def by_thread(thread_id) do
     query =
       from p in Poll,
-      where: p.thread_id == ^thread_id,
-      preload: [poll_answers: :poll_responses]
+        where: p.thread_id == ^thread_id,
+        preload: [poll_answers: :poll_responses]
+
     Repo.one(query)
   end
 end

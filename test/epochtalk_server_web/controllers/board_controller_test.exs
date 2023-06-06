@@ -61,7 +61,7 @@ defmodule EpochtalkServerWeb.BoardControllerTest do
           %{"boards" => boards} -> boards
         end
 
-      # two boards: one from seed, one from setup
+      # two categories: one from seed, one from setup
       assert Enum.count(result) == 2
 
       %{

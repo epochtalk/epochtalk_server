@@ -48,7 +48,18 @@ defmodule EpochtalkServerWeb.ThreadControllerTest do
       assert Map.get(first_thread, "title") == "test"
     end
 
-    test "does not get threads for board that is above user priority", %{conn: conn} do
+    test "does not get threads for board that is above user priority (unauthenticated)", %{conn: conn} do
+      result =
+        conn
+        |> get(Routes.thread_path(conn, :by_board), %{board_id: 2})
+        |> json_response(403)
+
+      assert %{"error" => "Forbidden"} = result
+      assert %{"message" => "Unauthorized, you do not have permission"} = result
+    end
+
+    @tag :authenticated
+    test "does not get threads for board that is above user priority (authenticated)", %{conn: conn} do
       result =
         conn
         |> get(Routes.thread_path(conn, :by_board), %{board_id: 2})

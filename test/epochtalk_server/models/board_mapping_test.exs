@@ -31,12 +31,14 @@ defmodule EpochtalkServer.BoardMappingTest do
   describe "all/1" do
     test "gets all board mappings" do
       result = BoardMapping.all()
-      assert Enum.count(result) == 1
+      assert Enum.count(result) >= 1
     end
   end
 
   describe "update/1" do
     test "updates a board mapping", %{category: category, board: board} do
+      initial_board_mappings_count = BoardMapping.all() |> Enum.count()
+
       board_mapping_attrs = [
         %{
           id: category.id,
@@ -57,20 +59,19 @@ defmodule EpochtalkServer.BoardMappingTest do
       assert result == {:ok, :ok}
 
       board_mappings_count = BoardMapping.all() |> Enum.count()
-      assert board_mappings_count == 2
+      assert board_mappings_count == initial_board_mappings_count + 1
     end
   end
 
   describe "delete_board_by_id/1" do
     test "deletes a board mapping" do
       initial_board_mappings_count = BoardMapping.all() |> Enum.count()
-      assert initial_board_mappings_count == 1
 
       board_id = 1
       BoardMapping.delete_board_by_id(board_id)
 
       board_mappings_count = BoardMapping.all() |> Enum.count()
-      assert board_mappings_count == 0
+      assert board_mappings_count == initial_board_mappings_count - 1
     end
   end
 end

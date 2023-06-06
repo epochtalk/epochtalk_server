@@ -9,6 +9,7 @@ defmodule EpochtalkServerWeb.PostController do
   alias EpochtalkServerWeb.Helpers.Validate
   alias EpochtalkServerWeb.Helpers.ACL
   alias EpochtalkServer.Models.Post
+  alias EpochtalkServer.Models.Poll
   alias EpochtalkServer.Models.Thread
   alias EpochtalkServer.Models.Board
   alias EpochtalkServer.Models.BoardBan
@@ -32,7 +33,7 @@ defmodule EpochtalkServerWeb.PostController do
   # end
 
   @doc """
-  Used to retrieve posts by thread
+  Used to retrieve `Posts` by `Thread`
   """
   def by_thread(conn, attrs) do
     with thread_id <- Validate.cast(attrs, "thread_id", :integer, required: true),
@@ -49,6 +50,7 @@ defmodule EpochtalkServerWeb.PostController do
          {:ok, board_banned} <- BoardBan.is_banned_from_board(user, thread_id: thread_id),
          board_mapping <- BoardMapping.all(),
          board_moderators <- BoardModerator.all(),
+         poll <- Poll.by_thread(thread_id),
          thread <- Thread.find(thread_id),
          posts <-
            Post.page_by_thread_id(thread_id, page,

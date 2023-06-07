@@ -32,11 +32,12 @@ defmodule EpochtalkServerWeb.PostJSON do
         user_priority
       )
 
+    poll = format_poll_data_for_by_thread(poll)
+
     %{
       board: board,
       posts: posts,
-      poll: poll,
-      thread: thread,
+      thread: Map.put(thread, :poll, poll),
       write_access: write_access,
       board_banned: board_banned,
       user: user,
@@ -45,5 +46,10 @@ defmodule EpochtalkServerWeb.PostJSON do
       limit: limit,
       desc: desc
     }
+  end
+
+  # TODO(akinsey): format poll reponses and answers to match route output
+  defp format_poll_data_for_by_thread(poll) do
+    poll
   end
 end

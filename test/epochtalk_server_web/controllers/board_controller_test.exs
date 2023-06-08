@@ -66,7 +66,7 @@ defmodule EpochtalkServerWeb.BoardControllerTest do
 
       # check seeded category boards
       seeded_category = result |> Enum.at(0)
-      assert seeded_category |> Map.get("boards") |> Enum.count == 2
+      assert seeded_category |> Map.get("boards") |> Enum.count() == 2
 
       # setup category
       %{

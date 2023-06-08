@@ -21,14 +21,23 @@ admin_board = %{
 }
 
 Repo.transaction(fn ->
-  general_category_id = Category.create(general_category)
-  |> case do {:ok, c} -> c.id end
+  general_category_id =
+    Category.create(general_category)
+    |> case do
+      {:ok, c} -> c.id
+    end
 
-  general_board_id = Board.create(general_board)
-  |> case do {:ok, b} -> b.id end
+  general_board_id =
+    Board.create(general_board)
+    |> case do
+      {:ok, b} -> b.id
+    end
 
-  admin_board_id = Board.create(admin_board)
-  |> case do {:ok, b} -> b.id end
+  admin_board_id =
+    Board.create(admin_board)
+    |> case do
+      {:ok, b} -> b.id
+    end
 
   board_mapping = [
     %{
@@ -56,7 +65,9 @@ Repo.transaction(fn ->
   BoardMapping.update(board_mapping)
 end)
 |> case do
-  {:ok, _} -> IO.puts("Success")
+  {:ok, _} ->
+    IO.puts("Success")
+
   {:error, error} ->
     IO.puts("Error during seed")
     IO.inspect(error)

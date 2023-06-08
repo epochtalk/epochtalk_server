@@ -22,7 +22,7 @@ defmodule EpochtalkServerWeb.ThreadControllerTest do
       assert Map.has_key?(result, "sticky") == true
 
       normal_threads = result["normal"]
-      first_thread = normal_threads |> List.first
+      first_thread = normal_threads |> List.first()
       assert Map.has_key?(first_thread, "created_at") == true
       assert Map.has_key?(first_thread, "id") == true
       assert Map.has_key?(first_thread, "last_post_avatar") == true
@@ -48,7 +48,9 @@ defmodule EpochtalkServerWeb.ThreadControllerTest do
       assert Map.get(first_thread, "title") == "test"
     end
 
-    test "does not get threads for board that is above user priority (unauthenticated)", %{conn: conn} do
+    test "does not get threads for board that is above user priority (unauthenticated)", %{
+      conn: conn
+    } do
       result =
         conn
         |> get(Routes.thread_path(conn, :by_board), %{board_id: 2})
@@ -59,7 +61,9 @@ defmodule EpochtalkServerWeb.ThreadControllerTest do
     end
 
     @tag :authenticated
-    test "does not get threads for board that is above user priority (authenticated)", %{conn: conn} do
+    test "does not get threads for board that is above user priority (authenticated)", %{
+      conn: conn
+    } do
       result =
         conn
         |> get(Routes.thread_path(conn, :by_board), %{board_id: 2})

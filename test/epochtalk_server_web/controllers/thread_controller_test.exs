@@ -51,26 +51,38 @@ defmodule EpochtalkServerWeb.ThreadControllerTest do
     test "does not get threads for board that is above user priority (unauthenticated)", %{
       conn: conn
     } do
-      result =
+      admin_board_result =
         conn
         |> get(Routes.thread_path(conn, :by_board), %{board_id: 2})
         |> json_response(403)
+      super_admin_board_result =
+        conn
+        |> get(Routes.thread_path(conn, :by_board), %{board_id: 3})
+        |> json_response(403)
 
-      assert %{"error" => "Forbidden"} = result
-      assert %{"message" => "Unauthorized, you do not have permission"} = result
+      assert %{"error" => "Forbidden"} = admin_board_result
+      assert %{"message" => "Unauthorized, you do not have permission"} = admin_board_result
+      assert %{"error" => "Forbidden"} = super_admin_board_result
+      assert %{"message" => "Unauthorized, you do not have permission"} = super_admin_board_result
     end
 
     @tag :authenticated
     test "does not get threads for board that is above user priority (authenticated)", %{
       conn: conn
     } do
-      result =
+      admin_board_result =
         conn
         |> get(Routes.thread_path(conn, :by_board), %{board_id: 2})
         |> json_response(403)
+      super_admin_board_result =
+        conn
+        |> get(Routes.thread_path(conn, :by_board), %{board_id: 3})
+        |> json_response(403)
 
-      assert %{"error" => "Forbidden"} = result
-      assert %{"message" => "Unauthorized, you do not have permission"} = result
+      assert %{"error" => "Forbidden"} = admin_board_result
+      assert %{"message" => "Unauthorized, you do not have permission"} = admin_board_result
+      assert %{"error" => "Forbidden"} = super_admin_board_result
+      assert %{"message" => "Unauthorized, you do not have permission"} = super_admin_board_result
     end
 
     @tag authenticated: :admin
@@ -78,6 +90,17 @@ defmodule EpochtalkServerWeb.ThreadControllerTest do
       result =
         conn
         |> get(Routes.thread_path(conn, :by_board), %{board_id: 2})
+        |> json_response(200)
+
+      assert Map.has_key?(result, "normal") == true
+      assert Map.has_key?(result, "sticky") == true
+    end
+
+    @tag authenticated: :admin
+    test "gets threads for board that is at user priority", %{conn: conn} do
+      result =
+        conn
+        |> get(Routes.thread_path(conn, :by_board), %{board_id: 3})
         |> json_response(200)
 
       assert Map.has_key?(result, "normal") == true

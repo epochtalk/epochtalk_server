@@ -20,6 +20,13 @@ admin_board = %{
   slug: "admin-board"
 }
 
+super_admin_board = %{
+  name: "Admin Board",
+  description: "this board is for admins",
+  viewable_by: 0,
+  slug: "super-admin-board"
+}
+
 Repo.transaction(fn ->
   general_category_id =
     Category.create(general_category)
@@ -35,6 +42,12 @@ Repo.transaction(fn ->
 
   admin_board_id =
     Board.create(admin_board)
+    |> case do
+      {:ok, b} -> b.id
+    end
+
+  super_admin_board_id =
+    Board.create(super_admin_board)
     |> case do
       {:ok, b} -> b.id
     end
@@ -59,6 +72,13 @@ Repo.transaction(fn ->
       type: "board",
       category_id: general_category_id,
       view_order: 2
+    },
+    %{
+      id: super_admin_board_id,
+      name: super_admin_board.name,
+      type: "board",
+      category_id: general_category_id,
+      view_order: 3
     }
   ]
 

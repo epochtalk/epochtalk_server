@@ -25,6 +25,18 @@ admin_board_thread = %{
   "slug" => "admin_board_test_slug"
 }
 
+super_admin_board_thread = %{
+  "title" => "super admin board thread test",
+  "body" => "testing super admin board thread",
+  "board_id" => 3,
+  "sticky" => false,
+  "locked" => false,
+  "moderated" => false,
+  "addPoll" => false,
+  "pollValid" => false,
+  "slug" => "super_admin_board_test_slug"
+}
+
 Repo.transaction(fn ->
   Thread.create(thread, 1)
   |> case do
@@ -45,6 +57,18 @@ Repo.transaction(fn ->
 
     {:error, error} ->
       IO.puts("Error seeding admin board test thread")
+      IO.inspect(error)
+  end
+end)
+
+Repo.transaction(fn ->
+  Thread.create(super_admin_board_thread, 1)
+  |> case do
+    {:ok, _} ->
+      IO.puts("Successfully seeded super admin board test thread")
+
+    {:error, error} ->
+      IO.puts("Error seeding super admin board test thread")
       IO.inspect(error)
   end
 end)

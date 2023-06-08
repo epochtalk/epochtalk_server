@@ -55,6 +55,7 @@ defmodule EpochtalkServerWeb.ThreadControllerTest do
         conn
         |> get(Routes.thread_path(conn, :by_board), %{board_id: 2})
         |> json_response(403)
+
       super_admin_board_result =
         conn
         |> get(Routes.thread_path(conn, :by_board), %{board_id: 3})
@@ -74,6 +75,7 @@ defmodule EpochtalkServerWeb.ThreadControllerTest do
         conn
         |> get(Routes.thread_path(conn, :by_board), %{board_id: 2})
         |> json_response(403)
+
       super_admin_board_result =
         conn
         |> get(Routes.thread_path(conn, :by_board), %{board_id: 3})

@@ -34,7 +34,7 @@ threads = [
     "addPoll" => false,
     "pollValid" => false,
     "slug" => "test_slug3"
-  },
+  }
 ]
 
 admin_board_thread = %{

@@ -267,6 +267,23 @@ defmodule EpochtalkServer.Models.Board do
       else: {:error, :board_does_not_exist}
   end
 
+  @doc """
+  Find a `Board` by it's `id`
+  """
+  @spec find_by_id(id :: non_neg_integer) ::
+          {:ok, t()} | {:error, :board_does_not_exist}
+  def find_by_id(id) when is_integer(id) do
+    query =
+      from b in Board,
+        where: b.id == ^id
+
+    board = Repo.one(query)
+
+    if board,
+      do: {:ok, board},
+      else: {:error, :board_does_not_exist}
+  end
+
   ## ======== Private Helpers ========
 
   defp get_write_access(board, user_priority) do

@@ -48,6 +48,8 @@ defmodule EpochtalkServerWeb.PostJSON do
     }
   end
 
+  ## === Private Helper Functions ===
+
   defp format_poll_data_for_by_thread(poll, user) do
     formatted_poll = %{
       id: poll.id,

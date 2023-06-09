@@ -87,14 +87,10 @@ defmodule EpochtalkServerWeb.ThreadJSON do
     if board_banned, do: Map.put(result, :board_banned, board_banned), else: result
   end
 
-  defp format_thread_data(thread, user_id) do
-    thread
-    |> format_user_data()
-    |> format_last_post_data(user_id)
-    |> format_last_post_user_data()
-  end
-
-  defp format_user_data(thread) do
+  @doc """
+  Used to format `Thread` user data from db into the format the frontend expects
+  """
+  def format_user_data(thread) do
     # handle deleted user
     thread =
       if thread.user_deleted,
@@ -115,6 +111,15 @@ defmodule EpochtalkServerWeb.ThreadJSON do
     |> Map.delete(:user_id)
     |> Map.delete(:username)
     |> Map.delete(:user_deleted)
+  end
+
+  ## === Private Helper Functions ===
+
+  defp format_thread_data(thread, user_id) do
+    thread
+    |> format_user_data()
+    |> format_last_post_data(user_id)
+    |> format_last_post_user_data()
   end
 
   defp format_last_post_data(thread, user_id) do

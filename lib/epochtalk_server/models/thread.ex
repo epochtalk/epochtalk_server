@@ -260,7 +260,7 @@ defmodule EpochtalkServer.Models.Thread do
   end
 
   @doc """
-  Returns paged threads by `Board` given a `board_id`
+  Returns a specific `Thread` given a valid `id` or `slug`
   """
   @spec find(id_or_slug :: non_neg_integer | String.t()) :: map() | nil
   def find(id) when is_integer(id) do

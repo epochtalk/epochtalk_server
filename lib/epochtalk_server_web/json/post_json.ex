@@ -1,5 +1,6 @@
 defmodule EpochtalkServerWeb.PostJSON do
   alias EpochtalkServerWeb.BoardJSON
+  alias EpochtalkServerWeb.ThreadJSON
 
   @moduledoc """
   Renders and formats `Post` data, in JSON format for frontend
@@ -7,6 +8,8 @@ defmodule EpochtalkServerWeb.PostJSON do
 
   @doc """
   Renders all `Post` for a particular `Thread`.
+
+  TODO(akinsey): implement trust and watched hook information for thread
   """
   def by_thread(%{
         posts: posts,
@@ -23,8 +26,7 @@ defmodule EpochtalkServerWeb.PostJSON do
         limit: limit,
         desc: desc
       }) do
-    # format board data
-    board =
+    formatted_board =
       BoardJSON.format_board_data_for_find(
         board_moderators,
         board_mapping,
@@ -32,12 +34,17 @@ defmodule EpochtalkServerWeb.PostJSON do
         user_priority
       )
 
-    poll = format_poll_data_for_by_thread(poll, user)
+    formatted_poll = format_poll_data_for_by_thread(poll, user)
+
+    formatted_thread =
+      thread
+      |> ThreadJSON.format_user_data()
+      |> Map.put(:poll, formatted_poll)
 
     %{
-      board: board,
+      board: formatted_board,
       posts: posts,
-      thread: Map.put(thread, :poll, poll),
+      thread: formatted_thread,
       write_access: write_access,
       board_banned: board_banned,
       user: user,

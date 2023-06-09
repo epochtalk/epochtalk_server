@@ -27,6 +27,21 @@ defmodule EpochtalkServer.Models.Board do
           imported_at: NaiveDateTime.t() | nil,
           meta: map() | nil
         }
+  @derive {Jason.Encoder,
+           only: [
+             :id,
+             :name,
+             :slug,
+             :description,
+             :post_count,
+             :thread_count,
+             :viewable_by,
+             :postable_by,
+             :right_to_left,
+             :created_at,
+             :imported_at,
+             :meta
+           ]}
   schema "boards" do
     field :name, :string
     field :slug, :string

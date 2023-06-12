@@ -40,5 +40,9 @@ defmodule EpochtalkServer.Models.BoardModerator do
     |> validate_required([:user_id, :board_id])
   end
 
+  @doc """
+  Query all `BoardModerator` models
+  """
+  @spec all() :: [Ecto.Changeset.t()] | nil
   def all(), do: Repo.all(from BoardModerator, preload: [user: ^from(User, select: [:username])])
 end

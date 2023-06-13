@@ -1,5 +1,5 @@
 defmodule EpochtalkServerWeb.ModerationLogControllerTest do
-  use EpochtalkServerWeb.ConnCase, async: false
+  use EpochtalkServerWeb.ConnCase, async: true
   alias EpochtalkServer.Models.ModerationLog
 
   @create_update_boards_attrs %{

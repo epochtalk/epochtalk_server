@@ -1,4 +1,4 @@
-defmodule EpochtalkServerWeb.UserSocketTest do
+defmodule Test.EpochtalkServerWeb.UserSocket do
   use EpochtalkServerWeb.ChannelCase
   alias EpochtalkServerWeb.UserSocket
   alias EpochtalkServer.Auth.Guardian

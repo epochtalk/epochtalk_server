@@ -32,17 +32,13 @@ defmodule EpochtalkServerWeb.Router do
     pipe_through [:api, :enforce_auth]
     get "/users/preferences", Preference, :preferences
     get "/mentions", Mention, :page
+    get "/notifications/counts", Notification, :counts
+    post "/notifications/dismiss", Notification, :dismiss
     get "/authenticate", User, :authenticate
     get "/admin/roles/all", Role, :all
     put "/admin/roles/update", Role, :update
     post "/threads", Thread, :create
     get "/admin/modlog", ModerationLog, :page
-  end
-
-  scope "/api", EpochtalkServerWeb do
-    pipe_through [:api, :enforce_auth]
-    get "/notifications/counts", NotificationController, :counts
-    post "/notifications/dismiss", NotificationController, :dismiss
   end
 
   scope "/api", EpochtalkServerWeb.Controllers do

@@ -1,4 +1,4 @@
-defmodule EpochtalkServerWeb.NotificationController do
+defmodule EpochtalkServerWeb.Controllers.Notification do
   use EpochtalkServerWeb, :controller
 
   @moduledoc """

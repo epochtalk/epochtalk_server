@@ -3,7 +3,7 @@ defmodule EpochtalkServerWeb.SessionTest do
   @almost_one_day_in_seconds @one_day_in_seconds - 100
   @four_weeks_in_seconds 4 * 7 * @one_day_in_seconds
   @almost_four_weeks_in_seconds @four_weeks_in_seconds - 100
-  use EpochtalkServerWeb.ConnCase, async: false
+  use EpochtalkServerWeb.ConnCase, async: true
   alias EpochtalkServer.Session
 
   describe "get_resource/2" do

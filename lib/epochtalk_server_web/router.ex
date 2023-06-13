@@ -60,8 +60,8 @@ defmodule EpochtalkServerWeb.Router do
     delete "/logout", UserController, :logout
   end
 
-  scope "/", EpochtalkServerWeb do
-    get "/config.js", ConfigurationController, :config
+  scope "/", EpochtalkServerWeb.Controllers do
+    get "/config.js", Configuration, :config
   end
 
   # Enables the Swoosh mailbox preview in development.

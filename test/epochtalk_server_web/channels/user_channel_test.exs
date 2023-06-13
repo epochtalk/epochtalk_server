@@ -1,5 +1,5 @@
 defmodule Test.EpochtalkServerWeb.UserChannel do
-  use EpochtalkServerWeb.ChannelCase
+  use Test.Support.ChannelCase
   alias EpochtalkServerWeb.UserSocket
   alias EpochtalkServerWeb.UserChannel
 

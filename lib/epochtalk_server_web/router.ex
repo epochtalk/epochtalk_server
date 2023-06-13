@@ -28,36 +28,36 @@ defmodule EpochtalkServerWeb.Router do
     plug Guardian.Plug.EnsureAuthenticated
   end
 
-  scope "/api", EpochtalkServerWeb do
+  scope "/api", EpochtalkServerWeb.Controllers do
     pipe_through [:api, :enforce_auth]
-    get "/users/preferences", PreferenceController, :preferences
-    get "/mentions", MentionController, :page
-    get "/notifications/counts", NotificationController, :counts
-    post "/notifications/dismiss", NotificationController, :dismiss
-    get "/admin/modlog", ModerationLogController, :page
-    post "/threads", ThreadController, :create
-    get "/admin/roles/all", RoleController, :all
-    put "/admin/roles/update", RoleController, :update
-    get "/authenticate", UserController, :authenticate
+    get "/users/preferences", Preference, :preferences
+    get "/mentions", Mention, :page
+    get "/notifications/counts", Notification, :counts
+    post "/notifications/dismiss", Notification, :dismiss
+    get "/authenticate", User, :authenticate
+    get "/admin/roles/all", Role, :all
+    put "/admin/roles/update", Role, :update
+    post "/threads", Thread, :create
+    get "/admin/modlog", ModerationLog, :page
   end
 
-  scope "/api", EpochtalkServerWeb do
+  scope "/api", EpochtalkServerWeb.Controllers do
     pipe_through [:api, :maybe_auth]
-    get "/register/username/:username", UserController, :username
-    get "/register/email/:email", UserController, :email
-    get "/boards", BoardController, :by_category
-    get "/boards/:id", BoardController, :find
-    get "/boards/:slug/id", BoardController, :slug_to_id
-    get "/threads", ThreadController, :by_board
-    get "/threads/recent", ThreadController, :recent
-    post "/register", UserController, :register
-    post "/login", UserController, :login
-    post "/confirm", UserController, :confirm
-    delete "/logout", UserController, :logout
+    get "/boards", Board, :by_category
+    get "/boards/:id", Board, :find
+    get "/boards/:slug/id", Board, :slug_to_id
+    get "/threads", Thread, :by_board
+    get "/threads/recent", Thread, :recent
+    get "/register/username/:username", User, :username
+    get "/register/email/:email", User, :email
+    post "/register", User, :register
+    post "/login", User, :login
+    post "/confirm", User, :confirm
+    delete "/logout", User, :logout
   end
 
-  scope "/", EpochtalkServerWeb do
-    get "/config.js", ConfigurationController, :config
+  scope "/", EpochtalkServerWeb.Controllers do
+    get "/config.js", Configuration, :config
   end
 
   # Enables the Swoosh mailbox preview in development.

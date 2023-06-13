@@ -1,9 +1,13 @@
-defmodule EpochtalkServerWeb.SessionTest do
+defmodule Test.EpochtalkServer.Session do
+  @moduledoc """
+  This test sets async: false because it uses redis session storage, which will
+  run into concurrency issues when run alongside other tests
+  """
+  use Test.Support.ConnCase, async: false
   @one_day_in_seconds 1 * 24 * 60 * 60
   @almost_one_day_in_seconds @one_day_in_seconds - 100
   @four_weeks_in_seconds 4 * 7 * @one_day_in_seconds
   @almost_four_weeks_in_seconds @four_weeks_in_seconds - 100
-  use EpochtalkServerWeb.ConnCase, async: false
   alias EpochtalkServer.Session
 
   describe "get_resource/2" do

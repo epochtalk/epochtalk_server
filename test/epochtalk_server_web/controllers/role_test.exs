@@ -1,5 +1,9 @@
-defmodule EpochtalkServerWeb.RoleControllerTest do
-  use EpochtalkServerWeb.ConnCase, async: false
+defmodule Test.EpochtalkServerWeb.Controllers.Role do
+  @moduledoc """
+  This test sets async: false because it uses the RoleCache, which will run into
+  concurrency issues when run alongside other tests
+  """
+  use Test.Support.ConnCase, async: false
   alias EpochtalkServerWeb.CustomErrors.InvalidPermission
   alias EpochtalkServer.Cache.Role, as: RoleCache
   @postgres_integer_max 2_147_483_647

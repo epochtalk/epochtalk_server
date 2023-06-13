@@ -1,4 +1,4 @@
-defmodule EpochtalkServerWeb.ThreadController do
+defmodule EpochtalkServerWeb.Controllers.Thread do
   use EpochtalkServerWeb, :controller
 
   @moduledoc """

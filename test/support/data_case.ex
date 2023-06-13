@@ -1,4 +1,4 @@
-defmodule EpochtalkServer.DataCase do
+defmodule Test.Support.DataCase do
   @moduledoc """
   This module defines the setup for tests requiring
   access to the application's data layer.
@@ -10,7 +10,7 @@ defmodule EpochtalkServer.DataCase do
   we enable the SQL sandbox, so changes done to the database
   are reverted at the end of every test. If you are using
   PostgreSQL, you can even run database tests asynchronously
-  by setting `use EpochtalkServer.DataCase, async: true`, although
+  by setting `use Test.Support.DataCase, async: true`, although
   this option is not recommended for other databases.
   """
 
@@ -23,12 +23,12 @@ defmodule EpochtalkServer.DataCase do
       import Ecto
       import Ecto.Changeset
       import Ecto.Query
-      import EpochtalkServer.DataCase
+      import Test.Support.DataCase
     end
   end
 
   setup tags do
-    EpochtalkServer.DataCase.setup_sandbox(tags)
+    Test.Support.DataCase.setup_sandbox(tags)
     :ok
   end
 

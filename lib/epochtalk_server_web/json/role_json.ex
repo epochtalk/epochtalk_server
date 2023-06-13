@@ -1,4 +1,4 @@
-defmodule EpochtalkServerWeb.RoleJSON do
+defmodule EpochtalkServerWeb.Controllers.RoleJSON do
   @moduledoc """
   Renders and formats `Role` data, in JSON format for frontend
   """

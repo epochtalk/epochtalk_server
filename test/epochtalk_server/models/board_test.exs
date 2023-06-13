@@ -1,5 +1,5 @@
-defmodule EpochtalkServer.BoardTest do
-  use EpochtalkServer.DataCase, async: false
+defmodule Test.EpochtalkServer.Models.Board do
+  use Test.Support.DataCase, async: true
   alias EpochtalkServer.Models.Board
 
   describe "create/1" do

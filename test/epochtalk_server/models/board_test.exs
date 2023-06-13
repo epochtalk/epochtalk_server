@@ -1,4 +1,4 @@
-defmodule EpochtalkServer.BoardTest do
+defmodule Test.EpochtalkServer.Models.Board do
   use EpochtalkServer.DataCase, async: true
   alias EpochtalkServer.Models.Board
 

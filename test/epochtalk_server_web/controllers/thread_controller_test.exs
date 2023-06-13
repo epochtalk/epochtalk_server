@@ -1,5 +1,5 @@
 defmodule EpochtalkServerWeb.ThreadControllerTest do
-  use EpochtalkServerWeb.ConnCase, async: false
+  use EpochtalkServerWeb.ConnCase, async: true
 
   describe "by_board/2" do
     test "does not get threads for board that does not exist", %{conn: conn} do

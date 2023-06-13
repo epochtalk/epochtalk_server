@@ -25,6 +25,7 @@ alias EpochtalkServer.Models.{
   PollResponse,
   Preference,
   Profile,
+  Rank,
   Role,
   RolePermission,
   RoleUser,

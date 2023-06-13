@@ -35,6 +35,7 @@ defmodule EpochtalkServerWeb.Router do
     get "/admin/roles/all", Role, :all
     put "/admin/roles/update", Role, :update
     post "/threads", Thread, :create
+    get "/admin/modlog", ModerationLog, :page
   end
 
   scope "/api", EpochtalkServerWeb do
@@ -42,7 +43,6 @@ defmodule EpochtalkServerWeb.Router do
     get "/mentions", MentionController, :page
     get "/notifications/counts", NotificationController, :counts
     post "/notifications/dismiss", NotificationController, :dismiss
-    get "/admin/modlog", ModerationLogController, :page
   end
 
   scope "/api", EpochtalkServerWeb.Controllers do

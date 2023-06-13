@@ -1,4 +1,4 @@
-defmodule EpochtalkServerWeb.ModerationLogControllerTest do
+defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
   use EpochtalkServerWeb.ConnCase, async: true
   alias EpochtalkServer.Models.ModerationLog
 

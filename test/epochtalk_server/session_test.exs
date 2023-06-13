@@ -1,4 +1,4 @@
-defmodule EpochtalkServerWeb.SessionTest do
+defmodule Test.EpochtalkServer.Session do
   @moduledoc """
   This test sets async: false because it uses redis session storage, which will
   run into concurrency issues when run alongside other tests

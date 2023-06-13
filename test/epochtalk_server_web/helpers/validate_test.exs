@@ -1,4 +1,4 @@
-defmodule EpochtalkServerWeb.ValidateTest do
+defmodule Test.EpochtalkServerWeb.Helpers.Validate do
   use EpochtalkServerWeb.ConnCase, async: true
   alias EpochtalkServerWeb.Helpers.Validate
   doctest Validate

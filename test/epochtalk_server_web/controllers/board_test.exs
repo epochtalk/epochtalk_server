@@ -1,4 +1,4 @@
-defmodule EpochtalkServerWeb.BoardControllerTest do
+defmodule Test.EpochtalkServerWeb.Controllers.Board do
   use EpochtalkServerWeb.ConnCase, async: true
   alias EpochtalkServer.Models.Category
   alias EpochtalkServer.Models.Board

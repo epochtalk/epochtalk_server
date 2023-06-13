@@ -41,13 +41,17 @@ defmodule EpochtalkServerWeb.Router do
     get "/authenticate", UserController, :authenticate
   end
 
+  scope "/api", EpochtalkServerWeb.Controllers do
+    pipe_through [:api, :maybe_auth]
+    get "/boards", Board, :by_category
+    get "/boards/:id", Board, :find
+    get "/boards/:slug/id", Board, :slug_to_id
+  end
+
   scope "/api", EpochtalkServerWeb do
     pipe_through [:api, :maybe_auth]
     get "/register/username/:username", UserController, :username
     get "/register/email/:email", UserController, :email
-    get "/boards", BoardController, :by_category
-    get "/boards/:id", BoardController, :find
-    get "/boards/:slug/id", BoardController, :slug_to_id
     get "/threads", ThreadController, :by_board
     get "/threads/recent", ThreadController, :recent
     post "/register", UserController, :register

@@ -1,5 +1,5 @@
 defmodule EpochtalkServerWeb.ThreadJSON do
-  alias EpochtalkServerWeb.BoardJSON
+  alias EpochtalkServerWeb.Controllers.BoardJSON
 
   @moduledoc """
   Renders and formats `Thread` data, in JSON format for frontend

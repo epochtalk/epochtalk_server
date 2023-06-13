@@ -30,6 +30,7 @@ defmodule EpochtalkServerWeb.Router do
 
   scope "/api", EpochtalkServerWeb.Controllers do
     pipe_through [:api, :enforce_auth]
+    get "/users/preferences", Preference, :preferences
     get "/authenticate", User, :authenticate
     get "/admin/roles/all", Role, :all
     put "/admin/roles/update", Role, :update
@@ -38,7 +39,6 @@ defmodule EpochtalkServerWeb.Router do
 
   scope "/api", EpochtalkServerWeb do
     pipe_through [:api, :enforce_auth]
-    get "/users/preferences", PreferenceController, :preferences
     get "/mentions", MentionController, :page
     get "/notifications/counts", NotificationController, :counts
     post "/notifications/dismiss", NotificationController, :dismiss

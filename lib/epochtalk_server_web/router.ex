@@ -28,6 +28,11 @@ defmodule EpochtalkServerWeb.Router do
     plug Guardian.Plug.EnsureAuthenticated
   end
 
+  scope "/api", EpochtalkServerWeb.Controllers do
+    pipe_through [:api, :enforce_auth]
+    get "/authenticate", User, :authenticate
+  end
+
   scope "/api", EpochtalkServerWeb do
     pipe_through [:api, :enforce_auth]
     get "/users/preferences", PreferenceController, :preferences
@@ -38,7 +43,6 @@ defmodule EpochtalkServerWeb.Router do
     post "/threads", ThreadController, :create
     get "/admin/roles/all", RoleController, :all
     put "/admin/roles/update", RoleController, :update
-    get "/authenticate", UserController, :authenticate
   end
 
   scope "/api", EpochtalkServerWeb.Controllers do
@@ -46,18 +50,18 @@ defmodule EpochtalkServerWeb.Router do
     get "/boards", Board, :by_category
     get "/boards/:id", Board, :find
     get "/boards/:slug/id", Board, :slug_to_id
+    get "/register/username/:username", User, :username
+    get "/register/email/:email", User, :email
+    post "/register", User, :register
+    post "/login", User, :login
+    post "/confirm", User, :confirm
+    delete "/logout", User, :logout
   end
 
   scope "/api", EpochtalkServerWeb do
     pipe_through [:api, :maybe_auth]
-    get "/register/username/:username", UserController, :username
-    get "/register/email/:email", UserController, :email
     get "/threads", ThreadController, :by_board
     get "/threads/recent", ThreadController, :recent
-    post "/register", UserController, :register
-    post "/login", UserController, :login
-    post "/confirm", UserController, :confirm
-    delete "/logout", UserController, :logout
   end
 
   scope "/", EpochtalkServerWeb.Controllers do

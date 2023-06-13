@@ -1,4 +1,4 @@
-defmodule EpochtalkServerWeb.UserJSON do
+defmodule EpochtalkServerWeb.Controllers.UserJSON do
   alias EpochtalkServer.Models.Role
   alias EpochtalkServer.Models.User
 
@@ -16,7 +16,7 @@ defmodule EpochtalkServerWeb.UserJSON do
   @doc """
   Renders formatted JSON response for registration confirmation.
   ## Example
-    iex> EpochtalkServerWeb.UserJSON.register_with_verify(%{user: %User{ username: "Test" }})
+    iex> EpochtalkServerWeb.Controllers.UserJSON.register_with_verify(%{user: %User{ username: "Test" }})
     %{
       username: "Test",
       confirm_token: true,
@@ -35,9 +35,9 @@ defmodule EpochtalkServerWeb.UserJSON do
   Renders whatever data it is passed when template not found. Data pass through
   for rendering misc responses (ex: {found: true} or {success: true})
   ## Example
-      iex> EpochtalkServerWeb.UserJSON.data(%{data: %{found: true}})
+      iex> EpochtalkServerWeb.Controllers.UserJSON.data(%{data: %{found: true}})
       %{found: true}
-      iex> EpochtalkServerWeb.UserJSON.data(%{data: %{success: true}})
+      iex> EpochtalkServerWeb.Controllers.UserJSON.data(%{data: %{success: true}})
       %{success: true}
   """
   def data(%{conn: %{assigns: %{data: data}}}), do: data

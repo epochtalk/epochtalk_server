@@ -1,6 +1,6 @@
-defmodule EpochtalkServerWeb.UserJSONTest do
+defmodule Test.EpochtalkServerWeb.Controllers.UserJSON do
   use EpochtalkServerWeb.ConnCase, async: true
-  alias EpochtalkServerWeb.UserJSON
+  alias EpochtalkServerWeb.Controllers.UserJSON
   alias EpochtalkServer.Models.User
   alias EpochtalkServer.Models.Preference
   alias EpochtalkServer.Models.Profile

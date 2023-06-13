@@ -1,5 +1,5 @@
 defmodule Test.EpochtalkServerWeb.Controllers.User do
-  use EpochtalkServerWeb.ConnCase, async: true
+  use Test.Support.ConnCase, async: true
   import Ecto.Changeset
   alias EpochtalkServer.Models.User
   alias EpochtalkServer.Models.Ban

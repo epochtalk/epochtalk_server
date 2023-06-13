@@ -1,5 +1,5 @@
 defmodule Test.EpochtalkServerWeb.Controllers.ErrorJSON do
-  use EpochtalkServerWeb.ConnCase, async: true
+  use Test.Support.ConnCase, async: true
 
   # Specify that we want to use doctests:
   doctest EpochtalkServerWeb.Controllers.ErrorJSON

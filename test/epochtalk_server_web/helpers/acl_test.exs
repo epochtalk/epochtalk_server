@@ -1,4 +1,4 @@
-defmodule EpochtalkServerWeb.ACLTest do
+defmodule Test.EpochtalkServerWeb.Helpers.ACL do
   use EpochtalkServerWeb.ConnCase, async: true
   alias EpochtalkServerWeb.Helpers.ACL
   alias EpochtalkServerWeb.CustomErrors.InvalidPermission

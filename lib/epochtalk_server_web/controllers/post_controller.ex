@@ -36,6 +36,16 @@ defmodule EpochtalkServerWeb.PostController do
 
   @doc """
   Used to retrieve `Posts` by `Thread`
+
+  Test Cases:
+  1) Authenticated vs Not Authenticated
+  2) Thread with Poll vs no Poll
+  3) Query with start position vs page
+  4) Read/Write access test against user priority (postable/writable by on board)
+  5) Base permission check
+  6) Authorizations tests (TODOL implement authorizations first)
+  7) Board ban on authed user
+  8) Board and Thread metadata is correct (ex: thread.watched,)
   """
   def by_thread(conn, attrs) do
     with thread_id <- Validate.cast(attrs, "thread_id", :integer, required: true),

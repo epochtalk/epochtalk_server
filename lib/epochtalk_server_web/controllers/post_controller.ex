@@ -15,6 +15,8 @@ defmodule EpochtalkServerWeb.PostController do
   alias EpochtalkServer.Models.BoardBan
   alias EpochtalkServer.Models.BoardMapping
   alias EpochtalkServer.Models.BoardModerator
+  alias EpochtalkServer.Models.MetricRankMap
+  alias EpochtalkServer.Models.Rank
 
   # @doc """
   # Used to create posts
@@ -57,7 +59,9 @@ defmodule EpochtalkServerWeb.PostController do
              user: user,
              start: start,
              per_page: limit
-           ) do
+           ),
+         metric_rank_maps <- MetricRankMap.all_merged(),
+         ranks <- Rank.all() do
       render(conn, :by_thread, %{
         posts: posts,
         poll: poll,
@@ -71,7 +75,9 @@ defmodule EpochtalkServerWeb.PostController do
         page: page,
         start: start,
         limit: limit,
-        desc: desc
+        desc: desc,
+        metric_rank_maps: metric_rank_maps,
+        ranks: ranks
       })
     else
       {:error, :board_does_not_exist} ->

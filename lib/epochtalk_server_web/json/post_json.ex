@@ -24,7 +24,9 @@ defmodule EpochtalkServerWeb.PostJSON do
         page: page,
         start: start,
         limit: limit,
-        desc: desc
+        desc: desc,
+        metric_rank_maps: metric_rank_maps,
+        ranks: ranks
       }) do
     formatted_board =
       BoardJSON.format_board_data_for_find(
@@ -48,6 +50,10 @@ defmodule EpochtalkServerWeb.PostJSON do
       write_access: write_access,
       board_banned: board_banned,
       user: user,
+      metadata: %{
+        metric_rank_maps: metric_rank_maps,
+        ranks: ranks
+      },
       page: page,
       start: start,
       limit: limit,

@@ -1,4 +1,4 @@
-defmodule EpochtalkServerWeb.ThreadControllerTest do
+defmodule Test.EpochtalkServerWeb.Controllers.Thread do
   use EpochtalkServerWeb.ConnCase, async: true
 
   describe "by_board/2" do

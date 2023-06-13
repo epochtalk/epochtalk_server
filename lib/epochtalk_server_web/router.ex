@@ -31,6 +31,7 @@ defmodule EpochtalkServerWeb.Router do
   scope "/api", EpochtalkServerWeb.Controllers do
     pipe_through [:api, :enforce_auth]
     get "/authenticate", User, :authenticate
+    post "/threads", Thread, :create
   end
 
   scope "/api", EpochtalkServerWeb do
@@ -40,7 +41,6 @@ defmodule EpochtalkServerWeb.Router do
     get "/notifications/counts", NotificationController, :counts
     post "/notifications/dismiss", NotificationController, :dismiss
     get "/admin/modlog", ModerationLogController, :page
-    post "/threads", ThreadController, :create
     get "/admin/roles/all", RoleController, :all
     put "/admin/roles/update", RoleController, :update
   end
@@ -50,18 +50,14 @@ defmodule EpochtalkServerWeb.Router do
     get "/boards", Board, :by_category
     get "/boards/:id", Board, :find
     get "/boards/:slug/id", Board, :slug_to_id
+    get "/threads", Thread, :by_board
+    get "/threads/recent", Thread, :recent
     get "/register/username/:username", User, :username
     get "/register/email/:email", User, :email
     post "/register", User, :register
     post "/login", User, :login
     post "/confirm", User, :confirm
     delete "/logout", User, :logout
-  end
-
-  scope "/api", EpochtalkServerWeb do
-    pipe_through [:api, :maybe_auth]
-    get "/threads", ThreadController, :by_board
-    get "/threads/recent", ThreadController, :recent
   end
 
   scope "/", EpochtalkServerWeb.Controllers do

@@ -1,4 +1,4 @@
-defmodule EpochtalkServerWeb.ThreadJSON do
+defmodule EpochtalkServerWeb.Controllers.ThreadJSON do
   alias EpochtalkServerWeb.Controllers.BoardJSON
 
   @moduledoc """

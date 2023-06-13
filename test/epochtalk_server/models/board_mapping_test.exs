@@ -1,5 +1,5 @@
 defmodule Test.EpochtalkServer.Models.BoardMapping do
-  use EpochtalkServer.DataCase, async: true
+  use Test.Support.DataCase, async: true
   alias EpochtalkServer.Models.Category
   alias EpochtalkServer.Models.Board
   alias EpochtalkServer.Models.BoardMapping

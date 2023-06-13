@@ -33,7 +33,7 @@ defmodule EpochtalkServerWeb.ChannelCase do
 
   @endpoint EpochtalkServerWeb.Endpoint
   setup context do
-    EpochtalkServer.DataCase.setup_sandbox(context)
+    Test.Support.DataCase.setup_sandbox(context)
     import Phoenix.ChannelTest
     alias EpochtalkServer.Session
     alias EpochtalkServer.Models.User

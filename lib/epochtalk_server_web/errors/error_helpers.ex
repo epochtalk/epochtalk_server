@@ -1,6 +1,6 @@
 defmodule EpochtalkServerWeb.ErrorHelpers do
   use Phoenix.Controller
-  alias EpochtalkServerWeb.ErrorJSON
+  alias EpochtalkServerWeb.Controllers.ErrorJSON
 
   @moduledoc """
   Conveniences for translating and building error messages.

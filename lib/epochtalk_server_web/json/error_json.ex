@@ -1,4 +1,4 @@
-defmodule EpochtalkServerWeb.ErrorJSON do
+defmodule EpochtalkServerWeb.Controllers.ErrorJSON do
   @moduledoc """
   Renders and formats error data, in JSON format for frontend
   """
@@ -8,17 +8,17 @@ defmodule EpochtalkServerWeb.ErrorJSON do
   errors through this render in order to create a consistent error JSON.
 
   ## Example
-      iex> EpochtalkServerWeb.ErrorJSON.render("500.json")
+      iex> EpochtalkServerWeb.Controllers.ErrorJSON.render("500.json")
       %{error: "Internal Server Error", message: "Request Error", status: 500}
-      iex> EpochtalkServerWeb.ErrorJSON.render("400.json")
+      iex> EpochtalkServerWeb.Controllers.ErrorJSON.render("400.json")
       %{error: "Bad Request", message: "Request Error", status: 400}
-      iex> EpochtalkServerWeb.ErrorJSON.render("404.json")
+      iex> EpochtalkServerWeb.Controllers.ErrorJSON.render("404.json")
       %{error: "Not Found", message: "Request Error", status: 404}
-      iex> EpochtalkServerWeb.ErrorJSON.render("401.json")
+      iex> EpochtalkServerWeb.Controllers.ErrorJSON.render("401.json")
       %{error: "Unauthorized", message: "Request Error", status: 401}
-      iex> EpochtalkServerWeb.ErrorJSON.template_not_found("DoesNotExist.json", %{message: "Custom Error Message", status: 500})
+      iex> EpochtalkServerWeb.Controllers.ErrorJSON.template_not_found("DoesNotExist.json", %{message: "Custom Error Message", status: 500})
       %{error: "Internal Server Error", message: "Custom Error Message", status: 500}
-      iex> EpochtalkServerWeb.ErrorJSON.template_not_found("DoesNotExist.json", %{message: "Custom Error Message", status: 404})
+      iex> EpochtalkServerWeb.Controllers.ErrorJSON.template_not_found("DoesNotExist.json", %{message: "Custom Error Message", status: 404})
       %{error: "Not Found", message: "Custom Error Message", status: 404}
   """
   def render(template), do: format_error(template, %{__phx_template_not_found__: true})

@@ -31,6 +31,8 @@ defmodule EpochtalkServerWeb.Router do
   scope "/api", EpochtalkServerWeb.Controllers do
     pipe_through [:api, :enforce_auth]
     get "/authenticate", User, :authenticate
+    get "/admin/roles/all", Role, :all
+    put "/admin/roles/update", Role, :update
     post "/threads", Thread, :create
   end
 
@@ -41,8 +43,6 @@ defmodule EpochtalkServerWeb.Router do
     get "/notifications/counts", NotificationController, :counts
     post "/notifications/dismiss", NotificationController, :dismiss
     get "/admin/modlog", ModerationLogController, :page
-    get "/admin/roles/all", RoleController, :all
-    put "/admin/roles/update", RoleController, :update
   end
 
   scope "/api", EpochtalkServerWeb.Controllers do

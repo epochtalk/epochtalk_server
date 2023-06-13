@@ -1,4 +1,4 @@
-defmodule EpochtalkServerWeb.RoleControllerTest do
+defmodule Test.EpochtalkServerWeb.Controllers.Role do
   @moduledoc """
   This test sets async: false because it uses the RoleCache, which will run into
   concurrency issues when run alongside other tests

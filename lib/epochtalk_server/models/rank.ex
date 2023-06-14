@@ -30,8 +30,8 @@ defmodule EpochtalkServer.Models.Rank do
         ) :: Ecto.Changeset.t()
   def changeset(rank, attrs \\ %{}) do
     rank
-    |> cast(attrs, [:name, :user_id])
-    |> validate_required([:name, :user_id])
+    |> cast(attrs, [:name, :number])
+    |> validate_required([:name, :number])
   end
 
   ## === Database Functions ===

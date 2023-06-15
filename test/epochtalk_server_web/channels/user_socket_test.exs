@@ -5,12 +5,12 @@ defmodule Test.EpochtalkServerWeb.UserSocket do
 
   describe "connect/3" do
     test "given invalid JWT, returns :error" do
-      assert :error = connect(UserSocket, %{token: "bad_token"})
+      assert connect(UserSocket, %{token: "bad_token"}) == :error
     end
 
     test "given valid JWT without backing user, returns :error" do
       {:ok, token, _claims} = Guardian.encode_and_sign(%{user_id: :rand.uniform(9999)})
-      assert :error = connect(UserSocket, %{token: token})
+      assert connect(UserSocket, %{token: token}) == :error
     end
 
     @tag :authenticated

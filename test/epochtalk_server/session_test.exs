@@ -109,30 +109,33 @@ defmodule Test.EpochtalkServer.Session do
       assert session_user_id_to_persist == user.id
       assert session_user_username_to_persist == user.username
 
-      authenticate_persisted_conn =
-        get(authed_conn_to_persist, Routes.user_path(authed_conn_to_persist, :authenticate))
+      authenticate_persisted_result = authed_conn_to_persist
+                                      |> get(Routes.user_path(authed_conn_to_persist, :authenticate))
+                                      |> json_response(200)
 
-      assert user.id == json_response(authenticate_persisted_conn, 200)["id"]
+      assert authenticate_persisted_result["id"] == user.id
       {:ok, new_resource} = Session.get_resource(user.id, new_session_id)
       %{id: new_session_user_id, username: new_session_user_username} = new_resource
       assert new_session_user_id == user.id
       assert new_session_user_username == user.username
 
-      new_authenticate_conn =
-        get(new_authed_conn, Routes.user_path(new_authed_conn, :authenticate))
+      new_authenticate_result = new_authed_conn
+                              |> get(Routes.user_path(new_authed_conn, :authenticate))
+                              |> json_response(200)
 
-      assert user.id == json_response(new_authenticate_conn, 200)["id"]
+      assert new_authenticate_result["id"] == user.id
       # check that expired session is not active
       unauthed_resource = Session.get_resource(user.id, session_id_to_delete)
 
       assert unauthed_resource ==
                {:error, "No session for user_id #{user.id} with id #{session_id_to_delete}"}
 
-      authenticate_deleted_conn =
-        get(authed_conn_to_delete, Routes.user_path(authed_conn_to_delete, :authenticate))
+      authenticate_deleted_result = authed_conn_to_delete
+                                    |> get(Routes.user_path(authed_conn_to_delete, :authenticate))
+                                    |> json_response(401)
 
-      assert %{"error" => "Unauthorized", "message" => "No resource found"} =
-               json_response(authenticate_deleted_conn, 401)
+      assert authenticate_deleted_result["error"] == "Unauthorized"
+      assert authenticate_deleted_result["message"] == "No resource found"
     end
   end
 

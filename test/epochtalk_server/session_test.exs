@@ -109,9 +109,10 @@ defmodule Test.EpochtalkServer.Session do
       assert session_user_id_to_persist == user.id
       assert session_user_username_to_persist == user.username
 
-      authenticate_persisted_result = authed_conn_to_persist
-                                      |> get(Routes.user_path(authed_conn_to_persist, :authenticate))
-                                      |> json_response(200)
+      authenticate_persisted_result =
+        authed_conn_to_persist
+        |> get(Routes.user_path(authed_conn_to_persist, :authenticate))
+        |> json_response(200)
 
       assert authenticate_persisted_result["id"] == user.id
       {:ok, new_resource} = Session.get_resource(user.id, new_session_id)
@@ -119,9 +120,10 @@ defmodule Test.EpochtalkServer.Session do
       assert new_session_user_id == user.id
       assert new_session_user_username == user.username
 
-      new_authenticate_result = new_authed_conn
-                              |> get(Routes.user_path(new_authed_conn, :authenticate))
-                              |> json_response(200)
+      new_authenticate_result =
+        new_authed_conn
+        |> get(Routes.user_path(new_authed_conn, :authenticate))
+        |> json_response(200)
 
       assert new_authenticate_result["id"] == user.id
       # check that expired session is not active
@@ -130,9 +132,10 @@ defmodule Test.EpochtalkServer.Session do
       assert unauthed_resource ==
                {:error, "No session for user_id #{user.id} with id #{session_id_to_delete}"}
 
-      authenticate_deleted_result = authed_conn_to_delete
-                                    |> get(Routes.user_path(authed_conn_to_delete, :authenticate))
-                                    |> json_response(401)
+      authenticate_deleted_result =
+        authed_conn_to_delete
+        |> get(Routes.user_path(authed_conn_to_delete, :authenticate))
+        |> json_response(401)
 
       assert authenticate_deleted_result["error"] == "Unauthorized"
       assert authenticate_deleted_result["message"] == "No resource found"

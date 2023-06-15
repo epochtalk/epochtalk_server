@@ -109,7 +109,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Board do
   end
 
   describe "find/2" do
-    test "does not find a board that doesn't exist", %{conn: conn} do
+    test "given a nonexistant id, does not find a board", %{conn: conn} do
       result =
         conn
         |> get(Routes.board_path(conn, :find, 0))
@@ -119,7 +119,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Board do
       assert %{"message" => "Error, board does not exist"} = result
     end
 
-    test "finds a board that exist", %{conn: conn, board: board} do
+    test "given an existing id, finds a board", %{conn: conn, board: board} do
       result =
         conn
         |> get(Routes.board_path(conn, :find, board.id))
@@ -135,7 +135,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Board do
   end
 
   describe "slug_to_id/2" do
-    test "does not deslugify a board that doesn't exist", %{conn: conn} do
+    test "given a nonexistant slug, does not deslugify board id", %{conn: conn} do
       result =
         conn
         |> get(Routes.board_path(conn, :slug_to_id, "bad-slug"))
@@ -145,7 +145,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Board do
       assert %{"message" => "Error, cannot board does not exist"} = result
     end
 
-    test "deslugifies a board that exist", %{conn: conn, board: board} do
+    test "given an existing slug, deslugifies board id", %{conn: conn, board: board} do
       result =
         conn
         |> get(Routes.board_path(conn, :slug_to_id, board.slug))

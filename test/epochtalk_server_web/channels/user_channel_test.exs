@@ -13,7 +13,7 @@ defmodule Test.EpochtalkServerWeb.UserChannel do
     test "when not authenticated, does not join" do
       socket = socket(UserSocket, nil, %{})
       assert socket.joined == false
-      assert {:ok, _payload, socket} = subscribe_and_join(socket, UserChannel, "user:public")
+      {:ok, _payload, socket} = subscribe_and_join(socket, UserChannel, "user:public")
       assert socket.joined == true
       assert socket.id == nil
     end

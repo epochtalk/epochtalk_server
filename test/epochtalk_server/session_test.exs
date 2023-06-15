@@ -11,7 +11,7 @@ defmodule Test.EpochtalkServer.Session do
   alias EpochtalkServer.Session
 
   describe "get_resource/2" do
-    test "errors when session_id is invalid", %{user: user} do
+    test "when session_id is invalid, errors", %{user: user} do
       session_id = "bogussessionid"
 
       assert Session.get_resource(user.id, session_id) ==
@@ -19,7 +19,7 @@ defmodule Test.EpochtalkServer.Session do
     end
 
     @tag :authenticated
-    test "errors when user id is invalid", %{conn: conn} do
+    test "when user id is invalid, errors", %{conn: conn} do
       user_id = 0
       # get session_id (jti) from conn
       session_id = conn.private.guardian_default_claims["jti"]
@@ -29,7 +29,7 @@ defmodule Test.EpochtalkServer.Session do
     end
 
     @tag :authenticated
-    test "gets a valid resource when authenticated", %{conn: conn, authed_user: authed_user} do
+    test "when authenticated, gets a valid resource", %{conn: conn, authed_user: authed_user} do
       # get session_id (jti) from conn
       session_id = conn.private.guardian_default_claims["jti"]
       {:ok, resource_user} = Session.get_resource(authed_user.id, session_id)
@@ -60,7 +60,7 @@ defmodule Test.EpochtalkServer.Session do
   end
 
   describe "create/3 session expiration" do
-    test "deletes an expired user session when logging in", %{conn: conn, user: user} do
+    test "when logging in, deletes an expired user session", %{conn: conn, user: user} do
       remember_me = false
       # create session that should be deleted
       {:ok, _authed_user_to_delete, _token, authed_conn_to_delete} =

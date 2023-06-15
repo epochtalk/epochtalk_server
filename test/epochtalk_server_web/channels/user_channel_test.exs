@@ -57,7 +57,9 @@ defmodule Test.EpochtalkServerWeb.UserChannel do
     test "without authentication, errors" do
       socket = socket(UserSocket, nil, %{})
       assert socket.joined == false
-      assert subscribe_and_join(socket, UserChannel, "user:role") == {:error, %{reason: "unauthorized, cannot join 'user:role' channel"}}
+
+      assert subscribe_and_join(socket, UserChannel, "user:role") ==
+               {:error, %{reason: "unauthorized, cannot join 'user:role' channel"}}
     end
 
     @tag authenticated: "user:role"
@@ -80,7 +82,9 @@ defmodule Test.EpochtalkServerWeb.UserChannel do
     test "without authentication, errors" do
       socket = socket(UserSocket, nil, %{})
       assert socket.joined == false
-      assert subscribe_and_join(socket, UserChannel, "user:1") == {:error, %{reason: "unauthorized, cannot join 'user:1' channel"}}
+
+      assert subscribe_and_join(socket, UserChannel, "user:1") ==
+               {:error, %{reason: "unauthorized, cannot join 'user:1' channel"}}
     end
 
     @tag authenticated: "user:<user_id>"

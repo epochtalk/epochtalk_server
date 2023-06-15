@@ -45,7 +45,7 @@ defmodule EpochtalkServerWeb.PostController do
   5) Base permission check
   6) Authorizations tests (TODOL implement authorizations first)
   7) Board ban on authed user
-  8) Board and Thread metadata is correct (ex: thread.watched,)
+  8) Board and Thread metadata is correct (ex: board.signature_disabled, thread.trust_visible)
   """
   def by_thread(conn, attrs) do
     with thread_id <- Validate.cast(attrs, "thread_id", :integer, required: true),

@@ -5,12 +5,12 @@ defmodule Test.EpochtalkServerWeb.UserChannel do
 
   describe "websocket channel 'user:public'" do
     @tag authenticated: "user:public"
-    test "joins with authentication", %{socket: socket} do
+    test "when authenticated, joins", %{socket: socket} do
       assert socket.joined == true
       assert socket.id == "user:#{socket.assigns.user_id}"
     end
 
-    test "does not join without authentication" do
+    test "when not authenticated, does not join" do
       socket = socket(UserSocket, nil, %{})
       assert socket.joined == false
       assert {:ok, _payload, socket} = subscribe_and_join(socket, UserChannel, "user:public")
@@ -19,7 +19,7 @@ defmodule Test.EpochtalkServerWeb.UserChannel do
     end
 
     @tag authenticated: "user:public"
-    test "server responds to 'is_online' message with %{user_id: <user_id>, online: true} for online user",
+    test "when user is online, server responds to 'is_online' message with %{user_id: <user_id>, online: true}",
          %{
            socket: socket,
            user_id: user_id
@@ -29,7 +29,7 @@ defmodule Test.EpochtalkServerWeb.UserChannel do
     end
 
     @tag authenticated: "user:public"
-    test "server responds to 'is_online' message with %{user_id: <user_id>, online: false} for offline user",
+    test "when user is not online, server responds to 'is_online' message with %{user_id: <user_id>, online: false}",
          %{
            socket: socket,
            user_id: user_id
@@ -40,7 +40,7 @@ defmodule Test.EpochtalkServerWeb.UserChannel do
     end
 
     @tag authenticated: "user:public"
-    test "server can broadcast 'announcement' message with motd payload", %{socket: socket} do
+    test "with motd payload, server broadcasts 'announcement' message", %{socket: socket} do
       assert :ok = broadcast_from(socket, "announcement", %{motd: "message"})
       assert_push "announcement", %{motd: "message"}
       refute_push "announcement", %{motd: "message"}
@@ -49,12 +49,12 @@ defmodule Test.EpochtalkServerWeb.UserChannel do
 
   describe "websocket channel 'user:role'" do
     @tag authenticated: "user:role"
-    test "joins with authentication", %{socket: socket} do
+    test "with authentication, joins", %{socket: socket} do
       assert socket.joined == true
       assert socket.id == "user:#{socket.assigns.user_id}"
     end
 
-    test "errors without authentication" do
+    test "without authentication, errors" do
       socket = socket(UserSocket, nil, %{})
       assert socket.joined == false
 
@@ -63,7 +63,7 @@ defmodule Test.EpochtalkServerWeb.UserChannel do
     end
 
     @tag authenticated: "user:role"
-    test "server can broadcast 'permissionsChanged' message with lookup payload", %{
+    test "with lookup payload, server broadcasts 'permissionsChanged' message", %{
       socket: socket
     } do
       assert :ok = broadcast_from(socket, "permissionsChanged", %{lookup: "user"})
@@ -74,12 +74,12 @@ defmodule Test.EpochtalkServerWeb.UserChannel do
 
   describe "websocket channel 'user:<user_id>'" do
     @tag authenticated: "user:<user_id>"
-    test "joins with authentication", %{socket: socket} do
+    test "with authentication, joins", %{socket: socket} do
       assert socket.joined == true
       assert socket.id == "user:#{socket.assigns.user_id}"
     end
 
-    test "errors without authentication" do
+    test "without authentication, errors" do
       socket = socket(UserSocket, nil, %{})
       assert socket.joined == false
 
@@ -88,28 +88,28 @@ defmodule Test.EpochtalkServerWeb.UserChannel do
     end
 
     @tag authenticated: "user:<user_id>"
-    test "broadcasts 'reauthenticate' message with empty payload", %{socket: socket} do
+    test "with empty payload, broadcasts 'reauthenticate' message", %{socket: socket} do
       assert :ok = broadcast_from(socket, "reauthenticate", %{})
       assert_push "reauthenticate", %{}
       refute_push "reauthenticate", %{}
     end
 
     @tag authenticated: "user:<user_id>"
-    test "broadcasts 'logout' message with token payload", %{socket: socket} do
+    test "with token payload, broadcasts 'logout' message", %{socket: socket} do
       assert :ok = broadcast_from(socket, "logout", %{token: "some_token"})
       assert_push "logout", %{token: "some_token"}
       refute_push "logout", %{token: "some_token"}
     end
 
     @tag authenticated: "user:<user_id>"
-    test "broadcasts 'newMessage' message with empty payload", %{socket: socket} do
+    test "with empty payload, broadcasts 'newMessage' message", %{socket: socket} do
       assert :ok = broadcast_from(socket, "newMessage", %{})
       assert_push "newMessage", %{}
       refute_push "newMessage", %{}
     end
 
     @tag authenticated: "user:<user_id>"
-    test "broadcasts 'refreshMentions' message with empty payload", %{socket: socket} do
+    test "with empty payload, broadcasts 'refreshMentions' message", %{socket: socket} do
       assert :ok = broadcast_from(socket, "refreshMentions", %{})
       assert_push "refreshMentions", %{}
       refute_push "refreshMentions", %{}

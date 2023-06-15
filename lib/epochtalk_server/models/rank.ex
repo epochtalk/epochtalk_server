@@ -40,5 +40,5 @@ defmodule EpochtalkServer.Models.Rank do
   Query all `Rank` models
   """
   @spec all() :: [Ecto.Changeset.t()] | nil
-  def all(), do: Repo.all(from Rank)
+  def all(), do: Repo.all(from(Rank))
 end

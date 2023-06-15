@@ -36,5 +36,5 @@ defmodule EpochtalkServer.Models.TrustBoard do
   Query all `TrustBoard` models
   """
   @spec all() :: [Ecto.Changeset.t()] | nil
-  def all(), do: Repo.all(from TrustBoard)
+  def all(), do: Repo.all(from(TrustBoard))
 end

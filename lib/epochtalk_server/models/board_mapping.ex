@@ -99,10 +99,11 @@ defmodule EpochtalkServer.Models.BoardMapping do
             board: %{id: b.id, slug: b.slug, name: b.name, viewable_by: b.viewable_by}
           }
       else
-        sticky_count_subquery = from t in Thread,
-          where: t.sticky == true,
-          select: %{board_id: t.board_id, sticky_thread_count: count(t.id)},
-          group_by: [t.board_id]
+        sticky_count_subquery =
+          from t in Thread,
+            where: t.sticky == true,
+            select: %{board_id: t.board_id, sticky_thread_count: count(t.id)},
+            group_by: [t.board_id]
 
         from bm in BoardMapping,
           left_join: mb in MetadataBoard,
@@ -122,7 +123,6 @@ defmodule EpochtalkServer.Models.BoardMapping do
             sticky_thread_count: s.sticky_thread_count
           },
           preload: [:board]
-
       end
 
     Repo.all(query)

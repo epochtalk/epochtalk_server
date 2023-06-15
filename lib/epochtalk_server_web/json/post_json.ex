@@ -44,6 +44,11 @@ defmodule EpochtalkServerWeb.PostJSON do
       thread
       |> ThreadJSON.format_user_data()
       |> Map.put(:poll, formatted_poll)
+      |> Map.put(
+        :trust_visible,
+        Enum.filter(trust_boards, &(&1.board_id == thread.board_id)) != []
+      )
+      |> Map.put(:watched, watched)
 
     %{
       board: formatted_board,
@@ -66,6 +71,7 @@ defmodule EpochtalkServerWeb.PostJSON do
   ## === Private Helper Functions ===
 
   defp format_poll_data_for_by_thread(nil, _), do: nil
+
   defp format_poll_data_for_by_thread(poll, user) do
     formatted_poll = %{
       id: poll.id,

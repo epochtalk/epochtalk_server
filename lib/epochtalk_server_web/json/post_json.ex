@@ -26,7 +26,9 @@ defmodule EpochtalkServerWeb.PostJSON do
         limit: limit,
         desc: desc,
         metric_rank_maps: metric_rank_maps,
-        ranks: ranks
+        ranks: ranks,
+        trust_boards: trust_boards,
+        watched: watched
       }) do
     formatted_board =
       BoardJSON.format_board_data_for_find(

@@ -17,6 +17,8 @@ defmodule EpochtalkServerWeb.PostController do
   alias EpochtalkServer.Models.BoardModerator
   alias EpochtalkServer.Models.MetricRankMap
   alias EpochtalkServer.Models.Rank
+  alias EpochtalkServer.Models.TrustBoard
+  alias EpochtalkServer.Models.WatchThread
 
   # @doc """
   # Used to create posts
@@ -71,7 +73,9 @@ defmodule EpochtalkServerWeb.PostController do
              per_page: limit
            ),
          metric_rank_maps <- MetricRankMap.all_merged(),
-         ranks <- Rank.all() do
+         ranks <- Rank.all(),
+         trust_boards <- TrustBoard.all(),
+         {:ok, watching_thread} <- WatchThread.is_watching(user, thread_id) do
       render(conn, :by_thread, %{
         posts: posts,
         poll: poll,
@@ -87,7 +91,9 @@ defmodule EpochtalkServerWeb.PostController do
         limit: limit,
         desc: desc,
         metric_rank_maps: metric_rank_maps,
-        ranks: ranks
+        ranks: ranks,
+        trust_boards: trust_boards,
+        watched: watching_thread
       })
     else
       {:error, :board_does_not_exist} ->

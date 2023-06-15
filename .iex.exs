@@ -30,7 +30,9 @@ alias EpochtalkServer.Models.{
   RolePermission,
   RoleUser,
   Thread,
-  User
+  TrustBoard,
+  User,
+  WatchThread
 }
 
 reload = fn -> r(Enum.map(__ENV__.aliases, fn {_, module} -> module end)) end

@@ -18,12 +18,14 @@ defmodule Test.EpochtalkServerWeb.UserSocket do
       user_id: user_id,
       token: token
     } do
-      assert {:ok, %Phoenix.Socket{assigns: %{user_id: ^user_id}}} =
-               connect(UserSocket, %{token: token})
+      {:ok, socket} = connect(UserSocket, %{token: token})
+      assert socket.assigns.user_id == user_id
+      assert socket.assigns.guardian_default_token == token
     end
 
     test "with anonymous connection, returns unauthenticated socket" do
-      assert {:ok, %Phoenix.Socket{}} = connect(UserSocket, %{})
+      {:ok, socket} = connect(UserSocket, %{})
+      assert socket.assigns == %{}
     end
   end
 end

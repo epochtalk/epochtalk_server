@@ -142,7 +142,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Board do
         |> json_response(400)
 
       assert result["error"] == "Bad Request"
-      assert result["message"] == "Error, cannot board does not exist"
+      assert result["message"] == "Error, cannot convert slug: board does not exist"
     end
 
     test "given an existing slug, deslugifies board id", %{conn: conn, board: board} do

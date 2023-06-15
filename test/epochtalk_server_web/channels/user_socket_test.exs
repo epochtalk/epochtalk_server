@@ -4,17 +4,17 @@ defmodule Test.EpochtalkServerWeb.UserSocket do
   alias EpochtalkServer.Auth.Guardian
 
   describe "connect/3" do
-    test "returns :error for an invalid JWT" do
+    test "given invalid JWT, returns :error" do
       assert :error = connect(UserSocket, %{token: "bad_token"})
     end
 
-    test "returns :error for a valid JWT without backing user" do
+    test "given valid JWT without backing user, returns :error" do
       {:ok, token, _claims} = Guardian.encode_and_sign(%{user_id: :rand.uniform(9999)})
       assert :error = connect(UserSocket, %{token: token})
     end
 
     @tag :authenticated
-    test "returns authenticated socket for a valid JWT with backing user", %{
+    test "given valid JWT with backing user, returns authenticated socket", %{
       user_id: user_id,
       token: token
     } do
@@ -22,7 +22,7 @@ defmodule Test.EpochtalkServerWeb.UserSocket do
                connect(UserSocket, %{token: token})
     end
 
-    test "returns unauthenticated socket for anonymous connections" do
+    test "with anonymous connection, returns unauthenticated socket" do
       assert {:ok, %Phoenix.Socket{}} = connect(UserSocket, %{})
     end
   end

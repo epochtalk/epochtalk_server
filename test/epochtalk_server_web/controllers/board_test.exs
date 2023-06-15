@@ -115,8 +115,8 @@ defmodule Test.EpochtalkServerWeb.Controllers.Board do
         |> get(Routes.board_path(conn, :find, 0))
         |> json_response(400)
 
-      assert %{"error" => "Bad Request"} = result
-      assert %{"message" => "Error, board does not exist"} = result
+      assert result["error"] == "Bad Request"
+      assert result["message"] == "Error, board does not exist"
     end
 
     test "given an existing id, finds a board", %{conn: conn, board: board} do
@@ -141,8 +141,8 @@ defmodule Test.EpochtalkServerWeb.Controllers.Board do
         |> get(Routes.board_path(conn, :slug_to_id, "bad-slug"))
         |> json_response(400)
 
-      assert %{"error" => "Bad Request"} = result
-      assert %{"message" => "Error, cannot board does not exist"} = result
+      assert result["error"] == "Bad Request"
+      assert result["message"] == "Error, cannot board does not exist"
     end
 
     test "given an existing slug, deslugifies board id", %{conn: conn, board: board} do

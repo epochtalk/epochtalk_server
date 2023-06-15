@@ -145,7 +145,7 @@ defmodule Test.EpochtalkServer.Session do
   describe "create/3 expiration/ttl" do
     setup [:flush_redis]
 
-    test "creates a user session without remember me (< 1 day ttl)", %{conn: conn, user: user} do
+    test "without remember me, creates a user session (< 1 day ttl)", %{conn: conn, user: user} do
       remember_me = false
       {:ok, authed_user, _token, _authed_conn} = Session.create(user, remember_me, conn)
       user_ttl = Redix.command!(:redix, ["TTL", "user:#{authed_user.id}"])
@@ -164,7 +164,7 @@ defmodule Test.EpochtalkServer.Session do
       assert sessions_ttl <= @one_day_in_seconds
     end
 
-    test "creates a user session with remember me (< 4 week ttl)", %{conn: conn, user: user} do
+    test "with remember me, creates a user session (< 4 week ttl)", %{conn: conn, user: user} do
       remember_me = true
       {:ok, authed_user, _token, _authed_conn} = Session.create(user, remember_me, conn)
       user_ttl = Redix.command!(:redix, ["TTL", "user:#{authed_user.id}"])
@@ -237,7 +237,7 @@ defmodule Test.EpochtalkServer.Session do
     end
 
     @tag :banned
-    test "handles baninfo ttl and ban_expiration without remember me (< 1 day ttl)", %{
+    test "without remember me, handles baninfo ttl and ban_expiration (< 1 day ttl)", %{
       conn: conn,
       user_attrs: user_attrs,
       user: user
@@ -268,7 +268,7 @@ defmodule Test.EpochtalkServer.Session do
     end
 
     @tag :banned
-    test "handles baninfo ttl and ban_expiration with remember me (< 4 weeks ttl)", %{
+    test "with remember me, handles baninfo ttl and ban_expiration (< 4 weeks ttl)", %{
       conn: conn,
       user_attrs: user_attrs,
       user: user
@@ -300,7 +300,7 @@ defmodule Test.EpochtalkServer.Session do
     end
 
     @tag :malicious
-    test "handles baninfo ttl and malicious score without remember me (< 1 day ttl)", %{
+    test "without remember me, handles baninfo ttl and malicious score (< 1 day ttl)", %{
       conn: conn,
       user: user,
       malicious_user_changeset: malicious_user_changeset
@@ -327,7 +327,7 @@ defmodule Test.EpochtalkServer.Session do
     end
 
     @tag :malicious
-    test "handles baninfo ttl and malicious score with remember me (< 4 weeks ttl)", %{
+    test "with remember me, handles baninfo ttl and malicious score (< 4 weeks ttl)", %{
       conn: conn,
       user: user,
       malicious_user_changeset: malicious_user_changeset

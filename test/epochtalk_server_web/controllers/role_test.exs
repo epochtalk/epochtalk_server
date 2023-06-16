@@ -158,8 +158,8 @@ defmodule Test.EpochtalkServerWeb.Controllers.Role do
         |> put(Routes.role_path(conn, :update), new_newbie_permissions_attrs)
         |> json_response(401)
 
-      assert %{"error" => "Unauthorized", "message" => "No resource found", "status" => 401} ==
-               json_response(update_conn, 401)
+      assert response["error"] == "Unauthorized"
+      assert response["message"] == "No resource found"
     end
 
     @tag :authenticated
@@ -210,11 +210,11 @@ defmodule Test.EpochtalkServerWeb.Controllers.Role do
         |> json_response(200)
         |> Enum.at(6)
 
-      assert new_newbie_permissions_attrs.name == modified_newbie["name"]
-      assert new_newbie_permissions_attrs.description == modified_newbie["description"]
-      assert new_newbie_permissions_attrs.priority == modified_newbie["priority"]
-      assert new_newbie_permissions_attrs.lookup == modified_newbie["lookup"]
-      assert new_newbie_permissions_attrs.highlight_color == modified_newbie["highlight_color"]
+      assert modified_newbie["name"] == new_newbie_permissions_attrs.name
+      assert modified_newbie["description"] == new_newbie_permissions_attrs.description
+      assert modified_newbie["priority"] == new_newbie_permissions_attrs.priority
+      assert modified_newbie["lookup"] == new_newbie_permissions_attrs.lookup
+      assert modified_newbie["highlight_color"] == new_newbie_permissions_attrs.highlight_color
 
       blank_hc_attrs = %{id: 7, highlight_color: ""}
 
@@ -223,7 +223,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Role do
         |> put(Routes.role_path(conn, :update), blank_hc_attrs)
         |> json_response(200)
 
-      assert blank_hc_attrs.id == blank_hc_resp
+      assert blank_hc_response == blank_hc_attrs.id
 
       blank_hc_newbie =
         conn
@@ -231,7 +231,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Role do
         |> json_response(200)
         |> Enum.at(6)
 
-      assert nil == blank_hc_newbie["highlight_color"]
+      assert blank_hc_newbie["highlight_color"] == nil
     end
 
     @tag authenticated: :admin

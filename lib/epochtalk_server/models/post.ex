@@ -292,4 +292,17 @@ defmodule EpochtalkServer.Models.Post do
     |> order_by([plist], plist.position)
     |> Repo.all()
   end
+
+  @doc """
+  Used to find a specific `Post` by it's `id`
+  """
+  @spec find_by_id(id :: non_neg_integer) :: t()
+  def find_by_id(id) when is_integer(id) do
+    query =
+      from p in Post,
+        where: p.id == ^id,
+        preload: [:thread, user: :profile]
+
+    Repo.one(query)
+  end
 end

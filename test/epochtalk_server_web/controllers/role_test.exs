@@ -451,7 +451,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Role do
         |> put(Routes.role_path(conn, :update), new_newbie_permissions_attrs)
         |> json_response(200)
 
-      assert new_newbie_permissions_attrs.id == update_response
+      assert update_response == new_newbie_permissions_attrs.id
 
       modified_newbie =
         conn
@@ -459,10 +459,8 @@ defmodule Test.EpochtalkServerWeb.Controllers.Role do
         |> json_response(200)
         |> Enum.at(6)
 
-      assert invalid_modified_newbie_priority_restrictions !=
-               modified_newbie["priority_restrictions"]
-
-      assert initial_newbie_priority_restrictions == modified_newbie["priority_restrictions"]
+      assert modified_newbie["priority_restrictions"] != invalid_modified_newbie_priority_restrictions
+      assert modified_newbie["priority_restrictions"] == initial_newbie_priority_restrictions
     end
 
     @tag authenticated: :admin
@@ -494,7 +492,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Role do
         |> put(Routes.role_path(conn, :update), new_newbie_permissions_attrs)
         |> json_response(200)
 
-      assert new_newbie_permissions_attrs.id == update_response
+      assert update_response == new_newbie_permissions_attrs.id
 
       modified_newbie =
         conn
@@ -502,7 +500,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Role do
         |> json_response(200)
         |> Enum.at(6)
 
-      assert modified_newbie_permissions == modified_newbie["permissions"]
+      assert modified_newbie["permissions"] == modified_newbie_permissions
     end
 
     @tag authenticated: :admin
@@ -528,7 +526,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Role do
         |> put(Routes.role_path(conn, :update), new_newbie_permissions_attrs)
         |> json_response(200)
 
-      assert new_newbie_permissions_attrs.id == update_response
+      assert update_response == new_newbie_permissions_attrs.id
 
       modified_newbie =
         conn
@@ -536,10 +534,8 @@ defmodule Test.EpochtalkServerWeb.Controllers.Role do
         |> json_response(200)
         |> Enum.at(6)
 
-      assert invalid_modified_newbie_permissions !=
-               modified_newbie["permissions"]
-
-      assert initial_newbie_permissions == modified_newbie["permissions"]
+      assert modified_newbie["permissions"] != invalid_modified_newbie_permissions
+      assert modified_newbie["permissions"] == initial_newbie_permissions
     end
   end
 end

@@ -334,16 +334,16 @@ defmodule Test.EpochtalkServerWeb.Controllers.Role do
         |> put(Routes.role_path(conn, :update), bad_hc_attrs)
         |> json_response(400)
 
-      assert %{"message" => "Name can't be blank"} = short_name_response
-      assert %{"message" => "Name should be at most 255 character(s)"} = long_name_response
-      assert %{"message" => "Lookup can't be blank"} = short_lu_response
-      assert %{"message" => "Lookup should be at most 255 character(s)"} = long_lu_response
-      assert %{"message" => "Lookup has already been taken"} = uniq_lu_response
-      assert %{"message" => "Description can't be blank"} = short_desc_response
-      assert %{"message" => "Description should be at most 1000 character(s)"} = long_desc_response
-      assert %{"message" => "Priority must be greater than or equal to 1"} = low_prio_response
-      assert %{"message" => "Priority must be less than or equal to 2147483647"} = high_prio_response
-      assert %{"message" => "Highlight_color has invalid format"} = bad_hc_response
+      assert short_name_response["message"] == "Name can't be blank"
+      assert long_name_response["message"] == "Name should be at most 255 character(s)"
+      assert short_lu_response["message"] == "Lookup can't be blank"
+      assert long_lu_response["message"] == "Lookup should be at most 255 character(s)"
+      assert uniq_lu_response["message"] == "Lookup has already been taken"
+      assert short_desc_response["message"] == "Description can't be blank"
+      assert long_desc_response["message"] == "Description should be at most 1000 character(s)"
+      assert low_prio_response["message"] == "Priority must be greater than or equal to 1"
+      assert high_prio_response["message"] == "Priority must be less than or equal to 2147483647"
+      assert bad_hc_response["message"] == "Highlight_color has invalid format"
 
       modified_newbie =
         conn

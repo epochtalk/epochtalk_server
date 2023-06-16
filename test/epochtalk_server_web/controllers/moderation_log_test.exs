@@ -1487,7 +1487,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
   end
 
   describe "create/1" do
-    test "success if moderation_log entry is created in database", %{} do
+    test "creates moderation_log entry", %{} do
       {:ok, moderation_log} = ModerationLog.create(@create_update_boards_attrs)
       assert moderation_log.mod_username == @create_update_boards_attrs.mod.username
       assert moderation_log.mod_id == @create_update_boards_attrs.mod.id
@@ -1500,7 +1500,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert moderation_log.action_display_url == "admin-management.boards"
     end
 
-    test "success if moderation_log entry is created in database using helper data_query function",
+    test "creates moderation_log using helper data_query function",
          %{} do
       {:ok, moderation_log} = ModerationLog.create(@create_add_moderators_attrs)
       assert moderation_log.mod_username == @create_add_moderators_attrs.mod.username

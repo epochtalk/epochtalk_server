@@ -163,7 +163,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Role do
     end
 
     @tag :authenticated
-    test "errors with unauthorized when logged in but without correct ACL", %{conn: conn} do
+    test "when logged in and given incorrect ACL, errors with unauthorized", %{conn: conn} do
       modified_newbie_priority_restrictions = [1, 2, 3]
 
       new_newbie_permissions_attrs = %{

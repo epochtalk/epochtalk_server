@@ -129,7 +129,8 @@ defmodule Test.EpochtalkServerWeb.Controllers.Role do
     end
 
     test "when not authenticated, does not get roles", %{conn: conn} do
-      response = conn
+      response =
+        conn
         |> get(Routes.role_path(conn, :all))
         |> json_response(401)
 
@@ -154,7 +155,8 @@ defmodule Test.EpochtalkServerWeb.Controllers.Role do
         priority_restrictions: modified_newbie_priority_restrictions
       }
 
-      response = conn
+      response =
+        conn
         |> put(Routes.role_path(conn, :update), new_newbie_permissions_attrs)
         |> json_response(401)
 
@@ -198,9 +200,10 @@ defmodule Test.EpochtalkServerWeb.Controllers.Role do
         highlight_color: "#00Ff00"
       }
 
-      update_response = conn
-                      |> put(Routes.role_path(conn, :update), new_newbie_permissions_attrs)
-                      |> json_response(200)
+      update_response =
+        conn
+        |> put(Routes.role_path(conn, :update), new_newbie_permissions_attrs)
+        |> json_response(200)
 
       assert update_response == new_newbie_permissions_attrs.id
 
@@ -459,7 +462,9 @@ defmodule Test.EpochtalkServerWeb.Controllers.Role do
         |> json_response(200)
         |> Enum.at(6)
 
-      assert modified_newbie["priority_restrictions"] != invalid_modified_newbie_priority_restrictions
+      assert modified_newbie["priority_restrictions"] !=
+               invalid_modified_newbie_priority_restrictions
+
       assert modified_newbie["priority_restrictions"] == initial_newbie_priority_restrictions
     end
 

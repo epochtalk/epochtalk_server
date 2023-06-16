@@ -98,8 +98,8 @@ defmodule Test.EpochtalkServerWeb.Controllers.Role do
       initial_newbie_priority_restrictions = nil
 
       newbie_role = roles |> Enum.at(6)
-      assert newbie_permissions == newbie_role["permissions"]
-      assert initial_newbie_priority_restrictions == newbie_role["priority_restrictions"]
+      assert newbie_role["permissions"] == newbie_permissions
+      assert newbie_role["priority_restrictions"] == initial_newbie_priority_restrictions
 
       assert [
                %{
@@ -129,10 +129,12 @@ defmodule Test.EpochtalkServerWeb.Controllers.Role do
     end
 
     test "when not authenticated, does not get roles", %{conn: conn} do
-      conn = get(conn, Routes.role_path(conn, :all))
+      result = conn
+        |> get(Routes.role_path(conn, :all))
+        |> json_response(401)
 
-      assert %{"error" => "Unauthorized", "message" => "No resource found"} =
-               json_response(conn, 401)
+      assert result["error"] == "Unauthorized"
+      assert result["message"] == "No resource found"
     end
   end
 

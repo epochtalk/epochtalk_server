@@ -50,13 +50,14 @@ defmodule EpochtalkServerWeb.PostJSON do
       )
       |> Map.put(:watched, watched)
 
+    formatted_posts = posts |> Enum.map(&format_post_data_for_by_thread(&1))
+
     %{
       board: formatted_board,
-      posts: posts,
+      posts: formatted_posts,
       thread: formatted_thread,
       write_access: write_access,
       board_banned: board_banned,
-      user: user,
       metadata: %{
         metric_rank_maps: metric_rank_maps,
         ranks: ranks
@@ -103,5 +104,32 @@ defmodule EpochtalkServerWeb.PostJSON do
     formatted_poll
     |> Map.put(:answers, answers)
     |> Map.put(:has_voted, has_voted)
+  end
+
+  defp format_post_data_for_by_thread(post) do
+    post
+    |> Map.put(:user, %{
+      id: post.user_id,
+      name: post.name,
+      original_poster: post.original_poster,
+      username: post.username,
+      priority: if(is_nil(post.priority), do: post.default_priority, else: post.priority),
+      deleted: post.user_deleted,
+      signature: post.signature,
+      post_count: post.post_count,
+      highlight_color: post.highlight_color,
+      role_name: post.role_name
+    })
+    |> Map.delete(:user_id)
+    |> Map.delete(:username)
+    |> Map.delete(:priority)
+    |> Map.delete(:default_priority)
+    |> Map.delete(:original_poster)
+    |> Map.delete(:name)
+    |> Map.delete(:user_deleted)
+    |> Map.delete(:post_count)
+    |> Map.delete(:signature)
+    |> Map.delete(:highlight_color)
+    |> Map.delete(:role_name)
   end
 end

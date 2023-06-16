@@ -3,7 +3,7 @@ defmodule Test.EpochtalkServer.Models.Board do
   alias EpochtalkServer.Models.Board
 
   describe "create/1" do
-    test "does not create a board with invalid parameters", _ do
+    test "with invalid parameters, does not create a board", _ do
       assert_raise BadMapError,
                    ~r/^expected a map, got: ""/,
                    fn ->
@@ -11,7 +11,7 @@ defmodule Test.EpochtalkServer.Models.Board do
                    end
     end
 
-    test "creates a board with valid parameters", _ do
+    test "with valid parameters, creates a board", _ do
       board = %{
         name: "test board",
         slug: "test-board",
@@ -21,13 +21,13 @@ defmodule Test.EpochtalkServer.Models.Board do
         right_to_left: false
       }
 
-      assert {:ok, new_board} = Board.create(board)
-      assert board.name == new_board.name
-      assert board.slug == new_board.slug
-      assert board.description == new_board.description
-      assert board.viewable_by == new_board.viewable_by
-      assert board.postable_by == new_board.postable_by
-      assert board.right_to_left == new_board.right_to_left
+      {:ok, new_board} = Board.create(board)
+      assert new_board.name == board.name
+      assert new_board.slug == board.slug
+      assert new_board.description == board.description
+      assert new_board.viewable_by == board.viewable_by
+      assert new_board.postable_by == board.postable_by
+      assert new_board.right_to_left == board.right_to_left
     end
   end
 end

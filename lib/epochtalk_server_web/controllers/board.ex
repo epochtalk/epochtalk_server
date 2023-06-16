@@ -63,7 +63,11 @@ defmodule EpochtalkServerWeb.Controllers.Board do
       render(conn, :slug_to_id, id: id)
     else
       {:error, :board_does_not_exist} ->
-        ErrorHelpers.render_json_error(conn, 400, "Error, cannot board does not exist")
+        ErrorHelpers.render_json_error(
+          conn,
+          400,
+          "Error, cannot convert slug: board does not exist"
+        )
 
       _ ->
         ErrorHelpers.render_json_error(conn, 400, "Error, cannot convert board slug to id")

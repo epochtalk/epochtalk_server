@@ -368,7 +368,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Role do
         |> json_response(200)
         |> Enum.at(6)
 
-      assert initial_newbie_priority_restrictions == newbie["priority_restrictions"]
+      assert newbie["priority_restrictions"] == initial_newbie_priority_restrictions
 
       modified_newbie_priority_restrictions = [1, 2, 3]
 
@@ -389,7 +389,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Role do
         |> put(Routes.role_path(conn, :update), new_newbie_permissions_attrs)
         |> json_response(200)
 
-      assert new_newbie_permissions_attrs.id == update_response
+      assert update_response == new_newbie_permissions_attrs.id
 
       modified_newbie =
         conn
@@ -397,7 +397,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Role do
         |> json_response(200)
         |> Enum.at(6)
 
-      assert modified_newbie_priority_restrictions == modified_newbie["priority_restrictions"]
+      assert modified_newbie["priority_restrictions"] == modified_newbie_priority_restrictions
 
       re_modified_newbie_priority_restrictions = []
 
@@ -418,7 +418,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Role do
         |> put(Routes.role_path(conn, :update), new_newbie_permissions_attrs)
         |> json_response(200)
 
-      assert new_newbie_permissions_attrs.id == new_update_response
+      assert new_update_response == new_newbie_permissions_attrs.id
 
       modified_newbie =
         conn
@@ -426,7 +426,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Role do
         |> json_response(200)
         |> Enum.at(6)
 
-      assert nil == modified_newbie["priority_restrictions"]
+      assert modified_newbie["priority_restrictions"] == nil
     end
 
     @tag authenticated: :admin

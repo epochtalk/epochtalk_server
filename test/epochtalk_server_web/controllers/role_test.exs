@@ -12,7 +12,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Role do
 
   describe "all/2" do
     @tag :authenticated
-    test "gets all roles when authenticated", %{conn: conn} do
+    test "when authenticated, gets all roles", %{conn: conn} do
       RoleCache.reload()
       conn = get(conn, Routes.role_path(conn, :all))
       roles = json_response(conn, 200)
@@ -128,7 +128,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Role do
       assert [] = roles
     end
 
-    test "does not get roles when not authenticated", %{conn: conn} do
+    test "when not authenticated, does not get roles", %{conn: conn} do
       conn = get(conn, Routes.role_path(conn, :all))
 
       assert %{"error" => "Unauthorized", "message" => "No resource found"} =
@@ -137,7 +137,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Role do
   end
 
   describe "update/2" do
-    test "errors with unauthorized when not logged", %{conn: conn} do
+    test "when not logged in, errors with unauthorized", %{conn: conn} do
       modified_newbie_priority_restrictions = [1, 2, 3]
 
       new_newbie_permissions_attrs = %{
@@ -182,7 +182,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Role do
     end
 
     @tag authenticated: :admin
-    test "modifies a role's properties when provided", %{conn: conn} do
+    test "given properties, modifies a role", %{conn: conn} do
       RoleCache.reload()
 
       new_newbie_permissions_attrs = %{
@@ -229,7 +229,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Role do
     end
 
     @tag authenticated: :admin
-    test "does not modify a role's properties when not provided", %{conn: conn} do
+    test "given no properties, does not modify a role", %{conn: conn} do
       RoleCache.reload()
       new_newbie_permissions_attrs = %{id: 7}
 
@@ -260,7 +260,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Role do
     end
 
     @tag authenticated: :admin
-    test "errors when fields are not properly formatted", %{conn: conn} do
+    test "when fields are not properly formatted, errors", %{conn: conn} do
       original_newbie =
         conn
         |> get(Routes.role_path(conn, :all))
@@ -352,7 +352,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Role do
     end
 
     @tag authenticated: :admin
-    test "modifies a role's priority_restrictions when authenticated", %{conn: conn} do
+    test "when authenticated, modifies a role's priority_restrictions", %{conn: conn} do
       RoleCache.reload()
       initial_newbie_priority_restrictions = nil
 
@@ -424,7 +424,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Role do
     end
 
     @tag authenticated: :admin
-    test "does not modify a role's priority_restrictions when input is invalid", %{conn: conn} do
+    test "when input is invalid, does not modify a role's priority_restrictions", %{conn: conn} do
       RoleCache.reload()
 
       initial_newbie_priority_restrictions =
@@ -460,7 +460,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Role do
     end
 
     @tag authenticated: :admin
-    test "modifies a role's permissions when authenticated", %{conn: conn} do
+    test "when authenticated, modifies a role's permissions", %{conn: conn} do
       RoleCache.reload()
 
       new_newbie_permissions_attrs = %{
@@ -500,7 +500,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Role do
     end
 
     @tag authenticated: :admin
-    test "does not modify a user's permissions when input is invalid", %{conn: conn} do
+    test "when input is invalid, does not modify a user's permissions", %{conn: conn} do
       RoleCache.reload()
 
       initial_newbie_permissions =

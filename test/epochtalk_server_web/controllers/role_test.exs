@@ -129,12 +129,12 @@ defmodule Test.EpochtalkServerWeb.Controllers.Role do
     end
 
     test "when not authenticated, does not get roles", %{conn: conn} do
-      result = conn
+      response = conn
         |> get(Routes.role_path(conn, :all))
         |> json_response(401)
 
-      assert result["error"] == "Unauthorized"
-      assert result["message"] == "No resource found"
+      assert response["error"] == "Unauthorized"
+      assert response["message"] == "No resource found"
     end
   end
 
@@ -154,7 +154,9 @@ defmodule Test.EpochtalkServerWeb.Controllers.Role do
         priority_restrictions: modified_newbie_priority_restrictions
       }
 
-      update_conn = put(conn, Routes.role_path(conn, :update), new_newbie_permissions_attrs)
+      response = conn
+        |> put(Routes.role_path(conn, :update), new_newbie_permissions_attrs)
+        |> json_response(401)
 
       assert %{"error" => "Unauthorized", "message" => "No resource found", "status" => 401} ==
                json_response(update_conn, 401)
@@ -196,9 +198,11 @@ defmodule Test.EpochtalkServerWeb.Controllers.Role do
         highlight_color: "#00Ff00"
       }
 
-      update_conn = put(conn, Routes.role_path(conn, :update), new_newbie_permissions_attrs)
+      update_response = conn
+                      |> put(Routes.role_path(conn, :update), new_newbie_permissions_attrs)
+                      |> json_response(200)
 
-      assert new_newbie_permissions_attrs.id == json_response(update_conn, 200)
+      assert update_response == new_newbie_permissions_attrs.id
 
       modified_newbie =
         conn
@@ -214,7 +218,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Role do
 
       blank_hc_attrs = %{id: 7, highlight_color: ""}
 
-      blank_hc_resp =
+      blank_hc_response =
         conn
         |> put(Routes.role_path(conn, :update), blank_hc_attrs)
         |> json_response(200)
@@ -241,12 +245,12 @@ defmodule Test.EpochtalkServerWeb.Controllers.Role do
         |> json_response(200)
         |> Enum.at(6)
 
-      update_resp =
+      update_response =
         conn
         |> put(Routes.role_path(conn, :update), new_newbie_permissions_attrs)
         |> json_response(200)
 
-      assert new_newbie_permissions_attrs.id == update_resp
+      assert update_response == new_newbie_permissions_attrs.id
 
       modified_newbie =
         conn
@@ -280,66 +284,66 @@ defmodule Test.EpochtalkServerWeb.Controllers.Role do
       high_prio_attrs = %{id: 7, priority: @postgres_integer_max + 1}
       bad_hc_attrs = %{id: 7, highlight_color: "lol"}
 
-      short_name_resp =
+      short_name_response =
         conn
         |> put(Routes.role_path(conn, :update), short_name_attrs)
         |> json_response(400)
 
-      long_name_resp =
+      long_name_response =
         conn
         |> put(Routes.role_path(conn, :update), long_name_attrs)
         |> json_response(400)
 
-      short_lu_resp =
+      short_lu_response =
         conn
         |> put(Routes.role_path(conn, :update), short_lu_attrs)
         |> json_response(400)
 
-      long_lu_resp =
+      long_lu_response =
         conn
         |> put(Routes.role_path(conn, :update), long_lu_attrs)
         |> json_response(400)
 
-      uniq_lu_resp =
+      uniq_lu_response =
         conn
         |> put(Routes.role_path(conn, :update), uniq_lu_attrs)
         |> json_response(400)
 
-      short_desc_resp =
+      short_desc_response =
         conn
         |> put(Routes.role_path(conn, :update), short_desc_attrs)
         |> json_response(400)
 
-      long_desc_resp =
+      long_desc_response =
         conn
         |> put(Routes.role_path(conn, :update), long_desc_attrs)
         |> json_response(400)
 
-      low_prio_resp =
+      low_prio_response =
         conn
         |> put(Routes.role_path(conn, :update), low_prio_attrs)
         |> json_response(400)
 
-      high_prio_resp =
+      high_prio_response =
         conn
         |> put(Routes.role_path(conn, :update), high_prio_attrs)
         |> json_response(400)
 
-      bad_hc_resp =
+      bad_hc_response =
         conn
         |> put(Routes.role_path(conn, :update), bad_hc_attrs)
         |> json_response(400)
 
-      assert %{"message" => "Name can't be blank"} = short_name_resp
-      assert %{"message" => "Name should be at most 255 character(s)"} = long_name_resp
-      assert %{"message" => "Lookup can't be blank"} = short_lu_resp
-      assert %{"message" => "Lookup should be at most 255 character(s)"} = long_lu_resp
-      assert %{"message" => "Lookup has already been taken"} = uniq_lu_resp
-      assert %{"message" => "Description can't be blank"} = short_desc_resp
-      assert %{"message" => "Description should be at most 1000 character(s)"} = long_desc_resp
-      assert %{"message" => "Priority must be greater than or equal to 1"} = low_prio_resp
-      assert %{"message" => "Priority must be less than or equal to 2147483647"} = high_prio_resp
-      assert %{"message" => "Highlight_color has invalid format"} = bad_hc_resp
+      assert %{"message" => "Name can't be blank"} = short_name_response
+      assert %{"message" => "Name should be at most 255 character(s)"} = long_name_response
+      assert %{"message" => "Lookup can't be blank"} = short_lu_response
+      assert %{"message" => "Lookup should be at most 255 character(s)"} = long_lu_response
+      assert %{"message" => "Lookup has already been taken"} = uniq_lu_response
+      assert %{"message" => "Description can't be blank"} = short_desc_response
+      assert %{"message" => "Description should be at most 1000 character(s)"} = long_desc_response
+      assert %{"message" => "Priority must be greater than or equal to 1"} = low_prio_response
+      assert %{"message" => "Priority must be less than or equal to 2147483647"} = high_prio_response
+      assert %{"message" => "Highlight_color has invalid format"} = bad_hc_response
 
       modified_newbie =
         conn

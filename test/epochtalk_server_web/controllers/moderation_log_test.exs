@@ -1212,7 +1212,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     end
 
     @tag :authenticated
-    test "success if 'mod' query param as an integer returns correct moderation_log entry by id",
+    test "given a valid id for 'mod', returns correct moderation_log entry",
          %{conn: conn} do
       conn = get(conn, Routes.moderation_log_path(conn, :page, %{"mod" => 1}))
       moderation_logs = json_response(conn, 200)["moderation_logs"]
@@ -1220,7 +1220,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     end
 
     @tag :authenticated
-    test "success if 'mod' query param as an integer returns an empty list for an invalid id",
+    test "given an invalid id for 'mod', returns an empty list",
          %{conn: conn} do
       conn = get(conn, Routes.moderation_log_path(conn, :page, %{"mod" => 999}))
       moderation_logs = json_response(conn, 200)["moderation_logs"]
@@ -1228,7 +1228,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     end
 
     @tag :authenticated
-    test "success if 'mod' query param as a string returns correct moderation_log entry by username",
+    test "given a valid username for 'mod', returns correct moderation_log entry",
          %{conn: conn} do
       conn =
         get(
@@ -1241,7 +1241,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     end
 
     @tag :authenticated
-    test "success if 'mod' query param as a string returns an empty list for an invalid username",
+    test "given an invalid string for 'mod', returns an empty list",
          %{conn: conn} do
       conn =
         get(
@@ -1254,7 +1254,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     end
 
     @tag :authenticated
-    test "success if 'action' query param returns correct moderation_log entry by action_type",
+    test "given a valid action_type 'action', returns correct moderation_log entry",
          %{conn: conn} do
       conn =
         get(
@@ -1267,7 +1267,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     end
 
     @tag :authenticated
-    test "success if 'keyword' query param returns correct moderation_log entry by action_display_text",
+    test "given a valid action_display_text 'keyword', returns correct moderation_log entry",
          %{conn: conn} do
       conn =
         get(
@@ -1281,7 +1281,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     end
 
     @tag :authenticated
-    test "success if 'keyword' query param returns an empty list for an invalid keyword",
+    test "given an invalid 'keyword', returns an empty list",
          %{conn: conn} do
       conn =
         get(
@@ -1294,7 +1294,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     end
 
     @tag :authenticated
-    test "success if 'before date' query param returns correct moderation_log entries for a date in the future",
+    test "given a future 'before date', returns correct moderation_log entries",
          %{conn: conn} do
       datetime = NaiveDateTime.to_string(NaiveDateTime.add(NaiveDateTime.utc_now(), 2, :day))
 
@@ -1317,7 +1317,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     end
 
     @tag :authenticated
-    test "success if 'before date' query param returns an empty list for a date in the past",
+    test "given a past 'before date', returns an empty list",
          %{conn: conn} do
       datetime = NaiveDateTime.to_string(NaiveDateTime.add(NaiveDateTime.utc_now(), -2, :day))
 
@@ -1338,7 +1338,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     end
 
     @tag :authenticated
-    test "success if 'after date' query param returns correct moderation_log entries for a date in the past",
+    test "given a past 'after date', returns correct moderation_log entries",
          %{conn: conn} do
       datetime = NaiveDateTime.to_string(NaiveDateTime.add(NaiveDateTime.utc_now(), -2, :day))
 
@@ -1361,7 +1361,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     end
 
     @tag :authenticated
-    test "success if 'after date' query param returns an empty list for a date in the future",
+    test "given a future 'after date', returns an empty list",
          %{conn: conn} do
       datetime = NaiveDateTime.to_string(NaiveDateTime.add(NaiveDateTime.utc_now(), 2, :day))
 
@@ -1382,7 +1382,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     end
 
     @tag :authenticated
-    test "success if date range query param returns correct moderation_log entries for a valid date range",
+    test "given a valid date range, returns correct moderation_log entries",
          %{conn: conn} do
       start_datetime =
         NaiveDateTime.to_string(NaiveDateTime.add(NaiveDateTime.utc_now(), -2, :day))
@@ -1409,7 +1409,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     end
 
     @tag :authenticated
-    test "success if date range query param returns an empty list for an invalid date range",
+    test "given an invalid date range, returns an empty list",
          %{conn: conn} do
       start_datetime =
         NaiveDateTime.to_string(NaiveDateTime.add(NaiveDateTime.utc_now(), 2, :day))
@@ -1434,7 +1434,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     end
 
     @tag :authenticated
-    test "success if id and date range query param returns correct moderation_log for a valid date range",
+    test "given an valid id and date range, returns correct moderation_log",
          %{conn: conn} do
       start_datetime =
         NaiveDateTime.to_string(NaiveDateTime.add(NaiveDateTime.utc_now(), -2, :day))
@@ -1460,7 +1460,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     end
 
     @tag :authenticated
-    test "success if username and date range query param returns correct moderation_log for a valid date range",
+    test "given a valid username and date range, returns correct moderation_log",
          %{conn: conn} do
       start_datetime =
         NaiveDateTime.to_string(NaiveDateTime.add(NaiveDateTime.utc_now(), -2, :day))

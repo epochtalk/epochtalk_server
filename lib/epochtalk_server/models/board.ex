@@ -186,6 +186,9 @@ defmodule EpochtalkServer.Models.Board do
   with the specified `thread_id`. If the user doesn't have read access to the parent of the specified
   `Board`, the user does not have read access to the `Board` either.
 
+  DEVELOPER NOTE(akinsey): This method replaces Threads.getThreadsBoardInBoardMapping function from the node
+  server. The previous naming convention was confusing as this is just checking read access to the board
+
   TODO(akinsey): Should this check against banned user_priority?
   """
   @spec get_read_access_by_thread_id(
@@ -208,6 +211,9 @@ defmodule EpochtalkServer.Models.Board do
   Determines if the provided `user_priority` has read access to the `Board` with the specified `id`.
   If the user doesn't have read access to the parent of the specified `Board`, the user does not have
   read access to the `Board` either.
+
+  DEVELOPER NOTE(akinsey): This method replaces Boards.getBoardInBoardMapping function from the node
+  server. The previous naming convention was confusing as this is just checking read access to the board
 
   TODO(akinsey): Should this check against banned user_priority?
   """

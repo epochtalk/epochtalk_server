@@ -115,41 +115,31 @@ defmodule EpochtalkServer.Models.Thread do
   @doc """
   Creates a new `Thread` in the database
   """
-  @spec create(thread_attrs :: map(), user_id :: non_neg_integer) ::
-          {:ok, thread :: t()} | {:error, Ecto.Changeset.t()}
+  @spec create(thread_attrs :: map(), user_id :: non_neg_integer) :: {:ok, thread :: t()} | {:error, Ecto.Changeset.t()}
   def create(thread_attrs, user_id) do
     thread_cs = create_changeset(%Thread{}, thread_attrs)
 
     case Repo.transaction(fn ->
-           db_thread =
-             case Repo.insert(thread_cs) do
-               {:ok, db_thread} -> db_thread
-               # rollback and bubble up changeset error
-               {:error, cs} -> Repo.rollback(cs)
-             end
-
-           # create thread metadata
-           MetadataThread.insert(%MetadataThread{thread_id: db_thread.id, views: 0})
-           # create poll, if necessary
-           db_poll = handle_create_poll(db_thread.id, thread_attrs["poll"])
-           # create post
-           db_post = handle_create_post(db_thread.id, user_id, thread_attrs)
-           # return post (preloaded thread) and poll data
-           %{post: db_post, poll: db_poll}
-         end) do
+      db_thread = case Repo.insert(thread_cs) do
+        {:ok, db_thread} -> db_thread
+        # rollback and bubble up changeset error
+        {:error, cs} -> Repo.rollback(cs)
+      end
+      # create thread metadata
+      MetadataThread.insert(%MetadataThread{thread_id: db_thread.id, views: 0})
+      # create poll, if necessary
+      db_poll = handle_create_poll(db_thread.id, thread_attrs["poll"])
+      # create post
+      db_post = handle_create_post(db_thread.id, user_id, thread_attrs)
+      # return post (preloaded thread) and poll data
+      %{post: db_post, poll: db_poll}
+    end) do
       # transaction success return post with preloaded thread
-      {:ok, thread_data} ->
-        {:ok, thread_data}
+      {:ok, thread_data} -> {:ok, thread_data}
 
       # handle slug conflict, add hash to slug, try to insert again
-      {:error,
-       %Ecto.Changeset{
-         errors: [
-           slug:
-             {"has already been taken",
-              [constraint: :unique, constraint_name: "threads_slug_index"]}
-         ]
-       } = _cs} ->
+      {:error, %Ecto.Changeset{errors: [slug: {"has already been taken",
+     [constraint: :unique, constraint_name: "threads_slug_index"]}]} = _cs} ->
         hash =
           :crypto.strong_rand_bytes(3)
           |> Base.url_encode64()
@@ -161,8 +151,7 @@ defmodule EpochtalkServer.Models.Thread do
         create(thread_attrs, user_id)
 
       # some other error
-      {:error, cs} ->
-        {:error, cs}
+      {:error, cs} -> {:error, cs}
     end
   end
 
@@ -266,43 +255,42 @@ defmodule EpochtalkServer.Models.Thread do
   def find(id) when is_integer(id) do
     initial_query =
       from t in Thread,
-        where: t.id == ^id,
-        select: %{
-          id: t.id,
-          board_id: t.board_id,
-          slug: t.slug,
-          locked: t.locked,
-          sticky: t.sticky,
-          moderated: t.moderated,
-          post_count: t.post_count,
-          created_at: t.created_at,
-          updated_at: t.updated_at
-        }
+      where: t.id == ^id,
+      select: %{
+        id: t.id,
+        board_id: t.board_id,
+        slug: t.slug,
+        locked: t.locked,
+        sticky: t.sticky,
+        moderated: t.moderated,
+        post_count: t.post_count,
+        created_at: t.created_at,
+        updated_at: t.updated_at
+      }
 
     find_shared(initial_query)
   end
-
   def find(slug) when is_binary(slug) do
     initial_query =
       from t in Thread,
-        where: t.slug == ^slug,
-        select: %{
-          id: t.id,
-          board_id: t.board_id,
-          slug: t.slug,
-          locked: t.locked,
-          sticky: t.sticky,
-          moderated: t.moderated,
-          post_count: t.post_count,
-          created_at: t.created_at,
-          updated_at: t.updated_at
-        }
+      where: t.slug == ^slug,
+      select: %{
+        id: t.id,
+        board_id: t.board_id,
+        slug: t.slug,
+        locked: t.locked,
+        sticky: t.sticky,
+        moderated: t.moderated,
+        post_count: t.post_count,
+        created_at: t.created_at,
+        updated_at: t.updated_at
+      }
 
     find_shared(initial_query)
   end
 
   @doc """
-  Converts a threads's `slug` to `id`
+  Convert `Thread` `slug` to `id`
   """
   @spec slug_to_id(slug :: String.t()) ::
           {:ok, id :: non_neg_integer} | {:error, :thread_does_not_exist}
@@ -322,40 +310,38 @@ defmodule EpochtalkServer.Models.Thread do
   ## === Private Helper Functions ===
 
   defp find_shared(initial_query) do
-    query =
-      from(t in subquery(initial_query))
-      |> join(
-        :left_lateral,
-        [t],
-        p in fragment(
-          """
-            SELECT
-              p1.user_id, p1.content ->> \'title\' as title, u.username, u.deleted as user_deleted
-              FROM posts p1
-              LEFT JOIN users u on p1.user_id = u.id
-              WHERE p1.thread_id = ?
-              ORDER BY p1.created_at
-              LIMIT 1
-          """,
-          t.id
-        ),
-        on: true
-      )
-      |> select([t, p], %{
-        id: t.id,
-        board_id: t.board_id,
-        slug: t.slug,
-        locked: t.locked,
-        sticky: t.sticky,
-        moderated: t.moderated,
-        created_at: t.created_at,
-        updated_at: t.updated_at,
-        post_count: t.post_count,
-        user_id: p.user_id,
-        title: p.title,
-        username: p.username,
-        user_deleted: p.user_deleted
-      })
+    query = from(t in subquery(initial_query))
+    |> join(
+      :left_lateral,
+      [t],
+      p in fragment(
+        """
+          SELECT
+            p1.user_id, p1.content ->> \'title\' as title, u.username, u.deleted as user_deleted
+            FROM posts p1
+            LEFT JOIN users u on p1.user_id = u.id
+            WHERE p1.thread_id = ?
+            ORDER BY p1.created_at
+            LIMIT 1
+        """,
+        t.id),
+      on: true
+    )
+    |> select([t, p], %{
+      id: t.id,
+      board_id: t.board_id,
+      slug: t.slug,
+      locked: t.locked,
+      sticky: t.sticky,
+      moderated: t.moderated,
+      created_at: t.created_at,
+      updated_at: t.updated_at,
+      post_count: t.post_count,
+      user_id: p.user_id,
+      title: p.title,
+      username: p.username,
+      user_deleted: p.user_deleted
+    })
 
     Repo.one(query)
   end
@@ -549,7 +535,6 @@ defmodule EpochtalkServer.Models.Thread do
   end
 
   defp handle_create_poll(_thread_id, nil), do: nil
-
   defp handle_create_poll(thread_id, poll_attrs) when is_map(poll_attrs) do
     # append thread_id
     poll_attrs = Map.put(poll_attrs, "thread_id", thread_id)
@@ -569,7 +554,6 @@ defmodule EpochtalkServer.Models.Thread do
       user_id: user_id,
       content: %{title: thread_attrs["title"], body: thread_attrs["body"]}
     }
-
     case Post.create(post_attrs) do
       {:ok, post} -> post
       {:error, cs} -> Repo.rollback(cs)

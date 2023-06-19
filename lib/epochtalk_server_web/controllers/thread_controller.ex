@@ -103,4 +103,24 @@ defmodule EpochtalkServerWeb.ThreadController do
         ErrorHelpers.render_json_error(conn, 400, "Error, cannot get threads by board")
     end
   end
+
+  @doc """
+  Used to convert `Thread` slug to id
+  """
+  def slug_to_id(conn, attrs) do
+    with slug <- Validate.cast(attrs, "slug", :string, required: true),
+         {:ok, id} <- Thread.slug_to_id(slug) do
+      render(conn, :slug_to_id, id: id)
+    else
+      {:error, :thread_does_not_exist} ->
+        ErrorHelpers.render_json_error(
+          conn,
+          400,
+          "Error, cannot convert slug, thread does not exist"
+        )
+
+      _ ->
+        ErrorHelpers.render_json_error(conn, 400, "Error, cannot convert thread slug to id")
+    end
+  end
 end

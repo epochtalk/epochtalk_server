@@ -88,6 +88,13 @@ defmodule EpochtalkServerWeb.ThreadJSON do
   end
 
   @doc """
+  Renders `Thread` id for slug to id route.
+  """
+  def slug_to_id(%{id: id}), do: %{id: id}
+
+  ## === Public Fomatting Functions ===
+
+  @doc """
   Used to format `Thread` user data from db into the format the frontend expects
   """
   def format_user_data(thread) do

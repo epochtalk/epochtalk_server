@@ -301,6 +301,24 @@ defmodule EpochtalkServer.Models.Thread do
     find_shared(initial_query)
   end
 
+  @doc """
+  Converts a threads's `slug` to `id`
+  """
+  @spec slug_to_id(slug :: String.t()) ::
+          {:ok, id :: non_neg_integer} | {:error, :thread_does_not_exist}
+  def slug_to_id(slug) when is_binary(slug) do
+    query =
+      from t in Thread,
+        where: t.slug == ^slug,
+        select: t.id
+
+    id = Repo.one(query)
+
+    if id,
+      do: {:ok, id},
+      else: {:error, :thread_does_not_exist}
+  end
+
   ## === Private Helper Functions ===
 
   defp find_shared(initial_query) do

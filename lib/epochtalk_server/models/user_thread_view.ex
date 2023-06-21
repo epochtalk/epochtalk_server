@@ -27,18 +27,21 @@ defmodule EpochtalkServer.Models.UserThreadView do
     field :time, :naive_datetime
   end
 
-  ## === Changesets Functions ===
+  ## === Database Functions ===
 
   @doc """
-  Generic changeset for `UserThreadView` model
+  Used to upsert a `UserThreadView`. Used to update `time` field everytime `User` views
+  a specific `Thread`
   """
-  @spec changeset(
-          user_thread_view :: t(),
-          attrs :: map() | nil
-        ) :: Ecto.Changeset.t()
-  def changeset(user_thread_view, attrs \\ %{}) do
-    user_thread_view
-    |> cast(attrs, [:user_id, :thread_id, :time])
-    |> validate_required([:user_id, :thread_id, :time])
+  @spec upsert(user_id :: non_neg_integer, thread_id :: non_neg_integer) :: {:ok, t()} | {:error, Ecto.Changeset.t()}
+  def upsert(user_id, thread_id) when is_integer(user_id) and is_integer(thread_id) do
+    now = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
+    Repo.insert(
+      %UserThreadView{user_id: user_id, thread_id: thread_id, time: now},
+      on_conflict: [
+        set: [time: now]
+      ],
+      conflict_target: [:user_id, :thread_id]
+    )
   end
 end

@@ -32,6 +32,7 @@ alias EpochtalkServer.Models.{
   Thread,
   TrustBoard,
   User,
+  UserThreadView,
   WatchThread
 }
 

@@ -123,4 +123,28 @@ defmodule EpochtalkServerWeb.ThreadController do
         ErrorHelpers.render_json_error(conn, 400, "Error, cannot convert thread slug to id")
     end
   end
+
+  @doc """
+  Used to mark `Thread` as viewed for a specific user
+  """
+  def viewed(conn, attrs) do
+    with thread_id <- Validate.cast(attrs, "id", :integer, required: true),
+         :ok <- ACL.allow!(conn, "threads.viewed"),
+         _user <- Guardian.Plug.current_resource(conn),
+         user_priority <- ACL.get_user_priority(conn),
+         {:can_read, {:ok, true}} <-
+           {:can_read, Board.get_read_access_by_thread_id(thread_id, user_priority)} do
+      IO.inspect("Success viewed")
+    else
+      {:error, :board_does_not_exist} ->
+        ErrorHelpers.render_json_error(
+          conn,
+          400,
+          "Error, cannot mark thread viewed, parent board does not exist"
+        )
+
+      _ ->
+        ErrorHelpers.render_json_error(conn, 400, "Error, cannot convert mark thread viewed")
+    end
+  end
 end

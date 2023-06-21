@@ -1,9 +1,8 @@
-defmodule EpochtalkServer.Models.UserUserThreadView do
+defmodule EpochtalkServer.Models.UserThreadView do
   use Ecto.Schema
-  import Ecto.Changeset
-  import Ecto.Query
   alias EpochtalkServer.Repo
   alias EpochtalkServer.Models.User
+  alias EpochtalkServer.Models.Thread
   alias EpochtalkServer.Models.UserThreadView
 
   @moduledoc """
@@ -12,7 +11,7 @@ defmodule EpochtalkServer.Models.UserUserThreadView do
   @type t :: %__MODULE__{
           user_id: non_neg_integer | nil,
           thread_id: non_neg_integer | nil,
-          time: String.t() | nil
+          time: NaiveDateTime.t() | nil
         }
   @derive {Jason.Encoder,
            only: [

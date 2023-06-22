@@ -59,7 +59,7 @@ defmodule EpochtalkServerWeb.PostJSON do
       write_access: write_access,
       board_banned: board_banned,
       metadata: %{
-        metric_rank_maps: metric_rank_maps,
+        rank_metric_maps: metric_rank_maps,
         ranks: ranks
       },
       page: page,
@@ -108,6 +108,8 @@ defmodule EpochtalkServerWeb.PostJSON do
 
   defp format_post_data_for_by_thread(post) do
     post
+    # TODO(akinsey): this is a temp hack to get posts to display
+    |> Map.put(:body_html, post.body)
     |> Map.put(:user, %{
       id: post.user_id,
       name: post.name,

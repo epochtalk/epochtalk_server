@@ -50,6 +50,7 @@ defmodule EpochtalkServerWeb.Router do
     get "/boards/:slug/id", BoardController, :slug_to_id
     get "/threads", ThreadController, :by_board
     get "/threads/:slug/id", ThreadController, :slug_to_id
+    post "/threads/:id/viewed", ThreadController, :viewed
     get "/threads/recent", ThreadController, :recent
     get "/posts", PostController, :by_thread
     post "/register", UserController, :register

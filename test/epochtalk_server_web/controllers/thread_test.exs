@@ -8,8 +8,8 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
         |> get(Routes.thread_path(conn, :by_board), %{board_id: -1})
         |> json_response(400)
 
-      assert %{"error" => "Bad Request"} = result
-      assert %{"message" => "Read error, board does not exist"} = result
+      assert result["error"] == "Bad Request"
+      assert result["message"] == "Read error, board does not exist"
     end
 
     test "given an id for existing board, gets threads", %{conn: conn} do
@@ -61,10 +61,10 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
         |> get(Routes.thread_path(conn, :by_board), %{board_id: 3})
         |> json_response(403)
 
-      assert %{"error" => "Forbidden"} = admin_board_result
-      assert %{"message" => "Unauthorized, you do not have permission"} = admin_board_result
-      assert %{"error" => "Forbidden"} = super_admin_board_result
-      assert %{"message" => "Unauthorized, you do not have permission"} = super_admin_board_result
+      assert admin_board_result["error"] == "Forbidden"
+      assert admin_board_result["message"] == "Unauthorized, you do not have permission"
+      assert super_admin_board_result["error"] == "Forbidden"
+      assert super_admin_board_result["message"] == "Unauthorized, you do not have permission"
     end
 
     @tag :authenticated
@@ -81,10 +81,10 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
         |> get(Routes.thread_path(conn, :by_board), %{board_id: 3})
         |> json_response(403)
 
-      assert %{"error" => "Forbidden"} = admin_board_result
-      assert %{"message" => "Unauthorized, you do not have permission"} = admin_board_result
-      assert %{"error" => "Forbidden"} = super_admin_board_result
-      assert %{"message" => "Unauthorized, you do not have permission"} = super_admin_board_result
+      assert admin_board_result["error"] == "Forbidden"
+      assert admin_board_result["message"] == "Unauthorized, you do not have permission"
+      assert super_admin_board_result["error"] == "Forbidden"
+      assert super_admin_board_result["message"] == "Unauthorized, you do not have permission"
     end
 
     @tag authenticated: :admin

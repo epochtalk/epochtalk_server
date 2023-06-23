@@ -13,6 +13,7 @@ defmodule EpochtalkServerWeb.ThreadController do
   alias EpochtalkServer.Models.BoardBan
   alias EpochtalkServer.Models.BoardMapping
   alias EpochtalkServer.Models.BoardModerator
+  alias EpochtalkServer.Models.UserThreadView
 
   @doc """
   Used to retrieve recent threads
@@ -130,11 +131,18 @@ defmodule EpochtalkServerWeb.ThreadController do
   def viewed(conn, attrs) do
     with thread_id <- Validate.cast(attrs, "id", :integer, required: true),
          :ok <- ACL.allow!(conn, "threads.viewed"),
-         _user <- Guardian.Plug.current_resource(conn),
+         user <- Guardian.Plug.current_resource(conn),
          user_priority <- ACL.get_user_priority(conn),
          {:can_read, {:ok, true}} <-
-           {:can_read, Board.get_read_access_by_thread_id(thread_id, user_priority)} do
-      IO.inspect("Success viewed")
+           {:can_read, Board.get_read_access_by_thread_id(thread_id, user_priority)},
+           viewer_id <- check_view(conn, thread_id),
+         {:ok, _user_thread_view} <- update_view(user, thread_id) do
+
+      IO.inspect("Success viewed" <> viewer_id)
+      conn
+      |> put_resp_header("epoch-viewer", viewer_id)
+      |> send_resp(200, [])
+      |> halt()
     else
       {:error, :board_does_not_exist} ->
         ErrorHelpers.render_json_error(
@@ -143,8 +151,35 @@ defmodule EpochtalkServerWeb.ThreadController do
           "Error, cannot mark thread viewed, parent board does not exist"
         )
 
-      _ ->
-        ErrorHelpers.render_json_error(conn, 400, "Error, cannot convert mark thread viewed")
+      _err ->
+      IO.inspect _err
+        ErrorHelpers.render_json_error(conn, 400, "Error, cannot mark thread viewed")
     end
   end
+
+  ## === Private Helper Functions ===
+
+  defp check_view(conn, thread_id) do
+    viewer_id = case Plug.Conn.get_req_header(conn, "epoch-viewer") do
+      [] -> ""
+      [viewer_id] -> viewer_id
+    end
+    new_viewer_id = ""
+    view_id_key = viewer_id <> Integer.to_string(thread_id)
+  end
+
+  defp check_view_key(key) do
+    if stored_time = Redix.command!(conn, ["GET", key]) do
+      time_elapsed = NaiveDateTime.diff(NaiveDateTime.utc_now(), stored_time, :second)
+      one_hour = 60 * 60
+      hour_passed = time_elapsed > one_hour
+      if hour_passed, do: Redix.command(conn, ["SET", key, NaiveDateTime.utc_now()])
+      %{valid: true, cooloff: !hour_passed}
+    else
+      %{valid: false}
+    end
+  end
+
+  defp update_view(nil, _thread_id), do: {:ok, nil}
+  defp update_view(user, thread_id), do: UserThreadView.upsert(user.id, thread_id)
 end

@@ -11,6 +11,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.User do
         conn
         |> get(Routes.user_path(conn, :username, user.username))
         |> json_response(200)
+
       assert response["found"] == true
     end
 
@@ -19,6 +20,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.User do
         conn
         |> get(Routes.user_path(conn, :username, "false_username"))
         |> json_response(200)
+
       assert response["found"] == false
     end
   end
@@ -29,15 +31,18 @@ defmodule Test.EpochtalkServerWeb.Controllers.User do
         conn
         |> get(Routes.user_path(conn, :email, user.email))
         |> json_response(200)
+
       assert response["found"] == true
     end
 
     test "when email is not taken, found is false", %{conn: conn} do
       invalid_email = "false@test.com"
+
       response =
         conn
         |> get(Routes.user_path(conn, :email, invalid_email))
         |> json_response(200)
+
       assert response["found"] == false
     end
   end
@@ -81,6 +86,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.User do
         conn
         |> post(Routes.user_path(conn, :register, register_attrs))
         |> json_response(200)
+
       {:ok, registered_user} = User.by_username(register_attrs.username)
       assert response["id"] == registered_user.id
     end
@@ -171,6 +177,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.User do
 
     test "when user is not found, errors", %{conn: conn} do
       invalid_username_confirm = %{username: "invalidusernametest", token: "(anything)"}
+
       response =
         conn
         |> post(Routes.user_path(conn, :confirm, invalid_username_confirm))
@@ -183,6 +190,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.User do
     test "given an invalid token, errors", %{conn: conn, user_attrs: valid_user_attrs} do
       invalid_token = 1
       invalid_token_confirm = %{username: valid_user_attrs.username, token: invalid_token}
+
       response =
         conn
         |> post(Routes.user_path(conn, :confirm, invalid_token_confirm))
@@ -194,11 +202,16 @@ defmodule Test.EpochtalkServerWeb.Controllers.User do
   end
 
   describe "login/2" do
-    test "given valid credentials, logs a user in", %{conn: conn, user: user, user_attrs: user_attrs} do
+    test "given valid credentials, logs a user in", %{
+      conn: conn,
+      user: user,
+      user_attrs: user_attrs
+    } do
       response =
         conn
         |> post(Routes.user_path(conn, :login, user_attrs))
         |> json_response(200)
+
       assert response["id"] == user.id
     end
 
@@ -256,6 +269,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.User do
 
     test "given invalid username, errors", %{conn: conn} do
       invalid_username_login_attrs = %{username: "invalidlogintest", password: "password"}
+
       response =
         conn
         |> post(Routes.user_path(conn, :login, invalid_username_login_attrs))
@@ -267,6 +281,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.User do
 
     test "given invalid password, errors", %{conn: conn} do
       invalid_password_login_attrs = %{username: "logintest", password: "1"}
+
       response =
         conn
         |> post(Routes.user_path(conn, :login, invalid_password_login_attrs))
@@ -284,6 +299,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.User do
         conn
         |> delete(Routes.user_path(conn, :logout))
         |> json_response(200)
+
       assert response["success"] == true
     end
 
@@ -292,6 +308,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.User do
         conn
         |> delete(Routes.user_path(conn, :logout))
         |> json_response(400)
+
       assert response["error"] == "Bad Request"
       assert response["message"] == "Not logged in"
     end
@@ -307,6 +324,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.User do
         conn
         |> get(Routes.user_path(conn, :authenticate))
         |> json_response(200)
+
       {:ok, user} = User.by_username(authed_user_attrs.username)
       assert response["id"] == user.id
       assert Map.has_key?(response, "permissions") == true

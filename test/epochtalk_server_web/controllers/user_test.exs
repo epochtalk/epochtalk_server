@@ -309,6 +309,10 @@ defmodule Test.EpochtalkServerWeb.Controllers.User do
         |> json_response(200)
       {:ok, user} = User.by_username(authed_user_attrs.username)
       assert response["id"] == user.id
+      assert Map.has_key?(response, "permissions") == true
+      assert Map.has_key?(response, "roles") == true
+      assert Map.has_key?(response, "token") == true
+      assert Map.has_key?(response, "username") == true
     end
 
     test "when user is not authenticated, errors", %{conn: conn} do

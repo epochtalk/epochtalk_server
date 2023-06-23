@@ -2,7 +2,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
   use Test.Support.ConnCase, async: true
 
   describe "by_board/2" do
-    test "does not get threads for board that does not exist", %{conn: conn} do
+    test "given an id for nonexistant board, does not get threads", %{conn: conn} do
       result =
         conn
         |> get(Routes.thread_path(conn, :by_board), %{board_id: -1})
@@ -12,7 +12,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
       assert %{"message" => "Read error, board does not exist"} = result
     end
 
-    test "gets threads for a board that exists", %{conn: conn} do
+    test "given an id for existing board, gets threads", %{conn: conn} do
       result =
         conn
         |> get(Routes.thread_path(conn, :by_board), %{board_id: 1})
@@ -48,7 +48,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
       assert Map.get(first_thread, "title") == "test"
     end
 
-    test "does not get threads for board that is above user priority (unauthenticated)", %{
+    test "given an id for board above unauthenticated user priority, does not get threads", %{
       conn: conn
     } do
       admin_board_result =
@@ -68,7 +68,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     end
 
     @tag :authenticated
-    test "does not get threads for board that is above user priority (authenticated)", %{
+    test "given an id for board above authenticated user priority, does not get threads", %{
       conn: conn
     } do
       admin_board_result =
@@ -88,7 +88,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     end
 
     @tag authenticated: :admin
-    test "gets threads for board that is within user priority", %{conn: conn} do
+    test "given an id for board within authenticated user priority, gets threads", %{conn: conn} do
       result =
         conn
         |> get(Routes.thread_path(conn, :by_board), %{board_id: 2})
@@ -99,7 +99,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     end
 
     @tag authenticated: :admin
-    test "gets threads for board that is at user priority", %{conn: conn} do
+    test "given an id for board at authenticated user priority, gets threads", %{conn: conn} do
       result =
         conn
         |> get(Routes.thread_path(conn, :by_board), %{board_id: 3})

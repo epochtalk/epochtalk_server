@@ -6,7 +6,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.User do
   alias EpochtalkServer.Repo
 
   describe "username/2" do
-    test "found => true if username is taken", %{conn: conn, user: user} do
+    test "when username is taken, found is true", %{conn: conn, user: user} do
       response =
         conn
         |> get(Routes.user_path(conn, :username, user.username))
@@ -14,7 +14,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.User do
       assert response["found"] == true
     end
 
-    test "found => false if username is not found in the system", %{conn: conn} do
+    test "when username is not taken, found is false", %{conn: conn} do
       response =
         conn
         |> get(Routes.user_path(conn, :username, "false_username"))
@@ -24,7 +24,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.User do
   end
 
   describe "email/2" do
-    test "found => true if email is taken", %{conn: conn, user: user} do
+    test "when email is taken, found is true", %{conn: conn, user: user} do
       response =
         conn
         |> get(Routes.user_path(conn, :email, user.email))
@@ -32,7 +32,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.User do
       assert response["found"] == true
     end
 
-    test "found => false if email is not found in the system", %{conn: conn} do
+    test "when email is not taken, found is false", %{conn: conn} do
       invalid_email = "false@test.com"
       response =
         conn
@@ -43,7 +43,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.User do
   end
 
   describe "ban/1" do
-    test "user is banned", %{user: user} do
+    test "bans user", %{user: user} do
       {:ok, banned_user_changeset} = Ban.ban(user)
       assert banned_user_changeset.ban_info.user_id == user.id
     end
@@ -51,7 +51,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.User do
 
   @tag :banned
   describe "unban/1" do
-    test "user is unbanned", %{user: user} do
+    test "unbans banned user", %{user: user} do
       {:ok, unbanned_user_changeset} = Ban.unban(user)
       assert unbanned_user_changeset.ban_info == nil
     end
@@ -59,7 +59,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.User do
 
   @tag :malicious
   describe "handle_malicious_user/2" do
-    test "user is banned if malicious", %{
+    test "populates ban_info and malicious_score if user is malicious", %{
       user: user,
       malicious_user_changeset: malicious_user_changeset
     } do
@@ -70,7 +70,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.User do
   end
 
   describe "register/2" do
-    test "user is registered and returns newly registered user with 200", %{conn: conn} do
+    test "registers and returns new user", %{conn: conn} do
       register_attrs = %{
         username: "registertest",
         email: "registertest@test.com",
@@ -85,7 +85,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.User do
       assert response["id"] == registered_user.id
     end
 
-    test "errors with 400 when email is already taken", %{
+    test "when email is already taken, errors", %{
       conn: conn,
       user_attrs: existing_user_attrs
     } do
@@ -99,7 +99,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.User do
     end
 
     @tag :authenticated
-    test "errors with 400 when user is logged in", %{
+    test "when user is logged in, errors", %{
       conn: conn,
       authed_user_attrs: authed_user_attrs
     } do
@@ -112,7 +112,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.User do
       assert response["message"] == "Cannot register a new account while logged in"
     end
 
-    test "errors with 400 when username is missing", %{conn: conn} do
+    test "when username is missing, errors", %{conn: conn} do
       blank_username_attrs = %{
         username: "",
         email: "blankusernametest@test.com",
@@ -128,7 +128,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.User do
       assert response["message"] == "Username can't be blank"
     end
 
-    test "errors with 400 when password is missing", %{conn: conn} do
+    test "when password is missing, errors", %{conn: conn} do
       blank_password_attrs = %{
         username: "blankpasswordtest",
         email: "blankpasswordtest@test.com",
@@ -146,7 +146,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.User do
   end
 
   describe "confirm/2" do
-    test "confirms user using token", %{conn: conn, user: user} do
+    test "given a valid token, confirms user", %{conn: conn, user: user} do
       # confirm user
       User
       |> Repo.get(user.id)
@@ -169,7 +169,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.User do
       assert response["id"] == confirmed_user.id
     end
 
-    test "errors with 400 when user not found", %{conn: conn} do
+    test "when user is not found, errors", %{conn: conn} do
       invalid_username_confirm = %{username: "invalidusernametest", token: "(anything)"}
       response =
         conn
@@ -180,7 +180,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.User do
       assert response["message"] == "Confirmation error, account not found"
     end
 
-    test "errors with 400 when token is invalid", %{conn: conn, user_attrs: valid_user_attrs} do
+    test "given an invalid token, errors", %{conn: conn, user_attrs: valid_user_attrs} do
       invalid_token = 1
       invalid_token_confirm = %{username: valid_user_attrs.username, token: invalid_token}
       response =
@@ -194,7 +194,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.User do
   end
 
   describe "login/2" do
-    test "logs in a user", %{conn: conn, user: user, user_attrs: user_attrs} do
+    test "given valid credentials, logs a user in", %{conn: conn, user: user, user_attrs: user_attrs} do
       response =
         conn
         |> post(Routes.user_path(conn, :login, user_attrs))
@@ -203,7 +203,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.User do
     end
 
     @tag :authenticated
-    test "errors with 400 when user is already logged in", %{
+    test "when already logged in, errors", %{
       conn: conn,
       authed_user_attrs: authed_user_attrs
     } do
@@ -216,7 +216,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.User do
       assert response["message"] == "Already logged in"
     end
 
-    test "errors with 400 if user is not confirmed", %{
+    test "when user is not confirmed, errors", %{
       conn: conn,
       user: user,
       user_attrs: user_attrs
@@ -235,7 +235,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.User do
       assert response["message"] == "User account not confirmed"
     end
 
-    test "errors with 403 if user is missing passhash", %{
+    test "given a missing passhash, errors", %{
       conn: conn,
       user: user,
       user_attrs: user_attrs
@@ -254,7 +254,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.User do
       assert response["message"] == "User account migration not complete, please reset password"
     end
 
-    test "errors with 400 when username is not found", %{conn: conn} do
+    test "given invalid username, errors", %{conn: conn} do
       invalid_username_login_attrs = %{username: "invalidlogintest", password: "password"}
       response =
         conn
@@ -265,7 +265,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.User do
       assert response["message"] == "Invalid credentials"
     end
 
-    test "errors with 400 when password is not found", %{conn: conn} do
+    test "given invalid password, errors", %{conn: conn} do
       invalid_password_login_attrs = %{username: "logintest", password: "1"}
       response =
         conn
@@ -279,7 +279,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.User do
 
   describe "logout/1" do
     @tag :authenticated
-    test "success if user is logged out", %{conn: conn} do
+    test "when logged in, logs user out", %{conn: conn} do
       response =
         conn
         |> delete(Routes.user_path(conn, :logout))
@@ -287,7 +287,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.User do
       assert response["success"] == true
     end
 
-    test "errors with 400 when user is not logged in", %{conn: conn} do
+    test "when not logged in, errors", %{conn: conn} do
       response =
         conn
         |> delete(Routes.user_path(conn, :logout))
@@ -299,7 +299,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.User do
 
   describe "authenticate/1" do
     @tag :authenticated
-    test "success if current logged in user is authenticated", %{
+    test "when user is authenticated, returns user info", %{
       conn: conn,
       authed_user_attrs: authed_user_attrs
     } do
@@ -311,7 +311,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.User do
       assert response["id"] == user.id
     end
 
-    test "errors with 401 when user is not logged in but trying to authenticate", %{conn: conn} do
+    test "when user is not authenticated, errors", %{conn: conn} do
       response =
         conn
         |> get(Routes.user_path(conn, :authenticate))

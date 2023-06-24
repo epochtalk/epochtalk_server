@@ -136,10 +136,11 @@ defmodule EpochtalkServerWeb.ThreadController do
          user_priority <- ACL.get_user_priority(conn),
          {:can_read, {:ok, true}} <-
            {:can_read, Board.get_read_access_by_thread_id(thread_id, user_priority)},
-           new_viewer_id <- maybe_update_thread_view_count(conn, thread_id),
+         new_viewer_id <- maybe_update_thread_view_count(conn, thread_id),
          {:ok, _user_thread_view} <- update_user_thread_view_count(user, thread_id) do
+      conn =
+        if new_viewer_id, do: put_resp_header(conn, "epoch-viewer", new_viewer_id), else: conn
 
-      conn = if new_viewer_id, do: put_resp_header(conn, "epoch-viewer", new_viewer_id), else: conn
       conn
       |> send_resp(200, [])
       |> halt()
@@ -159,17 +160,24 @@ defmodule EpochtalkServerWeb.ThreadController do
   ## === Private Helper Functions ===
 
   defp maybe_update_thread_view_count(conn, thread_id) do
-    viewer_id = case Plug.Conn.get_req_header(conn, "epoch-viewer") do
-      [] -> ""
-      [viewer_id] -> viewer_id
-    end
+    viewer_id =
+      case Plug.Conn.get_req_header(conn, "epoch-viewer") do
+        [] -> ""
+        [viewer_id] -> viewer_id
+      end
+
     viewer_id_key = viewer_id <> Integer.to_string(thread_id)
     new_viewer_id = if viewer_id == "", do: Ecto.UUID.generate(), else: nil
+
     case check_view_key(viewer_id_key) do
       # data exists and in cool off, do nothing
-      %{exists: true, cooloff: true} -> nil
+      %{exists: true, cooloff: true} ->
+        nil
+
       # data exists and not in cooloff, increment thread view count
-      %{exists: true, cooloff: false} -> MetadataThread.increment_view_count(thread_id)
+      %{exists: true, cooloff: false} ->
+        MetadataThread.increment_view_count(thread_id)
+
       # data doesn't exist, create one for user/thread
       %{exists: false} ->
         viewer_id = if viewer_id == "", do: new_viewer_id, else: viewer_id
@@ -177,6 +185,7 @@ defmodule EpochtalkServerWeb.ThreadController do
         Redix.command(:redix, ["SET", viewer_id_key, NaiveDateTime.utc_now()])
         check_view_ip(conn, thread_id)
     end
+
     new_viewer_id
   end
 
@@ -184,6 +193,7 @@ defmodule EpochtalkServerWeb.ThreadController do
     # convert ip tuple into string
     viewer_ip = conn.remote_ip |> :inet_parse.ntoa() |> to_string
     viewer_ip_key = viewer_ip <> Integer.to_string(thread_id)
+
     case check_view_key(viewer_ip_key) do
       # data exists and in cool off, do nothing
       %{exists: true, cooloff: true} -> nil
@@ -198,7 +208,7 @@ defmodule EpochtalkServerWeb.ThreadController do
     if stored_time = Redix.command!(:redix, ["GET", key]) do
       stored_time_naive = NaiveDateTime.from_iso8601!(stored_time)
       time_elapsed = NaiveDateTime.diff(NaiveDateTime.utc_now(), stored_time_naive, :second)
-      one_hour_elapsed = time_elapsed > (60 * 60)
+      one_hour_elapsed = time_elapsed > 60 * 60
       if one_hour_elapsed, do: Redix.command(:redix, ["SET", key, NaiveDateTime.utc_now()])
       %{exists: true, cooloff: !one_hour_elapsed}
     else
@@ -207,5 +217,7 @@ defmodule EpochtalkServerWeb.ThreadController do
   end
 
   defp update_user_thread_view_count(nil, _thread_id), do: {:ok, nil}
-  defp update_user_thread_view_count(user, thread_id), do: UserThreadView.upsert(user.id, thread_id)
+
+  defp update_user_thread_view_count(user, thread_id),
+    do: UserThreadView.upsert(user.id, thread_id)
 end

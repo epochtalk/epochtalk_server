@@ -14,6 +14,7 @@ defmodule EpochtalkServerWeb.ThreadController do
   alias EpochtalkServer.Models.BoardMapping
   alias EpochtalkServer.Models.BoardModerator
   alias EpochtalkServer.Models.UserThreadView
+  alias EpochtalkServer.Models.MetadataThread
 
   @doc """
   Used to retrieve recent threads
@@ -135,12 +136,11 @@ defmodule EpochtalkServerWeb.ThreadController do
          user_priority <- ACL.get_user_priority(conn),
          {:can_read, {:ok, true}} <-
            {:can_read, Board.get_read_access_by_thread_id(thread_id, user_priority)},
-           viewer_id <- check_view(conn, thread_id),
-         {:ok, _user_thread_view} <- update_view(user, thread_id) do
+           new_viewer_id <- maybe_update_thread_view_count(conn, thread_id),
+         {:ok, _user_thread_view} <- update_user_thread_view_count(user, thread_id) do
 
-      IO.inspect("Success viewed" <> viewer_id)
+      conn = if new_viewer_id, do: put_resp_header(conn, "epoch-viewer", new_viewer_id), else: conn
       conn
-      |> put_resp_header("epoch-viewer", viewer_id)
       |> send_resp(200, [])
       |> halt()
     else
@@ -151,35 +151,61 @@ defmodule EpochtalkServerWeb.ThreadController do
           "Error, cannot mark thread viewed, parent board does not exist"
         )
 
-      _err ->
-      IO.inspect _err
+      _ ->
         ErrorHelpers.render_json_error(conn, 400, "Error, cannot mark thread viewed")
     end
   end
 
   ## === Private Helper Functions ===
 
-  defp check_view(conn, thread_id) do
+  defp maybe_update_thread_view_count(conn, thread_id) do
     viewer_id = case Plug.Conn.get_req_header(conn, "epoch-viewer") do
       [] -> ""
       [viewer_id] -> viewer_id
     end
-    new_viewer_id = ""
-    view_id_key = viewer_id <> Integer.to_string(thread_id)
+    viewer_id_key = viewer_id <> Integer.to_string(thread_id)
+    new_viewer_id = if viewer_id == "", do: Ecto.UUID.generate(), else: nil
+    case check_view_key(viewer_id_key) do
+      # data exists and in cool off, do nothing
+      %{exists: true, cooloff: true} -> nil
+      # data exists and not in cooloff, increment thread view count
+      %{exists: true, cooloff: false} -> MetadataThread.increment_view_count(thread_id)
+      # data doesn't exist, create one for user/thread
+      %{exists: false} ->
+        viewer_id = if viewer_id == "", do: new_viewer_id, else: viewer_id
+        viewer_id_key = viewer_id <> Integer.to_string(thread_id)
+        Redix.command(:redix, ["SET", viewer_id_key, NaiveDateTime.utc_now()])
+        check_view_ip(conn, thread_id)
+    end
+    new_viewer_id
   end
 
-  defp check_view_key(key) do
-    if stored_time = Redix.command!(conn, ["GET", key]) do
-      time_elapsed = NaiveDateTime.diff(NaiveDateTime.utc_now(), stored_time, :second)
-      one_hour = 60 * 60
-      hour_passed = time_elapsed > one_hour
-      if hour_passed, do: Redix.command(conn, ["SET", key, NaiveDateTime.utc_now()])
-      %{valid: true, cooloff: !hour_passed}
-    else
-      %{valid: false}
+  defp check_view_ip(conn, thread_id) do
+    # convert ip tuple into string
+    viewer_ip = conn.remote_ip |> :inet_parse.ntoa() |> to_string
+    viewer_ip_key = viewer_ip <> Integer.to_string(thread_id)
+    case check_view_key(viewer_ip_key) do
+      # data exists and in cool off, do nothing
+      %{exists: true, cooloff: true} -> nil
+      # data exists and not in cooloff, increment thread view count
+      %{exists: true, cooloff: false} -> MetadataThread.increment_view_count(thread_id)
+      # data doesn't exist, save this ip/thread key to redis
+      %{exists: false} -> Redix.command(:redix, ["SET", viewer_ip_key, NaiveDateTime.utc_now()])
     end
   end
 
-  defp update_view(nil, _thread_id), do: {:ok, nil}
-  defp update_view(user, thread_id), do: UserThreadView.upsert(user.id, thread_id)
+  defp check_view_key(key) do
+    if stored_time = Redix.command!(:redix, ["GET", key]) do
+      stored_time_naive = NaiveDateTime.from_iso8601!(stored_time)
+      time_elapsed = NaiveDateTime.diff(NaiveDateTime.utc_now(), stored_time_naive, :second)
+      one_hour_elapsed = time_elapsed > (60 * 60)
+      if one_hour_elapsed, do: Redix.command(:redix, ["SET", key, NaiveDateTime.utc_now()])
+      %{exists: true, cooloff: !one_hour_elapsed}
+    else
+      %{exists: false}
+    end
+  end
+
+  defp update_user_thread_view_count(nil, _thread_id), do: {:ok, nil}
+  defp update_user_thread_view_count(user, thread_id), do: UserThreadView.upsert(user.id, thread_id)
 end

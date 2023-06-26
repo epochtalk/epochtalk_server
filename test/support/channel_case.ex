@@ -1,4 +1,4 @@
-defmodule EpochtalkServerWeb.ChannelCase do
+defmodule Test.Support.ChannelCase do
   @moduledoc """
   This module defines the test case to be used by
   channel tests.
@@ -11,7 +11,7 @@ defmodule EpochtalkServerWeb.ChannelCase do
   we enable the SQL sandbox, so changes done to the database
   are reverted at the end of every test. If you are using
   PostgreSQL, you can even run database tests asynchronously
-  by setting `use EpochtalkServerWeb.ChannelCase, async: true`, although
+  by setting `use Test.Support.ChannelCase, async: true`, although
   this option is not recommended for other databases.
   """
 
@@ -24,7 +24,7 @@ defmodule EpochtalkServerWeb.ChannelCase do
     quote do
       # Import conveniences for testing with channels
       import Phoenix.ChannelTest
-      import EpochtalkServerWeb.ChannelCase
+      import Test.Support.ChannelCase
 
       # The default endpoint for testing
       @endpoint EpochtalkServerWeb.Endpoint
@@ -33,7 +33,7 @@ defmodule EpochtalkServerWeb.ChannelCase do
 
   @endpoint EpochtalkServerWeb.Endpoint
   setup context do
-    EpochtalkServer.DataCase.setup_sandbox(context)
+    Test.Support.DataCase.setup_sandbox(context)
     import Phoenix.ChannelTest
     alias EpochtalkServer.Session
     alias EpochtalkServer.Models.User

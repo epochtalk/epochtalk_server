@@ -1,4 +1,4 @@
-defmodule EpochtalkServerWeb.PreferenceJSON do
+defmodule EpochtalkServerWeb.Controllers.PreferenceJSON do
   @moduledoc """
   Renders and formats `Preference` data, in JSON format for frontend
   """
@@ -6,7 +6,7 @@ defmodule EpochtalkServerWeb.PreferenceJSON do
   @doc """
   Renders formatted JSON response for user preferences.
   ## Example
-    iex> EpochtalkServerWeb.PreferenceJSON.preferences(%{preferences: nil})
+    iex> EpochtalkServerWeb.Controllers.PreferenceJSON.preferences(%{preferences: nil})
     %{
       posts_per_page: 25,
       threads_per_page: 25,
@@ -31,7 +31,7 @@ defmodule EpochtalkServerWeb.PreferenceJSON do
     iex>   email_mentions: true,
     iex>   email_messages: true
     iex> }
-    iex> EpochtalkServerWeb.PreferenceJSON.preferences(%{preferences: preferences})
+    iex> EpochtalkServerWeb.Controllers.PreferenceJSON.preferences(%{preferences: preferences})
   """
   def preferences(%{preferences: nil}) do
     %{

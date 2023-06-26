@@ -1,4 +1,4 @@
-defmodule EpochtalkServerWeb.NotificationJSON do
+defmodule EpochtalkServerWeb.Controllers.NotificationJSON do
   @moduledoc """
   Renders and formats `User` data, in JSON format for frontend
   """

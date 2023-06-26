@@ -1,13 +1,17 @@
-defmodule EpochtalkServerWeb.SessionTest do
+defmodule Test.EpochtalkServer.Session do
+  @moduledoc """
+  This test sets async: false because it uses redis session storage, which will
+  run into concurrency issues when run alongside other tests
+  """
+  use Test.Support.ConnCase, async: false
   @one_day_in_seconds 1 * 24 * 60 * 60
   @almost_one_day_in_seconds @one_day_in_seconds - 100
   @four_weeks_in_seconds 4 * 7 * @one_day_in_seconds
   @almost_four_weeks_in_seconds @four_weeks_in_seconds - 100
-  use EpochtalkServerWeb.ConnCase, async: false
   alias EpochtalkServer.Session
 
   describe "get_resource/2" do
-    test "errors when session_id is invalid", %{user: user} do
+    test "when session_id is invalid, errors", %{user: user} do
       session_id = "bogussessionid"
 
       assert Session.get_resource(user.id, session_id) ==
@@ -15,7 +19,7 @@ defmodule EpochtalkServerWeb.SessionTest do
     end
 
     @tag :authenticated
-    test "errors when user id is invalid", %{conn: conn} do
+    test "when user id is invalid, errors", %{conn: conn} do
       user_id = 0
       # get session_id (jti) from conn
       session_id = conn.private.guardian_default_claims["jti"]
@@ -25,7 +29,7 @@ defmodule EpochtalkServerWeb.SessionTest do
     end
 
     @tag :authenticated
-    test "gets a valid resource when authenticated", %{conn: conn, authed_user: authed_user} do
+    test "when authenticated, gets a valid resource", %{conn: conn, authed_user: authed_user} do
       # get session_id (jti) from conn
       session_id = conn.private.guardian_default_claims["jti"]
       {:ok, resource_user} = Session.get_resource(authed_user.id, session_id)
@@ -56,7 +60,7 @@ defmodule EpochtalkServerWeb.SessionTest do
   end
 
   describe "create/3 session expiration" do
-    test "deletes an expired user session when logging in", %{conn: conn, user: user} do
+    test "when logging in, deletes an expired user session", %{conn: conn, user: user} do
       remember_me = false
       # create session that should be deleted
       {:ok, _authed_user_to_delete, _token, authed_conn_to_delete} =
@@ -105,37 +109,43 @@ defmodule EpochtalkServerWeb.SessionTest do
       assert session_user_id_to_persist == user.id
       assert session_user_username_to_persist == user.username
 
-      authenticate_persisted_conn =
-        get(authed_conn_to_persist, Routes.user_path(authed_conn_to_persist, :authenticate))
+      authenticate_persisted_response =
+        authed_conn_to_persist
+        |> get(Routes.user_path(authed_conn_to_persist, :authenticate))
+        |> json_response(200)
 
-      assert user.id == json_response(authenticate_persisted_conn, 200)["id"]
+      assert authenticate_persisted_response["id"] == user.id
       {:ok, new_resource} = Session.get_resource(user.id, new_session_id)
       %{id: new_session_user_id, username: new_session_user_username} = new_resource
       assert new_session_user_id == user.id
       assert new_session_user_username == user.username
 
-      new_authenticate_conn =
-        get(new_authed_conn, Routes.user_path(new_authed_conn, :authenticate))
+      new_authenticate_response =
+        new_authed_conn
+        |> get(Routes.user_path(new_authed_conn, :authenticate))
+        |> json_response(200)
 
-      assert user.id == json_response(new_authenticate_conn, 200)["id"]
+      assert new_authenticate_response["id"] == user.id
       # check that expired session is not active
       unauthed_resource = Session.get_resource(user.id, session_id_to_delete)
 
       assert unauthed_resource ==
                {:error, "No session for user_id #{user.id} with id #{session_id_to_delete}"}
 
-      authenticate_deleted_conn =
-        get(authed_conn_to_delete, Routes.user_path(authed_conn_to_delete, :authenticate))
+      authenticate_deleted_response =
+        authed_conn_to_delete
+        |> get(Routes.user_path(authed_conn_to_delete, :authenticate))
+        |> json_response(401)
 
-      assert %{"error" => "Unauthorized", "message" => "No resource found"} =
-               json_response(authenticate_deleted_conn, 401)
+      assert authenticate_deleted_response["error"] == "Unauthorized"
+      assert authenticate_deleted_response["message"] == "No resource found"
     end
   end
 
   describe "create/3 expiration/ttl" do
     setup [:flush_redis]
 
-    test "creates a user session without remember me (< 1 day ttl)", %{conn: conn, user: user} do
+    test "without remember me, creates a user session (< 1 day ttl)", %{conn: conn, user: user} do
       remember_me = false
       {:ok, authed_user, _token, _authed_conn} = Session.create(user, remember_me, conn)
       user_ttl = Redix.command!(:redix, ["TTL", "user:#{authed_user.id}"])
@@ -154,7 +164,7 @@ defmodule EpochtalkServerWeb.SessionTest do
       assert sessions_ttl <= @one_day_in_seconds
     end
 
-    test "creates a user session with remember me (< 4 week ttl)", %{conn: conn, user: user} do
+    test "with remember me, creates a user session (< 4 week ttl)", %{conn: conn, user: user} do
       remember_me = true
       {:ok, authed_user, _token, _authed_conn} = Session.create(user, remember_me, conn)
       user_ttl = Redix.command!(:redix, ["TTL", "user:#{authed_user.id}"])
@@ -227,7 +237,7 @@ defmodule EpochtalkServerWeb.SessionTest do
     end
 
     @tag :banned
-    test "handles baninfo ttl and ban_expiration without remember me (< 1 day ttl)", %{
+    test "without remember me, handles baninfo ttl and ban_expiration (< 1 day ttl)", %{
       conn: conn,
       user_attrs: user_attrs,
       user: user
@@ -250,7 +260,7 @@ defmodule EpochtalkServerWeb.SessionTest do
       ban_expiration =
         Redix.command!(:redix, ["HGET", "user:#{user.id}:baninfo", "ban_expiration"])
 
-      assert is_nil(pre_ban_ban_expiration)
+      assert pre_ban_ban_expiration == nil
       assert ban_expiration == "9999-12-31 00:00:00"
       assert pre_ban_baninfo_ttl == -2
       assert baninfo_ttl <= @one_day_in_seconds
@@ -258,7 +268,7 @@ defmodule EpochtalkServerWeb.SessionTest do
     end
 
     @tag :banned
-    test "handles baninfo ttl and ban_expiration with remember me (< 4 weeks ttl)", %{
+    test "with remember me, handles baninfo ttl and ban_expiration (< 4 weeks ttl)", %{
       conn: conn,
       user_attrs: user_attrs,
       user: user
@@ -282,7 +292,7 @@ defmodule EpochtalkServerWeb.SessionTest do
       ban_expiration =
         Redix.command!(:redix, ["HGET", "user:#{user.id}:baninfo", "ban_expiration"])
 
-      assert is_nil(pre_ban_ban_expiration)
+      assert pre_ban_ban_expiration == nil
       assert ban_expiration == "9999-12-31 00:00:00"
       assert pre_ban_baninfo_ttl == -2
       assert baninfo_ttl <= @four_weeks_in_seconds
@@ -290,7 +300,7 @@ defmodule EpochtalkServerWeb.SessionTest do
     end
 
     @tag :malicious
-    test "handles baninfo ttl and malicious score without remember me (< 1 day ttl)", %{
+    test "without remember me, handles baninfo ttl and malicious score (< 1 day ttl)", %{
       conn: conn,
       user: user,
       malicious_user_changeset: malicious_user_changeset
@@ -309,7 +319,7 @@ defmodule EpochtalkServerWeb.SessionTest do
       malicious_score =
         Redix.command!(:redix, ["HGET", "user:#{authed_user.id}:baninfo", "malicious_score"])
 
-      assert is_nil(pre_malicious_malicious_score)
+      assert pre_malicious_malicious_score == nil
       assert malicious_score == "4.0416"
       assert pre_malicious_baninfo_ttl == -2
       assert malicious_score_ttl <= @one_day_in_seconds
@@ -317,7 +327,7 @@ defmodule EpochtalkServerWeb.SessionTest do
     end
 
     @tag :malicious
-    test "handles baninfo ttl and malicious score with remember me (< 4 weeks ttl)", %{
+    test "with remember me, handles baninfo ttl and malicious score (< 4 weeks ttl)", %{
       conn: conn,
       user: user,
       malicious_user_changeset: malicious_user_changeset
@@ -336,7 +346,7 @@ defmodule EpochtalkServerWeb.SessionTest do
       malicious_score =
         Redix.command!(:redix, ["HGET", "user:#{authed_user.id}:baninfo", "malicious_score"])
 
-      assert is_nil(pre_malicious_malicious_score)
+      assert pre_malicious_malicious_score == nil
       assert malicious_score == "4.0416"
       assert pre_malicious_baninfo_ttl == -2
       assert malicious_score_ttl <= @four_weeks_in_seconds

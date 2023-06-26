@@ -1,4 +1,4 @@
-defmodule EpochtalkServerWeb.ConfigurationController do
+defmodule EpochtalkServerWeb.Controllers.Configuration do
   use EpochtalkServerWeb, :controller
 
   @moduledoc """

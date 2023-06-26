@@ -1,4 +1,4 @@
-defmodule EpochtalkServerWeb.MentionController do
+defmodule EpochtalkServerWeb.Controllers.Mention do
   use EpochtalkServerWeb, :controller
 
   @moduledoc """

@@ -203,16 +203,23 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
       # data exists and not in cooloff, increment thread view count
       %{exists: true, cooloff: false} -> MetadataThread.increment_view_count(thread_id)
       # data doesn't exist, save this ip/thread key to redis
-      %{exists: false} -> Redix.command(:redix, ["SET", viewer_ip_key, NaiveDateTime.utc_now()])
+      %{exists: false} -> update_thread_view_flag_for_viewer(id, thread_id)
     end
   end
 
+  defp update_thread_view_flag_for_viewer(key), do:
+    Redix.command(:redix, ["SET", key, NaiveDateTime.utc_now()])
+  defp update_thread_view_flag_for_viewer(viewer, thread_id), do:
+    update_thread_view_flag_for_viewer(viewer <> Integer.to_string(thread_id))
+  defp get_thread_view_flag_for_viewer(key, thread_id), do:
+    Redix.command!(:redix, ["GET", key])
+
   defp check_view_key(key) do
-    if stored_time = Redix.command!(:redix, ["GET", key]) do
+    if stored_time = get_thread_view_flag_for_viewer(key) do
       stored_time_naive = NaiveDateTime.from_iso8601!(stored_time)
       time_elapsed = NaiveDateTime.diff(NaiveDateTime.utc_now(), stored_time_naive, :second)
       one_hour_elapsed = time_elapsed > 60 * 60
-      if one_hour_elapsed, do: Redix.command(:redix, ["SET", key, NaiveDateTime.utc_now()])
+      if one_hour_elapsed, do: update_thread_view_flag_for_viewer(key)
       %{exists: true, cooloff: !one_hour_elapsed}
     else
       %{exists: false}

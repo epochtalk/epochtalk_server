@@ -19,7 +19,12 @@ defmodule Test.EpochtalkServerWeb.Controllers.Board do
       description: "test board description",
       viewable_by: 10,
       postable_by: 10,
-      right_to_left: false
+      right_to_left: false,
+      meta: %{
+        disable_self_mod: false,
+        disable_post_edit: nil,
+        disable_signature: false
+      }
     }
 
     {:ok, board} = Board.create(board_attrs)
@@ -85,7 +90,12 @@ defmodule Test.EpochtalkServerWeb.Controllers.Board do
             "slug" => response_board_slug,
             "viewable_by" => response_board_viewable_by,
             "postable_by" => response_board_postable_by,
-            "right_to_left" => response_board_right_to_left
+            "right_to_left" => response_board_right_to_left,
+            "meta" => %{
+              "disable_self_mod" => response_board_meta_disable_self_mod,
+              "disable_post_edit" => response_board_meta_disable_post_edit,
+              "disable_signature" => response_board_meta_disable_signature
+            }
           }
         ]
       } = response |> Enum.at(1)
@@ -105,6 +115,9 @@ defmodule Test.EpochtalkServerWeb.Controllers.Board do
       assert response_board_viewable_by == board.viewable_by
       assert response_board_postable_by == board.postable_by
       assert response_board_right_to_left == board.right_to_left
+      assert response_board_meta_disable_self_mod == board.meta.disable_self_mod
+      assert response_board_meta_disable_post_edit == board.meta.disable_post_edit
+      assert response_board_meta_disable_signature == board.meta.disable_signature
     end
   end
 
@@ -131,6 +144,9 @@ defmodule Test.EpochtalkServerWeb.Controllers.Board do
       assert response["viewable_by"] == board.viewable_by
       assert response["postable_by"] == board.postable_by
       assert response["right_to_left"] == board.right_to_left
+      assert response["disable_self_mod"] == board.meta.disable_self_mod
+      assert response["disable_post_edit"] == board.meta.disable_post_edit
+      assert response["disable_signature"] == board.meta.disable_signature
     end
   end
 

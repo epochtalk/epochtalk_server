@@ -200,6 +200,7 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
   defp check_view_ip(conn, thread_id) do
     # convert ip tuple into string
     viewer_ip = conn.remote_ip |> :inet_parse.ntoa() |> to_string
+    viewer_ip_key = viewer_ip <> Integer.to_string(thread_id)
     handle_cooloff(viewer_ip_key, viewer_ip, thread_id)
   end
 

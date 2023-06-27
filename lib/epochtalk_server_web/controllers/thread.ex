@@ -194,7 +194,7 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
     Redix.command(:redix, ["SET", key, NaiveDateTime.utc_now()])
   defp update_thread_view_flag_for_viewer(viewer, thread_id), do:
     update_thread_view_flag_for_viewer(viewer <> Integer.to_string(thread_id))
-  defp get_thread_view_flag_for_viewer(key, thread_id), do:
+  defp get_thread_view_flag_for_viewer(key), do:
     Redix.command!(:redix, ["GET", key])
 
   defp check_view_ip(conn, thread_id) do

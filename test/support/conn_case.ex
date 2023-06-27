@@ -1,4 +1,4 @@
-defmodule EpochtalkServerWeb.ConnCase do
+defmodule Test.Support.ConnCase do
   @moduledoc """
   This module defines the test case to be used by
   tests that require setting up a connection.
@@ -11,7 +11,7 @@ defmodule EpochtalkServerWeb.ConnCase do
   we enable the SQL sandbox, so changes done to the database
   are reverted at the end of every test. If you are using
   PostgreSQL, you can even run database tests asynchronously
-  by setting `use EpochtalkServerWeb.ConnCase, async: true`, although
+  by setting `use Test.Support.ConnCase, async: true`, although
   this option is not recommended for other databases.
   """
 
@@ -42,7 +42,7 @@ defmodule EpochtalkServerWeb.ConnCase do
       # Import conveniences for testing with connections
       import Plug.Conn
       import Phoenix.ConnTest
-      import EpochtalkServerWeb.ConnCase
+      import Test.Support.ConnCase
 
       alias EpochtalkServerWeb.Router.Helpers, as: Routes
 
@@ -68,6 +68,8 @@ defmodule EpochtalkServerWeb.ConnCase do
     {:ok, admin_user} = User.by_username(@test_admin_username)
     conn = Phoenix.ConnTest.build_conn()
 
+    context_updates = {:ok, []}
+
     # log user in if necessary
     context_updates =
       case context[:authenticated] do
@@ -75,30 +77,39 @@ defmodule EpochtalkServerWeb.ConnCase do
           remember_me = false
           {:ok, user, token, authed_conn} = Session.create(user, remember_me, conn)
 
-          {:ok,
-           conn: authed_conn, authed_user: user, token: token, authed_user_attrs: @test_user_attrs}
+          {:ok, k_list} = context_updates
+          k_list = [conn: authed_conn] ++ k_list
+          k_list = [authed_user: user] ++ k_list
+          k_list = [token: token] ++ k_list
+          k_list = [authed_user_attrs: @test_user_attrs] ++ k_list
+          {:ok, k_list}
 
         :admin ->
           remember_me = false
           {:ok, admin_user, token, authed_conn} = Session.create(admin_user, remember_me, conn)
 
-          {:ok,
-           conn: authed_conn,
-           authed_user: admin_user,
-           token: token,
-           authed_user_attrs: @test_admin_user_attrs}
+          {:ok, k_list} = context_updates
+          k_list = [conn: authed_conn] ++ k_list
+          k_list = [authed_user: admin_user] ++ k_list
+          k_list = [token: token] ++ k_list
+          k_list = [authed_user_attrs: @test_admin_user_attrs] ++ k_list
+          {:ok, k_list}
 
         # :authenticated not set, return default conn
         _ ->
-          {:ok, conn: conn, user: user, user_attrs: @test_user_attrs}
+          {:ok, k_list} = context_updates
+          k_list = [conn: conn] ++ k_list
+          k_list = [user: user] ++ k_list
+          k_list = [user_attrs: @test_user_attrs] ++ k_list
+          {:ok, k_list}
       end
 
     # ban user if necessary
     context_updates =
       if context[:banned] do
         {:ok, banned_user_changeset} = Ban.ban(user)
-        {:ok, updates_keyword_list} = context_updates
-        {:ok, updates_keyword_list ++ [banned_user_changeset: banned_user_changeset]}
+        {:ok, k_list} = context_updates
+        {:ok, [banned_user_changeset: banned_user_changeset] ++ k_list}
       else
         context_updates
       end
@@ -108,8 +119,8 @@ defmodule EpochtalkServerWeb.ConnCase do
       if context[:malicious] do
         # returns changeset from Ban.ban()
         {:ok, malicious_user_changeset} = User.handle_malicious_user(user, conn.remote_ip)
-        {:ok, updates_keyword_list} = context_updates
-        {:ok, updates_keyword_list ++ [malicious_user_changeset: malicious_user_changeset]}
+        {:ok, k_list} = context_updates
+        {:ok, [malicious_user_changeset: malicious_user_changeset] ++ k_list}
       else
         context_updates
       end

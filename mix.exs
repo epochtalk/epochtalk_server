@@ -69,30 +69,39 @@ defmodule EpochtalkServer.MixProject do
   defp aliases do
     [
       setup: ["deps.get", "ecto.setup"],
-      "ecto.setup": ["ecto.create", "ecto.migrate", "seed.all"],
+      "ecto.setup": ["ecto.create", "ecto.migrate", "seed.default"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
       "db.migrate": ["ecto.migrate", "ecto.dump"],
       "db.rollback": ["ecto.rollback", "ecto.dump"],
-      "seed.all": ["seed.prp", "seed.permissions", "seed.roles", "seed.rp", "seed.forum"],
-      "seed.test_banned_address": ["run priv/repo/seed_test_banned_address.exs"],
-      "seed.forum": ["run priv/repo/seed_forum.exs"],
-      "seed.permissions": ["run priv/repo/seed_permissions.exs"],
+      # required seeds
+      "seed.required": ["seed.prp", "seed.permissions", "seed.roles", "seed.rp"],
       "seed.prp": ["run priv/repo/process_roles_permissions.exs"],
+      "seed.permissions": ["run priv/repo/seed_permissions.exs"],
       "seed.roles": ["run priv/repo/seed_roles.exs"],
       "seed.rp": ["run priv/repo/seed_roles_permissions.exs"],
+      # forum seeds
+      "seed.default": ["seed.required", "seed.forum"],
+      "seed.forum": ["run priv/repo/seed_forum.exs"],
       "seed.user": ["run priv/repo/seed_user.exs"],
-      "seed.test_moderation_logs": ["run priv/repo/seed_test_moderation_log.exs"],
-      "seed.test_thread": ["run priv/repo/seed_test_thread.exs"],
-      "seed.test_users": ["run priv/repo/seed_test_users.exs"],
+      # test seeds
+      "seed.test": [
+        "seed.required",
+        "seed.test_boards",
+        "seed.test_banned_address",
+        "seed.test_users",
+        "seed.test_threads",
+        "seed.test_moderation_logs"
+      ],
+      "seed.test_boards": ["run test/seed/boards.exs"],
+      "seed.test_banned_address": ["run test/seed/banned_address.exs"],
+      "seed.test_users": ["run test/seed/users.exs"],
+      "seed.test_threads": ["run test/seed/threads.exs"],
+      "seed.test_moderation_logs": ["run test/seed/moderation_log.exs"],
       test: [
         "ecto.drop",
         "ecto.create --quiet",
         "ecto.migrate --quiet",
-        "seed.test_banned_address",
-        "seed.all",
-        "seed.test_users",
-        "seed.test_thread",
-        "seed.test_moderation_logs",
+        "seed.test",
         "test"
       ]
     ]

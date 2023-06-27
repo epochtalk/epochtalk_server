@@ -1,4 +1,4 @@
-defmodule EpochtalkServerWeb.ModerationLogController do
+defmodule EpochtalkServerWeb.Controllers.ModerationLog do
   use EpochtalkServerWeb, :controller
 
   @moduledoc """

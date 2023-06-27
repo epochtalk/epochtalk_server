@@ -1,4 +1,4 @@
-defmodule EpochtalkServerWeb.MentionJSON do
+defmodule EpochtalkServerWeb.Controllers.MentionJSON do
   @moduledoc """
   Renders and formats `User` data, in JSON format for frontend
   """

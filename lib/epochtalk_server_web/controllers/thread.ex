@@ -1,4 +1,4 @@
-defmodule EpochtalkServerWeb.ThreadController do
+defmodule EpochtalkServerWeb.Controllers.Thread do
   use EpochtalkServerWeb, :controller
 
   @moduledoc """
@@ -100,6 +100,9 @@ defmodule EpochtalkServerWeb.ThreadController do
 
       {:can_read, {:ok, false}} ->
         ErrorHelpers.render_json_error(conn, 403, "Unauthorized, you do not have permission")
+
+      {:can_read, {:error, :board_does_not_exist}} ->
+        ErrorHelpers.render_json_error(conn, 400, "Read error, board does not exist")
 
       _ ->
         ErrorHelpers.render_json_error(conn, 400, "Error, cannot get threads by board")

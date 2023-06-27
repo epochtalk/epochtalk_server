@@ -570,7 +570,13 @@ logs = [
       api_url: "/api/threads/move",
       api_method: "post",
       type: "threads.move",
-      obj: %{title: "new_title", thread_id: 1, user_id: 1, old_board_name: "old_board", new_board_id: 1}
+      obj: %{
+        title: "new_title",
+        thread_id: 1,
+        user_id: 1,
+        old_board_name: "old_board",
+        new_board_id: 1
+      }
     }
   },
   %{

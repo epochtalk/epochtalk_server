@@ -1,4 +1,4 @@
-defmodule EpochtalkServerWeb.ModerationLogJSON do
+defmodule EpochtalkServerWeb.Controllers.ModerationLogJSON do
   @moduledoc """
   Renders and formats `ModerationLog` data, in JSON format for frontend
   """

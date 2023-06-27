@@ -1,6 +1,6 @@
-defmodule EpochtalkServerWeb.BoardJSON do
+defmodule EpochtalkServerWeb.Controllers.BoardJSON do
   @moduledoc """
-  Renders and formats `BoardController` data, in JSON format for frontend
+  Renders and formats `Controllers.Board` data, in JSON format for frontend
   """
 
   @doc """

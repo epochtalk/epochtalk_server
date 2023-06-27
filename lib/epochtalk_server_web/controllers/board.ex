@@ -1,4 +1,4 @@
-defmodule EpochtalkServerWeb.BoardController do
+defmodule EpochtalkServerWeb.Controllers.Board do
   use EpochtalkServerWeb, :controller
 
   @moduledoc """
@@ -66,7 +66,7 @@ defmodule EpochtalkServerWeb.BoardController do
         ErrorHelpers.render_json_error(
           conn,
           400,
-          "Error, cannot convert slug, board does not exist"
+          "Error, cannot convert slug: board does not exist"
         )
 
       _ ->

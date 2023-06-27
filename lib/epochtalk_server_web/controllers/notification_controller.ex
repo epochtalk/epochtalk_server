@@ -16,7 +16,6 @@ defmodule EpochtalkServerWeb.NotificationController do
   def counts(conn, attrs) do
     with {:auth, user} <- {:auth, Guardian.Plug.current_resource(conn)},
          :ok <- ACL.allow!(conn, "notifications.counts"),
-         # {:ok, :allow} <- Authorization.grant(conn, counts_auth),
          max <- Validate.cast(attrs, "max", :integer, min: 1) do
       render(conn, :counts, data: Notification.counts_by_user_id(user.id, max: max || 99))
     else
@@ -35,16 +34,6 @@ defmodule EpochtalkServerWeb.NotificationController do
         )
     end
   end
-
-  # defp counts_auth() do
-  #   one = Task.one("some error one")
-  #   two = Task.two("some error two")
-
-  #   case Run.tasks(one, two) do
-  #     :ok -> {:ok, :allow}
-  #     {:error, msg} -> throw(msg)
-  #   end
-  # end
 
   @doc """
   Used to dismiss `Notification` counts for a specific `User`

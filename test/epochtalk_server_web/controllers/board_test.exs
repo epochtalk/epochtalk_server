@@ -115,6 +115,9 @@ defmodule Test.EpochtalkServerWeb.Controllers.Board do
       assert response_board_viewable_by == board.viewable_by
       assert response_board_postable_by == board.postable_by
       assert response_board_right_to_left == board.right_to_left
+      assert response_board_meta_disable_self_mod == board.meta.disable_self_mod
+      assert response_board_meta_disable_post_edit == board.meta.disable_post_edit
+      assert response_board_meta_disable_signature == board.meta.disable_signature
     end
   end
 
@@ -141,6 +144,9 @@ defmodule Test.EpochtalkServerWeb.Controllers.Board do
       assert response["viewable_by"] == board.viewable_by
       assert response["postable_by"] == board.postable_by
       assert response["right_to_left"] == board.right_to_left
+      assert response["disable_self_mod"] == board.meta.disable_self_mod
+      assert response["disable_post_edit"] == board.meta.disable_post_edit
+      assert response["disable_signature"] == board.meta.disable_signature
     end
   end
 

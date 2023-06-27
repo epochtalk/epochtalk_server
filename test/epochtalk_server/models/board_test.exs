@@ -33,6 +33,7 @@ defmodule Test.EpochtalkServer.Models.Board do
       assert new_board.viewable_by == board.viewable_by
       assert new_board.postable_by == board.postable_by
       assert new_board.right_to_left == board.right_to_left
+      assert new_board.meta == board.meta
     end
   end
 end

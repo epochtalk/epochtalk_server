@@ -173,8 +173,8 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
     new_viewer_id = if viewer_id == "", do: Ecto.UUID.generate(), else: nil
     viewer_id = if viewer_id == "", do: new_viewer_id, else: viewer_id
 
-    if handle_cooloff(viewer_id_key, viewer_id, thread_id) == {:ok, "OK"}, do:
-      check_view_ip(conn, thread_id)
+    if handle_cooloff(viewer_id_key, viewer_id, thread_id) == {:ok, "OK"},
+      do: check_view_ip(conn, thread_id)
 
     new_viewer_id
   end
@@ -190,12 +190,13 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
     end
   end
 
-  defp update_thread_view_flag_for_viewer(key), do:
-    Redix.command(:redix, ["SET", key, NaiveDateTime.utc_now()])
-  defp update_thread_view_flag_for_viewer(viewer, thread_id), do:
-    update_thread_view_flag_for_viewer(viewer <> Integer.to_string(thread_id))
-  defp get_thread_view_flag_for_viewer(key), do:
-    Redix.command!(:redix, ["GET", key])
+  defp update_thread_view_flag_for_viewer(key),
+    do: Redix.command(:redix, ["SET", key, NaiveDateTime.utc_now()])
+
+  defp update_thread_view_flag_for_viewer(viewer, thread_id),
+    do: update_thread_view_flag_for_viewer(viewer <> Integer.to_string(thread_id))
+
+  defp get_thread_view_flag_for_viewer(key), do: Redix.command!(:redix, ["GET", key])
 
   defp check_view_ip(conn, thread_id) do
     # convert ip tuple into string

@@ -1,6 +1,6 @@
-defmodule EpochtalkServerWeb.PostJSON do
-  alias EpochtalkServerWeb.BoardJSON
-  alias EpochtalkServerWeb.ThreadJSON
+defmodule EpochtalkServerWeb.Controllers.PostJSON do
+  alias EpochtalkServerWeb.Controllers.BoardJSON
+  alias EpochtalkServerWeb.Controllers.ThreadJSON
 
   @moduledoc """
   Renders and formats `Post` data, in JSON format for frontend

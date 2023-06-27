@@ -1,4 +1,4 @@
-defmodule EpochtalkServerWeb.PostController do
+defmodule EpochtalkServerWeb.Controllers.Post do
   use EpochtalkServerWeb, :controller
 
   @moduledoc """

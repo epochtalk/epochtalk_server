@@ -171,33 +171,16 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
 
     viewer_id_key = viewer_id <> Integer.to_string(thread_id)
     new_viewer_id = if viewer_id == "", do: Ecto.UUID.generate(), else: nil
+    viewer_id = if viewer_id == "", do: new_viewer_id, else: viewer_id
 
-    case check_view_key(viewer_id_key) do
-      # data exists and in cool off, do nothing
-      %{exists: true, cooloff: true} ->
-        nil
-
-      # data exists and not in cooloff, increment thread view count
-      %{exists: true, cooloff: false} ->
-        MetadataThread.increment_view_count(thread_id)
-
-      # data doesn't exist, create one for user/thread
-      %{exists: false} ->
-        viewer_id = if viewer_id == "", do: new_viewer_id, else: viewer_id
-        viewer_id_key = viewer_id <> Integer.to_string(thread_id)
-        Redix.command(:redix, ["SET", viewer_id_key, NaiveDateTime.utc_now()])
-        check_view_ip(conn, thread_id)
-    end
+    if handle_cooloff(viewer_id_key, viewer_id, thread_id) == {:ok, "OK"}, do:
+      check_view_ip(conn, thread_id)
 
     new_viewer_id
   end
 
-  defp check_view_ip(conn, thread_id) do
-    # convert ip tuple into string
-    viewer_ip = conn.remote_ip |> :inet_parse.ntoa() |> to_string
-    viewer_ip_key = viewer_ip <> Integer.to_string(thread_id)
-
-    case check_view_key(viewer_ip_key) do
+  defp handle_cooloff(key, id, thread_id) do
+    case check_view_key(key) do
       # data exists and in cool off, do nothing
       %{exists: true, cooloff: true} -> nil
       # data exists and not in cooloff, increment thread view count
@@ -213,6 +196,12 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
     update_thread_view_flag_for_viewer(viewer <> Integer.to_string(thread_id))
   defp get_thread_view_flag_for_viewer(key, thread_id), do:
     Redix.command!(:redix, ["GET", key])
+
+  defp check_view_ip(conn, thread_id) do
+    # convert ip tuple into string
+    viewer_ip = conn.remote_ip |> :inet_parse.ntoa() |> to_string
+    handle_cooloff(viewer_ip_key, viewer_ip, thread_id)
+  end
 
   defp check_view_key(key) do
     if stored_time = get_thread_view_flag_for_viewer(key) do

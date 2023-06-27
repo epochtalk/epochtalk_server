@@ -10,21 +10,36 @@ general_category = %{
 general_board = %{
   name: "General Discussion",
   description: "Every forum's got one; talk about anything here",
-  slug: "general-discussion"
+  slug: "general-discussion",
+  meta: %{
+    disable_self_mod: false,
+    disable_post_edit: nil,
+    disable_signature: false
+  }
 }
 
 admin_board = %{
   name: "Admin Board",
   description: "this board is for admins",
   viewable_by: 1,
-  slug: "admin-board"
+  slug: "admin-board",
+  meta: %{
+    disable_self_mod: false,
+    disable_post_edit: nil,
+    disable_signature: false
+  }
 }
 
 super_admin_board = %{
   name: "Admin Board",
   description: "this board is for admins",
   viewable_by: 0,
-  slug: "super-admin-board"
+  slug: "super-admin-board",
+  meta: %{
+    disable_self_mod: false,
+    disable_post_edit: nil,
+    disable_signature: false
+  }
 }
 
 Repo.transaction(fn ->

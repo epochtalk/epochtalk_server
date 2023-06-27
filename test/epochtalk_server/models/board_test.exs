@@ -18,7 +18,12 @@ defmodule Test.EpochtalkServer.Models.Board do
         description: "test board description",
         viewable_by: 10,
         postable_by: 10,
-        right_to_left: false
+        right_to_left: false,
+        meta: %{
+          disable_self_mod: false,
+          disable_post_edit: nil,
+          disable_signature: false
+        }
       }
 
       {:ok, new_board} = Board.create(board)

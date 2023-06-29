@@ -182,11 +182,17 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
   defp handle_cooloff(key, id, thread_id) do
     case check_view_key(key) do
       # data exists and in cool off, do nothing
-      %{exists: true, cooloff: true} -> nil
+      %{exists: true, cooloff: true} ->
+        IO.inspect "data exists and in cool off, do nothing"
+       nil
       # data exists and not in cooloff, increment thread view count
-      %{exists: true, cooloff: false} -> MetadataThread.increment_view_count(thread_id)
+      %{exists: true, cooloff: false} ->
+        IO.inspect "data exists and not in cooloff, increment thread view count"
+        MetadataThread.increment_view_count(thread_id)
       # data doesn't exist, save this ip/thread key to redis
-      %{exists: false} -> update_thread_view_flag_for_viewer(id, thread_id)
+      %{exists: false} ->
+        IO.inspect "data doesn't exist, save this ip/thread key to redis"
+        update_thread_view_flag_for_viewer(id, thread_id)
     end
   end
 

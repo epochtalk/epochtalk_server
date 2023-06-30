@@ -179,19 +179,19 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
     new_viewer_id
   end
 
-  defp handle_cooloff(key, id, thread_id) do
+  defp handle_cooloff(key, id, thread_id, increment \\ false) do
     case check_view_key(key) do
       # data exists and in cool off, do nothing
       %{exists: true, cooloff: true} ->
-        IO.inspect "data exists and in cool off, do nothing"
-       nil
+        nil
+
       # data exists and not in cooloff, increment thread view count
       %{exists: true, cooloff: false} ->
-        IO.inspect "data exists and not in cooloff, increment thread view count"
         MetadataThread.increment_view_count(thread_id)
+
       # data doesn't exist, save this ip/thread key to redis
       %{exists: false} ->
-        IO.inspect "data doesn't exist, save this ip/thread key to redis"
+        if increment, do: MetadataThread.increment_view_count(thread_id)
         update_thread_view_flag_for_viewer(id, thread_id)
     end
   end
@@ -208,7 +208,7 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
     # convert ip tuple into string
     viewer_ip = conn.remote_ip |> :inet_parse.ntoa() |> to_string
     viewer_ip_key = viewer_ip <> Integer.to_string(thread_id)
-    handle_cooloff(viewer_ip_key, viewer_ip, thread_id)
+    handle_cooloff(viewer_ip_key, viewer_ip, thread_id, true)
   end
 
   defp check_view_key(key) do

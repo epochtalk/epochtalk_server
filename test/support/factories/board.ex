@@ -1,5 +1,6 @@
 defmodule Test.Support.Factories.Board do
   alias EpochtalkServer.Models.Board
+
   defmacro __using__(_opts) do
     quote do
       def board_factory do

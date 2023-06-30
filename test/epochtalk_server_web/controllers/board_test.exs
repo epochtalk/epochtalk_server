@@ -5,11 +5,13 @@ defmodule Test.EpochtalkServerWeb.Controllers.Board do
 
   setup %{conn: conn} do
     category = insert(:category)
-    board = insert(:board, [
-      viewable_by: 10,
-      postable_by: 10,
-      right_to_left: false
-    ])
+
+    board =
+      insert(:board,
+        viewable_by: 10,
+        postable_by: 10,
+        right_to_left: false
+      )
 
     # create board mapping for testing
     board_mapping = [

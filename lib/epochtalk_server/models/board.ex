@@ -185,32 +185,38 @@ defmodule EpochtalkServer.Models.Board do
       find_parent_initial_query
       |> union(^find_parent_recursion_query)
 
-    board_and_parents =
-      Board
-      |> recursive_ctes(true)
-      |> with_cte("find_parent", as: ^find_parent_query)
-      |> join(:inner, [b], fp in "find_parent", on: b.id == fp.board_id)
-      |> join(:left, [b, fp], c in Category, on: c.id == fp.category_id)
-      |> select([b, fp, c], %{
-        board_id: fp.board_id,
-        parent_id: fp.parent_id,
-        category_id: fp.category_id,
-        cat_viewable_by: c.viewable_by,
-        board_viewable_by: b.viewable_by
-      })
-      |> Repo.all()
+    Board
+    |> recursive_ctes(true)
+    |> with_cte("find_parent", as: ^find_parent_query)
+    |> join(:inner, [b], fp in "find_parent", on: b.id == fp.board_id)
+    |> join(:left, [b, fp], c in Category, on: c.id == fp.category_id)
+    |> select([b, fp, c], %{
+      board_id: fp.board_id,
+      parent_id: fp.parent_id,
+      category_id: fp.category_id,
+      cat_viewable_by: c.viewable_by,
+      board_viewable_by: b.viewable_by
+    })
+    |> Repo.all()
+    |> case do
+      [] ->
+        {:error, :board_does_not_exist}
 
-    # not readable if nothing in list, readable if viewable_by is nil, otherwise check viewable_by against user priority
-    can_read =
-      Enum.reduce(board_and_parents, length(board_and_parents) > 0, fn i, acc ->
-        boards_viewable =
-          not (is_integer(i.board_viewable_by) && user_priority > i.board_viewable_by)
+      board_and_parents ->
+        # not readable if nothing in list, readable if viewable_by is nil, otherwise check viewable_by against user priority
+        can_read =
+          Enum.reduce(board_and_parents, length(board_and_parents) > 0, fn i, acc ->
+            boards_viewable =
+              not (is_integer(i.board_viewable_by) && user_priority > i.board_viewable_by)
 
-        cats_viewable = not (is_integer(i.cat_viewable_by) && user_priority > i.cat_viewable_by)
-        acc && boards_viewable && cats_viewable
-      end)
+            cats_viewable =
+              not (is_integer(i.cat_viewable_by) && user_priority > i.cat_viewable_by)
 
-    {:ok, can_read}
+            acc && boards_viewable && cats_viewable
+          end)
+
+        {:ok, can_read}
+    end
   end
 
   @doc """

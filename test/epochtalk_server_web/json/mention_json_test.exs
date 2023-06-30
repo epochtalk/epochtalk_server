@@ -1,7 +1,7 @@
-defmodule EpochtalkServerWeb.MentionJSONTest do
-  use EpochtalkServerWeb.ConnCase, async: true
+defmodule Test.EpochtalkServerWeb.Controllers.MentionJSON do
+  use Test.Support.ConnCase, async: true
   # Bring render/3 and render_to_string/3 for testing custom views
-  alias EpochtalkServerWeb.MentionJSON
+  alias EpochtalkServerWeb.Controllers.MentionJSON
   alias EpochtalkServer.Models.{User, Mention, Thread, Post, Board}
 
   # this was too long to be a doctest, we still need to test with Sandbox db connection

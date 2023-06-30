@@ -1,5 +1,9 @@
-defmodule EpochtalkServerWeb.RoleControllerTest do
-  use EpochtalkServerWeb.ConnCase, async: false
+defmodule Test.EpochtalkServerWeb.Controllers.Role do
+  @moduledoc """
+  This test sets async: false because it uses the RoleCache, which will run into
+  concurrency issues when run alongside other tests
+  """
+  use Test.Support.ConnCase, async: false
   alias EpochtalkServerWeb.CustomErrors.InvalidPermission
   alias EpochtalkServer.Cache.Role, as: RoleCache
   @postgres_integer_max 2_147_483_647
@@ -8,7 +12,7 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
 
   describe "all/2" do
     @tag :authenticated
-    test "gets all roles when authenticated", %{conn: conn} do
+    test "when authenticated, gets all roles", %{conn: conn} do
       RoleCache.reload()
       conn = get(conn, Routes.role_path(conn, :all))
       roles = json_response(conn, 200)
@@ -94,8 +98,8 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
       initial_newbie_priority_restrictions = nil
 
       newbie_role = roles |> Enum.at(6)
-      assert newbie_permissions == newbie_role["permissions"]
-      assert initial_newbie_priority_restrictions == newbie_role["priority_restrictions"]
+      assert newbie_role["permissions"] == newbie_permissions
+      assert newbie_role["priority_restrictions"] == initial_newbie_priority_restrictions
 
       assert [
                %{
@@ -124,16 +128,19 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
       assert [] = roles
     end
 
-    test "does not get roles when not authenticated", %{conn: conn} do
-      conn = get(conn, Routes.role_path(conn, :all))
+    test "when not authenticated, does not get roles", %{conn: conn} do
+      response =
+        conn
+        |> get(Routes.role_path(conn, :all))
+        |> json_response(401)
 
-      assert %{"error" => "Unauthorized", "message" => "No resource found"} =
-               json_response(conn, 401)
+      assert response["error"] == "Unauthorized"
+      assert response["message"] == "No resource found"
     end
   end
 
   describe "update/2" do
-    test "errors with unauthorized when not logged", %{conn: conn} do
+    test "when not logged in, errors with unauthorized", %{conn: conn} do
       modified_newbie_priority_restrictions = [1, 2, 3]
 
       new_newbie_permissions_attrs = %{
@@ -148,14 +155,17 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
         priority_restrictions: modified_newbie_priority_restrictions
       }
 
-      update_conn = put(conn, Routes.role_path(conn, :update), new_newbie_permissions_attrs)
+      response =
+        conn
+        |> put(Routes.role_path(conn, :update), new_newbie_permissions_attrs)
+        |> json_response(401)
 
-      assert %{"error" => "Unauthorized", "message" => "No resource found", "status" => 401} ==
-               json_response(update_conn, 401)
+      assert response["error"] == "Unauthorized"
+      assert response["message"] == "No resource found"
     end
 
     @tag :authenticated
-    test "errors with unauthorized when logged in but without correct ACL", %{conn: conn} do
+    test "when logged in and given incorrect ACL, errors with unauthorized", %{conn: conn} do
       modified_newbie_priority_restrictions = [1, 2, 3]
 
       new_newbie_permissions_attrs = %{
@@ -178,7 +188,7 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
     end
 
     @tag authenticated: :admin
-    test "modifies a role's properties when provided", %{conn: conn} do
+    test "given properties, modifies a role", %{conn: conn} do
       RoleCache.reload()
 
       new_newbie_permissions_attrs = %{
@@ -190,9 +200,12 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
         highlight_color: "#00Ff00"
       }
 
-      update_conn = put(conn, Routes.role_path(conn, :update), new_newbie_permissions_attrs)
+      update_response =
+        conn
+        |> put(Routes.role_path(conn, :update), new_newbie_permissions_attrs)
+        |> json_response(200)
 
-      assert new_newbie_permissions_attrs.id == json_response(update_conn, 200)
+      assert update_response == new_newbie_permissions_attrs.id
 
       modified_newbie =
         conn
@@ -200,20 +213,20 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
         |> json_response(200)
         |> Enum.at(6)
 
-      assert new_newbie_permissions_attrs.name == modified_newbie["name"]
-      assert new_newbie_permissions_attrs.description == modified_newbie["description"]
-      assert new_newbie_permissions_attrs.priority == modified_newbie["priority"]
-      assert new_newbie_permissions_attrs.lookup == modified_newbie["lookup"]
-      assert new_newbie_permissions_attrs.highlight_color == modified_newbie["highlight_color"]
+      assert modified_newbie["name"] == new_newbie_permissions_attrs.name
+      assert modified_newbie["description"] == new_newbie_permissions_attrs.description
+      assert modified_newbie["priority"] == new_newbie_permissions_attrs.priority
+      assert modified_newbie["lookup"] == new_newbie_permissions_attrs.lookup
+      assert modified_newbie["highlight_color"] == new_newbie_permissions_attrs.highlight_color
 
       blank_hc_attrs = %{id: 7, highlight_color: ""}
 
-      blank_hc_resp =
+      blank_hc_response =
         conn
         |> put(Routes.role_path(conn, :update), blank_hc_attrs)
         |> json_response(200)
 
-      assert blank_hc_attrs.id == blank_hc_resp
+      assert blank_hc_response == blank_hc_attrs.id
 
       blank_hc_newbie =
         conn
@@ -221,11 +234,11 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
         |> json_response(200)
         |> Enum.at(6)
 
-      assert nil == blank_hc_newbie["highlight_color"]
+      assert blank_hc_newbie["highlight_color"] == nil
     end
 
     @tag authenticated: :admin
-    test "does not modify a role's properties when not provided", %{conn: conn} do
+    test "given no properties, does not modify a role", %{conn: conn} do
       RoleCache.reload()
       new_newbie_permissions_attrs = %{id: 7}
 
@@ -235,12 +248,12 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
         |> json_response(200)
         |> Enum.at(6)
 
-      update_resp =
+      update_response =
         conn
         |> put(Routes.role_path(conn, :update), new_newbie_permissions_attrs)
         |> json_response(200)
 
-      assert new_newbie_permissions_attrs.id == update_resp
+      assert update_response == new_newbie_permissions_attrs.id
 
       modified_newbie =
         conn
@@ -256,7 +269,7 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
     end
 
     @tag authenticated: :admin
-    test "errors when fields are not properly formatted", %{conn: conn} do
+    test "when fields are not properly formatted, errors", %{conn: conn} do
       original_newbie =
         conn
         |> get(Routes.role_path(conn, :all))
@@ -274,66 +287,66 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
       high_prio_attrs = %{id: 7, priority: @postgres_integer_max + 1}
       bad_hc_attrs = %{id: 7, highlight_color: "lol"}
 
-      short_name_resp =
+      short_name_response =
         conn
         |> put(Routes.role_path(conn, :update), short_name_attrs)
         |> json_response(400)
 
-      long_name_resp =
+      long_name_response =
         conn
         |> put(Routes.role_path(conn, :update), long_name_attrs)
         |> json_response(400)
 
-      short_lu_resp =
+      short_lu_response =
         conn
         |> put(Routes.role_path(conn, :update), short_lu_attrs)
         |> json_response(400)
 
-      long_lu_resp =
+      long_lu_response =
         conn
         |> put(Routes.role_path(conn, :update), long_lu_attrs)
         |> json_response(400)
 
-      uniq_lu_resp =
+      uniq_lu_response =
         conn
         |> put(Routes.role_path(conn, :update), uniq_lu_attrs)
         |> json_response(400)
 
-      short_desc_resp =
+      short_desc_response =
         conn
         |> put(Routes.role_path(conn, :update), short_desc_attrs)
         |> json_response(400)
 
-      long_desc_resp =
+      long_desc_response =
         conn
         |> put(Routes.role_path(conn, :update), long_desc_attrs)
         |> json_response(400)
 
-      low_prio_resp =
+      low_prio_response =
         conn
         |> put(Routes.role_path(conn, :update), low_prio_attrs)
         |> json_response(400)
 
-      high_prio_resp =
+      high_prio_response =
         conn
         |> put(Routes.role_path(conn, :update), high_prio_attrs)
         |> json_response(400)
 
-      bad_hc_resp =
+      bad_hc_response =
         conn
         |> put(Routes.role_path(conn, :update), bad_hc_attrs)
         |> json_response(400)
 
-      assert %{"message" => "Name can't be blank"} = short_name_resp
-      assert %{"message" => "Name should be at most 255 character(s)"} = long_name_resp
-      assert %{"message" => "Lookup can't be blank"} = short_lu_resp
-      assert %{"message" => "Lookup should be at most 255 character(s)"} = long_lu_resp
-      assert %{"message" => "Lookup has already been taken"} = uniq_lu_resp
-      assert %{"message" => "Description can't be blank"} = short_desc_resp
-      assert %{"message" => "Description should be at most 1000 character(s)"} = long_desc_resp
-      assert %{"message" => "Priority must be greater than or equal to 1"} = low_prio_resp
-      assert %{"message" => "Priority must be less than or equal to 2147483647"} = high_prio_resp
-      assert %{"message" => "Highlight_color has invalid format"} = bad_hc_resp
+      assert short_name_response["message"] == "Name can't be blank"
+      assert long_name_response["message"] == "Name should be at most 255 character(s)"
+      assert short_lu_response["message"] == "Lookup can't be blank"
+      assert long_lu_response["message"] == "Lookup should be at most 255 character(s)"
+      assert uniq_lu_response["message"] == "Lookup has already been taken"
+      assert short_desc_response["message"] == "Description can't be blank"
+      assert long_desc_response["message"] == "Description should be at most 1000 character(s)"
+      assert low_prio_response["message"] == "Priority must be greater than or equal to 1"
+      assert high_prio_response["message"] == "Priority must be less than or equal to 2147483647"
+      assert bad_hc_response["message"] == "Highlight_color has invalid format"
 
       modified_newbie =
         conn
@@ -348,7 +361,7 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
     end
 
     @tag authenticated: :admin
-    test "modifies a role's priority_restrictions when authenticated", %{conn: conn} do
+    test "when authenticated, modifies a role's priority_restrictions", %{conn: conn} do
       RoleCache.reload()
       initial_newbie_priority_restrictions = nil
 
@@ -358,7 +371,7 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
         |> json_response(200)
         |> Enum.at(6)
 
-      assert initial_newbie_priority_restrictions == newbie["priority_restrictions"]
+      assert newbie["priority_restrictions"] == initial_newbie_priority_restrictions
 
       modified_newbie_priority_restrictions = [1, 2, 3]
 
@@ -379,7 +392,7 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
         |> put(Routes.role_path(conn, :update), new_newbie_permissions_attrs)
         |> json_response(200)
 
-      assert new_newbie_permissions_attrs.id == update_response
+      assert update_response == new_newbie_permissions_attrs.id
 
       modified_newbie =
         conn
@@ -387,7 +400,7 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
         |> json_response(200)
         |> Enum.at(6)
 
-      assert modified_newbie_priority_restrictions == modified_newbie["priority_restrictions"]
+      assert modified_newbie["priority_restrictions"] == modified_newbie_priority_restrictions
 
       re_modified_newbie_priority_restrictions = []
 
@@ -408,7 +421,7 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
         |> put(Routes.role_path(conn, :update), new_newbie_permissions_attrs)
         |> json_response(200)
 
-      assert new_newbie_permissions_attrs.id == new_update_response
+      assert new_update_response == new_newbie_permissions_attrs.id
 
       modified_newbie =
         conn
@@ -416,11 +429,11 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
         |> json_response(200)
         |> Enum.at(6)
 
-      assert nil == modified_newbie["priority_restrictions"]
+      assert modified_newbie["priority_restrictions"] == nil
     end
 
     @tag authenticated: :admin
-    test "does not modify a role's priority_restrictions when input is invalid", %{conn: conn} do
+    test "when input is invalid, does not modify a role's priority_restrictions", %{conn: conn} do
       RoleCache.reload()
 
       initial_newbie_priority_restrictions =
@@ -441,7 +454,7 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
         |> put(Routes.role_path(conn, :update), new_newbie_permissions_attrs)
         |> json_response(200)
 
-      assert new_newbie_permissions_attrs.id == update_response
+      assert update_response == new_newbie_permissions_attrs.id
 
       modified_newbie =
         conn
@@ -449,14 +462,14 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
         |> json_response(200)
         |> Enum.at(6)
 
-      assert invalid_modified_newbie_priority_restrictions !=
-               modified_newbie["priority_restrictions"]
+      assert modified_newbie["priority_restrictions"] !=
+               invalid_modified_newbie_priority_restrictions
 
-      assert initial_newbie_priority_restrictions == modified_newbie["priority_restrictions"]
+      assert modified_newbie["priority_restrictions"] == initial_newbie_priority_restrictions
     end
 
     @tag authenticated: :admin
-    test "modifies a role's permissions when authenticated", %{conn: conn} do
+    test "when authenticated, modifies a role's permissions", %{conn: conn} do
       RoleCache.reload()
 
       new_newbie_permissions_attrs = %{
@@ -484,7 +497,7 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
         |> put(Routes.role_path(conn, :update), new_newbie_permissions_attrs)
         |> json_response(200)
 
-      assert new_newbie_permissions_attrs.id == update_response
+      assert update_response == new_newbie_permissions_attrs.id
 
       modified_newbie =
         conn
@@ -492,11 +505,11 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
         |> json_response(200)
         |> Enum.at(6)
 
-      assert modified_newbie_permissions == modified_newbie["permissions"]
+      assert modified_newbie["permissions"] == modified_newbie_permissions
     end
 
     @tag authenticated: :admin
-    test "does not modify a user's permissions when input is invalid", %{conn: conn} do
+    test "when input is invalid, does not modify a user's permissions", %{conn: conn} do
       RoleCache.reload()
 
       initial_newbie_permissions =
@@ -518,7 +531,7 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
         |> put(Routes.role_path(conn, :update), new_newbie_permissions_attrs)
         |> json_response(200)
 
-      assert new_newbie_permissions_attrs.id == update_response
+      assert update_response == new_newbie_permissions_attrs.id
 
       modified_newbie =
         conn
@@ -526,10 +539,8 @@ defmodule EpochtalkServerWeb.RoleControllerTest do
         |> json_response(200)
         |> Enum.at(6)
 
-      assert invalid_modified_newbie_permissions !=
-               modified_newbie["permissions"]
-
-      assert initial_newbie_permissions == modified_newbie["permissions"]
+      assert modified_newbie["permissions"] != invalid_modified_newbie_permissions
+      assert modified_newbie["permissions"] == initial_newbie_permissions
     end
   end
 end

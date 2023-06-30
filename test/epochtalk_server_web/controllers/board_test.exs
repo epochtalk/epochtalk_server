@@ -1,28 +1,15 @@
 defmodule Test.EpochtalkServerWeb.Controllers.Board do
   use Test.Support.ConnCase, async: true
-  alias EpochtalkServer.Models.Category
-  alias EpochtalkServer.Models.Board
+  import Test.Support.Factory
   alias EpochtalkServer.Models.BoardMapping
 
   setup %{conn: conn} do
-    # create category for testing
-    category_attrs = %{
-      name: "test category"
-    }
-
-    {:ok, category} = Category.create(category_attrs)
-
-    # create board for testing
-    board_attrs = %{
-      name: "test board",
-      slug: "test-board",
-      description: "test board description",
+    category = insert(:category)
+    board = insert(:board, [
       viewable_by: 10,
       postable_by: 10,
       right_to_left: false
-    }
-
-    {:ok, board} = Board.create(board_attrs)
+    ])
 
     # create board mapping for testing
     board_mapping = [
@@ -43,12 +30,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Board do
 
     BoardMapping.update(board_mapping)
 
-    {:ok,
-     conn: conn,
-     board: board,
-     board_attrs: board_attrs,
-     category: category,
-     category_attrs: category_attrs}
+    {:ok, conn: conn, board: board, category: category}
   end
 
   describe "by_category/2" do

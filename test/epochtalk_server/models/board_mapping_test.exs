@@ -1,24 +1,11 @@
 defmodule Test.EpochtalkServer.Models.BoardMapping do
   use Test.Support.DataCase, async: true
   import Test.Support.Factory
-  alias EpochtalkServer.Models.Board
   alias EpochtalkServer.Models.BoardMapping
 
   setup _context do
     category = insert(:category)
-
-    # create board for testing
-    board_attrs = %{
-      name: "test board",
-      slug: "test-board",
-      description: "test board description",
-      viewable_by: 10,
-      postable_by: 10,
-      right_to_left: false
-    }
-
-    {:ok, board} = Board.create(board_attrs)
-
+    board = insert(:board)
     {:ok, board: board, category: category}
   end
 

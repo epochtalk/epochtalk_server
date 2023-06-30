@@ -3,4 +3,5 @@ defmodule Test.Support.Factory do
   use ExMachina.Ecto, repo: EpochtalkServer.Repo
 
   use Test.Support.Factories.Category
+  use Test.Support.Factories.Board
 end

@@ -31,6 +31,7 @@ alias EpochtalkServer.Models.{
   RoleUser,
   Thread,
   TrustBoard,
+  TrustMaxDepth,
   User,
   UserThreadView,
   WatchThread

@@ -1,16 +1,11 @@
 defmodule Test.EpochtalkServer.Models.BoardMapping do
   use Test.Support.DataCase, async: true
-  alias EpochtalkServer.Models.Category
+  import Test.Support.Factory
   alias EpochtalkServer.Models.Board
   alias EpochtalkServer.Models.BoardMapping
 
   setup _context do
-    # create category for testing
-    category_attrs = %{
-      name: "test category"
-    }
-
-    {:ok, category} = Category.create(category_attrs)
+    category = insert(:category)
 
     # create board for testing
     board_attrs = %{
@@ -24,8 +19,7 @@ defmodule Test.EpochtalkServer.Models.BoardMapping do
 
     {:ok, board} = Board.create(board_attrs)
 
-    {:ok,
-     board: board, board_attrs: board_attrs, category: category, category_attrs: category_attrs}
+    {:ok, board: board, category: category}
   end
 
   describe "all/1" do

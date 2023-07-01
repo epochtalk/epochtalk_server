@@ -16,7 +16,17 @@ defmodule EpochtalkServer.Models.TrustFeedback do
           comments: String.t() | nil,
           created_at: NaiveDateTime.t() | nil
         }
-  @derive {Jason.Encoder, only: [:id, :user_id, :reporter_id, :risked_btc, :scammer, :reference, :comments, :created_at]}
+  @derive {Jason.Encoder,
+           only: [
+             :id,
+             :user_id,
+             :reporter_id,
+             :risked_btc,
+             :scammer,
+             :reference,
+             :comments,
+             :created_at
+           ]}
   schema "trust_max_depth" do
     belongs_to :user, User
     belongs_to :reporter, User
@@ -38,7 +48,25 @@ defmodule EpochtalkServer.Models.TrustFeedback do
         ) :: Ecto.Changeset.t()
   def changeset(trust_max_depth, attrs \\ %{}) do
     trust_max_depth
-    |> cast(attrs, [:id, :user_id, :reporter_id, :risked_btc, :scammer, :reference, :comments, :created_at])
-    |> validate_required([:id, :user_id, :reporter_id, :risked_btc, :scammer, :reference, :comments, :created_at])
+    |> cast(attrs, [
+      :id,
+      :user_id,
+      :reporter_id,
+      :risked_btc,
+      :scammer,
+      :reference,
+      :comments,
+      :created_at
+    ])
+    |> validate_required([
+      :id,
+      :user_id,
+      :reporter_id,
+      :risked_btc,
+      :scammer,
+      :reference,
+      :comments,
+      :created_at
+    ])
   end
 end

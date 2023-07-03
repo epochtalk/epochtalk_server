@@ -1,7 +1,10 @@
 defmodule EpochtalkServer.Models.TrustMaxDepth do
   use Ecto.Schema
   import Ecto.Changeset
+  import Ecto.Query
+  alias EpochtalkServer.Repo
   alias EpochtalkServer.Models.User
+  alias EpochtalkServer.Models.TrustMaxDepth
 
   @moduledoc """
   `TrustMaxDepth` model, for performing actions relating to `TrustMaxDepth`
@@ -30,5 +33,15 @@ defmodule EpochtalkServer.Models.TrustMaxDepth do
     trust_max_depth
     |> cast(attrs, [:user_id, :max_depth])
     |> validate_required([:user_id, :max_depth])
+  end
+
+  @doc """
+  Gets `max_depth` record for a specific `User`
+  """
+  @spec by_user_id(user_id :: non_neg_integer) ::
+          {:ok, max_depth :: non_neg_integer | nil}
+  def by_user_id(user_id) do
+    query = from t in TrustMaxDepth, where: t.user_id == ^user_id, select: t.max_depth
+    {:ok, Repo.one(query)}
   end
 end

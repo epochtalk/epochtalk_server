@@ -1,7 +1,10 @@
 defmodule EpochtalkServer.Models.TrustFeedback do
   use Ecto.Schema
   import Ecto.Changeset
+  import Ecto.Query
+  alias EpochtalkServer.Repo
   alias EpochtalkServer.Models.User
+  alias EpochtalkServer.Models.TrustFeedback
 
   @moduledoc """
   `TrustFeedback` model, for performing actions relating to `TrustFeedback`
@@ -68,5 +71,17 @@ defmodule EpochtalkServer.Models.TrustFeedback do
       :comments,
       :created_at
     ])
+  end
+
+  @doc """
+  Get count of postivie or negative `TrustFeedback` a specific `User`
+  """
+  @spec counts_by_user_id(user_id :: non_neg_integer, scammer :: boolean, reporters :: []) ::
+          {:ok, max_depth :: non_neg_integer | nil}
+  def counts_by_user_id(user_id, scammer, reporters) do
+    query = from t in TrustFeedback,
+      where: t.user_id == ^user_id and t.scammer == ^scammer and t.reporter_id in ^reporters,
+      select: count(fragment("distinct ?", t.reporter_id))
+    {:ok, Repo.one(query)}
   end
 end

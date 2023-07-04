@@ -27,7 +27,7 @@ defmodule EpochtalkServer.Models.TrustFeedback do
              :comments,
              :created_at
            ]}
-  schema "trust_max_depth" do
+  schema "trust_feedback" do
     belongs_to :user, User
     belongs_to :reporter, User
     field :risked_btc, :float

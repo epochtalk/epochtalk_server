@@ -74,14 +74,47 @@ defmodule EpochtalkServer.Models.TrustFeedback do
   end
 
   @doc """
-  Get count of postivie or negative `TrustFeedback` a specific `User`
+  Get count of postivie or negative `TrustFeedback` a specific `User` and trust network (array of `User` IDs)
   """
-  @spec counts_by_user_id(user_id :: non_neg_integer, scammer :: boolean, reporters :: []) ::
+  @spec counts_by_user_id(user_id :: non_neg_integer, scammer :: boolean, trusted :: []) ::
           {:ok, max_depth :: non_neg_integer | nil}
-  def counts_by_user_id(user_id, scammer, reporters) do
-    query = from t in TrustFeedback,
-      where: t.user_id == ^user_id and t.scammer == ^scammer and t.reporter_id in ^reporters,
-      select: count(fragment("distinct ?", t.reporter_id))
+  def counts_by_user_id(user_id, scammer, trusted) do
+    query =
+      from t in TrustFeedback,
+        where: t.user_id == ^user_id and t.scammer == ^scammer and t.reporter_id in ^trusted,
+        select: count(fragment("distinct ?", t.reporter_id))
+
+    {:ok, Repo.one(query)}
+  end
+
+  @doc """
+  Used to calculate the user's `Trust` score when that `User` has no negative  `TrustFeedback`
+  """
+  @spec calculate_score_when_no_negative_feedback(user_id :: non_neg_integer, trusted :: []) ::
+          {:ok, score :: non_neg_integer | nil}
+  def calculate_score_when_no_negative_feedback(user_id, trusted) do
+    inner_most_subquery =
+      from t3 in TrustFeedback,
+        where: t3.user_id == ^user_id and t3.scammer == false and t3.reporter_id in ^trusted,
+        group_by: t3.reporter_id,
+        select: %{created_at: min(t3.created_at), reporter_id: t3.reporter_id}
+
+    inner_subquery =
+      from t2 in TrustFeedback,
+        join: g in subquery(inner_most_subquery),
+        on: t2.created_at == g.created_at and t2.reporter_id == g.reporter_id,
+        select: %{id: t2.id, created_at: g.created_at, reporter_id: g.reporter_id}
+
+    query =
+      from t in TrustFeedback,
+        join: i in subquery(inner_subquery),
+        on: t.id == i.id,
+        select:
+          fragment(
+            "FLOOR(SUM(LEAST(10,date_part('epoch', (now()-?)/(60*60*24*30))::int)))",
+            i.created_at
+          )
+
     {:ok, Repo.one(query)}
   end
 end

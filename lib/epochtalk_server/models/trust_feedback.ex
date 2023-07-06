@@ -76,13 +76,18 @@ defmodule EpochtalkServer.Models.TrustFeedback do
   @doc """
   Get count of postivie or negative `TrustFeedback` a specific `User` and trust network (array of `User` IDs)
   """
-  @spec counts_by_user_id(user_id :: non_neg_integer, scammer :: boolean, trusted :: []) ::
+  @spec counts_by_user_id(user_id :: non_neg_integer, scammer :: boolean, trusted :: [], created_at :: NaiveDateTime.t() | nil) ::
           {:ok, max_depth :: non_neg_integer | nil}
-  def counts_by_user_id(user_id, scammer, trusted) do
+  def counts_by_user_id(user_id, scammer, trusted, created_at \\ nil) do
     query =
-      from t in TrustFeedback,
-        where: t.user_id == ^user_id and t.scammer == ^scammer and t.reporter_id in ^trusted,
-        select: count(fragment("distinct ?", t.reporter_id))
+      TrustFeedback
+      |> select([t], count(fragment("distinct ?", t.reporter_id)))
+
+    query = if is_nil(created_at) do
+      where(query, [t], t.user_id == ^user_id and t.scammer == ^scammer and t.reporter_id in ^trusted)
+    else
+      where(query, [t], t.user_id == ^user_id and t.scammer == ^scammer and t.created_at >= ^created_at and t.reporter_id in ^trusted)
+    end
 
     {:ok, Repo.one(query)}
   end

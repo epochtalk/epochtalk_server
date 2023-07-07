@@ -1,6 +1,13 @@
 defmodule Test.Support.Factories.BoardMapping do
   @moduledoc """
   Factory for `BoardMapping`
+
+  Usage:
+  BoardMapping.update([
+    build(:board_mapping_attributes, ...),
+    build(:board_mapping_attributes, ...),
+    build(:board_mapping_attributes, ...)
+  })
   """
   alias EpochtalkServer.Models.BoardMapping
 

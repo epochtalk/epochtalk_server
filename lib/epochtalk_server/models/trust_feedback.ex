@@ -76,7 +76,7 @@ defmodule EpochtalkServer.Models.TrustFeedback do
   @doc """
   Get count of postivie or negative `TrustFeedback` a specific `User` and trust network (array of `User` IDs)
   """
-  @spec counts_by_user_id(user_id :: non_neg_integer, scammer :: boolean, trusted :: [], created_at :: NaiveDateTime.t() | nil) ::
+  @spec counts_by_user_id(user_id :: non_neg_integer, scammer :: boolean, trusted :: [non_neg_integer], created_at :: NaiveDateTime.t() | nil) ::
           {:ok, max_depth :: non_neg_integer | nil}
   def counts_by_user_id(user_id, scammer, trusted, created_at \\ nil) do
     query =
@@ -95,7 +95,7 @@ defmodule EpochtalkServer.Models.TrustFeedback do
   @doc """
   Used to calculate the user's `Trust` score when that `User` has no negative  `TrustFeedback`
   """
-  @spec calculate_score_when_no_negative_feedback(user_id :: non_neg_integer, trusted :: []) ::
+  @spec calculate_score_when_no_negative_feedback(user_id :: non_neg_integer, trusted :: [non_neg_integer]) ::
           {:ok, score :: non_neg_integer | nil}
   def calculate_score_when_no_negative_feedback(user_id, trusted) do
     inner_most_subquery =
@@ -126,7 +126,7 @@ defmodule EpochtalkServer.Models.TrustFeedback do
   @doc """
   Get timestamp of the first negative `TrustFeedback` left for a specific `User` and trust network (array of `User` IDs)
   """
-  @spec first_negative_feedback_timestamp_by_user_id(user_id :: non_neg_integer, trusted :: []) ::
+  @spec first_negative_feedback_timestamp_by_user_id(user_id :: non_neg_integer, trusted :: [non_neg_integer]) ::
           {:ok, timestamp :: NaiveDateTime.t() | nil}
   def first_negative_feedback_timestamp_by_user_id(user_id, trusted) do
     query =

@@ -122,4 +122,20 @@ defmodule EpochtalkServer.Models.TrustFeedback do
 
     {:ok, Repo.one(query)}
   end
+
+  @doc """
+  Get timestamp of the first negative `TrustFeedback` left for a specific `User` and trust network (array of `User` IDs)
+  """
+  @spec first_negative_feedback_timestamp_by_user_id(user_id :: non_neg_integer, trusted :: []) ::
+          {:ok, timestamp :: NaiveDateTime.t() | nil}
+  def first_negative_feedback_timestamp_by_user_id(user_id, trusted) do
+    query =
+      from t in TrustFeedback,
+        where: t.user_id == ^user_id and t.scammer == true and t.reporter_id in ^trusted,
+        order_by: [asc: t.created_at],
+        limit: 1,
+        select: t.created_at
+
+    {:ok, Repo.one(query)}
+  end
 end

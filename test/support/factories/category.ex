@@ -1,4 +1,7 @@
 defmodule Test.Support.Factories.Category do
+  @moduledoc """
+  Factory for `Category`
+  """
   alias EpochtalkServer.Models.Category
 
   defmacro __using__(_opts) do

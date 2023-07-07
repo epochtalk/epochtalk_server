@@ -1,4 +1,7 @@
 defmodule Test.Support.Factories.Board do
+  @moduledoc """
+  Factory for `Board`
+  """
   alias EpochtalkServer.Models.Board
 
   defmacro __using__(_opts) do

@@ -1,4 +1,8 @@
 defmodule Test.Support.Factory do
+  @moduledoc """
+  Consolidates access to test factories in the project
+  """
+
   # see thoughtbot/ex_machina for docs
   use ExMachina.Ecto, repo: EpochtalkServer.Repo
 

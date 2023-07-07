@@ -6,7 +6,7 @@ defmodule Test.Support.Factories.BoardMapping do
 
   defmacro __using__(_opts) do
     quote do
-      def board_mapping_factory(%{board: board, view_order: view_order, category: category}) do
+      def board_mapping_attributes_factory(%{board: board, view_order: view_order, category: category}) do
         %{
           id: board.id,
           name: board.name,
@@ -15,7 +15,7 @@ defmodule Test.Support.Factories.BoardMapping do
           view_order: view_order
         }
       end
-      def board_mapping_factory(%{board: board, view_order: view_order, parent: parent}) do
+      def board_mapping_attributes_factory(%{board: board, view_order: view_order, parent: parent}) do
         %{
           id: board.id,
           name: board.name,
@@ -24,7 +24,7 @@ defmodule Test.Support.Factories.BoardMapping do
           view_order: view_order
         }
       end
-      def board_mapping_factory(%{category: category, view_order: view_order}) do
+      def board_mapping_attributes_factory(%{category: category, view_order: view_order}) do
         %{
           id: category.id,
           name: category.name,

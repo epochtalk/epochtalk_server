@@ -9,7 +9,6 @@ defmodule Test.Support.Factories.BoardMapping do
     build(:board_mapping_attributes, ...)
   })
   """
-  alias EpochtalkServer.Models.BoardMapping
 
   defmacro __using__(_opts) do
     quote do

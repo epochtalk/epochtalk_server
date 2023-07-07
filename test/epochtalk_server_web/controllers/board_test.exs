@@ -45,8 +45,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Board do
           %{"boards" => boards} -> boards
         end
 
-      # two categories: one from seed, one from setup
-      assert Enum.count(response) == 2
+      assert Enum.count(response) == 1
 
       # check seeded category boards
       seeded_category = response |> Enum.at(0)

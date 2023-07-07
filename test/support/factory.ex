@@ -10,4 +10,5 @@ defmodule Test.Support.Factory do
   use Test.Support.Factories.BoardMapping
   use Test.Support.Factories.Category
   use Test.Support.Factories.Board
+  use Test.Support.Factories.Thread
 end

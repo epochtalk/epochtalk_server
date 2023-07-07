@@ -6,32 +6,18 @@ defmodule Test.Support.Factories.Thread do
 
   defmacro __using__(_opts) do
     quote do
-      def thread_factory do
-        %Thread{
-          # title: sequence(:thread_title, &"Thread title #{&1}"),
-          # body: sequence(:thread_body, &"Thread body #{&1}"),
-          board_id: insert(:board).id,
-          locked: false,
-          sticky: false,
-          slug: sequence(:thread_slug, &"thread-slug-#{&1}"),
-          moderated: false
+      def thread_attributes_factory(%{board: board} = attrs) do
+        %{
+          title: sequence(:thread_title, &"Thread title #{&1}"),
+          body: sequence(:thread_body, &"Thread body #{&1}"),
+          board_id: board.id,
+          sticky: Map.get(attrs, :sticky) || false,
+          locked: Map.get(attrs, :locked) || false,
+          moderated: false,
+          addPoll: false,
+          pollValid: false,
+          slug: sequence(:thread_slug, &"thread-slug-#{&1}")
         }
-      end
-      def sticky_thread_factory do
-        struct!(
-          thread_factory(),
-          %{
-            sticky: true
-          }
-        )
-      end
-      def locked_thread_factory do
-        struct!(
-          thread_factory(),
-          %{
-            locked: true
-          }
-        )
       end
     end
   end

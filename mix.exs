@@ -87,11 +87,11 @@ defmodule EpochtalkServer.MixProject do
       # test seeds
       "seed.test": [
         "seed.required",
-        "seed.test_boards",
+        # "seed.test_boards",
         "seed.test_banned_address",
         "seed.test_users",
-        "seed.test_threads",
-        "seed.test_moderation_logs"
+        # "seed.test_threads",
+        # "seed.test_moderation_logs"
       ],
       "seed.test_boards": ["run test/seed/boards.exs"],
       "seed.test_banned_address": ["run test/seed/banned_address.exs"],

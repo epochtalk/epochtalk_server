@@ -19,6 +19,13 @@ defmodule Test.Support.Factories.Thread do
           "slug" => sequence(:thread_slug, &"thread-slug-#{&1}")
         }
       end
+      def thread_factory(%{user: user} = attrs) do
+        attributes = build(:thread_attributes, attrs)
+        Thread.create(attributes, user.id)
+        |> case do
+          {:ok, thread} -> thread
+        end
+      end
     end
   end
 end

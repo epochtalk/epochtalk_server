@@ -1,6 +1,11 @@
 defmodule Test.Support.Factories.User do
   @moduledoc """
   Factory for `User`
+
+  Usage:
+  build(:user)
+  OR
+  build(:user, admin: true)
   """
   alias EpochtalkServer.Models.User
 

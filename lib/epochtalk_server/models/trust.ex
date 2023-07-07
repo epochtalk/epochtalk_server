@@ -36,4 +36,18 @@ defmodule EpochtalkServer.Models.Trust do
     |> cast(attrs, [:user_id, :user_id_trusted, :type])
     |> validate_required([:user_id, :user_id_trusted, :type])
   end
+
+  ## === Database Functions ===
+
+  @doc """
+  Query all `Trust` models
+  """
+  @spec trust_by_user_id(trusted :: [non_neg_integer]) :: [Ecto.Changeset.t()]
+  def trust_by_user_ids(trusted) do
+    query =
+      from t in Trust,
+      where: t.user_id in ^trusted
+
+    Repo.all(query)
+  end
 end

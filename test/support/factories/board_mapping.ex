@@ -9,6 +9,7 @@ defmodule Test.Support.Factories.BoardMapping do
     build(:board_mapping_attributes, ...)
   })
   """
+  alias EpochtalkServer.Models.BoardMapping
 
   defmacro __using__(_opts) do
     quote do
@@ -40,6 +41,9 @@ defmodule Test.Support.Factories.BoardMapping do
           type: "category",
           view_order: view_order
         }
+      end
+      def board_mapping_factory(%{attributes: attributes}) do
+        BoardMapping.update(attributes)
       end
     end
   end

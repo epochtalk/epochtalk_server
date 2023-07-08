@@ -1,5 +1,20 @@
 defmodule Test.EpochtalkServerWeb.Controllers.Thread do
   use Test.Support.ConnCase, async: true
+  import Test.Support.Factory
+  alias EpochtalkServer.Models.BoardMapping
+
+  setup do
+    board = insert(:board)
+    category = insert(:category)
+    BoardMapping.update([
+      build(:board_mapping_attributes, category: category, view_order: 0),
+      build(:board_mapping_attributes, board: board, category: category, view_order: 0),
+    ])
+    user = build(:user)
+    threads = build_list(3, :thread, board: board, user: user)
+
+    {:ok, board: board, threads: threads}
+  end
 
   describe "by_board/2" do
     test "given an id for nonexistant board, does not get threads", %{conn: conn} do

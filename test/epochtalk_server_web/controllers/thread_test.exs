@@ -39,6 +39,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
       normal_threads = response["normal"]
       first_thread = normal_threads |> List.first
       first_created_thread = created_threads |> List.first
+      first_created_thread_attributes = first_created_thread.attributes
       assert Map.has_key?(first_thread, "created_at") == true
       assert Map.has_key?(first_thread, "last_post_avatar") == true
       assert Map.has_key?(first_thread, "last_post_created_at") == true
@@ -57,11 +58,11 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
       assert Map.has_key?(first_thread, "view_count") == true
 
       assert Map.get(first_thread, "id") == first_created_thread.post.thread.id
-      assert Map.get(first_thread, "locked") == false
-      assert Map.get(first_thread, "moderated") == false
-      assert Map.get(first_thread, "slug") == "test_slug"
-      assert Map.get(first_thread, "sticky") == false
-      assert Map.get(first_thread, "title") == "test"
+      assert Map.get(first_thread, "locked") == Map.get(first_created_thread_attributes, "locked")
+      assert Map.get(first_thread, "moderated") == Map.get(first_created_thread_attributes, "moderated")
+      assert Map.get(first_thread, "slug") == Map.get(first_created_thread_attributes, "slug")
+      assert Map.get(first_thread, "sticky") == Map.get(first_created_thread_attributes, "sticky")
+      assert Map.get(first_thread, "title") == Map.get(first_created_thread_attributes, "title")
     end
 
     test "given an id for board above unauthenticated user priority, does not get threads", %{

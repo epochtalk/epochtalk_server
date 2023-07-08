@@ -13,7 +13,7 @@ defmodule Test.EpochtalkServer.Models.BoardMapping do
       category_board2 = insert(:board)
       child_board1 = insert(:board)
       child_board2 = insert(:board)
-      BoardMapping.update([
+      build(:board_mapping, attributes: [
         build(:board_mapping_attributes, category: category, view_order: 0),
         build(:board_mapping_attributes, board: category_board1, category: category, view_order: 1),
         build(:board_mapping_attributes, board: category_board2, category: category, view_order: 2),
@@ -31,7 +31,7 @@ defmodule Test.EpochtalkServer.Models.BoardMapping do
 
       category = insert(:category)
       board = insert(:board)
-      result = BoardMapping.update([
+      result = build(:board_mapping, attributes: [
         build(:board_mapping_attributes, category: category, view_order: 0),
         build(:board_mapping_attributes, board: board, category: category, view_order: 1),
       ])
@@ -47,7 +47,7 @@ defmodule Test.EpochtalkServer.Models.BoardMapping do
 
       category = insert(:category)
       board = insert(:board)
-      BoardMapping.update([
+      build(:board_mapping, attributes: [
         build(:board_mapping_attributes, category: category, view_order: 0),
         build(:board_mapping_attributes, board: board, category: category, view_order: 1),
       ])

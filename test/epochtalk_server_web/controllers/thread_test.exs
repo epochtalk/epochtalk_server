@@ -27,19 +27,19 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
       assert response["message"] == "Read error, board does not exist"
     end
 
-    test "given an id for existing board, gets threads", %{conn: conn} do
+    test "given an id for existing board, gets threads", %{conn: conn, board: board, threads: created_threads} do
       response =
         conn
-        |> get(Routes.thread_path(conn, :by_board), %{board_id: 1})
+        |> get(Routes.thread_path(conn, :by_board), %{board_id: board.id})
         |> json_response(200)
 
       assert Map.has_key?(response, "normal") == true
       assert Map.has_key?(response, "sticky") == true
 
       normal_threads = response["normal"]
-      first_thread = normal_threads |> List.first()
+      first_thread = normal_threads |> List.first
+      first_created_thread = created_threads |> List.first
       assert Map.has_key?(first_thread, "created_at") == true
-      assert Map.has_key?(first_thread, "id") == true
       assert Map.has_key?(first_thread, "last_post_avatar") == true
       assert Map.has_key?(first_thread, "last_post_created_at") == true
       assert Map.has_key?(first_thread, "last_post_id") == true
@@ -56,6 +56,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
       assert Map.has_key?(first_thread, "user") == true
       assert Map.has_key?(first_thread, "view_count") == true
 
+      assert Map.get(first_thread, "id") == first_created_thread.post.thread.id
       assert Map.get(first_thread, "locked") == false
       assert Map.get(first_thread, "moderated") == false
       assert Map.get(first_thread, "slug") == "test_slug"

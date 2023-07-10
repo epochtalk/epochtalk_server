@@ -73,6 +73,23 @@ defmodule Test.EpochtalkServerWeb.Controllers.Board do
       assert response_parent_board["viewable_by"] == parent_board.viewable_by
       assert response_parent_board["postable_by"] == parent_board.postable_by
       assert response_parent_board["right_to_left"] == parent_board.right_to_left
+
+      # extract child board
+      response_parent_board_children = response_parent_board["children"]
+      [response_child_board | response_parent_board_children] = response_parent_board_children
+      assert response_parent_board_children == []
+
+      # check child board
+      assert response_child_board["id"] == child_board.id
+      assert response_child_board["name"] == child_board.name
+      assert response_child_board["category_id"] == nil
+      assert response_child_board["children"] |> Enum.count == 0
+      assert response_child_board["description"] == child_board.description
+      assert response_child_board["view_order"] == 2
+      assert response_child_board["slug"] == child_board.slug
+      assert response_child_board["viewable_by"] == child_board.viewable_by
+      assert response_child_board["postable_by"] == child_board.postable_by
+      assert response_child_board["right_to_left"] == child_board.right_to_left
     end
   end
 

@@ -53,7 +53,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Board do
         "boards" => response_boards
       } = response |> Enum.at(0)
 
-      # test category/board info
+      # check category/board info
       assert response_category_id == category.id
       assert response_category_name == category.name
       assert response_category_view_order == 0

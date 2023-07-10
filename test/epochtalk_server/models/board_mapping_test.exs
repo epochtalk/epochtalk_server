@@ -21,7 +21,8 @@ defmodule Test.EpochtalkServer.Models.BoardMapping do
         build(:board_mapping_attributes, board: child_board2, parent: category_board1, view_order: 4)
       ])
 
-      assert BoardMapping.all() |> Enum.count() == 4
+      board_mappings = BoardMapping.all()
+      assert board_mappings |> Enum.count() == 4
     end
   end
 

@@ -13,24 +13,10 @@ defmodule Test.EpochtalkServerWeb.Controllers.Board do
         right_to_left: false
       )
 
-    # create board mapping for testing
-    board_mapping = [
-      %{
-        id: category.id,
-        name: category.name,
-        type: "category",
-        view_order: 0
-      },
-      %{
-        id: board.id,
-        name: board.name,
-        type: "board",
-        category_id: category.id,
-        view_order: 1
-      }
-    ]
-
-    BoardMapping.update(board_mapping)
+    build(:board_mapping, attributes: [
+      build(:board_mapping_attributes, category: category, view_order: 0),
+      build(:board_mapping_attributes, board: board, category: category, view_order: 1)
+    ])
 
     {:ok, conn: conn, board: board, category: category}
   end
@@ -45,13 +31,14 @@ defmodule Test.EpochtalkServerWeb.Controllers.Board do
           %{"boards" => boards} -> boards
         end
 
+      # check number of categories
       assert Enum.count(response) == 1
-
-      # check seeded category boards
       seeded_category = response |> Enum.at(0)
-      assert seeded_category |> Map.get("boards") |> Enum.count() > 0
 
-      # setup category
+      # check number of boards
+      assert seeded_category |> Map.get("boards") |> Enum.count() == 1
+
+      # extract category/board info
       %{
         "id" => response_category_id,
         "name" => response_category_name,
@@ -71,8 +58,9 @@ defmodule Test.EpochtalkServerWeb.Controllers.Board do
             "right_to_left" => response_board_right_to_left
           }
         ]
-      } = response |> Enum.at(1)
+      } = response |> Enum.at(0)
 
+      # test category/board info
       assert response_category_id == category.id
       assert response_category_name == category.name
       assert response_category_view_order == 0

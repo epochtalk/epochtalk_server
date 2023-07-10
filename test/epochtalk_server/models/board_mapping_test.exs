@@ -25,12 +25,12 @@ defmodule Test.EpochtalkServer.Models.BoardMapping do
       assert board_mappings |> Enum.count() == 4
 
       # test first board
-      [board_mapping_1 | board_mappings] = board_mappings
-      assert board_mapping_1.board_id == category_board1.id
-      assert board_mapping_1.category_id == category.id
-      assert board_mapping_1.parent_id == nil
-      assert board_mapping_1.view_order == 1
-      # assert board_mapping_1.board == category_board1
+      [board_mapping | board_mappings] = board_mappings
+      assert board_mapping.board_id == category_board1.id
+      assert board_mapping.category_id == category.id
+      assert board_mapping.parent_id == nil
+      assert board_mapping.view_order == 1
+      # assert board_mapping.board == category_board1
     end
   end
 

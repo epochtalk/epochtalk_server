@@ -12,9 +12,9 @@ defmodule Test.Support.Factories.Board do
           description: "description",
           slug: sequence(:board_slug, &"board-slug-#{&1}"),
           meta: %{
-            disable_self_mod: false,
-            disable_post_edit: nil,
-            disable_signature: false
+            "disable_self_mod" => false,
+            "disable_post_edit" => nil,
+            "disable_signature" => false
           }
         }
       end

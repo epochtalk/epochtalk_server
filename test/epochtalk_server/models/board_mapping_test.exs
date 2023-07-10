@@ -62,8 +62,6 @@ defmodule Test.EpochtalkServer.Models.BoardMapping do
 
   describe "update/1" do
     test "updates a board mapping" do
-      initial_board_mappings_count = BoardMapping.all() |> Enum.count()
-
       category = insert(:category)
       board = insert(:board)
       result = build(:board_mapping, attributes: [

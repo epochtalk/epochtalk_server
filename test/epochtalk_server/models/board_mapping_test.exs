@@ -47,6 +47,16 @@ defmodule Test.EpochtalkServer.Models.BoardMapping do
       assert board_mapping.parent_id == category_board1.id
       assert board_mapping.view_order == 3
       # assert board_mapping.board == child_board1
+
+      # test fourth board
+      [board_mapping | board_mappings] = board_mappings
+      assert board_mapping.board_id == child_board2.id
+      assert board_mapping.category_id == nil
+      assert board_mapping.parent_id == category_board1.id
+      assert board_mapping.view_order == 4
+      # assert board_mapping.board == child_board2
+
+      assert board_mappings == []
     end
   end
 

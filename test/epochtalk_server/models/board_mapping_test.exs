@@ -30,7 +30,7 @@ defmodule Test.EpochtalkServer.Models.BoardMapping do
       assert board_mapping.category_id == category.id
       assert board_mapping.parent_id == nil
       assert board_mapping.view_order == 1
-      # assert board_mapping.board == category_board1
+      assert board_mapping.board == category_board1
 
       # test second board
       [board_mapping | board_mappings] = board_mappings
@@ -38,7 +38,7 @@ defmodule Test.EpochtalkServer.Models.BoardMapping do
       assert board_mapping.category_id == category.id
       assert board_mapping.parent_id == nil
       assert board_mapping.view_order == 2
-      # assert board_mapping.board == category_board2
+      assert board_mapping.board == category_board2
 
       # test third board
       [board_mapping | board_mappings] = board_mappings
@@ -46,7 +46,7 @@ defmodule Test.EpochtalkServer.Models.BoardMapping do
       assert board_mapping.category_id == nil
       assert board_mapping.parent_id == category_board1.id
       assert board_mapping.view_order == 3
-      # assert board_mapping.board == child_board1
+      assert board_mapping.board == child_board1
 
       # test fourth board
       [board_mapping | board_mappings] = board_mappings
@@ -54,7 +54,7 @@ defmodule Test.EpochtalkServer.Models.BoardMapping do
       assert board_mapping.category_id == nil
       assert board_mapping.parent_id == category_board1.id
       assert board_mapping.view_order == 4
-      # assert board_mapping.board == child_board2
+      assert board_mapping.board == child_board2
 
       assert board_mappings == []
     end

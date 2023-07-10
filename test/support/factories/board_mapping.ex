@@ -29,7 +29,7 @@ defmodule Test.Support.Factories.BoardMapping do
           id: board.id,
           name: board.name,
           type: "board",
-          board_id: parent.id,
+          parent_id: parent.id,
           view_order: view_order
         }
       end

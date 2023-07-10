@@ -66,6 +66,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Board do
       assert response_parent_board["id"] == parent_board.id
       assert response_parent_board["name"] == parent_board.name
       assert response_parent_board["category_id"] == category.id
+      assert response_parent_board["parent_id"] == nil
       assert response_parent_board["children"] |> Enum.count == 1
       assert response_parent_board["description"] == parent_board.description
       assert response_parent_board["view_order"] == 1
@@ -83,6 +84,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Board do
       assert response_child_board["id"] == child_board.id
       assert response_child_board["name"] == child_board.name
       assert response_child_board["category_id"] == nil
+      assert response_child_board["parent_id"] == parent_board.id
       assert response_child_board["children"] |> Enum.count == 0
       assert response_child_board["description"] == child_board.description
       assert response_child_board["view_order"] == 2

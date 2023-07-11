@@ -163,6 +163,17 @@ defmodule EpochtalkServer.Models.User do
   def by_id(id) when is_integer(id), do: Repo.get_by(User, id: id)
 
   @doc """
+  Gets `id` of `DefaultTrustList` `User` from the database
+  """
+  @spec get_default_trust_user_id() :: non_neg_integer | nil
+  def get_default_trust_user_id() do
+    query = from u in User,
+      where: u.username == "DefaultTrustList",
+      select: u.id
+    Repo.one(query)
+  end
+
+  @doc """
   Clears the malicious score of a `User` by `id`, from the database
   """
   @spec clear_malicious_score_by_id(id :: integer) :: {non_neg_integer(), nil}

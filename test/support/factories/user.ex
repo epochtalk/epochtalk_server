@@ -25,7 +25,15 @@ defmodule Test.Support.Factories.User do
         user
       end
 
-      def user_factory(_attrs) do
+      def user_with_attributes_factory(attributes) do
+        attributes
+        |> User.create()
+        |> case do
+          {:ok, user} -> user
+        end
+      end
+
+      def user_factory do
         build(:user_attributes)
         |> User.create()
         |> case do

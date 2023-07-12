@@ -12,17 +12,17 @@ test_user_username = "test"
 test_user_email = "test@test.com"
 test_user_password = "password"
 
-build(:user_with_attributes,
+build(:user,
   username: test_super_admin_user_username,
   email: test_super_admin_user_email,
   password: test_super_admin_user_password
 ) |> with_role_id(1)
-build(:user_with_attributes,
+build(:user,
   username: test_admin_user_username,
   email: test_admin_user_email,
   password: test_admin_user_password
 ) |> with_role_id(2)
-build(:user_with_attributes,
+build(:user,
   username: test_user_username,
   email: test_user_email,
   password: test_user_password

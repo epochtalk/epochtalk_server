@@ -35,6 +35,16 @@ defmodule Test.Support.ConnCase do
     password: @test_admin_password
   }
 
+  # super admin username/email/password from user seed in `mix test` (see mix.exs)
+  @test_super_admin_username "superadmin"
+  @test_super_admin_email "superadmin@test.com"
+  @test_super_admin_password "password"
+  @test_super_admin_user_attrs %{
+    username: @test_super_admin_username,
+    email: @test_super_admin_email,
+    password: @test_super_admin_password
+  }
+
   use ExUnit.CaseTemplate
 
   using do
@@ -66,6 +76,7 @@ defmodule Test.Support.ConnCase do
 
     {:ok, user} = User.by_username(@test_username)
     {:ok, admin_user} = User.by_username(@test_admin_username)
+    {:ok, super_admin_user} = User.by_username(@test_super_admin_username)
     conn = Phoenix.ConnTest.build_conn()
 
     context_updates = {:ok, []}
@@ -93,6 +104,17 @@ defmodule Test.Support.ConnCase do
           k_list = [authed_user: admin_user] ++ k_list
           k_list = [token: token] ++ k_list
           k_list = [authed_user_attrs: @test_admin_user_attrs] ++ k_list
+          {:ok, k_list}
+
+        :super_admin ->
+          remember_me = false
+          {:ok, super_admin_user, token, authed_conn} = Session.create(super_admin_user, remember_me, conn)
+
+          {:ok, k_list} = context_updates
+          k_list = [conn: authed_conn] ++ k_list
+          k_list = [authed_user: super_admin_user] ++ k_list
+          k_list = [token: token] ++ k_list
+          k_list = [authed_user_attrs: @test_super_admin_user_attrs] ++ k_list
           {:ok, k_list}
 
         # :authenticated not set, return default conn

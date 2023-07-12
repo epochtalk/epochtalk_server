@@ -124,10 +124,13 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     end
 
     @tag authenticated: :admin
-    test "given an id for board within authenticated user priority, gets threads", %{conn: conn} do
+    test "given an id for board within authenticated user priority, gets threads", %{
+      conn: conn,
+      admin_board: admin_board
+    } do
       response =
         conn
-        |> get(Routes.thread_path(conn, :by_board), %{board_id: 2})
+        |> get(Routes.thread_path(conn, :by_board), %{board_id: admin_board.id})
         |> json_response(200)
 
       assert Map.has_key?(response, "normal") == true
@@ -135,10 +138,13 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     end
 
     @tag authenticated: :admin
-    test "given an id for board at authenticated user priority, gets threads", %{conn: conn} do
+    test "given an id for board at authenticated user priority, gets threads", %{
+      conn: conn,
+      super_admin_board: super_admin_board
+    } do
       response =
         conn
-        |> get(Routes.thread_path(conn, :by_board), %{board_id: 3})
+        |> get(Routes.thread_path(conn, :by_board), %{board_id: super_admin_board.id})
         |> json_response(200)
 
       assert Map.has_key?(response, "normal") == true

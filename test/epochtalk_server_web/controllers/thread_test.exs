@@ -157,10 +157,11 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     end
 
     @tag authenticated: :super_admin
-    test "given an id for board within authenticated user priority (super_admin), gets threads", %{
-      conn: conn,
-      admin_board: admin_board
-    } do
+    test "given an id for board within authenticated user priority (super_admin), gets threads",
+         %{
+           conn: conn,
+           admin_board: admin_board
+         } do
       response =
         conn
         |> get(Routes.thread_path(conn, :by_board), %{board_id: admin_board.id})

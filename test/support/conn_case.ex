@@ -108,7 +108,9 @@ defmodule Test.Support.ConnCase do
 
         :super_admin ->
           remember_me = false
-          {:ok, super_admin_user, token, authed_conn} = Session.create(super_admin_user, remember_me, conn)
+
+          {:ok, super_admin_user, token, authed_conn} =
+            Session.create(super_admin_user, remember_me, conn)
 
           {:ok, k_list} = context_updates
           k_list = [conn: authed_conn] ++ k_list

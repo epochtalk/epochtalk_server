@@ -2,31 +2,25 @@ defmodule Test.Support.Factories.User do
   @moduledoc """
   Factory for `User`
 
+  This factory is really slow; DO NOT USE anywhere except user seed
+
   Usage:
-  build(:user)
+  build(:user, [attributes])
 
   (optional role id)
-  build(:user) |> with_role_id(1)
+  build(:user, [attributes]) |> with_role_id(1)
   """
   alias EpochtalkServer.Models.User
 
   defmacro __using__(_opts) do
     quote do
-      def user_attributes_factory do
-        %{
-          username: sequence(:user_username, &"username#{&1}"),
-          email: sequence(:user_email, &"email#{&1}@test.com"),
-          password: sequence(:user_password, &"password#{&1}")
-        }
-      end
-
       def with_role_id(user, role_id) do
         insert(:role_user, role_id: role_id, user: user)
         user
       end
 
-      def user_factory(_attrs) do
-        build(:user_attributes)
+      def user_factory(attributes) do
+        attributes
         |> User.create()
         |> case do
           {:ok, user} -> user

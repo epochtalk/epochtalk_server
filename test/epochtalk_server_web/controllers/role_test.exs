@@ -187,7 +187,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Role do
                    end
     end
 
-    @tag authenticated: :admin
+    @tag authenticated: :super_admin
     test "given properties, modifies a role", %{conn: conn} do
       RoleCache.reload()
 
@@ -237,7 +237,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Role do
       assert blank_hc_newbie["highlight_color"] == nil
     end
 
-    @tag authenticated: :admin
+    @tag authenticated: :super_admin
     test "given no properties, does not modify a role", %{conn: conn} do
       RoleCache.reload()
       new_newbie_permissions_attrs = %{id: 7}
@@ -268,7 +268,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Role do
       assert modified_newbie["highlight_color"] == original_newbie["highlight_color"]
     end
 
-    @tag authenticated: :admin
+    @tag authenticated: :super_admin
     test "when fields are not properly formatted, errors", %{conn: conn} do
       original_newbie =
         conn
@@ -360,7 +360,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Role do
       assert modified_newbie["lookup"] == original_newbie["lookup"]
     end
 
-    @tag authenticated: :admin
+    @tag authenticated: :super_admin
     test "when authenticated, modifies a role's priority_restrictions", %{conn: conn} do
       RoleCache.reload()
       initial_newbie_priority_restrictions = nil
@@ -432,7 +432,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Role do
       assert modified_newbie["priority_restrictions"] == nil
     end
 
-    @tag authenticated: :admin
+    @tag authenticated: :super_admin
     test "when input is invalid, does not modify a role's priority_restrictions", %{conn: conn} do
       RoleCache.reload()
 
@@ -468,7 +468,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Role do
       assert modified_newbie["priority_restrictions"] == initial_newbie_priority_restrictions
     end
 
-    @tag authenticated: :admin
+    @tag authenticated: :super_admin
     test "when authenticated, modifies a role's permissions", %{conn: conn} do
       RoleCache.reload()
 
@@ -508,7 +508,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Role do
       assert modified_newbie["permissions"] == modified_newbie_permissions
     end
 
-    @tag authenticated: :admin
+    @tag authenticated: :super_admin
     test "when input is invalid, does not modify a user's permissions", %{conn: conn} do
       RoleCache.reload()
 

@@ -89,7 +89,7 @@ defmodule EpochtalkServer.MixProject do
         "seed.required",
         # "seed.test_boards",
         "seed.test_banned_address",
-        "seed.test_users",
+        "seed.test_users"
         # "seed.test_threads",
         # "seed.test_moderation_logs"
       ],

@@ -7,12 +7,20 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     admin_board = insert(:board, viewable_by: 1)
     super_admin_board = insert(:board, viewable_by: 0)
     category = insert(:category)
-    build(:board_mapping, attributes: [
-      build(:board_mapping_attributes, category: category, view_order: 0),
-      build(:board_mapping_attributes, board: board, category: category, view_order: 1),
-      build(:board_mapping_attributes, board: admin_board, category: category, view_order: 2),
-      build(:board_mapping_attributes, board: super_admin_board, category: category, view_order: 3)
-    ])
+
+    build(:board_mapping,
+      attributes: [
+        build(:board_mapping_attributes, category: category, view_order: 0),
+        build(:board_mapping_attributes, board: board, category: category, view_order: 1),
+        build(:board_mapping_attributes, board: admin_board, category: category, view_order: 2),
+        build(:board_mapping_attributes,
+          board: super_admin_board,
+          category: category,
+          view_order: 3
+        )
+      ]
+    )
+
     user = build(:user)
     admin_user = build(:user) |> with_role_id(2)
     super_admin_user = build(:user) |> with_role_id(1)
@@ -42,7 +50,11 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
       assert response["message"] == "Read error, board does not exist"
     end
 
-    test "given an id for existing board, gets threads", %{conn: conn, board: board, threads: created_threads} do
+    test "given an id for existing board, gets threads", %{
+      conn: conn,
+      board: board,
+      threads: created_threads
+    } do
       response =
         conn
         |> get(Routes.thread_path(conn, :by_board), %{board_id: board.id})
@@ -52,8 +64,8 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
       assert Map.has_key?(response, "sticky") == true
 
       normal_threads = response["normal"]
-      first_thread = normal_threads |> List.first
-      first_created_thread = created_threads |> List.first
+      first_thread = normal_threads |> List.first()
+      first_created_thread = created_threads |> List.first()
       first_created_thread_attributes = first_created_thread.attributes
       assert Map.has_key?(first_thread, "created_at") == true
       assert Map.has_key?(first_thread, "last_post_avatar") == true
@@ -74,7 +86,10 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
 
       assert Map.get(first_thread, "id") == first_created_thread.post.thread.id
       assert Map.get(first_thread, "locked") == Map.get(first_created_thread_attributes, "locked")
-      assert Map.get(first_thread, "moderated") == Map.get(first_created_thread_attributes, "moderated")
+
+      assert Map.get(first_thread, "moderated") ==
+               Map.get(first_created_thread_attributes, "moderated")
+
       assert Map.get(first_thread, "slug") == Map.get(first_created_thread_attributes, "slug")
       assert Map.get(first_thread, "sticky") == Map.get(first_created_thread_attributes, "sticky")
       assert Map.get(first_thread, "title") == Map.get(first_created_thread_attributes, "title")

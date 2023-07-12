@@ -11,6 +11,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Board do
         postable_by: 10,
         right_to_left: false
       )
+
     child_board =
       insert(:board,
         viewable_by: 10,
@@ -18,17 +19,24 @@ defmodule Test.EpochtalkServerWeb.Controllers.Board do
         right_to_left: false
       )
 
-    build(:board_mapping, attributes: [
-      build(:board_mapping_attributes, category: category, view_order: 0),
-      build(:board_mapping_attributes, board: parent_board, category: category, view_order: 1),
-      build(:board_mapping_attributes, board: child_board, parent: parent_board, view_order: 2)
-    ])
+    build(:board_mapping,
+      attributes: [
+        build(:board_mapping_attributes, category: category, view_order: 0),
+        build(:board_mapping_attributes, board: parent_board, category: category, view_order: 1),
+        build(:board_mapping_attributes, board: child_board, parent: parent_board, view_order: 2)
+      ]
+    )
 
     {:ok, conn: conn, parent_board: parent_board, child_board: child_board, category: category}
   end
 
   describe "by_category/2" do
-    test "finds all active boards", %{conn: conn, category: category, parent_board: parent_board, child_board: child_board} do
+    test "finds all active boards", %{
+      conn: conn,
+      category: category,
+      parent_board: parent_board,
+      child_board: child_board
+    } do
       response =
         conn
         |> get(Routes.board_path(conn, :by_category))
@@ -66,7 +74,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Board do
       assert response_parent_board["name"] == parent_board.name
       assert response_parent_board["category_id"] == category.id
       assert response_parent_board["parent_id"] == nil
-      assert response_parent_board["children"] |> Enum.count == 1
+      assert response_parent_board["children"] |> Enum.count() == 1
       assert response_parent_board["description"] == parent_board.description
       assert response_parent_board["view_order"] == 1
       assert response_parent_board["slug"] == parent_board.slug
@@ -84,7 +92,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Board do
       assert response_child_board["name"] == child_board.name
       assert response_child_board["category_id"] == nil
       assert response_child_board["parent_id"] == parent_board.id
-      assert response_child_board["children"] |> Enum.count == 0
+      assert response_child_board["children"] |> Enum.count() == 0
       assert response_child_board["description"] == child_board.description
       assert response_child_board["view_order"] == 2
       assert response_child_board["slug"] == child_board.slug

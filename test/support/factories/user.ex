@@ -19,10 +19,12 @@ defmodule Test.Support.Factories.User do
           password: sequence(:user_password, &"password#{&1}")
         }
       end
+
       def with_role_id(user, role_id) do
         insert(:role_user, role_id: role_id, user: user)
         user
       end
+
       def user_factory(_attrs) do
         build(:user_attributes)
         |> User.create()

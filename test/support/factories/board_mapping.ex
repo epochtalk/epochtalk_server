@@ -14,7 +14,11 @@ defmodule Test.Support.Factories.BoardMapping do
   defmacro __using__(_opts) do
     quote do
       # generate attributes for board under category
-      def board_mapping_attributes_factory(%{board: board, view_order: view_order, category: category}) do
+      def board_mapping_attributes_factory(%{
+            board: board,
+            view_order: view_order,
+            category: category
+          }) do
         %{
           id: board.id,
           name: board.name,
@@ -23,6 +27,7 @@ defmodule Test.Support.Factories.BoardMapping do
           view_order: view_order
         }
       end
+
       # generate attributes for board under parent board
       def board_mapping_attributes_factory(%{board: board, view_order: view_order, parent: parent}) do
         %{
@@ -33,6 +38,7 @@ defmodule Test.Support.Factories.BoardMapping do
           view_order: view_order
         }
       end
+
       # generate attributes for category
       def board_mapping_attributes_factory(%{category: category, view_order: view_order}) do
         %{
@@ -42,6 +48,7 @@ defmodule Test.Support.Factories.BoardMapping do
           view_order: view_order
         }
       end
+
       def board_mapping_factory(%{attributes: attributes}) do
         BoardMapping.update(attributes)
       end

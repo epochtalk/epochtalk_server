@@ -4,10 +4,14 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
 
   setup do
     board = insert(:board)
+    admin_board = insert(:board, viewable_by: 1)
+    super_admin_board = insert(:board, viewable_by: 0)
     category = insert(:category)
     build(:board_mapping, attributes: [
       build(:board_mapping_attributes, category: category, view_order: 0),
       build(:board_mapping_attributes, board: board, category: category, view_order: 1),
+      build(:board_mapping_attributes, board: admin_board, category: category, view_order: 2),
+      build(:board_mapping_attributes, board: super_admin_board, category: category, view_order: 3)
     ])
     user = build(:user)
     threads = build_list(3, :thread, board: board, user: user)

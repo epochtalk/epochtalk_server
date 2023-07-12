@@ -4,8 +4,9 @@ defmodule Test.Support.Factories.User do
 
   Usage:
   build(:user)
-  OR
-  build(:user, admin: true)
+
+  (optional role id)
+  build(:user) |> with_role_id(1)
   """
   alias EpochtalkServer.Models.User
 

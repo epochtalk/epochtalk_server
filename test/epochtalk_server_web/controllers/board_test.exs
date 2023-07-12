@@ -1,7 +1,6 @@
 defmodule Test.EpochtalkServerWeb.Controllers.Board do
   use Test.Support.ConnCase, async: true
   import Test.Support.Factory
-  alias EpochtalkServer.Models.BoardMapping
 
   setup %{conn: conn} do
     category = insert(:category)

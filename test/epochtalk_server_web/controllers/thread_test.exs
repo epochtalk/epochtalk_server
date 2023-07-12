@@ -14,9 +14,21 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
       build(:board_mapping_attributes, board: super_admin_board, category: category, view_order: 3)
     ])
     user = build(:user)
+    admin_user = build(:user) |> with_role_id(2)
+    super_admin_user = build(:user) |> with_role_id(1)
     threads = build_list(3, :thread, board: board, user: user)
+    admin_threads = build_list(3, :thread, board: admin_board, user: admin_user)
+    super_admin_threads = build_list(3, :thread, board: super_admin_board, user: super_admin_user)
 
-    {:ok, board: board, threads: threads}
+    {
+      :ok,
+      board: board,
+      admin_board: admin_board,
+      super_admin_board: super_admin_board,
+      threads: threads,
+      admin_threads: admin_threads,
+      super_admin_threads: super_admin_threads
+    }
   end
 
   describe "by_board/2" do

@@ -81,16 +81,18 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     end
 
     test "given an id for board above unauthenticated user priority, does not get threads", %{
-      conn: conn
+      conn: conn,
+      admin_board: admin_board,
+      super_admin_board: super_admin_board
     } do
       admin_board_response =
         conn
-        |> get(Routes.thread_path(conn, :by_board), %{board_id: 2})
+        |> get(Routes.thread_path(conn, :by_board), %{board_id: admin_board.id})
         |> json_response(403)
 
       super_admin_board_response =
         conn
-        |> get(Routes.thread_path(conn, :by_board), %{board_id: 3})
+        |> get(Routes.thread_path(conn, :by_board), %{board_id: super_admin_board.id})
         |> json_response(403)
 
       assert admin_board_response["error"] == "Forbidden"

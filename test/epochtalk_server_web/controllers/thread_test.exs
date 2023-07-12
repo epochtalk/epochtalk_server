@@ -1,6 +1,10 @@
 defmodule Test.EpochtalkServerWeb.Controllers.Thread do
   use Test.Support.ConnCase, async: true
   import Test.Support.Factory
+  alias EpochtalkServer.Models.User
+  @test_username "test"
+  @test_admin_username "admin"
+  @test_super_admin_username "superadmin"
 
   setup do
     board = insert(:board)
@@ -21,9 +25,9 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
       ]
     )
 
-    user = build(:user)
-    admin_user = build(:user) |> with_role_id(2)
-    super_admin_user = build(:user) |> with_role_id(1)
+    {:ok, user} = User.by_username(@test_username)
+    {:ok, admin_user} = User.by_username(@test_admin_username)
+    {:ok, super_admin_user} = User.by_username(@test_super_admin_username)
     threads = build_list(3, :thread, board: board, user: user)
     admin_threads = build_list(3, :thread, board: admin_board, user: admin_user)
     super_admin_threads = build_list(3, :thread, board: super_admin_board, user: super_admin_user)

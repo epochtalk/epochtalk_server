@@ -26,7 +26,7 @@ defmodule Test.Support.Factories.BannedAddress do
       def banned_address_factory(attributes) do
         %BannedAddress{}
         |> BannedAddress.upsert_changeset(build(:banned_address_attributes, attributes))
-        |> Repo.insert(returning: true)
+        |> Repo.insert()
       end
     end
   end

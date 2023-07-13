@@ -3,11 +3,11 @@ defmodule Test.Support.Factories.BoardMapping do
   Factory for `BoardMapping`
 
   Usage:
-  BoardMapping.update([
-    build(:board_mapping_attributes, ...),
-    build(:board_mapping_attributes, ...),
-    build(:board_mapping_attributes, ...)
-  })
+  build(:board_mapping, attributes: [
+    [attrs...],
+    [attrs...],
+    [attrs...]
+  ])
   """
   alias EpochtalkServer.Models.BoardMapping
 
@@ -49,8 +49,10 @@ defmodule Test.Support.Factories.BoardMapping do
         }
       end
 
-      def board_mapping_factory(%{attributes: attributes}) do
-        BoardMapping.update(attributes)
+      def board_mapping_factory(%{attributes: attributes_list}) do
+        attributes_list
+        |> Enum.map(&build(:board_mapping_attributes, &1))
+        |> BoardMapping.update()
       end
     end
   end

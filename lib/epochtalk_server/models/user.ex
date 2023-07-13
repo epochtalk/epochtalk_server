@@ -167,9 +167,11 @@ defmodule EpochtalkServer.Models.User do
   """
   @spec get_default_trust_user_id() :: non_neg_integer | nil
   def get_default_trust_user_id() do
-    query = from u in User,
-      where: u.username == "DefaultTrustList",
-      select: u.id
+    query =
+      from u in User,
+        where: u.username == "DefaultTrustList",
+        select: u.id
+
     Repo.one(query)
   end
 

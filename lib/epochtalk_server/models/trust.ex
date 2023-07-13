@@ -47,7 +47,7 @@ defmodule EpochtalkServer.Models.Trust do
   def trust_by_user_ids(trusted) do
     query =
       from t in Trust,
-      where: t.user_id in ^trusted
+        where: t.user_id in ^trusted
 
     Repo.all(query)
   end

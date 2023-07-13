@@ -14,14 +14,10 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
 
     build(:board_mapping,
       attributes: [
-        build(:board_mapping_attributes, category: category, view_order: 0),
-        build(:board_mapping_attributes, board: board, category: category, view_order: 1),
-        build(:board_mapping_attributes, board: admin_board, category: category, view_order: 2),
-        build(:board_mapping_attributes,
-          board: super_admin_board,
-          category: category,
-          view_order: 3
-        )
+        [category: category, view_order: 0],
+        [board: board, category: category, view_order: 1],
+        [board: admin_board, category: category, view_order: 2],
+        [board: super_admin_board, category: category, view_order: 3]
       ]
     )
 

@@ -21,9 +21,9 @@ defmodule Test.EpochtalkServerWeb.Controllers.Board do
 
     build(:board_mapping,
       attributes: [
-        build(:board_mapping_attributes, category: category, view_order: 0),
-        build(:board_mapping_attributes, board: parent_board, category: category, view_order: 1),
-        build(:board_mapping_attributes, board: child_board, parent: parent_board, view_order: 2)
+        [category: category, view_order: 0],
+        [board: parent_board, category: category, view_order: 1],
+        [board: child_board, parent: parent_board, view_order: 2]
       ]
     )
 

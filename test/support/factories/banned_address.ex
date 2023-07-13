@@ -1,6 +1,11 @@
 defmodule Test.Support.Factories.BannedAddress do
   @moduledoc """
   Factory for `BannedAddress`
+
+  Usage:
+  build(:banned_address, ip: ip, weight: weight)
+  OR
+  build(:banned_address, hostname: hostname, weight: weight)
   """
   alias EpochtalkServer.Repo
   alias EpochtalkServer.Models.BannedAddress

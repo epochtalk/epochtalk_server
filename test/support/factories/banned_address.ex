@@ -20,6 +20,7 @@ defmodule Test.Support.Factories.BannedAddress do
           imported_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
         }
       end
+
       def banned_address_attributes_factory(%{hostname: hostname, weight: weight}) do
         %{
           hostname: hostname,
@@ -28,6 +29,7 @@ defmodule Test.Support.Factories.BannedAddress do
           imported_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
         }
       end
+
       def banned_address_factory(attributes) do
         %BannedAddress{}
         |> BannedAddress.upsert_changeset(build(:banned_address_attributes, attributes))

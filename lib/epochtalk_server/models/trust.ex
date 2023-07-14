@@ -7,14 +7,22 @@ defmodule EpochtalkServer.Models.Trust do
   alias EpochtalkServer.Models.Trust
   alias EpochtalkServer.Models.User
 
+  @untrusted 1
+
   @moduledoc """
   `Trust` model, for performing actions relating to `Trust`
+
+  Each `User` has a list of users who they directly `Trust`
+
+  Data structure represents who each `User` trusts directly, the function `trust_by_user_ids`
+  ties this together by recursively checking users in that trust list
   """
+  # TODO(akinsey): change user_id_trusted to something that doesn't imply the user is trusted
   @type t :: %__MODULE__{
-    user_id: non_neg_integer | nil,
-    user_id_trusted: non_neg_integer | nil,
-    type: non_neg_integer | nil
-  }
+          user_id: non_neg_integer | nil,
+          user_id_trusted: non_neg_integer | nil,
+          type: non_neg_integer | nil
+        }
   @derive {Jason.Encoder, only: [:user_id, :user_id_trusted, :type]}
   @primary_key false
   schema "trust" do
@@ -55,37 +63,45 @@ defmodule EpochtalkServer.Models.Trust do
   ## === Public Helper Functions ===
 
   @doc """
-  Calculates the set of users in a user's `Trust` network, `max_depth` is configured by the user
+  Determines the set of users in a user's `Trust` network, `max_depth` is configured by the user.
+
+  Algorithm Description:
+  * Starts with current users trust list, or DefaultTrustList's if user does not have one
+  * Iterates recursively through trust list up to `max_depth`, updates their scores based on whether they are trusted or not
+  * Returns all users who have a positive score (trusted sources)
   """
-  @spec trust_sources_by_user_id(user_id :: non_neg_integer, max_depth :: non_neg_integer, debug :: []) :: [non_neg_integer]
+  @spec trust_sources_by_user_id(
+          user_id :: non_neg_integer,
+          max_depth :: non_neg_integer,
+          debug :: []
+        ) :: [non_neg_integer]
   def trust_sources_by_user_id(user_id, max_depth, debug) do
-    depth = 0..max_depth - 1 |> Enum.to_list()
+    depth = 0..(max_depth - 1) |> Enum.to_list()
+
     %{sources: sources, debug: debug} =
-      Enum.reduce(depth, %{sources: [], untrusted: %{}, last: [user_id], debug: debug}, fn i, acc ->
+      Enum.reduce(depth, %{sources: [], untrusted: %{}, last: [user_id], debug: debug}, fn i,
+                                                                                           acc ->
         debug = if acc.debug, do: Map.put(acc.debug, i, [])
 
         if acc.last == [] do
           # do nothing
           acc
         else
-          trust_info = trust_by_user_ids(acc.last)
+          # get trust list for list of trusted users. Initially just the truster, in subsequent
+          # runs this will be a calculated list of the previous iterations trusted users
+          current_trust_list_data = trust_by_user_ids(acc.last)
 
-          trust_info_len_enum = 0..length(trust_info) - 1 |> Enum.to_list()
+          # the votes list, at the end of all iterations determines if a
+          # user is trusted or not based on the number of votes
+          votes = update_votes(current_trust_list_data)
 
-          votes = update_votes(trust_info, trust_info_len_enum)
-
+          # using current trust list data (queried using last), update source, untrusted, last and debug
           %{sources: sources, untrusted: untrusted, last: last, debug: debug} =
-            update_sources_untrusted_last_and_debug(acc, votes, trust_info, i, trust_info_len_enum, debug)
+            update_sources_untrusted_last_and_debug(acc, votes, current_trust_list_data, i, debug)
 
-          no_trusted_sources = last == [] and i == 0 and Map.keys(votes) == []
-
-          default_trust_user_id = if no_trusted_sources, do: User.get_default_trust_user_id()
-
-          sources = if no_trusted_sources, do: sources ++ [default_trust_user_id], else: sources
-
-          last = if no_trusted_sources, do: last ++ [default_trust_user_id], else: last
-
-          debug = update_debug(debug, default_trust_user_id, no_trusted_sources)
+          # if user has no initial trust list, use default trust list
+          %{sources: sources, last: last, debug: debug} =
+            maybe_use_default_trust_list(sources, last, votes, debug, i)
 
           %{
             sources: sources,
@@ -96,6 +112,7 @@ defmodule EpochtalkServer.Models.Trust do
         end
       end)
 
+    # returns unique user ids after adding truster user id to sources, every user trusts themselves
     sources = Enum.uniq(sources ++ [user_id])
 
     if debug, do: Map.put(debug, 0, Enum.at(debug, 0) ++ [[user_id, 0]]) |> Logger.debug()
@@ -105,55 +122,104 @@ defmodule EpochtalkServer.Models.Trust do
 
   ## === Private Helper Functions ===
 
-  defp update_votes(trust_info, len_enum) do
-    Enum.reduce(len_enum, %{}, fn x, acc ->
-      cur = Enum.at(trust_info, x)
-      cur_id = cur.user_id_trusted
-      acc = if is_nil(acc[cur_id]), do: Map.put(acc, cur_id, 0), else: acc
-      if cur.type == 1,
-        do: Map.put(acc, cur_id, acc[cur_id] - 1),
-        else: Map.put(acc, cur_id, acc[cur_id] + 1)
+  # takes in trusted user's list (last) which is calculated in previous iteration of outer loop
+  # updates truster list votes list
+  defp update_votes(current_trust_list_data) do
+    # iterate through all user's trust data, return votes
+    Enum.reduce(current_trust_list_data, %{}, fn trust, votes ->
+      current_user_id = trust.user_id_trusted
+      votes = votes |> Map.put_new(current_user_id, 0)
+      # check if user is trusted or untrusted
+      # increment or decrement votes based on trust type
+      if trust.type == @untrusted,
+        do: votes |> Map.put(current_user_id, votes[current_user_id] - 1),
+        else: votes |> Map.put(current_user_id, votes[current_user_id] + 1)
     end)
   end
 
-  defp update_sources_untrusted_last_and_debug(acc, votes, trust_info, i, len_enum, debug) do
-    Enum.reduce(len_enum, %{sources: acc.sources, untrusted: acc.untrusted, last: [], debug: debug}, fn y, acc ->
-      cur_id = Enum.at(trust_info, y).user_id_trusted
-      cur_votes = votes[cur_id]
+  # takes in trusted user's list (last) which is calculated in previous iteration of outer loop
+  # iterates through each trusted user and updates: sources (accumulation of all trusted users),
+  # untrusted (accumulation of all untrusted users), last (previous iterations trusted user list)
+  # and debug (map containing debug info for trust sources)
+  defp update_sources_untrusted_last_and_debug(acc, votes, current_trust_list_data, i, debug) do
+    Enum.reduce(
+      current_trust_list_data,
+      %{sources: acc.sources, untrusted: acc.untrusted, last: [], debug: debug},
+      fn trust, acc ->
+        current_user_id = trust.user_id_trusted
+        current_user_votes = votes[current_user_id]
 
-      debug = if acc.debug and !acc.untrusted[cur_id] do
-        debug_i_len_enum = 0..length(acc.debug[i]) - 1 |> Enum.to_list()
-        exists = Enum.filter(debug_i_len_enum, fn n -> Enum.at(acc.debug[i], n) == cur_id end) |> length > 0
-        updated_debug_i = if exists, do: acc.debug[i], else: acc.debug[i] ++ [[cur_id, cur_votes]]
-        Map.put(acc.debug, i, updated_debug_i)
+        debug =
+          if acc.debug and !acc.untrusted[current_user_id] do
+            debug_i_len_enum = 0..(length(acc.debug[i]) - 1) |> Enum.to_list()
+
+            exists =
+              Enum.filter(debug_i_len_enum, fn n ->
+                Enum.at(acc.debug[i], n) == current_user_id
+              end)
+              |> length > 0
+
+            updated_debug_i =
+              if exists,
+                do: acc.debug[i],
+                else: acc.debug[i] ++ [[current_user_id, current_user_votes]]
+
+            Map.put(acc.debug, i, updated_debug_i)
+          end
+
+        # current user is trusted if votes is 0 (neutral) or greater
+        # and current user isn't in truster user's untrusted list
+        trusted_source = votes[current_user_id] >= 0 and !acc.untrusted[current_user_id]
+
+        # sources is all trusted user so far based on truster user's trust list (or default trust list if no list)
+        sources =
+          if trusted_source,
+            do: acc.sources ++ [current_user_id],
+            else: acc.sources
+
+        # last is the current user's trusted users, unlike sources which is all trusted user's so far
+        last =
+          if trusted_source,
+            do: acc.last ++ [current_user_id],
+            else: acc.last
+
+        # untrusted is a list of all untrusted users so far
+        untrusted =
+          if trusted_source,
+            do: acc.untrusted,
+            else: Map.put(acc.untrusted, current_user_id, 1)
+
+        %{
+          sources: sources,
+          untrusted: untrusted,
+          last: last,
+          debug: debug
+        }
       end
-
-      trusted_source = votes[cur_id] >= 0 and !acc.untrusted[cur_id]
-
-      sources = if trusted_source,
-        do: acc.sources ++ [cur_id],
-        else: acc.sources
-
-      last = if trusted_source,
-        do: acc.last ++ [cur_id],
-        else: acc.last
-
-      untrusted = if trusted_source,
-        do: acc.untrusted,
-        else: Map.put(acc.untrusted, cur_id, 1)
-
-      %{
-        sources: sources,
-        untrusted: untrusted,
-        last: last,
-        debug: debug
-      }
-    end)
+    )
   end
 
-  defp update_debug(debug, default_trust_user_id, no_trusted_sources) do
-    if no_trusted_sources and debug do
-      Map.put(debug, 0, Enum.at(debug, 0) ++ [[default_trust_user_id, 0]])
-    end
+  # If the user has no trust list, this will default to use Default Trust User's trust list instead. Only runs on
+  # initial iteration of outer most loop on max_depth, subsequent runs variables are just passed back
+  defp maybe_use_default_trust_list(sources, last, votes, debug, i) do
+    # if initial iteration finishes and there are no users in last array or votes, user has no trust list
+    no_trusted_sources = last == [] and i == 0 and Map.keys(votes) == []
+
+    # get default trust user id if user has no trust list
+    default_trust_user_id = if no_trusted_sources, do: User.get_default_trust_user_id()
+
+    sources = if no_trusted_sources, do: sources ++ [default_trust_user_id], else: sources
+
+    last = if no_trusted_sources, do: last ++ [default_trust_user_id], else: last
+
+    debug =
+      if no_trusted_sources and debug,
+        do: Map.put(debug, 0, Enum.at(debug, 0) ++ [[default_trust_user_id, 0]])
+
+    %{
+      sources: sources,
+      last: last,
+      debug: debug
+    }
   end
 end

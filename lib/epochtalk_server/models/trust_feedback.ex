@@ -4,7 +4,9 @@ defmodule EpochtalkServer.Models.TrustFeedback do
   import Ecto.Query
   alias EpochtalkServer.Repo
   alias EpochtalkServer.Models.User
+  alias EpochtalkServer.Models.Trust
   alias EpochtalkServer.Models.TrustFeedback
+  alias EpochtalkServer.Models.TrustMaxDepth
 
   @moduledoc """
   `TrustFeedback` model, for performing actions relating to `TrustFeedback`
@@ -82,7 +84,7 @@ defmodule EpochtalkServer.Models.TrustFeedback do
           trusted :: [non_neg_integer],
           created_at :: NaiveDateTime.t() | nil
         ) ::
-          {:ok, max_depth :: non_neg_integer | nil}
+          max_depth :: non_neg_integer
   def counts_by_user_id(user_id, scammer, trusted, created_at \\ nil) do
     query =
       TrustFeedback
@@ -104,7 +106,7 @@ defmodule EpochtalkServer.Models.TrustFeedback do
         )
       end
 
-    {:ok, Repo.one(query)}
+    Repo.one(query)
   end
 
   @doc """
@@ -114,7 +116,7 @@ defmodule EpochtalkServer.Models.TrustFeedback do
           user_id :: non_neg_integer,
           trusted :: [non_neg_integer]
         ) ::
-          {:ok, score :: non_neg_integer | nil}
+          score :: non_neg_integer
   def calculate_score_when_no_negative_feedback(user_id, trusted) do
     inner_most_subquery =
       from t3 in TrustFeedback,
@@ -138,17 +140,17 @@ defmodule EpochtalkServer.Models.TrustFeedback do
             i.created_at
           )
 
-    {:ok, Repo.one(query)}
+    Repo.one(query) || 0
   end
 
   @doc """
-  Get timestamp of the first negative `TrustFeedback` left for a specific `User` and trust network (array of `User` IDs)
+  Get `created_at` timestamp of the first negative `TrustFeedback` left for a specific `User` and trust network (array of `User` IDs)
   """
   @spec first_negative_feedback_timestamp_by_user_id(
           user_id :: non_neg_integer,
           trusted :: [non_neg_integer]
         ) ::
-          {:ok, timestamp :: NaiveDateTime.t() | nil}
+          created_at :: NaiveDateTime.t()
   def first_negative_feedback_timestamp_by_user_id(user_id, trusted) do
     query =
       from t in TrustFeedback,
@@ -157,6 +159,70 @@ defmodule EpochtalkServer.Models.TrustFeedback do
         limit: 1,
         select: t.created_at
 
-    {:ok, Repo.one(query)}
+    Repo.one(query)
+  end
+
+  ## === Public Helper Functions ===
+
+  @doc """
+  Calculates `Trust` statistics using `TrustFeedback` left for a specific `User` and the authenticated users
+  trust network (array of `User` IDs)
+  """
+  @spec statistics_by_user_id(
+          user_id :: non_neg_integer,
+          authed_user_id :: non_neg_integer,
+          trusted :: [non_neg_integer] | nil
+        ) :: %{neg: integer, pos: integer, score: integer}
+  def statistics_by_user_id(user_id, authed_user_id, trusted \\ nil)
+
+  def statistics_by_user_id(nil, _authed_user_id, _trusted), do: %{score: 0, pos: 0, neg: 0}
+
+  def statistics_by_user_id(user_id, authed_user_id, trusted) do
+    trusted = trusted || Trust.sources_by_user_id(authed_user_id, TrustMaxDepth.by_user_id(authed_user_id))
+    positive_count = TrustFeedback.counts_by_user_id(user_id, false, trusted)
+    negative_count = TrustFeedback.counts_by_user_id(user_id, true, trusted)
+    score = calculate_overall_score(user_id, trusted, positive_count, negative_count)
+
+    %{
+      score: score,
+      pos: positive_count,
+      neg: negative_count
+    }
+  end
+
+  ## === Private Helper Functions ===
+
+  defp calculate_overall_score(user_id, trusted, _positive_count, 0),
+    do: TrustFeedback.calculate_score_when_no_negative_feedback(user_id, trusted)
+
+  defp calculate_overall_score(user_id, trusted, positive_count, negative_count) do
+    calculate_score_when_has_negative_feedback(user_id, trusted, positive_count, negative_count)
+  end
+
+  defp calculate_score_when_has_negative_feedback(
+         user_id,
+         trusted,
+         positive_count,
+         negative_count
+       ) do
+    score = positive_count - Integer.pow(2, negative_count)
+
+    score =
+      if score >= 0 do
+        start_time = TrustFeedback.first_negative_feedback_timestamp_by_user_id(user_id, trusted)
+
+        positive_count_since_start_time =
+          TrustFeedback.counts_by_user_id(user_id, false, trusted, start_time)
+
+        negative_count_since_start_time =
+          TrustFeedback.counts_by_user_id(user_id, true, trusted, start_time)
+
+        score = positive_count_since_start_time - negative_count_since_start_time
+        if score < 0, do: "???", else: score
+      else
+        score
+      end
+
+    if score === "???", do: score, else: score |> min(9999) |> max(-9999)
   end
 end

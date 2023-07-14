@@ -70,12 +70,12 @@ defmodule EpochtalkServer.Models.Trust do
   * Iterates recursively through trust list up to `max_depth`, updates their scores based on whether they are trusted or not
   * Returns all users who have a positive score (trusted sources)
   """
-  @spec trust_sources_by_user_id(
+  @spec sources_by_user_id(
           user_id :: non_neg_integer,
           max_depth :: non_neg_integer,
-          debug :: []
+          debug :: [] | nil
         ) :: [non_neg_integer]
-  def trust_sources_by_user_id(user_id, max_depth, debug) do
+  def sources_by_user_id(user_id, max_depth, debug \\ nil) do
     depth = 0..(max_depth - 1) |> Enum.to_list()
 
     %{sources: sources, debug: debug} =
@@ -89,7 +89,7 @@ defmodule EpochtalkServer.Models.Trust do
         else
           # get trust list for list of trusted users. Initially just the truster, in subsequent
           # runs this will be a calculated list of the previous iterations trusted users
-          current_trust_list_data = trust_by_user_ids(acc.last)
+          current_trust_list_data = Trust.trust_by_user_ids(acc.last)
 
           # the votes list, at the end of all iterations determines if a
           # user is trusted or not based on the number of votes
@@ -113,7 +113,7 @@ defmodule EpochtalkServer.Models.Trust do
       end)
 
     # returns unique user ids after adding truster user id to sources, every user trusts themselves
-    sources = Enum.uniq(sources ++ [user_id])
+    sources = Enum.uniq(sources ++ [user_id]) |> Enum.filter(& &1)
 
     if debug, do: Map.put(debug, 0, Enum.at(debug, 0) ++ [[user_id, 0]]) |> Logger.debug()
 

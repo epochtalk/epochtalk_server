@@ -6,6 +6,8 @@ defmodule EpochtalkServer.Models.TrustMaxDepth do
   alias EpochtalkServer.Models.User
   alias EpochtalkServer.Models.TrustMaxDepth
 
+  @default_max_depth 2
+
   @moduledoc """
   `TrustMaxDepth` model, for performing actions relating to `TrustMaxDepth`
   """
@@ -36,12 +38,14 @@ defmodule EpochtalkServer.Models.TrustMaxDepth do
   end
 
   @doc """
-  Gets `max_depth` record for a specific `User`
+  Gets `max_depth` record for a specific `User`, defaults to `max_depth` of `2` if
+  `User` doesn't have `max_depth` set or if the it is outside the range 0-4
   """
   @spec by_user_id(user_id :: non_neg_integer) ::
-          {:ok, max_depth :: non_neg_integer | nil}
+          max_depth :: non_neg_integer | nil
   def by_user_id(user_id) do
     query = from t in TrustMaxDepth, where: t.user_id == ^user_id, select: t.max_depth
-    {:ok, Repo.one(query)}
+    max_depth = Repo.one(query)
+    if max_depth in 0..4, do: max_depth, else: @default_max_depth
   end
 end

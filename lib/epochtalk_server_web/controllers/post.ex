@@ -17,7 +17,10 @@ defmodule EpochtalkServerWeb.Controllers.Post do
   alias EpochtalkServer.Models.BoardModerator
   alias EpochtalkServer.Models.MetricRankMap
   alias EpochtalkServer.Models.Rank
+  alias EpochtalkServer.Models.Trust
   alias EpochtalkServer.Models.TrustBoard
+  alias EpochtalkServer.Models.TrustFeedback
+  alias EpochtalkServer.Models.TrustMaxDepth
   alias EpochtalkServer.Models.WatchThread
 
   # @doc """
@@ -76,6 +79,22 @@ defmodule EpochtalkServerWeb.Controllers.Post do
          ranks <- Rank.all(),
          trust_boards <- TrustBoard.all(),
          {:ok, watching_thread} <- WatchThread.is_watching(user, thread_id) do
+
+      # append trust statistics to each post in posts list
+      posts = if user do
+        authed_user_id = user.id
+        # pre calculate trust network for authed user to be optimal
+        max_depth = TrustMaxDepth.by_user_id(authed_user_id)
+        trusted = Trust.sources_by_user_id(authed_user_id, max_depth)
+        # append trust statistics for each post's authoring user
+        posts = posts |> Enum.map(fn post ->
+          user_trust_stats = TrustFeedback.statistics_by_user_id(post.user_id, authed_user_id, trusted)
+          post |> Map.put(:user_trust_stats, user_trust_stats)
+        end)
+      else
+        posts
+      end
+
       render(conn, :by_thread, %{
         posts: posts,
         poll: poll,

@@ -120,7 +120,8 @@ defmodule EpochtalkServerWeb.Controllers.PostJSON do
       signature: post.signature,
       post_count: post.post_count,
       highlight_color: post.highlight_color,
-      role_name: post.role_name
+      role_name: post.role_name,
+      stats: Map.get(post, :user_trust_stats)
     })
     |> Map.delete(:user_id)
     |> Map.delete(:username)

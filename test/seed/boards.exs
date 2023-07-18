@@ -7,6 +7,12 @@ general_category = %{
   name: "General"
 }
 
+parent_board = %{
+  name: "Parent General Discussion",
+  description: "Every forum's got one; talk about anything here",
+  slug: "parent-general-discussion"
+}
+
 general_board = %{
   name: "General Discussion",
   description: "Every forum's got one; talk about anything here",
@@ -52,6 +58,12 @@ Repo.transaction(fn ->
       {:ok, b} -> b.id
     end
 
+  parent_board_id =
+    Board.create(parent_board)
+    |> case do
+      {:ok, p} -> p.id
+    end
+
   board_mapping = [
     %{
       id: general_category_id,
@@ -60,25 +72,33 @@ Repo.transaction(fn ->
       view_order: 0
     },
     %{
-      id: general_board_id,
-      name: general_board.name,
+      id: parent_board_id,
+      name: parent_board.name,
       type: "board",
       category_id: general_category_id,
       view_order: 1
+    },
+    %{
+      id: general_board_id,
+      name: general_board.name,
+      type: "board",
+      parent_id: parent_board_id,
+      category_id: general_category_id,
+      view_order: 2
     },
     %{
       id: admin_board_id,
       name: admin_board.name,
       type: "board",
       category_id: general_category_id,
-      view_order: 2
+      view_order: 3
     },
     %{
       id: super_admin_board_id,
       name: super_admin_board.name,
       type: "board",
       category_id: general_category_id,
-      view_order: 3
+      view_order: 4
     }
   ]
 

@@ -45,4 +45,11 @@ defmodule EpochtalkServer.Models.BoardModerator do
   """
   @spec all() :: [Ecto.Changeset.t()] | nil
   def all(), do: Repo.all(from BoardModerator, preload: [user: ^from(User, select: [:username])])
+
+  @doc """
+  Returns list containing zero or more `board_id` corresponding to a `Board` that the specified `User` moderates
+  """
+  @spec get_user_moderated_boards(user_id :: non_neg_integer) :: [Ecto.Changeset.t()] | []
+  def get_user_moderated_boards(user_id),
+    do: Repo.all(from(b in BoardModerator, select: b.board_id, where: b.user_id == ^user_id))
 end

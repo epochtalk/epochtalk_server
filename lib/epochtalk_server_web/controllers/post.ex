@@ -18,9 +18,6 @@ defmodule EpochtalkServerWeb.Controllers.Post do
   alias EpochtalkServer.Models.MetricRankMap
   alias EpochtalkServer.Models.Rank
   alias EpochtalkServer.Models.Trust
-  alias EpochtalkServer.Models.TrustBoard
-  alias EpochtalkServer.Models.TrustFeedback
-  alias EpochtalkServer.Models.TrustMaxDepth
   alias EpochtalkServer.Models.WatchThread
 
   # @doc """
@@ -48,7 +45,7 @@ defmodule EpochtalkServerWeb.Controllers.Post do
   3) Query with start position vs page
   4) Read/Write access test against user priority (postable/writable by on board)
   5) Base permission check
-  6) Authorizations tests (TODOL implement authorizations first)
+  6) Authorizations tests (TODO: implement authorizations first)
   7) Board ban on authed user
   8) Board and Thread metadata is correct (ex: board.signature_disabled, thread.trust_visible)
   """
@@ -75,26 +72,11 @@ defmodule EpochtalkServerWeb.Controllers.Post do
              start: start,
              per_page: limit
            ),
+         posts <- Trust.maybe_append_post_trust_stats(posts, user),
+         thread <- Trust.maybe_append_thread_trust_visible(thread, user),
          metric_rank_maps <- MetricRankMap.all_merged(),
          ranks <- Rank.all(),
-         trust_boards <- TrustBoard.all(),
          {:ok, watching_thread} <- WatchThread.is_watching(user, thread_id) do
-
-      # append trust statistics to each post in posts list
-      posts = if user do
-        authed_user_id = user.id
-        # pre calculate trust network for authed user to be optimal
-        max_depth = TrustMaxDepth.by_user_id(authed_user_id)
-        trusted = Trust.sources_by_user_id(authed_user_id, max_depth)
-        # append trust statistics for each post's authoring user
-        posts = posts |> Enum.map(fn post ->
-          user_trust_stats = TrustFeedback.statistics_by_user_id(post.user_id, authed_user_id, trusted)
-          post |> Map.put(:user_trust_stats, user_trust_stats)
-        end)
-      else
-        posts
-      end
-
       render(conn, :by_thread, %{
         posts: posts,
         poll: poll,
@@ -111,7 +93,6 @@ defmodule EpochtalkServerWeb.Controllers.Post do
         desc: desc,
         metric_rank_maps: metric_rank_maps,
         ranks: ranks,
-        trust_boards: trust_boards,
         watched: watching_thread
       })
     else

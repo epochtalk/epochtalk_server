@@ -27,7 +27,6 @@ defmodule EpochtalkServerWeb.Controllers.PostJSON do
         desc: desc,
         metric_rank_maps: metric_rank_maps,
         ranks: ranks,
-        trust_boards: trust_boards,
         watched: watched
       }) do
     formatted_board =
@@ -44,10 +43,6 @@ defmodule EpochtalkServerWeb.Controllers.PostJSON do
       thread
       |> ThreadJSON.format_user_data()
       |> Map.put(:poll, formatted_poll)
-      |> Map.put(
-        :trust_visible,
-        Enum.filter(trust_boards, &(&1.board_id == thread.board_id)) != []
-      )
       |> Map.put(:watched, watched)
 
     formatted_posts = posts |> Enum.map(&format_post_data_for_by_thread(&1))

@@ -178,7 +178,10 @@ defmodule EpochtalkServer.Models.TrustFeedback do
   def statistics_by_user_id(nil, _authed_user_id, _trusted), do: %{score: 0, pos: 0, neg: 0}
 
   def statistics_by_user_id(user_id, authed_user_id, trusted) do
-    trusted = trusted || Trust.sources_by_user_id(authed_user_id, TrustMaxDepth.by_user_id(authed_user_id))
+    trusted =
+      trusted ||
+        Trust.sources_by_user_id(authed_user_id, TrustMaxDepth.by_user_id(authed_user_id))
+
     positive_count = TrustFeedback.counts_by_user_id(user_id, false, trusted)
     negative_count = TrustFeedback.counts_by_user_id(user_id, true, trusted)
     score = calculate_overall_score(user_id, trusted, positive_count, negative_count)

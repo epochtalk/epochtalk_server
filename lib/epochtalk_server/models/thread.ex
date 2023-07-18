@@ -319,6 +319,49 @@ defmodule EpochtalkServer.Models.Thread do
       else: {:error, :thread_does_not_exist}
   end
 
+  @doc """
+  Check if specific `Thread` is self moderated by a specific `User`
+  """
+  @spec is_self_moderated_by_user(id :: non_neg_integer, user_id :: non_neg_integer) ::
+          boolean
+  def is_self_moderated_by_user(id, user_id) do
+    query_first_thread_post =
+      from p in Post,
+        left_join: t in Thread,
+        on: t.id == p.thread_id,
+        order_by: [p.created_at],
+        limit: 1,
+        where: p.thread_id == ^id,
+        select: %{moderated: t.moderated, user_id: p.user_id}
+
+    first_post = Repo.one(query_first_thread_post)
+
+    first_post != nil and first_post.user_id == user_id and first_post.moderated
+  end
+
+  @doc """
+  Check if specific `Thread`, using a `post_id`, is self moderated by a specific `User`
+  """
+  @spec is_self_moderated_by_user_with_post_id(
+          post_id :: non_neg_integer,
+          user_id :: non_neg_integer
+        ) ::
+          boolean
+  def is_self_moderated_by_user_with_post_id(post_id, user_id) do
+    query_first_thread_post =
+      from p in Post,
+        left_join: t in Thread,
+        on: t.id == p.thread_id,
+        order_by: [p.created_at],
+        limit: 1,
+        where: p.id == ^post_id,
+        select: %{moderated: t.moderated, user_id: p.user_id}
+
+    first_post = Repo.one(query_first_thread_post)
+
+    first_post != nil and first_post.user_id == user_id and first_post.moderated
+  end
+
   ## === Private Helper Functions ===
 
   defp find_shared(initial_query) do

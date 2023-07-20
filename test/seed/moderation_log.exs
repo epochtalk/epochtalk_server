@@ -1,7 +1,10 @@
 import Test.Support.Factory
 alias EpochtalkServer.Models.ModerationLog
+alias EpochtalkServer.Models.User
 
 board = insert(:board, name: "General Discussion", slug: "general-discussion")
+test_user_username = "test"
+{:ok, user} = User.by_username(test_user_username)
 
 logs = [
   %{
@@ -40,7 +43,7 @@ logs = [
       api_url: "/api/admin/moderators",
       api_method: "post",
       type: "adminModerators.add",
-      obj: %{usernames: ["test"], board_id: board.id}
+      obj: %{usernames: [user.username], board_id: board.id}
     }
   },
   %{
@@ -66,7 +69,7 @@ logs = [
       api_url: "/api/admin/moderators",
       api_method: "post",
       type: "adminModerators.add",
-      obj: %{usernames: ["test"], board_id: board.id}
+      obj: %{usernames: [user.username], board_id: board.id}
     }
   },
   %{
@@ -79,7 +82,7 @@ logs = [
       api_url: "/api/admin/moderators",
       api_method: "delete",
       type: "adminModerators.remove",
-      obj: %{usernames: ["test"], board_id: board.id}
+      obj: %{usernames: [user.username], board_id: board.id}
     }
   },
   %{
@@ -339,7 +342,7 @@ logs = [
       api_url: "/api/users/addRoles",
       api_method: "post",
       type: "adminUsers.addRoles",
-      obj: %{usernames: ["test"], role_id: 1}
+      obj: %{usernames: [user.username], role_id: 1}
     }
   },
   %{
@@ -352,7 +355,7 @@ logs = [
       api_url: "/api/users/removeRoles",
       api_method: "delete",
       type: "adminUsers.removeRoles",
-      obj: %{role_id: 1, user_id: 1}
+      obj: %{role_id: 1, user_id: user.id}
     }
   },
   %{
@@ -365,7 +368,7 @@ logs = [
       api_url: "/api/userNotes/create",
       api_method: "post",
       type: "userNotes.create",
-      obj: %{user_id: 1}
+      obj: %{user_id: user.id}
     }
   },
   %{
@@ -378,7 +381,7 @@ logs = [
       api_url: "/api/userNotes/update",
       api_method: "post",
       type: "userNotes.update",
-      obj: %{user_id: 1}
+      obj: %{user_id: user.id}
     }
   },
   %{
@@ -391,7 +394,7 @@ logs = [
       api_url: "/api/userNotes/delete",
       api_method: "delete",
       type: "userNotes.delete",
-      obj: %{user_id: 1}
+      obj: %{user_id: user.id}
     }
   },
   %{
@@ -443,7 +446,7 @@ logs = [
       api_url: "/api/bans/ban",
       api_method: "post",
       type: "bans.ban",
-      obj: %{expiration: ~N[2030-12-31 00:00:00.000], user_id: 1}
+      obj: %{expiration: ~N[2030-12-31 00:00:00.000], user_id: user.id}
     }
   },
   %{
@@ -456,7 +459,7 @@ logs = [
       api_url: "/api/bans/unban",
       api_method: "post",
       type: "bans.unban",
-      obj: %{user_id: 1}
+      obj: %{user_id: user.id}
     }
   },
   %{
@@ -469,7 +472,7 @@ logs = [
       api_url: "/api/bans/banFromBoards",
       api_method: "post",
       type: "bans.banFromBoards",
-      obj: %{board_ids: [1], user_id: 1}
+      obj: %{board_ids: [1], user_id: user.id}
     }
   },
   %{
@@ -482,7 +485,7 @@ logs = [
       api_url: "/api/bans/unbanFromBoards",
       api_method: "post",
       type: "bans.unbanFromBoards",
-      obj: %{board_ids: [1], user_id: 1}
+      obj: %{board_ids: [1], user_id: user.id}
     }
   },
   %{
@@ -576,7 +579,7 @@ logs = [
       obj: %{
         title: "new_title",
         thread_id: 1,
-        user_id: 1,
+        user_id: user.id,
         old_board_name: "old_board",
         new_board_id: board.id
       }
@@ -592,7 +595,7 @@ logs = [
       api_url: "/api/threads/purge",
       api_method: "post",
       type: "threads.purge",
-      obj: %{title: "title", user_id: 1, old_board_name: "old_board", board_id: board.id}
+      obj: %{title: "title", user_id: user.id, old_board_name: "old_board", board_id: board.id}
     }
   },
   %{
@@ -644,7 +647,7 @@ logs = [
       api_url: "/api/posts/update",
       api_method: "post",
       type: "posts.update",
-      obj: %{id: 1, user_id: 1}
+      obj: %{id: 1, user_id: user.id}
     }
   },
   %{
@@ -657,7 +660,7 @@ logs = [
       api_url: "/api/posts/delete",
       api_method: "delete",
       type: "posts.delete",
-      obj: %{id: 1, user_id: 1}
+      obj: %{id: 1, user_id: user.id}
     }
   },
   %{
@@ -670,7 +673,7 @@ logs = [
       api_url: "/api/posts/undelete",
       api_method: "post",
       type: "posts.undelete",
-      obj: %{id: 1, user_id: 1}
+      obj: %{id: 1, user_id: user.id}
     }
   },
   %{
@@ -696,7 +699,7 @@ logs = [
       api_url: "/api/users/update",
       api_method: "post",
       type: "users.update",
-      obj: %{username: "test"}
+      obj: %{username: user.username}
     }
   },
   %{
@@ -735,7 +738,7 @@ logs = [
       api_url: "/api/users/delete",
       api_method: "delete",
       type: "users.delete",
-      obj: %{username: "test"}
+      obj: %{username: user.username}
     }
   },
   %{

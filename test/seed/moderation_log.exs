@@ -500,7 +500,7 @@ logs = [
       api_url: "/api/boards/create",
       api_method: "post",
       type: "boards.create",
-      obj: %{boards: [%{name: "test_board"}]}
+      obj: %{boards: [%{name: board.name}]}
     }
   },
   %{
@@ -513,7 +513,7 @@ logs = [
       api_url: "/api/boards/update",
       api_method: "post",
       type: "boards.update",
-      obj: %{boards: [%{name: "test_board"}]}
+      obj: %{boards: [%{name: board.name}]}
     }
   },
   %{
@@ -526,7 +526,7 @@ logs = [
       api_url: "/api/boards/delete",
       api_method: "delete",
       type: "boards.delete",
-      obj: %{names: "test_board"}
+      obj: %{names: board.name}
     }
   },
   %{

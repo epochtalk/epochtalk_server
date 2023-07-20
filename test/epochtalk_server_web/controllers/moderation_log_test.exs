@@ -762,7 +762,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
 
       assert moderation_log["mod_id"] == 38
       assert moderation_log["action_type"] == "boards.create"
-      assert moderation_log["action_display_text"] == "created board named 'test_board'"
+      assert moderation_log["action_display_text"] == "created board named 'General Discussion'"
       assert moderation_log["action_display_url"] == "admin-management.boards"
     end
 
@@ -782,7 +782,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
 
       assert moderation_log["mod_id"] == 39
       assert moderation_log["action_type"] == "boards.update"
-      assert moderation_log["action_display_text"] == "updated board named 'test_board'"
+      assert moderation_log["action_display_text"] == "updated board named 'General Discussion'"
       assert moderation_log["action_display_url"] == "admin-management.boards"
     end
 
@@ -802,7 +802,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
 
       assert moderation_log["mod_id"] == 40
       assert moderation_log["action_type"] == "boards.delete"
-      assert moderation_log["action_display_text"] == "deleted board named 'test_board'"
+      assert moderation_log["action_display_text"] == "deleted board named 'General Discussion'"
       assert moderation_log["action_display_url"] == "admin-management.boards"
     end
 

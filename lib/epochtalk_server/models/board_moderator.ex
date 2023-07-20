@@ -5,6 +5,8 @@ defmodule EpochtalkServer.Models.BoardModerator do
   alias EpochtalkServer.Repo
   alias EpochtalkServer.Models.User
   alias EpochtalkServer.Models.Board
+  alias EpochtalkServer.Models.Post
+  alias EpochtalkServer.Models.Thread
   alias EpochtalkServer.Models.BoardModerator
 
   @moduledoc """
@@ -52,4 +54,45 @@ defmodule EpochtalkServer.Models.BoardModerator do
   @spec get_user_moderated_boards(user_id :: non_neg_integer) :: [Ecto.Changeset.t()] | []
   def get_user_moderated_boards(user_id),
     do: Repo.all(from(b in BoardModerator, select: b.board_id, where: b.user_id == ^user_id))
+
+  @doc """
+  Check if a specific `User` is moderater of a `Board` using a `Thread` ID
+  """
+  @spec user_is_moderator_with_thread_id(thread_id :: non_neg_integer, user_id :: non_neg_integer) ::
+          boolean
+  def user_is_moderator_with_thread_id(thread_id, user_id) do
+    query =
+      from bm in BoardModerator,
+        left_join: b in Board,
+        on: bm.board_id == b.id,
+        left_join: t in Thread,
+        on: b.id == t.board_id,
+        where: bm.user_id == ^user_id and t.id == ^thread_id,
+        select: bm.user_id
+
+    Repo.exists?(query)
+  end
+
+  @doc """
+  Check if a specific `User` is moderater of a `Board` using a `Post` ID
+  """
+  @spec user_is_moderator_with_post_id(
+          post_id :: non_neg_integer,
+          user_id :: non_neg_integer
+        ) ::
+          boolean
+  def user_is_moderator_with_post_id(post_id, user_id) do
+    query =
+      from bm in BoardModerator,
+        left_join: b in Board,
+        on: bm.board_id == b.id,
+        left_join: t in Thread,
+        on: b.id == t.board_id,
+        left_join: p in Post,
+        on: p.thread_id == t.id,
+        where: bm.user_id == ^user_id and p.id == ^post_id,
+        select: bm.user_id
+
+    Repo.exists?(query)
+  end
 end

@@ -714,7 +714,7 @@ logs = [
       api_url: "/api/users/deactivate",
       api_method: "post",
       type: "users.deactivate",
-      obj: %{id: 1}
+      obj: %{id: user.id}
     }
   },
   %{
@@ -727,7 +727,7 @@ logs = [
       api_url: "/api/users/reactivate",
       api_method: "post",
       type: "users.reactivate",
-      obj: %{id: 1}
+      obj: %{id: user.id}
     }
   },
   %{

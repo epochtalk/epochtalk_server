@@ -3,8 +3,8 @@ alias EpochtalkServer.Models.ModerationLog
 alias EpochtalkServer.Models.User
 
 board = insert(:board, name: "General Discussion", slug: "general-discussion")
-test_user_username = "test"
-{:ok, user} = User.by_username(test_user_username)
+user_username = "test"
+{:ok, user} = User.by_username(user_username)
 thread = build(:thread, board: board, user: user, title: "test", slug: "test_slug")
 thread_id = thread.post.thread_id
 

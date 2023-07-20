@@ -4,7 +4,9 @@ alias EpochtalkServer.Models.User
 
 board = insert(:board, name: "General Discussion", slug: "general-discussion")
 user_username = "test"
+admin_username = "admin"
 {:ok, user} = User.by_username(user_username)
+{:ok, admin} = User.by_username(admin_username)
 thread = build(:thread, board: board, user: user, title: "test", slug: "test_slug")
 thread_id = thread.post.thread_id
 
@@ -754,7 +756,7 @@ logs = [
       api_method: "delete",
       type: "conversations.delete",
       obj: %{
-        sender_id: 2,
+        sender_id: admin.id,
         receiver_ids: [1]
       }
     }
@@ -770,7 +772,7 @@ logs = [
       api_method: "delete",
       type: "messages.delete",
       obj: %{
-        sender_id: 2,
+        sender_id: admin.id,
         receiver_ids: [1]
       }
     }

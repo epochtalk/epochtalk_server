@@ -5,6 +5,8 @@ alias EpochtalkServer.Models.User
 board = insert(:board, name: "General Discussion", slug: "general-discussion")
 test_user_username = "test"
 {:ok, user} = User.by_username(test_user_username)
+thread = build(:thread, board: board, user: user, title: "test", slug: "test_slug")
+thread_id = thread.post.thread_id
 
 logs = [
   %{
@@ -537,7 +539,7 @@ logs = [
       api_url: "/api/threads/title",
       api_method: "post",
       type: "threads.title",
-      obj: %{thread_id: 1, user_id: 1, title: "new_title"}
+      obj: %{thread_id: thread_id, user_id: user.id, title: "new_title"}
     }
   },
   %{
@@ -550,7 +552,7 @@ logs = [
       api_url: "/api/threads/lock",
       api_method: "post",
       type: "threads.lock",
-      obj: %{locked: true, user_id: 1, thread_id: 1}
+      obj: %{locked: true, user_id: user.id, thread_id: thread_id}
     }
   },
   %{
@@ -563,7 +565,7 @@ logs = [
       api_url: "/api/threads/sticky",
       api_method: "post",
       type: "threads.sticky",
-      obj: %{stickied: true, thread_id: 1, user_id: 1}
+      obj: %{stickied: true, thread_id: thread_id, user_id: user.id}
     }
   },
   %{
@@ -578,7 +580,7 @@ logs = [
       type: "threads.move",
       obj: %{
         title: "new_title",
-        thread_id: 1,
+        thread_id: thread_id,
         user_id: user.id,
         old_board_name: "old_board",
         new_board_id: board.id
@@ -608,7 +610,7 @@ logs = [
       api_url: "/api/threads/editPoll",
       api_method: "post",
       type: "threads.editPoll",
-      obj: %{thread_id: 1, user_id: 1}
+      obj: %{thread_id: thread_id, user_id: user.id}
     }
   },
   %{
@@ -621,7 +623,7 @@ logs = [
       api_url: "/api/threads/createPoll",
       api_method: "post",
       type: "threads.createPoll",
-      obj: %{thread_id: 1, user_id: 1}
+      obj: %{thread_id: thread_id, user_id: user.id}
     }
   },
   %{
@@ -634,7 +636,7 @@ logs = [
       api_url: "/api/threads/lockPoll",
       api_method: "post",
       type: "threads.lockPoll",
-      obj: %{locked: false, thread_id: 1, user_id: 1}
+      obj: %{locked: false, thread_id: thread_id, user_id: user.id}
     }
   },
   %{
@@ -686,7 +688,7 @@ logs = [
       api_url: "/api/posts/purge",
       api_method: "post",
       type: "posts.purge",
-      obj: %{user_id: 1, thread_id: 1}
+      obj: %{user_id: user.id, thread_id: thread_id}
     }
   },
   %{

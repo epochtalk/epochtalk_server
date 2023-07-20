@@ -8,7 +8,7 @@ defmodule Test.Support.Factories.Thread do
     quote do
       def thread_attributes_factory(%{board: board} = attrs) do
         %{
-          "title" => sequence(:thread_title, &"Thread title #{&1}"),
+          "title" => Map.get(attrs, :title) || sequence(:thread_title, &"Thread title #{&1}"),
           "body" => sequence(:thread_body, &"Thread body #{&1}"),
           "board_id" => board.id,
           "sticky" => Map.get(attrs, :sticky) || false,
@@ -16,7 +16,7 @@ defmodule Test.Support.Factories.Thread do
           "moderated" => false,
           "addPoll" => false,
           "pollValid" => false,
-          "slug" => sequence(:thread_slug, &"thread-slug-#{&1}")
+          "slug" => Map.get(attrs, :slug) || sequence(:thread_slug, &"thread-slug-#{&1}")
         }
       end
 

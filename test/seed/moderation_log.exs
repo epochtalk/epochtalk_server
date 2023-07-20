@@ -1,4 +1,7 @@
+import Test.Support.Factory
 alias EpochtalkServer.Models.ModerationLog
+
+board = insert(:board, name: "General Discussion", slug: "general-discussion")
 
 logs = [
   %{
@@ -37,7 +40,7 @@ logs = [
       api_url: "/api/admin/moderators",
       api_method: "post",
       type: "adminModerators.add",
-      obj: %{usernames: ["test"], board_id: 1}
+      obj: %{usernames: ["test"], board_id: board.id}
     }
   },
   %{
@@ -63,7 +66,7 @@ logs = [
       api_url: "/api/admin/moderators",
       api_method: "post",
       type: "adminModerators.add",
-      obj: %{usernames: ["test"], board_id: 1}
+      obj: %{usernames: ["test"], board_id: board.id}
     }
   },
   %{
@@ -76,7 +79,7 @@ logs = [
       api_url: "/api/admin/moderators",
       api_method: "delete",
       type: "adminModerators.remove",
-      obj: %{usernames: ["test"], board_id: 1}
+      obj: %{usernames: ["test"], board_id: board.id}
     }
   },
   %{
@@ -575,7 +578,7 @@ logs = [
         thread_id: 1,
         user_id: 1,
         old_board_name: "old_board",
-        new_board_id: 1
+        new_board_id: board.id
       }
     }
   },
@@ -589,7 +592,7 @@ logs = [
       api_url: "/api/threads/purge",
       api_method: "post",
       type: "threads.purge",
-      obj: %{title: "title", user_id: 1, old_board_name: "old_board", board_id: 1}
+      obj: %{title: "title", user_id: 1, old_board_name: "old_board", board_id: board.id}
     }
   },
   %{

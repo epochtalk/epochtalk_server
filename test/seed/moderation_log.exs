@@ -761,7 +761,7 @@ logs = [
       type: "conversations.delete",
       obj: %{
         sender_id: admin.id,
-        receiver_ids: [1]
+        receiver_ids: [user.id]
       }
     }
   },
@@ -777,7 +777,7 @@ logs = [
       type: "messages.delete",
       obj: %{
         sender_id: admin.id,
-        receiver_ids: [1]
+        receiver_ids: [user.id]
       }
     }
   }

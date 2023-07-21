@@ -25,8 +25,30 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     }
   }
 
-  @board_name "General Discussion"
-  @old_board_name "Old Board"
+  @board %{
+    name: "General Discussion",
+    slug: "general-discussion"
+  }
+  @old_board %{
+    name: "Old Board",
+    slug: "old-board"
+  }
+  @user %{
+    username: "test"
+  }
+  @admin %{
+    username: "admin"
+  }
+  @super_admin %{
+    username: "superadmin"
+  }
+  @thread %{
+    title: "Thread",
+    slug: "thread-slug"
+  }
+  @new_thread %{
+    title: "New Thread"
+  }
 
   describe "page/1" do
     @tag :authenticated
@@ -63,10 +85,10 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert moderation_log["action_type"] == "adminModerators.add"
 
       assert moderation_log["action_display_text"] ==
-               "added user(s) 'test' to list of moderators for board '#{@board_name}'"
+               "added user(s) 'test' to list of moderators for board '#{@board.name}'"
 
       assert moderation_log["action_display_url"] ==
-               "threads.data({ boardSlug: 'general-discussion' })"
+               "threads.data({ boardSlug: '#{@board.slug}' })"
     end
 
     @tag :authenticated
@@ -85,10 +107,10 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert moderation_log["action_type"] == "adminModerators.remove"
 
       assert moderation_log["action_display_text"] ==
-               "removed user(s) 'test' from list of moderators for board '#{@board_name}'"
+               "removed user(s) 'test' from list of moderators for board '#{@board.name}'"
 
       assert moderation_log["action_display_url"] ==
-               "threads.data({ boardSlug: 'general-discussion' })"
+               "threads.data({ boardSlug: '#{@board.slug}' })"
     end
 
     @tag :authenticated
@@ -525,7 +547,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert moderation_log["action_type"] == "adminUsers.removeRoles"
 
       assert moderation_log["action_display_text"] ==
-               "removed role 'Super Administrator' from user 'test'"
+               "removed role 'Super Administrator' from user '#{@user.username}'"
 
       assert moderation_log["action_display_url"] == "admin-management.roles({ roleId: '1' })"
     end
@@ -546,8 +568,8 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
 
       assert moderation_log["mod_id"] == 28
       assert moderation_log["action_type"] == "userNotes.create"
-      assert moderation_log["action_display_text"] == "created a moderation note for user 'test'"
-      assert moderation_log["action_display_url"] == "profile({ username: 'test' })"
+      assert moderation_log["action_display_text"] == "created a moderation note for user '#{@user.username}'"
+      assert moderation_log["action_display_url"] == "profile({ username: '#{@user.username}' })"
     end
 
     @tag :authenticated
@@ -568,9 +590,9 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert moderation_log["action_type"] == "userNotes.update"
 
       assert moderation_log["action_display_text"] ==
-               "edited their moderation note for user 'test'"
+               "edited their moderation note for user '#{@user.username}'"
 
-      assert moderation_log["action_display_url"] == "profile({ username: 'test' })"
+      assert moderation_log["action_display_url"] == "profile({ username: '#{@user.username}' })"
     end
 
     @tag :authenticated
@@ -591,9 +613,9 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert moderation_log["action_type"] == "userNotes.delete"
 
       assert moderation_log["action_display_text"] ==
-               "deleted their moderation note for user 'test'"
+               "deleted their moderation note for user '#{@user.username}'"
 
-      assert moderation_log["action_display_url"] == "profile({ username: 'test' })"
+      assert moderation_log["action_display_url"] == "profile({ username: '#{@user.username}' })"
     end
 
     @tag :authenticated
@@ -678,9 +700,9 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert moderation_log["action_type"] == "bans.ban"
 
       assert moderation_log["action_display_text"] ==
-               "temporarily banned user 'test' until '31 Dec 2030'"
+               "temporarily banned user '#{@user.username}' until '31 Dec 2030'"
 
-      assert moderation_log["action_display_url"] == "profile({ username: 'test' })"
+      assert moderation_log["action_display_url"] == "profile({ username: '#{@user.username}' })"
     end
 
     @tag :authenticated
@@ -699,8 +721,8 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
 
       assert moderation_log["mod_id"] == 35
       assert moderation_log["action_type"] == "bans.unban"
-      assert moderation_log["action_display_text"] == "unbanned user 'test'"
-      assert moderation_log["action_display_url"] == "profile({ username: 'test' })"
+      assert moderation_log["action_display_text"] == "unbanned user '#{@user.username}'"
+      assert moderation_log["action_display_url"] == "profile({ username: '#{@user.username}' })"
     end
 
     @tag :authenticated
@@ -721,7 +743,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert moderation_log["action_type"] == "bans.banFromBoards"
 
       assert moderation_log["action_display_text"] ==
-               "banned user 'test' from boards: #{@board_name}'"
+               "banned user '#{@user.username}' from boards: #{@board.name}'"
 
       assert moderation_log["action_display_url"] == "^.board-bans"
     end
@@ -744,7 +766,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert moderation_log["action_type"] == "bans.unbanFromBoards"
 
       assert moderation_log["action_display_text"] ==
-               "unbanned user 'test' from boards: #{@board_name}'"
+               "unbanned user '#{@user.username}' from boards: #{@board.name}'"
 
       assert moderation_log["action_display_url"] == "^.board-bans"
     end
@@ -765,7 +787,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
 
       assert moderation_log["mod_id"] == 38
       assert moderation_log["action_type"] == "boards.create"
-      assert moderation_log["action_display_text"] == "created board named '#{@board_name}'"
+      assert moderation_log["action_display_text"] == "created board named '#{@board.name}'"
       assert moderation_log["action_display_url"] == "admin-management.boards"
     end
 
@@ -785,7 +807,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
 
       assert moderation_log["mod_id"] == 39
       assert moderation_log["action_type"] == "boards.update"
-      assert moderation_log["action_display_text"] == "updated board named '#{@board_name}'"
+      assert moderation_log["action_display_text"] == "updated board named '#{@board.name}'"
       assert moderation_log["action_display_url"] == "admin-management.boards"
     end
 
@@ -805,7 +827,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
 
       assert moderation_log["mod_id"] == 40
       assert moderation_log["action_type"] == "boards.delete"
-      assert moderation_log["action_display_text"] == "deleted board named '#{@board_name}'"
+      assert moderation_log["action_display_text"] == "deleted board named '#{@board.name}'"
       assert moderation_log["action_display_url"] == "admin-management.boards"
     end
 
@@ -827,9 +849,9 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert moderation_log["action_type"] == "threads.title"
 
       assert moderation_log["action_display_text"] ==
-               "updated the title of a thread created by user 'test' to 'new_title'"
+               "updated the title of a thread created by user '#{@user.username}' to '#{@new_thread.title}'"
 
-      assert moderation_log["action_display_url"] == "posts.data({ slug: 'test_slug' })"
+      assert moderation_log["action_display_url"] == "posts.data({ slug: '#{@thread.slug}' })"
     end
 
     @tag :authenticated
@@ -850,9 +872,9 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert moderation_log["action_type"] == "threads.lock"
 
       assert moderation_log["action_display_text"] ==
-               "'locked' the thread 'test' created by user 'test'"
+               "'locked' the thread '#{@thread.title}' created by user '#{@user.username}'"
 
-      assert moderation_log["action_display_url"] == "posts.data({ slug: 'test_slug' })"
+      assert moderation_log["action_display_url"] == "posts.data({ slug: '#{@thread.slug}' })"
     end
 
     @tag :authenticated
@@ -873,9 +895,9 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert moderation_log["action_type"] == "threads.sticky"
 
       assert moderation_log["action_display_text"] ==
-               "'stickied' the thread 'test' created by user 'test'"
+               "'stickied' the thread '#{@thread.title}' created by user '#{@user.username}'"
 
-      assert moderation_log["action_display_url"] == "posts.data({ slug: 'test_slug' })"
+      assert moderation_log["action_display_url"] == "posts.data({ slug: '#{@thread.slug}' })"
     end
 
     @tag :authenticated
@@ -896,9 +918,9 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert moderation_log["action_type"] == "threads.move"
 
       assert moderation_log["action_display_text"] ==
-               "moved the thread 'new_title' created by user 'test' from board '#{@old_board_name}' to '#{@board_name}'"
+               "moved the thread '#{@thread.title}' created by user '#{@user.username}' from board '#{@old_board.name}' to '#{@board.name}'"
 
-      assert moderation_log["action_display_url"] == "posts.data({ slug: 'test_slug' })"
+      assert moderation_log["action_display_url"] == "posts.data({ slug: '#{@thread.slug}' })"
     end
 
     @tag :authenticated
@@ -919,7 +941,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert moderation_log["action_type"] == "threads.purge"
 
       assert moderation_log["action_display_text"] ==
-               "purged thread 'title' created by user 'test' from board 'old_board' to '#{@board_name}'"
+               "purged thread '#{@thread.title}' created by user '#{@user.username}' from board '#{@old_board.name}' to '#{@board.name}'"
 
       assert moderation_log["action_display_url"] == nil
     end
@@ -942,9 +964,9 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert moderation_log["action_type"] == "threads.editPoll"
 
       assert moderation_log["action_display_text"] ==
-               "edited a poll in thread named 'test' created by user 'test'"
+               "edited a poll in thread named '#{@thread.title}' created by user '#{@user.username}'"
 
-      assert moderation_log["action_display_url"] == "posts.data({ slug: 'test_slug' })"
+      assert moderation_log["action_display_url"] == "posts.data({ slug: '#{@thread.slug}' })"
     end
 
     @tag :authenticated
@@ -965,9 +987,9 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert moderation_log["action_type"] == "threads.createPoll"
 
       assert moderation_log["action_display_text"] ==
-               "created a poll in thread named 'test' created by user 'test'"
+               "created a poll in thread named '#{@thread.title}' created by user '#{@user.username}'"
 
-      assert moderation_log["action_display_url"] == "posts.data({ slug: 'test_slug' })"
+      assert moderation_log["action_display_url"] == "posts.data({ slug: '#{@thread.slug}' })"
     end
 
     @tag :authenticated
@@ -988,9 +1010,9 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert moderation_log["action_type"] == "threads.lockPoll"
 
       assert moderation_log["action_display_text"] ==
-               "'unlocked' poll in thread named 'test' created by user 'test'"
+               "'unlocked' poll in thread named '#{@thread.title}' created by user '#{@user.username}'"
 
-      assert moderation_log["action_display_url"] == "posts.data({ slug: 'test_slug' })"
+      assert moderation_log["action_display_url"] == "posts.data({ slug: '#{@thread.slug}' })"
     end
 
     @tag :authenticated
@@ -1011,10 +1033,10 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert moderation_log["action_type"] == "posts.update"
 
       assert moderation_log["action_display_text"] ==
-               "updated post created by user 'test' in thread named 'test'"
+               "updated post created by user '#{@user.username}' in thread named '#{@thread.title}'"
 
       assert moderation_log["action_display_url"] ==
-               "posts.data({ slug: 'test_slug', start: '1', '#': '1' })"
+               "posts.data({ slug: '#{@thread.slug}', start: '1', '#': '1' })"
     end
 
     @tag :authenticated
@@ -1035,10 +1057,10 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert moderation_log["action_type"] == "posts.delete"
 
       assert moderation_log["action_display_text"] ==
-               "hid post created by user 'test' in thread 'test'"
+               "hid post created by user '#{@user.username}' in thread '#{@thread.title}'"
 
       assert moderation_log["action_display_url"] ==
-               "posts.data({ slug: 'test_slug', start: '1', '#': '1' })"
+               "posts.data({ slug: '#{@thread.slug}', start: '1', '#': '1' })"
     end
 
     @tag :authenticated
@@ -1059,10 +1081,10 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert moderation_log["action_type"] == "posts.undelete"
 
       assert moderation_log["action_display_text"] ==
-               "unhid post created by user 'test' in thread 'test'"
+               "unhid post created by user '#{@user.username}' in thread '#{@thread.title}'"
 
       assert moderation_log["action_display_url"] ==
-               "posts.data({ slug: 'test_slug', start: '1', '#': '1' })"
+               "posts.data({ slug: '#{@thread.slug}', start: '1', '#': '1' })"
     end
 
     @tag :authenticated
@@ -1083,9 +1105,9 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert moderation_log["action_type"] == "posts.purge"
 
       assert moderation_log["action_display_text"] ==
-               "purged post created by user 'test' in thread 'test'"
+               "purged post created by user '#{@user.username}' in thread '#{@thread.title}'"
 
-      assert moderation_log["action_display_url"] == "posts.data({ slug: 'test_slug' })"
+      assert moderation_log["action_display_url"] == "posts.data({ slug: '#{@thread.slug}' })"
     end
 
     @tag :authenticated
@@ -1105,7 +1127,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert moderation_log["mod_id"] == 53
       assert moderation_log["action_type"] == "users.update"
       assert moderation_log["action_display_text"] == "Updated user account 'test'"
-      assert moderation_log["action_display_url"] == "profile({ username: 'test' })"
+      assert moderation_log["action_display_url"] == "profile({ username: '#{@user.username}' })"
     end
 
     @tag :authenticated
@@ -1125,7 +1147,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert moderation_log["mod_id"] == 54
       assert moderation_log["action_type"] == "users.deactivate"
       assert moderation_log["action_display_text"] == "deactivated user account 'test'"
-      assert moderation_log["action_display_url"] == "profile({ username: 'test' })"
+      assert moderation_log["action_display_url"] == "profile({ username: '#{@user.username}' })"
     end
 
     @tag :authenticated
@@ -1145,7 +1167,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert moderation_log["mod_id"] == 55
       assert moderation_log["action_type"] == "users.reactivate"
       assert moderation_log["action_display_text"] == "reactivated user account 'test'"
-      assert moderation_log["action_display_url"] == "profile({ username: 'test' })"
+      assert moderation_log["action_display_url"] == "profile({ username: '#{@user.username}' })"
     end
 
     @tag :authenticated

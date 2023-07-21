@@ -2,42 +2,20 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
   use Test.Support.ConnCase, async: true
   alias EpochtalkServer.Models.ModerationLog
 
-  @create_update_boards_attrs %{
-    mod: %{username: "mod", id: 1, ip: "127.0.0.1"},
-    action: %{
-      api_url: "/api/boards/all",
-      api_method: "post",
-      type: "adminBoards.updateCategories",
-      obj: %{}
-    }
-  }
-
-  @create_add_moderators_attrs %{
-    mod: %{username: "test", id: 2, ip: "127.0.0.1"},
-    action: %{
-      api_url: "/api/admin/moderators",
-      api_method: "post",
-      type: "adminModerators.add",
-      obj: %{
-        usernames: ["test"],
-        board_id: 1
-      }
-    }
-  }
-
-  @board %{
-    name: "General Discussion",
-    slug: "general-discussion"
-  }
-  @old_board %{
-    name: "Old Board",
-    slug: "old-board"
-  }
   @user %{
     username: "user"
   }
   @admin %{
     username: "admin"
+  }
+  @board %{
+    name: "General Discussion",
+    slug: "general-discussion",
+    id: 1
+  }
+  @old_board %{
+    name: "Old Board",
+    slug: "old-board"
   }
   @super_admin %{
     username: "superadmin"
@@ -53,6 +31,30 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     title: "New Thread"
   }
   @status "status"
+
+  @create_update_boards_attrs %{
+    mod: %{username: "mod", id: 1, ip: "127.0.0.1"},
+    action: %{
+      api_url: "/api/boards/all",
+      api_method: "post",
+      type: "adminBoards.updateCategories",
+      obj: %{}
+    }
+  }
+
+  @create_add_moderators_attrs %{
+    mod: %{username: @user.username, id: 2, ip: "127.0.0.1"},
+    action: %{
+      api_url: "/api/admin/moderators",
+      api_method: "post",
+      type: "adminModerators.add",
+      obj: %{
+        usernames: [@user.username],
+        board_id: @board.id
+      }
+    }
+  }
+
 
   describe "page/1" do
     @tag :authenticated

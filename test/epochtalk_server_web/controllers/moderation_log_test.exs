@@ -17,9 +17,6 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     name: "Old Board",
     slug: "old-board"
   }
-  @super_admin %{
-    username: "superadmin"
-  }
   @admin_role %{
     id: 1
   }

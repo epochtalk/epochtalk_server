@@ -478,7 +478,7 @@ logs = [
       api_url: "/api/bans/banFromBoards",
       api_method: "post",
       type: "bans.banFromBoards",
-      obj: %{board_ids: [1], user_id: user.id}
+      obj: %{board_ids: [board.id], user_id: user.id}
     }
   },
   %{
@@ -491,7 +491,7 @@ logs = [
       api_url: "/api/bans/unbanFromBoards",
       api_method: "post",
       type: "bans.unbanFromBoards",
-      obj: %{board_ids: [1], user_id: user.id}
+      obj: %{board_ids: [board.id], user_id: user.id}
     }
   },
   %{

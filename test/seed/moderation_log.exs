@@ -23,6 +23,7 @@ status = "status"
 message_report_id = 10
 post_report_id = 20
 user_report_id = 30
+ban_expiration = ~N[2030-12-31 00:00:00.000]
 
 logs = [
   %{
@@ -464,7 +465,7 @@ logs = [
       api_url: "/api/bans/ban",
       api_method: "post",
       type: "bans.ban",
-      obj: %{expiration: ~N[2030-12-31 00:00:00.000], user_id: user.id}
+      obj: %{expiration: ban_expiration, user_id: user.id}
     }
   },
   %{

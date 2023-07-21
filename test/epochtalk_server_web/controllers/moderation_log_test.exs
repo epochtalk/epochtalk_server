@@ -32,6 +32,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
   @message_report_id 10
   @post_report_id 20
   @user_report_id 30
+  @ban_expiration "31 Dec 2030"
 
   @create_update_boards_attrs %{
     mod: %{username: "mod", id: 1, ip: "127.0.0.1"},
@@ -707,7 +708,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert moderation_log["action_type"] == "bans.ban"
 
       assert moderation_log["action_display_text"] ==
-               "temporarily banned user '#{@user.username}' until '31 Dec 2030'"
+               "temporarily banned user '#{@user.username}' until '#{@ban_expiration}'"
 
       assert moderation_log["action_display_url"] == "profile({ username: '#{@user.username}' })"
     end

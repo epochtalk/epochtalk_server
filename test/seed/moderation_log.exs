@@ -14,7 +14,10 @@ thread_title = thread.post.content["title"]
 new_thread_title = "New Thread"
 
 post_id = thread.post.id
-superadministrator_role_id = 1
+super_admin_role = %{
+  id: 1,
+  name: "Super Administrator"
+}
 
 status = "status"
 
@@ -224,7 +227,7 @@ logs = [
       api_url: "/api/roles/add",
       api_method: "post",
       type: "adminRoles.add",
-      obj: %{name: "test", id: 1}
+      obj: %{name: super_admin_role.name, id: 1}
     }
   },
   %{
@@ -237,7 +240,7 @@ logs = [
       api_url: "/api/roles/remove",
       api_method: "delete",
       type: "adminRoles.remove",
-      obj: %{name: "test"}
+      obj: %{name: super_admin_role.name}
     }
   },
   %{
@@ -250,7 +253,7 @@ logs = [
       api_url: "/api/roles/update",
       api_method: "post",
       type: "adminRoles.update",
-      obj: %{name: "test", id: superadministrator_role_id}
+      obj: %{name: super_admin_role.name, id: super_admin_role.id}
     }
   },
   %{
@@ -354,7 +357,7 @@ logs = [
       api_url: "/api/users/addRoles",
       api_method: "post",
       type: "adminUsers.addRoles",
-      obj: %{usernames: [user.username], role_id: superadministrator_role_id}
+      obj: %{usernames: [user.username], role_id: super_admin_role.id}
     }
   },
   %{
@@ -367,7 +370,7 @@ logs = [
       api_url: "/api/users/removeRoles",
       api_method: "delete",
       type: "adminUsers.removeRoles",
-      obj: %{role_id: superadministrator_role_id, user_id: user.id}
+      obj: %{role_id: super_admin_role.id, user_id: user.id}
     }
   },
   %{

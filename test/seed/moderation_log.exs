@@ -9,6 +9,7 @@ admin_username = "admin"
 {:ok, admin} = User.by_username(admin_username)
 thread = build(:thread, board: board, user: user, title: "test", slug: "test_slug")
 thread_id = thread.post.thread_id
+thread_title = thread.post.content["title"]
 post_id = thread.post.id
 superadministrator_role_id = 1
 
@@ -583,7 +584,7 @@ logs = [
       api_method: "post",
       type: "threads.move",
       obj: %{
-        title: "new_title",
+        title: thread_title,
         thread_id: thread_id,
         user_id: user.id,
         old_board_name: "old_board",

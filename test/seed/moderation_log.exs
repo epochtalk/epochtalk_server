@@ -26,6 +26,9 @@ user_report_id = 30
 ban_expiration = ~N[2030-12-31 00:00:00.000]
 mod_address = "127.0.0.2"
 banned_address = "127.0.0.1"
+hostname = nil
+decay = nil
+weight = "99"
 
 logs = [
   %{
@@ -428,7 +431,7 @@ logs = [
       api_url: "/api/bans/addAddresses",
       api_method: "post",
       type: "bans.addAddresses",
-      obj: %{addresses: [%{hostname: nil, ip: banned_address}]}
+      obj: %{addresses: [%{hostname: hostname, ip: banned_address}]}
     }
   },
   %{
@@ -441,7 +444,7 @@ logs = [
       api_url: "/api/bans/editAddress",
       api_method: "post",
       type: "bans.editAddress",
-      obj: %{hostname: nil, ip: banned_address, weight: "99", decay: nil}
+      obj: %{hostname: hostname, ip: banned_address, weight: weight, decay: decay}
     }
   },
   %{

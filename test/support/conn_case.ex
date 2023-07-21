@@ -67,6 +67,7 @@ defmodule Test.Support.ConnCase do
     alias EpochtalkServer.Session
     alias EpochtalkServer.Models.User
     alias EpochtalkServer.Models.Ban
+    import Test.Support.Factory
 
     :ok = Ecto.Adapters.SQL.Sandbox.checkout(EpochtalkServer.Repo)
 
@@ -141,6 +142,9 @@ defmodule Test.Support.ConnCase do
     # handle malicious score if necessary
     context_updates =
       if context[:malicious] do
+        build(:banned_address, ip: "127.0.0.1", weight: 1.0)
+        build(:banned_address, hostname: "localhost", weight: 1.0)
+
         # returns changeset from Ban.ban()
         {:ok, malicious_user_changeset} = User.handle_malicious_user(user, conn.remote_ip)
         {:ok, k_list} = context_updates

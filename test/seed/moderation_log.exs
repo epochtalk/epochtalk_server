@@ -16,6 +16,8 @@ new_thread_title = "New Thread"
 post_id = thread.post.id
 superadministrator_role_id = 1
 
+status = "status"
+
 logs = [
   %{
     mod: %{
@@ -105,7 +107,7 @@ logs = [
       api_url: "/api/reports/updateMessageReport",
       api_method: "post",
       type: "reports.updateMessageReport",
-      obj: %{status: "test", id: 1}
+      obj: %{status: "#{status}", id: 1}
     }
   },
   %{
@@ -144,7 +146,7 @@ logs = [
       api_url: "/api/reports/updatePostReport",
       api_method: "post",
       type: "reports.updatePostReport",
-      obj: %{status: "test", id: 1}
+      obj: %{status: "#{status}", id: 1}
     }
   },
   %{
@@ -183,7 +185,7 @@ logs = [
       api_url: "/api/reports/updateUserReport",
       api_method: "post",
       type: "reports.updateUserReport",
-      obj: %{status: "test", id: 1}
+      obj: %{status: "#{status}", id: 1}
     }
   },
   %{

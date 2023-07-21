@@ -52,6 +52,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
   @new_thread %{
     title: "New Thread"
   }
+  @status "status"
 
   describe "page/1" do
     @tag :authenticated
@@ -132,7 +133,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert moderation_log["action_type"] == "reports.updateMessageReport"
 
       assert moderation_log["action_display_text"] ==
-               "updated the status of message report to 'test'"
+               "updated the status of message report to '#{@status}'"
 
       assert moderation_log["action_display_url"] == "^.messages({ reportId: '1' })"
     end
@@ -195,7 +196,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert moderation_log["action_type"] == "reports.updatePostReport"
 
       assert moderation_log["action_display_text"] ==
-               "updated the status of post report to 'test'"
+               "updated the status of post report to '#{@status}'"
 
       assert moderation_log["action_display_url"] == "^.messages({ reportId: '1' })"
     end
@@ -258,7 +259,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert moderation_log["action_type"] == "reports.updateUserReport"
 
       assert moderation_log["action_display_text"] ==
-               "updated the status of user report to 'test'"
+               "updated the status of user report to '#{@status}'"
 
       assert moderation_log["action_display_url"] == "^.messages({ reportId: '1' })"
     end

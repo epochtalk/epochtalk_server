@@ -4,7 +4,7 @@ alias EpochtalkServer.Models.User
 
 board = insert(:board, name: "General Discussion", slug: "general-discussion")
 old_board = insert(:board, name: "Old Board", slug: "old-board")
-user_username = "test"
+user_username = "user"
 admin_username = "admin"
 {:ok, user} = User.by_username(user_username)
 {:ok, admin} = User.by_username(admin_username)

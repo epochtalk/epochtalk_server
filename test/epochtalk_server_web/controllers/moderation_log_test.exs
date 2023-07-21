@@ -42,6 +42,9 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
   @super_admin %{
     username: "superadmin"
   }
+  @admin_role %{
+    id: 1
+  }
   @thread %{
     title: "Thread",
     slug: "thread-slug"
@@ -317,7 +320,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert moderation_log["mod_id"] == 16
       assert moderation_log["action_type"] == "adminRoles.add"
       assert moderation_log["action_display_text"] == "created a new role named 'test'"
-      assert moderation_log["action_display_url"] == "admin-management.roles({ roleId: '1' })"
+      assert moderation_log["action_display_url"] == "admin-management.roles({ roleId: '#{@admin_role.id}' })"
     end
 
     @tag :authenticated
@@ -357,7 +360,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert moderation_log["mod_id"] == 18
       assert moderation_log["action_type"] == "adminRoles.update"
       assert moderation_log["action_display_text"] == "updated the role named 'test'"
-      assert moderation_log["action_display_url"] == "admin-management.roles({ roleId: '1' })"
+      assert moderation_log["action_display_url"] == "admin-management.roles({ roleId: '#{@admin_role.id}' })"
     end
 
     @tag :authenticated
@@ -526,7 +529,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert moderation_log["action_display_text"] ==
                "added role 'Super Administrator' to users(s) 'test'"
 
-      assert moderation_log["action_display_url"] == "admin-management.roles({ roleId: '1' })"
+      assert moderation_log["action_display_url"] == "admin-management.roles({ roleId: '#{@admin_role.id}' })"
     end
 
     @tag :authenticated
@@ -549,7 +552,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert moderation_log["action_display_text"] ==
                "removed role 'Super Administrator' from user '#{@user.username}'"
 
-      assert moderation_log["action_display_url"] == "admin-management.roles({ roleId: '1' })"
+      assert moderation_log["action_display_url"] == "admin-management.roles({ roleId: '#{@admin_role.id}' })"
     end
 
     @tag :authenticated

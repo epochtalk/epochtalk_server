@@ -35,6 +35,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
   @ban_expiration "31 Dec 2030"
   @mod_address "127.0.0.2"
   @banned_address "127.0.0.1"
+  @weight 99
 
   @create_update_boards_attrs %{
     mod: %{username: @admin.username, id: 1, ip: @mod_address},
@@ -666,7 +667,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert moderation_log["action_type"] == "bans.editAddress"
 
       assert moderation_log["action_display_text"] ==
-               "edited banned address '#{@banned_address}' to 'not decay' with a weight of '99'"
+               "edited banned address '#{@banned_address}' to 'not decay' with a weight of '#{@weight}'"
 
       assert moderation_log["action_display_url"] ==
                "admin-management.banned-addresses({ search: '#{@banned_address}' })"

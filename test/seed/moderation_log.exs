@@ -236,7 +236,7 @@ logs = [
       api_url: "/api/roles/add",
       api_method: "post",
       type: "adminRoles.add",
-      obj: %{name: super_admin_role.name, id: 1}
+      obj: %{name: super_admin_role.name, id: super_admin_role.id}
     }
   },
   %{

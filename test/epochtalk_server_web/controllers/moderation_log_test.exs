@@ -34,6 +34,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
   @user_report_id 30
   @ban_expiration "31 Dec 2030"
   @mod_address "127.0.0.2"
+  @banned_address "127.0.0.1"
 
   @create_update_boards_attrs %{
     mod: %{username: @admin.username, id: 1, ip: @mod_address},
@@ -643,7 +644,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
 
       assert moderation_log["mod_id"] == 31
       assert moderation_log["action_type"] == "bans.addAddresses"
-      assert moderation_log["action_display_text"] == "banned the following addresses '127.0.0.1'"
+      assert moderation_log["action_display_text"] == "banned the following addresses '#{@banned_address}'"
       assert moderation_log["action_display_url"] == "admin-management.banned-addresses"
     end
 
@@ -665,10 +666,10 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert moderation_log["action_type"] == "bans.editAddress"
 
       assert moderation_log["action_display_text"] ==
-               "edited banned address '127.0.0.1' to 'not decay' with a weight of '99'"
+               "edited banned address '#{@banned_address}' to 'not decay' with a weight of '99'"
 
       assert moderation_log["action_display_url"] ==
-               "admin-management.banned-addresses({ search: '127.0.0.1' })"
+               "admin-management.banned-addresses({ search: '#{@banned_address}' })"
     end
 
     @tag :authenticated
@@ -687,7 +688,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
 
       assert moderation_log["mod_id"] == 33
       assert moderation_log["action_type"] == "bans.deleteAddress"
-      assert moderation_log["action_display_text"] == "deleted banned address '127.0.0.1'"
+      assert moderation_log["action_display_text"] == "deleted banned address '#{@banned_address}'"
       assert moderation_log["action_display_url"] == "admin-management.banned-addresses"
     end
 

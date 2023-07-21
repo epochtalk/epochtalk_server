@@ -33,9 +33,10 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
   @post_report_id 20
   @user_report_id 30
   @ban_expiration "31 Dec 2030"
+  @mod_address "127.0.0.2"
 
   @create_update_boards_attrs %{
-    mod: %{username: "mod", id: 1, ip: "127.0.0.1"},
+    mod: %{username: @admin.username, id: 1, ip: @mod_address},
     action: %{
       api_url: "/api/boards/all",
       api_method: "post",
@@ -45,7 +46,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
   }
 
   @create_add_moderators_attrs %{
-    mod: %{username: @user.username, id: 2, ip: "127.0.0.1"},
+    mod: %{username: @admin.username, id: 2, ip: @mod_address},
     action: %{
       api_url: "/api/admin/moderators",
       api_method: "post",

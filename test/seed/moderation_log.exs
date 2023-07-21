@@ -9,6 +9,7 @@ admin_username = "admin"
 {:ok, admin} = User.by_username(admin_username)
 thread = build(:thread, board: board, user: user, title: "test", slug: "test_slug")
 thread_id = thread.post.thread_id
+superadministrator_role_id = 1
 
 logs = [
   %{
@@ -242,7 +243,7 @@ logs = [
       api_url: "/api/roles/update",
       api_method: "post",
       type: "adminRoles.update",
-      obj: %{name: "test", id: 1}
+      obj: %{name: "test", id: superadministrator_role_id}
     }
   },
   %{
@@ -346,7 +347,7 @@ logs = [
       api_url: "/api/users/addRoles",
       api_method: "post",
       type: "adminUsers.addRoles",
-      obj: %{usernames: [user.username], role_id: 1}
+      obj: %{usernames: [user.username], role_id: superadministrator_role_id}
     }
   },
   %{
@@ -359,7 +360,7 @@ logs = [
       api_url: "/api/users/removeRoles",
       api_method: "delete",
       type: "adminUsers.removeRoles",
-      obj: %{role_id: 1, user_id: user.id}
+      obj: %{role_id: superadministrator_role_id, user_id: user.id}
     }
   },
   %{

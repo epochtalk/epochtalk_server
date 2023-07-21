@@ -603,7 +603,7 @@ logs = [
       api_url: "/api/threads/purge",
       api_method: "post",
       type: "threads.purge",
-      obj: %{title: "title", user_id: user.id, old_board_name: "old_board", board_id: board.id}
+      obj: %{title: thread_title, user_id: user.id, old_board_name: "old_board", board_id: board.id}
     }
   },
   %{

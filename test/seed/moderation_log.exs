@@ -24,13 +24,14 @@ message_report_id = 10
 post_report_id = 20
 user_report_id = 30
 ban_expiration = ~N[2030-12-31 00:00:00.000]
+mod_address = "127.0.0.2"
 
 logs = [
   %{
     mod: %{
       username: "one.adminBoards.updateCategories",
       id: 1,
-      ip: "127.0.0.1"
+      ip: mod_address
     },
     action: %{
       api_url: "/api/boards/all",
@@ -43,7 +44,7 @@ logs = [
     mod: %{
       username: "two.adminBoards.updateCategories",
       id: 2,
-      ip: "127.0.0.1"
+      ip: mod_address
     },
     action: %{
       api_url: "/api/boards/all",
@@ -56,7 +57,7 @@ logs = [
     mod: %{
       username: "one.adminModerators.add",
       id: 3,
-      ip: "127.0.0.1"
+      ip: mod_address
     },
     action: %{
       api_url: "/api/admin/moderators",
@@ -69,7 +70,7 @@ logs = [
     mod: %{
       username: "two.adminModerators.add",
       id: 4,
-      ip: "127.0.0.1"
+      ip: mod_address
     },
     action: %{
       api_url: "/api/boards/all",
@@ -82,7 +83,7 @@ logs = [
     mod: %{
       username: "three.adminModerators.add",
       id: 5,
-      ip: "127.0.0.1"
+      ip: mod_address
     },
     action: %{
       api_url: "/api/admin/moderators",
@@ -95,7 +96,7 @@ logs = [
     mod: %{
       username: "adminModerators.remove",
       id: 6,
-      ip: "127.0.0.1"
+      ip: mod_address
     },
     action: %{
       api_url: "/api/admin/moderators",
@@ -108,7 +109,7 @@ logs = [
     mod: %{
       username: "reports.updateMessageReport",
       id: 7,
-      ip: "127.0.0.1"
+      ip: mod_address
     },
     action: %{
       api_url: "/api/reports/updateMessageReport",
@@ -121,7 +122,7 @@ logs = [
     mod: %{
       username: "reports.createMessageReportNote",
       id: 8,
-      ip: "127.0.0.1"
+      ip: mod_address
     },
     action: %{
       api_url: "/api/reports/createMessageReportNote",
@@ -134,7 +135,7 @@ logs = [
     mod: %{
       username: "reports.updateMessageReportNote",
       id: 9,
-      ip: "127.0.0.1"
+      ip: mod_address
     },
     action: %{
       api_url: "/api/reports/updateMessageReportNote",
@@ -147,7 +148,7 @@ logs = [
     mod: %{
       username: "reports.updatePostReport",
       id: 10,
-      ip: "127.0.0.1"
+      ip: mod_address
     },
     action: %{
       api_url: "/api/reports/updatePostReport",
@@ -160,7 +161,7 @@ logs = [
     mod: %{
       username: "reports.createPostReportNote",
       id: 11,
-      ip: "127.0.0.1"
+      ip: mod_address
     },
     action: %{
       api_url: "/api/reports/createPostReportNote",
@@ -173,7 +174,7 @@ logs = [
     mod: %{
       username: "reports.updatePostReportNote",
       id: 12,
-      ip: "127.0.0.1"
+      ip: mod_address
     },
     action: %{
       api_url: "/api/reports/updatePostReportNote",
@@ -186,7 +187,7 @@ logs = [
     mod: %{
       username: "reports.updateUserReport",
       id: 13,
-      ip: "127.0.0.1"
+      ip: mod_address
     },
     action: %{
       api_url: "/api/reports/updateUserReport",
@@ -199,7 +200,7 @@ logs = [
     mod: %{
       username: "reports.createUserReportNote",
       id: 14,
-      ip: "127.0.0.1"
+      ip: mod_address
     },
     action: %{
       api_url: "/api/reports/createUserReportNote",
@@ -212,7 +213,7 @@ logs = [
     mod: %{
       username: "reports.updateUserReportNote",
       id: 15,
-      ip: "127.0.0.1"
+      ip: mod_address
     },
     action: %{
       api_url: "/api/reports/updateUserReportNote",
@@ -225,7 +226,7 @@ logs = [
     mod: %{
       username: "adminRoles.add",
       id: 16,
-      ip: "127.0.0.1"
+      ip: mod_address
     },
     action: %{
       api_url: "/api/roles/add",
@@ -238,7 +239,7 @@ logs = [
     mod: %{
       username: "adminRoles.remove",
       id: 17,
-      ip: "127.0.0.1"
+      ip: mod_address
     },
     action: %{
       api_url: "/api/roles/remove",
@@ -251,7 +252,7 @@ logs = [
     mod: %{
       username: "adminRoles.update",
       id: 18,
-      ip: "127.0.0.1"
+      ip: mod_address
     },
     action: %{
       api_url: "/api/roles/update",
@@ -264,7 +265,7 @@ logs = [
     mod: %{
       username: "adminRoles.reprioritize",
       id: 19,
-      ip: "127.0.0.1"
+      ip: mod_address
     },
     action: %{
       api_url: "/api/roles/reprioritize",
@@ -277,7 +278,7 @@ logs = [
     mod: %{
       username: "adminSettings.update",
       id: 20,
-      ip: "127.0.0.1"
+      ip: mod_address
     },
     action: %{
       api_url: "/api/settings/update",
@@ -290,7 +291,7 @@ logs = [
     mod: %{
       username: "adminSettings.addToBlacklist",
       id: 21,
-      ip: "127.0.0.1"
+      ip: mod_address
     },
     action: %{
       api_url: "/api/settings/addToBlacklist",
@@ -303,7 +304,7 @@ logs = [
     mod: %{
       username: "adminSettings.updateBlacklist",
       id: 22,
-      ip: "127.0.0.1"
+      ip: mod_address
     },
     action: %{
       api_url: "/api/settings/updateBlacklist",
@@ -316,7 +317,7 @@ logs = [
     mod: %{
       username: "adminSettings.deleteFromBlacklist",
       id: 23,
-      ip: "127.0.0.1"
+      ip: mod_address
     },
     action: %{
       api_url: "/api/settings/deleteFromBlacklist",
@@ -329,7 +330,7 @@ logs = [
     mod: %{
       username: "adminSettings.setTheme",
       id: 24,
-      ip: "127.0.0.1"
+      ip: mod_address
     },
     action: %{
       api_url: "/api/settings/setTheme",
@@ -342,7 +343,7 @@ logs = [
     mod: %{
       username: "adminSettings.resetTheme",
       id: 25,
-      ip: "127.0.0.1"
+      ip: mod_address
     },
     action: %{
       api_url: "/api/settings/resetTheme",
@@ -355,7 +356,7 @@ logs = [
     mod: %{
       username: "adminUsers.addRoles",
       id: 26,
-      ip: "127.0.0.1"
+      ip: mod_address
     },
     action: %{
       api_url: "/api/users/addRoles",
@@ -368,7 +369,7 @@ logs = [
     mod: %{
       username: "adminUsers.removeRoles",
       id: 27,
-      ip: "127.0.0.1"
+      ip: mod_address
     },
     action: %{
       api_url: "/api/users/removeRoles",
@@ -381,7 +382,7 @@ logs = [
     mod: %{
       username: "userNotes.create",
       id: 28,
-      ip: "127.0.0.1"
+      ip: mod_address
     },
     action: %{
       api_url: "/api/userNotes/create",
@@ -394,7 +395,7 @@ logs = [
     mod: %{
       username: "userNotes.update",
       id: 29,
-      ip: "127.0.0.1"
+      ip: mod_address
     },
     action: %{
       api_url: "/api/userNotes/update",
@@ -407,7 +408,7 @@ logs = [
     mod: %{
       username: "userNotes.delete",
       id: 30,
-      ip: "127.0.0.1"
+      ip: mod_address
     },
     action: %{
       api_url: "/api/userNotes/delete",
@@ -420,7 +421,7 @@ logs = [
     mod: %{
       username: "bans.addAddresses",
       id: 31,
-      ip: "127.0.0.1"
+      ip: mod_address
     },
     action: %{
       api_url: "/api/bans/addAddresses",
@@ -433,7 +434,7 @@ logs = [
     mod: %{
       username: "bans.editAddress",
       id: 32,
-      ip: "127.0.0.1"
+      ip: mod_address
     },
     action: %{
       api_url: "/api/bans/editAddress",
@@ -446,7 +447,7 @@ logs = [
     mod: %{
       username: "bans.deleteAddress",
       id: 33,
-      ip: "127.0.0.1"
+      ip: mod_address
     },
     action: %{
       api_url: "/api/bans/deleteAddress",
@@ -459,7 +460,7 @@ logs = [
     mod: %{
       username: "bans.ban",
       id: 34,
-      ip: "127.0.0.1"
+      ip: mod_address
     },
     action: %{
       api_url: "/api/bans/ban",
@@ -472,7 +473,7 @@ logs = [
     mod: %{
       username: "bans.unban",
       id: 35,
-      ip: "127.0.0.1"
+      ip: mod_address
     },
     action: %{
       api_url: "/api/bans/unban",
@@ -485,7 +486,7 @@ logs = [
     mod: %{
       username: "bans.banFromBoards",
       id: 36,
-      ip: "127.0.0.1"
+      ip: mod_address
     },
     action: %{
       api_url: "/api/bans/banFromBoards",
@@ -498,7 +499,7 @@ logs = [
     mod: %{
       username: "bans.unbanFromBoards",
       id: 37,
-      ip: "127.0.0.1"
+      ip: mod_address
     },
     action: %{
       api_url: "/api/bans/unbanFromBoards",
@@ -511,7 +512,7 @@ logs = [
     mod: %{
       username: "boards.create",
       id: 38,
-      ip: "127.0.0.1"
+      ip: mod_address
     },
     action: %{
       api_url: "/api/boards/create",
@@ -524,7 +525,7 @@ logs = [
     mod: %{
       username: "boards.update",
       id: 39,
-      ip: "127.0.0.1"
+      ip: mod_address
     },
     action: %{
       api_url: "/api/boards/update",
@@ -537,7 +538,7 @@ logs = [
     mod: %{
       username: "boards.delete",
       id: 40,
-      ip: "127.0.0.1"
+      ip: mod_address
     },
     action: %{
       api_url: "/api/boards/delete",
@@ -550,7 +551,7 @@ logs = [
     mod: %{
       username: "threads.title",
       id: 41,
-      ip: "127.0.0.1"
+      ip: mod_address
     },
     action: %{
       api_url: "/api/threads/title",
@@ -563,7 +564,7 @@ logs = [
     mod: %{
       username: "threads.lock",
       id: 42,
-      ip: "127.0.0.1"
+      ip: mod_address
     },
     action: %{
       api_url: "/api/threads/lock",
@@ -576,7 +577,7 @@ logs = [
     mod: %{
       username: "threads.sticky",
       id: 43,
-      ip: "127.0.0.1"
+      ip: mod_address
     },
     action: %{
       api_url: "/api/threads/sticky",
@@ -589,7 +590,7 @@ logs = [
     mod: %{
       username: "threads.move",
       id: 44,
-      ip: "127.0.0.1"
+      ip: mod_address
     },
     action: %{
       api_url: "/api/threads/move",
@@ -608,7 +609,7 @@ logs = [
     mod: %{
       username: "threads.purge",
       id: 45,
-      ip: "127.0.0.1"
+      ip: mod_address
     },
     action: %{
       api_url: "/api/threads/purge",
@@ -621,7 +622,7 @@ logs = [
     mod: %{
       username: "threads.editPoll",
       id: 46,
-      ip: "127.0.0.1"
+      ip: mod_address
     },
     action: %{
       api_url: "/api/threads/editPoll",
@@ -634,7 +635,7 @@ logs = [
     mod: %{
       username: "threads.createPoll",
       id: 47,
-      ip: "127.0.0.1"
+      ip: mod_address
     },
     action: %{
       api_url: "/api/threads/createPoll",
@@ -647,7 +648,7 @@ logs = [
     mod: %{
       username: "threads.lockPoll",
       id: 48,
-      ip: "127.0.0.1"
+      ip: mod_address
     },
     action: %{
       api_url: "/api/threads/lockPoll",
@@ -660,7 +661,7 @@ logs = [
     mod: %{
       username: "posts.update",
       id: 49,
-      ip: "127.0.0.1"
+      ip: mod_address
     },
     action: %{
       api_url: "/api/posts/update",
@@ -673,7 +674,7 @@ logs = [
     mod: %{
       username: "posts.delete",
       id: 50,
-      ip: "127.0.0.1"
+      ip: mod_address
     },
     action: %{
       api_url: "/api/posts/delete",
@@ -686,7 +687,7 @@ logs = [
     mod: %{
       username: "posts.undelete",
       id: 51,
-      ip: "127.0.0.1"
+      ip: mod_address
     },
     action: %{
       api_url: "/api/posts/undelete",
@@ -699,7 +700,7 @@ logs = [
     mod: %{
       username: "posts.purge",
       id: 52,
-      ip: "127.0.0.1"
+      ip: mod_address
     },
     action: %{
       api_url: "/api/posts/purge",
@@ -712,7 +713,7 @@ logs = [
     mod: %{
       username: "users.update",
       id: 53,
-      ip: "127.0.0.1"
+      ip: mod_address
     },
     action: %{
       api_url: "/api/users/update",
@@ -725,7 +726,7 @@ logs = [
     mod: %{
       username: "users.deactivate",
       id: 54,
-      ip: "127.0.0.1"
+      ip: mod_address
     },
     action: %{
       api_url: "/api/users/deactivate",
@@ -738,7 +739,7 @@ logs = [
     mod: %{
       username: "users.reactivate",
       id: 55,
-      ip: "127.0.0.1"
+      ip: mod_address
     },
     action: %{
       api_url: "/api/users/reactivate",
@@ -751,7 +752,7 @@ logs = [
     mod: %{
       username: "users.delete",
       id: 56,
-      ip: "127.0.0.1"
+      ip: mod_address
     },
     action: %{
       api_url: "/api/users/delete",
@@ -764,7 +765,7 @@ logs = [
     mod: %{
       username: "conversations.delete",
       id: 57,
-      ip: "127.0.0.1"
+      ip: mod_address
     },
     action: %{
       api_url: "/api/conversations/delete",
@@ -780,7 +781,7 @@ logs = [
     mod: %{
       username: "messages.delete",
       id: 58,
-      ip: "127.0.0.1"
+      ip: mod_address
     },
     action: %{
       api_url: "/api/messages/delete",

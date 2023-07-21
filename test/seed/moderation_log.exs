@@ -20,6 +20,9 @@ super_admin_role = %{
 }
 
 status = "status"
+message_report_id = 10
+post_report_id = 20
+user_report_id = 30
 
 logs = [
   %{
@@ -110,7 +113,7 @@ logs = [
       api_url: "/api/reports/updateMessageReport",
       api_method: "post",
       type: "reports.updateMessageReport",
-      obj: %{status: "#{status}", id: 1}
+      obj: %{status: "#{status}", id: message_report_id}
     }
   },
   %{
@@ -123,7 +126,7 @@ logs = [
       api_url: "/api/reports/createMessageReportNote",
       api_method: "post",
       type: "reports.createMessageReportNote",
-      obj: %{report_id: 1}
+      obj: %{report_id: message_report_id}
     }
   },
   %{
@@ -136,7 +139,7 @@ logs = [
       api_url: "/api/reports/updateMessageReportNote",
       api_method: "post",
       type: "reports.updateMessageReportNote",
-      obj: %{report_id: 1}
+      obj: %{report_id: message_report_id}
     }
   },
   %{
@@ -149,7 +152,7 @@ logs = [
       api_url: "/api/reports/updatePostReport",
       api_method: "post",
       type: "reports.updatePostReport",
-      obj: %{status: "#{status}", id: 1}
+      obj: %{status: "#{status}", id: post_report_id}
     }
   },
   %{
@@ -162,7 +165,7 @@ logs = [
       api_url: "/api/reports/createPostReportNote",
       api_method: "post",
       type: "reports.createPostReportNote",
-      obj: %{report_id: 1}
+      obj: %{report_id: post_report_id}
     }
   },
   %{
@@ -175,7 +178,7 @@ logs = [
       api_url: "/api/reports/updatePostReportNote",
       api_method: "post",
       type: "reports.updatePostReportNote",
-      obj: %{report_id: 1}
+      obj: %{report_id: post_report_id}
     }
   },
   %{
@@ -188,7 +191,7 @@ logs = [
       api_url: "/api/reports/updateUserReport",
       api_method: "post",
       type: "reports.updateUserReport",
-      obj: %{status: "#{status}", id: 1}
+      obj: %{status: "#{status}", id: user_report_id}
     }
   },
   %{
@@ -201,7 +204,7 @@ logs = [
       api_url: "/api/reports/createUserReportNote",
       api_method: "post",
       type: "reports.createUserReportNote",
-      obj: %{report_id: 1}
+      obj: %{report_id: user_report_id}
     }
   },
   %{
@@ -214,7 +217,7 @@ logs = [
       api_url: "/api/reports/updateUserReportNote",
       api_method: "post",
       type: "reports.updateUserReportNote",
-      obj: %{report_id: 1}
+      obj: %{report_id: user_report_id}
     }
   },
   %{

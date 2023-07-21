@@ -29,6 +29,9 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     title: "New Thread"
   }
   @status "status"
+  @message_report_id 10
+  @post_report_id 20
+  @user_report_id 30
 
   @create_update_boards_attrs %{
     mod: %{username: "mod", id: 1, ip: "127.0.0.1"},
@@ -135,7 +138,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert moderation_log["action_display_text"] ==
                "updated the status of message report to '#{@status}'"
 
-      assert moderation_log["action_display_url"] == "^.messages({ reportId: '1' })"
+      assert moderation_log["action_display_url"] == "^.messages({ reportId: '#{@message_report_id}' })"
     end
 
     @tag :authenticated
@@ -155,7 +158,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert moderation_log["mod_id"] == 8
       assert moderation_log["action_type"] == "reports.createMessageReportNote"
       assert moderation_log["action_display_text"] == "created a note on a message report"
-      assert moderation_log["action_display_url"] == "^.messages({ reportId: '1' })"
+      assert moderation_log["action_display_url"] == "^.messages({ reportId: '#{@message_report_id}' })"
     end
 
     @tag :authenticated
@@ -175,7 +178,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert moderation_log["mod_id"] == 9
       assert moderation_log["action_type"] == "reports.updateMessageReportNote"
       assert moderation_log["action_display_text"] == "edited their note on a message report"
-      assert moderation_log["action_display_url"] == "^.messages({ reportId: '1' })"
+      assert moderation_log["action_display_url"] == "^.messages({ reportId: '#{@message_report_id}' })"
     end
 
     @tag :authenticated
@@ -198,7 +201,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert moderation_log["action_display_text"] ==
                "updated the status of post report to '#{@status}'"
 
-      assert moderation_log["action_display_url"] == "^.messages({ reportId: '1' })"
+      assert moderation_log["action_display_url"] == "^.messages({ reportId: '#{@post_report_id}' })"
     end
 
     @tag :authenticated
@@ -218,7 +221,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert moderation_log["mod_id"] == 11
       assert moderation_log["action_type"] == "reports.createPostReportNote"
       assert moderation_log["action_display_text"] == "created a note on a post report"
-      assert moderation_log["action_display_url"] == "^.messages({ reportId: '1' })"
+      assert moderation_log["action_display_url"] == "^.messages({ reportId: '#{@post_report_id}' })"
     end
 
     @tag :authenticated
@@ -238,7 +241,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert moderation_log["mod_id"] == 12
       assert moderation_log["action_type"] == "reports.updatePostReportNote"
       assert moderation_log["action_display_text"] == "edited their note on a post report"
-      assert moderation_log["action_display_url"] == "^.messages({ reportId: '1' })"
+      assert moderation_log["action_display_url"] == "^.messages({ reportId: '#{@post_report_id}' })"
     end
 
     @tag :authenticated
@@ -261,7 +264,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert moderation_log["action_display_text"] ==
                "updated the status of user report to '#{@status}'"
 
-      assert moderation_log["action_display_url"] == "^.messages({ reportId: '1' })"
+      assert moderation_log["action_display_url"] == "^.messages({ reportId: '#{@user_report_id}' })"
     end
 
     @tag :authenticated
@@ -281,7 +284,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert moderation_log["mod_id"] == 14
       assert moderation_log["action_type"] == "reports.createUserReportNote"
       assert moderation_log["action_display_text"] == "created a note on a user report"
-      assert moderation_log["action_display_url"] == "^.messages({ reportId: '1' })"
+      assert moderation_log["action_display_url"] == "^.messages({ reportId: '#{@user_report_id}' })"
     end
 
     @tag :authenticated
@@ -301,7 +304,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert moderation_log["mod_id"] == 15
       assert moderation_log["action_type"] == "reports.updateUserReportNote"
       assert moderation_log["action_display_text"] == "edited their note on a user report"
-      assert moderation_log["action_display_url"] == "^.messages({ reportId: '1' })"
+      assert moderation_log["action_display_url"] == "^.messages({ reportId: '#{@user_report_id}' })"
     end
 
     @tag :authenticated

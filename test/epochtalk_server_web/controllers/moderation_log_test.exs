@@ -34,7 +34,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     slug: "old-board"
   }
   @user %{
-    username: "test"
+    username: "user"
   }
   @admin %{
     username: "admin"

@@ -42,6 +42,8 @@ defmodule EpochtalkServer.Models.BoardModerator do
     |> validate_required([:user_id, :board_id])
   end
 
+  ## === Database Functions ===
+
   @doc """
   Query all `BoardModerator` models
   """
@@ -54,6 +56,23 @@ defmodule EpochtalkServer.Models.BoardModerator do
   @spec get_user_moderated_boards(user_id :: non_neg_integer) :: [Ecto.Changeset.t()] | []
   def get_user_moderated_boards(user_id),
     do: Repo.all(from(b in BoardModerator, select: b.board_id, where: b.user_id == ^user_id))
+
+  @doc """
+  Check if a specific `User` is moderater of a `Board` using a `Board` ID
+  """
+  @spec user_is_moderator(
+          board_id :: non_neg_integer,
+          user_id :: non_neg_integer
+        ) ::
+          boolean
+  def user_is_moderator(board_id, user_id) do
+    query =
+      from bm in BoardModerator,
+        where: bm.user_id == ^user_id and bm.board_id == ^board_id,
+        select: bm.user_id
+
+    Repo.exists?(query)
+  end
 
   @doc """
   Check if a specific `User` is moderater of a `Board` using a `Thread` ID

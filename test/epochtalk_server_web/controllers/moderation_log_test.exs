@@ -88,7 +88,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert moderation_log["action_type"] == "adminModerators.add"
 
       assert moderation_log["action_display_text"] ==
-               "added user(s) 'test' to list of moderators for board '#{@board.name}'"
+               "added user(s) '#{@user.username}' to list of moderators for board '#{@board.name}'"
 
       assert moderation_log["action_display_url"] ==
                "threads.data({ boardSlug: '#{@board.slug}' })"
@@ -110,7 +110,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert moderation_log["action_type"] == "adminModerators.remove"
 
       assert moderation_log["action_display_text"] ==
-               "removed user(s) 'test' from list of moderators for board '#{@board.name}'"
+               "removed user(s) '#{@user.username}' from list of moderators for board '#{@board.name}'"
 
       assert moderation_log["action_display_url"] ==
                "threads.data({ boardSlug: '#{@board.slug}' })"
@@ -1129,7 +1129,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
 
       assert moderation_log["mod_id"] == 53
       assert moderation_log["action_type"] == "users.update"
-      assert moderation_log["action_display_text"] == "Updated user account 'test'"
+      assert moderation_log["action_display_text"] == "Updated user account '#{@user.username}'"
       assert moderation_log["action_display_url"] == "profile({ username: '#{@user.username}' })"
     end
 
@@ -1149,7 +1149,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
 
       assert moderation_log["mod_id"] == 54
       assert moderation_log["action_type"] == "users.deactivate"
-      assert moderation_log["action_display_text"] == "deactivated user account 'test'"
+      assert moderation_log["action_display_text"] == "deactivated user account '#{@user.username}'"
       assert moderation_log["action_display_url"] == "profile({ username: '#{@user.username}' })"
     end
 
@@ -1169,7 +1169,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
 
       assert moderation_log["mod_id"] == 55
       assert moderation_log["action_type"] == "users.reactivate"
-      assert moderation_log["action_display_text"] == "reactivated user account 'test'"
+      assert moderation_log["action_display_text"] == "reactivated user account '#{@user.username}'"
       assert moderation_log["action_display_url"] == "profile({ username: '#{@user.username}' })"
     end
 
@@ -1189,7 +1189,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
 
       assert moderation_log["mod_id"] == 56
       assert moderation_log["action_type"] == "users.delete"
-      assert moderation_log["action_display_text"] == "purged user account 'test'"
+      assert moderation_log["action_display_text"] == "purged user account '#{@user.username}'"
       assert moderation_log["action_display_url"] == nil
     end
 

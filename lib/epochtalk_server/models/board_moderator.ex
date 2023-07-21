@@ -114,4 +114,31 @@ defmodule EpochtalkServer.Models.BoardModerator do
 
     Repo.exists?(query)
   end
+
+  @doc """
+  Adds list of users to the list of moderators for a specific `Board`
+  """
+  @spec add_moderators_by_username(
+          board_id :: non_neg_integer,
+          usernames :: [String.t()]
+        ) ::
+          boolean
+  def add_moderators_by_username(board_id, usernames) when is_integer(board_id) and is_list(usernames) do
+    Repo.transaction(fn ->
+      # fetches all users in list with role data attached for return
+      users = User.by_usernames(usernames)
+
+      # insert each board moderator
+      Enum.each(users, fn user ->
+        Repo.insert(
+          %BoardModerator{user_id: user.id, board_id: board_id},
+          on_conflict: :nothing,
+          conflict_target: [:user_id, :board_id]
+        )
+      end)
+
+      # return users upon successfully adding new moderators
+      users
+    end)
+  end
 end

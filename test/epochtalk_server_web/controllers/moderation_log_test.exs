@@ -528,7 +528,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert moderation_log["action_type"] == "adminUsers.addRoles"
 
       assert moderation_log["action_display_text"] ==
-               "added role 'Super Administrator' to users(s) '#{@user.username}'"
+               "added role '#{@super_admin_role.name}' to users(s) '#{@user.username}'"
 
       assert moderation_log["action_display_url"] == "admin-management.roles({ roleId: '#{@super_admin_role.id}' })"
     end
@@ -551,7 +551,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert moderation_log["action_type"] == "adminUsers.removeRoles"
 
       assert moderation_log["action_display_text"] ==
-               "removed role 'Super Administrator' from user '#{@user.username}'"
+               "removed role '#{@super_admin_role.name}' from user '#{@user.username}'"
 
       assert moderation_log["action_display_url"] == "admin-management.roles({ roleId: '#{@super_admin_role.id}' })"
     end

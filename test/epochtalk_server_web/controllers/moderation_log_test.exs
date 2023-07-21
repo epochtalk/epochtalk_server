@@ -527,7 +527,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert moderation_log["action_type"] == "adminUsers.addRoles"
 
       assert moderation_log["action_display_text"] ==
-               "added role 'Super Administrator' to users(s) 'test'"
+               "added role 'Super Administrator' to users(s) '#{@user.username}'"
 
       assert moderation_log["action_display_url"] == "admin-management.roles({ roleId: '#{@admin_role.id}' })"
     end
@@ -1211,7 +1211,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert moderation_log["action_type"] == "conversations.delete"
 
       assert moderation_log["action_display_text"] ==
-               "deleted conversation between users 'admin' and 'test'"
+               "deleted conversation between users '#{@admin.username}' and '#{@user.username}'"
 
       assert moderation_log["action_display_url"] == nil
     end
@@ -1234,7 +1234,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert moderation_log["action_type"] == "messages.delete"
 
       assert moderation_log["action_display_text"] ==
-               "deleted message sent between users 'admin' and 'test'"
+               "deleted message sent between users '#{@admin.username}' and '#{@user.username}'"
 
       assert moderation_log["action_display_url"] == nil
     end

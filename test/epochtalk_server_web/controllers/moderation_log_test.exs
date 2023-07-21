@@ -26,6 +26,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
   }
 
   @board_name "General Discussion"
+  @old_board_name "Old Board"
 
   describe "page/1" do
     @tag :authenticated
@@ -895,7 +896,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert moderation_log["action_type"] == "threads.move"
 
       assert moderation_log["action_display_text"] ==
-               "moved the thread 'new_title' created by user 'test' from board 'old_board' to '#{@board_name}'"
+               "moved the thread 'new_title' created by user 'test' from board '#{@old_board_name}' to '#{@board_name}'"
 
       assert moderation_log["action_display_url"] == "posts.data({ slug: 'test_slug' })"
     end

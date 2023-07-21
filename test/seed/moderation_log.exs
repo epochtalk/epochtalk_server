@@ -8,9 +8,11 @@ user_username = "test"
 admin_username = "admin"
 {:ok, user} = User.by_username(user_username)
 {:ok, admin} = User.by_username(admin_username)
-thread = build(:thread, board: board, user: user, title: "test", slug: "test_slug")
+thread = build(:thread, board: board, user: user, title: "Thread", slug: "thread-slug")
 thread_id = thread.post.thread_id
 thread_title = thread.post.content["title"]
+new_thread_title = "New Thread"
+
 post_id = thread.post.id
 superadministrator_role_id = 1
 
@@ -545,7 +547,7 @@ logs = [
       api_url: "/api/threads/title",
       api_method: "post",
       type: "threads.title",
-      obj: %{thread_id: thread_id, user_id: user.id, title: "new_title"}
+      obj: %{thread_id: thread_id, user_id: user.id, title: new_thread_title}
     }
   },
   %{

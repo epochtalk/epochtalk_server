@@ -25,6 +25,8 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     }
   }
 
+  @board_name "General Discussion"
+
   describe "page/1" do
     @tag :authenticated
     test "when action_type is 'adminBoards.updateCategories', gets page",
@@ -60,7 +62,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert moderation_log["action_type"] == "adminModerators.add"
 
       assert moderation_log["action_display_text"] ==
-               "added user(s) 'test' to list of moderators for board 'General Discussion'"
+               "added user(s) 'test' to list of moderators for board '#{@board_name}'"
 
       assert moderation_log["action_display_url"] ==
                "threads.data({ boardSlug: 'general-discussion' })"
@@ -82,7 +84,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert moderation_log["action_type"] == "adminModerators.remove"
 
       assert moderation_log["action_display_text"] ==
-               "removed user(s) 'test' from list of moderators for board 'General Discussion'"
+               "removed user(s) 'test' from list of moderators for board '#{@board_name}'"
 
       assert moderation_log["action_display_url"] ==
                "threads.data({ boardSlug: 'general-discussion' })"
@@ -718,7 +720,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert moderation_log["action_type"] == "bans.banFromBoards"
 
       assert moderation_log["action_display_text"] ==
-               "banned user 'test' from boards: General Discussion'"
+               "banned user 'test' from boards: #{@board_name}'"
 
       assert moderation_log["action_display_url"] == "^.board-bans"
     end
@@ -741,7 +743,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert moderation_log["action_type"] == "bans.unbanFromBoards"
 
       assert moderation_log["action_display_text"] ==
-               "unbanned user 'test' from boards: General Discussion'"
+               "unbanned user 'test' from boards: #{@board_name}'"
 
       assert moderation_log["action_display_url"] == "^.board-bans"
     end
@@ -762,7 +764,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
 
       assert moderation_log["mod_id"] == 38
       assert moderation_log["action_type"] == "boards.create"
-      assert moderation_log["action_display_text"] == "created board named 'General Discussion'"
+      assert moderation_log["action_display_text"] == "created board named '#{@board_name}'"
       assert moderation_log["action_display_url"] == "admin-management.boards"
     end
 
@@ -782,7 +784,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
 
       assert moderation_log["mod_id"] == 39
       assert moderation_log["action_type"] == "boards.update"
-      assert moderation_log["action_display_text"] == "updated board named 'General Discussion'"
+      assert moderation_log["action_display_text"] == "updated board named '#{@board_name}'"
       assert moderation_log["action_display_url"] == "admin-management.boards"
     end
 
@@ -802,7 +804,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
 
       assert moderation_log["mod_id"] == 40
       assert moderation_log["action_type"] == "boards.delete"
-      assert moderation_log["action_display_text"] == "deleted board named 'General Discussion'"
+      assert moderation_log["action_display_text"] == "deleted board named '#{@board_name}'"
       assert moderation_log["action_display_url"] == "admin-management.boards"
     end
 
@@ -893,7 +895,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert moderation_log["action_type"] == "threads.move"
 
       assert moderation_log["action_display_text"] ==
-               "moved the thread 'new_title' created by user 'test' from board 'old_board' to 'General Discussion'"
+               "moved the thread 'new_title' created by user 'test' from board 'old_board' to '#{@board_name}'"
 
       assert moderation_log["action_display_url"] == "posts.data({ slug: 'test_slug' })"
     end
@@ -916,7 +918,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert moderation_log["action_type"] == "threads.purge"
 
       assert moderation_log["action_display_text"] ==
-               "purged thread 'title' created by user 'test' from board 'old_board' to 'General Discussion'"
+               "purged thread 'title' created by user 'test' from board 'old_board' to '#{@board_name}'"
 
       assert moderation_log["action_display_url"] == nil
     end

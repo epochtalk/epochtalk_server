@@ -16,8 +16,8 @@ defmodule Test.Support.ConnCase do
   """
 
   # username/email/password from user seed in `mix test` (see mix.exs)
-  @test_username "test"
-  @test_email "test@test.com"
+  @test_username "user"
+  @test_email "user@test.com"
   @test_password "password"
   @test_user_attrs %{
     username: @test_username,

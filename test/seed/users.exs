@@ -8,8 +8,8 @@ test_admin_user_username = "admin"
 test_admin_user_email = "admin@test.com"
 test_admin_user_password = "password"
 
-test_user_username = "test"
-test_user_email = "test@test.com"
+test_user_username = "user"
+test_user_email = "user@test.com"
 test_user_password = "password"
 
 build(:user,

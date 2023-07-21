@@ -2,7 +2,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
   use Test.Support.ConnCase, async: true
   import Test.Support.Factory
   alias EpochtalkServer.Models.User
-  @test_username "test"
+  @test_username "user"
   @test_admin_username "admin"
   @test_super_admin_username "superadmin"
 

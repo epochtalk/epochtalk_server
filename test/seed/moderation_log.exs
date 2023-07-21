@@ -3,6 +3,7 @@ alias EpochtalkServer.Models.ModerationLog
 alias EpochtalkServer.Models.User
 
 board = insert(:board, name: "General Discussion", slug: "general-discussion")
+old_board = insert(:board, name: "Old Board", slug: "old-board")
 user_username = "test"
 admin_username = "admin"
 {:ok, user} = User.by_username(user_username)
@@ -587,7 +588,7 @@ logs = [
         title: thread_title,
         thread_id: thread_id,
         user_id: user.id,
-        old_board_name: "old_board",
+        old_board_name: old_board.name,
         new_board_id: board.id
       }
     }

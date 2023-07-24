@@ -142,4 +142,32 @@ defmodule EpochtalkServer.Models.BoardModerator do
       users
     end)
   end
+
+  @doc """
+  Removes list of users from the list of moderators for a specific `Board`
+  """
+  @spec remove_moderators_by_username(
+          board_id :: non_neg_integer,
+          usernames :: [String.t()]
+        ) ::
+          {:ok, removed_moderators :: [User.t()] | []}
+  def remove_moderators_by_username(board_id, usernames)
+      when is_integer(board_id) and is_list(usernames) do
+    Repo.transaction(fn ->
+      # fetches all users in list with role data attached for return
+      users = User.by_usernames(usernames)
+
+      user_ids = Enum.map(users, & &1.id)
+
+      # remove board moderators
+      query =
+        from bm in BoardModerator,
+          where: bm.board_id == ^board_id and bm.user_id in ^user_ids
+
+      Repo.delete_all(query)
+
+      # return users upon successfully adding new moderators
+      users
+    end)
+  end
 end

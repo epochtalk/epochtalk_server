@@ -122,8 +122,9 @@ defmodule EpochtalkServer.Models.BoardModerator do
           board_id :: non_neg_integer,
           usernames :: [String.t()]
         ) ::
-          boolean
-  def add_moderators_by_username(board_id, usernames) when is_integer(board_id) and is_list(usernames) do
+          {:ok, added_moderators :: [User.t()] | []}
+  def add_moderators_by_username(board_id, usernames)
+      when is_integer(board_id) and is_list(usernames) do
     Repo.transaction(fn ->
       # fetches all users in list with role data attached for return
       users = User.by_usernames(usernames)

@@ -205,16 +205,18 @@ defmodule EpochtalkServer.Models.User do
   def by_usernames([]), do: []
 
   def by_usernames(usernames = [username | _other_usernames]) when is_binary(username) do
-    query = from u in User,
-      where: u.username in ^usernames,
-      preload: [:roles]
+    query =
+      from u in User,
+        where: u.username in ^usernames,
+        preload: [:roles]
 
-   query
-   |> Repo.all()
-   |> Enum.map(fn user ->
-      u = user
-      |> Role.handle_empty_user_roles()
-      |> Role.handle_banned_user_role()
+    query
+    |> Repo.all()
+    |> Enum.map(fn user ->
+      u =
+        user
+        |> Role.handle_empty_user_roles()
+        |> Role.handle_banned_user_role()
 
       # strip out unneeded sensitive data
       %User{id: u.id, username: u.username, roles: u.roles}

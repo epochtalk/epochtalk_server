@@ -60,6 +60,7 @@ defmodule EpochtalkServerWeb.Controllers.Post do
          :ok <- ACL.allow!(conn, "posts.byThread"),
          {:can_read, {:ok, true}} <-
            {:can_read, Board.get_read_access_by_thread_id(thread_id, user_priority)},
+         _view_deleted_posts <- can_authed_user_view_deleted_posts(user, thread_id),
          {:ok, write_access} <- Board.get_write_access_by_thread_id(thread_id, user_priority),
          {:ok, board_banned} <- BoardBan.is_banned_from_board(user, thread_id: thread_id),
          board_mapping <- BoardMapping.all(),
@@ -104,6 +105,32 @@ defmodule EpochtalkServerWeb.Controllers.Post do
 
       _ ->
         ErrorHelpers.render_json_error(conn, 400, "Error, cannot get posts by thread")
+    end
+  end
+
+  ## === Private Helper Functions ===
+
+  defp can_authed_user_view_deleted_posts(user, thread_id) do
+    view_all = ACL.has_permission(user, "posts.byThread.bypass.viewDeletedPosts.admin")
+    view_some = ACL.has_permission(user, "posts.byThread.bypass.viewDeletedPosts.mod")
+    view_self_mod = ACL.has_permission(user, "posts.byThread.bypass.viewDeletedPosts.selfMod")
+    view_priority = ACL.has_permission(user, "posts.byThread.bypass.viewDeletedPosts.priority")
+
+    user_id = Map.get(user, :id)
+    moderated_boards = BoardModerator.get_user_moderated_boards(user_id)
+
+    cond do
+      view_all or view_priority ->
+        true
+
+      view_some and moderated_boards != [] ->
+        moderated_boards
+
+      view_self_mod and moderated_boards == [] ->
+        Thread.is_self_moderated_by_user(thread_id, user_id)
+
+      true ->
+        false
     end
   end
 end

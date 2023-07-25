@@ -17,11 +17,11 @@ defmodule EpochtalkServer.Models.Board do
           name: String.t() | nil,
           slug: String.t() | nil,
           description: String.t() | nil,
-          post_count: non_neg_integer | nil,
-          thread_count: non_neg_integer | nil,
+          post_count: non_neg_integer | 0,
+          thread_count: non_neg_integer | 0,
           viewable_by: non_neg_integer | nil,
           postable_by: non_neg_integer | nil,
-          right_to_left: boolean | nil,
+          right_to_left: boolean | false,
           created_at: NaiveDateTime.t() | nil,
           imported_at: NaiveDateTime.t() | nil,
           meta: map() | nil
@@ -30,11 +30,11 @@ defmodule EpochtalkServer.Models.Board do
     field :name, :string
     field :slug, :string
     field :description, :string
-    field :post_count, :integer
-    field :thread_count, :integer
+    field :post_count, :integer, default: 0
+    field :thread_count, :integer, default: 0
     field :viewable_by, :integer
     field :postable_by, :integer
-    field :right_to_left, :boolean
+    field :right_to_left, :boolean, default: false
     field :created_at, :naive_datetime
     field :imported_at, :naive_datetime
     field :updated_at, :naive_datetime

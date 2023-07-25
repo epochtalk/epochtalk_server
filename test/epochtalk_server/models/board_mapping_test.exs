@@ -1,77 +1,106 @@
 defmodule Test.EpochtalkServer.Models.BoardMapping do
   use Test.Support.DataCase, async: true
-  alias EpochtalkServer.Models.Category
-  alias EpochtalkServer.Models.Board
+  import Test.Support.Factory
   alias EpochtalkServer.Models.BoardMapping
 
-  setup _context do
-    # create category for testing
-    category_attrs = %{
-      name: "test category"
-    }
-
-    {:ok, category} = Category.create(category_attrs)
-
-    # create board for testing
-    board_attrs = %{
-      name: "test board",
-      slug: "test-board",
-      description: "test board description",
-      viewable_by: 10,
-      postable_by: 10,
-      right_to_left: false
-    }
-
-    {:ok, board} = Board.create(board_attrs)
-
-    {:ok,
-     board: board, board_attrs: board_attrs, category: category, category_attrs: category_attrs}
-  end
-
   describe "all/1" do
-    test "gets all board mappings" do
-      result = BoardMapping.all()
-      assert Enum.count(result) >= 1
+    test "gets zero board mappings" do
+      assert BoardMapping.all() |> Enum.count() == 0
+    end
+
+    test "gets board mappings" do
+      category = insert(:category)
+      category_board1 = insert(:board)
+      category_board2 = insert(:board)
+      child_board1 = insert(:board)
+      child_board2 = insert(:board)
+
+      build(:board_mapping,
+        attributes: [
+          [category: category, view_order: 0],
+          [board: category_board1, category: category, view_order: 1],
+          [board: category_board2, category: category, view_order: 2],
+          [board: child_board1, parent: category_board1, view_order: 3],
+          [board: child_board2, parent: category_board1, view_order: 4]
+        ]
+      )
+
+      board_mappings = BoardMapping.all()
+      assert board_mappings |> Enum.count() == 4
+
+      # test first board
+      [board_mapping | board_mappings] = board_mappings
+      assert board_mapping.board_id == category_board1.id
+      assert board_mapping.category_id == category.id
+      assert board_mapping.parent_id == nil
+      assert board_mapping.view_order == 1
+      assert board_mapping.board == category_board1
+
+      # test second board
+      [board_mapping | board_mappings] = board_mappings
+      assert board_mapping.board_id == category_board2.id
+      assert board_mapping.category_id == category.id
+      assert board_mapping.parent_id == nil
+      assert board_mapping.view_order == 2
+      assert board_mapping.board == category_board2
+
+      # test third board
+      [board_mapping | board_mappings] = board_mappings
+      assert board_mapping.board_id == child_board1.id
+      assert board_mapping.category_id == nil
+      assert board_mapping.parent_id == category_board1.id
+      assert board_mapping.view_order == 3
+      assert board_mapping.board == child_board1
+
+      # test fourth board
+      [board_mapping | board_mappings] = board_mappings
+      assert board_mapping.board_id == child_board2.id
+      assert board_mapping.category_id == nil
+      assert board_mapping.parent_id == category_board1.id
+      assert board_mapping.view_order == 4
+      assert board_mapping.board == child_board2
+
+      assert board_mappings == []
     end
   end
 
   describe "update/1" do
-    test "updates a board mapping", %{category: category, board: board} do
-      initial_board_mappings_count = BoardMapping.all() |> Enum.count()
+    test "updates a board mapping" do
+      category = insert(:category)
+      board = insert(:board)
 
-      board_mapping_attrs = [
-        %{
-          id: category.id,
-          name: category.name,
-          type: "category",
-          view_order: 0
-        },
-        %{
-          id: board.id,
-          name: board.name,
-          type: "board",
-          category_id: category.id,
-          view_order: 1
-        }
-      ]
+      result =
+        build(:board_mapping,
+          attributes: [
+            [category: category, view_order: 0],
+            [board: board, category: category, view_order: 1]
+          ]
+        )
 
-      result = BoardMapping.update(board_mapping_attrs)
       assert result == {:ok, :ok}
 
-      board_mappings_count = BoardMapping.all() |> Enum.count()
-      assert board_mappings_count == initial_board_mappings_count + 1
+      assert BoardMapping.all() |> Enum.count() == 1
     end
   end
 
   describe "delete_board_by_id/1" do
     test "deletes a board mapping" do
-      initial_board_mappings_count = BoardMapping.all() |> Enum.count()
+      assert BoardMapping.all() |> Enum.count() == 0
 
-      board_id = 1
-      BoardMapping.delete_board_by_id(board_id)
+      category = insert(:category)
+      board = insert(:board)
 
-      board_mappings_count = BoardMapping.all() |> Enum.count()
-      assert board_mappings_count == initial_board_mappings_count - 1
+      build(:board_mapping,
+        attributes: [
+          [category: category, view_order: 0],
+          [board: board, category: category, view_order: 1]
+        ]
+      )
+
+      assert BoardMapping.all() |> Enum.count() == 1
+
+      BoardMapping.delete_board_by_id(board.id)
+      assert BoardMapping.all() |> Enum.count() == 0
     end
   end
 end

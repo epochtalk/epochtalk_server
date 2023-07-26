@@ -130,7 +130,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       response_moderation_log =
         conn |> response_for_mod(factory_moderation_log.mod_id)
 
-      assert response_moderation_log == factory_moderation_log
+      assert compare(response_moderation_log, factory_moderation_log)
       assert response_moderation_log["action_display_text"] == "added user(s) '#{@user.username}' to list of moderators for board '#{board.name}'"
       assert response_moderation_log["action_display_url"] == "threads.data({ boardSlug: '#{board.slug}' })"
     end

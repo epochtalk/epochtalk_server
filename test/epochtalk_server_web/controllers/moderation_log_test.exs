@@ -89,13 +89,12 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
   describe "page/1" do
     @tag :authenticated
     test "given mod username, when action_type is 'adminBoards.updateCategories', gets page", %{conn: conn} do
-      action = %{
+      factory_moderation_log = build(:moderation_log, %{
         api_url: "/api/boards/all",
         api_method: "post",
         type: "adminBoards.updateCategories",
         obj: %{}
-      }
-      factory_moderation_log = build(:moderation_log, action)
+      })
 
       response_moderation_log =
         conn |> response_for_mod(factory_moderation_log.mod_username)
@@ -105,13 +104,12 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
 
     @tag :authenticated
     test "given mod_id, when action_type is 'adminBoards.updateCategories', gets page", %{conn: conn} do
-      action = %{
+      factory_moderation_log = build(:moderation_log, %{
         api_url: "/api/boards/all",
         api_method: "post",
         type: "adminBoards.updateCategories",
         obj: %{}
-      }
-      factory_moderation_log = build(:moderation_log, action)
+      })
 
       response_moderation_log =
         conn |> response_for_mod(factory_moderation_log.mod_id)
@@ -122,13 +120,12 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     @tag :authenticated
     test "when action_type is 'adminModerators.add', gets page", %{conn: conn} do
       board = insert(:board)
-      action = %{
+      factory_moderation_log = build(:moderation_log, %{
         api_url: "/api/admin/moderators",
         api_method: "post",
         type: "adminModerators.add",
         obj: %{usernames: [@user.username], board_id: board.id}
-      }
-      factory_moderation_log = build(:moderation_log, action)
+      })
 
       response_moderation_log =
         conn |> response_for_mod(factory_moderation_log.mod_id)

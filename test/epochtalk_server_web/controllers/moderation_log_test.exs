@@ -470,52 +470,40 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert response_moderation_log["action_display_text"] == "restored the forum to the default theme"
       assert response_moderation_log["action_display_url"] == "admin-settings.theme"
     end
-    #
-    # @tag :authenticated
-    # test "when action_type is 'adminUsers.addRoles', gets page",
-    #      %{
-    #        conn: conn
-    #      } do
-    #   conn =
-    #     get(
-    #       conn,
-    #       Routes.moderation_log_path(conn, :page, %{"mod" => 26})
-    #     )
-    #
-    #   moderation_logs = json_response(conn, 200)["moderation_logs"]
-    #   moderation_log = List.first(moderation_logs)
-    #
-    #   assert response_moderation_log["mod_id"] == 26
-    #   assert response_moderation_log["action_type"] == "adminUsers.addRoles"
-    #
-    #   assert response_moderation_log["action_display_text"] ==
-    #            "added role '#{@super_admin_role.name}' to users(s) '#{@user.username}'"
-    #
-    #   assert response_moderation_log["action_display_url"] == "admin-management.roles({ roleId: '#{@super_admin_role.id}' })"
-    # end
-    #
-    # @tag :authenticated
-    # test "when action_type is 'adminUsers.removeRoles', gets page",
-    #      %{
-    #        conn: conn
-    #      } do
-    #   conn =
-    #     get(
-    #       conn,
-    #       Routes.moderation_log_path(conn, :page, %{"mod" => 27})
-    #     )
-    #
-    #   moderation_logs = json_response(conn, 200)["moderation_logs"]
-    #   moderation_log = List.first(moderation_logs)
-    #
-    #   assert response_moderation_log["mod_id"] == 27
-    #   assert response_moderation_log["action_type"] == "adminUsers.removeRoles"
-    #
-    #   assert response_moderation_log["action_display_text"] ==
-    #            "removed role '#{@super_admin_role.name}' from user '#{@user.username}'"
-    #
-    #   assert response_moderation_log["action_display_url"] == "admin-management.roles({ roleId: '#{@super_admin_role.id}' })"
-    # end
+
+    @tag :authenticated
+    test "when action_type is 'adminUsers.addRoles', gets page", %{conn: conn} do
+      factory_moderation_log = build(:moderation_log, %{
+        api_url: "/api/users/addRoles",
+        api_method: "post",
+        type: "adminUsers.addRoles",
+        obj: %{usernames: [@user.username], role_id: @super_admin_role.id}
+      })
+
+      response_moderation_log =
+        conn |> response_for_mod(factory_moderation_log.mod_id)
+
+      assert compare(response_moderation_log, factory_moderation_log)
+      assert response_moderation_log["action_display_text"] == "added role '#{@super_admin_role.name}' to users(s) '#{@user.username}'"
+      assert response_moderation_log["action_display_url"] == "admin-management.roles({ roleId: '#{@super_admin_role.id}' })"
+    end
+
+    @tag :authenticated
+    test "when action_type is 'adminUsers.removeRoles', gets page", %{conn: conn, users: %{user: user}} do
+      factory_moderation_log = build(:moderation_log, %{
+        api_url: "/api/users/removeRoles",
+        api_method: "delete",
+        type: "adminUsers.removeRoles",
+        obj: %{role_id: @super_admin_role.id, user_id: user.id}
+      })
+
+      response_moderation_log =
+        conn |> response_for_mod(factory_moderation_log.mod_id)
+
+      assert compare(response_moderation_log, factory_moderation_log)
+      assert response_moderation_log["action_display_text"] == "removed role '#{@super_admin_role.name}' from user '#{@user.username}'"
+      assert response_moderation_log["action_display_url"] == "admin-management.roles({ roleId: '#{@super_admin_role.id}' })"
+    end
     #
     # @tag :authenticated
     # test "when action_type is 'userNotes.create', gets page",

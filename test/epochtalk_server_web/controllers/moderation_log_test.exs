@@ -299,87 +299,75 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert response_moderation_log["action_display_text"] == "edited their note on a user report"
       assert response_moderation_log["action_display_url"] == "^.messages({ reportId: '#{@user_report_id}' })"
     end
-    #
-    # @tag :authenticated
-    # test "when action_type is 'adminRoles.add', gets page",
-    #      %{
-    #        conn: conn
-    #      } do
-    #   conn =
-    #     get(
-    #       conn,
-    #       Routes.moderation_log_path(conn, :page, %{"mod" => 16})
-    #     )
-    #
-    #   moderation_logs = json_response(conn, 200)["moderation_logs"]
-    #   moderation_log = List.first(moderation_logs)
-    #
-    #   assert response_moderation_log["mod_id"] == 16
-    #   assert response_moderation_log["action_type"] == "adminRoles.add"
-    #   assert response_moderation_log["action_display_text"] == "created a new role named '#{@super_admin_role.name}'"
-    #   assert response_moderation_log["action_display_url"] == "admin-management.roles({ roleId: '#{@super_admin_role.id}' })"
-    # end
-    #
-    # @tag :authenticated
-    # test "when action_type is 'adminRoles.remove', gets page",
-    #      %{
-    #        conn: conn
-    #      } do
-    #   conn =
-    #     get(
-    #       conn,
-    #       Routes.moderation_log_path(conn, :page, %{"mod" => 17})
-    #     )
-    #
-    #   moderation_logs = json_response(conn, 200)["moderation_logs"]
-    #   moderation_log = List.first(moderation_logs)
-    #
-    #   assert response_moderation_log["mod_id"] == 17
-    #   assert response_moderation_log["action_type"] == "adminRoles.remove"
-    #   assert response_moderation_log["action_display_text"] == "removed the role named '#{@super_admin_role.name}'"
-    #   assert response_moderation_log["action_display_url"] == "admin-management.roles"
-    # end
-    #
-    # @tag :authenticated
-    # test "when action_type is 'adminRoles.update', gets page",
-    #      %{
-    #        conn: conn
-    #      } do
-    #   conn =
-    #     get(
-    #       conn,
-    #       Routes.moderation_log_path(conn, :page, %{"mod" => 18})
-    #     )
-    #
-    #   moderation_logs = json_response(conn, 200)["moderation_logs"]
-    #   moderation_log = List.first(moderation_logs)
-    #
-    #   assert response_moderation_log["mod_id"] == 18
-    #   assert response_moderation_log["action_type"] == "adminRoles.update"
-    #   assert response_moderation_log["action_display_text"] == "updated the role named '#{@super_admin_role.name}'"
-    #   assert response_moderation_log["action_display_url"] == "admin-management.roles({ roleId: '#{@super_admin_role.id}' })"
-    # end
-    #
-    # @tag :authenticated
-    # test "when action_type is 'adminRoles.reprioritize', gets page",
-    #      %{
-    #        conn: conn
-    #      } do
-    #   conn =
-    #     get(
-    #       conn,
-    #       Routes.moderation_log_path(conn, :page, %{"mod" => 19})
-    #     )
-    #
-    #   moderation_logs = json_response(conn, 200)["moderation_logs"]
-    #   moderation_log = List.first(moderation_logs)
-    #
-    #   assert response_moderation_log["mod_id"] == 19
-    #   assert response_moderation_log["action_type"] == "adminRoles.reprioritize"
-    #   assert response_moderation_log["action_display_text"] == "reordered role priorities"
-    #   assert response_moderation_log["action_display_url"] == "admin-management.roles"
-    # end
-    #
+
+    @tag :authenticated
+    test "when action_type is 'adminRoles.add', gets page", %{conn: conn} do
+      factory_moderation_log = build(:moderation_log, %{
+        api_url: "/api/roles/add",
+        api_method: "post",
+        type: "adminRoles.add",
+        obj: %{name: @super_admin_role.name, id: @super_admin_role.id}
+      })
+
+      response_moderation_log =
+        conn |> response_for_mod(factory_moderation_log.mod_id)
+
+      assert compare(response_moderation_log, factory_moderation_log)
+      assert response_moderation_log["action_display_text"] == "created a new role named '#{@super_admin_role.name}'"
+      assert response_moderation_log["action_display_url"] == "admin-management.roles({ roleId: '#{@super_admin_role.id}' })"
+    end
+
+    @tag :authenticated
+    test "when action_type is 'adminRoles.remove', gets page", %{conn: conn} do
+      factory_moderation_log = build(:moderation_log, %{
+        api_url: "/api/roles/remove",
+        api_method: "delete",
+        type: "adminRoles.remove",
+        obj: %{name: @super_admin_role.name}
+      })
+
+      response_moderation_log =
+        conn |> response_for_mod(factory_moderation_log.mod_id)
+
+      assert compare(response_moderation_log, factory_moderation_log)
+      assert response_moderation_log["action_display_text"] == "removed the role named '#{@super_admin_role.name}'"
+      assert response_moderation_log["action_display_url"] == "admin-management.roles"
+    end
+
+    @tag :authenticated
+    test "when action_type is 'adminRoles.update', gets page", %{conn: conn} do
+      factory_moderation_log = build(:moderation_log, %{
+        api_url: "/api/roles/update",
+        api_method: "post",
+        type: "adminRoles.update",
+        obj: %{name: @super_admin_role.name, id: @super_admin_role.id}
+      })
+
+      response_moderation_log =
+        conn |> response_for_mod(factory_moderation_log.mod_id)
+
+      assert compare(response_moderation_log, factory_moderation_log)
+      assert response_moderation_log["action_display_text"] == "updated the role named '#{@super_admin_role.name}'"
+      assert response_moderation_log["action_display_url"] == "admin-management.roles({ roleId: '#{@super_admin_role.id}' })"
+    end
+
+    @tag :authenticated
+    test "when action_type is 'adminRoles.reprioritize', gets page", %{conn: conn} do
+      factory_moderation_log = build(:moderation_log, %{
+        api_url: "/api/roles/reprioritize",
+        api_method: "get",
+        type: "adminRoles.reprioritize",
+        obj: %{}
+      })
+
+      response_moderation_log =
+        conn |> response_for_mod(factory_moderation_log.mod_id)
+
+      assert compare(response_moderation_log, factory_moderation_log)
+      assert response_moderation_log["action_display_text"] == "reordered role priorities"
+      assert response_moderation_log["action_display_url"] == "admin-management.roles"
+    end
+
     # @tag :authenticated
     # test "when action_type is 'adminSettings.update', gets page",
     #      %{

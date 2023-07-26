@@ -1,6 +1,7 @@
 defmodule EpochtalkServerWeb.Controllers.PostJSON do
   alias EpochtalkServerWeb.Controllers.BoardJSON
   alias EpochtalkServerWeb.Controllers.ThreadJSON
+  alias EpochtalkServerWeb.Helpers.ACL
 
   @moduledoc """
   Renders and formats `Post` data, in JSON format for frontend
@@ -27,7 +28,8 @@ defmodule EpochtalkServerWeb.Controllers.PostJSON do
         desc: desc,
         metric_rank_maps: metric_rank_maps,
         ranks: ranks,
-        watched: watched
+        watched: watched,
+        view_deleted_posts: view_deleted_posts
       }) do
     formatted_board =
       BoardJSON.format_board_data_for_find(
@@ -45,7 +47,9 @@ defmodule EpochtalkServerWeb.Controllers.PostJSON do
       |> Map.put(:poll, formatted_poll)
       |> Map.put(:watched, watched)
 
-    formatted_posts = posts |> Enum.map(&format_post_data_for_by_thread(&1))
+    formatted_posts = posts
+      |> Enum.map(&format_post_data_for_by_thread(&1))
+      |> clean_posts(formatted_thread, user, user_priority, view_deleted_posts)
 
     %{
       board: formatted_board,
@@ -65,6 +69,22 @@ defmodule EpochtalkServerWeb.Controllers.PostJSON do
   end
 
   ## === Private Helper Functions ===
+
+  defp clean_posts(posts, thread, user, user_priority, view_deleted_posts, override_allow_view \\ false) do
+    authed_user_id = if user, do: user.id, else: nil
+    has_self_mod_bypass = ACL.has_permission(user, "posts.byThread.bypass.viewDeletedPosts.selfMod")
+    has_priority_bypass = ACL.has_permission(user, "posts.byThread.bypass.viewDeletedPosts.priority")
+    is_self_mod = if thread, do: thread.user.id == authed_user_id and thread.moderated, else: false
+
+    view_deleted_posts_is_board_list = is_list(view_deleted_posts)
+
+    Enum.map(posts, fn post ->
+
+    end)
+
+    # return posts for now
+    posts
+  end
 
   defp format_poll_data_for_by_thread(nil, _), do: nil
 

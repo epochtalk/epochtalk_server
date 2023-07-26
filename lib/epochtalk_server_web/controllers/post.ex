@@ -60,7 +60,7 @@ defmodule EpochtalkServerWeb.Controllers.Post do
          :ok <- ACL.allow!(conn, "posts.byThread"),
          {:can_read, {:ok, true}} <-
            {:can_read, Board.get_read_access_by_thread_id(thread_id, user_priority)},
-         _view_deleted_posts <- can_authed_user_view_deleted_posts(user, thread_id),
+         view_deleted_posts <- can_authed_user_view_deleted_posts(user, thread_id),
          {:ok, write_access} <- Board.get_write_access_by_thread_id(thread_id, user_priority),
          {:ok, board_banned} <- BoardBan.is_banned_from_board(user, thread_id: thread_id),
          board_mapping <- BoardMapping.all(),
@@ -94,7 +94,8 @@ defmodule EpochtalkServerWeb.Controllers.Post do
         desc: desc,
         metric_rank_maps: metric_rank_maps,
         ranks: ranks,
-        watched: watching_thread
+        watched: watching_thread,
+        view_deleted_posts: view_deleted_posts
       })
     else
       {:error, :board_does_not_exist} ->

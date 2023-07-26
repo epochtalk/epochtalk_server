@@ -57,25 +57,19 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
   # }
 
   defp compare(result_moderation_log, factory_moderation_log) do
-    result_moderation_log["action_api_method"] == factory_moderation_log.action_api_method
-    &&
-    result_moderation_log["action_api_url"] == factory_moderation_log.action_api_url
-    &&
-    result_moderation_log["action_display_text"] == factory_moderation_log.action_display_text
-    &&
-    result_moderation_log["action_display_url"] == factory_moderation_log.action_display_url
-    &&
-    result_moderation_log["action_obj"] == factory_moderation_log.action_obj
-    &&
-    result_moderation_log["action_taken_at"] |> NaiveDateTime.from_iso8601!() == factory_moderation_log.action_taken_at
-    &&
-    result_moderation_log["action_type"] == factory_moderation_log.action_type
-    &&
-    result_moderation_log["mod_id"] == factory_moderation_log.mod_id
-    &&
-    result_moderation_log["mod_ip"] == factory_moderation_log.mod_ip
-    &&
-    result_moderation_log["mod_username"] == factory_moderation_log.mod_username
+    assert result_moderation_log["action_api_method"] == factory_moderation_log.action_api_method
+    assert result_moderation_log["action_api_url"] == factory_moderation_log.action_api_url
+    assert result_moderation_log["action_display_text"] == factory_moderation_log.action_display_text
+    assert result_moderation_log["action_display_url"] == factory_moderation_log.action_display_url
+    factory_moderation_log.action_obj
+    |> Enum.each(fn {k, v} ->
+      assert result_moderation_log["action_obj"] |> Map.get(to_string(k)) == v
+    end)
+    assert result_moderation_log["action_taken_at"] |> NaiveDateTime.from_iso8601!() == factory_moderation_log.action_taken_at
+    assert result_moderation_log["action_type"] == factory_moderation_log.action_type
+    assert result_moderation_log["mod_id"] == factory_moderation_log.mod_id
+    assert result_moderation_log["mod_ip"] == factory_moderation_log.mod_ip
+    assert result_moderation_log["mod_username"] == factory_moderation_log.mod_username
   end
 
   defp response_for_mod(conn, mod) do

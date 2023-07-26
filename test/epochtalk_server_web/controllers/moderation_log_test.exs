@@ -149,7 +149,6 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
 
     @tag :authenticated
     test "when action_type is 'reports.updateMessageReport', gets page", %{conn: conn} do
-      board = insert(:board)
       factory_moderation_log = build(:moderation_log, %{
         api_url: "/api/reports/updateMessageReport",
         api_method: "post",
@@ -167,7 +166,6 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
 
     @tag :authenticated
     test "when action_type is 'reports.createMessageReportNote', gets page", %{conn: conn} do
-      board = insert(:board)
       factory_moderation_log = build(:moderation_log, %{
         api_url: "/api/reports/createMessageReportNote",
         api_method: "post",
@@ -185,7 +183,6 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
 
     @tag :authenticated
     test "when action_type is 'reports.updateMessageReportNote', gets page", %{conn: conn} do
-      board = insert(:board)
       factory_moderation_log = build(:moderation_log, %{
         api_url: "/api/reports/updateMessageReportNote",
         api_method: "post",
@@ -203,7 +200,6 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
 
     @tag :authenticated
     test "when action_type is 'reports.updatePostReport', gets page", %{conn: conn} do
-      board = insert(:board)
       factory_moderation_log = build(:moderation_log, %{
         api_url: "/api/reports/updatePostReport",
         api_method: "post",

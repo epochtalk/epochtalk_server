@@ -61,6 +61,28 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     }
   }
 
+  defp compare(result_moderation_log, factory_moderation_log) do
+    result_moderation_log["action_api_method"] == factory_moderation_log.action_api_method
+    &&
+    result_moderation_log["action_api_url"] == factory_moderation_log.action_api_url
+    &&
+    result_moderation_log["action_display_text"] == factory_moderation_log.action_display_text
+    &&
+    result_moderation_log["action_display_url"] == factory_moderation_log.action_display_url
+    &&
+    result_moderation_log["action_obj"] == factory_moderation_log.action_obj
+    &&
+    result_moderation_log["action_taken_at"] |> NaiveDateTime.from_iso8601!() == factory_moderation_log.action_taken_at
+    &&
+    result_moderation_log["action_type"] == factory_moderation_log.action_type
+    &&
+    result_moderation_log["mod_id"] == factory_moderation_log.mod_id
+    &&
+    result_moderation_log["mod_ip"] == factory_moderation_log.mod_ip
+    &&
+    result_moderation_log["mod_username"] == factory_moderation_log.mod_username
+  end
+
   describe "page/1" do
     @tag :authenticated
     test "given mod username, when action_type is 'adminBoards.updateCategories', gets page", %{conn: conn} do
@@ -70,15 +92,15 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
         type: "adminBoards.updateCategories",
         obj: %{}
       }
-      moderation_log = build(:moderation_log, action)
+      factory_moderation_log = build(:moderation_log, action)
 
       response_moderation_log = conn
-        |> get(Routes.moderation_log_path(conn, :page, %{"mod" => moderation_log.mod_username}))
+        |> get(Routes.moderation_log_path(conn, :page, %{"mod" => factory_moderation_log.mod_username}))
         |> json_response(200)
         |> Map.get("moderation_logs")
         |> List.first()
 
-      response_moderation_log == moderation_log
+      assert compare(response_moderation_log, factory_moderation_log)
     end
 
     @tag :authenticated

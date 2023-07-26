@@ -498,72 +498,57 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert response_moderation_log["action_display_text"] == "removed role '#{@super_admin_role.name}' from user '#{user.username}'"
       assert response_moderation_log["action_display_url"] == "admin-management.roles({ roleId: '#{@super_admin_role.id}' })"
     end
-    #
-    # @tag :authenticated
-    # test "when action_type is 'userNotes.create', gets page",
-    #      %{
-    #        conn: conn
-    #      } do
-    #   conn =
-    #     get(
-    #       conn,
-    #       Routes.moderation_log_path(conn, :page, %{"mod" => 28})
-    #     )
-    #
-    #   moderation_logs = json_response(conn, 200)["moderation_logs"]
-    #   moderation_log = List.first(moderation_logs)
-    #
-    #   assert response_moderation_log["mod_id"] == 28
-    #   assert response_moderation_log["action_type"] == "userNotes.create"
-    #   assert response_moderation_log["action_display_text"] == "created a moderation note for user '#{@user.username}'"
-    #   assert response_moderation_log["action_display_url"] == "profile({ username: '#{@user.username}' })"
-    # end
-    #
-    # @tag :authenticated
-    # test "when action_type is 'userNotes.update', gets page",
-    #      %{
-    #        conn: conn
-    #      } do
-    #   conn =
-    #     get(
-    #       conn,
-    #       Routes.moderation_log_path(conn, :page, %{"mod" => 29})
-    #     )
-    #
-    #   moderation_logs = json_response(conn, 200)["moderation_logs"]
-    #   moderation_log = List.first(moderation_logs)
-    #
-    #   assert response_moderation_log["mod_id"] == 29
-    #   assert response_moderation_log["action_type"] == "userNotes.update"
-    #
-    #   assert response_moderation_log["action_display_text"] ==
-    #            "edited their moderation note for user '#{@user.username}'"
-    #
-    #   assert response_moderation_log["action_display_url"] == "profile({ username: '#{@user.username}' })"
-    # end
-    #
-    # @tag :authenticated
-    # test "when action_type is 'userNotes.delete', gets page",
-    #      %{
-    #        conn: conn
-    #      } do
-    #   conn =
-    #     get(
-    #       conn,
-    #       Routes.moderation_log_path(conn, :page, %{"mod" => 30})
-    #     )
-    #
-    #   moderation_logs = json_response(conn, 200)["moderation_logs"]
-    #   moderation_log = List.first(moderation_logs)
-    #
-    #   assert response_moderation_log["mod_id"] == 30
-    #   assert response_moderation_log["action_type"] == "userNotes.delete"
-    #
-    #   assert response_moderation_log["action_display_text"] ==
-    #            "deleted their moderation note for user '#{@user.username}'"
-    #
-    #   assert response_moderation_log["action_display_url"] == "profile({ username: '#{@user.username}' })"
-    # end
+
+    @tag :authenticated
+    test "when action_type is 'userNotes.create', gets page", %{conn: conn, users: %{user: user}} do
+      factory_moderation_log = build(:moderation_log, %{
+        api_url: "/api/userNotes/create",
+        api_method: "post",
+        type: "userNotes.create",
+        obj: %{user_id: user.id}
+      })
+
+      response_moderation_log =
+        conn |> response_for_mod(factory_moderation_log.mod_id)
+
+      assert compare(response_moderation_log, factory_moderation_log)
+      assert response_moderation_log["action_display_text"] == "created a moderation note for user '#{user.username}'"
+      assert response_moderation_log["action_display_url"] == "profile({ username: '#{user.username}' })"
+    end
+
+    @tag :authenticated
+    test "when action_type is 'userNotes.update', gets page", %{conn: conn, users: %{user: user}} do
+      factory_moderation_log = build(:moderation_log, %{
+        api_url: "/api/userNotes/update",
+        api_method: "post",
+        type: "userNotes.update",
+        obj: %{user_id: user.id}
+      })
+
+      response_moderation_log =
+        conn |> response_for_mod(factory_moderation_log.mod_id)
+
+      assert compare(response_moderation_log, factory_moderation_log)
+      assert response_moderation_log["action_display_text"] == "edited their moderation note for user '#{user.username}'"
+      assert response_moderation_log["action_display_url"] == "profile({ username: '#{user.username}' })"
+    end
+
+    @tag :authenticated
+    test "when action_type is 'userNotes.delete', gets page", %{conn: conn, users: %{user: user}} do
+      factory_moderation_log = build(:moderation_log, %{
+        api_url: "/api/userNotes/delete",
+        api_method: "delete",
+        type: "userNotes.delete",
+        obj: %{user_id: user.id}
+      })
+
+      response_moderation_log =
+        conn |> response_for_mod(factory_moderation_log.mod_id)
+
+      assert compare(response_moderation_log, factory_moderation_log)
+      assert response_moderation_log["action_display_text"] == "deleted their moderation note for user '#{user.username}'"
+      assert response_moderation_log["action_display_url"] == "profile({ username: '#{user.username}' })"
+    end
     #
     # @tag :authenticated
     # test "when action_type is 'bans.addAddresses', gets page",

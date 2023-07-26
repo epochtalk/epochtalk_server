@@ -25,6 +25,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     title: "New Thread"
   }
   @status "status"
+  @note "test_note"
   @message_report_id 10
   @post_report_id 20
   @user_report_id 30
@@ -368,131 +369,107 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert response_moderation_log["action_display_url"] == "admin-management.roles"
     end
 
-    # @tag :authenticated
-    # test "when action_type is 'adminSettings.update', gets page",
-    #      %{
-    #        conn: conn
-    #      } do
-    #   conn =
-    #     get(
-    #       conn,
-    #       Routes.moderation_log_path(conn, :page, %{"mod" => 20})
-    #     )
-    #
-    #   moderation_logs = json_response(conn, 200)["moderation_logs"]
-    #   moderation_log = List.first(moderation_logs)
-    #
-    #   assert response_moderation_log["mod_id"] == 20
-    #   assert response_moderation_log["action_type"] == "adminSettings.update"
-    #   assert response_moderation_log["action_display_text"] == "updated forum settings"
-    #   assert response_moderation_log["action_display_url"] == "admin-settings"
-    # end
-    #
-    # @tag :authenticated
-    # test "when action_type is 'adminSettings.addToBlacklist', gets page",
-    #      %{
-    #        conn: conn
-    #      } do
-    #   conn =
-    #     get(
-    #       conn,
-    #       Routes.moderation_log_path(conn, :page, %{"mod" => 21})
-    #     )
-    #
-    #   moderation_logs = json_response(conn, 200)["moderation_logs"]
-    #   moderation_log = List.first(moderation_logs)
-    #
-    #   assert response_moderation_log["mod_id"] == 21
-    #   assert response_moderation_log["action_type"] == "adminSettings.addToBlacklist"
-    #   assert response_moderation_log["action_display_text"] == "added ip blacklist rule named 'test_note'"
-    #   assert response_moderation_log["action_display_url"] == "admin-settings.advanced"
-    # end
-    #
-    # @tag :authenticated
-    # test "when action_type is 'adminSettings.updateBlacklist', gets page",
-    #      %{
-    #        conn: conn
-    #      } do
-    #   conn =
-    #     get(
-    #       conn,
-    #       Routes.moderation_log_path(conn, :page, %{"mod" => 22})
-    #     )
-    #
-    #   moderation_logs = json_response(conn, 200)["moderation_logs"]
-    #   moderation_log = List.first(moderation_logs)
-    #
-    #   assert response_moderation_log["mod_id"] == 22
-    #   assert response_moderation_log["action_type"] == "adminSettings.updateBlacklist"
-    #
-    #   assert response_moderation_log["action_display_text"] ==
-    #            "updated ip blacklist rule named 'test_note'"
-    #
-    #   assert response_moderation_log["action_display_url"] == "admin-settings.advanced"
-    # end
-    #
-    # @tag :authenticated
-    # test "when action_type is 'adminSettings.deleteFromBlacklist', gets page",
-    #      %{
-    #        conn: conn
-    #      } do
-    #   conn =
-    #     get(
-    #       conn,
-    #       Routes.moderation_log_path(conn, :page, %{"mod" => 23})
-    #     )
-    #
-    #   moderation_logs = json_response(conn, 200)["moderation_logs"]
-    #   moderation_log = List.first(moderation_logs)
-    #
-    #   assert response_moderation_log["mod_id"] == 23
-    #   assert response_moderation_log["action_type"] == "adminSettings.deleteFromBlacklist"
-    #
-    #   assert response_moderation_log["action_display_text"] ==
-    #            "deleted ip blacklist rule named 'test_note'"
-    #
-    #   assert response_moderation_log["action_display_url"] == "admin-settings.advanced"
-    # end
-    #
-    # @tag :authenticated
-    # test "when action_type is 'adminSettings.setTheme', gets page",
-    #      %{
-    #        conn: conn
-    #      } do
-    #   conn =
-    #     get(
-    #       conn,
-    #       Routes.moderation_log_path(conn, :page, %{"mod" => 24})
-    #     )
-    #
-    #   moderation_logs = json_response(conn, 200)["moderation_logs"]
-    #   moderation_log = List.first(moderation_logs)
-    #
-    #   assert response_moderation_log["mod_id"] == 24
-    #   assert response_moderation_log["action_type"] == "adminSettings.setTheme"
-    #   assert response_moderation_log["action_display_text"] == "updated the forum theme"
-    #   assert response_moderation_log["action_display_url"] == "admin-settings.theme"
-    # end
-    #
-    # @tag :authenticated
-    # test "when action_type is 'adminSettings.resetTheme', gets page",
-    #      %{
-    #        conn: conn
-    #      } do
-    #   conn =
-    #     get(
-    #       conn,
-    #       Routes.moderation_log_path(conn, :page, %{"mod" => 25})
-    #     )
-    #
-    #   moderation_logs = json_response(conn, 200)["moderation_logs"]
-    #   moderation_log = List.first(moderation_logs)
-    #
-    #   assert response_moderation_log["mod_id"] == 25
-    #   assert response_moderation_log["action_type"] == "adminSettings.resetTheme"
-    #   assert response_moderation_log["action_display_text"] == "restored the forum to the default theme"
-    #   assert response_moderation_log["action_display_url"] == "admin-settings.theme"
-    # end
+    @tag :authenticated
+    test "when action_type is 'adminSettings.update', gets page", %{conn: conn} do
+      factory_moderation_log = build(:moderation_log, %{
+        api_url: "/api/settings/update",
+        api_method: "post",
+        type: "adminSettings.update",
+        obj: %{}
+      })
+
+      response_moderation_log =
+        conn |> response_for_mod(factory_moderation_log.mod_id)
+
+      assert compare(response_moderation_log, factory_moderation_log)
+      assert response_moderation_log["action_display_text"] == "updated forum settings"
+      assert response_moderation_log["action_display_url"] == "admin-settings"
+    end
+
+    @tag :authenticated
+    test "when action_type is 'adminSettings.addToBlacklist', gets page", %{conn: conn} do
+      factory_moderation_log = build(:moderation_log, %{
+        api_url: "/api/settings/addToBlacklist",
+        api_method: "post",
+        type: "adminSettings.addToBlacklist",
+        obj: %{note: @note}
+      })
+
+      response_moderation_log =
+        conn |> response_for_mod(factory_moderation_log.mod_id)
+
+      assert compare(response_moderation_log, factory_moderation_log)
+      assert response_moderation_log["action_display_text"] == "added ip blacklist rule named '#{@note}'"
+      assert response_moderation_log["action_display_url"] == "admin-settings.advanced"
+    end
+
+    @tag :authenticated
+    test "when action_type is 'adminSettings.updateBlacklist', gets page", %{conn: conn} do
+      factory_moderation_log = build(:moderation_log, %{
+        api_url: "/api/settings/updateBlacklist",
+        api_method: "post",
+        type: "adminSettings.updateBlacklist",
+        obj: %{note: @note}
+      })
+
+      response_moderation_log =
+        conn |> response_for_mod(factory_moderation_log.mod_id)
+
+      assert compare(response_moderation_log, factory_moderation_log)
+      assert response_moderation_log["action_display_text"] == "updated ip blacklist rule named '#{@note}'"
+      assert response_moderation_log["action_display_url"] == "admin-settings.advanced"
+    end
+
+    @tag :authenticated
+    test "when action_type is 'adminSettings.deleteFromBlacklist', gets page", %{conn: conn} do
+      factory_moderation_log = build(:moderation_log, %{
+        api_url: "/api/settings/deleteFromBlacklist",
+        api_method: "delete",
+        type: "adminSettings.deleteFromBlacklist",
+        obj: %{note: @note}
+      })
+
+      response_moderation_log =
+        conn |> response_for_mod(factory_moderation_log.mod_id)
+
+      assert compare(response_moderation_log, factory_moderation_log)
+      assert response_moderation_log["action_display_text"] == "deleted ip blacklist rule named '#{@note}'"
+      assert response_moderation_log["action_display_url"] == "admin-settings.advanced"
+    end
+
+    @tag :authenticated
+    test "when action_type is 'adminSettings.setTheme', gets page", %{conn: conn} do
+      factory_moderation_log = build(:moderation_log, %{
+        api_url: "/api/settings/setTheme",
+        api_method: "post",
+        type: "adminSettings.setTheme",
+        obj: %{}
+      })
+
+      response_moderation_log =
+        conn |> response_for_mod(factory_moderation_log.mod_id)
+
+      assert compare(response_moderation_log, factory_moderation_log)
+      assert response_moderation_log["action_display_text"] == "updated the forum theme"
+      assert response_moderation_log["action_display_url"] == "admin-settings.theme"
+    end
+
+    @tag :authenticated
+    test "when action_type is 'adminSettings.resetTheme', gets page", %{conn: conn} do
+      factory_moderation_log = build(:moderation_log, %{
+        api_url: "/api/settings/resetTheme",
+        api_method: "post",
+        type: "adminSettings.resetTheme",
+        obj: %{}
+      })
+
+      response_moderation_log =
+        conn |> response_for_mod(factory_moderation_log.mod_id)
+
+      assert compare(response_moderation_log, factory_moderation_log)
+      assert response_moderation_log["action_display_text"] == "restored the forum to the default theme"
+      assert response_moderation_log["action_display_url"] == "admin-settings.theme"
+    end
     #
     # @tag :authenticated
     # test "when action_type is 'adminUsers.addRoles', gets page",

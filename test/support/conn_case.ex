@@ -80,7 +80,18 @@ defmodule Test.Support.ConnCase do
     {:ok, super_admin_user} = User.by_username(@test_super_admin_username)
     conn = Phoenix.ConnTest.build_conn()
 
-    context_updates = {:ok, []}
+    context_updates = {:ok, [
+      users: %{
+        user: user,
+        admin_user: admin_user,
+        super_admin_user: super_admin_user
+      },
+      user_attrs: %{
+        user: @test_user_attrs,
+        admin_user: @test_admin_user_attrs,
+        super_admin_user: @test_super_admin_user_attrs
+      }
+    ]}
 
     # log user in if necessary
     context_updates =
@@ -124,8 +135,6 @@ defmodule Test.Support.ConnCase do
         _ ->
           {:ok, k_list} = context_updates
           k_list = [conn: conn] ++ k_list
-          k_list = [user: user] ++ k_list
-          k_list = [user_attrs: @test_user_attrs] ++ k_list
           {:ok, k_list}
       end
 

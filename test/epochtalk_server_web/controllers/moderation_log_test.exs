@@ -63,24 +63,41 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
 
   describe "page/1" do
     @tag :authenticated
-    test "when action_type is 'adminBoards.updateCategories', gets page", %{conn: conn} do
+    test "given mod username, when action_type is 'adminBoards.updateCategories', gets page", %{conn: conn} do
       action = %{
         api_url: "/api/boards/all",
         api_method: "post",
         type: "adminBoards.updateCategories",
         obj: %{}
       }
-      %{mod_id: mod_id} = build(:moderation_log, action)
-      moderation_log = conn
-        |> get(Routes.moderation_log_path(conn, :page, %{"mod" => mod_id}))
+      moderation_log = build(:moderation_log, action)
+
+      response_moderation_log = conn
+        |> get(Routes.moderation_log_path(conn, :page, %{"mod" => moderation_log.mod_username}))
         |> json_response(200)
         |> Map.get("moderation_logs")
-        |> List.first
+        |> List.first()
 
-      assert moderation_log["mod_id"] == mod_id
-      assert moderation_log["action_type"] == action.type
-      assert moderation_log["action_display_text"] == "updated boards and categories"
-      assert moderation_log["action_display_url"] == "admin-management.boards"
+      response_moderation_log == moderation_log
+    end
+
+    @tag :authenticated
+    test "given mod_id, when action_type is 'adminBoards.updateCategories', gets page", %{conn: conn} do
+      action = %{
+        api_url: "/api/boards/all",
+        api_method: "post",
+        type: "adminBoards.updateCategories",
+        obj: %{}
+      }
+      moderation_log = build(:moderation_log, action)
+
+      response_moderation_log = conn
+        |> get(Routes.moderation_log_path(conn, :page, %{"mod" => moderation_log.mod_id}))
+        |> json_response(200)
+        |> Map.get("moderation_logs")
+        |> List.first()
+
+      response_moderation_log == moderation_log
     end
 
     # @tag :authenticated

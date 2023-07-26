@@ -111,15 +111,15 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
         type: "adminBoards.updateCategories",
         obj: %{}
       }
-      moderation_log = build(:moderation_log, action)
+      factory_moderation_log = build(:moderation_log, action)
 
       response_moderation_log = conn
-        |> get(Routes.moderation_log_path(conn, :page, %{"mod" => moderation_log.mod_id}))
+        |> get(Routes.moderation_log_path(conn, :page, %{"mod" => factory_moderation_log.mod_id}))
         |> json_response(200)
         |> Map.get("moderation_logs")
         |> List.first()
 
-      response_moderation_log == moderation_log
+      assert compare(response_moderation_log, factory_moderation_log)
     end
 
     # @tag :authenticated

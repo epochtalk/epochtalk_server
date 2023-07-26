@@ -11,7 +11,7 @@ defmodule Test.EpochtalkServer.Session do
   alias EpochtalkServer.Session
 
   describe "get_resource/2" do
-    test "when session_id is invalid, errors", %{user: user} do
+    test "when session_id is invalid, errors", %{users: %{user: user}} do
       session_id = "bogussessionid"
 
       assert Session.get_resource(user.id, session_id) ==
@@ -60,7 +60,7 @@ defmodule Test.EpochtalkServer.Session do
   end
 
   describe "create/3 session expiration" do
-    test "when logging in, deletes an expired user session", %{conn: conn, user: user} do
+    test "when logging in, deletes an expired user session", %{conn: conn, users: %{user: user}} do
       remember_me = false
       # create session that should be deleted
       {:ok, _authed_user_to_delete, _token, authed_conn_to_delete} =
@@ -145,7 +145,7 @@ defmodule Test.EpochtalkServer.Session do
   describe "create/3 expiration/ttl" do
     setup [:flush_redis]
 
-    test "without remember me, creates a user session (< 1 day ttl)", %{conn: conn, user: user} do
+    test "without remember me, creates a user session (< 1 day ttl)", %{conn: conn, users: %{user: user}} do
       remember_me = false
       {:ok, authed_user, _token, _authed_conn} = Session.create(user, remember_me, conn)
       user_ttl = Redix.command!(:redix, ["TTL", "user:#{authed_user.id}"])
@@ -164,7 +164,7 @@ defmodule Test.EpochtalkServer.Session do
       assert sessions_ttl <= @one_day_in_seconds
     end
 
-    test "with remember me, creates a user session (< 4 week ttl)", %{conn: conn, user: user} do
+    test "with remember me, creates a user session (< 4 week ttl)", %{conn: conn, users: %{user: user}} do
       remember_me = true
       {:ok, authed_user, _token, _authed_conn} = Session.create(user, remember_me, conn)
       user_ttl = Redix.command!(:redix, ["TTL", "user:#{authed_user.id}"])
@@ -183,7 +183,7 @@ defmodule Test.EpochtalkServer.Session do
       assert sessions_ttl <= @four_weeks_in_seconds
     end
 
-    test "handles updating ttl", %{conn: conn, user: user} do
+    test "handles updating ttl", %{conn: conn, users: %{user: user}} do
       remember_me_1 = false
       {:ok, authed_user_1, _token, _authed_conn} = Session.create(user, remember_me_1, conn)
       user_ttl_1 = Redix.command!(:redix, ["TTL", "user:#{authed_user_1.id}"])
@@ -239,8 +239,8 @@ defmodule Test.EpochtalkServer.Session do
     @tag :banned
     test "without remember me, handles baninfo ttl and ban_expiration (< 1 day ttl)", %{
       conn: conn,
-      user_attrs: user_attrs,
-      user: user
+      user_attrs: %{user: user_attrs},
+      users: %{user: user}
     } do
       pre_ban_baninfo_ttl = Redix.command!(:redix, ["TTL", "user:#{user.id}:baninfo"])
 
@@ -270,8 +270,8 @@ defmodule Test.EpochtalkServer.Session do
     @tag :banned
     test "with remember me, handles baninfo ttl and ban_expiration (< 4 weeks ttl)", %{
       conn: conn,
-      user_attrs: user_attrs,
-      user: user
+      user_attrs: %{user: user_attrs},
+      users: %{user: user}
     } do
       pre_ban_baninfo_ttl = Redix.command!(:redix, ["TTL", "user:#{user.id}:baninfo"])
 
@@ -302,7 +302,7 @@ defmodule Test.EpochtalkServer.Session do
     @tag :malicious
     test "without remember me, handles baninfo ttl and malicious score (< 1 day ttl)", %{
       conn: conn,
-      user: user,
+      users: %{user: user},
       malicious_user_changeset: malicious_user_changeset
     } do
       pre_malicious_baninfo_ttl = Redix.command!(:redix, ["TTL", "user:#{user.id}:baninfo"])
@@ -329,7 +329,7 @@ defmodule Test.EpochtalkServer.Session do
     @tag :malicious
     test "with remember me, handles baninfo ttl and malicious score (< 4 weeks ttl)", %{
       conn: conn,
-      user: user,
+      users: %{user: user},
       malicious_user_changeset: malicious_user_changeset
     } do
       pre_malicious_baninfo_ttl = Redix.command!(:redix, ["TTL", "user:#{user.id}:baninfo"])

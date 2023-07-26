@@ -3,12 +3,6 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
   alias EpochtalkServer.Models.ModerationLog
   import Test.Support.Factory
 
-  @user %{
-    username: "user"
-  }
-  @admin %{
-    username: "admin"
-  }
   @old_board %{
     name: "Old Board",
     slug: "old-board"
@@ -34,16 +28,16 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
   @banned_address "127.0.0.1"
   @weight 99
 
-  @create_update_boards_attrs %{
-    mod: %{username: @admin.username, id: 1, ip: @mod_address},
-    action: %{
-      api_url: "/api/boards/all",
-      api_method: "post",
-      type: "adminBoards.updateCategories",
-      obj: %{}
-    }
-  }
-
+  # @create_update_boards_attrs %{
+  #   mod: %{username: @admin.username, id: 1, ip: @mod_address},
+  #   action: %{
+  #     api_url: "/api/boards/all",
+  #     api_method: "post",
+  #     type: "adminBoards.updateCategories",
+  #     obj: %{}
+  #   }
+  # }
+  #
   # @create_add_moderators_attrs %{
   #   mod: %{username: @admin.username, id: 2, ip: @mod_address},
   #   action: %{
@@ -113,38 +107,38 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     end
 
     @tag :authenticated
-    test "when action_type is 'adminModerators.add', gets page", %{conn: conn} do
+    test "when action_type is 'adminModerators.add', gets page", %{conn: conn, users: %{user: user}} do
       board = insert(:board)
       factory_moderation_log = build(:moderation_log, %{
         api_url: "/api/admin/moderators",
         api_method: "post",
         type: "adminModerators.add",
-        obj: %{usernames: [@user.username], board_id: board.id}
+        obj: %{usernames: [user.username], board_id: board.id}
       })
 
       response_moderation_log =
         conn |> response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
-      assert response_moderation_log["action_display_text"] == "added user(s) '#{@user.username}' to list of moderators for board '#{board.name}'"
+      assert response_moderation_log["action_display_text"] == "added user(s) '#{user.username}' to list of moderators for board '#{board.name}'"
       assert response_moderation_log["action_display_url"] == "threads.data({ boardSlug: '#{board.slug}' })"
     end
 
     @tag :authenticated
-    test "when action_type is 'adminModerators.remove', gets page", %{conn: conn} do
+    test "when action_type is 'adminModerators.remove', gets page", %{conn: conn, users: %{user: user}} do
       board = insert(:board)
       factory_moderation_log = build(:moderation_log, %{
         api_url: "/api/admin/moderators",
         api_method: "delete",
         type: "adminModerators.remove",
-        obj: %{usernames: [@user.username], board_id: board.id}
+        obj: %{usernames: [user.username], board_id: board.id}
       })
 
       response_moderation_log =
         conn |> response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
-      assert response_moderation_log["action_display_text"] == "removed user(s) '#{@user.username}' from list of moderators for board '#{board.name}'"
+      assert response_moderation_log["action_display_text"] == "removed user(s) '#{user.username}' from list of moderators for board '#{board.name}'"
       assert response_moderation_log["action_display_url"] == "threads.data({ boardSlug: '#{board.slug}' })"
     end
 
@@ -268,7 +262,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     end
 
     @tag :authenticated
-    test "when action_type is 'reports.createUserReportNote', gets page", %{ conn: conn } do
+    test "when action_type is 'reports.createUserReportNote', gets page", %{conn: conn} do
       factory_moderation_log = build(:moderation_log, %{
         api_url: "/api/reports/createUserReportNote",
         api_method: "post",
@@ -472,19 +466,19 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     end
 
     @tag :authenticated
-    test "when action_type is 'adminUsers.addRoles', gets page", %{conn: conn} do
+    test "when action_type is 'adminUsers.addRoles', gets page", %{conn: conn, users: %{user: user}} do
       factory_moderation_log = build(:moderation_log, %{
         api_url: "/api/users/addRoles",
         api_method: "post",
         type: "adminUsers.addRoles",
-        obj: %{usernames: [@user.username], role_id: @super_admin_role.id}
+        obj: %{usernames: [user.username], role_id: @super_admin_role.id}
       })
 
       response_moderation_log =
         conn |> response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
-      assert response_moderation_log["action_display_text"] == "added role '#{@super_admin_role.name}' to users(s) '#{@user.username}'"
+      assert response_moderation_log["action_display_text"] == "added role '#{@super_admin_role.name}' to users(s) '#{user.username}'"
       assert response_moderation_log["action_display_url"] == "admin-management.roles({ roleId: '#{@super_admin_role.id}' })"
     end
 
@@ -501,7 +495,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
         conn |> response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
-      assert response_moderation_log["action_display_text"] == "removed role '#{@super_admin_role.name}' from user '#{@user.username}'"
+      assert response_moderation_log["action_display_text"] == "removed role '#{@super_admin_role.name}' from user '#{user.username}'"
       assert response_moderation_log["action_display_url"] == "admin-management.roles({ roleId: '#{@super_admin_role.id}' })"
     end
     #

@@ -135,27 +135,23 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert response_moderation_log["action_display_url"] == "threads.data({ boardSlug: '#{board.slug}' })"
     end
 
-    # @tag :authenticated
-    # test "when action_type is 'adminModerators.remove', gets page",
-    #      %{conn: conn} do
-    #   conn =
-    #     get(
-    #       conn,
-    #       Routes.moderation_log_path(conn, :page, %{"mod" => 6})
-    #     )
-    #
-    #   moderation_logs = json_response(conn, 200)["moderation_logs"]
-    #   moderation_log = List.first(moderation_logs)
-    #
-    #   assert moderation_log["mod_id"] == 6
-    #   assert moderation_log["action_type"] == "adminModerators.remove"
-    #
-    #   assert moderation_log["action_display_text"] ==
-    #            "removed user(s) '#{@user.username}' from list of moderators for board '#{@board.name}'"
-    #
-    #   assert moderation_log["action_display_url"] ==
-    #            "threads.data({ boardSlug: '#{@board.slug}' })"
-    # end
+    @tag :authenticated
+    test "when action_type is 'adminModerators.remove', gets page", %{conn: conn} do
+      board = insert(:board)
+      factory_moderation_log = build(:moderation_log, %{
+        api_url: "/api/admin/moderators",
+        api_method: "delete",
+        type: "adminModerators.remove",
+        obj: %{usernames: [@user.username], board_id: board.id}
+      })
+
+      response_moderation_log =
+        conn |> response_for_mod(factory_moderation_log.mod_id)
+
+      assert compare(response_moderation_log, factory_moderation_log)
+      assert response_moderation_log["action_display_text"] == "removed user(s) '#{@user.username}' from list of moderators for board '#{board.name}'"
+      assert response_moderation_log["action_display_url"] == "threads.data({ boardSlug: '#{board.slug}' })"
+    end
     #
     # @tag :authenticated
     # test "when action_type is 'reports.updateMessageReport', gets page",

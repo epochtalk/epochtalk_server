@@ -87,11 +87,9 @@ defmodule EpochtalkServer.MixProject do
       # test seeds
       "seed.test": [
         "seed.required",
-        "seed.test_users",
-        "seed.test_moderation_logs"
+        "seed.test_users"
       ],
       "seed.test_users": ["run test/seed/users.exs"],
-      "seed.test_moderation_logs": ["run test/seed/moderation_log.exs"],
       test: [
         "ecto.drop",
         "ecto.create --quiet",

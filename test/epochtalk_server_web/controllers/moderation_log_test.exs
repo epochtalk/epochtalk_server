@@ -232,88 +232,73 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert response_moderation_log["action_display_url"] == "^.messages({ reportId: '#{@post_report_id}' })"
     end
 
-    # @tag :authenticated
-    # test "when action_type is 'reports.updatePostReportNote', gets page",
-    #      %{
-    #        conn: conn
-    #      } do
-    #   conn =
-    #     get(
-    #       conn,
-    #       Routes.moderation_log_path(conn, :page, %{"mod" => 12})
-    #     )
-    #
-    #   moderation_logs = json_response(conn, 200)["moderation_logs"]
-    #   moderation_log = List.first(moderation_logs)
-    #
-    #   assert moderation_log["mod_id"] == 12
-    #   assert moderation_log["action_type"] == "reports.updatePostReportNote"
-    #   assert moderation_log["action_display_text"] == "edited their note on a post report"
-    #   assert moderation_log["action_display_url"] == "^.messages({ reportId: '#{@post_report_id}' })"
-    # end
-    #
-    # @tag :authenticated
-    # test "when action_type is 'reports.updateUserReport', gets page",
-    #      %{
-    #        conn: conn
-    #      } do
-    #   conn =
-    #     get(
-    #       conn,
-    #       Routes.moderation_log_path(conn, :page, %{"mod" => 13})
-    #     )
-    #
-    #   moderation_logs = json_response(conn, 200)["moderation_logs"]
-    #   moderation_log = List.first(moderation_logs)
-    #
-    #   assert moderation_log["mod_id"] == 13
-    #   assert moderation_log["action_type"] == "reports.updateUserReport"
-    #
-    #   assert moderation_log["action_display_text"] ==
-    #            "updated the status of user report to '#{@status}'"
-    #
-    #   assert moderation_log["action_display_url"] == "^.messages({ reportId: '#{@user_report_id}' })"
-    # end
-    #
-    # @tag :authenticated
-    # test "when action_type is 'reports.createUserReportNote', gets page",
-    #      %{
-    #        conn: conn
-    #      } do
-    #   conn =
-    #     get(
-    #       conn,
-    #       Routes.moderation_log_path(conn, :page, %{"mod" => 14})
-    #     )
-    #
-    #   moderation_logs = json_response(conn, 200)["moderation_logs"]
-    #   moderation_log = List.first(moderation_logs)
-    #
-    #   assert moderation_log["mod_id"] == 14
-    #   assert moderation_log["action_type"] == "reports.createUserReportNote"
-    #   assert moderation_log["action_display_text"] == "created a note on a user report"
-    #   assert moderation_log["action_display_url"] == "^.messages({ reportId: '#{@user_report_id}' })"
-    # end
-    #
-    # @tag :authenticated
-    # test "when action_type is 'reports.updateUserReportNote', gets page",
-    #      %{
-    #        conn: conn
-    #      } do
-    #   conn =
-    #     get(
-    #       conn,
-    #       Routes.moderation_log_path(conn, :page, %{"mod" => 15})
-    #     )
-    #
-    #   moderation_logs = json_response(conn, 200)["moderation_logs"]
-    #   moderation_log = List.first(moderation_logs)
-    #
-    #   assert moderation_log["mod_id"] == 15
-    #   assert moderation_log["action_type"] == "reports.updateUserReportNote"
-    #   assert moderation_log["action_display_text"] == "edited their note on a user report"
-    #   assert moderation_log["action_display_url"] == "^.messages({ reportId: '#{@user_report_id}' })"
-    # end
+    @tag :authenticated
+    test "when action_type is 'reports.updatePostReportNote', gets page", %{conn: conn} do
+      factory_moderation_log = build(:moderation_log, %{
+        api_url: "/api/reports/updatePostReportNote",
+        api_method: "post",
+        type: "reports.updatePostReportNote",
+        obj: %{report_id: @post_report_id}
+      })
+
+      response_moderation_log =
+        conn |> response_for_mod(factory_moderation_log.mod_id)
+
+      assert compare(response_moderation_log, factory_moderation_log)
+      assert response_moderation_log["action_display_text"] == "edited their note on a post report"
+      assert response_moderation_log["action_display_url"] == "^.messages({ reportId: '#{@post_report_id}' })"
+    end
+
+    @tag :authenticated
+    test "when action_type is 'reports.updateUserReport', gets page", %{conn: conn} do
+      factory_moderation_log = build(:moderation_log, %{
+        api_url: "/api/reports/updateUserReport",
+        api_method: "post",
+        type: "reports.updateUserReport",
+        obj: %{status: "#{@status}", id: @user_report_id}
+      })
+
+      response_moderation_log =
+        conn |> response_for_mod(factory_moderation_log.mod_id)
+
+      assert compare(response_moderation_log, factory_moderation_log)
+      assert response_moderation_log["action_display_text"] == "updated the status of user report to '#{@status}'"
+      assert response_moderation_log["action_display_url"] == "^.messages({ reportId: '#{@user_report_id}' })"
+    end
+
+    @tag :authenticated
+    test "when action_type is 'reports.createUserReportNote', gets page", %{ conn: conn } do
+      factory_moderation_log = build(:moderation_log, %{
+        api_url: "/api/reports/createUserReportNote",
+        api_method: "post",
+        type: "reports.createUserReportNote",
+        obj: %{report_id: @user_report_id}
+      })
+
+      response_moderation_log =
+        conn |> response_for_mod(factory_moderation_log.mod_id)
+
+      assert compare(response_moderation_log, factory_moderation_log)
+      assert response_moderation_log["action_display_text"] == "created a note on a user report"
+      assert response_moderation_log["action_display_url"] == "^.messages({ reportId: '#{@user_report_id}' })"
+    end
+
+    @tag :authenticated
+    test "when action_type is 'reports.updateUserReportNote', gets page", %{conn: conn} do
+      factory_moderation_log = build(:moderation_log, %{
+        api_url: "/api/reports/updateUserReportNote",
+        api_method: "post",
+        type: "reports.updateUserReportNote",
+        obj: %{report_id: @user_report_id}
+      })
+
+      response_moderation_log =
+        conn |> response_for_mod(factory_moderation_log.mod_id)
+
+      assert compare(response_moderation_log, factory_moderation_log)
+      assert response_moderation_log["action_display_text"] == "edited their note on a user report"
+      assert response_moderation_log["action_display_url"] == "^.messages({ reportId: '#{@user_report_id}' })"
+    end
     #
     # @tag :authenticated
     # test "when action_type is 'adminRoles.add', gets page",

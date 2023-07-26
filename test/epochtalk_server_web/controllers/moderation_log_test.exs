@@ -314,10 +314,10 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     #   moderation_logs = json_response(conn, 200)["moderation_logs"]
     #   moderation_log = List.first(moderation_logs)
     #
-    #   assert moderation_log["mod_id"] == 16
-    #   assert moderation_log["action_type"] == "adminRoles.add"
-    #   assert moderation_log["action_display_text"] == "created a new role named '#{@super_admin_role.name}'"
-    #   assert moderation_log["action_display_url"] == "admin-management.roles({ roleId: '#{@super_admin_role.id}' })"
+    #   assert response_moderation_log["mod_id"] == 16
+    #   assert response_moderation_log["action_type"] == "adminRoles.add"
+    #   assert response_moderation_log["action_display_text"] == "created a new role named '#{@super_admin_role.name}'"
+    #   assert response_moderation_log["action_display_url"] == "admin-management.roles({ roleId: '#{@super_admin_role.id}' })"
     # end
     #
     # @tag :authenticated
@@ -334,10 +334,10 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     #   moderation_logs = json_response(conn, 200)["moderation_logs"]
     #   moderation_log = List.first(moderation_logs)
     #
-    #   assert moderation_log["mod_id"] == 17
-    #   assert moderation_log["action_type"] == "adminRoles.remove"
-    #   assert moderation_log["action_display_text"] == "removed the role named '#{@super_admin_role.name}'"
-    #   assert moderation_log["action_display_url"] == "admin-management.roles"
+    #   assert response_moderation_log["mod_id"] == 17
+    #   assert response_moderation_log["action_type"] == "adminRoles.remove"
+    #   assert response_moderation_log["action_display_text"] == "removed the role named '#{@super_admin_role.name}'"
+    #   assert response_moderation_log["action_display_url"] == "admin-management.roles"
     # end
     #
     # @tag :authenticated
@@ -354,10 +354,10 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     #   moderation_logs = json_response(conn, 200)["moderation_logs"]
     #   moderation_log = List.first(moderation_logs)
     #
-    #   assert moderation_log["mod_id"] == 18
-    #   assert moderation_log["action_type"] == "adminRoles.update"
-    #   assert moderation_log["action_display_text"] == "updated the role named '#{@super_admin_role.name}'"
-    #   assert moderation_log["action_display_url"] == "admin-management.roles({ roleId: '#{@super_admin_role.id}' })"
+    #   assert response_moderation_log["mod_id"] == 18
+    #   assert response_moderation_log["action_type"] == "adminRoles.update"
+    #   assert response_moderation_log["action_display_text"] == "updated the role named '#{@super_admin_role.name}'"
+    #   assert response_moderation_log["action_display_url"] == "admin-management.roles({ roleId: '#{@super_admin_role.id}' })"
     # end
     #
     # @tag :authenticated
@@ -374,10 +374,10 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     #   moderation_logs = json_response(conn, 200)["moderation_logs"]
     #   moderation_log = List.first(moderation_logs)
     #
-    #   assert moderation_log["mod_id"] == 19
-    #   assert moderation_log["action_type"] == "adminRoles.reprioritize"
-    #   assert moderation_log["action_display_text"] == "reordered role priorities"
-    #   assert moderation_log["action_display_url"] == "admin-management.roles"
+    #   assert response_moderation_log["mod_id"] == 19
+    #   assert response_moderation_log["action_type"] == "adminRoles.reprioritize"
+    #   assert response_moderation_log["action_display_text"] == "reordered role priorities"
+    #   assert response_moderation_log["action_display_url"] == "admin-management.roles"
     # end
     #
     # @tag :authenticated
@@ -394,10 +394,10 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     #   moderation_logs = json_response(conn, 200)["moderation_logs"]
     #   moderation_log = List.first(moderation_logs)
     #
-    #   assert moderation_log["mod_id"] == 20
-    #   assert moderation_log["action_type"] == "adminSettings.update"
-    #   assert moderation_log["action_display_text"] == "updated forum settings"
-    #   assert moderation_log["action_display_url"] == "admin-settings"
+    #   assert response_moderation_log["mod_id"] == 20
+    #   assert response_moderation_log["action_type"] == "adminSettings.update"
+    #   assert response_moderation_log["action_display_text"] == "updated forum settings"
+    #   assert response_moderation_log["action_display_url"] == "admin-settings"
     # end
     #
     # @tag :authenticated
@@ -414,10 +414,10 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     #   moderation_logs = json_response(conn, 200)["moderation_logs"]
     #   moderation_log = List.first(moderation_logs)
     #
-    #   assert moderation_log["mod_id"] == 21
-    #   assert moderation_log["action_type"] == "adminSettings.addToBlacklist"
-    #   assert moderation_log["action_display_text"] == "added ip blacklist rule named 'test_note'"
-    #   assert moderation_log["action_display_url"] == "admin-settings.advanced"
+    #   assert response_moderation_log["mod_id"] == 21
+    #   assert response_moderation_log["action_type"] == "adminSettings.addToBlacklist"
+    #   assert response_moderation_log["action_display_text"] == "added ip blacklist rule named 'test_note'"
+    #   assert response_moderation_log["action_display_url"] == "admin-settings.advanced"
     # end
     #
     # @tag :authenticated
@@ -434,13 +434,13 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     #   moderation_logs = json_response(conn, 200)["moderation_logs"]
     #   moderation_log = List.first(moderation_logs)
     #
-    #   assert moderation_log["mod_id"] == 22
-    #   assert moderation_log["action_type"] == "adminSettings.updateBlacklist"
+    #   assert response_moderation_log["mod_id"] == 22
+    #   assert response_moderation_log["action_type"] == "adminSettings.updateBlacklist"
     #
-    #   assert moderation_log["action_display_text"] ==
+    #   assert response_moderation_log["action_display_text"] ==
     #            "updated ip blacklist rule named 'test_note'"
     #
-    #   assert moderation_log["action_display_url"] == "admin-settings.advanced"
+    #   assert response_moderation_log["action_display_url"] == "admin-settings.advanced"
     # end
     #
     # @tag :authenticated
@@ -457,13 +457,13 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     #   moderation_logs = json_response(conn, 200)["moderation_logs"]
     #   moderation_log = List.first(moderation_logs)
     #
-    #   assert moderation_log["mod_id"] == 23
-    #   assert moderation_log["action_type"] == "adminSettings.deleteFromBlacklist"
+    #   assert response_moderation_log["mod_id"] == 23
+    #   assert response_moderation_log["action_type"] == "adminSettings.deleteFromBlacklist"
     #
-    #   assert moderation_log["action_display_text"] ==
+    #   assert response_moderation_log["action_display_text"] ==
     #            "deleted ip blacklist rule named 'test_note'"
     #
-    #   assert moderation_log["action_display_url"] == "admin-settings.advanced"
+    #   assert response_moderation_log["action_display_url"] == "admin-settings.advanced"
     # end
     #
     # @tag :authenticated
@@ -480,10 +480,10 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     #   moderation_logs = json_response(conn, 200)["moderation_logs"]
     #   moderation_log = List.first(moderation_logs)
     #
-    #   assert moderation_log["mod_id"] == 24
-    #   assert moderation_log["action_type"] == "adminSettings.setTheme"
-    #   assert moderation_log["action_display_text"] == "updated the forum theme"
-    #   assert moderation_log["action_display_url"] == "admin-settings.theme"
+    #   assert response_moderation_log["mod_id"] == 24
+    #   assert response_moderation_log["action_type"] == "adminSettings.setTheme"
+    #   assert response_moderation_log["action_display_text"] == "updated the forum theme"
+    #   assert response_moderation_log["action_display_url"] == "admin-settings.theme"
     # end
     #
     # @tag :authenticated
@@ -500,10 +500,10 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     #   moderation_logs = json_response(conn, 200)["moderation_logs"]
     #   moderation_log = List.first(moderation_logs)
     #
-    #   assert moderation_log["mod_id"] == 25
-    #   assert moderation_log["action_type"] == "adminSettings.resetTheme"
-    #   assert moderation_log["action_display_text"] == "restored the forum to the default theme"
-    #   assert moderation_log["action_display_url"] == "admin-settings.theme"
+    #   assert response_moderation_log["mod_id"] == 25
+    #   assert response_moderation_log["action_type"] == "adminSettings.resetTheme"
+    #   assert response_moderation_log["action_display_text"] == "restored the forum to the default theme"
+    #   assert response_moderation_log["action_display_url"] == "admin-settings.theme"
     # end
     #
     # @tag :authenticated
@@ -520,13 +520,13 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     #   moderation_logs = json_response(conn, 200)["moderation_logs"]
     #   moderation_log = List.first(moderation_logs)
     #
-    #   assert moderation_log["mod_id"] == 26
-    #   assert moderation_log["action_type"] == "adminUsers.addRoles"
+    #   assert response_moderation_log["mod_id"] == 26
+    #   assert response_moderation_log["action_type"] == "adminUsers.addRoles"
     #
-    #   assert moderation_log["action_display_text"] ==
+    #   assert response_moderation_log["action_display_text"] ==
     #            "added role '#{@super_admin_role.name}' to users(s) '#{@user.username}'"
     #
-    #   assert moderation_log["action_display_url"] == "admin-management.roles({ roleId: '#{@super_admin_role.id}' })"
+    #   assert response_moderation_log["action_display_url"] == "admin-management.roles({ roleId: '#{@super_admin_role.id}' })"
     # end
     #
     # @tag :authenticated
@@ -543,13 +543,13 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     #   moderation_logs = json_response(conn, 200)["moderation_logs"]
     #   moderation_log = List.first(moderation_logs)
     #
-    #   assert moderation_log["mod_id"] == 27
-    #   assert moderation_log["action_type"] == "adminUsers.removeRoles"
+    #   assert response_moderation_log["mod_id"] == 27
+    #   assert response_moderation_log["action_type"] == "adminUsers.removeRoles"
     #
-    #   assert moderation_log["action_display_text"] ==
+    #   assert response_moderation_log["action_display_text"] ==
     #            "removed role '#{@super_admin_role.name}' from user '#{@user.username}'"
     #
-    #   assert moderation_log["action_display_url"] == "admin-management.roles({ roleId: '#{@super_admin_role.id}' })"
+    #   assert response_moderation_log["action_display_url"] == "admin-management.roles({ roleId: '#{@super_admin_role.id}' })"
     # end
     #
     # @tag :authenticated
@@ -566,10 +566,10 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     #   moderation_logs = json_response(conn, 200)["moderation_logs"]
     #   moderation_log = List.first(moderation_logs)
     #
-    #   assert moderation_log["mod_id"] == 28
-    #   assert moderation_log["action_type"] == "userNotes.create"
-    #   assert moderation_log["action_display_text"] == "created a moderation note for user '#{@user.username}'"
-    #   assert moderation_log["action_display_url"] == "profile({ username: '#{@user.username}' })"
+    #   assert response_moderation_log["mod_id"] == 28
+    #   assert response_moderation_log["action_type"] == "userNotes.create"
+    #   assert response_moderation_log["action_display_text"] == "created a moderation note for user '#{@user.username}'"
+    #   assert response_moderation_log["action_display_url"] == "profile({ username: '#{@user.username}' })"
     # end
     #
     # @tag :authenticated
@@ -586,13 +586,13 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     #   moderation_logs = json_response(conn, 200)["moderation_logs"]
     #   moderation_log = List.first(moderation_logs)
     #
-    #   assert moderation_log["mod_id"] == 29
-    #   assert moderation_log["action_type"] == "userNotes.update"
+    #   assert response_moderation_log["mod_id"] == 29
+    #   assert response_moderation_log["action_type"] == "userNotes.update"
     #
-    #   assert moderation_log["action_display_text"] ==
+    #   assert response_moderation_log["action_display_text"] ==
     #            "edited their moderation note for user '#{@user.username}'"
     #
-    #   assert moderation_log["action_display_url"] == "profile({ username: '#{@user.username}' })"
+    #   assert response_moderation_log["action_display_url"] == "profile({ username: '#{@user.username}' })"
     # end
     #
     # @tag :authenticated
@@ -609,13 +609,13 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     #   moderation_logs = json_response(conn, 200)["moderation_logs"]
     #   moderation_log = List.first(moderation_logs)
     #
-    #   assert moderation_log["mod_id"] == 30
-    #   assert moderation_log["action_type"] == "userNotes.delete"
+    #   assert response_moderation_log["mod_id"] == 30
+    #   assert response_moderation_log["action_type"] == "userNotes.delete"
     #
-    #   assert moderation_log["action_display_text"] ==
+    #   assert response_moderation_log["action_display_text"] ==
     #            "deleted their moderation note for user '#{@user.username}'"
     #
-    #   assert moderation_log["action_display_url"] == "profile({ username: '#{@user.username}' })"
+    #   assert response_moderation_log["action_display_url"] == "profile({ username: '#{@user.username}' })"
     # end
     #
     # @tag :authenticated
@@ -632,10 +632,10 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     #   moderation_logs = json_response(conn, 200)["moderation_logs"]
     #   moderation_log = List.first(moderation_logs)
     #
-    #   assert moderation_log["mod_id"] == 31
-    #   assert moderation_log["action_type"] == "bans.addAddresses"
-    #   assert moderation_log["action_display_text"] == "banned the following addresses '#{@banned_address}'"
-    #   assert moderation_log["action_display_url"] == "admin-management.banned-addresses"
+    #   assert response_moderation_log["mod_id"] == 31
+    #   assert response_moderation_log["action_type"] == "bans.addAddresses"
+    #   assert response_moderation_log["action_display_text"] == "banned the following addresses '#{@banned_address}'"
+    #   assert response_moderation_log["action_display_url"] == "admin-management.banned-addresses"
     # end
     #
     # @tag :authenticated
@@ -652,13 +652,13 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     #   moderation_logs = json_response(conn, 200)["moderation_logs"]
     #   moderation_log = List.first(moderation_logs)
     #
-    #   assert moderation_log["mod_id"] == 32
-    #   assert moderation_log["action_type"] == "bans.editAddress"
+    #   assert response_moderation_log["mod_id"] == 32
+    #   assert response_moderation_log["action_type"] == "bans.editAddress"
     #
-    #   assert moderation_log["action_display_text"] ==
+    #   assert response_moderation_log["action_display_text"] ==
     #            "edited banned address '#{@banned_address}' to 'not decay' with a weight of '#{@weight}'"
     #
-    #   assert moderation_log["action_display_url"] ==
+    #   assert response_moderation_log["action_display_url"] ==
     #            "admin-management.banned-addresses({ search: '#{@banned_address}' })"
     # end
     #
@@ -676,10 +676,10 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     #   moderation_logs = json_response(conn, 200)["moderation_logs"]
     #   moderation_log = List.first(moderation_logs)
     #
-    #   assert moderation_log["mod_id"] == 33
-    #   assert moderation_log["action_type"] == "bans.deleteAddress"
-    #   assert moderation_log["action_display_text"] == "deleted banned address '#{@banned_address}'"
-    #   assert moderation_log["action_display_url"] == "admin-management.banned-addresses"
+    #   assert response_moderation_log["mod_id"] == 33
+    #   assert response_moderation_log["action_type"] == "bans.deleteAddress"
+    #   assert response_moderation_log["action_display_text"] == "deleted banned address '#{@banned_address}'"
+    #   assert response_moderation_log["action_display_url"] == "admin-management.banned-addresses"
     # end
     #
     # @tag :authenticated
@@ -696,13 +696,13 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     #   moderation_logs = json_response(conn, 200)["moderation_logs"]
     #   moderation_log = List.first(moderation_logs)
     #
-    #   assert moderation_log["mod_id"] == 34
-    #   assert moderation_log["action_type"] == "bans.ban"
+    #   assert response_moderation_log["mod_id"] == 34
+    #   assert response_moderation_log["action_type"] == "bans.ban"
     #
-    #   assert moderation_log["action_display_text"] ==
+    #   assert response_moderation_log["action_display_text"] ==
     #            "temporarily banned user '#{@user.username}' until '#{@ban_expiration}'"
     #
-    #   assert moderation_log["action_display_url"] == "profile({ username: '#{@user.username}' })"
+    #   assert response_moderation_log["action_display_url"] == "profile({ username: '#{@user.username}' })"
     # end
     #
     # @tag :authenticated
@@ -719,10 +719,10 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     #   moderation_logs = json_response(conn, 200)["moderation_logs"]
     #   moderation_log = List.first(moderation_logs)
     #
-    #   assert moderation_log["mod_id"] == 35
-    #   assert moderation_log["action_type"] == "bans.unban"
-    #   assert moderation_log["action_display_text"] == "unbanned user '#{@user.username}'"
-    #   assert moderation_log["action_display_url"] == "profile({ username: '#{@user.username}' })"
+    #   assert response_moderation_log["mod_id"] == 35
+    #   assert response_moderation_log["action_type"] == "bans.unban"
+    #   assert response_moderation_log["action_display_text"] == "unbanned user '#{@user.username}'"
+    #   assert response_moderation_log["action_display_url"] == "profile({ username: '#{@user.username}' })"
     # end
     #
     # @tag :authenticated
@@ -739,13 +739,13 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     #   moderation_logs = json_response(conn, 200)["moderation_logs"]
     #   moderation_log = List.first(moderation_logs)
     #
-    #   assert moderation_log["mod_id"] == 36
-    #   assert moderation_log["action_type"] == "bans.banFromBoards"
+    #   assert response_moderation_log["mod_id"] == 36
+    #   assert response_moderation_log["action_type"] == "bans.banFromBoards"
     #
-    #   assert moderation_log["action_display_text"] ==
+    #   assert response_moderation_log["action_display_text"] ==
     #            "banned user '#{@user.username}' from boards: #{@board.name}'"
     #
-    #   assert moderation_log["action_display_url"] == "^.board-bans"
+    #   assert response_moderation_log["action_display_url"] == "^.board-bans"
     # end
     #
     # @tag :authenticated
@@ -762,13 +762,13 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     #   moderation_logs = json_response(conn, 200)["moderation_logs"]
     #   moderation_log = List.first(moderation_logs)
     #
-    #   assert moderation_log["mod_id"] == 37
-    #   assert moderation_log["action_type"] == "bans.unbanFromBoards"
+    #   assert response_moderation_log["mod_id"] == 37
+    #   assert response_moderation_log["action_type"] == "bans.unbanFromBoards"
     #
-    #   assert moderation_log["action_display_text"] ==
+    #   assert response_moderation_log["action_display_text"] ==
     #            "unbanned user '#{@user.username}' from boards: #{@board.name}'"
     #
-    #   assert moderation_log["action_display_url"] == "^.board-bans"
+    #   assert response_moderation_log["action_display_url"] == "^.board-bans"
     # end
     #
     # @tag :authenticated
@@ -785,10 +785,10 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     #   moderation_logs = json_response(conn, 200)["moderation_logs"]
     #   moderation_log = List.first(moderation_logs)
     #
-    #   assert moderation_log["mod_id"] == 38
-    #   assert moderation_log["action_type"] == "boards.create"
-    #   assert moderation_log["action_display_text"] == "created board named '#{@board.name}'"
-    #   assert moderation_log["action_display_url"] == "admin-management.boards"
+    #   assert response_moderation_log["mod_id"] == 38
+    #   assert response_moderation_log["action_type"] == "boards.create"
+    #   assert response_moderation_log["action_display_text"] == "created board named '#{@board.name}'"
+    #   assert response_moderation_log["action_display_url"] == "admin-management.boards"
     # end
     #
     # @tag :authenticated
@@ -805,10 +805,10 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     #   moderation_logs = json_response(conn, 200)["moderation_logs"]
     #   moderation_log = List.first(moderation_logs)
     #
-    #   assert moderation_log["mod_id"] == 39
-    #   assert moderation_log["action_type"] == "boards.update"
-    #   assert moderation_log["action_display_text"] == "updated board named '#{@board.name}'"
-    #   assert moderation_log["action_display_url"] == "admin-management.boards"
+    #   assert response_moderation_log["mod_id"] == 39
+    #   assert response_moderation_log["action_type"] == "boards.update"
+    #   assert response_moderation_log["action_display_text"] == "updated board named '#{@board.name}'"
+    #   assert response_moderation_log["action_display_url"] == "admin-management.boards"
     # end
     #
     # @tag :authenticated
@@ -825,10 +825,10 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     #   moderation_logs = json_response(conn, 200)["moderation_logs"]
     #   moderation_log = List.first(moderation_logs)
     #
-    #   assert moderation_log["mod_id"] == 40
-    #   assert moderation_log["action_type"] == "boards.delete"
-    #   assert moderation_log["action_display_text"] == "deleted board named '#{@board.name}'"
-    #   assert moderation_log["action_display_url"] == "admin-management.boards"
+    #   assert response_moderation_log["mod_id"] == 40
+    #   assert response_moderation_log["action_type"] == "boards.delete"
+    #   assert response_moderation_log["action_display_text"] == "deleted board named '#{@board.name}'"
+    #   assert response_moderation_log["action_display_url"] == "admin-management.boards"
     # end
     #
     # @tag :authenticated
@@ -845,13 +845,13 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     #   moderation_logs = json_response(conn, 200)["moderation_logs"]
     #   moderation_log = List.first(moderation_logs)
     #
-    #   assert moderation_log["mod_id"] == 41
-    #   assert moderation_log["action_type"] == "threads.title"
+    #   assert response_moderation_log["mod_id"] == 41
+    #   assert response_moderation_log["action_type"] == "threads.title"
     #
-    #   assert moderation_log["action_display_text"] ==
+    #   assert response_moderation_log["action_display_text"] ==
     #            "updated the title of a thread created by user '#{@user.username}' to '#{@new_thread.title}'"
     #
-    #   assert moderation_log["action_display_url"] == "posts.data({ slug: '#{@thread.slug}' })"
+    #   assert response_moderation_log["action_display_url"] == "posts.data({ slug: '#{@thread.slug}' })"
     # end
     #
     # @tag :authenticated
@@ -868,13 +868,13 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     #   moderation_logs = json_response(conn, 200)["moderation_logs"]
     #   moderation_log = List.first(moderation_logs)
     #
-    #   assert moderation_log["mod_id"] == 42
-    #   assert moderation_log["action_type"] == "threads.lock"
+    #   assert response_moderation_log["mod_id"] == 42
+    #   assert response_moderation_log["action_type"] == "threads.lock"
     #
-    #   assert moderation_log["action_display_text"] ==
+    #   assert response_moderation_log["action_display_text"] ==
     #            "'locked' the thread '#{@thread.title}' created by user '#{@user.username}'"
     #
-    #   assert moderation_log["action_display_url"] == "posts.data({ slug: '#{@thread.slug}' })"
+    #   assert response_moderation_log["action_display_url"] == "posts.data({ slug: '#{@thread.slug}' })"
     # end
     #
     # @tag :authenticated
@@ -891,13 +891,13 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     #   moderation_logs = json_response(conn, 200)["moderation_logs"]
     #   moderation_log = List.first(moderation_logs)
     #
-    #   assert moderation_log["mod_id"] == 43
-    #   assert moderation_log["action_type"] == "threads.sticky"
+    #   assert response_moderation_log["mod_id"] == 43
+    #   assert response_moderation_log["action_type"] == "threads.sticky"
     #
-    #   assert moderation_log["action_display_text"] ==
+    #   assert response_moderation_log["action_display_text"] ==
     #            "'stickied' the thread '#{@thread.title}' created by user '#{@user.username}'"
     #
-    #   assert moderation_log["action_display_url"] == "posts.data({ slug: '#{@thread.slug}' })"
+    #   assert response_moderation_log["action_display_url"] == "posts.data({ slug: '#{@thread.slug}' })"
     # end
     #
     # @tag :authenticated
@@ -914,13 +914,13 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     #   moderation_logs = json_response(conn, 200)["moderation_logs"]
     #   moderation_log = List.first(moderation_logs)
     #
-    #   assert moderation_log["mod_id"] == 44
-    #   assert moderation_log["action_type"] == "threads.move"
+    #   assert response_moderation_log["mod_id"] == 44
+    #   assert response_moderation_log["action_type"] == "threads.move"
     #
-    #   assert moderation_log["action_display_text"] ==
+    #   assert response_moderation_log["action_display_text"] ==
     #            "moved the thread '#{@thread.title}' created by user '#{@user.username}' from board '#{@old_board.name}' to '#{@board.name}'"
     #
-    #   assert moderation_log["action_display_url"] == "posts.data({ slug: '#{@thread.slug}' })"
+    #   assert response_moderation_log["action_display_url"] == "posts.data({ slug: '#{@thread.slug}' })"
     # end
     #
     # @tag :authenticated
@@ -937,13 +937,13 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     #   moderation_logs = json_response(conn, 200)["moderation_logs"]
     #   moderation_log = List.first(moderation_logs)
     #
-    #   assert moderation_log["mod_id"] == 45
-    #   assert moderation_log["action_type"] == "threads.purge"
+    #   assert response_moderation_log["mod_id"] == 45
+    #   assert response_moderation_log["action_type"] == "threads.purge"
     #
-    #   assert moderation_log["action_display_text"] ==
+    #   assert response_moderation_log["action_display_text"] ==
     #            "purged thread '#{@thread.title}' created by user '#{@user.username}' from board '#{@old_board.name}' to '#{@board.name}'"
     #
-    #   assert moderation_log["action_display_url"] == nil
+    #   assert response_moderation_log["action_display_url"] == nil
     # end
     #
     # @tag :authenticated
@@ -960,13 +960,13 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     #   moderation_logs = json_response(conn, 200)["moderation_logs"]
     #   moderation_log = List.first(moderation_logs)
     #
-    #   assert moderation_log["mod_id"] == 46
-    #   assert moderation_log["action_type"] == "threads.editPoll"
+    #   assert response_moderation_log["mod_id"] == 46
+    #   assert response_moderation_log["action_type"] == "threads.editPoll"
     #
-    #   assert moderation_log["action_display_text"] ==
+    #   assert response_moderation_log["action_display_text"] ==
     #            "edited a poll in thread named '#{@thread.title}' created by user '#{@user.username}'"
     #
-    #   assert moderation_log["action_display_url"] == "posts.data({ slug: '#{@thread.slug}' })"
+    #   assert response_moderation_log["action_display_url"] == "posts.data({ slug: '#{@thread.slug}' })"
     # end
     #
     # @tag :authenticated
@@ -983,13 +983,13 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     #   moderation_logs = json_response(conn, 200)["moderation_logs"]
     #   moderation_log = List.first(moderation_logs)
     #
-    #   assert moderation_log["mod_id"] == 47
-    #   assert moderation_log["action_type"] == "threads.createPoll"
+    #   assert response_moderation_log["mod_id"] == 47
+    #   assert response_moderation_log["action_type"] == "threads.createPoll"
     #
-    #   assert moderation_log["action_display_text"] ==
+    #   assert response_moderation_log["action_display_text"] ==
     #            "created a poll in thread named '#{@thread.title}' created by user '#{@user.username}'"
     #
-    #   assert moderation_log["action_display_url"] == "posts.data({ slug: '#{@thread.slug}' })"
+    #   assert response_moderation_log["action_display_url"] == "posts.data({ slug: '#{@thread.slug}' })"
     # end
     #
     # @tag :authenticated
@@ -1006,13 +1006,13 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     #   moderation_logs = json_response(conn, 200)["moderation_logs"]
     #   moderation_log = List.first(moderation_logs)
     #
-    #   assert moderation_log["mod_id"] == 48
-    #   assert moderation_log["action_type"] == "threads.lockPoll"
+    #   assert response_moderation_log["mod_id"] == 48
+    #   assert response_moderation_log["action_type"] == "threads.lockPoll"
     #
-    #   assert moderation_log["action_display_text"] ==
+    #   assert response_moderation_log["action_display_text"] ==
     #            "'unlocked' poll in thread named '#{@thread.title}' created by user '#{@user.username}'"
     #
-    #   assert moderation_log["action_display_url"] == "posts.data({ slug: '#{@thread.slug}' })"
+    #   assert response_moderation_log["action_display_url"] == "posts.data({ slug: '#{@thread.slug}' })"
     # end
     #
     # @tag :authenticated
@@ -1029,13 +1029,13 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     #   moderation_logs = json_response(conn, 200)["moderation_logs"]
     #   moderation_log = List.first(moderation_logs)
     #
-    #   assert moderation_log["mod_id"] == 49
-    #   assert moderation_log["action_type"] == "posts.update"
+    #   assert response_moderation_log["mod_id"] == 49
+    #   assert response_moderation_log["action_type"] == "posts.update"
     #
-    #   assert moderation_log["action_display_text"] ==
+    #   assert response_moderation_log["action_display_text"] ==
     #            "updated post created by user '#{@user.username}' in thread named '#{@thread.title}'"
     #
-    #   assert moderation_log["action_display_url"] ==
+    #   assert response_moderation_log["action_display_url"] ==
     #            "posts.data({ slug: '#{@thread.slug}', start: '1', '#': '1' })"
     # end
     #
@@ -1053,13 +1053,13 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     #   moderation_logs = json_response(conn, 200)["moderation_logs"]
     #   moderation_log = List.first(moderation_logs)
     #
-    #   assert moderation_log["mod_id"] == 50
-    #   assert moderation_log["action_type"] == "posts.delete"
+    #   assert response_moderation_log["mod_id"] == 50
+    #   assert response_moderation_log["action_type"] == "posts.delete"
     #
-    #   assert moderation_log["action_display_text"] ==
+    #   assert response_moderation_log["action_display_text"] ==
     #            "hid post created by user '#{@user.username}' in thread '#{@thread.title}'"
     #
-    #   assert moderation_log["action_display_url"] ==
+    #   assert response_moderation_log["action_display_url"] ==
     #            "posts.data({ slug: '#{@thread.slug}', start: '1', '#': '1' })"
     # end
     #
@@ -1077,13 +1077,13 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     #   moderation_logs = json_response(conn, 200)["moderation_logs"]
     #   moderation_log = List.first(moderation_logs)
     #
-    #   assert moderation_log["mod_id"] == 51
-    #   assert moderation_log["action_type"] == "posts.undelete"
+    #   assert response_moderation_log["mod_id"] == 51
+    #   assert response_moderation_log["action_type"] == "posts.undelete"
     #
-    #   assert moderation_log["action_display_text"] ==
+    #   assert response_moderation_log["action_display_text"] ==
     #            "unhid post created by user '#{@user.username}' in thread '#{@thread.title}'"
     #
-    #   assert moderation_log["action_display_url"] ==
+    #   assert response_moderation_log["action_display_url"] ==
     #            "posts.data({ slug: '#{@thread.slug}', start: '1', '#': '1' })"
     # end
     #
@@ -1101,13 +1101,13 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     #   moderation_logs = json_response(conn, 200)["moderation_logs"]
     #   moderation_log = List.first(moderation_logs)
     #
-    #   assert moderation_log["mod_id"] == 52
-    #   assert moderation_log["action_type"] == "posts.purge"
+    #   assert response_moderation_log["mod_id"] == 52
+    #   assert response_moderation_log["action_type"] == "posts.purge"
     #
-    #   assert moderation_log["action_display_text"] ==
+    #   assert response_moderation_log["action_display_text"] ==
     #            "purged post created by user '#{@user.username}' in thread '#{@thread.title}'"
     #
-    #   assert moderation_log["action_display_url"] == "posts.data({ slug: '#{@thread.slug}' })"
+    #   assert response_moderation_log["action_display_url"] == "posts.data({ slug: '#{@thread.slug}' })"
     # end
     #
     # @tag :authenticated
@@ -1124,10 +1124,10 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     #   moderation_logs = json_response(conn, 200)["moderation_logs"]
     #   moderation_log = List.first(moderation_logs)
     #
-    #   assert moderation_log["mod_id"] == 53
-    #   assert moderation_log["action_type"] == "users.update"
-    #   assert moderation_log["action_display_text"] == "Updated user account '#{@user.username}'"
-    #   assert moderation_log["action_display_url"] == "profile({ username: '#{@user.username}' })"
+    #   assert response_moderation_log["mod_id"] == 53
+    #   assert response_moderation_log["action_type"] == "users.update"
+    #   assert response_moderation_log["action_display_text"] == "Updated user account '#{@user.username}'"
+    #   assert response_moderation_log["action_display_url"] == "profile({ username: '#{@user.username}' })"
     # end
     #
     # @tag :authenticated
@@ -1144,10 +1144,10 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     #   moderation_logs = json_response(conn, 200)["moderation_logs"]
     #   moderation_log = List.first(moderation_logs)
     #
-    #   assert moderation_log["mod_id"] == 54
-    #   assert moderation_log["action_type"] == "users.deactivate"
-    #   assert moderation_log["action_display_text"] == "deactivated user account '#{@user.username}'"
-    #   assert moderation_log["action_display_url"] == "profile({ username: '#{@user.username}' })"
+    #   assert response_moderation_log["mod_id"] == 54
+    #   assert response_moderation_log["action_type"] == "users.deactivate"
+    #   assert response_moderation_log["action_display_text"] == "deactivated user account '#{@user.username}'"
+    #   assert response_moderation_log["action_display_url"] == "profile({ username: '#{@user.username}' })"
     # end
     #
     # @tag :authenticated
@@ -1164,10 +1164,10 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     #   moderation_logs = json_response(conn, 200)["moderation_logs"]
     #   moderation_log = List.first(moderation_logs)
     #
-    #   assert moderation_log["mod_id"] == 55
-    #   assert moderation_log["action_type"] == "users.reactivate"
-    #   assert moderation_log["action_display_text"] == "reactivated user account '#{@user.username}'"
-    #   assert moderation_log["action_display_url"] == "profile({ username: '#{@user.username}' })"
+    #   assert response_moderation_log["mod_id"] == 55
+    #   assert response_moderation_log["action_type"] == "users.reactivate"
+    #   assert response_moderation_log["action_display_text"] == "reactivated user account '#{@user.username}'"
+    #   assert response_moderation_log["action_display_url"] == "profile({ username: '#{@user.username}' })"
     # end
     #
     # @tag :authenticated
@@ -1184,10 +1184,10 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     #   moderation_logs = json_response(conn, 200)["moderation_logs"]
     #   moderation_log = List.first(moderation_logs)
     #
-    #   assert moderation_log["mod_id"] == 56
-    #   assert moderation_log["action_type"] == "users.delete"
-    #   assert moderation_log["action_display_text"] == "purged user account '#{@user.username}'"
-    #   assert moderation_log["action_display_url"] == nil
+    #   assert response_moderation_log["mod_id"] == 56
+    #   assert response_moderation_log["action_type"] == "users.delete"
+    #   assert response_moderation_log["action_display_text"] == "purged user account '#{@user.username}'"
+    #   assert response_moderation_log["action_display_url"] == nil
     # end
     #
     # @tag :authenticated
@@ -1204,13 +1204,13 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     #   moderation_logs = json_response(conn, 200)["moderation_logs"]
     #   moderation_log = List.first(moderation_logs)
     #
-    #   assert moderation_log["mod_id"] == 57
-    #   assert moderation_log["action_type"] == "conversations.delete"
+    #   assert response_moderation_log["mod_id"] == 57
+    #   assert response_moderation_log["action_type"] == "conversations.delete"
     #
-    #   assert moderation_log["action_display_text"] ==
+    #   assert response_moderation_log["action_display_text"] ==
     #            "deleted conversation between users '#{@admin.username}' and '#{@user.username}'"
     #
-    #   assert moderation_log["action_display_url"] == nil
+    #   assert response_moderation_log["action_display_url"] == nil
     # end
     #
     # @tag :authenticated
@@ -1227,13 +1227,13 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     #   moderation_logs = json_response(conn, 200)["moderation_logs"]
     #   moderation_log = List.first(moderation_logs)
     #
-    #   assert moderation_log["mod_id"] == 58
-    #   assert moderation_log["action_type"] == "messages.delete"
+    #   assert response_moderation_log["mod_id"] == 58
+    #   assert response_moderation_log["action_type"] == "messages.delete"
     #
-    #   assert moderation_log["action_display_text"] ==
+    #   assert response_moderation_log["action_display_text"] ==
     #            "deleted message sent between users '#{@admin.username}' and '#{@user.username}'"
     #
-    #   assert moderation_log["action_display_url"] == nil
+    #   assert response_moderation_log["action_display_url"] == nil
     # end
     #
     # @tag :authenticated

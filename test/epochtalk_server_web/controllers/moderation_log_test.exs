@@ -52,6 +52,14 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
   #   }
   # }
 
+  defp stringify_keys_deep(map) do
+    map
+    |> Enum.reduce(%{}, fn {k, v}, m ->
+      v = if is_map(v), do: stringify_keys_deep(v), else: v
+      Map.put(m, to_string(k), v)
+    end)
+  end
+
   defp compare(result_moderation_log, factory_moderation_log) do
     assert result_moderation_log["action_api_method"] == factory_moderation_log.action_api_method
     assert result_moderation_log["action_api_url"] == factory_moderation_log.action_api_url

@@ -9,8 +9,6 @@ defmodule EpochtalkServerWeb.Controllers.PostJSON do
 
   @doc """
   Renders all `Post` for a particular `Thread`.
-
-  TODO(akinsey): implement trust and watched hook information for thread
   """
   def by_thread(%{
         posts: posts,
@@ -47,7 +45,8 @@ defmodule EpochtalkServerWeb.Controllers.PostJSON do
       |> Map.put(:poll, formatted_poll)
       |> Map.put(:watched, watched)
 
-    formatted_posts = posts
+    formatted_posts =
+      posts
       |> Enum.map(&format_post_data_for_by_thread(&1))
       |> clean_posts(formatted_thread, user, user_priority, view_deleted_posts)
 

@@ -111,7 +111,8 @@ defmodule EpochtalkServerWeb.Controllers.Post do
 
   ## === Private Helper Functions ===
 
-  defp can_authed_user_view_deleted_posts(nil, thread_id), do: false
+  defp can_authed_user_view_deleted_posts(nil, _thread_id), do: false
+
   defp can_authed_user_view_deleted_posts(user, thread_id) do
     view_all = ACL.has_permission(user, "posts.byThread.bypass.viewDeletedPosts.admin")
     view_some = ACL.has_permission(user, "posts.byThread.bypass.viewDeletedPosts.mod")

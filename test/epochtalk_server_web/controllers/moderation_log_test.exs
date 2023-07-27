@@ -23,7 +23,8 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
   @message_report_id 10
   @post_report_id 20
   @user_report_id 30
-  @ban_expiration "31 Dec 2030"
+  @ban_expiration_input ~N[2030-12-31 00:00:00.000]
+  @ban_expiration_output "31 Dec 2030"
   @mod_address "127.0.0.2"
   @banned_address "127.0.0.1"
   @weight 99
@@ -549,159 +550,127 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert response_moderation_log["action_display_text"] == "deleted their moderation note for user '#{user.username}'"
       assert response_moderation_log["action_display_url"] == "profile({ username: '#{user.username}' })"
     end
-    #
-    # @tag :authenticated
-    # test "when action_type is 'bans.addAddresses', gets page",
-    #      %{
-    #        conn: conn
-    #      } do
-    #   conn =
-    #     get(
-    #       conn,
-    #       Routes.moderation_log_path(conn, :page, %{"mod" => 31})
-    #     )
-    #
-    #   moderation_logs = json_response(conn, 200)["moderation_logs"]
-    #   moderation_log = List.first(moderation_logs)
-    #
-    #   assert response_moderation_log["mod_id"] == 31
-    #   assert response_moderation_log["action_type"] == "bans.addAddresses"
-    #   assert response_moderation_log["action_display_text"] == "banned the following addresses '#{@banned_address}'"
-    #   assert response_moderation_log["action_display_url"] == "admin-management.banned-addresses"
-    # end
-    #
-    # @tag :authenticated
-    # test "when action_type is 'bans.editAddress', gets page",
-    #      %{
-    #        conn: conn
-    #      } do
-    #   conn =
-    #     get(
-    #       conn,
-    #       Routes.moderation_log_path(conn, :page, %{"mod" => 32})
-    #     )
-    #
-    #   moderation_logs = json_response(conn, 200)["moderation_logs"]
-    #   moderation_log = List.first(moderation_logs)
-    #
-    #   assert response_moderation_log["mod_id"] == 32
-    #   assert response_moderation_log["action_type"] == "bans.editAddress"
-    #
-    #   assert response_moderation_log["action_display_text"] ==
-    #            "edited banned address '#{@banned_address}' to 'not decay' with a weight of '#{@weight}'"
-    #
-    #   assert response_moderation_log["action_display_url"] ==
-    #            "admin-management.banned-addresses({ search: '#{@banned_address}' })"
-    # end
-    #
-    # @tag :authenticated
-    # test "when action_type is 'bans.deleteAddress', gets page",
-    #      %{
-    #        conn: conn
-    #      } do
-    #   conn =
-    #     get(
-    #       conn,
-    #       Routes.moderation_log_path(conn, :page, %{"mod" => 33})
-    #     )
-    #
-    #   moderation_logs = json_response(conn, 200)["moderation_logs"]
-    #   moderation_log = List.first(moderation_logs)
-    #
-    #   assert response_moderation_log["mod_id"] == 33
-    #   assert response_moderation_log["action_type"] == "bans.deleteAddress"
-    #   assert response_moderation_log["action_display_text"] == "deleted banned address '#{@banned_address}'"
-    #   assert response_moderation_log["action_display_url"] == "admin-management.banned-addresses"
-    # end
-    #
-    # @tag :authenticated
-    # test "when action_type is 'bans.ban', gets page",
-    #      %{
-    #        conn: conn
-    #      } do
-    #   conn =
-    #     get(
-    #       conn,
-    #       Routes.moderation_log_path(conn, :page, %{"mod" => 34})
-    #     )
-    #
-    #   moderation_logs = json_response(conn, 200)["moderation_logs"]
-    #   moderation_log = List.first(moderation_logs)
-    #
-    #   assert response_moderation_log["mod_id"] == 34
-    #   assert response_moderation_log["action_type"] == "bans.ban"
-    #
-    #   assert response_moderation_log["action_display_text"] ==
-    #            "temporarily banned user '#{@user.username}' until '#{@ban_expiration}'"
-    #
-    #   assert response_moderation_log["action_display_url"] == "profile({ username: '#{@user.username}' })"
-    # end
-    #
-    # @tag :authenticated
-    # test "when action_type is 'bans.unban', gets page",
-    #      %{
-    #        conn: conn
-    #      } do
-    #   conn =
-    #     get(
-    #       conn,
-    #       Routes.moderation_log_path(conn, :page, %{"mod" => 35})
-    #     )
-    #
-    #   moderation_logs = json_response(conn, 200)["moderation_logs"]
-    #   moderation_log = List.first(moderation_logs)
-    #
-    #   assert response_moderation_log["mod_id"] == 35
-    #   assert response_moderation_log["action_type"] == "bans.unban"
-    #   assert response_moderation_log["action_display_text"] == "unbanned user '#{@user.username}'"
-    #   assert response_moderation_log["action_display_url"] == "profile({ username: '#{@user.username}' })"
-    # end
-    #
-    # @tag :authenticated
-    # test "when action_type is 'bans.banFromBoards', gets page",
-    #      %{
-    #        conn: conn
-    #      } do
-    #   conn =
-    #     get(
-    #       conn,
-    #       Routes.moderation_log_path(conn, :page, %{"mod" => 36})
-    #     )
-    #
-    #   moderation_logs = json_response(conn, 200)["moderation_logs"]
-    #   moderation_log = List.first(moderation_logs)
-    #
-    #   assert response_moderation_log["mod_id"] == 36
-    #   assert response_moderation_log["action_type"] == "bans.banFromBoards"
-    #
-    #   assert response_moderation_log["action_display_text"] ==
-    #            "banned user '#{@user.username}' from boards: #{@board.name}'"
-    #
-    #   assert response_moderation_log["action_display_url"] == "^.board-bans"
-    # end
-    #
-    # @tag :authenticated
-    # test "when action_type is 'bans.unbanFromBoards', gets page",
-    #      %{
-    #        conn: conn
-    #      } do
-    #   conn =
-    #     get(
-    #       conn,
-    #       Routes.moderation_log_path(conn, :page, %{"mod" => 37})
-    #     )
-    #
-    #   moderation_logs = json_response(conn, 200)["moderation_logs"]
-    #   moderation_log = List.first(moderation_logs)
-    #
-    #   assert response_moderation_log["mod_id"] == 37
-    #   assert response_moderation_log["action_type"] == "bans.unbanFromBoards"
-    #
-    #   assert response_moderation_log["action_display_text"] ==
-    #            "unbanned user '#{@user.username}' from boards: #{@board.name}'"
-    #
-    #   assert response_moderation_log["action_display_url"] == "^.board-bans"
-    # end
+
+    @tag :authenticated
+    test "when action_type is 'bans.addAddresses', gets page", %{conn: conn} do
+      factory_moderation_log = build(:moderation_log, %{
+        api_url: "/api/bans/addAddresses",
+        api_method: "post",
+        type: "bans.addAddresses",
+        obj: %{addresses: [%{hostname: @hostname, ip: @banned_address}]}
+      })
+
+      response_moderation_log =
+        conn |> response_for_mod(factory_moderation_log.mod_id)
+
+      assert response_moderation_log["action_obj"]["addresses"] |> List.first() == factory_moderation_log.action_obj.addresses |> List.first() |> stringify_keys_deep()
+      assert response_moderation_log["action_display_text"] == "banned the following addresses '#{@banned_address}'"
+      assert response_moderation_log["action_display_url"] == "admin-management.banned-addresses"
+    end
+
+    @tag :authenticated
+    test "when action_type is 'bans.editAddress', gets page", %{conn: conn} do
+      factory_moderation_log = build(:moderation_log, %{
+        api_url: "/api/bans/editAddress",
+        api_method: "post",
+        type: "bans.editAddress",
+        obj: %{hostname: @hostname, ip: @banned_address, weight: @weight, decay: @decay}
+      })
+
+      response_moderation_log =
+        conn |> response_for_mod(factory_moderation_log.mod_id)
+
+      assert compare(response_moderation_log, factory_moderation_log)
+      assert response_moderation_log["action_display_text"] == "edited banned address '#{@banned_address}' to 'not decay' with a weight of '#{@weight}'"
+      assert response_moderation_log["action_display_url"] == "admin-management.banned-addresses({ search: '#{@banned_address}' })"
+    end
+
+    @tag :authenticated
+    test "when action_type is 'bans.deleteAddress', gets page", %{conn: conn} do
+      factory_moderation_log = build(:moderation_log, %{
+        api_url: "/api/bans/deleteAddress",
+        api_method: "delete",
+        type: "bans.deleteAddress",
+        obj: %{hostname: nil, ip: @banned_address}
+      })
+
+      response_moderation_log =
+        conn |> response_for_mod(factory_moderation_log.mod_id)
+
+      assert compare(response_moderation_log, factory_moderation_log)
+      assert response_moderation_log["action_display_text"] == "deleted banned address '#{@banned_address}'"
+      assert response_moderation_log["action_display_url"] == "admin-management.banned-addresses"
+    end
+
+    @tag :authenticated
+    test "when action_type is 'bans.ban', gets page", %{conn: conn, users: %{user: user}} do
+      factory_moderation_log = build(:moderation_log, %{
+        api_url: "/api/bans/ban",
+        api_method: "post",
+        type: "bans.ban",
+        obj: %{expiration: @ban_expiration_input, user_id: user.id}
+      })
+
+      response_moderation_log =
+        conn |> response_for_mod(factory_moderation_log.mod_id)
+
+      assert response_moderation_log["action_obj"]["expiration"] |> NaiveDateTime.from_iso8601!() == factory_moderation_log.action_obj.expiration
+      assert response_moderation_log["action_display_text"] == "temporarily banned user '#{user.username}' until '#{@ban_expiration_output}'"
+      assert response_moderation_log["action_display_url"] == "profile({ username: '#{user.username}' })"
+    end
+
+    @tag :authenticated
+    test "when action_type is 'bans.unban', gets page", %{conn: conn, users: %{user: user}} do
+      factory_moderation_log = build(:moderation_log, %{
+        api_url: "/api/bans/unban",
+        api_method: "post",
+        type: "bans.unban",
+        obj: %{user_id: user.id}
+      })
+
+      response_moderation_log =
+        conn |> response_for_mod(factory_moderation_log.mod_id)
+
+      assert compare(response_moderation_log, factory_moderation_log)
+      assert response_moderation_log["action_display_text"] == "unbanned user '#{user.username}'"
+      assert response_moderation_log["action_display_url"] == "profile({ username: '#{user.username}' })"
+    end
+
+    @tag :authenticated
+    test "when action_type is 'bans.banFromBoards', gets page", %{conn: conn, users: %{user: user}} do
+      board = insert(:board)
+      factory_moderation_log = build(:moderation_log, %{
+        api_url: "/api/bans/banFromBoards",
+        api_method: "post",
+        type: "bans.banFromBoards",
+        obj: %{board_ids: [board.id], user_id: user.id}
+      })
+
+      response_moderation_log =
+        conn |> response_for_mod(factory_moderation_log.mod_id)
+
+      assert compare(response_moderation_log, factory_moderation_log)
+      assert response_moderation_log["action_display_text"] == "banned user '#{user.username}' from boards: #{board.name}'"
+      assert response_moderation_log["action_display_url"] == "^.board-bans"
+    end
+
+    @tag :authenticated
+    test "when action_type is 'bans.unbanFromBoards', gets page", %{conn: conn, users: %{user: user}} do
+      board = insert(:board)
+      factory_moderation_log = build(:moderation_log, %{
+        api_url: "/api/bans/unbanFromBoards",
+        api_method: "post",
+        type: "bans.unbanFromBoards",
+        obj: %{board_ids: [board.id], user_id: user.id}
+      })
+
+      response_moderation_log =
+        conn |> response_for_mod(factory_moderation_log.mod_id)
+
+      assert compare(response_moderation_log, factory_moderation_log)
+      assert response_moderation_log["action_display_text"] == "unbanned user '#{user.username}' from boards: #{board.name}'"
+      assert response_moderation_log["action_display_url"] == "^.board-bans"
+    end
     #
     # @tag :authenticated
     # test "when action_type is 'boards.create', gets page",

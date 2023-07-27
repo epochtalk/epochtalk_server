@@ -61,13 +61,20 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
   end
 
   defp compare(result_moderation_log, factory_moderation_log) do
+    compare(result_moderation_log, factory_moderation_log, ignore: [])
+  end
+  defp compare(result_moderation_log, factory_moderation_log, ignore: ignore_list) do
     assert result_moderation_log["action_api_method"] == factory_moderation_log.action_api_method
     assert result_moderation_log["action_api_url"] == factory_moderation_log.action_api_url
     assert result_moderation_log["action_display_text"] == factory_moderation_log.action_display_text
     assert result_moderation_log["action_display_url"] == factory_moderation_log.action_display_url
     factory_moderation_log.action_obj
     |> Enum.each(fn {k, v} ->
-      assert result_moderation_log["action_obj"] |> Map.get(to_string(k)) == v
+      if Enum.member?(ignore_list, k) do
+        true
+      else
+        assert result_moderation_log["action_obj"] |> Map.get(to_string(k)) == v
+      end
     end)
     assert result_moderation_log["action_taken_at"] |> NaiveDateTime.from_iso8601!() == factory_moderation_log.action_taken_at
     assert result_moderation_log["action_type"] == factory_moderation_log.action_type
@@ -571,6 +578,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       response_moderation_log =
         conn |> response_for_mod(factory_moderation_log.mod_id)
 
+      assert compare(response_moderation_log, factory_moderation_log, ignore: [:addresses])
       assert response_moderation_log["action_obj"]["addresses"] |> List.first() == factory_moderation_log.action_obj.addresses |> List.first() |> stringify_keys_deep()
       assert response_moderation_log["action_display_text"] == "banned the following addresses '#{@banned_address}'"
       assert response_moderation_log["action_display_url"] == "admin-management.banned-addresses"
@@ -622,6 +630,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       response_moderation_log =
         conn |> response_for_mod(factory_moderation_log.mod_id)
 
+      assert compare(response_moderation_log, factory_moderation_log, ignore: [:expiration])
       assert response_moderation_log["action_obj"]["expiration"] |> NaiveDateTime.from_iso8601!() == factory_moderation_log.action_obj.expiration
       assert response_moderation_log["action_display_text"] == "temporarily banned user '#{user.username}' until '#{@ban_expiration_output}'"
       assert response_moderation_log["action_display_url"] == "profile({ username: '#{user.username}' })"

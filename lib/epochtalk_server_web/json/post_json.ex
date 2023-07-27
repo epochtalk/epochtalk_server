@@ -70,7 +70,7 @@ defmodule EpochtalkServerWeb.Controllers.PostJSON do
 
   ## === Private Helper Functions ===
 
-  defp clean_posts(posts, thread, user, user_priority, view_deleted_posts, override_allow_view \\ false) do
+  defp clean_posts(posts, thread, user, authed_user_priority, view_deleted_posts, override_allow_view \\ false) do
     authed_user_id = if user, do: user.id, else: nil
     has_self_mod_bypass = ACL.has_permission(user, "posts.byThread.bypass.viewDeletedPosts.selfMod")
     has_priority_bypass = ACL.has_permission(user, "posts.byThread.bypass.viewDeletedPosts.priority")
@@ -79,7 +79,21 @@ defmodule EpochtalkServerWeb.Controllers.PostJSON do
     view_deleted_posts_is_board_list = is_list(view_deleted_posts)
 
     Enum.map(posts, fn post ->
+      # check if metadata map exists
+      metadata_map_exists = !!post.metadata and Map.keys(post.metadata) != []
 
+      # get information about how current post was hidden
+      post_hidden_by_priority = if metadata_map_exists,
+        do: post.metadata.hidden_by_priority,
+        else: post.user.priority
+      post_hidden_by_id = if metadata_map_exists,
+        do: post.metadata.hidden_by_id,
+        else: post.user.id
+
+      # check if user has priority to view hidden post,
+      # or if the user was the one who hid the post
+      authed_user_has_priority = authed_user_priority <= post_hidden_by_priority
+      authed_user_hid_post = post_hidden_by_id == authed_user_id
     end)
 
     # return posts for now

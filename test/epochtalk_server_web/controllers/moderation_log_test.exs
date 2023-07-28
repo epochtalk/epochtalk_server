@@ -63,11 +63,17 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
   defp compare(result_moderation_log, factory_moderation_log) do
     compare(result_moderation_log, factory_moderation_log, ignore: [])
   end
+
   defp compare(result_moderation_log, factory_moderation_log, ignore: ignore_list) do
     assert result_moderation_log["action_api_method"] == factory_moderation_log.action_api_method
     assert result_moderation_log["action_api_url"] == factory_moderation_log.action_api_url
-    assert result_moderation_log["action_display_text"] == factory_moderation_log.action_display_text
-    assert result_moderation_log["action_display_url"] == factory_moderation_log.action_display_url
+
+    assert result_moderation_log["action_display_text"] ==
+             factory_moderation_log.action_display_text
+
+    assert result_moderation_log["action_display_url"] ==
+             factory_moderation_log.action_display_url
+
     factory_moderation_log.action_obj
     |> Enum.each(fn {k, v} ->
       if Enum.member?(ignore_list, k) do
@@ -76,7 +82,10 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
         assert result_moderation_log["action_obj"] |> Map.get(to_string(k)) == v
       end
     end)
-    assert result_moderation_log["action_taken_at"] |> NaiveDateTime.from_iso8601!() == factory_moderation_log.action_taken_at
+
+    assert result_moderation_log["action_taken_at"] |> NaiveDateTime.from_iso8601!() ==
+             factory_moderation_log.action_taken_at
+
     assert result_moderation_log["action_type"] == factory_moderation_log.action_type
     assert result_moderation_log["mod_id"] == factory_moderation_log.mod_id
     assert result_moderation_log["mod_ip"] == factory_moderation_log.mod_ip
@@ -93,286 +102,349 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
 
   describe "page/1" do
     @tag :authenticated
-    test "given mod username, when action_type is 'adminBoards.updateCategories', gets page", %{conn: conn} do
-      factory_moderation_log = build(:moderation_log, %{
-        api_url: "/api/boards/all",
-        api_method: "post",
-        type: "adminBoards.updateCategories",
-        obj: %{}
-      })
+    test "given mod username, when action_type is 'adminBoards.updateCategories', gets page", %{
+      conn: conn
+    } do
+      factory_moderation_log =
+        build(:moderation_log, %{
+          api_url: "/api/boards/all",
+          api_method: "post",
+          type: "adminBoards.updateCategories",
+          obj: %{}
+        })
 
-      response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_username)
-
-      assert compare(response_moderation_log, factory_moderation_log)
-    end
-
-    @tag :authenticated
-    test "given mod_id, when action_type is 'adminBoards.updateCategories', gets page", %{conn: conn} do
-      factory_moderation_log = build(:moderation_log, %{
-        api_url: "/api/boards/all",
-        api_method: "post",
-        type: "adminBoards.updateCategories",
-        obj: %{}
-      })
-
-      response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+      response_moderation_log = conn |> response_for_mod(factory_moderation_log.mod_username)
 
       assert compare(response_moderation_log, factory_moderation_log)
     end
 
     @tag :authenticated
-    test "when action_type is 'adminModerators.add', gets page", %{conn: conn, users: %{user: user}} do
+    test "given mod_id, when action_type is 'adminBoards.updateCategories', gets page", %{
+      conn: conn
+    } do
+      factory_moderation_log =
+        build(:moderation_log, %{
+          api_url: "/api/boards/all",
+          api_method: "post",
+          type: "adminBoards.updateCategories",
+          obj: %{}
+        })
+
+      response_moderation_log = conn |> response_for_mod(factory_moderation_log.mod_id)
+
+      assert compare(response_moderation_log, factory_moderation_log)
+    end
+
+    @tag :authenticated
+    test "when action_type is 'adminModerators.add', gets page", %{
+      conn: conn,
+      users: %{user: user}
+    } do
       board = insert(:board)
-      factory_moderation_log = build(:moderation_log, %{
-        api_url: "/api/admin/moderators",
-        api_method: "post",
-        type: "adminModerators.add",
-        obj: %{usernames: [user.username], board_id: board.id}
-      })
 
-      response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+      factory_moderation_log =
+        build(:moderation_log, %{
+          api_url: "/api/admin/moderators",
+          api_method: "post",
+          type: "adminModerators.add",
+          obj: %{usernames: [user.username], board_id: board.id}
+        })
+
+      response_moderation_log = conn |> response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
-      assert response_moderation_log["action_display_text"] == "added user(s) '#{user.username}' to list of moderators for board '#{board.name}'"
-      assert response_moderation_log["action_display_url"] == "threads.data({ boardSlug: '#{board.slug}' })"
+
+      assert response_moderation_log["action_display_text"] ==
+               "added user(s) '#{user.username}' to list of moderators for board '#{board.name}'"
+
+      assert response_moderation_log["action_display_url"] ==
+               "threads.data({ boardSlug: '#{board.slug}' })"
     end
 
     @tag :authenticated
-    test "when action_type is 'adminModerators.remove', gets page", %{conn: conn, users: %{user: user}} do
+    test "when action_type is 'adminModerators.remove', gets page", %{
+      conn: conn,
+      users: %{user: user}
+    } do
       board = insert(:board)
-      factory_moderation_log = build(:moderation_log, %{
-        api_url: "/api/admin/moderators",
-        api_method: "delete",
-        type: "adminModerators.remove",
-        obj: %{usernames: [user.username], board_id: board.id}
-      })
 
-      response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+      factory_moderation_log =
+        build(:moderation_log, %{
+          api_url: "/api/admin/moderators",
+          api_method: "delete",
+          type: "adminModerators.remove",
+          obj: %{usernames: [user.username], board_id: board.id}
+        })
+
+      response_moderation_log = conn |> response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
-      assert response_moderation_log["action_display_text"] == "removed user(s) '#{user.username}' from list of moderators for board '#{board.name}'"
-      assert response_moderation_log["action_display_url"] == "threads.data({ boardSlug: '#{board.slug}' })"
+
+      assert response_moderation_log["action_display_text"] ==
+               "removed user(s) '#{user.username}' from list of moderators for board '#{board.name}'"
+
+      assert response_moderation_log["action_display_url"] ==
+               "threads.data({ boardSlug: '#{board.slug}' })"
     end
 
     @tag :authenticated
     test "when action_type is 'reports.updateMessageReport', gets page", %{conn: conn} do
-      factory_moderation_log = build(:moderation_log, %{
-        api_url: "/api/reports/updateMessageReport",
-        api_method: "post",
-        type: "reports.updateMessageReport",
-        obj: %{status: "#{@status}", id: @message_report_id}
-      })
+      factory_moderation_log =
+        build(:moderation_log, %{
+          api_url: "/api/reports/updateMessageReport",
+          api_method: "post",
+          type: "reports.updateMessageReport",
+          obj: %{status: "#{@status}", id: @message_report_id}
+        })
 
-      response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+      response_moderation_log = conn |> response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
-      assert response_moderation_log["action_display_text"] == "updated the status of message report to '#{@status}'"
-      assert response_moderation_log["action_display_url"] == "^.messages({ reportId: '#{@message_report_id}' })"
+
+      assert response_moderation_log["action_display_text"] ==
+               "updated the status of message report to '#{@status}'"
+
+      assert response_moderation_log["action_display_url"] ==
+               "^.messages({ reportId: '#{@message_report_id}' })"
     end
 
     @tag :authenticated
     test "when action_type is 'reports.createMessageReportNote', gets page", %{conn: conn} do
-      factory_moderation_log = build(:moderation_log, %{
-        api_url: "/api/reports/createMessageReportNote",
-        api_method: "post",
-        type: "reports.createMessageReportNote",
-        obj: %{report_id: @message_report_id}
-      })
+      factory_moderation_log =
+        build(:moderation_log, %{
+          api_url: "/api/reports/createMessageReportNote",
+          api_method: "post",
+          type: "reports.createMessageReportNote",
+          obj: %{report_id: @message_report_id}
+        })
 
-      response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+      response_moderation_log = conn |> response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
-      assert response_moderation_log["action_display_text"] == "created a note on a message report"
-      assert response_moderation_log["action_display_url"] == "^.messages({ reportId: '#{@message_report_id}' })"
+
+      assert response_moderation_log["action_display_text"] ==
+               "created a note on a message report"
+
+      assert response_moderation_log["action_display_url"] ==
+               "^.messages({ reportId: '#{@message_report_id}' })"
     end
 
     @tag :authenticated
     test "when action_type is 'reports.updateMessageReportNote', gets page", %{conn: conn} do
-      factory_moderation_log = build(:moderation_log, %{
-        api_url: "/api/reports/updateMessageReportNote",
-        api_method: "post",
-        type: "reports.updateMessageReportNote",
-        obj: %{report_id: @message_report_id}
-      })
+      factory_moderation_log =
+        build(:moderation_log, %{
+          api_url: "/api/reports/updateMessageReportNote",
+          api_method: "post",
+          type: "reports.updateMessageReportNote",
+          obj: %{report_id: @message_report_id}
+        })
 
-      response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+      response_moderation_log = conn |> response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
-      assert response_moderation_log["action_display_text"] == "edited their note on a message report"
-      assert response_moderation_log["action_display_url"] == "^.messages({ reportId: '#{@message_report_id}' })"
+
+      assert response_moderation_log["action_display_text"] ==
+               "edited their note on a message report"
+
+      assert response_moderation_log["action_display_url"] ==
+               "^.messages({ reportId: '#{@message_report_id}' })"
     end
 
     @tag :authenticated
     test "when action_type is 'reports.updatePostReport', gets page", %{conn: conn} do
-      factory_moderation_log = build(:moderation_log, %{
-        api_url: "/api/reports/updatePostReport",
-        api_method: "post",
-        type: "reports.updatePostReport",
-        obj: %{status: "#{@status}", id: @post_report_id}
-      })
+      factory_moderation_log =
+        build(:moderation_log, %{
+          api_url: "/api/reports/updatePostReport",
+          api_method: "post",
+          type: "reports.updatePostReport",
+          obj: %{status: "#{@status}", id: @post_report_id}
+        })
 
-      response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+      response_moderation_log = conn |> response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
-      assert response_moderation_log["action_display_text"] == "updated the status of post report to '#{@status}'"
-      assert response_moderation_log["action_display_url"] == "^.messages({ reportId: '#{@post_report_id}' })"
+
+      assert response_moderation_log["action_display_text"] ==
+               "updated the status of post report to '#{@status}'"
+
+      assert response_moderation_log["action_display_url"] ==
+               "^.messages({ reportId: '#{@post_report_id}' })"
     end
 
     @tag :authenticated
     test "when action_type is 'reports.createPostReportNote', gets page", %{conn: conn} do
-      factory_moderation_log = build(:moderation_log, %{
-        api_url: "/api/reports/createPostReportNote",
-        api_method: "post",
-        type: "reports.createPostReportNote",
-        obj: %{report_id: @post_report_id}
-      })
+      factory_moderation_log =
+        build(:moderation_log, %{
+          api_url: "/api/reports/createPostReportNote",
+          api_method: "post",
+          type: "reports.createPostReportNote",
+          obj: %{report_id: @post_report_id}
+        })
 
-      response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+      response_moderation_log = conn |> response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
       assert response_moderation_log["action_display_text"] == "created a note on a post report"
-      assert response_moderation_log["action_display_url"] == "^.messages({ reportId: '#{@post_report_id}' })"
+
+      assert response_moderation_log["action_display_url"] ==
+               "^.messages({ reportId: '#{@post_report_id}' })"
     end
 
     @tag :authenticated
     test "when action_type is 'reports.updatePostReportNote', gets page", %{conn: conn} do
-      factory_moderation_log = build(:moderation_log, %{
-        api_url: "/api/reports/updatePostReportNote",
-        api_method: "post",
-        type: "reports.updatePostReportNote",
-        obj: %{report_id: @post_report_id}
-      })
+      factory_moderation_log =
+        build(:moderation_log, %{
+          api_url: "/api/reports/updatePostReportNote",
+          api_method: "post",
+          type: "reports.updatePostReportNote",
+          obj: %{report_id: @post_report_id}
+        })
 
-      response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+      response_moderation_log = conn |> response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
-      assert response_moderation_log["action_display_text"] == "edited their note on a post report"
-      assert response_moderation_log["action_display_url"] == "^.messages({ reportId: '#{@post_report_id}' })"
+
+      assert response_moderation_log["action_display_text"] ==
+               "edited their note on a post report"
+
+      assert response_moderation_log["action_display_url"] ==
+               "^.messages({ reportId: '#{@post_report_id}' })"
     end
 
     @tag :authenticated
     test "when action_type is 'reports.updateUserReport', gets page", %{conn: conn} do
-      factory_moderation_log = build(:moderation_log, %{
-        api_url: "/api/reports/updateUserReport",
-        api_method: "post",
-        type: "reports.updateUserReport",
-        obj: %{status: "#{@status}", id: @user_report_id}
-      })
+      factory_moderation_log =
+        build(:moderation_log, %{
+          api_url: "/api/reports/updateUserReport",
+          api_method: "post",
+          type: "reports.updateUserReport",
+          obj: %{status: "#{@status}", id: @user_report_id}
+        })
 
-      response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+      response_moderation_log = conn |> response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
-      assert response_moderation_log["action_display_text"] == "updated the status of user report to '#{@status}'"
-      assert response_moderation_log["action_display_url"] == "^.messages({ reportId: '#{@user_report_id}' })"
+
+      assert response_moderation_log["action_display_text"] ==
+               "updated the status of user report to '#{@status}'"
+
+      assert response_moderation_log["action_display_url"] ==
+               "^.messages({ reportId: '#{@user_report_id}' })"
     end
 
     @tag :authenticated
     test "when action_type is 'reports.createUserReportNote', gets page", %{conn: conn} do
-      factory_moderation_log = build(:moderation_log, %{
-        api_url: "/api/reports/createUserReportNote",
-        api_method: "post",
-        type: "reports.createUserReportNote",
-        obj: %{report_id: @user_report_id}
-      })
+      factory_moderation_log =
+        build(:moderation_log, %{
+          api_url: "/api/reports/createUserReportNote",
+          api_method: "post",
+          type: "reports.createUserReportNote",
+          obj: %{report_id: @user_report_id}
+        })
 
-      response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+      response_moderation_log = conn |> response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
       assert response_moderation_log["action_display_text"] == "created a note on a user report"
-      assert response_moderation_log["action_display_url"] == "^.messages({ reportId: '#{@user_report_id}' })"
+
+      assert response_moderation_log["action_display_url"] ==
+               "^.messages({ reportId: '#{@user_report_id}' })"
     end
 
     @tag :authenticated
     test "when action_type is 'reports.updateUserReportNote', gets page", %{conn: conn} do
-      factory_moderation_log = build(:moderation_log, %{
-        api_url: "/api/reports/updateUserReportNote",
-        api_method: "post",
-        type: "reports.updateUserReportNote",
-        obj: %{report_id: @user_report_id}
-      })
+      factory_moderation_log =
+        build(:moderation_log, %{
+          api_url: "/api/reports/updateUserReportNote",
+          api_method: "post",
+          type: "reports.updateUserReportNote",
+          obj: %{report_id: @user_report_id}
+        })
 
-      response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+      response_moderation_log = conn |> response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
-      assert response_moderation_log["action_display_text"] == "edited their note on a user report"
-      assert response_moderation_log["action_display_url"] == "^.messages({ reportId: '#{@user_report_id}' })"
+
+      assert response_moderation_log["action_display_text"] ==
+               "edited their note on a user report"
+
+      assert response_moderation_log["action_display_url"] ==
+               "^.messages({ reportId: '#{@user_report_id}' })"
     end
 
     @tag :authenticated
     test "when action_type is 'adminRoles.add', gets page", %{conn: conn} do
-      factory_moderation_log = build(:moderation_log, %{
-        api_url: "/api/roles/add",
-        api_method: "post",
-        type: "adminRoles.add",
-        obj: %{name: @super_admin_role.name, id: @super_admin_role.id}
-      })
+      factory_moderation_log =
+        build(:moderation_log, %{
+          api_url: "/api/roles/add",
+          api_method: "post",
+          type: "adminRoles.add",
+          obj: %{name: @super_admin_role.name, id: @super_admin_role.id}
+        })
 
-      response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+      response_moderation_log = conn |> response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
-      assert response_moderation_log["action_display_text"] == "created a new role named '#{@super_admin_role.name}'"
-      assert response_moderation_log["action_display_url"] == "admin-management.roles({ roleId: '#{@super_admin_role.id}' })"
+
+      assert response_moderation_log["action_display_text"] ==
+               "created a new role named '#{@super_admin_role.name}'"
+
+      assert response_moderation_log["action_display_url"] ==
+               "admin-management.roles({ roleId: '#{@super_admin_role.id}' })"
     end
 
     @tag :authenticated
     test "when action_type is 'adminRoles.remove', gets page", %{conn: conn} do
-      factory_moderation_log = build(:moderation_log, %{
-        api_url: "/api/roles/remove",
-        api_method: "delete",
-        type: "adminRoles.remove",
-        obj: %{name: @super_admin_role.name}
-      })
+      factory_moderation_log =
+        build(:moderation_log, %{
+          api_url: "/api/roles/remove",
+          api_method: "delete",
+          type: "adminRoles.remove",
+          obj: %{name: @super_admin_role.name}
+        })
 
-      response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+      response_moderation_log = conn |> response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
-      assert response_moderation_log["action_display_text"] == "removed the role named '#{@super_admin_role.name}'"
+
+      assert response_moderation_log["action_display_text"] ==
+               "removed the role named '#{@super_admin_role.name}'"
+
       assert response_moderation_log["action_display_url"] == "admin-management.roles"
     end
 
     @tag :authenticated
     test "when action_type is 'adminRoles.update', gets page", %{conn: conn} do
-      factory_moderation_log = build(:moderation_log, %{
-        api_url: "/api/roles/update",
-        api_method: "post",
-        type: "adminRoles.update",
-        obj: %{name: @super_admin_role.name, id: @super_admin_role.id}
-      })
+      factory_moderation_log =
+        build(:moderation_log, %{
+          api_url: "/api/roles/update",
+          api_method: "post",
+          type: "adminRoles.update",
+          obj: %{name: @super_admin_role.name, id: @super_admin_role.id}
+        })
 
-      response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+      response_moderation_log = conn |> response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
-      assert response_moderation_log["action_display_text"] == "updated the role named '#{@super_admin_role.name}'"
-      assert response_moderation_log["action_display_url"] == "admin-management.roles({ roleId: '#{@super_admin_role.id}' })"
+
+      assert response_moderation_log["action_display_text"] ==
+               "updated the role named '#{@super_admin_role.name}'"
+
+      assert response_moderation_log["action_display_url"] ==
+               "admin-management.roles({ roleId: '#{@super_admin_role.id}' })"
     end
 
     @tag :authenticated
     test "when action_type is 'adminRoles.reprioritize', gets page", %{conn: conn} do
-      factory_moderation_log = build(:moderation_log, %{
-        api_url: "/api/roles/reprioritize",
-        api_method: "get",
-        type: "adminRoles.reprioritize",
-        obj: %{}
-      })
+      factory_moderation_log =
+        build(:moderation_log, %{
+          api_url: "/api/roles/reprioritize",
+          api_method: "get",
+          type: "adminRoles.reprioritize",
+          obj: %{}
+        })
 
-      response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+      response_moderation_log = conn |> response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
       assert response_moderation_log["action_display_text"] == "reordered role priorities"
@@ -381,15 +453,15 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
 
     @tag :authenticated
     test "when action_type is 'adminSettings.update', gets page", %{conn: conn} do
-      factory_moderation_log = build(:moderation_log, %{
-        api_url: "/api/settings/update",
-        api_method: "post",
-        type: "adminSettings.update",
-        obj: %{}
-      })
+      factory_moderation_log =
+        build(:moderation_log, %{
+          api_url: "/api/settings/update",
+          api_method: "post",
+          type: "adminSettings.update",
+          obj: %{}
+        })
 
-      response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+      response_moderation_log = conn |> response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
       assert response_moderation_log["action_display_text"] == "updated forum settings"
@@ -398,66 +470,75 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
 
     @tag :authenticated
     test "when action_type is 'adminSettings.addToBlacklist', gets page", %{conn: conn} do
-      factory_moderation_log = build(:moderation_log, %{
-        api_url: "/api/settings/addToBlacklist",
-        api_method: "post",
-        type: "adminSettings.addToBlacklist",
-        obj: %{note: @note}
-      })
+      factory_moderation_log =
+        build(:moderation_log, %{
+          api_url: "/api/settings/addToBlacklist",
+          api_method: "post",
+          type: "adminSettings.addToBlacklist",
+          obj: %{note: @note}
+        })
 
-      response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+      response_moderation_log = conn |> response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
-      assert response_moderation_log["action_display_text"] == "added ip blacklist rule named '#{@note}'"
+
+      assert response_moderation_log["action_display_text"] ==
+               "added ip blacklist rule named '#{@note}'"
+
       assert response_moderation_log["action_display_url"] == "admin-settings.advanced"
     end
 
     @tag :authenticated
     test "when action_type is 'adminSettings.updateBlacklist', gets page", %{conn: conn} do
-      factory_moderation_log = build(:moderation_log, %{
-        api_url: "/api/settings/updateBlacklist",
-        api_method: "post",
-        type: "adminSettings.updateBlacklist",
-        obj: %{note: @note}
-      })
+      factory_moderation_log =
+        build(:moderation_log, %{
+          api_url: "/api/settings/updateBlacklist",
+          api_method: "post",
+          type: "adminSettings.updateBlacklist",
+          obj: %{note: @note}
+        })
 
-      response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+      response_moderation_log = conn |> response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
-      assert response_moderation_log["action_display_text"] == "updated ip blacklist rule named '#{@note}'"
+
+      assert response_moderation_log["action_display_text"] ==
+               "updated ip blacklist rule named '#{@note}'"
+
       assert response_moderation_log["action_display_url"] == "admin-settings.advanced"
     end
 
     @tag :authenticated
     test "when action_type is 'adminSettings.deleteFromBlacklist', gets page", %{conn: conn} do
-      factory_moderation_log = build(:moderation_log, %{
-        api_url: "/api/settings/deleteFromBlacklist",
-        api_method: "delete",
-        type: "adminSettings.deleteFromBlacklist",
-        obj: %{note: @note}
-      })
+      factory_moderation_log =
+        build(:moderation_log, %{
+          api_url: "/api/settings/deleteFromBlacklist",
+          api_method: "delete",
+          type: "adminSettings.deleteFromBlacklist",
+          obj: %{note: @note}
+        })
 
-      response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+      response_moderation_log = conn |> response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
-      assert response_moderation_log["action_display_text"] == "deleted ip blacklist rule named '#{@note}'"
+
+      assert response_moderation_log["action_display_text"] ==
+               "deleted ip blacklist rule named '#{@note}'"
+
       assert response_moderation_log["action_display_url"] == "admin-settings.advanced"
     end
 
     @tag :authenticated
     test "when action_type is 'adminSettings.setTheme', gets page", %{conn: conn} do
-      factory_moderation_log = build(:moderation_log, %{
-        api_url: "/api/settings/setTheme",
-        api_method: "post",
-        type: "adminSettings.setTheme",
-        obj: %{}
-      })
+      factory_moderation_log =
+        build(:moderation_log, %{
+          api_url: "/api/settings/setTheme",
+          api_method: "post",
+          type: "adminSettings.setTheme",
+          obj: %{}
+        })
 
-      response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+      response_moderation_log = conn |> response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
       assert response_moderation_log["action_display_text"] == "updated the forum theme"
@@ -466,228 +547,294 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
 
     @tag :authenticated
     test "when action_type is 'adminSettings.resetTheme', gets page", %{conn: conn} do
-      factory_moderation_log = build(:moderation_log, %{
-        api_url: "/api/settings/resetTheme",
-        api_method: "post",
-        type: "adminSettings.resetTheme",
-        obj: %{}
-      })
+      factory_moderation_log =
+        build(:moderation_log, %{
+          api_url: "/api/settings/resetTheme",
+          api_method: "post",
+          type: "adminSettings.resetTheme",
+          obj: %{}
+        })
 
-      response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+      response_moderation_log = conn |> response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
-      assert response_moderation_log["action_display_text"] == "restored the forum to the default theme"
+
+      assert response_moderation_log["action_display_text"] ==
+               "restored the forum to the default theme"
+
       assert response_moderation_log["action_display_url"] == "admin-settings.theme"
     end
 
     @tag :authenticated
-    test "when action_type is 'adminUsers.addRoles', gets page", %{conn: conn, users: %{user: user}} do
-      factory_moderation_log = build(:moderation_log, %{
-        api_url: "/api/users/addRoles",
-        api_method: "post",
-        type: "adminUsers.addRoles",
-        obj: %{usernames: [user.username], role_id: @super_admin_role.id}
-      })
+    test "when action_type is 'adminUsers.addRoles', gets page", %{
+      conn: conn,
+      users: %{user: user}
+    } do
+      factory_moderation_log =
+        build(:moderation_log, %{
+          api_url: "/api/users/addRoles",
+          api_method: "post",
+          type: "adminUsers.addRoles",
+          obj: %{usernames: [user.username], role_id: @super_admin_role.id}
+        })
 
-      response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+      response_moderation_log = conn |> response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
-      assert response_moderation_log["action_display_text"] == "added role '#{@super_admin_role.name}' to users(s) '#{user.username}'"
-      assert response_moderation_log["action_display_url"] == "admin-management.roles({ roleId: '#{@super_admin_role.id}' })"
+
+      assert response_moderation_log["action_display_text"] ==
+               "added role '#{@super_admin_role.name}' to users(s) '#{user.username}'"
+
+      assert response_moderation_log["action_display_url"] ==
+               "admin-management.roles({ roleId: '#{@super_admin_role.id}' })"
     end
 
     @tag :authenticated
-    test "when action_type is 'adminUsers.removeRoles', gets page", %{conn: conn, users: %{user: user}} do
-      factory_moderation_log = build(:moderation_log, %{
-        api_url: "/api/users/removeRoles",
-        api_method: "delete",
-        type: "adminUsers.removeRoles",
-        obj: %{role_id: @super_admin_role.id, user_id: user.id}
-      })
+    test "when action_type is 'adminUsers.removeRoles', gets page", %{
+      conn: conn,
+      users: %{user: user}
+    } do
+      factory_moderation_log =
+        build(:moderation_log, %{
+          api_url: "/api/users/removeRoles",
+          api_method: "delete",
+          type: "adminUsers.removeRoles",
+          obj: %{role_id: @super_admin_role.id, user_id: user.id}
+        })
 
-      response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+      response_moderation_log = conn |> response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
-      assert response_moderation_log["action_display_text"] == "removed role '#{@super_admin_role.name}' from user '#{user.username}'"
-      assert response_moderation_log["action_display_url"] == "admin-management.roles({ roleId: '#{@super_admin_role.id}' })"
+
+      assert response_moderation_log["action_display_text"] ==
+               "removed role '#{@super_admin_role.name}' from user '#{user.username}'"
+
+      assert response_moderation_log["action_display_url"] ==
+               "admin-management.roles({ roleId: '#{@super_admin_role.id}' })"
     end
 
     @tag :authenticated
     test "when action_type is 'userNotes.create', gets page", %{conn: conn, users: %{user: user}} do
-      factory_moderation_log = build(:moderation_log, %{
-        api_url: "/api/userNotes/create",
-        api_method: "post",
-        type: "userNotes.create",
-        obj: %{user_id: user.id}
-      })
+      factory_moderation_log =
+        build(:moderation_log, %{
+          api_url: "/api/userNotes/create",
+          api_method: "post",
+          type: "userNotes.create",
+          obj: %{user_id: user.id}
+        })
 
-      response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+      response_moderation_log = conn |> response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
-      assert response_moderation_log["action_display_text"] == "created a moderation note for user '#{user.username}'"
-      assert response_moderation_log["action_display_url"] == "profile({ username: '#{user.username}' })"
+
+      assert response_moderation_log["action_display_text"] ==
+               "created a moderation note for user '#{user.username}'"
+
+      assert response_moderation_log["action_display_url"] ==
+               "profile({ username: '#{user.username}' })"
     end
 
     @tag :authenticated
     test "when action_type is 'userNotes.update', gets page", %{conn: conn, users: %{user: user}} do
-      factory_moderation_log = build(:moderation_log, %{
-        api_url: "/api/userNotes/update",
-        api_method: "post",
-        type: "userNotes.update",
-        obj: %{user_id: user.id}
-      })
+      factory_moderation_log =
+        build(:moderation_log, %{
+          api_url: "/api/userNotes/update",
+          api_method: "post",
+          type: "userNotes.update",
+          obj: %{user_id: user.id}
+        })
 
-      response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+      response_moderation_log = conn |> response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
-      assert response_moderation_log["action_display_text"] == "edited their moderation note for user '#{user.username}'"
-      assert response_moderation_log["action_display_url"] == "profile({ username: '#{user.username}' })"
+
+      assert response_moderation_log["action_display_text"] ==
+               "edited their moderation note for user '#{user.username}'"
+
+      assert response_moderation_log["action_display_url"] ==
+               "profile({ username: '#{user.username}' })"
     end
 
     @tag :authenticated
     test "when action_type is 'userNotes.delete', gets page", %{conn: conn, users: %{user: user}} do
-      factory_moderation_log = build(:moderation_log, %{
-        api_url: "/api/userNotes/delete",
-        api_method: "delete",
-        type: "userNotes.delete",
-        obj: %{user_id: user.id}
-      })
+      factory_moderation_log =
+        build(:moderation_log, %{
+          api_url: "/api/userNotes/delete",
+          api_method: "delete",
+          type: "userNotes.delete",
+          obj: %{user_id: user.id}
+        })
 
-      response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+      response_moderation_log = conn |> response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
-      assert response_moderation_log["action_display_text"] == "deleted their moderation note for user '#{user.username}'"
-      assert response_moderation_log["action_display_url"] == "profile({ username: '#{user.username}' })"
+
+      assert response_moderation_log["action_display_text"] ==
+               "deleted their moderation note for user '#{user.username}'"
+
+      assert response_moderation_log["action_display_url"] ==
+               "profile({ username: '#{user.username}' })"
     end
 
     @tag :authenticated
     test "when action_type is 'bans.addAddresses', gets page", %{conn: conn} do
-      factory_moderation_log = build(:moderation_log, %{
-        api_url: "/api/bans/addAddresses",
-        api_method: "post",
-        type: "bans.addAddresses",
-        obj: %{addresses: [%{hostname: @hostname, ip: @banned_address}]}
-      })
+      factory_moderation_log =
+        build(:moderation_log, %{
+          api_url: "/api/bans/addAddresses",
+          api_method: "post",
+          type: "bans.addAddresses",
+          obj: %{addresses: [%{hostname: @hostname, ip: @banned_address}]}
+        })
 
-      response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+      response_moderation_log = conn |> response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log, ignore: [:addresses])
-      assert response_moderation_log["action_obj"]["addresses"] |> List.first() == factory_moderation_log.action_obj.addresses |> List.first() |> stringify_keys_deep()
-      assert response_moderation_log["action_display_text"] == "banned the following addresses '#{@banned_address}'"
+
+      assert response_moderation_log["action_obj"]["addresses"] |> List.first() ==
+               factory_moderation_log.action_obj.addresses
+               |> List.first()
+               |> stringify_keys_deep()
+
+      assert response_moderation_log["action_display_text"] ==
+               "banned the following addresses '#{@banned_address}'"
+
       assert response_moderation_log["action_display_url"] == "admin-management.banned-addresses"
     end
 
     @tag :authenticated
     test "when action_type is 'bans.editAddress', gets page", %{conn: conn} do
-      factory_moderation_log = build(:moderation_log, %{
-        api_url: "/api/bans/editAddress",
-        api_method: "post",
-        type: "bans.editAddress",
-        obj: %{hostname: @hostname, ip: @banned_address, weight: @weight, decay: @decay}
-      })
+      factory_moderation_log =
+        build(:moderation_log, %{
+          api_url: "/api/bans/editAddress",
+          api_method: "post",
+          type: "bans.editAddress",
+          obj: %{hostname: @hostname, ip: @banned_address, weight: @weight, decay: @decay}
+        })
 
-      response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+      response_moderation_log = conn |> response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
-      assert response_moderation_log["action_display_text"] == "edited banned address '#{@banned_address}' to 'not decay' with a weight of '#{@weight}'"
-      assert response_moderation_log["action_display_url"] == "admin-management.banned-addresses({ search: '#{@banned_address}' })"
+
+      assert response_moderation_log["action_display_text"] ==
+               "edited banned address '#{@banned_address}' to 'not decay' with a weight of '#{@weight}'"
+
+      assert response_moderation_log["action_display_url"] ==
+               "admin-management.banned-addresses({ search: '#{@banned_address}' })"
     end
 
     @tag :authenticated
     test "when action_type is 'bans.deleteAddress', gets page", %{conn: conn} do
-      factory_moderation_log = build(:moderation_log, %{
-        api_url: "/api/bans/deleteAddress",
-        api_method: "delete",
-        type: "bans.deleteAddress",
-        obj: %{hostname: nil, ip: @banned_address}
-      })
+      factory_moderation_log =
+        build(:moderation_log, %{
+          api_url: "/api/bans/deleteAddress",
+          api_method: "delete",
+          type: "bans.deleteAddress",
+          obj: %{hostname: nil, ip: @banned_address}
+        })
 
-      response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+      response_moderation_log = conn |> response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
-      assert response_moderation_log["action_display_text"] == "deleted banned address '#{@banned_address}'"
+
+      assert response_moderation_log["action_display_text"] ==
+               "deleted banned address '#{@banned_address}'"
+
       assert response_moderation_log["action_display_url"] == "admin-management.banned-addresses"
     end
 
     @tag :authenticated
     test "when action_type is 'bans.ban', gets page", %{conn: conn, users: %{user: user}} do
-      factory_moderation_log = build(:moderation_log, %{
-        api_url: "/api/bans/ban",
-        api_method: "post",
-        type: "bans.ban",
-        obj: %{expiration: @ban_expiration_input, user_id: user.id}
-      })
+      factory_moderation_log =
+        build(:moderation_log, %{
+          api_url: "/api/bans/ban",
+          api_method: "post",
+          type: "bans.ban",
+          obj: %{expiration: @ban_expiration_input, user_id: user.id}
+        })
 
-      response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+      response_moderation_log = conn |> response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log, ignore: [:expiration])
-      assert response_moderation_log["action_obj"]["expiration"] |> NaiveDateTime.from_iso8601!() == factory_moderation_log.action_obj.expiration
-      assert response_moderation_log["action_display_text"] == "temporarily banned user '#{user.username}' until '#{@ban_expiration_output}'"
-      assert response_moderation_log["action_display_url"] == "profile({ username: '#{user.username}' })"
+
+      assert response_moderation_log["action_obj"]["expiration"] |> NaiveDateTime.from_iso8601!() ==
+               factory_moderation_log.action_obj.expiration
+
+      assert response_moderation_log["action_display_text"] ==
+               "temporarily banned user '#{user.username}' until '#{@ban_expiration_output}'"
+
+      assert response_moderation_log["action_display_url"] ==
+               "profile({ username: '#{user.username}' })"
     end
 
     @tag :authenticated
     test "when action_type is 'bans.unban', gets page", %{conn: conn, users: %{user: user}} do
-      factory_moderation_log = build(:moderation_log, %{
-        api_url: "/api/bans/unban",
-        api_method: "post",
-        type: "bans.unban",
-        obj: %{user_id: user.id}
-      })
+      factory_moderation_log =
+        build(:moderation_log, %{
+          api_url: "/api/bans/unban",
+          api_method: "post",
+          type: "bans.unban",
+          obj: %{user_id: user.id}
+        })
 
-      response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+      response_moderation_log = conn |> response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
       assert response_moderation_log["action_display_text"] == "unbanned user '#{user.username}'"
-      assert response_moderation_log["action_display_url"] == "profile({ username: '#{user.username}' })"
+
+      assert response_moderation_log["action_display_url"] ==
+               "profile({ username: '#{user.username}' })"
     end
 
     @tag :authenticated
-    test "when action_type is 'bans.banFromBoards', gets page", %{conn: conn, users: %{user: user}} do
+    test "when action_type is 'bans.banFromBoards', gets page", %{
+      conn: conn,
+      users: %{user: user}
+    } do
       board = insert(:board)
-      factory_moderation_log = build(:moderation_log, %{
-        api_url: "/api/bans/banFromBoards",
-        api_method: "post",
-        type: "bans.banFromBoards",
-        obj: %{board_ids: [board.id], user_id: user.id}
-      })
 
-      response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+      factory_moderation_log =
+        build(:moderation_log, %{
+          api_url: "/api/bans/banFromBoards",
+          api_method: "post",
+          type: "bans.banFromBoards",
+          obj: %{board_ids: [board.id], user_id: user.id}
+        })
+
+      response_moderation_log = conn |> response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
-      assert response_moderation_log["action_display_text"] == "banned user '#{user.username}' from boards: #{board.name}'"
+
+      assert response_moderation_log["action_display_text"] ==
+               "banned user '#{user.username}' from boards: #{board.name}'"
+
       assert response_moderation_log["action_display_url"] == "^.board-bans"
     end
 
     @tag :authenticated
-    test "when action_type is 'bans.unbanFromBoards', gets page", %{conn: conn, users: %{user: user}} do
+    test "when action_type is 'bans.unbanFromBoards', gets page", %{
+      conn: conn,
+      users: %{user: user}
+    } do
       board = insert(:board)
-      factory_moderation_log = build(:moderation_log, %{
-        api_url: "/api/bans/unbanFromBoards",
-        api_method: "post",
-        type: "bans.unbanFromBoards",
-        obj: %{board_ids: [board.id], user_id: user.id}
-      })
 
-      response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+      factory_moderation_log =
+        build(:moderation_log, %{
+          api_url: "/api/bans/unbanFromBoards",
+          api_method: "post",
+          type: "bans.unbanFromBoards",
+          obj: %{board_ids: [board.id], user_id: user.id}
+        })
+
+      response_moderation_log = conn |> response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
-      assert response_moderation_log["action_display_text"] == "unbanned user '#{user.username}' from boards: #{board.name}'"
+
+      assert response_moderation_log["action_display_text"] ==
+               "unbanned user '#{user.username}' from boards: #{board.name}'"
+
       assert response_moderation_log["action_display_url"] == "^.board-bans"
     end
+
     #
     # @tag :authenticated
     # test "when action_type is 'boards.create', gets page",

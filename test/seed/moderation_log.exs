@@ -14,6 +14,7 @@ thread_title = thread.post.content["title"]
 new_thread_title = "New Thread"
 
 post_id = thread.post.id
+
 super_admin_role = %{
   id: 1,
   name: "Super Administrator"
@@ -619,7 +620,12 @@ logs = [
       api_url: "/api/threads/purge",
       api_method: "post",
       type: "threads.purge",
-      obj: %{title: thread_title, user_id: user.id, old_board_name: "old_board", board_id: board.id}
+      obj: %{
+        title: thread_title,
+        user_id: user.id,
+        old_board_name: "old_board",
+        board_id: board.id
+      }
     }
   },
   %{
@@ -807,7 +813,9 @@ try do
       {:error, error} ->
         IO.puts("Error Seeding Moderation Log Entry #{log.mod.id}")
         IO.inspect(error)
-      _ -> :ok
+
+      _ ->
+        :ok
     end
   end)
 rescue

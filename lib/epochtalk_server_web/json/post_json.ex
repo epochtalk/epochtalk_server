@@ -69,34 +69,109 @@ defmodule EpochtalkServerWeb.Controllers.PostJSON do
 
   ## === Private Helper Functions ===
 
-  defp clean_posts(posts, thread, user, authed_user_priority, view_deleted_posts, override_allow_view \\ false) do
-    authed_user_id = if user, do: user.id, else: nil
-    has_self_mod_bypass = ACL.has_permission(user, "posts.byThread.bypass.viewDeletedPosts.selfMod")
-    has_priority_bypass = ACL.has_permission(user, "posts.byThread.bypass.viewDeletedPosts.priority")
-    is_self_mod = if thread, do: thread.user.id == authed_user_id and thread.moderated, else: false
+  defp clean_posts(posts, thread, user, authed_user_priority, view_deleted_posts) do
+    authed_user_id = if is_nil(user), do: nil, else: user.id
 
-    view_deleted_posts_is_board_list = is_list(view_deleted_posts)
+    has_self_mod_bypass =
+      ACL.has_permission(user, "posts.byThread.bypass.viewDeletedPosts.selfMod")
 
-    Enum.map(posts, fn post ->
+    has_priority_bypass =
+      ACL.has_permission(user, "posts.byThread.bypass.viewDeletedPosts.priority")
+
+    has_self_mod_permissions = has_self_mod_bypass or has_priority_bypass
+
+    authed_user_is_self_mod =
+      if thread,
+        do: thread.user.id == authed_user_id and thread.moderated and has_self_mod_permissions,
+        else: false
+
+    viewable_in_board_with_id = if is_list(view_deleted_posts), do: view_deleted_posts
+
+    cleaned_posts = Enum.map(posts, fn post ->
       # check if metadata map exists
       metadata_map_exists = !!post.metadata and Map.keys(post.metadata) != []
 
       # get information about how current post was hidden
-      post_hidden_by_priority = if metadata_map_exists,
-        do: post.metadata.hidden_by_priority,
-        else: post.user.priority
-      post_hidden_by_id = if metadata_map_exists,
-        do: post.metadata.hidden_by_id,
-        else: post.user.id
+      post_hidden_by_priority =
+        if metadata_map_exists,
+          do: post.metadata.hidden_by_priority,
+          else: post.user.priority
+
+      post_hidden_by_id =
+        if metadata_map_exists,
+          do: post.metadata.hidden_by_id,
+          else: post.user.id
 
       # check if user has priority to view hidden post,
       # or if the user was the one who hid the post
       authed_user_has_priority = authed_user_priority <= post_hidden_by_priority
       authed_user_hid_post = post_hidden_by_id == authed_user_id
+
+      post_is_viewable =
+        cond do
+          # user owns the post
+          authed_user_id == post.user.id ->
+            true
+
+          # user is viewing post within a board they moderate
+          !!viewable_in_board_with_id and post.board_id in viewable_in_board_with_id ->
+            true
+
+          # if view_deleted_posts is true, every post is viewable
+          view_deleted_posts ->
+            true
+
+          # if the authed user is a self mod of the current thread, and
+          # the post is not deleted, then the post is viewable if they have
+          # the appropriate priority or they are the one who hid the post
+          authed_user_is_self_mod and !!post.deleted ->
+            authed_user_has_priority or authed_user_hid_post
+
+          # default to false
+          true ->
+            false
+        end
+
+      # delete posts that are marked deleted, the user was deleted, or the board is not visible
+      post_is_deleted = post.deleted or post.user.deleted or Map.get(post, :board_visible) == false
+      # only hide delete posts if user has permissions to see them
+      post =
+        cond do
+          # post is deleted but user has permission to view it, hide the post
+          post_is_viewable and post_is_deleted ->
+            Map.put(post, :hidden, true)
+
+          # post is deleted and user does not have permission to view it, modify and delete post
+          post_is_deleted ->
+            %{
+              id: post.id,
+              hidden: true,
+              _deleted: true,
+              position: post.position,
+              thread_title: "deleted",
+              user: %{}
+            }
+
+          # post was not marked deleted, return the original post
+          true ->
+            post
+        end
+
+      # remove deleted property if not set to true
+      post = if Map.get(post, :deleted) != true, do: Map.delete(post, :deleted), else: post
+
+      # remove board_visible property
+      post = Map.delete(post, :board_visible)
+
+      # remove user delete property from nested user map
+      post = Map.put(post, :user, Map.delete(post.user, :deleted))
+
+      # return updated post
+      post
     end)
 
     # return posts for now
-    posts
+    cleaned_posts
   end
 
   defp format_poll_data_for_by_thread(nil, _), do: nil

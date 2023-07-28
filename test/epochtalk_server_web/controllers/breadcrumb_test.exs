@@ -157,7 +157,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Breadcrumb do
       response_board_crumb = response["breadcrumbs"] |> Enum.at(2)
       assert response_board_crumb["label"] == child_board.name
       assert response_board_crumb["opts"]["boardSlug"] == child_board.slug
-      assert response_board_crumb["routeName"] == "Threads"_crum
+      assert response_board_crumb["routeName"] == "Threads"
 
       response_thread_crumb = response["breadcrumbs"] |> Enum.at(3)
       assert response_thread_crumb["label"] == thread.attributes["title"]

@@ -73,6 +73,7 @@ defmodule EpochtalkServerWeb.Controllers.Post do
              start: start,
              per_page: limit
            ),
+         {:has_posts, true} <- {:has_posts, posts != []},
          posts <- Trust.maybe_append_post_trust_stats(posts, user),
          thread <- Trust.maybe_append_thread_trust_visible(thread, user),
          metric_rank_maps <- MetricRankMap.all_merged(),
@@ -103,6 +104,9 @@ defmodule EpochtalkServerWeb.Controllers.Post do
 
       {:can_read, {:ok, false}} ->
         ErrorHelpers.render_json_error(conn, 403, "Unauthorized, you do not have permission")
+
+      {:has_posts, false} ->
+        ErrorHelpers.render_json_error(conn, 404, "Error, requested posts not found in thread")
 
       _ ->
         ErrorHelpers.render_json_error(conn, 400, "Error, cannot get posts by thread")

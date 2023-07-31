@@ -92,11 +92,14 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     assert result_moderation_log["mod_username"] == factory_moderation_log.mod_username
   end
 
-  defp response_for_mod(conn, mod) do
+  defp response_list_for_mod(conn, mod) do
     conn
     |> get(Routes.moderation_log_path(conn, :page, %{"mod" => mod}))
     |> json_response(200)
     |> Map.get("moderation_logs")
+  end
+  defp response_for_mod(conn, mod) do
+    response_list_for_mod(conn, mod)
     |> List.first()
   end
 

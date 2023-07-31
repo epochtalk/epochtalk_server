@@ -755,7 +755,6 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       board = insert(:board)
       thread = build(:thread, board: board, user: user, title: "Thread", slug: "thread-slug")
       thread_id = thread.post.thread_id
-      thread_title = thread.post.content["title"]
       thread_slug = thread.attributes["slug"]
       factory_moderation_log = build(:moderation_log, %{
         api_url: "/api/threads/title",
@@ -848,7 +847,6 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     test "when action_type is 'threads.purge', gets page", %{conn: conn, users: %{user: user}} do
       board = insert(:board)
       thread = build(:thread, board: board, user: user, title: "Thread", slug: "thread-slug")
-      thread_id = thread.post.thread_id
       thread_title = thread.post.content["title"]
       factory_moderation_log = build(:moderation_log, %{
         api_url: "/api/threads/purge",

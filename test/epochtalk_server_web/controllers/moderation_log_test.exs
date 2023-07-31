@@ -932,101 +932,95 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert response_moderation_log["action_display_text"] == "'unlocked' poll in thread named '#{thread_title}' created by user '#{user.username}'"
       assert response_moderation_log["action_display_url"] == "posts.data({ slug: '#{thread_slug}' })"
     end
-    #
-    # @tag :authenticated
-    # test "when action_type is 'posts.update', gets page",
-    #      %{
-    #        conn: conn
-    #      } do
-    #   conn =
-    #     get(
-    #       conn,
-    #       Routes.moderation_log_path(conn, :page, %{"mod" => 49})
-    #     )
-    #
-    #   moderation_logs = json_response(conn, 200)["moderation_logs"]
-    #   moderation_log = List.first(moderation_logs)
-    #
-    #   assert response_moderation_log["mod_id"] == 49
-    #   assert response_moderation_log["action_type"] == "posts.update"
-    #
-    #   assert response_moderation_log["action_display_text"] ==
-    #            "updated post created by user '#{@user.username}' in thread named '#{@thread.title}'"
-    #
-    #   assert response_moderation_log["action_display_url"] ==
-    #            "posts.data({ slug: '#{@thread.slug}', start: '1', '#': '1' })"
-    # end
-    #
-    # @tag :authenticated
-    # test "when action_type is 'posts.delete', gets page",
-    #      %{
-    #        conn: conn
-    #      } do
-    #   conn =
-    #     get(
-    #       conn,
-    #       Routes.moderation_log_path(conn, :page, %{"mod" => 50})
-    #     )
-    #
-    #   moderation_logs = json_response(conn, 200)["moderation_logs"]
-    #   moderation_log = List.first(moderation_logs)
-    #
-    #   assert response_moderation_log["mod_id"] == 50
-    #   assert response_moderation_log["action_type"] == "posts.delete"
-    #
-    #   assert response_moderation_log["action_display_text"] ==
-    #            "hid post created by user '#{@user.username}' in thread '#{@thread.title}'"
-    #
-    #   assert response_moderation_log["action_display_url"] ==
-    #            "posts.data({ slug: '#{@thread.slug}', start: '1', '#': '1' })"
-    # end
-    #
-    # @tag :authenticated
-    # test "when action_type is 'posts.undelete', gets page",
-    #      %{
-    #        conn: conn
-    #      } do
-    #   conn =
-    #     get(
-    #       conn,
-    #       Routes.moderation_log_path(conn, :page, %{"mod" => 51})
-    #     )
-    #
-    #   moderation_logs = json_response(conn, 200)["moderation_logs"]
-    #   moderation_log = List.first(moderation_logs)
-    #
-    #   assert response_moderation_log["mod_id"] == 51
-    #   assert response_moderation_log["action_type"] == "posts.undelete"
-    #
-    #   assert response_moderation_log["action_display_text"] ==
-    #            "unhid post created by user '#{@user.username}' in thread '#{@thread.title}'"
-    #
-    #   assert response_moderation_log["action_display_url"] ==
-    #            "posts.data({ slug: '#{@thread.slug}', start: '1', '#': '1' })"
-    # end
-    #
-    # @tag :authenticated
-    # test "when action_type is 'posts.purge', gets page",
-    #      %{
-    #        conn: conn
-    #      } do
-    #   conn =
-    #     get(
-    #       conn,
-    #       Routes.moderation_log_path(conn, :page, %{"mod" => 52})
-    #     )
-    #
-    #   moderation_logs = json_response(conn, 200)["moderation_logs"]
-    #   moderation_log = List.first(moderation_logs)
-    #
-    #   assert response_moderation_log["mod_id"] == 52
-    #   assert response_moderation_log["action_type"] == "posts.purge"
-    #
-    #   assert response_moderation_log["action_display_text"] ==
-    #            "purged post created by user '#{@user.username}' in thread '#{@thread.title}'"
-    #
-    #   assert response_moderation_log["action_display_url"] == "posts.data({ slug: '#{@thread.slug}' })"
-    # end
+
+    @tag :authenticated
+    test "when action_type is 'posts.update', gets page", %{conn: conn, users: %{user: user}} do
+      board = insert(:board)
+      thread = build(:thread, board: board, user: user, title: "Thread", slug: "thread-slug")
+      thread_title = thread.post.content["title"]
+      thread_slug = thread.attributes["slug"]
+      post_id = thread.post.id
+      factory_moderation_log = build(:moderation_log, %{
+        api_url: "/api/posts/update",
+        api_method: "post",
+        type: "posts.update",
+        obj: %{id: post_id, user_id: user.id}
+      })
+
+      response_moderation_log =
+        conn |> response_for_mod(factory_moderation_log.mod_id)
+
+      assert compare(response_moderation_log, factory_moderation_log)
+      assert response_moderation_log["action_display_text"] == "updated post created by user '#{user.username}' in thread named '#{thread_title}'"
+      assert response_moderation_log["action_display_url"] == "posts.data({ slug: '#{thread_slug}', start: '1', '#': '#{post_id}' })"
+    end
+
+    @tag :authenticated
+    test "when action_type is 'posts.delete', gets page", %{conn: conn, users: %{user: user}} do
+      board = insert(:board)
+      thread = build(:thread, board: board, user: user, title: "Thread", slug: "thread-slug")
+      thread_title = thread.post.content["title"]
+      thread_slug = thread.attributes["slug"]
+      post_id = thread.post.id
+      factory_moderation_log = build(:moderation_log, %{
+        api_url: "/api/posts/delete",
+        api_method: "delete",
+        type: "posts.delete",
+        obj: %{id: post_id, user_id: user.id}
+      })
+
+      response_moderation_log =
+        conn |> response_for_mod(factory_moderation_log.mod_id)
+
+      assert compare(response_moderation_log, factory_moderation_log)
+      assert response_moderation_log["action_display_text"] == "hid post created by user '#{user.username}' in thread '#{thread_title}'"
+      IO.inspect(post_id)
+      assert response_moderation_log["action_display_url"] == "posts.data({ slug: '#{thread_slug}', start: '1', '#': '#{post_id}' })"
+    end
+
+    @tag :authenticated
+    test "when action_type is 'posts.undelete', gets page", %{conn: conn, users: %{user: user}} do
+      board = insert(:board)
+      thread = build(:thread, board: board, user: user, title: "Thread", slug: "thread-slug")
+      thread_title = thread.post.content["title"]
+      thread_slug = thread.attributes["slug"]
+      post_id = thread.post.id
+      factory_moderation_log = build(:moderation_log, %{
+        api_url: "/api/posts/undelete",
+        api_method: "post",
+        type: "posts.undelete",
+        obj: %{id: post_id, user_id: user.id}
+      })
+
+      response_moderation_log =
+        conn |> response_for_mod(factory_moderation_log.mod_id)
+
+      assert compare(response_moderation_log, factory_moderation_log)
+      assert response_moderation_log["action_display_text"] == "unhid post created by user '#{user.username}' in thread '#{thread_title}'"
+      assert response_moderation_log["action_display_url"] == "posts.data({ slug: '#{thread_slug}', start: '1', '#': '#{post_id}' })"
+    end
+
+    @tag :authenticated
+    test "when action_type is 'posts.purge', gets page", %{ conn: conn, users: %{user: user}} do
+      board = insert(:board)
+      thread = build(:thread, board: board, user: user, title: "Thread", slug: "thread-slug")
+      thread_id = thread.post.thread_id
+      thread_title = thread.post.content["title"]
+      thread_slug = thread.attributes["slug"]
+      factory_moderation_log = build(:moderation_log, %{
+        api_url: "/api/posts/purge",
+        api_method: "post",
+        type: "posts.purge",
+        obj: %{user_id: user.id, thread_id: thread_id}
+      })
+
+      response_moderation_log =
+        conn |> response_for_mod(factory_moderation_log.mod_id)
+
+      assert compare(response_moderation_log, factory_moderation_log)
+      assert response_moderation_log["action_display_text"] == "purged post created by user '#{user.username}' in thread '#{thread_title}'"
+      assert response_moderation_log["action_display_url"] == "posts.data({ slug: '#{thread_slug}' })"
+    end
     #
     # @tag :authenticated
     # test "when action_type is 'users.update', gets page",

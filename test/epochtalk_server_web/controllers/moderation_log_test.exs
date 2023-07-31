@@ -1088,52 +1088,46 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert response_moderation_log["action_display_text"] == "purged user account '#{user.username}'"
       assert response_moderation_log["action_display_url"] == nil
     end
-    #
-    # @tag :authenticated
-    # test "when action_type is 'conversations.delete', gets page",
-    #      %{
-    #        conn: conn
-    #      } do
-    #   conn =
-    #     get(
-    #       conn,
-    #       Routes.moderation_log_path(conn, :page, %{"mod" => 57})
-    #     )
-    #
-    #   moderation_logs = json_response(conn, 200)["moderation_logs"]
-    #   moderation_log = List.first(moderation_logs)
-    #
-    #   assert response_moderation_log["mod_id"] == 57
-    #   assert response_moderation_log["action_type"] == "conversations.delete"
-    #
-    #   assert response_moderation_log["action_display_text"] ==
-    #            "deleted conversation between users '#{@admin.username}' and '#{@user.username}'"
-    #
-    #   assert response_moderation_log["action_display_url"] == nil
-    # end
-    #
-    # @tag :authenticated
-    # test "when action_type is 'messages.delete', gets page",
-    #      %{
-    #        conn: conn
-    #      } do
-    #   conn =
-    #     get(
-    #       conn,
-    #       Routes.moderation_log_path(conn, :page, %{"mod" => 58})
-    #     )
-    #
-    #   moderation_logs = json_response(conn, 200)["moderation_logs"]
-    #   moderation_log = List.first(moderation_logs)
-    #
-    #   assert response_moderation_log["mod_id"] == 58
-    #   assert response_moderation_log["action_type"] == "messages.delete"
-    #
-    #   assert response_moderation_log["action_display_text"] ==
-    #            "deleted message sent between users '#{@admin.username}' and '#{@user.username}'"
-    #
-    #   assert response_moderation_log["action_display_url"] == nil
-    # end
+
+    @tag :authenticated
+    test "when action_type is 'conversations.delete', gets page", %{conn: conn, users: %{user: user, admin_user: admin_user}} do
+      factory_moderation_log = build(:moderation_log, %{
+        api_url: "/api/conversations/delete",
+        api_method: "delete",
+        type: "conversations.delete",
+        obj: %{
+          sender_id: admin_user.id,
+          receiver_ids: [user.id]
+        }
+      })
+
+      response_moderation_log =
+        conn |> response_for_mod(factory_moderation_log.mod_id)
+
+      assert compare(response_moderation_log, factory_moderation_log)
+      assert response_moderation_log["action_display_text"] == "deleted conversation between users '#{admin_user.username}' and '#{user.username}'"
+      assert response_moderation_log["action_display_url"] == nil
+    end
+
+    @tag :authenticated
+    test "when action_type is 'messages.delete', gets page", %{conn: conn, users: %{user: user, admin_user: admin_user}} do
+      factory_moderation_log = build(:moderation_log, %{
+        api_url: "/api/messages/delete",
+        api_method: "delete",
+        type: "messages.delete",
+        obj: %{
+          sender_id: admin_user.id,
+          receiver_ids: [user.id]
+        }
+      })
+
+      response_moderation_log =
+        conn |> response_for_mod(factory_moderation_log.mod_id)
+
+      assert compare(response_moderation_log, factory_moderation_log)
+      assert response_moderation_log["action_display_text"] == "deleted message sent between users '#{admin_user.username}' and '#{user.username}'"
+      assert response_moderation_log["action_display_url"] == nil
+    end
     #
     # @tag :authenticated
     # test "given a valid id for 'mod', returns correct moderation_log entry",

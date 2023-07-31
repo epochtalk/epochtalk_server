@@ -11,10 +11,6 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     id: 1,
     name: "Super Administrator"
   }
-  @thread %{
-    title: "Thread",
-    slug: "thread-slug"
-  }
   @new_thread %{
     title: "New Thread"
   }
@@ -775,29 +771,28 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert response_moderation_log["action_display_text"] == "updated the title of a thread created by user '#{user.username}' to '#{@new_thread.title}'"
       assert response_moderation_log["action_display_url"] == "posts.data({ slug: '#{thread_slug}' })"
     end
-    #
-    # @tag :authenticated
-    # test "when action_type is 'threads.lock', gets page",
-    #      %{
-    #        conn: conn
-    #      } do
-    #   conn =
-    #     get(
-    #       conn,
-    #       Routes.moderation_log_path(conn, :page, %{"mod" => 42})
-    #     )
-    #
-    #   moderation_logs = json_response(conn, 200)["moderation_logs"]
-    #   moderation_log = List.first(moderation_logs)
-    #
-    #   assert response_moderation_log["mod_id"] == 42
-    #   assert response_moderation_log["action_type"] == "threads.lock"
-    #
-    #   assert response_moderation_log["action_display_text"] ==
-    #            "'locked' the thread '#{@thread.title}' created by user '#{@user.username}'"
-    #
-    #   assert response_moderation_log["action_display_url"] == "posts.data({ slug: '#{@thread.slug}' })"
-    # end
+
+    @tag :authenticated
+    test "when action_type is 'threads.lock', gets page", %{conn: conn, users: %{user: user}} do
+      board = insert(:board)
+      thread = build(:thread, board: board, user: user, title: "Thread", slug: "thread-slug")
+      thread_id = thread.post.thread_id
+      thread_title = thread.post.content["title"]
+      thread_slug = thread.attributes["slug"]
+      factory_moderation_log = build(:moderation_log, %{
+        api_url: "/api/threads/lock",
+        api_method: "post",
+        type: "threads.lock",
+        obj: %{locked: true, user_id: user.id, thread_id: thread_id}
+      })
+
+      response_moderation_log =
+        conn |> response_for_mod(factory_moderation_log.mod_id)
+
+      assert compare(response_moderation_log, factory_moderation_log)
+      assert response_moderation_log["action_display_text"] == "'locked' the thread '#{thread_title}' created by user '#{user.username}'"
+      assert response_moderation_log["action_display_url"] == "posts.data({ slug: '#{thread_slug}' })"
+    end
     #
     # @tag :authenticated
     # test "when action_type is 'threads.sticky', gets page",

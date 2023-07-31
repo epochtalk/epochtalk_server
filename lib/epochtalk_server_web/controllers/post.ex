@@ -74,8 +74,8 @@ defmodule EpochtalkServerWeb.Controllers.Post do
              per_page: limit
            ),
          {:has_posts, true} <- {:has_posts, posts != []},
-         posts <- Trust.maybe_append_post_trust_stats(posts, user),
-         thread <- Trust.maybe_append_thread_trust_visible(thread, user),
+         posts <- Trust.maybe_append_trust_stats_to_posts(posts, user),
+         thread <- Trust.maybe_append_trust_visible_to_thread(thread, user),
          metric_rank_maps <- MetricRankMap.all_merged(),
          ranks <- Rank.all(),
          {:ok, watching_thread} <- WatchThread.is_watching(user, thread_id) do

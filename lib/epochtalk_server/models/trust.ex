@@ -70,14 +70,14 @@ defmodule EpochtalkServer.Models.Trust do
   @doc """
   Appends `Trust` statistics to each `Post` in list if provided with a valid authenticated `User`
   """
-  @spec maybe_append_post_trust_stats(
+  @spec maybe_append_trust_stats_to_posts(
           posts :: [],
           authed_user :: User.t() | nil
         ) :: [Post.t()]
-  def maybe_append_post_trust_stats(posts, authed_user)
-  def maybe_append_post_trust_stats(posts, nil), do: posts
+  def maybe_append_trust_stats_to_posts(posts, authed_user)
+  def maybe_append_trust_stats_to_posts(posts, nil), do: posts
 
-  def maybe_append_post_trust_stats(posts, authed_user) do
+  def maybe_append_trust_stats_to_posts(posts, authed_user) do
     authed_user_id = authed_user.id
     # pre calculate trust network for authed user to be optimal
     max_depth = TrustMaxDepth.by_user_id(authed_user_id)
@@ -95,14 +95,14 @@ defmodule EpochtalkServer.Models.Trust do
   @doc """
   Appends `trust_visible` field to `Thread` if provided with a valid authenticated `User`
   """
-  @spec maybe_append_thread_trust_visible(
+  @spec maybe_append_trust_visible_to_thread(
           thread :: Thread.t(),
           authed_user :: User.t() | nil
         ) :: Thread.t()
-  def maybe_append_thread_trust_visible(thread, authed_user)
-  def maybe_append_thread_trust_visible(thread, nil), do: thread
+  def maybe_append_trust_visible_to_thread(thread, authed_user)
+  def maybe_append_trust_visible_to_thread(thread, nil), do: thread
 
-  def maybe_append_thread_trust_visible(thread, _authed_user) do
+  def maybe_append_trust_visible_to_thread(thread, _authed_user) do
     trust_boards = TrustBoard.all()
     trust_visible = Enum.filter(trust_boards, &(&1.board_id == thread.board_id)) != []
     thread |> Map.put(:trust_visible, trust_visible)

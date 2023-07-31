@@ -1120,48 +1120,48 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert response_moderation_log["action_display_text"] == "deleted message sent between users '#{admin_user.username}' and '#{user.username}'"
       assert response_moderation_log["action_display_url"] == nil
     end
-    #
-    # @tag :authenticated
-    # test "given a valid id for 'mod', returns correct moderation_log entry",
-    #      %{conn: conn} do
-    #   conn = get(conn, Routes.moderation_log_path(conn, :page, %{"mod" => 1}))
-    #   moderation_logs = json_response(conn, 200)["moderation_logs"]
-    #   assert List.first(moderation_logs)["mod_id"] == 1
-    # end
-    #
-    # @tag :authenticated
-    # test "given an invalid id for 'mod', returns an empty list",
-    #      %{conn: conn} do
-    #   conn = get(conn, Routes.moderation_log_path(conn, :page, %{"mod" => 999}))
-    #   moderation_logs = json_response(conn, 200)["moderation_logs"]
-    #   assert Enum.empty?(moderation_logs) == true
-    # end
-    #
-    # @tag :authenticated
-    # test "given a valid username for 'mod', returns correct moderation_log entry",
-    #      %{conn: conn} do
-    #   conn =
-    #     get(
-    #       conn,
-    #       Routes.moderation_log_path(conn, :page, %{"mod" => "one.adminBoards.updateCategories"})
-    #     )
-    #
-    #   moderation_logs = json_response(conn, 200)["moderation_logs"]
-    #   assert List.first(moderation_logs)["mod_username"] == "one.adminBoards.updateCategories"
-    # end
-    #
-    # @tag :authenticated
-    # test "given an invalid string for 'mod', returns an empty list",
-    #      %{conn: conn} do
-    #   conn =
-    #     get(
-    #       conn,
-    #       Routes.moderation_log_path(conn, :page, %{"mod" => "test_username"})
-    #     )
-    #
-    #   moderation_logs = json_response(conn, 200)["moderation_logs"]
-    #   assert Enum.empty?(moderation_logs) == true
-    # end
+
+    @tag :authenticated
+    test "given a valid id for 'mod', returns correct moderation_log entry", %{conn: conn} do
+      factory_moderation_log = build(:moderation_log, %{
+        api_url: "/api/boards/all",
+        api_method: "post",
+        type: "adminBoards.updateCategories",
+        obj: %{}
+      })
+
+      response_moderation_log =
+        conn |> response_for_mod(factory_moderation_log.mod_id)
+
+      assert compare(response_moderation_log, factory_moderation_log)
+    end
+
+    @tag :authenticated
+    test "given an invalid id for 'mod', returns an empty list", %{conn: conn} do
+      invalid_mod_id = 0
+      assert conn |> response_list_for_mod(invalid_mod_id) |> Enum.empty?() == true
+    end
+
+    @tag :authenticated
+    test "given a valid username for 'mod', returns correct moderation_log entry", %{conn: conn} do
+      factory_moderation_log = build(:moderation_log, %{
+        api_url: "/api/boards/all",
+        api_method: "post",
+        type: "adminBoards.updateCategories",
+        obj: %{}
+      })
+
+      response_moderation_log =
+        conn |> response_for_mod(factory_moderation_log.mod_username)
+
+      assert compare(response_moderation_log, factory_moderation_log)
+    end
+
+    @tag :authenticated
+    test "given an invalid string for 'mod', returns an empty list", %{conn: conn} do
+      invalid_mod_username = ""
+      assert conn |> response_list_for_mod(invalid_mod_username) |> Enum.empty?() == true
+    end
     #
     # @tag :authenticated
     # test "given a valid action_type 'action', returns correct moderation_log entry",

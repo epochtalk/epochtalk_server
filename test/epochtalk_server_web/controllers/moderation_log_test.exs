@@ -1188,6 +1188,20 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert compare(response_moderation_log, factory_moderation_log)
     end
 
+    @tag :authenticated
+    test "given an unpopulated action_type 'action', returns an empty list", %{conn: conn} do
+      unpopulated_action_type = "adminBoards.updateCategories"
+      assert conn |> response_list_for_action(unpopulated_action_type) |> Enum.empty?() == true
+    end
+
+    @tag :authenticated
+    test "given an invalid action_type 'action', returns an empty list", %{conn: conn} do
+      invalid_action_type = ""
+      assert_raise Postgrex.Error, fn ->
+        conn |> response_list_for_action(invalid_action_type)
+      end
+    end
+
     # @tag :authenticated
     # test "given a valid action_display_text 'keyword', returns correct moderation_log entry",
     #      %{conn: conn} do

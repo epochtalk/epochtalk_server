@@ -65,10 +65,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     defaults = %{convert_date: [], stringify: []}
     %{convert_date: convert_date_list, stringify: stringify_list} = Enum.into(options, defaults)
 
-    assert result_moderation_log["action_api_method"] == factory_moderation_log.action_api_method
-    assert result_moderation_log["action_api_url"] == factory_moderation_log.action_api_url
-    assert result_moderation_log["action_display_text"] == factory_moderation_log.action_display_text
-    assert result_moderation_log["action_display_url"] == factory_moderation_log.action_display_url
+    # check "action_obj" key
     factory_moderation_log.action_obj
     |> Enum.each(fn {k, v} ->
       result_value = result_moderation_log["action_obj"] |> Map.get(to_string(k))
@@ -86,6 +83,12 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       end
       assert result_value == v
     end)
+
+    # check all other keys
+    assert result_moderation_log["action_api_method"] == factory_moderation_log.action_api_method
+    assert result_moderation_log["action_api_url"] == factory_moderation_log.action_api_url
+    assert result_moderation_log["action_display_text"] == factory_moderation_log.action_display_text
+    assert result_moderation_log["action_display_url"] == factory_moderation_log.action_display_url
     assert result_moderation_log["action_taken_at"] |> NaiveDateTime.from_iso8601!() == factory_moderation_log.action_taken_at
     assert result_moderation_log["action_type"] == factory_moderation_log.action_type
     assert result_moderation_log["mod_id"] == factory_moderation_log.mod_id

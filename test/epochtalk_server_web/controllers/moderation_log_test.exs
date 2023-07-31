@@ -753,7 +753,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     @tag :authenticated
     test "when action_type is 'threads.title', gets page", %{conn: conn, users: %{user: user}} do
       board = insert(:board)
-      thread = build(:thread, board: board, user: user, title: "Thread", slug: "thread-slug")
+      thread = build(:thread, board: board, user: user)
       thread_id = thread.post.thread_id
       thread_slug = thread.attributes["slug"]
       factory_moderation_log = build(:moderation_log, %{
@@ -774,7 +774,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     @tag :authenticated
     test "when action_type is 'threads.lock', gets page", %{conn: conn, users: %{user: user}} do
       board = insert(:board)
-      thread = build(:thread, board: board, user: user, title: "Thread", slug: "thread-slug")
+      thread = build(:thread, board: board, user: user)
       thread_id = thread.post.thread_id
       thread_title = thread.post.content["title"]
       thread_slug = thread.attributes["slug"]
@@ -796,7 +796,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     @tag :authenticated
     test "when action_type is 'threads.sticky', gets page", %{conn: conn, users: %{user: user}} do
       board = insert(:board)
-      thread = build(:thread, board: board, user: user, title: "Thread", slug: "thread-slug")
+      thread = build(:thread, board: board, user: user)
       thread_id = thread.post.thread_id
       thread_title = thread.post.content["title"]
       thread_slug = thread.attributes["slug"]
@@ -818,7 +818,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     @tag :authenticated
     test "when action_type is 'threads.move', gets page", %{conn: conn, users: %{user: user}} do
       board = insert(:board)
-      thread = build(:thread, board: board, user: user, title: "Thread", slug: "thread-slug")
+      thread = build(:thread, board: board, user: user)
       thread_id = thread.post.thread_id
       thread_title = thread.post.content["title"]
       thread_slug = thread.attributes["slug"]
@@ -846,7 +846,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     @tag :authenticated
     test "when action_type is 'threads.purge', gets page", %{conn: conn, users: %{user: user}} do
       board = insert(:board)
-      thread = build(:thread, board: board, user: user, title: "Thread", slug: "thread-slug")
+      thread = build(:thread, board: board, user: user)
       thread_title = thread.post.content["title"]
       factory_moderation_log = build(:moderation_log, %{
         api_url: "/api/threads/purge",
@@ -870,7 +870,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     @tag :authenticated
     test "when action_type is 'threads.editPoll', gets page", %{conn: conn, users: %{user: user}} do
       board = insert(:board)
-      thread = build(:thread, board: board, user: user, title: "Thread", slug: "thread-slug")
+      thread = build(:thread, board: board, user: user)
       thread_id = thread.post.thread_id
       thread_title = thread.post.content["title"]
       thread_slug = thread.attributes["slug"]
@@ -892,7 +892,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     @tag :authenticated
     test "when action_type is 'threads.createPoll', gets page", %{conn: conn, users: %{user: user}} do
       board = insert(:board)
-      thread = build(:thread, board: board, user: user, title: "Thread", slug: "thread-slug")
+      thread = build(:thread, board: board, user: user)
       thread_id = thread.post.thread_id
       thread_title = thread.post.content["title"]
       thread_slug = thread.attributes["slug"]
@@ -914,7 +914,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     @tag :authenticated
     test "when action_type is 'threads.lockPoll', gets page", %{conn: conn, users: %{user: user}} do
       board = insert(:board)
-      thread = build(:thread, board: board, user: user, title: "Thread", slug: "thread-slug")
+      thread = build(:thread, board: board, user: user)
       thread_id = thread.post.thread_id
       thread_title = thread.post.content["title"]
       thread_slug = thread.attributes["slug"]
@@ -936,7 +936,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     @tag :authenticated
     test "when action_type is 'posts.update', gets page", %{conn: conn, users: %{user: user}} do
       board = insert(:board)
-      thread = build(:thread, board: board, user: user, title: "Thread", slug: "thread-slug")
+      thread = build(:thread, board: board, user: user)
       thread_title = thread.post.content["title"]
       thread_slug = thread.attributes["slug"]
       post_id = thread.post.id
@@ -958,7 +958,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     @tag :authenticated
     test "when action_type is 'posts.delete', gets page", %{conn: conn, users: %{user: user}} do
       board = insert(:board)
-      thread = build(:thread, board: board, user: user, title: "Thread", slug: "thread-slug")
+      thread = build(:thread, board: board, user: user)
       thread_title = thread.post.content["title"]
       thread_slug = thread.attributes["slug"]
       post_id = thread.post.id
@@ -981,7 +981,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     @tag :authenticated
     test "when action_type is 'posts.undelete', gets page", %{conn: conn, users: %{user: user}} do
       board = insert(:board)
-      thread = build(:thread, board: board, user: user, title: "Thread", slug: "thread-slug")
+      thread = build(:thread, board: board, user: user)
       thread_title = thread.post.content["title"]
       thread_slug = thread.attributes["slug"]
       post_id = thread.post.id
@@ -1003,7 +1003,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     @tag :authenticated
     test "when action_type is 'posts.purge', gets page", %{ conn: conn, users: %{user: user}} do
       board = insert(:board)
-      thread = build(:thread, board: board, user: user, title: "Thread", slug: "thread-slug")
+      thread = build(:thread, board: board, user: user)
       thread_id = thread.post.thread_id
       thread_title = thread.post.content["title"]
       thread_slug = thread.attributes["slug"]

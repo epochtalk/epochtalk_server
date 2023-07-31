@@ -577,11 +577,12 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
 
     @tag :authenticated
     test "when action_type is 'bans.addAddresses', gets page", %{conn: conn} do
+      hostname = nil
       factory_moderation_log = build(:moderation_log, %{
         api_url: "/api/bans/addAddresses",
         api_method: "post",
         type: "bans.addAddresses",
-        obj: %{addresses: [%{hostname: @hostname, ip: @banned_address}]}
+        obj: %{addresses: [%{hostname: hostname, ip: @banned_address}]}
       })
 
       response_moderation_log =
@@ -595,11 +596,12 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     @tag :authenticated
     test "when action_type is 'bans.editAddress', gets page", %{conn: conn} do
       decay = nil
+      hostname = nil
       factory_moderation_log = build(:moderation_log, %{
         api_url: "/api/bans/editAddress",
         api_method: "post",
         type: "bans.editAddress",
-        obj: %{hostname: @hostname, ip: @banned_address, weight: @weight, decay: decay}
+        obj: %{hostname: hostname, ip: @banned_address, weight: @weight, decay: decay}
       })
 
       response_moderation_log =
@@ -612,11 +614,12 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
 
     @tag :authenticated
     test "when action_type is 'bans.deleteAddress', gets page", %{conn: conn} do
+      hostname = nil
       factory_moderation_log = build(:moderation_log, %{
         api_url: "/api/bans/deleteAddress",
         api_method: "delete",
         type: "bans.deleteAddress",
-        obj: %{hostname: nil, ip: @banned_address}
+        obj: %{hostname: hostname, ip: @banned_address}
       })
 
       response_moderation_log =

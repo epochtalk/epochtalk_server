@@ -843,29 +843,31 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert response_moderation_log["action_display_text"] == "moved the thread '#{thread_title}' created by user '#{user.username}' from board '#{@old_board.name}' to '#{board.name}'"
       assert response_moderation_log["action_display_url"] == "posts.data({ slug: '#{thread_slug}' })"
     end
-    #
-    # @tag :authenticated
-    # test "when action_type is 'threads.purge', gets page",
-    #      %{
-    #        conn: conn
-    #      } do
-    #   conn =
-    #     get(
-    #       conn,
-    #       Routes.moderation_log_path(conn, :page, %{"mod" => 45})
-    #     )
-    #
-    #   moderation_logs = json_response(conn, 200)["moderation_logs"]
-    #   moderation_log = List.first(moderation_logs)
-    #
-    #   assert response_moderation_log["mod_id"] == 45
-    #   assert response_moderation_log["action_type"] == "threads.purge"
-    #
-    #   assert response_moderation_log["action_display_text"] ==
-    #            "purged thread '#{@thread.title}' created by user '#{@user.username}' from board '#{@old_board.name}' to '#{@board.name}'"
-    #
-    #   assert response_moderation_log["action_display_url"] == nil
-    # end
+
+    @tag :authenticated
+    test "when action_type is 'threads.purge', gets page", %{conn: conn, users: %{user: user}} do
+      board = insert(:board)
+      thread = build(:thread, board: board, user: user, title: "Thread", slug: "thread-slug")
+      thread_id = thread.post.thread_id
+      thread_title = thread.post.content["title"]
+      factory_moderation_log = build(:moderation_log, %{
+        api_url: "/api/threads/purge",
+        api_method: "post",
+        type: "threads.purge",
+        obj: %{
+          title: thread_title,
+          user_id: user.id,
+          old_board_name: @old_board.name,
+          board_id: board.id}
+      })
+
+      response_moderation_log =
+        conn |> response_for_mod(factory_moderation_log.mod_id)
+
+      assert compare(response_moderation_log, factory_moderation_log)
+      assert response_moderation_log["action_display_text"] == "purged thread '#{thread_title}' created by user '#{user.username}' from board '#{@old_board.name}' to '#{board.name}'"
+      assert response_moderation_log["action_display_url"] == nil
+    end
     #
     # @tag :authenticated
     # test "when action_type is 'threads.editPoll', gets page",

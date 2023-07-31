@@ -6,7 +6,6 @@ defmodule Test.Support.Factories.ModerationLog do
   build(:moderation_log, action)
   """
   alias EpochtalkServer.Models.ModerationLog
-  @mod_address "127.0.0.2"
 
   defmacro __using__(_opts) do
     quote do
@@ -15,7 +14,7 @@ defmodule Test.Support.Factories.ModerationLog do
           mod: %{
             username: sequence(:moderation_log_username, &"#{action.type}#{&1}"),
             id: sequence(""), # 1, 2, 3 ...
-            ip: @mod_address
+            ip: "127.0.0.2"
           },
           action: action
         }

@@ -692,26 +692,24 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert response_moderation_log["action_display_text"] == "unbanned user '#{user.username}' from boards: #{board.name}'"
       assert response_moderation_log["action_display_url"] == "^.board-bans"
     end
-    #
-    # @tag :authenticated
-    # test "when action_type is 'boards.create', gets page",
-    #      %{
-    #        conn: conn
-    #      } do
-    #   conn =
-    #     get(
-    #       conn,
-    #       Routes.moderation_log_path(conn, :page, %{"mod" => 38})
-    #     )
-    #
-    #   moderation_logs = json_response(conn, 200)["moderation_logs"]
-    #   moderation_log = List.first(moderation_logs)
-    #
-    #   assert response_moderation_log["mod_id"] == 38
-    #   assert response_moderation_log["action_type"] == "boards.create"
-    #   assert response_moderation_log["action_display_text"] == "created board named '#{@board.name}'"
-    #   assert response_moderation_log["action_display_url"] == "admin-management.boards"
-    # end
+
+    @tag :authenticated
+    test "when action_type is 'boards.create', gets page", %{conn: conn} do
+      board = insert(:board)
+      factory_moderation_log = build(:moderation_log, %{
+        api_url: "/api/boards/create",
+        api_method: "post",
+        type: "boards.create",
+        obj: %{boards: [%{name: board.name}]}
+      })
+
+      response_moderation_log =
+        conn |> response_for_mod(factory_moderation_log.mod_id)
+
+      assert compare(response_moderation_log, factory_moderation_log, stringify: [:boards])
+      assert response_moderation_log["action_display_text"] == "created board named '#{board.name}'"
+      assert response_moderation_log["action_display_url"] == "admin-management.boards"
+    end
     #
     # @tag :authenticated
     # test "when action_type is 'boards.update', gets page",

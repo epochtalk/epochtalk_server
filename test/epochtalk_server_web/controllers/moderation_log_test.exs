@@ -1172,20 +1172,22 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       invalid_mod_username = ""
       assert conn |> response_list_for_mod(invalid_mod_username) |> Enum.empty?() == true
     end
-    #
-    # @tag :authenticated
-    # test "given a valid action_type 'action', returns correct moderation_log entry",
-    #      %{conn: conn} do
-    #   conn =
-    #     get(
-    #       conn,
-    #       Routes.moderation_log_path(conn, :page, %{"action" => "adminModerators.remove"})
-    #     )
-    #
-    #   moderation_logs = json_response(conn, 200)["moderation_logs"]
-    #   assert List.first(moderation_logs)["action_type"] == "adminModerators.remove"
-    # end
-    #
+
+    @tag :authenticated
+    test "given a valid action_type 'action', returns correct moderation_log entry", %{conn: conn, users: %{user: user}} do
+      board = insert(:board)
+      factory_moderation_log = build(:moderation_log, %{
+        api_url: "/api/admin/moderators",
+        api_method: "delete",
+        type: "adminModerators.remove",
+        obj: %{usernames: [user.username], board_id: board.id}
+      })
+
+      response_moderation_log =
+        conn |> response_for_action(factory_moderation_log.action_type)
+      assert compare(response_moderation_log, factory_moderation_log)
+    end
+
     # @tag :authenticated
     # test "given a valid action_display_text 'keyword', returns correct moderation_log entry",
     #      %{conn: conn} do

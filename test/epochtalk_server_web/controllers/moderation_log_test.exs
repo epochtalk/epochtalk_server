@@ -102,22 +102,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
 
   describe "page/1" do
     @tag :authenticated
-    test "given mod username, when action_type is 'adminBoards.updateCategories', gets page", %{conn: conn} do
-      factory_moderation_log = build(:moderation_log, %{
-        api_url: "/api/boards/all",
-        api_method: "post",
-        type: "adminBoards.updateCategories",
-        obj: %{}
-      })
-
-      response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_username)
-
-      assert compare(response_moderation_log, factory_moderation_log)
-    end
-
-    @tag :authenticated
-    test "given mod_id, when action_type is 'adminBoards.updateCategories', gets page", %{conn: conn} do
+    test "when action_type is 'adminBoards.updateCategories', gets page", %{conn: conn} do
       factory_moderation_log = build(:moderation_log, %{
         api_url: "/api/boards/all",
         api_method: "post",

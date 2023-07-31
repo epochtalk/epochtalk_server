@@ -92,14 +92,24 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     assert result_moderation_log["mod_username"] == factory_moderation_log.mod_username
   end
 
-  defp response_list_for_mod(conn, mod) do
+  defp moderation_log_response(conn, identifier) do
     conn
-    |> get(Routes.moderation_log_path(conn, :page, %{"mod" => mod}))
+    |> get(Routes.moderation_log_path(conn, :page, identifier))
     |> json_response(200)
     |> Map.get("moderation_logs")
   end
+  defp response_list_for_mod(conn, mod) do
+    moderation_log_response(conn, %{"mod" => mod})
+  end
   defp response_for_mod(conn, mod) do
     response_list_for_mod(conn, mod)
+    |> List.first()
+  end
+  defp response_list_for_action(conn, action) do
+    moderation_log_response(conn, %{"action" => action})
+  end
+  defp response_for_action(conn, action) do
+    response_list_for_mod(conn, action)
     |> List.first()
   end
 

@@ -60,16 +60,21 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     end)
   end
 
-  defp compare(result_moderation_log, factory_moderation_log) do
-    compare(result_moderation_log, factory_moderation_log, ignore: [])
-  end
-  defp compare(result_moderation_log, factory_moderation_log, ignore: ignore_list) do
+  defp compare(result_moderation_log, factory_moderation_log, options \\ []) do
+    defaults = %{ignore: [], stringify: []}
+    %{ignore: ignore_list, stringify: stringify_list} = Enum.into(options, defaults)
     assert result_moderation_log["action_api_method"] == factory_moderation_log.action_api_method
     assert result_moderation_log["action_api_url"] == factory_moderation_log.action_api_url
     assert result_moderation_log["action_display_text"] == factory_moderation_log.action_display_text
     assert result_moderation_log["action_display_url"] == factory_moderation_log.action_display_url
     factory_moderation_log.action_obj
     |> Enum.each(fn {k, v} ->
+      # convert atom-keyed maps in list to string-keyed
+      v = if Enum.member?(stringify_list, k) do
+        v |> Enum.map(fn e -> stringify_keys_deep(e) end)
+      else
+        v
+      end
       if Enum.member?(ignore_list, k) do
         true
       else
@@ -578,8 +583,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       response_moderation_log =
         conn |> response_for_mod(factory_moderation_log.mod_id)
 
-      assert compare(response_moderation_log, factory_moderation_log, ignore: [:addresses])
-      assert response_moderation_log["action_obj"]["addresses"] |> List.first() == factory_moderation_log.action_obj.addresses |> List.first() |> stringify_keys_deep()
+      assert compare(response_moderation_log, factory_moderation_log, stringify: [:addresses])
       assert response_moderation_log["action_display_text"] == "banned the following addresses '#{@banned_address}'"
       assert response_moderation_log["action_display_url"] == "admin-management.banned-addresses"
     end

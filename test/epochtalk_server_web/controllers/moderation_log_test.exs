@@ -48,6 +48,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
   #   }
   # }
 
+  ## helper functions
   defp stringify_keys_deep(map) do
     map
     |> Enum.reduce(%{}, fn {k, v}, m ->
@@ -113,6 +114,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     |> List.first()
   end
 
+  ## tests
   describe "page/1" do
     @tag :authenticated
     test "when action_type is 'adminBoards.updateCategories', gets page", %{conn: conn} do

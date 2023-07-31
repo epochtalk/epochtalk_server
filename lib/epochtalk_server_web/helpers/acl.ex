@@ -120,6 +120,9 @@ defmodule EpochtalkServerWeb.Helpers.ACL do
   def has_permission(%User{} = user, permission_path) when is_binary(permission_path),
     do: has_permission(%Plug.Conn{private: %{guardian_default_resource: user}}, permission_path)
 
+  def has_permission(%{} = user, permission_path) when is_binary(permission_path),
+    do: has_permission(%Plug.Conn{private: %{guardian_default_resource: user}}, permission_path)
+
   def has_permission(nil, permission_path) when is_binary(permission_path),
     do: has_permission(%Plug.Conn{private: %{guardian_default_resource: nil}}, permission_path)
 

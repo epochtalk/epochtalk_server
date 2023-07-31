@@ -974,7 +974,6 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
 
       assert compare(response_moderation_log, factory_moderation_log)
       assert response_moderation_log["action_display_text"] == "hid post created by user '#{user.username}' in thread '#{thread_title}'"
-      IO.inspect(post_id)
       assert response_moderation_log["action_display_url"] == "posts.data({ slug: '#{thread_slug}', start: '1', '#': '#{post_id}' })"
     end
 

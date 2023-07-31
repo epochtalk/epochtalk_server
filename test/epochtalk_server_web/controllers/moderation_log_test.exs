@@ -857,15 +857,15 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
         obj: %{
           title: thread_title,
           user_id: user.id,
-          old_board_name: @old_board.name,
-          board_id: board.id}
+          old_board_name: board.name
+        }
       })
 
       response_moderation_log =
         conn |> response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
-      assert response_moderation_log["action_display_text"] == "purged thread '#{thread_title}' created by user '#{user.username}' from board '#{@old_board.name}' to '#{board.name}'"
+      assert response_moderation_log["action_display_text"] == "purged thread '#{thread_title}' created by user '#{user.username}' from board '#{board.name}'"
       assert response_moderation_log["action_display_url"] == nil
     end
     #

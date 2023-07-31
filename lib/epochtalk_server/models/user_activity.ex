@@ -6,7 +6,7 @@ defmodule EpochtalkServer.Models.UserActivity do
   alias EpochtalkServer.Models.UserActivity
 
   @moduledoc """
-  `UserActivity` model, for performing actions relating to `User` `UserActivity`
+  `UserActivity` model, for performing actions relating to `UserActivity`
   """
   @type t :: %__MODULE__{
           user_id: non_neg_integer | nil,

@@ -6,7 +6,7 @@ defmodule EpochtalkServer.Models.UserThreadView do
   alias EpochtalkServer.Models.UserThreadView
 
   @moduledoc """
-  `UserThreadView` model, for performing actions relating to `User` `UserThreadView`
+  `UserThreadView` model, for performing actions relating to `UserThreadView`
   """
   @type t :: %__MODULE__{
           user_id: non_neg_integer | nil,

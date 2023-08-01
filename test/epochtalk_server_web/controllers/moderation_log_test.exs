@@ -128,7 +128,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
   end
 
   ## tests
-  describe "page/1" do
+  describe "page/1, action types" do
     @tag :authenticated
     test "when action_type is 'adminBoards.updateCategories', gets page", %{conn: conn} do
       factory_moderation_log = build(:moderation_log, %{
@@ -1167,7 +1167,9 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert response_moderation_log["action_display_text"] == "deleted message sent between users '#{admin_user.username}' and '#{user.username}'"
       assert response_moderation_log["action_display_url"] == nil
     end
+  end
 
+  describe "page/1, mod_id" do
     @tag :authenticated
     test "given a valid id for 'mod', returns correct moderation_log entry", %{conn: conn} do
       factory_moderation_log = build(:moderation_log, %{
@@ -1188,7 +1190,9 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       invalid_mod_id = 0
       assert conn |> page_response_list_for_mod(invalid_mod_id) |> Enum.empty?() == true
     end
+  end
 
+  describe "page/1, mod_username" do
     @tag :authenticated
     test "given a valid username for 'mod', returns correct moderation_log entry", %{conn: conn} do
       factory_moderation_log = build(:moderation_log, %{
@@ -1209,7 +1213,9 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       invalid_mod_username = ""
       assert conn |> page_response_list_for_mod(invalid_mod_username) |> Enum.empty?() == true
     end
+  end
 
+  describe "page/1, action_type" do
     @tag :authenticated
     test "given a valid action_type 'action', returns correct moderation_log entry", %{conn: conn, users: %{user: user}} do
       board = insert(:board)
@@ -1238,7 +1244,9 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
         conn |> page_response_list_for_action(invalid_action_type)
       end
     end
+  end
 
+  describe "page/1, action_display_text" do
     @tag :authenticated
     test "given a valid action_display_text 'keyword', returns correct moderation_log entry", %{conn: conn} do
       factory_moderation_log = build(:moderation_log, %{

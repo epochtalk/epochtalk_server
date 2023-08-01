@@ -47,4 +47,19 @@ defmodule EpochtalkServer.Models.UserActivity do
 
     Repo.one(query) || 0
   end
+
+  ## === Public Helper Functions ===
+
+  @doc """
+  Appends `UserActivity` data to list of `Post`
+  """
+  @spec append_user_activity_to_posts(posts :: []) ::
+          posts :: []
+  def append_user_activity_to_posts(posts) when is_list(posts) do
+    Enum.map(posts, fn post ->
+      if post.user_deleted,
+        do: post,
+        else: post |> Map.put(:user_activity, UserActivity.get_by_user_id(post.user_id))
+    end)
+  end
 end

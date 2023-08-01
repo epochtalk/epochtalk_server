@@ -7,9 +7,6 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     id: 1,
     name: "Super Administrator"
   }
-  @new_thread %{
-    title: "New Thread"
-  }
   @status "status"
   @note "test_note"
   @message_report_id 10
@@ -790,18 +787,19 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       thread = build(:thread, board: board, user: user)
       thread_id = thread.post.thread_id
       thread_slug = thread.attributes["slug"]
+      new_thread = %{title: "New Thread"}
       factory_moderation_log = build(:moderation_log, %{
         api_url: "/api/threads/title",
         api_method: "post",
         type: "threads.title",
-        obj: %{thread_id: thread_id, user_id: user.id, title: @new_thread.title}
+        obj: %{thread_id: thread_id, user_id: user.id, title: new_thread.title}
       })
 
       response_moderation_log =
         conn |> page_response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
-      assert response_moderation_log["action_display_text"] == "updated the title of a thread created by user '#{user.username}' to '#{@new_thread.title}'"
+      assert response_moderation_log["action_display_text"] == "updated the title of a thread created by user '#{user.username}' to '#{new_thread.title}'"
       assert response_moderation_log["action_display_url"] == "posts.data({ slug: '#{thread_slug}' })"
     end
 

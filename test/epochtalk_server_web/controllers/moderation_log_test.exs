@@ -21,32 +21,8 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
   @user_report_id 30
   @ban_expiration_input ~N[2030-12-31 00:00:00.000]
   @ban_expiration_output "31 Dec 2030"
-  @mod_address "127.0.0.2"
   @banned_address "127.0.0.1"
   @weight 99
-
-  # @create_update_boards_attrs %{
-  #   mod: %{username: @admin.username, id: 1, ip: @mod_address},
-  #   action: %{
-  #     api_url: "/api/boards/all",
-  #     api_method: "post",
-  #     type: "adminBoards.updateCategories",
-  #     obj: %{}
-  #   }
-  # }
-  #
-  # @create_add_moderators_attrs %{
-  #   mod: %{username: @admin.username, id: 2, ip: @mod_address},
-  #   action: %{
-  #     api_url: "/api/admin/moderators",
-  #     api_method: "post",
-  #     type: "adminModerators.add",
-  #     obj: %{
-  #       usernames: [@user.username],
-  #       board_id: @board.id
-  #     }
-  #   }
-  # }
 
   ## helper functions
   defp stringify_keys_deep(map) do
@@ -119,6 +95,57 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
   defp response_for_keyword(conn, keyword) do
     response_list_for_keyword(conn, keyword)
     |> List.first()
+  end
+
+  describe "create/1" do
+    test "creates moderation_log entry", %{users: %{admin_user: admin_user}} do
+      mod_address = "127.0.0.2"
+      attrs = %{
+        mod: %{username: admin_user.username, id: 1, ip: mod_address},
+        action: %{
+          api_url: "/api/boards/all",
+          api_method: "post",
+          type: "adminBoards.updateCategories",
+          obj: %{}
+        }
+      }
+
+      {:ok, moderation_log} = ModerationLog.create(attrs)
+      assert moderation_log.mod_username == attrs.mod.username
+      assert moderation_log.mod_id == attrs.mod.id
+      assert moderation_log.mod_ip == attrs.mod.ip
+      assert moderation_log.action_api_url == attrs.action.api_url
+      assert moderation_log.action_api_method == attrs.action.api_method
+      assert moderation_log.action_obj == attrs.action.obj
+      assert moderation_log.action_type == attrs.action.type
+      assert moderation_log.action_display_text == "updated boards and categories"
+      assert moderation_log.action_display_url == "admin-management.boards"
+    end
+
+    test "creates moderation_log using helper data_query function", %{users: %{user: user, admin_user: admin_user}} do
+      mod_address = "127.0.0.2"
+      board = insert(:board)
+      attrs = %{
+        mod: %{username: admin_user.username, id: 1, ip: mod_address},
+        action: %{
+          api_url: "/api/admin/moderators",
+          api_method: "post",
+          type: "adminModerators.add",
+          obj: %{
+            usernames: [user.username],
+            board_id: board.id
+          }
+        }
+      }
+
+      {:ok, moderation_log} = ModerationLog.create(attrs)
+      assert moderation_log.mod_username == attrs.mod.username
+      assert moderation_log.mod_id == attrs.mod.id
+      assert moderation_log.mod_ip == attrs.mod.ip
+      assert moderation_log.action_api_url == attrs.action.api_url
+      assert moderation_log.action_api_method == attrs.action.api_method
+      assert moderation_log.action_type == attrs.action.type
+    end
   end
 
   ## tests
@@ -1424,30 +1451,4 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     #   assert List.first(moderation_logs)["mod_username"] == "one.adminBoards.updateCategories"
     # end
   end
-
-  # describe "create/1" do
-  #   test "creates moderation_log entry", %{} do
-  #     {:ok, moderation_log} = ModerationLog.create(@create_update_boards_attrs)
-  #     assert moderation_log.mod_username == @create_update_boards_attrs.mod.username
-  #     assert moderation_log.mod_id == @create_update_boards_attrs.mod.id
-  #     assert moderation_log.mod_ip == @create_update_boards_attrs.mod.ip
-  #     assert moderation_log.action_api_url == @create_update_boards_attrs.action.api_url
-  #     assert moderation_log.action_api_method == @create_update_boards_attrs.action.api_method
-  #     assert moderation_log.action_obj == @create_update_boards_attrs.action.obj
-  #     assert moderation_log.action_type == @create_update_boards_attrs.action.type
-  #     assert moderation_log.action_display_text == "updated boards and categories"
-  #     assert moderation_log.action_display_url == "admin-management.boards"
-  #   end
-  #
-  #   test "creates moderation_log using helper data_query function",
-  #        %{} do
-  #     {:ok, moderation_log} = ModerationLog.create(@create_add_moderators_attrs)
-  #     assert moderation_log.mod_username == @create_add_moderators_attrs.mod.username
-  #     assert moderation_log.mod_id == @create_add_moderators_attrs.mod.id
-  #     assert moderation_log.mod_ip == @create_add_moderators_attrs.mod.ip
-  #     assert moderation_log.action_api_url == @create_add_moderators_attrs.action.api_url
-  #     assert moderation_log.action_api_method == @create_add_moderators_attrs.action.api_method
-  #     assert moderation_log.action_type == @create_add_moderators_attrs.action.type
-  #   end
-  # end
 end

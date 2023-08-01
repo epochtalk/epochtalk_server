@@ -1368,31 +1368,21 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
         })
       assert List.first(response_moderation_log)["mod_id"] == first_log.mod_id
     end
-    #
-    # @tag :authenticated
-    # test "given a valid username and date range, returns correct moderation_log",
-    #      %{conn: conn} do
-    #   start_datetime =
-    #     NaiveDateTime.to_string(NaiveDateTime.add(NaiveDateTime.utc_now(), -2, :day))
-    #
-    #   end_datetime = NaiveDateTime.to_string(NaiveDateTime.add(NaiveDateTime.utc_now(), 2, :day))
-    #
-    #   conn =
-    #     get(
-    #       conn,
-    #       Routes.moderation_log_path(
-    #         conn,
-    #         :page,
-    #         %{
-    #           "mod" => "one.adminBoards.updateCategories",
-    #           "sdate" => List.first(String.split(start_datetime)),
-    #           "edate" => List.first(String.split(end_datetime))
-    #         }
-    #       )
-    #     )
-    #
-    #   moderation_logs = json_response(conn, 200)["moderation_logs"]
-    #   assert List.first(moderation_logs)["mod_username"] == "one.adminBoards.updateCategories"
-    # end
+
+    @tag :authenticated
+    test "given a valid username and date range, returns correct moderation_log", %{conn: conn, logs: logs} do
+      two_days_ago = NaiveDateTime.to_string(NaiveDateTime.add(NaiveDateTime.utc_now(), -2, :day))
+      two_days_from_now = NaiveDateTime.to_string(NaiveDateTime.add(NaiveDateTime.utc_now(), 2, :day))
+      first_log = List.first(logs)
+
+      response_moderation_log =
+        conn
+        |> page_response(%{
+          "mod" => first_log.mod_username,
+          "sdate" => List.first(String.split(two_days_ago)),
+          "edate" => List.first(String.split(two_days_from_now))
+        })
+      assert List.first(response_moderation_log)["mod_username"] == first_log.mod_username
+    end
   end
 end

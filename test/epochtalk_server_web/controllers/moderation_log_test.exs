@@ -7,7 +7,6 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     id: 1,
     name: "Super Administrator"
   }
-  @weight 99
 
   ## helper functions
   defp stringify_keys_deep(map) do
@@ -626,19 +625,20 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     test "when action_type is 'bans.editAddress', gets page", %{conn: conn} do
       hostname = nil
       banned_address = "127.0.0.1"
+      weight = 99
       decay = nil
       factory_moderation_log = build(:moderation_log, %{
         api_url: "/api/bans/editAddress",
         api_method: "post",
         type: "bans.editAddress",
-        obj: %{hostname: hostname, ip: banned_address, weight: @weight, decay: decay}
+        obj: %{hostname: hostname, ip: banned_address, weight: weight, decay: decay}
       })
 
       response_moderation_log =
         conn |> page_response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
-      assert response_moderation_log["action_display_text"] == "edited banned address '#{banned_address}' to 'not decay' with a weight of '#{@weight}'"
+      assert response_moderation_log["action_display_text"] == "edited banned address '#{banned_address}' to 'not decay' with a weight of '#{weight}'"
       assert response_moderation_log["action_display_url"] == "admin-management.banned-addresses({ search: '#{banned_address}' })"
     end
 

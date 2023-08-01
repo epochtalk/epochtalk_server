@@ -113,6 +113,13 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     response_list_for_mod(conn, action)
     |> List.first()
   end
+  defp response_list_for_keyword(conn, keyword) do
+    moderation_log_response(conn, %{"keyword" => keyword})
+  end
+  defp response_for_keyword(conn, keyword) do
+    response_list_for_keyword(conn, keyword)
+    |> List.first()
+  end
 
   ## tests
   describe "page/1" do

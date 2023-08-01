@@ -1258,50 +1258,44 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       invalid_keyword = ""
       assert conn |> page_response_list_for_keyword(invalid_keyword) |> Enum.empty?() == true
     end
-    #
-    # @tag :authenticated
-    # test "given a future 'before date', returns correct moderation_log entries",
-    #      %{conn: conn} do
-    #   datetime = NaiveDateTime.to_string(NaiveDateTime.add(NaiveDateTime.utc_now(), 2, :day))
-    #
-    #   conn =
-    #     get(
-    #       conn,
-    #       Routes.moderation_log_path(
-    #         conn,
-    #         :page,
-    #         %{
-    #           "bdate" => List.first(String.split(datetime)),
-    #           "page" => 1,
-    #           "limit" => 100
-    #         }
-    #       )
-    #     )
-    #
-    #   moderation_logs = json_response(conn, 200)["moderation_logs"]
-    #   assert length(moderation_logs) == 58
-    # end
-    #
-    # @tag :authenticated
-    # test "given a past 'before date', returns an empty list",
-    #      %{conn: conn} do
-    #   datetime = NaiveDateTime.to_string(NaiveDateTime.add(NaiveDateTime.utc_now(), -2, :day))
-    #
-    #   conn =
-    #     get(
-    #       conn,
-    #       Routes.moderation_log_path(
-    #         conn,
-    #         :page,
-    #         %{
-    #           "bdate" => List.first(String.split(datetime))
-    #         }
-    #       )
-    #     )
-    #
-    #   moderation_logs = json_response(conn, 200)["moderation_logs"]
-    #   assert Enum.empty?(moderation_logs) == true
-    # end
+  end
+
+  describe "page/1, by date" do
+    setup do
+      number_of_logs = 58
+      build_list(number_of_logs, :moderation_log, %{
+        api_url: "/api/settings/setTheme",
+        api_method: "post",
+        type: "adminSettings.setTheme",
+        obj: %{}
+      })
+      {:ok, number_of_logs: number_of_logs}
+    end
+
+    @tag :authenticated
+    test "given a future 'before date', returns correct moderation_log entries", %{conn: conn, number_of_logs: number_of_logs} do
+      two_days_from_now = NaiveDateTime.to_string(NaiveDateTime.add(NaiveDateTime.utc_now(), 2, :day))
+      response_moderation_log =
+        conn
+        |> page_response(%{
+          "bdate" => List.first(String.split(two_days_from_now)),
+          "page" => 1,
+          "limit" => 100
+        })
+      assert length(response_moderation_log) == number_of_logs
+    end
+
+    @tag :authenticated
+    test "given a past 'before date', returns an empty list", %{conn: conn} do
+      two_days_ago = NaiveDateTime.to_string(NaiveDateTime.add(NaiveDateTime.utc_now(), -2, :day))
+
+      response_moderation_log =
+        conn
+        |> page_response(%{
+          "bdate" => List.first(String.split(two_days_ago))
+        })
+      assert Enum.empty?(response_moderation_log) == true
+    end
     #
     # @tag :authenticated
     # test "given a past 'after date', returns correct moderation_log entries",

@@ -21,7 +21,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     factory_moderation_log.action_obj
     |> Enum.each(fn {k, v} ->
       result_value = result_moderation_log["action_obj"] |> Map.get(to_string(k))
-      # convert specified atom-keyed maps in list to string-keyed
+      # convert specified factory atom-keyed maps in list to string-keyed
       v = if Enum.member?(stringify_list, k) do
         v |> Enum.map(fn e -> stringify_keys_deep(e) end)
       else

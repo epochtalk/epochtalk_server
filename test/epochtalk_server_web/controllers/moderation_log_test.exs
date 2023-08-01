@@ -7,7 +7,6 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     id: 1,
     name: "Super Administrator"
   }
-  @status "status"
   @note "test_note"
   @message_report_id 10
   @post_report_id 20
@@ -200,14 +199,14 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
         api_url: "/api/reports/updateMessageReport",
         api_method: "post",
         type: "reports.updateMessageReport",
-        obj: %{status: "#{@status}", id: @message_report_id}
+        obj: %{status: "status", id: @message_report_id}
       })
 
       response_moderation_log =
         conn |> page_response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
-      assert response_moderation_log["action_display_text"] == "updated the status of message report to '#{@status}'"
+      assert response_moderation_log["action_display_text"] == "updated the status of message report to 'status'"
       assert response_moderation_log["action_display_url"] == "^.messages({ reportId: '#{@message_report_id}' })"
     end
 
@@ -251,14 +250,14 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
         api_url: "/api/reports/updatePostReport",
         api_method: "post",
         type: "reports.updatePostReport",
-        obj: %{status: "#{@status}", id: @post_report_id}
+        obj: %{status: "status", id: @post_report_id}
       })
 
       response_moderation_log =
         conn |> page_response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
-      assert response_moderation_log["action_display_text"] == "updated the status of post report to '#{@status}'"
+      assert response_moderation_log["action_display_text"] == "updated the status of post report to 'status'"
       assert response_moderation_log["action_display_url"] == "^.messages({ reportId: '#{@post_report_id}' })"
     end
 
@@ -302,14 +301,14 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
         api_url: "/api/reports/updateUserReport",
         api_method: "post",
         type: "reports.updateUserReport",
-        obj: %{status: "#{@status}", id: @user_report_id}
+        obj: %{status: "status", id: @user_report_id}
       })
 
       response_moderation_log =
         conn |> page_response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
-      assert response_moderation_log["action_display_text"] == "updated the status of user report to '#{@status}'"
+      assert response_moderation_log["action_display_text"] == "updated the status of user report to 'status'"
       assert response_moderation_log["action_display_url"] == "^.messages({ reportId: '#{@user_report_id}' })"
     end
 

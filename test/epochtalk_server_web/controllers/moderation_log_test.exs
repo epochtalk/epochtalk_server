@@ -1263,13 +1263,13 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
   describe "page/1, by date" do
     setup do
       number_of_logs = 58
-      build_list(number_of_logs, :moderation_log, %{
+      logs = build_list(number_of_logs, :moderation_log, %{
         api_url: "/api/settings/setTheme",
         api_method: "post",
         type: "adminSettings.setTheme",
         obj: %{}
       })
-      {:ok, number_of_logs: number_of_logs}
+      {:ok, logs: logs, number_of_logs: number_of_logs}
     end
 
     @tag :authenticated

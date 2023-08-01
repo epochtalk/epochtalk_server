@@ -3,11 +3,6 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
   alias EpochtalkServer.Models.ModerationLog
   import Test.Support.Factory
 
-  @super_admin_role %{
-    id: 1,
-    name: "Super Administrator"
-  }
-
   ## helper functions
   defp stringify_keys_deep(map) do
     map
@@ -349,53 +344,56 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
 
     @tag :authenticated
     test "when action_type is 'adminRoles.add', gets page", %{conn: conn} do
+      super_admin_role = %{id: 1, name: "Super Administrator"}
       factory_moderation_log = build(:moderation_log, %{
         api_url: "/api/roles/add",
         api_method: "post",
         type: "adminRoles.add",
-        obj: %{name: @super_admin_role.name, id: @super_admin_role.id}
+        obj: %{name: super_admin_role.name, id: super_admin_role.id}
       })
 
       response_moderation_log =
         conn |> page_response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
-      assert response_moderation_log["action_display_text"] == "created a new role named '#{@super_admin_role.name}'"
-      assert response_moderation_log["action_display_url"] == "admin-management.roles({ roleId: '#{@super_admin_role.id}' })"
+      assert response_moderation_log["action_display_text"] == "created a new role named '#{super_admin_role.name}'"
+      assert response_moderation_log["action_display_url"] == "admin-management.roles({ roleId: '#{super_admin_role.id}' })"
     end
 
     @tag :authenticated
     test "when action_type is 'adminRoles.remove', gets page", %{conn: conn} do
+      super_admin_role = %{id: 1, name: "Super Administrator"}
       factory_moderation_log = build(:moderation_log, %{
         api_url: "/api/roles/remove",
         api_method: "delete",
         type: "adminRoles.remove",
-        obj: %{name: @super_admin_role.name}
+        obj: %{name: super_admin_role.name}
       })
 
       response_moderation_log =
         conn |> page_response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
-      assert response_moderation_log["action_display_text"] == "removed the role named '#{@super_admin_role.name}'"
+      assert response_moderation_log["action_display_text"] == "removed the role named '#{super_admin_role.name}'"
       assert response_moderation_log["action_display_url"] == "admin-management.roles"
     end
 
     @tag :authenticated
     test "when action_type is 'adminRoles.update', gets page", %{conn: conn} do
+      super_admin_role = %{id: 1, name: "Super Administrator"}
       factory_moderation_log = build(:moderation_log, %{
         api_url: "/api/roles/update",
         api_method: "post",
         type: "adminRoles.update",
-        obj: %{name: @super_admin_role.name, id: @super_admin_role.id}
+        obj: %{name: super_admin_role.name, id: super_admin_role.id}
       })
 
       response_moderation_log =
         conn |> page_response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
-      assert response_moderation_log["action_display_text"] == "updated the role named '#{@super_admin_role.name}'"
-      assert response_moderation_log["action_display_url"] == "admin-management.roles({ roleId: '#{@super_admin_role.id}' })"
+      assert response_moderation_log["action_display_text"] == "updated the role named '#{super_admin_role.name}'"
+      assert response_moderation_log["action_display_url"] == "admin-management.roles({ roleId: '#{super_admin_role.id}' })"
     end
 
     @tag :authenticated
@@ -519,36 +517,38 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
 
     @tag :authenticated
     test "when action_type is 'adminUsers.addRoles', gets page", %{conn: conn, users: %{user: user}} do
+      super_admin_role = %{id: 1, name: "Super Administrator"}
       factory_moderation_log = build(:moderation_log, %{
         api_url: "/api/users/addRoles",
         api_method: "post",
         type: "adminUsers.addRoles",
-        obj: %{usernames: [user.username], role_id: @super_admin_role.id}
+        obj: %{usernames: [user.username], role_id: super_admin_role.id}
       })
 
       response_moderation_log =
         conn |> page_response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
-      assert response_moderation_log["action_display_text"] == "added role '#{@super_admin_role.name}' to users(s) '#{user.username}'"
-      assert response_moderation_log["action_display_url"] == "admin-management.roles({ roleId: '#{@super_admin_role.id}' })"
+      assert response_moderation_log["action_display_text"] == "added role '#{super_admin_role.name}' to users(s) '#{user.username}'"
+      assert response_moderation_log["action_display_url"] == "admin-management.roles({ roleId: '#{super_admin_role.id}' })"
     end
 
     @tag :authenticated
     test "when action_type is 'adminUsers.removeRoles', gets page", %{conn: conn, users: %{user: user}} do
+      super_admin_role = %{id: 1, name: "Super Administrator"}
       factory_moderation_log = build(:moderation_log, %{
         api_url: "/api/users/removeRoles",
         api_method: "delete",
         type: "adminUsers.removeRoles",
-        obj: %{role_id: @super_admin_role.id, user_id: user.id}
+        obj: %{role_id: super_admin_role.id, user_id: user.id}
       })
 
       response_moderation_log =
         conn |> page_response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
-      assert response_moderation_log["action_display_text"] == "removed role '#{@super_admin_role.name}' from user '#{user.username}'"
-      assert response_moderation_log["action_display_url"] == "admin-management.roles({ roleId: '#{@super_admin_role.id}' })"
+      assert response_moderation_log["action_display_text"] == "removed role '#{super_admin_role.name}' from user '#{user.username}'"
+      assert response_moderation_log["action_display_url"] == "admin-management.roles({ roleId: '#{super_admin_role.id}' })"
     end
 
     @tag :authenticated

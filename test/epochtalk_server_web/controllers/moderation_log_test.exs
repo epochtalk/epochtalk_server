@@ -7,7 +7,6 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     id: 1,
     name: "Super Administrator"
   }
-  @note "test_note"
   @message_report_id 10
   @post_report_id 20
   @user_report_id 30
@@ -437,14 +436,14 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
         api_url: "/api/settings/addToBlacklist",
         api_method: "post",
         type: "adminSettings.addToBlacklist",
-        obj: %{note: @note}
+        obj: %{note: "note"}
       })
 
       response_moderation_log =
         conn |> page_response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
-      assert response_moderation_log["action_display_text"] == "added ip blacklist rule named '#{@note}'"
+      assert response_moderation_log["action_display_text"] == "added ip blacklist rule named 'note'"
       assert response_moderation_log["action_display_url"] == "admin-settings.advanced"
     end
 
@@ -454,14 +453,14 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
         api_url: "/api/settings/updateBlacklist",
         api_method: "post",
         type: "adminSettings.updateBlacklist",
-        obj: %{note: @note}
+        obj: %{note: "note"}
       })
 
       response_moderation_log =
         conn |> page_response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
-      assert response_moderation_log["action_display_text"] == "updated ip blacklist rule named '#{@note}'"
+      assert response_moderation_log["action_display_text"] == "updated ip blacklist rule named 'note'"
       assert response_moderation_log["action_display_url"] == "admin-settings.advanced"
     end
 
@@ -471,14 +470,14 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
         api_url: "/api/settings/deleteFromBlacklist",
         api_method: "delete",
         type: "adminSettings.deleteFromBlacklist",
-        obj: %{note: @note}
+        obj: %{note: "note"}
       })
 
       response_moderation_log =
         conn |> page_response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
-      assert response_moderation_log["action_display_text"] == "deleted ip blacklist rule named '#{@note}'"
+      assert response_moderation_log["action_display_text"] == "deleted ip blacklist rule named 'note'"
       assert response_moderation_log["action_display_url"] == "admin-settings.advanced"
     end
 

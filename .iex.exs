@@ -36,6 +36,7 @@ alias EpochtalkServer.Models.{
   TrustMaxDepth,
   User,
   UserActivity,
+  UserIgnored,
   UserThreadView,
   WatchThread
 }

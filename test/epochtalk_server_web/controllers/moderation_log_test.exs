@@ -1211,32 +1211,26 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       end
     end
 
-    # @tag :authenticated
-    # test "given a valid action_display_text 'keyword', returns correct moderation_log entry",
-    #      %{conn: conn} do
-    #   conn =
-    #     get(
-    #       conn,
-    #       Routes.moderation_log_path(conn, :page, %{"keyword" => "updated the forum theme"})
-    #     )
-    #
-    #   moderation_logs = json_response(conn, 200)["moderation_logs"]
-    #   assert List.first(moderation_logs)["action_type"] == "adminSettings.setTheme"
-    #   assert List.first(moderation_logs)["action_display_text"] == "updated the forum theme"
-    # end
-    #
-    # @tag :authenticated
-    # test "given an invalid 'keyword', returns an empty list",
-    #      %{conn: conn} do
-    #   conn =
-    #     get(
-    #       conn,
-    #       Routes.moderation_log_path(conn, :page, %{"keyword" => "invalid_keyword"})
-    #     )
-    #
-    #   moderation_logs = json_response(conn, 200)["moderation_logs"]
-    #   assert Enum.empty?(moderation_logs) == true
-    # end
+    @tag :authenticated
+    test "given a valid action_display_text 'keyword', returns correct moderation_log entry", %{conn: conn} do
+      factory_moderation_log = build(:moderation_log, %{
+        api_url: "/api/settings/setTheme",
+        api_method: "post",
+        type: "adminSettings.setTheme",
+        obj: %{}
+      })
+
+      response_moderation_log =
+        conn |> response_for_keyword(factory_moderation_log.action_display_text)
+
+      assert compare(response_moderation_log, factory_moderation_log)
+    end
+
+    @tag :authenticated
+    test "given an invalid 'keyword', returns an empty list", %{conn: conn} do
+      invalid_keyword = ""
+      assert conn |> response_list_for_keyword(invalid_keyword) |> Enum.empty?() == true
+    end
     #
     # @tag :authenticated
     # test "given a future 'before date', returns correct moderation_log entries",

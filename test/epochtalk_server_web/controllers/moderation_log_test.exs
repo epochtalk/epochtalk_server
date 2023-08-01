@@ -58,13 +58,6 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     page_response_list(conn, query)
     |> List.first()
   end
-  defp page_response_list_for_keyword(conn, keyword) do
-    page_response_list(conn, %{"keyword" => keyword})
-  end
-  defp page_response_for_keyword(conn, keyword) do
-    page_response_list_for_keyword(conn, keyword)
-    |> List.first()
-  end
 
   describe "create/1" do
     test "creates moderation_log entry", %{users: %{admin_user: admin_user}} do
@@ -1247,7 +1240,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       })
 
       response_moderation_log =
-        conn |> page_response_for_keyword(factory_moderation_log.action_display_text)
+        conn |> page_response(%{"keyword" => factory_moderation_log.action_display_text})
 
       assert compare(response_moderation_log, factory_moderation_log)
     end
@@ -1255,7 +1248,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     @tag :authenticated
     test "given an invalid 'keyword', returns an empty list", %{conn: conn} do
       invalid_keyword = ""
-      assert conn |> page_response_list_for_keyword(invalid_keyword) |> Enum.empty?() == true
+      assert conn |> page_response_list(%{"keyword" => invalid_keyword}) |> Enum.empty?() == true
     end
   end
 

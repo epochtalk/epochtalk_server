@@ -7,7 +7,6 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     id: 1,
     name: "Super Administrator"
   }
-  @post_report_id 20
   @user_report_id 30
   @ban_expiration_input ~N[2030-12-31 00:00:00.000]
   @ban_expiration_output "31 Dec 2030"
@@ -247,11 +246,12 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
 
     @tag :authenticated
     test "when action_type is 'reports.updatePostReport', gets page", %{conn: conn} do
+      post_report_id = 20
       factory_moderation_log = build(:moderation_log, %{
         api_url: "/api/reports/updatePostReport",
         api_method: "post",
         type: "reports.updatePostReport",
-        obj: %{status: "status", id: @post_report_id}
+        obj: %{status: "status", id: post_report_id}
       })
 
       response_moderation_log =
@@ -259,16 +259,17 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
 
       assert compare(response_moderation_log, factory_moderation_log)
       assert response_moderation_log["action_display_text"] == "updated the status of post report to 'status'"
-      assert response_moderation_log["action_display_url"] == "^.messages({ reportId: '#{@post_report_id}' })"
+      assert response_moderation_log["action_display_url"] == "^.messages({ reportId: '#{post_report_id}' })"
     end
 
     @tag :authenticated
     test "when action_type is 'reports.createPostReportNote', gets page", %{conn: conn} do
+      post_report_id = 20
       factory_moderation_log = build(:moderation_log, %{
         api_url: "/api/reports/createPostReportNote",
         api_method: "post",
         type: "reports.createPostReportNote",
-        obj: %{report_id: @post_report_id}
+        obj: %{report_id: post_report_id}
       })
 
       response_moderation_log =
@@ -276,16 +277,17 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
 
       assert compare(response_moderation_log, factory_moderation_log)
       assert response_moderation_log["action_display_text"] == "created a note on a post report"
-      assert response_moderation_log["action_display_url"] == "^.messages({ reportId: '#{@post_report_id}' })"
+      assert response_moderation_log["action_display_url"] == "^.messages({ reportId: '#{post_report_id}' })"
     end
 
     @tag :authenticated
     test "when action_type is 'reports.updatePostReportNote', gets page", %{conn: conn} do
+      post_report_id = 20
       factory_moderation_log = build(:moderation_log, %{
         api_url: "/api/reports/updatePostReportNote",
         api_method: "post",
         type: "reports.updatePostReportNote",
-        obj: %{report_id: @post_report_id}
+        obj: %{report_id: post_report_id}
       })
 
       response_moderation_log =
@@ -293,7 +295,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
 
       assert compare(response_moderation_log, factory_moderation_log)
       assert response_moderation_log["action_display_text"] == "edited their note on a post report"
-      assert response_moderation_log["action_display_url"] == "^.messages({ reportId: '#{@post_report_id}' })"
+      assert response_moderation_log["action_display_url"] == "^.messages({ reportId: '#{post_report_id}' })"
     end
 
     @tag :authenticated

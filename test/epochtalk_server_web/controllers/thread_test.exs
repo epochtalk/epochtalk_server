@@ -1,7 +1,6 @@
 defmodule Test.EpochtalkServerWeb.Controllers.Thread do
   use Test.Support.ConnCase, async: true
   import Test.Support.Factory
-  alias EpochtalkServer.Models.User
 
   setup %{users: %{user: user, admin_user: admin_user, super_admin_user: super_admin_user}} do
     board = insert(:board)

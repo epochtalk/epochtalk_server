@@ -69,31 +69,31 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     assert result_moderation_log["mod_username"] == factory_moderation_log.mod_username
   end
 
-  defp moderation_log_response(conn, identifier) do
+  defp page_response(conn, identifier) do
     conn
     |> get(Routes.moderation_log_path(conn, :page, identifier))
     |> json_response(200)
     |> Map.get("moderation_logs")
   end
-  defp response_list_for_mod(conn, mod) do
-    moderation_log_response(conn, %{"mod" => mod})
+  defp page_response_list_for_mod(conn, mod) do
+    page_response(conn, %{"mod" => mod})
   end
-  defp response_for_mod(conn, mod) do
-    response_list_for_mod(conn, mod)
+  defp page_response_for_mod(conn, mod) do
+    page_response_list_for_mod(conn, mod)
     |> List.first()
   end
-  defp response_list_for_action(conn, action) do
-    moderation_log_response(conn, %{"action" => action})
+  defp page_response_list_for_action(conn, action) do
+    page_response(conn, %{"action" => action})
   end
-  defp response_for_action(conn, action) do
-    response_list_for_mod(conn, action)
+  defp page_response_for_action(conn, action) do
+    page_response_list_for_mod(conn, action)
     |> List.first()
   end
-  defp response_list_for_keyword(conn, keyword) do
-    moderation_log_response(conn, %{"keyword" => keyword})
+  defp page_response_list_for_keyword(conn, keyword) do
+    page_response(conn, %{"keyword" => keyword})
   end
-  defp response_for_keyword(conn, keyword) do
-    response_list_for_keyword(conn, keyword)
+  defp page_response_for_keyword(conn, keyword) do
+    page_response_list_for_keyword(conn, keyword)
     |> List.first()
   end
 
@@ -160,7 +160,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       })
 
       response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+        conn |> page_response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
     end
@@ -176,7 +176,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       })
 
       response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+        conn |> page_response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
       assert response_moderation_log["action_display_text"] == "added user(s) '#{user.username}' to list of moderators for board '#{board.name}'"
@@ -194,7 +194,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       })
 
       response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+        conn |> page_response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
       assert response_moderation_log["action_display_text"] == "removed user(s) '#{user.username}' from list of moderators for board '#{board.name}'"
@@ -211,7 +211,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       })
 
       response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+        conn |> page_response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
       assert response_moderation_log["action_display_text"] == "updated the status of message report to '#{@status}'"
@@ -228,7 +228,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       })
 
       response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+        conn |> page_response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
       assert response_moderation_log["action_display_text"] == "created a note on a message report"
@@ -245,7 +245,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       })
 
       response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+        conn |> page_response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
       assert response_moderation_log["action_display_text"] == "edited their note on a message report"
@@ -262,7 +262,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       })
 
       response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+        conn |> page_response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
       assert response_moderation_log["action_display_text"] == "updated the status of post report to '#{@status}'"
@@ -279,7 +279,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       })
 
       response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+        conn |> page_response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
       assert response_moderation_log["action_display_text"] == "created a note on a post report"
@@ -296,7 +296,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       })
 
       response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+        conn |> page_response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
       assert response_moderation_log["action_display_text"] == "edited their note on a post report"
@@ -313,7 +313,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       })
 
       response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+        conn |> page_response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
       assert response_moderation_log["action_display_text"] == "updated the status of user report to '#{@status}'"
@@ -330,7 +330,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       })
 
       response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+        conn |> page_response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
       assert response_moderation_log["action_display_text"] == "created a note on a user report"
@@ -347,7 +347,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       })
 
       response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+        conn |> page_response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
       assert response_moderation_log["action_display_text"] == "edited their note on a user report"
@@ -364,7 +364,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       })
 
       response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+        conn |> page_response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
       assert response_moderation_log["action_display_text"] == "created a new role named '#{@super_admin_role.name}'"
@@ -381,7 +381,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       })
 
       response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+        conn |> page_response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
       assert response_moderation_log["action_display_text"] == "removed the role named '#{@super_admin_role.name}'"
@@ -398,7 +398,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       })
 
       response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+        conn |> page_response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
       assert response_moderation_log["action_display_text"] == "updated the role named '#{@super_admin_role.name}'"
@@ -415,7 +415,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       })
 
       response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+        conn |> page_response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
       assert response_moderation_log["action_display_text"] == "reordered role priorities"
@@ -432,7 +432,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       })
 
       response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+        conn |> page_response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
       assert response_moderation_log["action_display_text"] == "updated forum settings"
@@ -449,7 +449,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       })
 
       response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+        conn |> page_response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
       assert response_moderation_log["action_display_text"] == "added ip blacklist rule named '#{@note}'"
@@ -466,7 +466,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       })
 
       response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+        conn |> page_response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
       assert response_moderation_log["action_display_text"] == "updated ip blacklist rule named '#{@note}'"
@@ -483,7 +483,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       })
 
       response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+        conn |> page_response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
       assert response_moderation_log["action_display_text"] == "deleted ip blacklist rule named '#{@note}'"
@@ -500,7 +500,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       })
 
       response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+        conn |> page_response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
       assert response_moderation_log["action_display_text"] == "updated the forum theme"
@@ -517,7 +517,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       })
 
       response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+        conn |> page_response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
       assert response_moderation_log["action_display_text"] == "restored the forum to the default theme"
@@ -534,7 +534,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       })
 
       response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+        conn |> page_response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
       assert response_moderation_log["action_display_text"] == "added role '#{@super_admin_role.name}' to users(s) '#{user.username}'"
@@ -551,7 +551,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       })
 
       response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+        conn |> page_response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
       assert response_moderation_log["action_display_text"] == "removed role '#{@super_admin_role.name}' from user '#{user.username}'"
@@ -568,7 +568,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       })
 
       response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+        conn |> page_response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
       assert response_moderation_log["action_display_text"] == "created a moderation note for user '#{user.username}'"
@@ -585,7 +585,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       })
 
       response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+        conn |> page_response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
       assert response_moderation_log["action_display_text"] == "edited their moderation note for user '#{user.username}'"
@@ -602,7 +602,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       })
 
       response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+        conn |> page_response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
       assert response_moderation_log["action_display_text"] == "deleted their moderation note for user '#{user.username}'"
@@ -620,7 +620,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       })
 
       response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+        conn |> page_response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log, stringify: [:addresses])
       assert response_moderation_log["action_display_text"] == "banned the following addresses '#{@banned_address}'"
@@ -639,7 +639,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       })
 
       response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+        conn |> page_response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
       assert response_moderation_log["action_display_text"] == "edited banned address '#{@banned_address}' to 'not decay' with a weight of '#{@weight}'"
@@ -657,7 +657,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       })
 
       response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+        conn |> page_response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
       assert response_moderation_log["action_display_text"] == "deleted banned address '#{@banned_address}'"
@@ -674,7 +674,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       })
 
       response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+        conn |> page_response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log, convert_date: [:expiration])
       assert response_moderation_log["action_display_text"] == "temporarily banned user '#{user.username}' until '#{@ban_expiration_output}'"
@@ -691,7 +691,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       })
 
       response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+        conn |> page_response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
       assert response_moderation_log["action_display_text"] == "unbanned user '#{user.username}'"
@@ -709,7 +709,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       })
 
       response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+        conn |> page_response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
       assert response_moderation_log["action_display_text"] == "banned user '#{user.username}' from boards: #{board.name}'"
@@ -727,7 +727,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       })
 
       response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+        conn |> page_response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
       assert response_moderation_log["action_display_text"] == "unbanned user '#{user.username}' from boards: #{board.name}'"
@@ -745,7 +745,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       })
 
       response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+        conn |> page_response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log, stringify: [:boards])
       assert response_moderation_log["action_display_text"] == "created board named '#{board.name}'"
@@ -763,7 +763,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       })
 
       response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+        conn |> page_response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log, stringify: [:boards])
       assert response_moderation_log["action_display_text"] == "updated board named '#{board.name}'"
@@ -781,7 +781,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       })
 
       response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+        conn |> page_response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
       assert response_moderation_log["action_display_text"] == "deleted board named '#{board.name}'"
@@ -802,7 +802,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       })
 
       response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+        conn |> page_response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
       assert response_moderation_log["action_display_text"] == "updated the title of a thread created by user '#{user.username}' to '#{@new_thread.title}'"
@@ -824,7 +824,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       })
 
       response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+        conn |> page_response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
       assert response_moderation_log["action_display_text"] == "'locked' the thread '#{thread_title}' created by user '#{user.username}'"
@@ -846,7 +846,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       })
 
       response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+        conn |> page_response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
       assert response_moderation_log["action_display_text"] == "'stickied' the thread '#{thread_title}' created by user '#{user.username}'"
@@ -874,7 +874,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       })
 
       response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+        conn |> page_response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
       assert response_moderation_log["action_display_text"] == "moved the thread '#{thread_title}' created by user '#{user.username}' from board '#{@old_board.name}' to '#{board.name}'"
@@ -898,7 +898,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       })
 
       response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+        conn |> page_response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
       assert response_moderation_log["action_display_text"] == "purged thread '#{thread_title}' created by user '#{user.username}' from board '#{board.name}'"
@@ -920,7 +920,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       })
 
       response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+        conn |> page_response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
       assert response_moderation_log["action_display_text"] == "edited a poll in thread named '#{thread_title}' created by user '#{user.username}'"
@@ -942,7 +942,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       })
 
       response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+        conn |> page_response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
       assert response_moderation_log["action_display_text"] == "created a poll in thread named '#{thread_title}' created by user '#{user.username}'"
@@ -964,7 +964,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       })
 
       response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+        conn |> page_response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
       assert response_moderation_log["action_display_text"] == "'unlocked' poll in thread named '#{thread_title}' created by user '#{user.username}'"
@@ -986,7 +986,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       })
 
       response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+        conn |> page_response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
       assert response_moderation_log["action_display_text"] == "updated post created by user '#{user.username}' in thread named '#{thread_title}'"
@@ -1008,7 +1008,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       })
 
       response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+        conn |> page_response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
       assert response_moderation_log["action_display_text"] == "hid post created by user '#{user.username}' in thread '#{thread_title}'"
@@ -1030,7 +1030,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       })
 
       response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+        conn |> page_response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
       assert response_moderation_log["action_display_text"] == "unhid post created by user '#{user.username}' in thread '#{thread_title}'"
@@ -1052,7 +1052,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       })
 
       response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+        conn |> page_response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
       assert response_moderation_log["action_display_text"] == "purged post created by user '#{user.username}' in thread '#{thread_title}'"
@@ -1069,7 +1069,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       })
 
       response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+        conn |> page_response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
       assert response_moderation_log["action_display_text"] == "Updated user account '#{user.username}'"
@@ -1086,7 +1086,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       })
 
       response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+        conn |> page_response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
       assert response_moderation_log["action_display_text"] == "deactivated user account '#{user.username}'"
@@ -1103,7 +1103,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       })
 
       response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+        conn |> page_response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
       assert response_moderation_log["action_display_text"] == "reactivated user account '#{user.username}'"
@@ -1120,7 +1120,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       })
 
       response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+        conn |> page_response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
       assert response_moderation_log["action_display_text"] == "purged user account '#{user.username}'"
@@ -1140,7 +1140,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       })
 
       response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+        conn |> page_response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
       assert response_moderation_log["action_display_text"] == "deleted conversation between users '#{admin_user.username}' and '#{user.username}'"
@@ -1160,7 +1160,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       })
 
       response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+        conn |> page_response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
       assert response_moderation_log["action_display_text"] == "deleted message sent between users '#{admin_user.username}' and '#{user.username}'"
@@ -1177,7 +1177,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       })
 
       response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_id)
+        conn |> page_response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
     end
@@ -1185,7 +1185,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     @tag :authenticated
     test "given an invalid id for 'mod', returns an empty list", %{conn: conn} do
       invalid_mod_id = 0
-      assert conn |> response_list_for_mod(invalid_mod_id) |> Enum.empty?() == true
+      assert conn |> page_response_list_for_mod(invalid_mod_id) |> Enum.empty?() == true
     end
 
     @tag :authenticated
@@ -1198,7 +1198,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       })
 
       response_moderation_log =
-        conn |> response_for_mod(factory_moderation_log.mod_username)
+        conn |> page_response_for_mod(factory_moderation_log.mod_username)
 
       assert compare(response_moderation_log, factory_moderation_log)
     end
@@ -1206,7 +1206,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     @tag :authenticated
     test "given an invalid string for 'mod', returns an empty list", %{conn: conn} do
       invalid_mod_username = ""
-      assert conn |> response_list_for_mod(invalid_mod_username) |> Enum.empty?() == true
+      assert conn |> page_response_list_for_mod(invalid_mod_username) |> Enum.empty?() == true
     end
 
     @tag :authenticated
@@ -1220,21 +1220,21 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       })
 
       response_moderation_log =
-        conn |> response_for_action(factory_moderation_log.action_type)
+        conn |> page_response_for_action(factory_moderation_log.action_type)
       assert compare(response_moderation_log, factory_moderation_log)
     end
 
     @tag :authenticated
     test "given an unpopulated action_type 'action', returns an empty list", %{conn: conn} do
       unpopulated_action_type = "adminBoards.updateCategories"
-      assert conn |> response_list_for_action(unpopulated_action_type) |> Enum.empty?() == true
+      assert conn |> page_response_list_for_action(unpopulated_action_type) |> Enum.empty?() == true
     end
 
     @tag :authenticated
     test "given an invalid action_type 'action', returns an empty list", %{conn: conn} do
       invalid_action_type = ""
       assert_raise Postgrex.Error, fn ->
-        conn |> response_list_for_action(invalid_action_type)
+        conn |> page_response_list_for_action(invalid_action_type)
       end
     end
 
@@ -1248,7 +1248,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       })
 
       response_moderation_log =
-        conn |> response_for_keyword(factory_moderation_log.action_display_text)
+        conn |> page_response_for_keyword(factory_moderation_log.action_display_text)
 
       assert compare(response_moderation_log, factory_moderation_log)
     end
@@ -1256,7 +1256,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     @tag :authenticated
     test "given an invalid 'keyword', returns an empty list", %{conn: conn} do
       invalid_keyword = ""
-      assert conn |> response_list_for_keyword(invalid_keyword) |> Enum.empty?() == true
+      assert conn |> page_response_list_for_keyword(invalid_keyword) |> Enum.empty?() == true
     end
     #
     # @tag :authenticated

@@ -1296,50 +1296,32 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
         })
       assert Enum.empty?(response_moderation_log) == true
     end
-    #
-    # @tag :authenticated
-    # test "given a past 'after date', returns correct moderation_log entries",
-    #      %{conn: conn} do
-    #   datetime = NaiveDateTime.to_string(NaiveDateTime.add(NaiveDateTime.utc_now(), -2, :day))
-    #
-    #   conn =
-    #     get(
-    #       conn,
-    #       Routes.moderation_log_path(
-    #         conn,
-    #         :page,
-    #         %{
-    #           "adate" => List.first(String.split(datetime)),
-    #           "page" => 1,
-    #           "limit" => 100
-    #         }
-    #       )
-    #     )
-    #
-    #   moderation_logs = json_response(conn, 200)["moderation_logs"]
-    #   assert length(moderation_logs) == 58
-    # end
-    #
-    # @tag :authenticated
-    # test "given a future 'after date', returns an empty list",
-    #      %{conn: conn} do
-    #   datetime = NaiveDateTime.to_string(NaiveDateTime.add(NaiveDateTime.utc_now(), 2, :day))
-    #
-    #   conn =
-    #     get(
-    #       conn,
-    #       Routes.moderation_log_path(
-    #         conn,
-    #         :page,
-    #         %{
-    #           "adate" => List.first(String.split(datetime))
-    #         }
-    #       )
-    #     )
-    #
-    #   moderation_logs = json_response(conn, 200)["moderation_logs"]
-    #   assert Enum.empty?(moderation_logs) == true
-    # end
+
+    @tag :authenticated
+    test "given a past 'after date', returns correct moderation_log entries", %{conn: conn} do
+      two_days_ago = NaiveDateTime.to_string(NaiveDateTime.add(NaiveDateTime.utc_now(), -2, :day))
+
+      response_moderation_log =
+        conn
+        |> page_response(%{
+          "adate" => List.first(String.split(two_days_ago)),
+          "page" => 1,
+          "limit" => 100
+        })
+      assert length(response_moderation_log) == 58
+    end
+
+    @tag :authenticated
+    test "given a future 'after date', returns an empty list", %{conn: conn} do
+      two_days_from_now = NaiveDateTime.to_string(NaiveDateTime.add(NaiveDateTime.utc_now(), 2, :day))
+
+      response_moderation_log =
+        conn
+        |> page_response(%{
+              "adate" => List.first(String.split(two_days_from_now))
+        })
+      assert Enum.empty?(response_moderation_log) == true
+    end
     #
     # @tag :authenticated
     # test "given a valid date range, returns correct moderation_log entries",

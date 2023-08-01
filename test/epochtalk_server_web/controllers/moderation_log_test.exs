@@ -48,28 +48,28 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     assert result_moderation_log["mod_username"] == factory_moderation_log.mod_username
   end
 
-  defp page_response(conn, identifier) do
+  defp page_response_list(conn, identifier) do
     conn
     |> get(Routes.moderation_log_path(conn, :page, identifier))
     |> json_response(200)
     |> Map.get("moderation_logs")
   end
   defp page_response_list_for_mod(conn, mod) do
-    page_response(conn, %{"mod" => mod})
+    page_response_list(conn, %{"mod" => mod})
   end
   defp page_response_for_mod(conn, mod) do
     page_response_list_for_mod(conn, mod)
     |> List.first()
   end
   defp page_response_list_for_action(conn, action) do
-    page_response(conn, %{"action" => action})
+    page_response_list(conn, %{"action" => action})
   end
   defp page_response_for_action(conn, action) do
     page_response_list_for_mod(conn, action)
     |> List.first()
   end
   defp page_response_list_for_keyword(conn, keyword) do
-    page_response(conn, %{"keyword" => keyword})
+    page_response_list(conn, %{"keyword" => keyword})
   end
   defp page_response_for_keyword(conn, keyword) do
     page_response_list_for_keyword(conn, keyword)
@@ -1286,7 +1286,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       two_days_from_now = NaiveDateTime.to_string(NaiveDateTime.add(NaiveDateTime.utc_now(), 2, :day))
       response_moderation_log =
         conn
-        |> page_response(%{
+        |> page_response_list(%{
           "bdate" => List.first(String.split(two_days_from_now)),
           "page" => 1,
           "limit" => 100
@@ -1300,7 +1300,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
 
       response_moderation_log =
         conn
-        |> page_response(%{
+        |> page_response_list(%{
           "bdate" => List.first(String.split(two_days_ago))
         })
       assert Enum.empty?(response_moderation_log) == true
@@ -1312,7 +1312,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
 
       response_moderation_log =
         conn
-        |> page_response(%{
+        |> page_response_list(%{
           "adate" => List.first(String.split(two_days_ago)),
           "page" => 1,
           "limit" => 100
@@ -1326,7 +1326,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
 
       response_moderation_log =
         conn
-        |> page_response(%{
+        |> page_response_list(%{
               "adate" => List.first(String.split(two_days_from_now))
         })
       assert Enum.empty?(response_moderation_log) == true
@@ -1339,7 +1339,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
 
       response_moderation_log =
         conn
-        |> page_response(%{
+        |> page_response_list(%{
           "sdate" => List.first(String.split(two_days_ago)),
           "edate" => List.first(String.split(two_days_from_now)),
           "page" => 1,
@@ -1355,7 +1355,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
 
       response_moderation_log =
         conn
-        |> page_response(%{
+        |> page_response_list(%{
           "sdate" => List.first(String.split(two_days_from_now)),
           "edate" => List.first(String.split(four_days_from_now))
         })
@@ -1370,7 +1370,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
 
       response_moderation_log =
         conn
-        |> page_response(%{
+        |> page_response_list(%{
           "mod" => first_log.mod_id,
           "sdate" => List.first(String.split(two_days_ago)),
           "edate" => List.first(String.split(two_days_from_now))
@@ -1386,7 +1386,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
 
       response_moderation_log =
         conn
-        |> page_response(%{
+        |> page_response_list(%{
           "mod" => first_log.mod_username,
           "sdate" => List.first(String.split(two_days_ago)),
           "edate" => List.first(String.split(two_days_from_now))

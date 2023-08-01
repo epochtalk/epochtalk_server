@@ -69,7 +69,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     page_response_list(conn, %{"action" => action})
   end
   defp page_response_for_action(conn, action) do
-    page_response_list_for_mod(conn, action)
+    page_response_list_for_action(conn, action)
     |> List.first()
   end
   defp page_response_list_for_keyword(conn, keyword) do

@@ -7,7 +7,6 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     id: 1,
     name: "Super Administrator"
   }
-  @ban_expiration_input ~N[2030-12-31 00:00:00.000]
   @ban_expiration_output "31 Dec 2030"
   @banned_address "127.0.0.1"
   @weight 99
@@ -663,11 +662,12 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
 
     @tag :authenticated
     test "when action_type is 'bans.ban', gets page", %{conn: conn, users: %{user: user}} do
+      ban_expiration_input = ~N[2030-12-31 00:00:00.000]
       factory_moderation_log = build(:moderation_log, %{
         api_url: "/api/bans/ban",
         api_method: "post",
         type: "bans.ban",
-        obj: %{expiration: @ban_expiration_input, user_id: user.id}
+        obj: %{expiration: ban_expiration_input, user_id: user.id}
       })
 
       response_moderation_log =

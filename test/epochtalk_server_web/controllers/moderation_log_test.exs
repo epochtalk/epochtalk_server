@@ -59,6 +59,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     |> List.first()
   end
 
+  ## tests
   describe "create/1" do
     test "creates moderation_log entry", %{users: %{admin_user: admin_user}} do
       mod_address = "127.0.0.2"
@@ -110,7 +111,6 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     end
   end
 
-  ## tests
   describe "page/1, action types" do
     @tag :authenticated
     test "when action_type is 'adminBoards.updateCategories', gets page", %{conn: conn} do

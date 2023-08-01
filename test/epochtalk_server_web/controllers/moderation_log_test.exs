@@ -3,10 +3,6 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
   alias EpochtalkServer.Models.ModerationLog
   import Test.Support.Factory
 
-  @old_board %{
-    name: "Old Board",
-    slug: "old-board"
-  }
   @super_admin_role %{
     id: 1,
     name: "Super Administrator"
@@ -860,6 +856,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       thread_id = thread.post.thread_id
       thread_title = thread.post.content["title"]
       thread_slug = thread.attributes["slug"]
+      old_board = %{name: "Old Board", slug: "old-board"}
       factory_moderation_log = build(:moderation_log, %{
         api_url: "/api/threads/move",
         api_method: "post",
@@ -868,7 +865,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
           title: thread_title,
           thread_id: thread_id,
           user_id: user.id,
-          old_board_name: @old_board.name,
+          old_board_name: old_board.name,
           new_board_id: board.id
         }
       })
@@ -877,7 +874,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
         conn |> page_response_for_mod(factory_moderation_log.mod_id)
 
       assert compare(response_moderation_log, factory_moderation_log)
-      assert response_moderation_log["action_display_text"] == "moved the thread '#{thread_title}' created by user '#{user.username}' from board '#{@old_board.name}' to '#{board.name}'"
+      assert response_moderation_log["action_display_text"] == "moved the thread '#{thread_title}' created by user '#{user.username}' from board '#{old_board.name}' to '#{board.name}'"
       assert response_moderation_log["action_display_url"] == "posts.data({ slug: '#{thread_slug}' })"
     end
 

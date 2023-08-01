@@ -145,7 +145,10 @@ defmodule Test.EpochtalkServer.Session do
   describe "create/3 expiration/ttl" do
     setup [:flush_redis]
 
-    test "without remember me, creates a user session (< 1 day ttl)", %{conn: conn, users: %{user: user}} do
+    test "without remember me, creates a user session (< 1 day ttl)", %{
+      conn: conn,
+      users: %{user: user}
+    } do
       remember_me = false
       {:ok, authed_user, _token, _authed_conn} = Session.create(user, remember_me, conn)
       user_ttl = Redix.command!(:redix, ["TTL", "user:#{authed_user.id}"])
@@ -164,7 +167,10 @@ defmodule Test.EpochtalkServer.Session do
       assert sessions_ttl <= @one_day_in_seconds
     end
 
-    test "with remember me, creates a user session (< 4 week ttl)", %{conn: conn, users: %{user: user}} do
+    test "with remember me, creates a user session (< 4 week ttl)", %{
+      conn: conn,
+      users: %{user: user}
+    } do
       remember_me = true
       {:ok, authed_user, _token, _authed_conn} = Session.create(user, remember_me, conn)
       user_ttl = Redix.command!(:redix, ["TTL", "user:#{authed_user.id}"])

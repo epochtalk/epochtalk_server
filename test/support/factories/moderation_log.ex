@@ -13,7 +13,8 @@ defmodule Test.Support.Factories.ModerationLog do
         %{
           mod: %{
             username: sequence(:moderation_log_username, &"#{action.type}#{&1}"),
-            id: sequence(""), # 1, 2, 3 ...
+            # 1, 2, 3 ...
+            id: sequence(""),
             ip: "127.0.0.2"
           },
           action: action

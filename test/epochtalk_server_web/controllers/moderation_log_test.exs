@@ -58,13 +58,6 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
     page_response_list(conn, query)
     |> List.first()
   end
-  defp page_response_list_for_action(conn, action) do
-    page_response_list(conn, %{"action" => action})
-  end
-  defp page_response_for_action(conn, action) do
-    page_response_list_for_action(conn, action)
-    |> List.first()
-  end
   defp page_response_list_for_keyword(conn, keyword) do
     page_response_list(conn, %{"keyword" => keyword})
   end
@@ -1224,21 +1217,21 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       })
 
       response_moderation_log =
-        conn |> page_response_for_action(factory_moderation_log.action_type)
+        conn |> page_response(%{"action" => factory_moderation_log.action_type})
       assert compare(response_moderation_log, factory_moderation_log)
     end
 
     @tag :authenticated
     test "given an unpopulated action_type 'action', returns an empty list", %{conn: conn} do
       unpopulated_action_type = "adminBoards.updateCategories"
-      assert conn |> page_response_list_for_action(unpopulated_action_type) |> Enum.empty?() == true
+      assert conn |> page_response_list(%{"action" => unpopulated_action_type}) |> Enum.empty?() == true
     end
 
     @tag :authenticated
     test "given an invalid action_type 'action', returns an empty list", %{conn: conn} do
       invalid_action_type = ""
       assert_raise Postgrex.Error, fn ->
-        conn |> page_response_list_for_action(invalid_action_type)
+        conn |> page_response_list(%{"action" => invalid_action_type})
       end
     end
   end

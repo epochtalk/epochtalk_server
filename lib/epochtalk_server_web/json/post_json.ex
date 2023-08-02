@@ -270,6 +270,8 @@ defmodule EpochtalkServerWeb.Controllers.PostJSON do
       highlight_color: post.highlight_color,
       role_name: post.role_name,
       stats: Map.get(post, :user_trust_stats),
+      ignored: Map.get(post, :user_ignored),
+      _ignored: Map.get(post, :user_ignored),
       activity: Map.get(post, :user_activity)
     })
     |> Map.delete(:user_id)

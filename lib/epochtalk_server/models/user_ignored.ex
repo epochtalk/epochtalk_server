@@ -42,4 +42,26 @@ defmodule EpochtalkServer.Models.UserIgnored do
 
     Repo.all(query)
   end
+
+  ## === Public Helper Functions ===
+
+  @doc """
+  Appends `UserIgnored` data to list of `Post`
+  """
+  @spec append_user_ignored_data_to_posts(
+          posts :: [],
+          authed_user :: User.t() | nil
+        ) :: [Posts.t()]
+  def append_user_ignored_data_to_posts(posts, authed_user)
+  def append_user_ignored_data_to_posts(posts, nil), do: posts
+
+  def append_user_ignored_data_to_posts(posts, authed_user) when is_list(posts) do
+    posts_user_ids = Enum.map(posts, & &1.user_id)
+    ignored_user_ids = UserIgnored.by_user_ids(authed_user.id, posts_user_ids)
+    Enum.map(posts, fn post ->
+      if post.user_id in ignored_user_ids,
+        do: post |> Map.put(:user_ignored, true),
+        else: post
+    end)
+  end
 end

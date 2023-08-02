@@ -19,6 +19,7 @@ defmodule EpochtalkServerWeb.Controllers.Post do
   alias EpochtalkServer.Models.Rank
   alias EpochtalkServer.Models.Trust
   alias EpochtalkServer.Models.UserActivity
+  alias EpochtalkServer.Models.UserIgnored
   alias EpochtalkServer.Models.WatchThread
 
   # @doc """
@@ -78,6 +79,7 @@ defmodule EpochtalkServerWeb.Controllers.Post do
          posts <- Trust.maybe_append_trust_stats_to_posts(posts, user),
          thread <- Trust.maybe_append_trust_visible_to_thread(thread, user),
          posts <- UserActivity.append_user_activity_to_posts(posts),
+         posts <- UserIgnored.append_user_ignored_data_to_posts(posts, user),
          metric_rank_maps <- MetricRankMap.all_merged(),
          ranks <- Rank.all(),
          {:ok, watching_thread} <- WatchThread.is_watching(user, thread_id) do

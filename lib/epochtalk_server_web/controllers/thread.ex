@@ -131,6 +131,8 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
 
   @doc """
   Used to mark `Thread` as viewed for a specific user
+
+  TODO(akinsey): verify this is working for newly registered accounts
   """
   def viewed(conn, attrs) do
     with thread_id <- Validate.cast(attrs, "id", :integer, required: true),

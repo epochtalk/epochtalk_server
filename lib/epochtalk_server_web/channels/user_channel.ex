@@ -7,11 +7,6 @@ defmodule EpochtalkServerWeb.UserChannel do
   action is performed, this notifies the client to perform an action, such as requesting data
   from the server.
 
-  *TODO(akinsey):* This is a direct port of the old epochtalk websocket architecture,
-  there is room for improvement. For certain messages (ex: announcement) relevant data
-  can be sent over the channel via the broadcast message payload. Currently, receiving
-  a message triggers the client to manually make an api request for the updated data.
-
   ### Supported User Channels
   | channel⠀⠀⠀⠀⠀⠀   | authed  | purpose                                                              |
   | ---------------- |-------- |--------------------------------------------------------------------- |
@@ -34,6 +29,10 @@ defmodule EpochtalkServerWeb.UserChannel do
   | -------------------- | ---------------- | ------------- |---------------------------------------- |
   | `is_online`          | `user:public`    | `%{:user_id}` | replies to client with the specified user's online status |
   """
+  # TODO(akinsey): This is a direct port of the old epochtalk websocket architecture,
+  # there is room for improvement. For certain messages (ex: announcement) relevant data
+  # can be sent over the channel via the broadcast message payload. Currently, receiving
+  # a message triggers the client to manually make an api request for the updated data.
   alias EpochtalkServerWeb.Presence
 
   @impl true

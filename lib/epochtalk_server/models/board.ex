@@ -142,9 +142,8 @@ defmodule EpochtalkServer.Models.Board do
   @doc """
   Determines if the provided `user_priority` has write access to the board that contains the thread
   the specified `thread_idid`
-
-  TODO(akinsey): Should this check against banned user_priority?
   """
+  # TODO(akinsey): Should this check against banned user_priority?
   @spec get_write_access_by_thread_id(
           thread_id :: non_neg_integer,
           user_priority :: non_neg_integer
@@ -165,8 +164,6 @@ defmodule EpochtalkServer.Models.Board do
 
   @doc """
   Determines if the provided `user_priority` has write access to the board with the specified `id`
-
-  TODO(akinsey): Should this check against banned user_priority?
   """
   @spec get_write_access_by_id(id :: non_neg_integer, user_priority :: non_neg_integer) ::
           {:ok, can_write :: boolean} | {:error, :board_does_not_exist}
@@ -188,9 +185,8 @@ defmodule EpochtalkServer.Models.Board do
 
   DEVELOPER NOTE(akinsey): This method replaces Threads.getThreadsBoardInBoardMapping function from the node
   server. The previous naming convention was confusing as this is just checking read access to the board
-
-  TODO(akinsey): Should this check against banned user_priority?
   """
+  # TODO(akinsey): Should this check against banned user_priority?
   @spec get_read_access_by_thread_id(
           thread_id :: non_neg_integer,
           user_priority :: non_neg_integer
@@ -214,9 +210,8 @@ defmodule EpochtalkServer.Models.Board do
 
   DEVELOPER NOTE(akinsey): This method replaces Boards.getBoardInBoardMapping function from the node
   server. The previous naming convention was confusing as this is just checking read access to the board
-
-  TODO(akinsey): Should this check against banned user_priority?
   """
+  # TODO(akinsey): Should this check against banned user_priority?
   @spec get_read_access_by_id(id :: non_neg_integer, user_priority :: non_neg_integer) ::
           {:ok, can_read :: boolean} | {:error, :board_does_not_exist}
   def get_read_access_by_id(id, user_priority) do

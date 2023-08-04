@@ -82,10 +82,9 @@ defmodule EpochtalkServer.Models.BoardMapping do
 
   @doc """
   Returns BoardMapping with loaded boards and relevant metadata
-
-  TODO(akinsey): writing this assuming other models will update metadata board table properly.
-  Old implementation was querying metadata boards then filling in holes in the data after the fact.
   """
+  # TODO(akinsey): writing this assuming other models will update metadata board table properly.
+  # Old implementation was querying metadata boards then filling in holes in the data after the fact.
   @spec all(opts :: list() | nil) :: [t()]
   def all(opts \\ []) do
     stripped = Keyword.get(opts, :stripped, false)

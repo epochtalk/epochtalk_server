@@ -18,9 +18,8 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
 
   @doc """
   Used to retrieve recent threads
-
-  TODO(akinsey): come back to this after implementing thread and post create
   """
+  # TODO(akinsey): come back to this after implementing thread and post create
   def recent(conn, attrs) do
     with limit <- Validate.cast(attrs, "limit", :integer, default: 5),
          user <- Guardian.Plug.current_resource(conn),
@@ -34,12 +33,11 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
 
   @doc """
   Used to create threads
-
-  TODO(akinsey): Post pre processing, authorizations, image processing, hooks. Things to consider:
-  - does html sanitizer need to run on the front end too
-  - how do we run the same parser/sanitizer on the elixir back end as the node frontend
-  - processing mentions
   """
+  # TODO(akinsey): Post pre processing, authorizations, image processing, hooks. Things to consider:
+  # - does html sanitizer need to run on the front end too
+  # - how do we run the same parser/sanitizer on the elixir back end as the node frontend
+  # - processing mentions
   def create(conn, attrs) do
     with user <- Guardian.Plug.current_resource(conn),
          {:ok, thread_data} <- Thread.create(attrs, user.id) do
@@ -55,9 +53,8 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
 
   @doc """
   Used to retrieve threads by board
-
-  TODO(akinsey): implement thread.byBoard hooks (ex: watchingBoard)
   """
+  # TODO(akinsey): implement thread.byBoard hooks (ex: watchingBoard)
   def by_board(conn, attrs) do
     with board_id <- Validate.cast(attrs, "board_id", :integer, required: true),
          page <- Validate.cast(attrs, "page", :integer, default: 1),
@@ -131,8 +128,6 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
 
   @doc """
   Used to mark `Thread` as viewed for a specific user
-
-  TODO(akinsey): verify this is working for newly registered accounts
   """
   def viewed(conn, attrs) do
     with thread_id <- Validate.cast(attrs, "id", :integer, required: true),

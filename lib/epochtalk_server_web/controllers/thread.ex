@@ -171,9 +171,9 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
         [viewer_id] -> viewer_id
       end
 
-    viewer_id_key = viewer_id <> Integer.to_string(thread_id)
     new_viewer_id = if viewer_id == "", do: Ecto.UUID.generate(), else: nil
     viewer_id = if viewer_id == "", do: new_viewer_id, else: viewer_id
+    viewer_id_key = viewer_id <> Integer.to_string(thread_id)
 
     if handle_cooloff(viewer_id_key, viewer_id, thread_id) == {:ok, "OK"},
       do: check_view_ip(conn, thread_id)

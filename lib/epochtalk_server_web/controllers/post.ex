@@ -50,7 +50,10 @@ defmodule EpochtalkServerWeb.Controllers.Post do
   6) Authorizations tests (TODO: implement authorizations first)
   7) Board ban on authed user
   8) Board and Thread metadata is correct (ex: board.signature_disabled, thread.trust_visible)
+  9) Ignored users posts are hidden properly
+  10) Rank and activity are calculated for each post
   """
+  # TODO(akinsey): Implement mentions hook and parser for completion
   def by_thread(conn, attrs) do
     with thread_id <- Validate.cast(attrs, "thread_id", :integer, required: true),
          page <- Validate.cast(attrs, "page", :integer, default: 1),

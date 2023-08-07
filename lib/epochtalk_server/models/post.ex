@@ -122,12 +122,12 @@ defmodule EpochtalkServer.Models.Post do
   ## === Database Functions ===
 
   @doc """
-  Creates a new `Post` in the database
+  Creates a new `Post` in the database, used during `Thread` creation
   """
   @spec create(post_attrs :: map()) :: {:ok, post :: t()} | {:error, Ecto.Changeset.t()}
-  def create(post) do
+  def create(post_attrs) do
     Repo.transaction(fn ->
-      post_cs = create_changeset(%Post{}, post)
+      post_cs = create_changeset(%Post{}, post_attrs)
 
       case Repo.insert(post_cs) do
         # changeset valid, insert success, update metadata threads and return thread

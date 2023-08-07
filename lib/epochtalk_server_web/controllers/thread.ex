@@ -39,13 +39,17 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
   # - how do we run the same parser/sanitizer on the elixir back end as the node frontend
   # - processing mentions
   # - does createImageReferences need to be called here? was this missing from the old code?
+  # - does updateUserActivity need to be called here? was this missing from the old code?
   def create(conn, attrs) do
-    with user <- Guardian.Plug.current_resource(conn),
+    with {:auth, user} <- {:auth, Guardian.Plug.current_resource(conn)},
          {:ok, thread_data} <- Thread.create(attrs, user.id) do
       render(conn, :create, %{thread_data: thread_data})
     else
       {:error, %Ecto.Changeset{} = cs} ->
         ErrorHelpers.render_json_error(conn, 400, cs)
+
+      {:auth, nil} ->
+        ErrorHelpers.render_json_error(conn, 400, "Not logged in, cannot create thread")
 
       _ ->
         ErrorHelpers.render_json_error(conn, 400, "Error, cannot create thread")

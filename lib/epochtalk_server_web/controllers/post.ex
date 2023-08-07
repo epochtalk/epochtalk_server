@@ -54,11 +54,12 @@ defmodule EpochtalkServerWeb.Controllers.Post do
   10) Rank and activity are calculated for each post
   """
   # TODO(akinsey): Implement mentions hook and parser for completion
+  # - Implement guard in Validate that prevents passing in page and start at the same time
   def by_thread(conn, attrs) do
     with thread_id <- Validate.cast(attrs, "thread_id", :integer, required: true),
-         page <- Validate.cast(attrs, "page", :integer, default: 1),
-         start <- Validate.cast(attrs, "start", :string),
-         limit <- Validate.cast(attrs, "limit", :integer, default: 25),
+         page <- Validate.cast(attrs, "page", :integer, default: 1, min: 1),
+         start <- Validate.cast(attrs, "start", :integer, min: 1),
+         limit <- Validate.cast(attrs, "limit", :integer, default: 25, min: 1, max: 100),
          desc <- Validate.cast(attrs, "desc", :boolean, default: true),
          user <- Guardian.Plug.current_resource(conn),
          user_priority <- ACL.get_user_priority(conn),

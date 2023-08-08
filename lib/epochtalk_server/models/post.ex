@@ -155,6 +155,19 @@ defmodule EpochtalkServer.Models.Post do
   end
 
   @doc """
+  Creates a new `Post` in the database
+  """
+  @spec create(post_attrs :: map(), user_id :: non_neg_integer) ::
+          {:ok, post :: t()} | {:error, Ecto.Changeset.t()}
+  def create(post_attrs, user_id),
+    do:
+      create(%{
+        "thread_id" => post_attrs["thread_id"],
+        "user_id" => user_id,
+        "content" => %{title: post_attrs["title"], body: post_attrs["body"]}
+      })
+
+  @doc """
   Sets the `post_position` of a new `Post`, by querying the `post_count` of the
   parent `Thread` and adding one
   """

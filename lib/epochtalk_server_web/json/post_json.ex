@@ -8,6 +8,15 @@ defmodule EpochtalkServerWeb.Controllers.PostJSON do
   """
 
   @doc """
+  Renders `Post` data after creating new `Post`
+  """
+  def create(%{
+        post_data: post_data
+      }) do
+    post_data
+  end
+
+  @doc """
   Renders all `Post` for a particular `Thread`.
   """
   def by_thread(%{

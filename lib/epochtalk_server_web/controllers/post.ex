@@ -22,21 +22,34 @@ defmodule EpochtalkServerWeb.Controllers.Post do
   alias EpochtalkServer.Models.UserIgnored
   alias EpochtalkServer.Models.WatchThread
 
-  # @doc """
-  # Used to create posts
-  # """
-  # def create(conn, attrs) do
-  #   with user <- Guardian.Plug.current_resource(conn),
-  #        {:ok, post_data} <- Post.create(attrs, user.id) do
-  #     render(conn, :create, %{post_data: post_data})
-  #   else
-  #     {:error, %Ecto.Changeset{} = cs} ->
-  #       ErrorHelpers.render_json_error(conn, 400, cs)
+  @doc """
+  Used to create posts
+  """
+  # TODO(akinsey): Implement track ip plugin, authorizations, hooks, pre methods, and image processing
+  def create(conn, attrs) do
+    with {:auth, user} <- {:auth, Guardian.Plug.current_resource(conn)},
+         :ok <- ACL.allow!(conn, "posts.create"),
+         # TODO(akinsey): finish remaining authorizations
+         # - Handle locked thread
+         #   - User has permission based override
+         #   - Thread is not locked
+         #   - User moderates this board
+         # - Can read board
+         # - Can write board
+         # - User is not deleted
+         {:ok, post_data} <- Post.create(attrs, user.id) do
+      render(conn, :create, %{post_data: post_data})
+    else
+      {:error, %Ecto.Changeset{} = cs} ->
+        ErrorHelpers.render_json_error(conn, 400, cs)
 
-  #     _ ->
-  #       ErrorHelpers.render_json_error(conn, 400, "Error, cannot create post")
-  #   end
-  # end
+      {:auth, nil} ->
+        ErrorHelpers.render_json_error(conn, 400, "Not logged in, cannot create post")
+
+      _ ->
+        ErrorHelpers.render_json_error(conn, 400, "Error, cannot create post")
+    end
+  end
 
   @doc """
   Used to retrieve `Posts` by `Thread`
@@ -47,7 +60,7 @@ defmodule EpochtalkServerWeb.Controllers.Post do
   3) Query with start position vs page
   4) Read/Write access test against user priority (postable/writable by on board)
   5) Base permission check
-  6) Authorizations tests (TODO: implement authorizations first)
+  6) Authorizations tests
   7) Board ban on authed user
   8) Board and Thread metadata is correct (ex: board.signature_disabled, thread.trust_visible)
   9) Ignored users posts are hidden properly

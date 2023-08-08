@@ -16,7 +16,7 @@ defmodule Test.Support.ChannelCase do
   """
 
   # username from user seed in `mix test` (see mix.exs)
-  @test_username "test"
+  @test_username "user"
 
   use ExUnit.CaseTemplate
 

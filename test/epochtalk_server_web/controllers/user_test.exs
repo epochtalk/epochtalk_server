@@ -6,7 +6,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.User do
   alias EpochtalkServer.Repo
 
   describe "username/2" do
-    test "when username is taken, found is true", %{conn: conn, user: user} do
+    test "when username is taken, found is true", %{conn: conn, users: %{user: user}} do
       response =
         conn
         |> get(Routes.user_path(conn, :username, user.username))
@@ -26,7 +26,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.User do
   end
 
   describe "email/2" do
-    test "when email is taken, found is true", %{conn: conn, user: user} do
+    test "when email is taken, found is true", %{conn: conn, users: %{user: user}} do
       response =
         conn
         |> get(Routes.user_path(conn, :email, user.email))
@@ -48,7 +48,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.User do
   end
 
   describe "ban/1" do
-    test "bans user", %{user: user} do
+    test "bans user", %{users: %{user: user}} do
       {:ok, banned_user_changeset} = Ban.ban(user)
       assert banned_user_changeset.ban_info.user_id == user.id
     end
@@ -56,7 +56,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.User do
 
   @tag :banned
   describe "unban/1" do
-    test "unbans banned user", %{user: user} do
+    test "unbans banned user", %{users: %{user: user}} do
       {:ok, unbanned_user_changeset} = Ban.unban(user)
       assert unbanned_user_changeset.ban_info == nil
     end
@@ -65,7 +65,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.User do
   @tag :malicious
   describe "handle_malicious_user/2" do
     test "populates ban_info and malicious_score if user is malicious", %{
-      user: user,
+      users: %{user: user},
       malicious_user_changeset: malicious_user_changeset
     } do
       assert malicious_user_changeset.ban_info.user_id == user.id
@@ -93,7 +93,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.User do
 
     test "when email is already taken, errors", %{
       conn: conn,
-      user_attrs: existing_user_attrs
+      user_attrs: %{user: existing_user_attrs}
     } do
       response =
         conn
@@ -152,7 +152,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.User do
   end
 
   describe "confirm/2" do
-    test "given a valid token, confirms user", %{conn: conn, user: user} do
+    test "given a valid token, confirms user", %{conn: conn, users: %{user: user}} do
       # confirm user
       User
       |> Repo.get(user.id)
@@ -187,7 +187,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.User do
       assert response["message"] == "Confirmation error, account not found"
     end
 
-    test "given an invalid token, errors", %{conn: conn, user_attrs: valid_user_attrs} do
+    test "given an invalid token, errors", %{conn: conn, user_attrs: %{user: valid_user_attrs}} do
       invalid_token = 1
       invalid_token_confirm = %{username: valid_user_attrs.username, token: invalid_token}
 
@@ -204,8 +204,8 @@ defmodule Test.EpochtalkServerWeb.Controllers.User do
   describe "login/2" do
     test "given valid credentials, logs a user in", %{
       conn: conn,
-      user: user,
-      user_attrs: user_attrs
+      users: %{user: user},
+      user_attrs: %{user: user_attrs}
     } do
       response =
         conn
@@ -231,8 +231,8 @@ defmodule Test.EpochtalkServerWeb.Controllers.User do
 
     test "when user is not confirmed, errors", %{
       conn: conn,
-      user: user,
-      user_attrs: user_attrs
+      users: %{user: user},
+      user_attrs: %{user: user_attrs}
     } do
       User
       |> Repo.get(user.id)
@@ -250,8 +250,8 @@ defmodule Test.EpochtalkServerWeb.Controllers.User do
 
     test "given a missing passhash, errors", %{
       conn: conn,
-      user: user,
-      user_attrs: user_attrs
+      users: %{user: user},
+      user_attrs: %{user: user_attrs}
     } do
       User
       |> Repo.get(user.id)

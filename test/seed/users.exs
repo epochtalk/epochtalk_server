@@ -1,37 +1,35 @@
-alias EpochtalkServer.Models.User
+import Test.Support.Factory
 
-test_user_username = "test"
-test_user_email = "test@test.com"
-test_user_password = "password"
+test_super_admin_user_username = "superadmin"
+test_super_admin_user_email = "superadmin@test.com"
+test_super_admin_user_password = "password"
 
 test_admin_user_username = "admin"
 test_admin_user_email = "admin@test.com"
 test_admin_user_password = "password"
-test_admin_user_admin = true
 
-User.create(%{username: test_user_username, email: test_user_email, password: test_user_password})
-|> case do
-  {:ok, _} ->
-    IO.puts("Successfully seeded test user")
+test_user_username = "user"
+test_user_email = "user@test.com"
+test_user_password = "password"
 
-  {:error, error} ->
-    IO.puts("Error seeding test user")
-    IO.inspect(error)
-end
-
-User.create(
-  %{
-    username: test_admin_user_username,
-    email: test_admin_user_email,
-    password: test_admin_user_password
-  },
-  test_admin_user_admin
+build(:user,
+  username: test_super_admin_user_username,
+  email: test_super_admin_user_email,
+  password: test_super_admin_user_password
 )
-|> case do
-  {:ok, _} ->
-    IO.puts("Successfully seeded test admin user")
+|> with_role_id(1)
 
-  {:error, error} ->
-    IO.puts("Error seeding test admin user")
-    IO.inspect(error)
-end
+build(:user,
+  username: test_admin_user_username,
+  email: test_admin_user_email,
+  password: test_admin_user_password
+)
+|> with_role_id(2)
+
+build(:user,
+  username: test_user_username,
+  email: test_user_email,
+  password: test_user_password
+)
+
+IO.puts("Successfully seeded test users")

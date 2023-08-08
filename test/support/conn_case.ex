@@ -16,8 +16,8 @@ defmodule Test.Support.ConnCase do
   """
 
   # username/email/password from user seed in `mix test` (see mix.exs)
-  @test_username "test"
-  @test_email "test@test.com"
+  @test_username "user"
+  @test_email "user@test.com"
   @test_password "password"
   @test_user_attrs %{
     username: @test_username,
@@ -33,6 +33,16 @@ defmodule Test.Support.ConnCase do
     username: @test_admin_username,
     email: @test_admin_email,
     password: @test_admin_password
+  }
+
+  # super admin username/email/password from user seed in `mix test` (see mix.exs)
+  @test_super_admin_username "superadmin"
+  @test_super_admin_email "superadmin@test.com"
+  @test_super_admin_password "password"
+  @test_super_admin_user_attrs %{
+    username: @test_super_admin_username,
+    email: @test_super_admin_email,
+    password: @test_super_admin_password
   }
 
   use ExUnit.CaseTemplate
@@ -57,6 +67,7 @@ defmodule Test.Support.ConnCase do
     alias EpochtalkServer.Session
     alias EpochtalkServer.Models.User
     alias EpochtalkServer.Models.Ban
+    import Test.Support.Factory
 
     :ok = Ecto.Adapters.SQL.Sandbox.checkout(EpochtalkServer.Repo)
 
@@ -66,9 +77,23 @@ defmodule Test.Support.ConnCase do
 
     {:ok, user} = User.by_username(@test_username)
     {:ok, admin_user} = User.by_username(@test_admin_username)
+    {:ok, super_admin_user} = User.by_username(@test_super_admin_username)
     conn = Phoenix.ConnTest.build_conn()
 
-    context_updates = {:ok, []}
+    context_updates =
+      {:ok,
+       [
+         users: %{
+           user: user,
+           admin_user: admin_user,
+           super_admin_user: super_admin_user
+         },
+         user_attrs: %{
+           user: @test_user_attrs,
+           admin_user: @test_admin_user_attrs,
+           super_admin_user: @test_super_admin_user_attrs
+         }
+       ]}
 
     # log user in if necessary
     context_updates =
@@ -95,12 +120,23 @@ defmodule Test.Support.ConnCase do
           k_list = [authed_user_attrs: @test_admin_user_attrs] ++ k_list
           {:ok, k_list}
 
+        :super_admin ->
+          remember_me = false
+
+          {:ok, super_admin_user, token, authed_conn} =
+            Session.create(super_admin_user, remember_me, conn)
+
+          {:ok, k_list} = context_updates
+          k_list = [conn: authed_conn] ++ k_list
+          k_list = [authed_user: super_admin_user] ++ k_list
+          k_list = [token: token] ++ k_list
+          k_list = [authed_user_attrs: @test_super_admin_user_attrs] ++ k_list
+          {:ok, k_list}
+
         # :authenticated not set, return default conn
         _ ->
           {:ok, k_list} = context_updates
           k_list = [conn: conn] ++ k_list
-          k_list = [user: user] ++ k_list
-          k_list = [user_attrs: @test_user_attrs] ++ k_list
           {:ok, k_list}
       end
 
@@ -117,6 +153,9 @@ defmodule Test.Support.ConnCase do
     # handle malicious score if necessary
     context_updates =
       if context[:malicious] do
+        build(:banned_address, ip: "127.0.0.1", weight: 1.0)
+        build(:banned_address, hostname: "localhost", weight: 1.0)
+
         # returns changeset from Ban.ban()
         {:ok, malicious_user_changeset} = User.handle_malicious_user(user, conn.remote_ip)
         {:ok, k_list} = context_updates

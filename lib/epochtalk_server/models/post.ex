@@ -105,15 +105,27 @@ defmodule EpochtalkServer.Models.Post do
     ])
     |> validate_required([:user_id, :thread_id, :content])
     |> validate_change(:content, fn _, content ->
-      has_key = fn key ->
+      string_not_blank = fn key ->
         case String.trim(content[key] || "") do
           "" -> [{key, "can't be blank"}]
           _ -> []
         end
       end
 
-      # validate content map has :title and :body, and they're not blank
-      has_key.(:title) ++ has_key.(:body)
+      is_string = fn key ->
+        case is_binary(content[key]) do
+          false -> [{key, "must be a string"}]
+          true -> []
+        end
+      end
+
+      # check that nested values at specified keys are strings
+      errors_list = is_string.(:title) ++ is_string.(:body)
+
+      # nested values are strings, check that values aren't blank, return errors
+      if errors_list == [],
+        do: string_not_blank.(:title) ++ string_not_blank.(:body),
+        else: errors_list
     end)
     |> unique_constraint(:id, name: :posts_pkey)
     |> foreign_key_constraint(:thread_id, name: :posts_thread_id_fkey)

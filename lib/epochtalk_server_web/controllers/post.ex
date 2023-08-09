@@ -29,15 +29,18 @@ defmodule EpochtalkServerWeb.Controllers.Post do
   def create(conn, attrs) do
     with {:auth, user} <- {:auth, Guardian.Plug.current_resource(conn)},
          :ok <- ACL.allow!(conn, "posts.create"),
+         thread_id <- Validate.cast(attrs, "thread_id", :integer, required: true)
          # TODO(akinsey): finish remaining authorizations
          # - Handle locked thread
          #   - User has permission based override
          #   - Thread is not locked
          #   - User moderates this board
-         # - Can read board
-         # - Can write board
          # - User is not deleted
-         {:ok, post_data} <- Post.create(attrs, user.id) do
+         {:ok, post_data} <- Post.create(attrs, user.id),
+         {:can_read, {:ok, true}} <-
+           {:can_read, Board.get_read_access_by_thread_id(thread_id, user_priority)},
+         {:can_write, {:ok, true}} <-
+           {:can_write, Board.get_write_access_by_thread_id(thread_id, user_priority)}, do
       render(conn, :create, %{post_data: post_data})
     else
       {:error, %Ecto.Changeset{} = cs} ->
@@ -45,6 +48,12 @@ defmodule EpochtalkServerWeb.Controllers.Post do
 
       {:auth, nil} ->
         ErrorHelpers.render_json_error(conn, 400, "Not logged in, cannot create post")
+
+      {:can_read, {:ok, false}} ->
+        ErrorHelpers.render_json_error(conn, 403, "Unauthorized, you do not have permission")
+
+      {:can_write, {:ok, false}} ->
+        ErrorHelpers.render_json_error(conn, 403, "Unauthorized, you do not have permission")
 
       _ ->
         ErrorHelpers.render_json_error(conn, 400, "Error, cannot create post")

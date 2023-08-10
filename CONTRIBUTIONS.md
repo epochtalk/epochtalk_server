@@ -3,14 +3,12 @@
 Before your pull request can be accepted, it must conform to our projects
 conventions.  Please refer to these guidelines!
 
-
 ## Responsibilities
 
 * Write tests
 
-  Write a test that will pass once your code is implemented correctly;
-  it should fail at first.  Be mindful of edge cases and add test cases
-  accordingly.
+  Always write tests.  See [Testing](#Testing) section for best practices.
+
 
 * Write [code](https://en.wikipedia.org/wiki/Computer_programming)
   in [Elixir](https://elixir-lang.org/) to implement your feature
@@ -104,6 +102,27 @@ conventions.  Please refer to these guidelines!
   Release tags are updated via Semantic Release, which analyzes commits with
   Angular Commit message convention and selects an appropriate version to
   release on GitHub.
+
+
+## Testing
+
+Motivational notes on testing:
+```
+Always test code.
+
+Testing ensures that features work as intended without requiring a manual check
+every time code is updated.  It improves the stability and maintainability of
+the project, which saves developers time and reduces frustration.
+
+Occasionally, you can uncover a bug or come up with a new idea for improving a
+feature - but AT THE VERY LEAST, well-written tests will ensure that a feature
+you wrote works now and will keep working in the future.
+
+A small time investment in testing today will save you countless hours in the
+future.
+```
+
+Our testing best practices are based off of [nimble's best practices](https://nimblehq.co/compass/development/code-conventions/elixir/ex-unit/)
 
 
 ## Documentation overview

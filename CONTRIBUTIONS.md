@@ -158,6 +158,9 @@ is a `moduledoc` included, explaining this.
 
 ### Formatting
 
+When a test fails, we'll need to know which test broke and why.  Writing
+descriptions and test names in a useful way can help us determine these details.
+
 
 #### Descriptions
 

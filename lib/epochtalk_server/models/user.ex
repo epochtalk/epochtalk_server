@@ -163,6 +163,23 @@ defmodule EpochtalkServer.Models.User do
   def by_id(id) when is_integer(id), do: Repo.get_by(User, id: id)
 
   @doc """
+  Returns boolean indicating if `User` account is deleted
+  """
+  @spec is_active(user_id :: non_neg_integer) :: {:ok, is_active :: boolean} | {:error, :user_not_found}
+  def is_active(user_id) do
+    query =
+      from u in User,
+        where: u.id == ^user_id,
+        select: u.deleted
+
+    is_deleted = Repo.one(query)
+
+    if is_deleted != nil,
+      do: {:ok, !is_deleted},
+      else: {:error, :user_not_found}
+  end
+
+  @doc """
   Gets `id` of `DefaultTrustList` `User` from the database
   """
   @spec get_default_trust_user_id() :: non_neg_integer | nil

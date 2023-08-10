@@ -122,7 +122,11 @@ A small time investment in testing today will save you countless hours in the
 future.
 ```
 
-Our testing best practices are based off of [nimble's best practices](https://nimblehq.co/compass/development/code-conventions/elixir/ex-unit/)
+Our testing best practices are based off of [nimble's best practices](https://nimblehq.co/compass/development/code-conventions/elixir/ex-unit/).
+You can read their documentation as long as the link is good - it should take
+around 5 minutes, as there really isn't much.
+
+Anyhow, here is a regurgitation of it with additional amendments...
 
 
 ## Documentation overview

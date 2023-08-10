@@ -18,11 +18,11 @@ defmodule EpochtalkServer.Models.Board do
           name: String.t() | nil,
           slug: String.t() | nil,
           description: String.t() | nil,
-          post_count: non_neg_integer | nil,
-          thread_count: non_neg_integer | nil,
+          post_count: non_neg_integer | 0,
+          thread_count: non_neg_integer | 0,
           viewable_by: non_neg_integer | nil,
           postable_by: non_neg_integer | nil,
-          right_to_left: boolean | nil,
+          right_to_left: boolean | false,
           created_at: NaiveDateTime.t() | nil,
           imported_at: NaiveDateTime.t() | nil,
           meta: map() | nil
@@ -46,11 +46,11 @@ defmodule EpochtalkServer.Models.Board do
     field :name, :string
     field :slug, :string
     field :description, :string
-    field :post_count, :integer
-    field :thread_count, :integer
+    field :post_count, :integer, default: 0
+    field :thread_count, :integer, default: 0
     field :viewable_by, :integer
     field :postable_by, :integer
-    field :right_to_left, :boolean
+    field :right_to_left, :boolean, default: false
     field :created_at, :naive_datetime
     field :imported_at, :naive_datetime
     field :updated_at, :naive_datetime
@@ -215,31 +215,9 @@ defmodule EpochtalkServer.Models.Board do
   @spec get_read_access_by_id(id :: non_neg_integer, user_priority :: non_neg_integer) ::
           {:ok, can_read :: boolean} | {:error, :board_does_not_exist}
   def get_read_access_by_id(id, user_priority) do
-    find_parent_initial_query =
-      BoardMapping
-      |> where([bm], bm.board_id == ^id)
-      |> select([bm], %{
-        board_id: bm.board_id,
-        parent_id: bm.parent_id,
-        category_id: bm.category_id
-      })
-
-    find_parent_recursion_query =
-      BoardMapping
-      |> join(:inner, [bm], fp in "find_parent", on: bm.board_id == fp.parent_id)
-      |> select([bm], %{
-        board_id: bm.board_id,
-        parent_id: bm.parent_id,
-        category_id: bm.category_id
-      })
-
-    find_parent_query =
-      find_parent_initial_query
-      |> union(^find_parent_recursion_query)
-
     Board
     |> recursive_ctes(true)
-    |> with_cte("find_parent", as: ^find_parent_query)
+    |> with_cte("find_parent", as: ^get_parent_query(id))
     |> join(:inner, [b], fp in "find_parent", on: b.id == fp.board_id)
     |> join(:left, [b, fp], c in Category, on: c.id == fp.category_id)
     |> select([b, fp, c], %{
@@ -304,6 +282,42 @@ defmodule EpochtalkServer.Models.Board do
       else: {:error, :board_does_not_exist}
   end
 
+  @doc """
+  Used to obtain breadcrumb data for a specific `Board` given it's `slug`
+  """
+  @spec breadcrumb(slug :: String.t()) ::
+          {:ok, board :: t()} | {:error, :board_does_not_exist}
+  def breadcrumb(slug) when is_binary(slug) do
+    case slug_to_id(slug) do
+      {:ok, id} ->
+        Board
+        |> recursive_ctes(true)
+        |> with_cte("find_parent", as: ^get_parent_query(id))
+        |> join(:inner, [b], fp in "find_parent", on: b.id == fp.board_id)
+        |> join(:left, [b, fp], b2 in Board, on: b2.id == fp.parent_id)
+        |> join(:left, [b, fp, b2], c in Category, on: c.id == fp.category_id)
+        |> select([b, fp, b2, c], %{
+          id: b.id,
+          name: b.name,
+          parent_slug: b2.slug,
+          board_id: fp.board_id,
+          parent_id: fp.parent_id,
+          category_id: fp.category_id
+        })
+        |> Repo.all()
+        |> case do
+          [] ->
+            {:error, :board_does_not_exist}
+
+          board_and_parents ->
+            {:ok, board_and_parents}
+        end
+
+      {:error, :board_does_not_exist} ->
+        {:error, :board_does_not_exist}
+    end
+  end
+
   ## ======== Private Helpers ========
 
   defp get_write_access(board, user_priority) do
@@ -320,5 +334,28 @@ defmodule EpochtalkServer.Models.Board do
     else
       {:error, :board_does_not_exist}
     end
+  end
+
+  defp get_parent_query(id) when is_integer(id) do
+    find_parent_initial_query =
+      BoardMapping
+      |> where([bm], bm.board_id == ^id)
+      |> select([bm], %{
+        board_id: bm.board_id,
+        parent_id: bm.parent_id,
+        category_id: bm.category_id
+      })
+
+    find_parent_recursion_query =
+      BoardMapping
+      |> join(:inner, [bm], fp in "find_parent", on: bm.board_id == fp.parent_id)
+      |> select([bm], %{
+        board_id: bm.board_id,
+        parent_id: bm.parent_id,
+        category_id: bm.category_id
+      })
+
+    find_parent_initial_query
+    |> union(^find_parent_recursion_query)
   end
 end

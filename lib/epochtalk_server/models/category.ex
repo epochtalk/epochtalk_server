@@ -114,6 +114,13 @@ defmodule EpochtalkServer.Models.Category do
   @doc """
   Used to find a specific `Category` by it's `id`
   """
-  @spec find_by_id(id :: non_neg_integer) :: t()
-  def find_by_id(id) when is_integer(id), do: Repo.one(from c in Category, where: c.id == ^id)
+  @spec find_by_id(id :: non_neg_integer) ::
+          {:ok, category :: t()} | {:error, :category_does_not_exist}
+  def find_by_id(id) when is_integer(id) do
+    category = Repo.one(from c in Category, where: c.id == ^id)
+
+    if category,
+      do: {:ok, category},
+      else: {:error, :category_does_not_exist}
+  end
 end

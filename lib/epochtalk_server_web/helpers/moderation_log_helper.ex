@@ -584,34 +584,21 @@ defmodule EpochtalkServerWeb.Helpers.ModerationLogHelper do
   def get_display_data(action_type) when action_type == "threads.purge" do
     %{
       get_display_text: fn data ->
-        "purged thread '#{data.title}' created by user '#{data.author.username}' from board '#{data.old_board_name}' to '#{data.new_board_name}'"
+        "purged thread '#{data.title}' created by user '#{data.author.username}' from board '#{data.old_board_name}'"
       end,
       get_display_url: fn _ -> nil end,
       data_query: fn data ->
-        data =
-          case Repo.get_by(User, id: data.user_id) do
-            nil ->
-              data
+        case Repo.get_by(User, id: data.user_id) do
+          nil ->
+            data
 
-            user ->
-              author = %{id: user.id, username: user.username, email: user.email}
+          user ->
+            author = %{id: user.id, username: user.username, email: user.email}
 
-              data
-              |> Map.delete(:user_id)
-              |> Map.put(:author, author)
-          end
-
-        data =
-          case Repo.get_by(Board, id: data.board_id) do
-            nil ->
-              data
-
-            board ->
-              data
-              |> Map.put(:new_board_name, board.name)
-          end
-
-        data
+            data
+            |> Map.delete(:user_id)
+            |> Map.put(:author, author)
+        end
       end
     }
   end

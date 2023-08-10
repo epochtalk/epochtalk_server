@@ -136,6 +136,14 @@ appear in the `lib/` directory; this makes it easy to find the corresponding
 code file when a test fails.
 
 
+### Seeding
+
+Refrain from adding more `test/seed/` files.  Currently, user seed is there
+because all tests use users for authentication and user creation is expensive.
+
+Instead of seeding, please use factories, and setup functions.
+
+
 ## Documentation overview
 
 

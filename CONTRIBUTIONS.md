@@ -156,6 +156,25 @@ once a test finishes.  Because of this, they cannot be run in async mode.  There
 is a `moduledoc` included, explaining this.
 
 
+### Formatting
+
+
+#### Descriptions
+
+Describe tests by the function and arity they are testing.  If a describe block
+is too long, you can break them down into seperate describe blocks, adding
+context after the arity.
+
+```
+describe "create/1" do
+
+...
+
+describe "page/1, action types" do
+describe "page/1, mod_id" do
+```
+
+
 ## Documentation overview
 
 

@@ -76,18 +76,21 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
       assert Map.has_key?(first_thread, "user") == true
       assert Map.has_key?(first_thread, "view_count") == true
 
-      # compare to factory result
-      first_factory_thread = factory_threads |> List.first()
-      first_factory_thread_attributes = first_factory_thread.attributes
-      assert Map.get(first_thread, "id") == first_factory_thread.post.thread.id
-      assert Map.get(first_thread, "locked") == Map.get(first_factory_thread_attributes, "locked")
+      # compare to factory results
+      factory_threads = factory_threads |> Enum.sort(&(&1.post.thread.id < &2.post.thread.id))
+      Enum.zip(normal_threads, factory_threads)
+      |> Enum.each(fn {normal_thread, factory_thread} ->
+        factory_thread_attributes = factory_thread.attributes
+        assert Map.get(normal_thread, "id") == factory_thread.post.thread.id
+        assert Map.get(normal_thread, "locked") == Map.get(factory_thread_attributes, "locked")
 
-      assert Map.get(first_thread, "moderated") ==
-               Map.get(first_factory_thread_attributes, "moderated")
+        assert Map.get(normal_thread, "moderated") ==
+          Map.get(normal_thread, "moderated")
 
-      assert Map.get(first_thread, "slug") == Map.get(first_factory_thread_attributes, "slug")
-      assert Map.get(first_thread, "sticky") == Map.get(first_factory_thread_attributes, "sticky")
-      assert Map.get(first_thread, "title") == Map.get(first_factory_thread_attributes, "title")
+        assert Map.get(normal_thread, "slug") == Map.get(factory_thread_attributes, "slug")
+        assert Map.get(normal_thread, "sticky") == Map.get(factory_thread_attributes, "sticky")
+        assert Map.get(normal_thread, "title") == Map.get(factory_thread_attributes, "title")
+      end)
     end
 
     test "given an id for board above unauthenticated user priority, does not get threads", %{

@@ -138,7 +138,7 @@ code file when a test fails.
 
 ### Seeding
 
-Refrain from adding more `test/seed/` files.  Currently, user seed is there
+Refrain from adding more `test/seed/` files.  Currently, `User` seed is there
 because all tests use users for authentication and user creation is expensive.
 
 Seeding creates interdependency between tests.  One test may expect data to be
@@ -211,7 +211,7 @@ assert result.other_key == other_value
 Use `==` when checking `nil`, `true`, and `false` to assure exact matches.
 
 
-#### Factories
+### Factories
 
 When testing, it is necessary to generate some generic data to test on.
 Factories provide this functionality, and are located in the

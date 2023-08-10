@@ -144,6 +144,16 @@ because all tests use users for authentication and user creation is expensive.
 Instead of seeding, please use factories, and setup functions.
 
 
+### Data/Conn/Channel Case
+
+Use `async: true` by default when using cases.  If a test won't work with async
+set to true, include a `moduledoc` with a reason why.
+
+For example, our `Session` tests use Redis, which is not automatically reset
+once a test finishes.  Because of this, they cannot be run in async mode.  There
+is a `moduledoc` included, explaining this.
+
+
 ## Documentation overview
 
 

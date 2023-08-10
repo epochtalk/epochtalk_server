@@ -143,7 +143,7 @@ because all tests use users for authentication and user creation is expensive.
 
 Seeding creates interdependency between tests.  One test may expect data to be
 there in order to work, and another may need there to be no data first.
-Instead of seeding, please use factories and setup functions.
+Instead of seeding, please use [Factories](#Factories) and setup functions.
 
 
 ### Data/Conn/Channel Case
@@ -210,6 +210,22 @@ assert result.other_key == other_value
 
 Use `==` when checking `nil`, `true`, and `false` to assure exact matches.
 
+
+#### Factories
+
+When testing, it is necessary to generate some generic data to test on.
+Factories provide this functionality, and are located in the
+`test/support/factories/` directory.  You can add a new factory or modify an
+existing one there.  When adding a new factory, you also need to `use` it in
+`test/support/factory.ex` for it to be available in †he tests.
+
+This project currently uses `thoughtbot/ex_machina`(https://github.com/thoughtbot/ex_machina)
+for factory functionality.  This repo is no longer maintained by thoughtbot, so
+whatever extra functionality we need, we must implement ourselves.
+
+Many models implement their own `create` methods, so they can't be created using
+`ex_machina`'s insert().  Instead, use build() and take in options to specify
+model attributes.
 
 
 ## Documentation overview

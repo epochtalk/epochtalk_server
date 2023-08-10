@@ -78,6 +78,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
 
       # compare to factory results
       factory_threads = factory_threads |> Enum.sort(&(&1.post.thread.id < &2.post.thread.id))
+
       Enum.zip(normal_threads, factory_threads)
       |> Enum.each(fn {normal_thread, factory_thread} ->
         factory_thread_attributes = factory_thread.attributes
@@ -85,7 +86,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
         assert Map.get(normal_thread, "locked") == Map.get(factory_thread_attributes, "locked")
 
         assert Map.get(normal_thread, "moderated") ==
-          Map.get(normal_thread, "moderated")
+                 Map.get(normal_thread, "moderated")
 
         assert Map.get(normal_thread, "slug") == Map.get(factory_thread_attributes, "slug")
         assert Map.get(normal_thread, "sticky") == Map.get(factory_thread_attributes, "sticky")

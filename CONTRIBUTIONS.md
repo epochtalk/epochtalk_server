@@ -136,6 +136,57 @@ appear in the `lib/` directory; this makes it easy to find the corresponding
 code file when a test fails.
 
 
+### Authentication/Banning/Malicious
+
+If you need a handle on seeded `User` info in a test that uses `ConnCase`, you
+can grab it from the context map, which contains three users under
+`context.users` and their attributes under `context.user_attrs`.  Refer to the
+implementation in [conn_case.ex](test/support/conn_case.ex) for more details.
+
+Ex:
+```
+test "finds user's posts", %{conn: conn, users: %{user: user}} do
+  posts = Post.by_user(user)
+  ...
+end
+```
+
+To authenticate a request in a `ConnCase` test, use the `@authenticated` tag.
+This will authenticate the `conn` and provide authed user info in the context
+
+```
+# user
+@tags :authenticated
+# admin
+@tags authenticated: :admin
+# super admin
+@tags authenticated: :super_admin
+...
+%{
+  authed_user: authed_user,
+  token: token,
+  authed_user_attrs: authed_user_attrs
+} = context
+```
+
+For a handle on a banned or malicious user, use the tags `:banned` and
+`:malicious`.  These will convert the `user` in `context.users` into a banned
+or malicious user and provide either `malicious_user_changeset` or
+`banned_user_changeset` in `context`.
+
+```
+@tags :banned
+...
+%{banned_user_changeset: banned_user_changeset} = context
+
+OR
+
+@tags :malicious
+...
+%{malicious_user_changeset: malicious_user_changeset} = context
+```
+
+
 ### Seeding
 
 Refrain from adding more `test/seed/` files.  Currently, `User` seed is there

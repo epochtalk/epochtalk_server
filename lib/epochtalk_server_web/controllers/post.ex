@@ -29,7 +29,8 @@ defmodule EpochtalkServerWeb.Controllers.Post do
   def create(conn, attrs) do
     with {:auth, user} <- {:auth, Guardian.Plug.current_resource(conn)},
          :ok <- ACL.allow!(conn, "posts.create"),
-         thread_id <- Validate.cast(attrs, "thread_id", :integer, required: true)
+         thread_id <- Validate.cast(attrs, "thread_id", :integer, required: true),
+         user_priority <- ACL.get_user_priority(conn),
          # TODO(akinsey): finish remaining authorizations
          # - Handle locked thread
          #   - User has permission based override
@@ -40,7 +41,7 @@ defmodule EpochtalkServerWeb.Controllers.Post do
          {:can_read, {:ok, true}} <-
            {:can_read, Board.get_read_access_by_thread_id(thread_id, user_priority)},
          {:can_write, {:ok, true}} <-
-           {:can_write, Board.get_write_access_by_thread_id(thread_id, user_priority)}, do
+           {:can_write, Board.get_write_access_by_thread_id(thread_id, user_priority)} do
       render(conn, :create, %{post_data: post_data})
     else
       {:error, %Ecto.Changeset{} = cs} ->

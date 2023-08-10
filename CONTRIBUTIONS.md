@@ -141,7 +141,9 @@ code file when a test fails.
 Refrain from adding more `test/seed/` files.  Currently, user seed is there
 because all tests use users for authentication and user creation is expensive.
 
-Instead of seeding, please use factories, and setup functions.
+Seeding creates interdependency between tests.  One test may expect data to be
+there in order to work, and another may need there to be no data first.
+Instead of seeding, please use factories and setup functions.
 
 
 ### Data/Conn/Channel Case

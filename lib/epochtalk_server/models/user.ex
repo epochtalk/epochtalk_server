@@ -165,18 +165,16 @@ defmodule EpochtalkServer.Models.User do
   @doc """
   Returns boolean indicating if `User` account is deleted
   """
-  @spec is_active(user_id :: non_neg_integer) :: {:ok, is_active :: boolean} | {:error, :user_not_found}
-  def is_active(user_id) do
+  @spec is_active(id :: non_neg_integer) :: boolean
+  def is_active(id) when is_integer(id) do
     query =
       from u in User,
-        where: u.id == ^user_id,
+        where: u.id == ^id,
         select: u.deleted
 
     is_deleted = Repo.one(query)
 
-    if is_deleted != nil,
-      do: {:ok, !is_deleted},
-      else: {:error, :user_not_found}
+    if is_deleted == nil, do: false,  else: !is_deleted
   end
 
   @doc """

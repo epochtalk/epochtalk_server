@@ -46,7 +46,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     test "given an id for existing board, gets threads", %{
       conn: conn,
       board: board,
-      threads: created_threads
+      threads: factory_threads
     } do
       response =
         conn
@@ -56,10 +56,9 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
       assert Map.has_key?(response, "normal") == true
       assert Map.has_key?(response, "sticky") == true
 
+      # check thread keys
       normal_threads = response["normal"]
       first_thread = normal_threads |> List.first()
-      first_created_thread = created_threads |> List.first()
-      first_created_thread_attributes = first_created_thread.attributes
       assert Map.has_key?(first_thread, "created_at") == true
       assert Map.has_key?(first_thread, "last_post_avatar") == true
       assert Map.has_key?(first_thread, "last_post_created_at") == true
@@ -77,15 +76,18 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
       assert Map.has_key?(first_thread, "user") == true
       assert Map.has_key?(first_thread, "view_count") == true
 
-      assert Map.get(first_thread, "id") == first_created_thread.post.thread.id
-      assert Map.get(first_thread, "locked") == Map.get(first_created_thread_attributes, "locked")
+      # compare to factory result
+      first_factory_thread = factory_threads |> List.first()
+      first_factory_thread_attributes = first_factory_thread.attributes
+      assert Map.get(first_thread, "id") == first_factory_thread.post.thread.id
+      assert Map.get(first_thread, "locked") == Map.get(first_factory_thread_attributes, "locked")
 
       assert Map.get(first_thread, "moderated") ==
-               Map.get(first_created_thread_attributes, "moderated")
+               Map.get(first_factory_thread_attributes, "moderated")
 
-      assert Map.get(first_thread, "slug") == Map.get(first_created_thread_attributes, "slug")
-      assert Map.get(first_thread, "sticky") == Map.get(first_created_thread_attributes, "sticky")
-      assert Map.get(first_thread, "title") == Map.get(first_created_thread_attributes, "title")
+      assert Map.get(first_thread, "slug") == Map.get(first_factory_thread_attributes, "slug")
+      assert Map.get(first_thread, "sticky") == Map.get(first_factory_thread_attributes, "sticky")
+      assert Map.get(first_thread, "title") == Map.get(first_factory_thread_attributes, "title")
     end
 
     test "given an id for board above unauthenticated user priority, does not get threads", %{

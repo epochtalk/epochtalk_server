@@ -193,6 +193,24 @@ describe "create/1" do
 end
 ```
 
+#### Assertions
+
+The data being tested should be on the left hand side of an assert expression;
+the expected value should be on the right hand side.
+
+Do not use pattern matching (`=`) to check values on data structures.  Instead,
+assure exact matches by explicitly checking the entire data structure, or by
+extract values from it before checking equality with `==`
+
+```
+assert result == %{key: value, other_key: other_value}
+assert result.key == value
+assert result.other_key == other_value
+```
+
+Use `==` when checking `nil`, `true`, and `false` to assure exact matches.
+
+
 
 ## Documentation overview
 

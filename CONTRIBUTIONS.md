@@ -178,6 +178,22 @@ describe "page/1, mod_id" do
 ```
 
 
+#### Test names
+
+Use `given`, `with`, or `when` to describe test preconditions.  If multiple
+preconditions are necessary, compound them.
+
+```
+describe "create/1" do
+  test "given valid input, creates a thread" do
+  ...
+  test "given valid input, when a user is logged in, creates a thread" do
+  ...
+  test "given valid input, when a user is not logged in, errors with unauthenticated" do
+end
+```
+
+
 ## Documentation overview
 
 

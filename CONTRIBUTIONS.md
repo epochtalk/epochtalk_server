@@ -129,6 +129,13 @@ around 5 minutes, as there really isn't much.
 Anyhow, here is a regurgitation of it with additional amendments...
 
 
+### Naming & Structure
+
+Place all test files under the `test/` directory, in the same structure as they
+appear in the `lib/` directory; this makes it easy to find the corresponding
+code file when a test fails.
+
+
 ## Documentation overview
 
 

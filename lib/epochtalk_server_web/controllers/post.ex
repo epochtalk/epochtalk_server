@@ -84,6 +84,7 @@ defmodule EpochtalkServerWeb.Controllers.Post do
   # TODO(akinsey): Implement mentions hook and parser for completion
   # - Implement guard in Validate that prevents passing in page and start at the same time
   def by_thread(conn, attrs) do
+    # Parameter Validation
     with thread_id <- Validate.cast(attrs, "thread_id", :integer, required: true),
          page <- Validate.cast(attrs, "page", :integer, default: 1, min: 1),
          start <- Validate.cast(attrs, "start", :integer, min: 1),
@@ -91,10 +92,14 @@ defmodule EpochtalkServerWeb.Controllers.Post do
          desc <- Validate.cast(attrs, "desc", :boolean, default: true),
          user <- Guardian.Plug.current_resource(conn),
          user_priority <- ACL.get_user_priority(conn),
+
+         # Authorizations Checks
          :ok <- ACL.allow!(conn, "posts.byThread"),
          {:can_read, {:ok, true}} <-
            {:can_read, Board.get_read_access_by_thread_id(thread_id, user_priority)},
          view_deleted_posts <- can_authed_user_view_deleted_posts(user, thread_id),
+
+         # Data Queries
          {:ok, write_access} <- Board.get_write_access_by_thread_id(thread_id, user_priority),
          {:ok, board_banned} <- BoardBan.is_banned_from_board(user, thread_id: thread_id),
          board_mapping <- BoardMapping.all(),
@@ -108,6 +113,8 @@ defmodule EpochtalkServerWeb.Controllers.Post do
              per_page: limit
            ),
          {:has_posts, true} <- {:has_posts, posts != []},
+
+         # Hooks (Addtional related data)
          posts <- Trust.maybe_append_trust_stats_to_posts(posts, user),
          thread <- Trust.maybe_append_trust_visible_to_thread(thread, user),
          posts <- UserActivity.append_user_activity_to_posts(posts),

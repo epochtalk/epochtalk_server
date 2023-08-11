@@ -174,7 +174,7 @@ defmodule EpochtalkServer.Models.User do
 
     is_deleted = Repo.one(query)
 
-    if is_deleted == nil, do: false,  else: !is_deleted
+    if is_deleted == nil, do: false, else: !is_deleted
   end
 
   @doc """

@@ -19,6 +19,7 @@ defmodule EpochtalkServerWeb.Controllers.Post do
   alias EpochtalkServer.Models.Rank
   alias EpochtalkServer.Models.Trust
   alias EpochtalkServer.Models.UserActivity
+  alias EpochtalkServer.Models.User
   alias EpochtalkServer.Models.UserIgnored
   alias EpochtalkServer.Models.WatchThread
 
@@ -36,12 +37,13 @@ defmodule EpochtalkServerWeb.Controllers.Post do
          #   - User has permission based override
          #   - Thread is not locked
          #   - User moderates this board
-         # - User is not deleted
-         {:ok, post_data} <- Post.create(attrs, user.id),
+         {:is_active, true} <-
+           {:is_active, User.is_active(user.id)},
          {:can_read, {:ok, true}} <-
            {:can_read, Board.get_read_access_by_thread_id(thread_id, user_priority)},
          {:can_write, {:ok, true}} <-
-           {:can_write, Board.get_write_access_by_thread_id(thread_id, user_priority)} do
+           {:can_write, Board.get_write_access_by_thread_id(thread_id, user_priority)},
+         {:ok, post_data} <- Post.create(attrs, user.id) do
       render(conn, :create, %{post_data: post_data})
     else
       {:error, %Ecto.Changeset{} = cs} ->
@@ -49,6 +51,9 @@ defmodule EpochtalkServerWeb.Controllers.Post do
 
       {:auth, nil} ->
         ErrorHelpers.render_json_error(conn, 400, "Not logged in, cannot create post")
+
+      {:is_active, false} ->
+        ErrorHelpers.render_json_error(conn, 400, "Account must be active to create posts")
 
       {:can_read, {:ok, false}} ->
         ErrorHelpers.render_json_error(conn, 403, "Unauthorized, you do not have permission")

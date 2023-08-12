@@ -138,7 +138,7 @@ defmodule EpochtalkServerWeb.Controllers.ThreadJSON do
           |> Map.put(:last_unread_position, 1)
 
         is_integer(user_id) and user_id != thread.last_post_user_id and
-            thread.last_viewed >= thread.last_post_created_at ->
+            NaiveDateTime.compare(thread.last_viewed, thread.last_post_created_at) == :lt ->
           thread
           |> Map.put(:has_new_post, true)
           |> Map.put(:last_unread_position, thread.post_position)

@@ -167,6 +167,19 @@ defmodule EpochtalkServer.Models.Thread do
   end
 
   @doc """
+  Returns boolean indicating if `Thread` is locked or nil if it does not exist
+  """
+  @spec is_locked(id :: non_neg_integer) :: boolean | nil
+  def is_locked(id) when is_integer(id) do
+    query =
+      from t in Thread,
+        where: t.id == ^id,
+        select: t.locked
+
+    Repo.one(query)
+  end
+
+  @doc """
   Increments the `post_count` field given a `Thread` id
   """
   @spec increment_post_count(id :: non_neg_integer) :: {non_neg_integer(), nil}

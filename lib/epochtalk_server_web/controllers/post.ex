@@ -26,23 +26,23 @@ defmodule EpochtalkServerWeb.Controllers.Post do
   @doc """
   Used to create posts
   """
-  # TODO(akinsey): Implement track ip plugin, authorizations, hooks, pre methods, and image processing
+  # TODO(akinsey): Implement track ip plugin, hooks, pre methods, and image processing
   def create(conn, attrs) do
+    # Authorizations Checks
     with {:auth, user} <- {:auth, Guardian.Plug.current_resource(conn)},
          :ok <- ACL.allow!(conn, "posts.create"),
          thread_id <- Validate.cast(attrs, "thread_id", :integer, required: true),
          user_priority <- ACL.get_user_priority(conn),
-         # TODO(akinsey): finish remaining authorizations
-         # - Handle locked thread
-         #   - User has permission based override
-         #   - Thread is not locked
-         #   - User moderates this board
+         {:bypass_lock, true} <-
+           {:bypass_lock, can_authed_user_bypass_thread_lock(user, thread_id)},
          {:is_active, true} <-
            {:is_active, User.is_active(user.id)},
          {:can_read, {:ok, true}} <-
            {:can_read, Board.get_read_access_by_thread_id(thread_id, user_priority)},
          {:can_write, {:ok, true}} <-
            {:can_write, Board.get_write_access_by_thread_id(thread_id, user_priority)},
+
+         # Data Queries
          {:ok, post_data} <- Post.create(attrs, user.id) do
       render(conn, :create, %{post_data: post_data})
     else
@@ -51,6 +51,9 @@ defmodule EpochtalkServerWeb.Controllers.Post do
 
       {:auth, nil} ->
         ErrorHelpers.render_json_error(conn, 400, "Not logged in, cannot create post")
+
+      {:bypass_lock, false} ->
+        ErrorHelpers.render_json_error(conn, 400, "Thread is locked")
 
       {:is_active, false} ->
         ErrorHelpers.render_json_error(conn, 400, "Account must be active to create posts")
@@ -182,5 +185,13 @@ defmodule EpochtalkServerWeb.Controllers.Post do
       true ->
         false
     end
+  end
+
+  defp can_authed_user_bypass_thread_lock(user, thread_id) do
+    has_bypass = ACL.has_permission(user, "posts.create.bypass.locked.admin")
+    thread_not_locked = !Thread.is_locked(thread_id)
+    is_mod = BoardModerator.user_is_moderator_with_thread_id(thread_id, user.id)
+
+    has_bypass or thread_not_locked or is_mod
   end
 end

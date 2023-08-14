@@ -171,4 +171,138 @@ defmodule EpochtalkServer.Models.Post do
     from(p in Post, where: p.id == ^id)
     |> Repo.update_all(set: [position: thread_post_count + 1])
   end
+
+  @doc """
+  Paginates `Post` records for a given a `Thread`
+  """
+  @spec page_by_thread_id(
+          thread_id :: non_neg_integer,
+          page :: non_neg_integer | nil,
+          opts :: list() | nil
+        ) :: [map()] | []
+  def page_by_thread_id(thread_id, page \\ 1, opts \\ []) do
+    per_page = Keyword.get(opts, :per_page, 25)
+    user_id = Keyword.get(opts, :user_id)
+    page = if start = Keyword.get(opts, :start), do: ceil(start / per_page), else: page
+    start = page * per_page - per_page
+    start = if start < 0, do: 0, else: start
+
+    inner_query =
+      Post
+      |> where([p], p.thread_id == ^thread_id and p.position > ^start)
+      |> order_by([p], p.position)
+      |> limit(^per_page)
+      |> select([p], %{id: p.id, position: p.position})
+
+    from(plist in subquery(inner_query))
+    |> join(
+      :left_lateral,
+      [plist],
+      p1 in fragment(
+        """
+          SELECT
+            p.thread_id, t.board_id, t.slug, b.right_to_left, p.user_id, p.content ->> \'title\' as title,
+            p.content ->> \'body\' as body, p.metadata, p.deleted, p.locked, p.created_at,
+            p.updated_at, p.imported_at, CASE WHEN EXISTS (
+              SELECT rp.id
+              FROM administration.reports_posts rp
+              WHERE rp.offender_post_id = p.id AND rp.reporter_user_id = ?
+            )
+            THEN \'TRUE\'::boolean ELSE \'FALSE\'::boolean END AS reported,
+            CASE WHEN EXISTS (
+              SELECT ru.id
+              FROM administration.reports_users ru
+              WHERE ru.offender_user_id = p.user_id AND ru.reporter_user_id = ? AND ru.status = \'Pending\'
+            )
+            THEN \'TRUE\'::boolean ELSE \'FALSE\'::boolean END AS reported_author,
+            CASE WHEN p.user_id = (
+              SELECT user_id
+              FROM posts
+              WHERE thread_id = t.id ORDER BY created_at limit 1
+            )
+            THEN \'TRUE\'::boolean ELSE \'FALSE\'::boolean END AS original_poster,
+            u.username, u.deleted as user_deleted, up.signature, up.post_count, up.avatar,
+            up.fields->\'name\' as name
+          FROM posts p
+          LEFT JOIN users u ON p.user_id = u.id
+          LEFT JOIN users.profiles up ON u.id = up.user_id
+          LEFT JOIN threads t ON p.thread_id = t.id
+          LEFT JOIN boards b ON t.board_id = b.id
+          WHERE p.id = ?
+        """,
+        ^user_id,
+        ^user_id,
+        plist.id
+      ),
+      on: true
+    )
+    |> join(
+      :left_lateral,
+      [plist, p1],
+      p2 in fragment(
+        """
+          SELECT r.priority, r.highlight_color, r.name as role_name
+          FROM roles_users ru
+          LEFT JOIN roles r ON ru.role_id = r.id
+          WHERE ? = ru.user_id
+          ORDER BY r.priority limit 1
+        """,
+        p1.user_id
+      ),
+      on: true
+    )
+    |> join(
+      :left_lateral,
+      [],
+      p3 in fragment("""
+        SELECT priority FROM roles WHERE lookup =\'user\'
+      """),
+      on: true
+    )
+    |> select([plist, p1, p2, p3], %{
+      id: plist.id,
+      position: plist.position,
+      thread_id: p1.thread_id,
+      board_id: p1.board_id,
+      slug: p1.slug,
+      user_id: p1.user_id,
+      title: p1.title,
+      body: p1.body,
+      deleted: p1.deleted,
+      locked: p1.locked,
+      right_to_left: p1.right_to_left,
+      metadata: p1.metadata,
+      created_at: p1.created_at,
+      updated_at: p1.updated_at,
+      imported_at: p1.updated_at,
+      username: p1.username,
+      reported: p1.reported,
+      reported_author: p1.reported_author,
+      original_poster: p1.original_poster,
+      user_deleted: p1.user_deleted,
+      signature: p1.signature,
+      avatar: p1.avatar,
+      post_count: p1.post_count,
+      name: p1.name,
+      priority: p2.priority,
+      highlight_color: p2.highlight_color,
+      role_name: p2.role_name,
+      default_priority: p3.priority
+    })
+    |> order_by([plist], plist.position)
+    |> Repo.all()
+  end
+
+  @doc """
+  Used to find a specific `Post` by it's `id`
+  """
+  @spec find_by_id(id :: non_neg_integer) :: t()
+  def find_by_id(id) when is_integer(id) do
+    query =
+      from p in Post,
+        where: p.id == ^id,
+        preload: [:thread, user: :profile]
+
+    Repo.one(query)
+  end
 end

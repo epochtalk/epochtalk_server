@@ -110,4 +110,17 @@ defmodule EpochtalkServer.Models.Category do
   """
   @spec all() :: [t()]
   def all(), do: Repo.all(from Category, order_by: [asc: :view_order])
+
+  @doc """
+  Used to find a specific `Category` by it's `id`
+  """
+  @spec find_by_id(id :: non_neg_integer) ::
+          {:ok, category :: t()} | {:error, :category_does_not_exist}
+  def find_by_id(id) when is_integer(id) do
+    category = Repo.one(from c in Category, where: c.id == ^id)
+
+    if category,
+      do: {:ok, category},
+      else: {:error, :category_does_not_exist}
+  end
 end

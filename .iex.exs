@@ -4,6 +4,7 @@ IEx.configure(inspect: [limit: :infinity])
 alias EpochtalkServer.Repo
 
 alias EpochtalkServer.Models.{
+  AutoModeration,
   Ban,
   BannedAddress,
   Board,

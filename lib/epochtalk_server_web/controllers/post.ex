@@ -31,7 +31,13 @@ defmodule EpochtalkServerWeb.Controllers.Post do
     # Authorizations Checks
     with {:auth, user} <- {:auth, Guardian.Plug.current_resource(conn)},
          :ok <- ACL.allow!(conn, "posts.create"),
+         # normally we use model changesets for validating POST requests parameters,
+         # this is an exception to save us from doing excessive processing between here
+         # and the creation of the post
+         post_max_length <-
+           Application.get_env(:epochtalk_server, :frontend_config)["post_max_length"],
          thread_id <- Validate.cast(attrs, "thread_id", :integer, required: true),
+         _body <- Validate.cast(attrs, "body", :string, required: true, max: post_max_length),
          user_priority <- ACL.get_user_priority(conn),
          {:bypass_lock, true} <-
            {:bypass_lock, can_authed_user_bypass_thread_lock(user, thread_id)},
@@ -41,6 +47,23 @@ defmodule EpochtalkServerWeb.Controllers.Post do
            {:can_read, Board.get_read_access_by_thread_id(thread_id, user_priority)},
          {:can_write, {:ok, true}} <-
            {:can_write, Board.get_write_access_by_thread_id(thread_id, user_priority)},
+
+         # Pre Processing
+
+         # 1) clean post (html_sanitize_ex)
+         # 2) parse post
+         # 3) handle uploaded images
+         # 4) handle filtering out newbie images
+
+         # Hooks
+         # 1) Auto Moderation (pre)
+         # 2) Update user Activity (post)
+         # 3) Mentions -> convert username to user id (pre)
+         # 4) Mentions -> create mentions (post)
+         # 5) Mentions -> correct text search vector after creating mentions (post)
+         # 6) Notifications -> Email Subscribers (post)
+         # 7) Notifications -> Subscribe to Thread (post)
+         # 8) Watchlist -> Watch thread(post)
 
          # Data Queries
          {:ok, post_data} <- Post.create(attrs, user.id) do

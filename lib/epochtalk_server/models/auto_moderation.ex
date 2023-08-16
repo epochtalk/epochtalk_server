@@ -1,9 +1,9 @@
 defmodule EpochtalkServer.Models.AutoModeration do
   use Ecto.Schema
   import Ecto.Changeset
-  # import Ecto.Query
-  # alias EpochtalkServer.Repo
-  # alias EpochtalkServer.Models.AutoModeration
+  import Ecto.Query
+  alias EpochtalkServer.Repo
+  alias EpochtalkServer.Models.AutoModeration
 
   @postgres_varchar255_max 255
   @postgres_varchar1000_max 1000
@@ -72,5 +72,16 @@ defmodule EpochtalkServer.Models.AutoModeration do
     |> validate_length(:name, min: 1, max: @postgres_varchar255_max)
     |> validate_length(:description, max: @postgres_varchar1000_max)
     |> validate_length(:message, max: @postgres_varchar1000_max)
+  end
+
+  ## === Database Functions ===
+
+  @doc """
+  Get all `AutoModeration` rules
+  """
+  @spec all() :: [t()]
+  def all() do
+    query = from a in AutoModeration
+    Repo.all(query)
   end
 end

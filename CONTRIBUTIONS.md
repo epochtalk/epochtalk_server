@@ -3,14 +3,12 @@
 Before your pull request can be accepted, it must conform to our projects
 conventions.  Please refer to these guidelines!
 
-
 ## Responsibilities
 
 * Write tests
 
-  Write a test that will pass once your code is implemented correctly;
-  it should fail at first.  Be mindful of edge cases and add test cases
-  accordingly.
+  Always write tests.  See [Testing](#Testing) section for best practices.
+
 
 * Write [code](https://en.wikipedia.org/wiki/Computer_programming)
   in [Elixir](https://elixir-lang.org/) to implement your feature
@@ -104,6 +102,181 @@ conventions.  Please refer to these guidelines!
   Release tags are updated via Semantic Release, which analyzes commits with
   Angular Commit message convention and selects an appropriate version to
   release on GitHub.
+
+
+## Testing
+
+Motivational notes on testing:
+```
+Always test code.
+
+Testing ensures that features work as intended without requiring a manual check
+every time code is updated.  It improves the stability and maintainability of
+the project, which saves developers time and reduces frustration.
+
+Occasionally, you can uncover a bug or come up with a new idea for improving a
+feature - but AT THE VERY LEAST, well-written tests will ensure that a feature
+you wrote works now and will keep working in the future.
+
+A small time investment in testing today will save you countless hours in the
+future.
+```
+
+Our testing best practices are based off of [nimble's best practices](https://nimblehq.co/compass/development/code-conventions/elixir/ex-unit/).
+You can read their documentation as long as the link is good - it should take
+around 5 minutes, as there really isn't much.
+
+Anyhow, here is a regurgitation of it with additional amendments...
+
+
+### Naming & Structure
+
+Place all test files under the `test/` directory, in the same structure as they
+appear in the `lib/` directory; this makes it easy to find the corresponding
+code file when a test fails.
+
+
+### Authentication/Banning/Malicious
+
+If you need a handle on seeded `User` info in a test that uses `ConnCase`, you
+can grab it from the context map, which contains three users under
+`context.users` and their attributes under `context.user_attrs`.  Refer to the
+implementation in [conn_case.ex](test/support/conn_case.ex) for more details.
+
+Ex:
+```
+test "finds user's posts", %{conn: conn, users: %{user: user}} do
+  posts = Post.by_user(user)
+  ...
+end
+```
+
+To authenticate a request in a `ConnCase` test, use the `@authenticated` tag.
+This will authenticate the `conn` and provide authed user info in the context
+
+```
+# user
+@tags :authenticated
+# admin
+@tags authenticated: :admin
+# super admin
+@tags authenticated: :super_admin
+...
+%{
+  authed_user: authed_user,
+  token: token,
+  authed_user_attrs: authed_user_attrs
+} = context
+```
+
+For a handle on a banned or malicious user, use the tags `:banned` and
+`:malicious`.  These will convert the `user` in `context.users` into a banned
+or malicious user and provide either `malicious_user_changeset` or
+`banned_user_changeset` in `context`.
+
+```
+@tags :banned
+...
+%{banned_user_changeset: banned_user_changeset} = context
+
+OR
+
+@tags :malicious
+...
+%{malicious_user_changeset: malicious_user_changeset} = context
+```
+
+
+### Seeding
+
+Refrain from adding more `test/seed/` files.  Currently, `User` seed is there
+because all tests use users for authentication and user creation is expensive.
+
+Seeding creates interdependency between tests.  One test may expect data to be
+there in order to work, and another may need there to be no data first.
+Instead of seeding, please use [Factories](#Factories) and setup functions.
+
+
+### Data/Conn/Channel Case
+
+Use `async: true` by default when using cases.  If a test won't work with async
+set to true, include a `moduledoc` with a reason why.
+
+For example, our `Session` tests use Redis, which is not automatically reset
+once a test finishes.  Because of this, they cannot be run in async mode.  There
+is a `moduledoc` included, explaining this.
+
+
+### Formatting
+
+When a test fails, we'll need to know which test broke and why.  Writing
+descriptions and test names in a useful way can help us determine these details.
+
+
+#### Descriptions
+
+Describe tests by the function and arity they are testing.  If a describe block
+is too long, you can break them down into seperate describe blocks, adding
+context after the arity.
+
+```
+describe "create/1" do
+
+...
+
+describe "page/1, action types" do
+describe "page/1, mod_id" do
+```
+
+
+#### Test names
+
+Use `given`, `with`, or `when` to describe test preconditions.  If multiple
+preconditions are necessary, compound them.
+
+```
+describe "create/1" do
+  test "given valid input, creates a thread" do
+  ...
+  test "given valid input, when a user is logged in, creates a thread" do
+  ...
+  test "given valid input, when a user is not logged in, errors with unauthenticated" do
+end
+```
+
+#### Assertions
+
+The data being tested should be on the left hand side of an assert expression;
+the expected value should be on the right hand side.
+
+Do not use pattern matching (`=`) to check values on data structures.  Instead,
+assure exact matches by explicitly checking the entire data structure, or by
+extract values from it before checking equality with `==`
+
+```
+assert result == %{key: value, other_key: other_value}
+assert result.key == value
+assert result.other_key == other_value
+```
+
+Use `==` when checking `nil`, `true`, and `false` to assure exact matches.
+
+
+### Factories
+
+When testing, it is necessary to generate some generic data to test on.
+Factories provide this functionality, and are located in the
+`test/support/factories/` directory.  You can add a new factory or modify an
+existing one there.  When adding a new factory, you also need to `use` it in
+`test/support/factory.ex` for it to be available in †he tests.
+
+This project currently uses `thoughtbot/ex_machina`(https://github.com/thoughtbot/ex_machina)
+for factory functionality.  This repo is no longer maintained by thoughtbot, so
+whatever extra functionality we need, we must implement ourselves.
+
+Many models implement their own `create` methods, so they can't be created using
+`ex_machina`'s insert().  Instead, use build() and take in options to specify
+model attributes.
 
 
 ## Documentation overview

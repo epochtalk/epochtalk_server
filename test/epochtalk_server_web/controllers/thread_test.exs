@@ -78,6 +78,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
 
       # compare to factory results
       factory_threads = factory_threads |> Enum.sort(&(&1.post.thread.id < &2.post.thread.id))
+      normal_threads = normal_threads |> Enum.sort(&(Map.get(&1, "id") < Map.get(&2, "id")))
 
       Enum.zip(normal_threads, factory_threads)
       |> Enum.each(fn {normal_thread, factory_thread} ->

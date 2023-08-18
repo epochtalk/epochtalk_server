@@ -5,6 +5,8 @@
 
 Phoenix Framework server for Epochtalk
 
+This project is still under development, see [Port Roadmap](/PortRoadmap.md) for more details.
+
 See [API Reference](https://docs.epochtalk.org/api-reference.html) for API documentation
 
 Please review [Contribution Guidelines](https://github.com/epochtalk/epochtalk_server/blob/main/CONTRIBUTIONS.md) before submitting code

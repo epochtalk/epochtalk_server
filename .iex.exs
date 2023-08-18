@@ -39,6 +39,7 @@ alias EpochtalkServer.Models.{
   UserActivity,
   UserIgnored,
   UserThreadView,
+  WatchBoard,
   WatchThread
 }
 

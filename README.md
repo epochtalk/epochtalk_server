@@ -1,22 +1,28 @@
-# EpochtalkServer
+# Epochtalk Server
 
 [![Build Status](https://github.com/epochtalk/epochtalk_server/actions/workflows/main.yml/badge.svg)](https://github.com/epochtalk/epochtalk_server/actions)
 [![Documentation](https://img.shields.io/badge/documentation-gray)](https://docs.epochtalk.org/api-reference.html)
 
-To start your Phoenix server:
+Phoenix Framework server for Epochtalk
 
-  * Install dependencies with `mix deps.get`
-  * Create and migrate your database with `mix ecto.setup`
-  * Start Phoenix endpoint with `mix phx.server` or inside IEx with `iex -S mix phx.server`
+This project is still under development, see [Port Roadmap](/PortRoadmap.md) for more details.
 
-Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
+See [API Reference](https://docs.epochtalk.org/api-reference.html) for API documentation
 
-Ready to run in production? Please [check our deployment guides](https://hexdocs.pm/phoenix/deployment.html).
+Please review [Contribution Guidelines](https://github.com/epochtalk/epochtalk_server/blob/main/CONTRIBUTIONS.md) before submitting code
 
-## Learn more
+## Getting Started
 
-  * Official website: https://www.phoenixframework.org/
-  * Guides: https://hexdocs.pm/phoenix/overview.html
-  * Docs: https://hexdocs.pm/phoenix
-  * Forum: https://elixirforum.com/c/phoenix-forum
-  * Source: https://github.com/phoenixframework/phoenix
+### Requirements
+
+Postgres
+Redis
+[epochtalk-vue](https://github.com/epochtalk/epochtalk-vue) (Frontend functionality)
+
+### Installation
+
+Install dependencies with `mix deps.get`
+
+Set up postgres database with `mix ecto.setup`
+
+Start Phoenix endpoint with `mix phx.server` or inside IEx with `iex -S mix phx.server`

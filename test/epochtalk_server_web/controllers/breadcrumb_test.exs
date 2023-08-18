@@ -1,10 +1,8 @@
 defmodule Test.EpochtalkServerWeb.Controllers.Breadcrumb do
   use Test.Support.ConnCase, async: true
   import Test.Support.Factory
-  alias EpochtalkServer.Models.User
-  @test_username "user"
 
-  setup %{conn: conn} do
+  setup %{users: %{user: user}} do
     category = insert(:category)
     parent_board = insert(:board)
     child_board = insert(:board)
@@ -19,19 +17,17 @@ defmodule Test.EpochtalkServerWeb.Controllers.Breadcrumb do
       ]
     )
 
-    {:ok, user} = User.by_username(@test_username)
-    threads = build_list(1, :thread, board: child_board, user: user)
-    threads_no_parent = build_list(1, :thread, board: board_no_parent, user: user)
+    thread = build(:thread, board: child_board, user: user)
+    thread_no_parent = build(:thread, board: board_no_parent, user: user)
 
     {
       :ok,
-      conn: conn,
       category: category,
       parent_board: parent_board,
       child_board: child_board,
-      threads: threads,
+      thread: thread,
       board_no_parent: board_no_parent,
-      threads_no_parent: threads_no_parent
+      thread_no_parent: thread_no_parent
     }
   end
 
@@ -125,10 +121,8 @@ defmodule Test.EpochtalkServerWeb.Controllers.Breadcrumb do
            category: category,
            parent_board: parent_board,
            child_board: child_board,
-           threads: threads
+           thread: thread
          } do
-      thread = threads |> List.first()
-
       response =
         conn
         |> get(
@@ -199,15 +193,13 @@ defmodule Test.EpochtalkServerWeb.Controllers.Breadcrumb do
            conn: conn,
            category: category,
            board_no_parent: board_no_parent,
-           threads_no_parent: threads_no_parent
+           thread_no_parent: thread_no_parent
          } do
-      thread = threads_no_parent |> List.first()
-
       response =
         conn
         |> get(
           Routes.breadcrumb_path(conn, :breadcrumbs, %{
-            "id" => thread.attributes["slug"],
+            "id" => thread_no_parent.attributes["slug"],
             "type" => "thread"
           })
         )
@@ -229,9 +221,9 @@ defmodule Test.EpochtalkServerWeb.Controllers.Breadcrumb do
       assert response_board_crumb["routeName"] == "Threads"
 
       response_thread_crumb = response["breadcrumbs"] |> Enum.at(2)
-      assert response_thread_crumb["label"] == thread.attributes["title"]
-      assert response_thread_crumb["opts"]["locked"] == thread.attributes["locked"]
-      assert response_thread_crumb["opts"]["slug"] == thread.attributes["slug"]
+      assert response_thread_crumb["label"] == thread_no_parent.attributes["title"]
+      assert response_thread_crumb["opts"]["locked"] == thread_no_parent.attributes["locked"]
+      assert response_thread_crumb["opts"]["slug"] == thread_no_parent.attributes["slug"]
       assert response_thread_crumb["routeName"] == "Posts"
     end
 

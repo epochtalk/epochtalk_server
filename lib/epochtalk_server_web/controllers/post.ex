@@ -61,12 +61,15 @@ defmodule EpochtalkServerWeb.Controllers.Post do
          # 3) Mentions -> convert username to user id (pre)
          # 4) Mentions -> create mentions (post)
          # 5) Mentions -> correct text search vector after creating mentions (post)
-         # 6) Notifications -> Email Subscribers (post)
-         # 7) Notifications -> Subscribe to Thread (post)
-         # 8) Watchlist -> Watch thread(post)
+         # 6) Thread Subscriptions -> Email Subscribers (post)
+         # 7) Thread Subscriptions -> Subscribe to Thread (post)
 
          # Data Queries
          {:ok, post_data} <- Post.create(attrs, user.id) do
+      # watch thread after post is created
+      WatchThread.create(user, thread_id)
+
+      # render post json data
       render(conn, :create, %{post_data: post_data})
     else
       {:error, %Ecto.Changeset{} = cs} ->

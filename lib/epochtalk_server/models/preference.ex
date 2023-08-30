@@ -180,4 +180,37 @@ defmodule EpochtalkServer.Models.Preference do
       {:error, err} -> {:error, err}
     end
   end
+
+  @doc """
+  Returns boolean indicating if specific `User` has `email_mentions` `Preference` set
+  """
+  @spec email_mentions?(user_id :: integer) :: boolean
+  def email_mentions?(user_id) when is_integer(user_id) do
+    query =
+      from p in Preference,
+        where: p.user_id == ^user_id,
+        select: p.email_mentions
+
+    case Repo.one(query) do
+      true -> true
+      _ -> false
+    end
+  end
+
+  @doc """
+  Enables Email Notifications (`email_mentions`) for `Mention`
+  """
+  @spec toggle_email_mentions(user_id :: integer, enabled :: boolean) ::
+          boolean | {:error, Ecto.Changeset.t()}
+  def toggle_email_mentions(user_id, enabled)
+      when is_integer(user_id) and is_boolean(enabled) do
+    case Repo.insert(
+           %Preference{user_id: user_id, email_mentions: enabled},
+           on_conflict: [set: [email_mentions: enabled]],
+           conflict_target: [:user_id]
+         ) do
+      {:ok, _} -> enabled
+      {:error, err} -> {:error, err}
+    end
+  end
 end

@@ -92,11 +92,12 @@ defmodule EpochtalkServer.Models.ThreadSubscription do
   Get all `Thread` subscriber's `User` data for emailing
   """
   @spec get_subscriber_email_data(user :: User.t(), thread_id :: non_neg_integer) ::
-        {:ok, thread_subscription :: t()} | {:error, Ecto.Changeset.t()}
+          {:ok, thread_subscription :: t()} | {:error, Ecto.Changeset.t()}
   def get_subscriber_email_data(%User{} = user, thread_id) do
-   inner_thread_subscription_query = from t in ThreadSubscription,
-      where: t.thread_id == ^thread_id and t.user_id != ^user.id,
-      select: t.user_id
+    inner_thread_subscription_query =
+      from t in ThreadSubscription,
+        where: t.thread_id == ^thread_id and t.user_id != ^user.id,
+        select: t.user_id
 
     query =
       from u in User,
@@ -105,13 +106,40 @@ defmodule EpochtalkServer.Models.ThreadSubscription do
           user_id: u.id,
           email: u.email,
           username: u.username,
-          id: subquery(from p in Post, where: p.thread_id == ^thread_id, select: p.id, order_by: [desc: p.created_at], limit: 1),
-          position: subquery(from p in Post, where: p.thread_id == ^thread_id, select: p.position, order_by: [desc: p.created_at], limit: 1),
-          thread_author: subquery(from p in Post, where: p.thread_id == ^thread_id, select: p.user_id, order_by: [desc: p.created_at], limit: 1) == u.id,
-          title: subquery(from p in Post, where: p.thread_id == ^thread_id, select: p.content["title"], order_by: [desc: p.created_at], limit: 1)
+          id:
+            subquery(
+              from p in Post,
+                where: p.thread_id == ^thread_id,
+                select: p.id,
+                order_by: [desc: p.created_at],
+                limit: 1
+            ),
+          position:
+            subquery(
+              from p in Post,
+                where: p.thread_id == ^thread_id,
+                select: p.position,
+                order_by: [desc: p.created_at],
+                limit: 1
+            ),
+          thread_author:
+            subquery(
+              from p in Post,
+                where: p.thread_id == ^thread_id,
+                select: p.user_id,
+                order_by: [desc: p.created_at],
+                limit: 1
+            ) == u.id,
+          title:
+            subquery(
+              from p in Post,
+                where: p.thread_id == ^thread_id,
+                select: p.content["title"],
+                order_by: [desc: p.created_at],
+                limit: 1
+            )
         }
 
     Repo.all(query)
   end
-
 end

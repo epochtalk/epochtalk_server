@@ -82,19 +82,21 @@ defmodule EpochtalkServer.Models.Mention do
   def create(mention_attrs) do
     query =
       from b in Board,
-      where: fragment(
-        """
-          ? = (SELECT board_id FROM threads WHERE id = ?)
-          AND (? IS NULL OR ? >= (SELECT r.priority FROM roles_users ru, roles r WHERE ru.role_id = r.id AND ru.user_id = ? ORDER BY r.priority limit 1))
-          AND (SELECT EXISTS ( SELECT 1 FROM board_mapping WHERE board_id = (SELECT board_id FROM threads WHERE id = ?)))
-        """,
-        b.id,
-        ^mention_attrs["thread_id"],
-        b.viewable_by,
-        b.viewable_by,
-        ^mention_attrs["mentionee_id"],
-        ^mention_attrs["thread_id"]),
-      select: true
+        where:
+          fragment(
+            """
+              ? = (SELECT board_id FROM threads WHERE id = ?)
+              AND (? IS NULL OR ? >= (SELECT r.priority FROM roles_users ru, roles r WHERE ru.role_id = r.id AND ru.user_id = ? ORDER BY r.priority limit 1))
+              AND (SELECT EXISTS ( SELECT 1 FROM board_mapping WHERE board_id = (SELECT board_id FROM threads WHERE id = ?)))
+            """,
+            b.id,
+            ^mention_attrs["thread_id"],
+            b.viewable_by,
+            b.viewable_by,
+            ^mention_attrs["mentionee_id"],
+            ^mention_attrs["thread_id"]
+          ),
+        select: true
 
     can_view_board = !!Repo.one(query)
 
@@ -111,7 +113,7 @@ defmodule EpochtalkServer.Models.Mention do
   def delete_by_user_id(user_id) when is_integer(user_id) do
     query =
       from m in Mention,
-      where: m.mentionee_id == ^user_id
+        where: m.mentionee_id == ^user_id
 
     {num_deleted, _} = Repo.delete_all(query)
 
@@ -126,7 +128,7 @@ defmodule EpochtalkServer.Models.Mention do
   def delete(id) when is_integer(id) do
     query =
       from m in Mention,
-      where: m.id == ^id
+        where: m.id == ^id
 
     {num_deleted, _} = Repo.delete_all(query)
 

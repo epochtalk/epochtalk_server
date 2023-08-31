@@ -85,8 +85,8 @@ defmodule EpochtalkServer.Models.Mention do
       where: fragment(
         """
           ? = (SELECT board_id FROM threads WHERE id = ?)
-          AND ( ? IS NULL OR ? >= (SELECT r.priority FROM roles_users ru, roles r WHERE ru.role_id = r.id AND ru.user_id = ? ORDER BY r.priority limit 1) )
-          AND ( SELECT EXISTS ( SELECT 1 FROM board_mapping WHERE board_id = (SELECT board_id FROM threads WHERE id = ?)))
+          AND (? IS NULL OR ? >= (SELECT r.priority FROM roles_users ru, roles r WHERE ru.role_id = r.id AND ru.user_id = ? ORDER BY r.priority limit 1))
+          AND (SELECT EXISTS ( SELECT 1 FROM board_mapping WHERE board_id = (SELECT board_id FROM threads WHERE id = ?)))
         """,
         b.id,
         ^mention_attrs["thread_id"],

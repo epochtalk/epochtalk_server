@@ -26,7 +26,6 @@ defmodule EpochtalkServerWeb.Controllers.Post do
   @doc """
   Used to create posts
   """
-  # TODO(akinsey): Implement track ip plugin, hooks, pre methods, and image processing
   def create(conn, attrs) do
     # Authorizations Checks
     with {:auth, user} <- {:auth, Guardian.Plug.current_resource(conn)},
@@ -47,6 +46,10 @@ defmodule EpochtalkServerWeb.Controllers.Post do
            {:can_read, Board.get_read_access_by_thread_id(thread_id, user_priority)},
          {:can_write, {:ok, true}} <-
            {:can_write, Board.get_write_access_by_thread_id(thread_id, user_priority)},
+
+         # TODO(akinsey): Implement the following for completion
+         # Plugins
+         # 1) Track IP
 
          # Pre Processing
 

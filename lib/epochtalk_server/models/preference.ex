@@ -165,7 +165,7 @@ defmodule EpochtalkServer.Models.Preference do
   end
 
   @doc """
-  Enables Email Notifications (`notify_replied_threads`) for `ThreadSubscriptions`
+  Enables Email Notifications (`notify_replied_threads`) for `ThreadSubscription`
   """
   @spec toggle_notify_replied_threads(user_id :: integer, enabled :: boolean) ::
           boolean | {:error, Ecto.Changeset.t()}

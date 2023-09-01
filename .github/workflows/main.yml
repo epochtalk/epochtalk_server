@@ -166,10 +166,9 @@ jobs:
   #     - name: Checkout
   #       uses: actions/checkout@v3.6.0
   #     - name: Semantic Release
-  #       uses: cycjimmy/semantic-release-action@v3.0.0
+  #       uses: cycjimmy/semantic-release-action@v4.0.0
   #       with:
   #         dry_run: true
-  #         semantic_version: 19.0.5
   #         branches: |
   #           [
   #             'github-actions'
@@ -184,9 +183,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3.6.0
       - name: Semantic Release
-        uses: cycjimmy/semantic-release-action@v3.0.0
+        uses: cycjimmy/semantic-release-action@v4.0.0
         with:
-          semantic_version: 19.0.5
           branches: |
             [
               'main'

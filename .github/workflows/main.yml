@@ -42,7 +42,7 @@ jobs:
           mix local.hex --force
           mix deps.get
           mix deps.compile
-  static-code-analysis:
+  static_code_analysis:
     needs: dependencies
     runs-on: ubuntu-latest
     steps:

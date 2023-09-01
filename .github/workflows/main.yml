@@ -102,7 +102,7 @@ jobs:
             priv/plts
       - name: Run dialyzer
         run: mix dialyzer --format github
-  test_job:
+  test:
     needs: dependencies
     name: Run tests
     runs-on: ubuntu-latest

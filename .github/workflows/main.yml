@@ -208,7 +208,7 @@ jobs:
       - name: Build docs
         uses: lee-dohm/generate-elixir-docs@v1.0.1
       - name: Publish to Pages
-        uses: peaceiris/actions-gh-pages@v3.9.0
+        uses: peaceiris/actions-gh-pages@v3.9.3
         with:
           deploy_key: ${{ secrets.DOCS_DEPLOY_KEY }}
           external_repository: epochtalk/server.epochtalk.github.io

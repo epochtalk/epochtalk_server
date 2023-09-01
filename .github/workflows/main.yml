@@ -16,7 +16,7 @@ jobs:
         with:
           access_token: ${{ github.token }}
       - name: Checkout
-        uses: actions/checkout@v3.5.3
+        uses: actions/checkout@v3.6.0
         with:
           ref: ${{ github.event.client_payload.branch }}
       - name: Parse .tool-versions
@@ -51,7 +51,7 @@ jobs:
         with:
           access_token: ${{ github.token }}
       - name: Checkout
-        uses: actions/checkout@v3.5.3
+        uses: actions/checkout@v3.6.0
         with:
           ref: ${{ github.event.client_payload.branch }}
       - name: Parse .tool-versions
@@ -144,7 +144,7 @@ jobs:
         id: branch-name
         uses: tj-actions/branch-names@v6.1
       - name: Checkout
-        uses: actions/checkout@v3.1.0
+        uses: actions/checkout@v3.6.0
         with:
           ref: ${{ github.event.client_payload.branch }}
       - name: Sets up an Erlang/OTP environment
@@ -168,7 +168,7 @@ jobs:
   #   runs-on: ubuntu-latest
   #   steps:
   #     - name: Checkout
-  #       uses: actions/checkout@v3.5.3
+  #       uses: actions/checkout@v3.6.0
   #     - name: Semantic Release
   #       uses: cycjimmy/semantic-release-action@v3.0.0
   #       with:
@@ -186,7 +186,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3.5.3
+        uses: actions/checkout@v3.6.0
       - name: Semantic Release
         uses: cycjimmy/semantic-release-action@v3.0.0
         with:
@@ -207,7 +207,7 @@ jobs:
         otp: ['25.3.1']
     steps:
       - name: Checkout
-        uses: actions/checkout@v3.5.3
+        uses: actions/checkout@v3.6.0
       - name: Sets up an Erlang/OTP environment
         uses: erlef/setup-beam@v1
         with:

@@ -45,10 +45,6 @@ jobs:
   static-code-analysis:
     needs: dependencies
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        elixir: ['1.14.4']
-        otp: ['25.3.1']
     steps:
       - name: Cancel previous runs
         uses: styfle/cancel-workflow-action@0.11.0
@@ -61,8 +57,8 @@ jobs:
       - name: Sets up an Erlang/OTP environment
         uses: erlef/setup-beam@v1
         with:
-          elixir-version: ${{ matrix.elixir }}
-          otp-version: ${{ matrix.otp }}
+          version-file: .tool-versions
+          version-type: strict
       - name: Retrieve cached dependencies
         uses: actions/cache@v3.0.11
         id: mix-cache

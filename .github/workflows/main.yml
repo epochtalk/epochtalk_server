@@ -197,18 +197,14 @@ jobs:
     if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/github-actions' }}
     name: Generate project documentation
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        elixir: ['1.14.4']
-        otp: ['25.3.1']
     steps:
       - name: Checkout
         uses: actions/checkout@v3.6.0
       - name: Sets up an Erlang/OTP environment
         uses: erlef/setup-beam@v1
         with:
-          elixir-version: ${{ matrix.elixir }}
-          otp-version: ${{ matrix.otp }}
+          version-file: .tool-versions
+          version-type: strict
       - name: Build docs
         uses: lee-dohm/generate-elixir-docs@v1.0.1
       - name: Publish to Pages

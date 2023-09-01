@@ -172,7 +172,7 @@ jobs:
             [
               'main',
               {
-                name: 'github-actions',
+                name: 'prerelease',
                 prerelease: true
               },
             ]

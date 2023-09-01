@@ -159,7 +159,7 @@ jobs:
       - name: Run tests
         run: mix test
   release:
-    needs: test
+    needs: [test, static_code_analysis]
     name: Release
     runs-on: ubuntu-latest
     steps:

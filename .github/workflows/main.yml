@@ -195,8 +195,8 @@ jobs:
             ]
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  generateDocs:
-    if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/github-actions' }}
+  elixir_docs:
+    if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/elixir-docs' }}
     name: Generate project documentation
     runs-on: ubuntu-latest
     steps:

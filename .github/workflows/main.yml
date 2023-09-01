@@ -158,8 +158,8 @@ jobs:
           key: ${{ runner.os }}-${{ steps.tool-versions.outputs.erlang }}-${{ steps.tool-versions.outputs.elixir }}-${{ hashFiles('mix.lock') }}
       - name: Run tests
         run: mix test
-  release_job:
-    needs: test_job
+  release:
+    needs: test
     name: Release
     runs-on: ubuntu-latest
     steps:

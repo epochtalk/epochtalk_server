@@ -28,7 +28,7 @@ jobs:
           version-file: .tool-versions
           version-type: strict
       - name: Retrieve cached dependencies
-        uses: actions/cache@v3.0.11
+        uses: actions/cache@v3.3.1
         id: mix-cache
         with:
           path: |
@@ -63,7 +63,7 @@ jobs:
           version-file: .tool-versions
           version-type: strict
       - name: Retrieve cached dependencies
-        uses: actions/cache@v3.0.11
+        uses: actions/cache@v3.3.1
         id: mix-cache
         with:
           path: |
@@ -149,7 +149,7 @@ jobs:
           version-file: .tool-versions
           version-type: strict
       - name: Retrieve cached dependencies
-        uses: actions/cache@v3.0.11
+        uses: actions/cache@v3.3.1
         id: mix-cache
         with:
           path: |

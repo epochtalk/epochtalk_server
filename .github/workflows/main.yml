@@ -10,35 +10,31 @@ on:
 jobs:
   dependencies:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        elixir: ['1.14.4']
-        otp: ['25.3.1']
     steps:
       - name: Cancel previous runs
         uses: styfle/cancel-workflow-action@0.11.0
         with:
           access_token: ${{ github.token }}
-      - name: Get branch name
-        id: branch-name
-        uses: tj-actions/branch-names@v6.1
       - name: Checkout
-        uses: actions/checkout@v3.1.0
+        uses: actions/checkout@v3.6.0
         with:
           ref: ${{ github.event.client_payload.branch }}
+      - name: Parse .tool-versions
+        id: tool-versions
+        uses: paulo-ferraz-oliveira/parse-tool-versions@v1
       - name: Sets up an Erlang/OTP environment
         uses: erlef/setup-beam@v1
         with:
-          elixir-version: ${{ matrix.elixir }}
-          otp-version: ${{ matrix.otp }}
+          version-file: .tool-versions
+          version-type: strict
       - name: Retrieve cached dependencies
-        uses: actions/cache@v3.0.11
+        uses: actions/cache@v3.3.1
         id: mix-cache
         with:
           path: |
             deps
             _build
-          key: ${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-${{ hashFiles('mix.lock') }}
+          key: ${{ runner.os }}-${{ steps.tool-versions.outputs.erlang }}-${{ steps.tool-versions.outputs.elixir }}-${{ hashFiles('mix.lock') }}
       - name: Install dependencies
         if: steps.mix-cache.outputs.cache-hit != 'true'
         run: |
@@ -46,35 +42,34 @@ jobs:
           mix local.hex --force
           mix deps.get
           mix deps.compile
-  static-code-analysis:
+  static_code_analysis:
     needs: dependencies
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        elixir: ['1.14.4']
-        otp: ['25.3.1']
     steps:
       - name: Cancel previous runs
         uses: styfle/cancel-workflow-action@0.11.0
         with:
           access_token: ${{ github.token }}
       - name: Checkout
-        uses: actions/checkout@v3.1.0
+        uses: actions/checkout@v3.6.0
         with:
           ref: ${{ github.event.client_payload.branch }}
+      - name: Parse .tool-versions
+        id: tool-versions
+        uses: paulo-ferraz-oliveira/parse-tool-versions@v1
       - name: Sets up an Erlang/OTP environment
         uses: erlef/setup-beam@v1
         with:
-          elixir-version: ${{ matrix.elixir }}
-          otp-version: ${{ matrix.otp }}
+          version-file: .tool-versions
+          version-type: strict
       - name: Retrieve cached dependencies
-        uses: actions/cache@v3.0.11
+        uses: actions/cache@v3.3.1
         id: mix-cache
         with:
           path: |
             deps
             _build
-          key: ${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-${{ hashFiles('mix.lock') }}
+          key: ${{ runner.os }}-${{ steps.tool-versions.outputs.erlang }}-${{ steps.tool-versions.outputs.elixir }}-${{ hashFiles('mix.lock') }}
       - run: mix format --check-formatted
       - run: mix credo || ret=$?; if [ $ret != 2 ]; then exit $ret; fi
       # PLT cache for dialyzer
@@ -85,9 +80,9 @@ jobs:
         id: plt_cache
         with:
           key: |
-            ${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-plt
+            ${{ runner.os }}-${{ steps.tool-versions.outputs.erlang }}-${{ steps.tool-versions.outputs.elixir }}-plt
           restore-keys: |
-            ${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-plt
+            ${{ runner.os }}-${{ steps.tool-versions.outputs.erlang }}-${{ steps.tool-versions.outputs.elixir }}-plt
           path: |
             priv/plts
       # Create PLTs if no cache was found
@@ -102,19 +97,15 @@ jobs:
         id: plt_cache_save
         with:
           key: |
-            ${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-plt
+            ${{ runner.os }}-${{ steps.tool-versions.outputs.erlang }}-${{ steps.tool-versions.outputs.elixir }}-plt
           path: |
             priv/plts
       - name: Run dialyzer
         run: mix dialyzer --format github
-  test_job:
+  test:
     needs: dependencies
     name: Run tests
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        elixir: ['1.14.4']
-        otp: ['25.3.1']
     services:
       postgres:
         image: postgres:14.2
@@ -145,83 +136,64 @@ jobs:
         uses: styfle/cancel-workflow-action@0.11.0
         with:
           access_token: ${{ github.token }}
-      - name: Get branch name
-        id: branch-name
-        uses: tj-actions/branch-names@v6.1
       - name: Checkout
-        uses: actions/checkout@v3.1.0
+        uses: actions/checkout@v3.6.0
         with:
           ref: ${{ github.event.client_payload.branch }}
+      - name: Parse .tool-versions
+        id: tool-versions
+        uses: paulo-ferraz-oliveira/parse-tool-versions@v1
       - name: Sets up an Erlang/OTP environment
         uses: erlef/setup-beam@v1
         with:
-          elixir-version: ${{ matrix.elixir }}
-          otp-version: ${{ matrix.otp }}
+          version-file: .tool-versions
+          version-type: strict
       - name: Retrieve cached dependencies
-        uses: actions/cache@v3.0.11
+        uses: actions/cache@v3.3.1
         id: mix-cache
         with:
           path: |
             deps
             _build
-          key: ${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-${{ hashFiles('mix.lock') }}
+          key: ${{ runner.os }}-${{ steps.tool-versions.outputs.erlang }}-${{ steps.tool-versions.outputs.elixir }}-${{ hashFiles('mix.lock') }}
       - name: Run tests
         run: mix test
-  # pre_release_job:
-  #   needs: test_job
-  #   name: Pre-Release
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v3.1.0
-  #     - name: Semantic Release
-  #       uses: cycjimmy/semantic-release-action@v3.0.0
-  #       with:
-  #         dry_run: true
-  #         semantic_version: 19.0.5
-  #         branches: |
-  #           [
-  #             'github-actions'
-  #           ]
-  #       env:
-  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  release_job:
-    needs: test_job
+  release:
+    needs: [test, static_code_analysis]
     name: Release
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3.1.0
+        uses: actions/checkout@v3.6.0
       - name: Semantic Release
-        uses: cycjimmy/semantic-release-action@v3.0.0
+        uses: cycjimmy/semantic-release-action@v4.0.0
         with:
-          semantic_version: 19.0.5
           branches: |
             [
-              'main'
+              'main',
+              {
+                name: 'prerelease',
+                prerelease: true
+              },
             ]
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  generateDocs:
-    if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/github-actions' }}
+  elixir_docs:
+    if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/elixir-docs' }}
     name: Generate project documentation
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        elixir: ['1.14.4']
-        otp: ['25.3.1']
     steps:
       - name: Checkout
-        uses: actions/checkout@v3.1.0
+        uses: actions/checkout@v3.6.0
       - name: Sets up an Erlang/OTP environment
         uses: erlef/setup-beam@v1
         with:
-          elixir-version: ${{ matrix.elixir }}
-          otp-version: ${{ matrix.otp }}
+          version-file: .tool-versions
+          version-type: strict
       - name: Build docs
         uses: lee-dohm/generate-elixir-docs@v1.0.1
       - name: Publish to Pages
-        uses: peaceiris/actions-gh-pages@v3.9.0
+        uses: peaceiris/actions-gh-pages@v3.9.3
         with:
           deploy_key: ${{ secrets.DOCS_DEPLOY_KEY }}
           external_repository: epochtalk/server.epochtalk.github.io

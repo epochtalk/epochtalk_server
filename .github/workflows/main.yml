@@ -158,23 +158,6 @@ jobs:
           key: ${{ runner.os }}-${{ steps.tool-versions.outputs.erlang }}-${{ steps.tool-versions.outputs.elixir }}-${{ hashFiles('mix.lock') }}
       - name: Run tests
         run: mix test
-  # pre_release_job:
-  #   needs: test_job
-  #   name: Pre-Release
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v3.6.0
-  #     - name: Semantic Release
-  #       uses: cycjimmy/semantic-release-action@v4.0.0
-  #       with:
-  #         dry_run: true
-  #         branches: |
-  #           [
-  #             'github-actions'
-  #           ]
-  #       env:
-  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   release_job:
     needs: test_job
     name: Release
@@ -187,12 +170,16 @@ jobs:
         with:
           branches: |
             [
-              'main'
+              'main',
+              {
+                name: 'prerelease',
+                prerelease: true
+              },
             ]
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  generateDocs:
-    if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/github-actions' }}
+  elixir_docs:
+    if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/elixir-docs' }}
     name: Generate project documentation
     runs-on: ubuntu-latest
     steps:

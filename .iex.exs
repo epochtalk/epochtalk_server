@@ -15,6 +15,7 @@ alias EpochtalkServer.Models.{
   Configuration,
   Invitation,
   Mention,
+  MentionIgnored,
   MetadataBoard,
   MetadataThread,
   MetricRankMap,

@@ -49,7 +49,7 @@ defmodule EpochtalkServer.Models.WatchThread do
   """
   @spec create(user :: User.t(), thread_id :: non_neg_integer) ::
           {:ok, watch_thread :: t()} | {:error, Ecto.Changeset.t()}
-  def create(%User{} = user, thread_id) do
+  def create(%{} = user, thread_id) do
     watch_thread_cs = create_changeset(%WatchThread{user_id: user.id, thread_id: thread_id})
 
     case Repo.insert(watch_thread_cs) do

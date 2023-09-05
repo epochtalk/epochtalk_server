@@ -53,7 +53,7 @@ defmodule EpochtalkServer.Models.ThreadSubscription do
   """
   @spec create(user :: User.t(), thread_id :: non_neg_integer) ::
           {:ok, thread_subscription :: t()} | {:error, Ecto.Changeset.t()} | nil
-  def create(%User{} = user, thread_id) do
+  def create(%{} = user, thread_id) do
     if Preference.notify_replied_threads?(user.id) do
       thread_subscription_cs =
         create_changeset(%ThreadSubscription{user_id: user.id, thread_id: thread_id})
@@ -67,7 +67,7 @@ defmodule EpochtalkServer.Models.ThreadSubscription do
   """
   @spec delete(user :: User.t(), thread_id :: non_neg_integer) ::
           {non_neg_integer(), nil | [term()]}
-  def delete(%User{} = user, thread_id) do
+  def delete(%{} = user, thread_id) do
     query =
       from t in ThreadSubscription,
         where: t.user_id == ^user.id and t.thread_id == ^thread_id
@@ -80,7 +80,7 @@ defmodule EpochtalkServer.Models.ThreadSubscription do
   """
   @spec delete_all(user :: User.t()) ::
           {non_neg_integer(), nil | [term()]}
-  def delete_all(%User{} = user) do
+  def delete_all(%{} = user) do
     query =
       from t in ThreadSubscription,
         where: t.user_id == ^user.id
@@ -93,7 +93,7 @@ defmodule EpochtalkServer.Models.ThreadSubscription do
   """
   @spec get_subscriber_email_data(user :: User.t(), thread_id :: non_neg_integer) ::
           {:ok, thread_subscription :: t()} | {:error, Ecto.Changeset.t()}
-  def get_subscriber_email_data(%User{} = user, thread_id) do
+  def get_subscriber_email_data(%{} = user, thread_id) do
     inner_thread_subscription_query =
       from t in ThreadSubscription,
         where: t.thread_id == ^thread_id and t.user_id != ^user.id,

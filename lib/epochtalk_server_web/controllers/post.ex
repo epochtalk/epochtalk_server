@@ -22,6 +22,7 @@ defmodule EpochtalkServerWeb.Controllers.Post do
   alias EpochtalkServer.Models.User
   alias EpochtalkServer.Models.UserIgnored
   alias EpochtalkServer.Models.WatchThread
+  alias EpochtalkServer.Models.ThreadSubscription
 
   @doc """
   Used to create posts
@@ -65,12 +66,15 @@ defmodule EpochtalkServerWeb.Controllers.Post do
          # 4) Mentions -> create mentions (post)
          # 5) Mentions -> correct text search vector after creating mentions (post)
          # 6) Thread Subscriptions -> Email Subscribers (post)
-         # 7) Thread Subscriptions -> Subscribe to Thread (post)
+         # 7) Thread Subscriptions -> Subscribe to Thread (post) (done)
 
          # Data Queries
          {:ok, post_data} <- Post.create(attrs, user.id) do
       # watch thread after post is created
       WatchThread.create(user, thread_id)
+
+      # Subscribe to Thread (this will check user preferences)
+      ThreadSubscription.create(user, thread_id)
 
       # render post json data
       render(conn, :create, %{post_data: post_data})

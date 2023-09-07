@@ -7,6 +7,8 @@ defmodule EpochtalkServer.Models.ThreadSubscription do
   alias EpochtalkServer.Models.User
   alias EpochtalkServer.Models.Preference
   alias EpochtalkServer.Models.Post
+  alias EpochtalkServer.Models.Thread
+  alias EpochtalkServer.Mailer
 
   @moduledoc """
   `ThreadSubscription` model, for performing actions relating to `ThreadSubscription`
@@ -106,6 +108,12 @@ defmodule EpochtalkServer.Models.ThreadSubscription do
           user_id: u.id,
           email: u.email,
           username: u.username,
+          thread_slug:
+            subquery(
+              from t in Thread,
+              where: t.id == ^thread_id,
+              select: t.slug
+            ),
           id:
             subquery(
               from p in Post,
@@ -141,5 +149,16 @@ defmodule EpochtalkServer.Models.ThreadSubscription do
         }
 
     Repo.all(query)
+  end
+
+  # === Public Helper Functions ===
+
+  def email_subscribers(%{} = user, thread_id) do
+    get_subscriber_email_data(user, thread_id)
+    |> Enum.each(fn email_data ->
+      IO.inspect email_data
+      Mailer.send_thread_subscription(email_data)
+      if email_data.thread_author == false, do: delete(user, thread_id)
+    end)
   end
 end

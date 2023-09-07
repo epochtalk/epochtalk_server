@@ -111,8 +111,8 @@ defmodule EpochtalkServer.Models.ThreadSubscription do
           thread_slug:
             subquery(
               from t in Thread,
-              where: t.id == ^thread_id,
-              select: t.slug
+                where: t.id == ^thread_id,
+                select: t.slug
             ),
           id:
             subquery(
@@ -156,7 +156,6 @@ defmodule EpochtalkServer.Models.ThreadSubscription do
   def email_subscribers(%{} = user, thread_id) do
     get_subscriber_email_data(user, thread_id)
     |> Enum.each(fn email_data ->
-      IO.inspect email_data
       Mailer.send_thread_subscription(email_data)
       if email_data.thread_author == false, do: delete(user, thread_id)
     end)

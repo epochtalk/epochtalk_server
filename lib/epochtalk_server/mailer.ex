@@ -44,19 +44,22 @@ defmodule EpochtalkServer.Mailer do
   """
   @spec send_thread_subscription(email_data :: map) :: {:ok, term} | {:error, term}
   def send_thread_subscription(%{
-    email: email,
-    id: last_post_id,
-    position: last_post_position,
-    thread_author: _thread_author,
-    thread_slug: thread_slug,
-    title: thread_title,
-    user_id: _user_id,
-    username: username}) do
+        email: email,
+        id: last_post_id,
+        position: last_post_position,
+        thread_author: _thread_author,
+        thread_slug: thread_slug,
+        title: thread_title,
+        user_id: _user_id,
+        username: username
+      }) do
     config = Application.get_env(:epochtalk_server, :frontend_config)
     frontend_url = config["frontend_url"]
     website_title = config["website"]["title"]
     from_address = config["emailer"]["options"]["from_address"]
-    thread_url = "#{frontend_url}/threads/#{thread_slug}?start=#{last_post_position}##{last_post_id}"
+
+    thread_url =
+      "#{frontend_url}/threads/#{thread_slug}?start=#{last_post_position}##{last_post_id}"
 
     content =
       generate_from_base_template(

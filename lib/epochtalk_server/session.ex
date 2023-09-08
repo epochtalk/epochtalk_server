@@ -58,6 +58,7 @@ defmodule EpochtalkServer.Session do
     update_user_info(user.id, user.username, avatar: avatar)
     update_roles(user.id, user.roles)
     update_moderating(user.id, user.moderating)
+    {:ok, user}
   end
 
   @doc """

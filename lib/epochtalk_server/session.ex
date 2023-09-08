@@ -56,6 +56,7 @@ defmodule EpochtalkServer.Session do
     user = User.by_id(user_id)
     avatar = if is_nil(user.profile), do: nil, else: user.profile.avatar
     update_user_info(user.id, user.username, avatar: avatar)
+    update_roles(user.id, user.roles)
   end
 
   @doc """
@@ -201,8 +202,7 @@ defmodule EpochtalkServer.Session do
     add_session(user.id, session_id, ttl)
   end
 
-  # use default role
-  defp update_roles(user_id, roles, ttl) when is_list(roles) do
+  defp update_roles(user_id, roles, ttl \\ nil) when is_list(roles) do
     # save/replace roles to redis under "user:{user_id}:roles"
     role_lookups = roles |> Enum.map(& &1.lookup)
     role_key = generate_key(user_id, "roles")
@@ -213,6 +213,8 @@ defmodule EpochtalkServer.Session do
     unless role_lookups == [],
       do: Enum.each(role_lookups, &Redix.command(:redix, ["SADD", role_key, &1]))
 
+    # if ttl is not provided, re-use old_ttl
+    ttl = if is_nil(ttl), do: old_ttl, else: ttl
     # set ttl
     maybe_extend_ttl(role_key, ttl, old_ttl)
   end

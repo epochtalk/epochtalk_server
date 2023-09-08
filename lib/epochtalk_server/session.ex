@@ -57,6 +57,7 @@ defmodule EpochtalkServer.Session do
     avatar = if is_nil(user.profile), do: nil, else: user.profile.avatar
     update_user_info(user.id, user.username, avatar: avatar)
     update_roles(user.id, user.roles)
+    update_moderating(user.id, user.moderating)
   end
 
   @doc """
@@ -219,7 +220,7 @@ defmodule EpochtalkServer.Session do
     maybe_extend_ttl(role_key, ttl, old_ttl)
   end
 
-  defp update_moderating(user_id, moderating, ttl) do
+  defp update_moderating(user_id, moderating, ttl \\ nil) do
     # get list of board ids from user.moderating
     moderating = moderating |> Enum.map(& &1.board_id)
     # save/replace moderating boards to redis under "user:{user_id}:moderating"
@@ -231,6 +232,8 @@ defmodule EpochtalkServer.Session do
     unless moderating == [],
       do: Enum.each(moderating, &Redix.command(:redix, ["SADD", moderating_key, &1]))
 
+    # if ttl is not provided, re-use old_ttl
+    ttl = if is_nil(ttl), do: old_ttl, else: ttl
     # set ttl
     maybe_extend_ttl(moderating_key, ttl, old_ttl)
   end

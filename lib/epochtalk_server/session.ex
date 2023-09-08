@@ -57,6 +57,16 @@ defmodule EpochtalkServer.Session do
     avatar = if is_nil(user.profile), do: nil, else: user.profile.avatar
     update_user_info(user.id, user.username, avatar: avatar)
     update_roles(user.id, user.roles)
+
+    ban_info =
+      if is_nil(user.ban_info), do: %{}, else: %{ban_expiration: user.ban_info.expiration}
+
+    ban_info =
+      if !is_nil(user.malicious_score) && user.malicious_score >= 1,
+        do: Map.put(ban_info, :malicious_score, user.malicious_score),
+        else: ban_info
+
+    update_ban_info(user.id, ban_info)
     update_moderating(user.id, user.moderating)
     {:ok, user}
   end
@@ -272,7 +282,7 @@ defmodule EpochtalkServer.Session do
     end
   end
 
-  defp update_ban_info(user_id, ban_info, ttl) do
+  defp update_ban_info(user_id, ban_info, ttl \\ nil) do
     # save/replace ban_expiration to redis under "user:{user_id}:baninfo"
     ban_key = generate_key(user_id, "baninfo")
     # get current TTL
@@ -285,8 +295,14 @@ defmodule EpochtalkServer.Session do
     if malicious_score = Map.get(ban_info, :malicious_score),
       do: Redix.command(:redix, ["HSET", ban_key, "malicious_score", malicious_score])
 
-    # set ttl
-    maybe_extend_ttl(ban_key, ttl, old_ttl)
+    # if ttl is provided
+    if ttl do
+      # maybe extend ttl
+      maybe_extend_ttl(ban_key, ttl, old_ttl)
+    else
+      # otherwise, re-set old_ttl
+      maybe_extend_ttl(ban_key, old_ttl)
+    end
   end
 
   # session storage uses "pseudo-expiry" (via redis sorted-set score)

@@ -215,10 +215,14 @@ defmodule EpochtalkServer.Session do
     unless role_lookups == [],
       do: Enum.each(role_lookups, &Redix.command(:redix, ["SADD", role_key, &1]))
 
-    # if ttl is not provided, re-use old_ttl
-    ttl = if is_nil(ttl), do: old_ttl, else: ttl
-    # set ttl
-    maybe_extend_ttl(role_key, ttl, old_ttl)
+    # if ttl is provided
+    if ttl do
+      # maybe extend ttl
+      maybe_extend_ttl(role_key, ttl, old_ttl)
+    else
+      # otherwise, re-set old_ttl
+      maybe_extend_ttl(role_key, old_ttl)
+    end
   end
 
   defp update_moderating(user_id, moderating, ttl \\ nil) do
@@ -233,10 +237,14 @@ defmodule EpochtalkServer.Session do
     unless moderating == [],
       do: Enum.each(moderating, &Redix.command(:redix, ["SADD", moderating_key, &1]))
 
-    # if ttl is not provided, re-use old_ttl
-    ttl = if is_nil(ttl), do: old_ttl, else: ttl
-    # set ttl
-    maybe_extend_ttl(moderating_key, ttl, old_ttl)
+    # if ttl is provided
+    if ttl do
+      # maybe extend ttl
+      maybe_extend_ttl(moderating_key, ttl, old_ttl)
+    else
+      # otherwise, re-set old_ttl
+      maybe_extend_ttl(moderating_key, old_ttl)
+    end
   end
 
   defp update_user_info(user_id, username, opts \\ []) do
@@ -256,8 +264,10 @@ defmodule EpochtalkServer.Session do
       user_key = generate_key(user_id, "user")
       Redix.command(:redix, ["HSET", user_key, "username", username, "avatar", avatar])
     end
+
+    # if ttl is provided
     if ttl do
-      # set ttl
+      # maybe extend ttl
       maybe_extend_ttl(user_key, ttl)
     end
   end

@@ -43,6 +43,21 @@ defmodule EpochtalkServer.Session do
   end
 
   @doc """
+  Update session performs the following actions for active session:
+  * Saves `User` session info to redis (avatar, roles, moderating, ban info, etc)
+  * returns {:ok, user}
+
+  DOES NOT change:
+  * User's session id, timestamp, ttl
+  * Guardian token
+  """
+  @spec update(user :: User.t()) :: {:ok, user :: User.t()}
+  def update(%User{} = user) do
+    avatar = if is_nil(user.profile), do: nil, else: user.profile.avatar
+    update_user_info(user.id, user.username, avatar: avatar)
+  end
+
+  @doc """
   Get the resource for a specified user_id and session_id if available
   Otherwise, return an error
   """
@@ -169,7 +184,7 @@ defmodule EpochtalkServer.Session do
 
   defp save(%User{} = user, session_id, ttl) do
     avatar = if is_nil(user.profile), do: nil, else: user.profile.avatar
-    update_user_info(user.id, user.username, avatar, ttl)
+    update_user_info(user.id, user.username, avatar: avatar, ttl: ttl)
     update_roles(user.id, user.roles, ttl)
 
     ban_info =
@@ -217,26 +232,27 @@ defmodule EpochtalkServer.Session do
     maybe_extend_ttl(moderating_key, ttl, old_ttl)
   end
 
-  defp update_user_info(user_id, username, ttl) do
+  defp update_user_info(user_id, username, opts \\ []) do
+    # save user info to redis hash under "user:{user_id}"
     user_key = generate_key(user_id, "user")
-    # delete avatar from redis hash under "user:{user_id}"
-    Redix.command(:redix, ["HDEL", user_key, "avatar"])
-    # save username to redis hash under "user:{user_id}"
-    Redix.command(:redix, ["HSET", user_key, "username", username])
-    # set ttl
-    maybe_extend_ttl(user_key, ttl)
-  end
-
-  defp update_user_info(user_id, username, avatar, ttl) when is_nil(avatar) or avatar == "" do
-    update_user_info(user_id, username, ttl)
-  end
-
-  defp update_user_info(user_id, username, avatar, ttl) do
-    # save username, avatar to redis hash under "user:{user_id}"
-    user_key = generate_key(user_id, "user")
-    Redix.command(:redix, ["HSET", user_key, "username", username, "avatar", avatar])
-    # set ttl
-    maybe_extend_ttl(user_key, ttl)
+    avatar = opts[:avatar]
+    ttl = opts[:ttl]
+    # if avatar not present
+    if is_nil(avatar) do
+      Redix.command(:redix, ["HDEL", user_key, "avatar"])
+      # delete avatar from redis hash
+      Redix.command(:redix, ["HDEL", user_key, "avatar"])
+      # save username to redis hash
+      Redix.command(:redix, ["HSET", user_key, "username", username])
+    else
+      # save username and avatar to redis hash
+      user_key = generate_key(user_id, "user")
+      Redix.command(:redix, ["HSET", user_key, "username", username, "avatar", avatar])
+    end
+    if ttl do
+      # set ttl
+      maybe_extend_ttl(user_key, ttl)
+    end
   end
 
   defp update_ban_info(user_id, ban_info, ttl) do

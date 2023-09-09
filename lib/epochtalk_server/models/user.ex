@@ -164,8 +164,8 @@ defmodule EpochtalkServer.Models.User do
   def by_id(id) when is_integer(id) do
     query =
       from u in User,
-      where: u.id == ^id,
-      preload: [:preferences, :profile, :ban_info, :moderating, :roles]
+        where: u.id == ^id,
+        preload: [:preferences, :profile, :ban_info, :moderating, :roles]
 
     if user = Repo.one(query),
       do: {:ok, user |> Role.handle_empty_user_roles() |> Role.handle_banned_user_role()},

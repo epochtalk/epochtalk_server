@@ -91,7 +91,6 @@ defmodule EpochtalkServer.Models.UserActivity do
         }
 
     db_info = Repo.one(query)
-
   end
 
   ## === Public Helper Functions ===

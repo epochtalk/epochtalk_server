@@ -160,7 +160,7 @@ defmodule EpochtalkServer.Models.User do
   @doc """
   Gets a `User` from the database by `id`
   """
-  @spec by_id(id :: integer) :: t() | nil
+  @spec by_id(id :: integer) :: {:ok, user :: t()} | {:error, :user_not_found}
   def by_id(id) when is_integer(id) do
     query =
       from u in User,

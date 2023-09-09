@@ -156,11 +156,21 @@ defmodule EpochtalkServer.Models.User do
   @spec with_email_exists?(email :: String.t()) :: true | false
   def with_email_exists?(email), do: Repo.exists?(from u in User, where: u.email == ^email)
 
+  # TODO(boka): refactor to combine duplicate code with by_username and create
   @doc """
   Gets a `User` from the database by `id`
   """
-  @spec by_id(id :: integer) :: t() | nil
-  def by_id(id) when is_integer(id), do: Repo.get_by(User, id: id)
+  @spec by_id(id :: integer) :: {:ok, user :: t()} | {:error, :user_not_found}
+  def by_id(id) when is_integer(id) do
+    query =
+      from u in User,
+        where: u.id == ^id,
+        preload: [:preferences, :profile, :ban_info, :moderating, :roles]
+
+    if user = Repo.one(query),
+      do: {:ok, user |> Role.handle_empty_user_roles() |> Role.handle_banned_user_role()},
+      else: {:error, :user_not_found}
+  end
 
   @doc """
   Returns boolean indicating if `User` account is deleted

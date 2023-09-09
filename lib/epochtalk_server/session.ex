@@ -53,7 +53,7 @@ defmodule EpochtalkServer.Session do
   """
   @spec update(user_id :: non_neg_integer) :: {:ok, user :: User.t()}
   def update(user_id) do
-    user = User.by_id(user_id)
+    {:ok, user} = User.by_id(user_id)
     avatar = if is_nil(user.profile), do: nil, else: user.profile.avatar
     update_user_info(user.id, user.username, avatar: avatar)
     update_roles(user.id, user.roles)

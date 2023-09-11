@@ -27,6 +27,10 @@ defmodule EpochtalkServerWeb.Controllers.Post do
   @doc """
   Used to create posts
   """
+  # TODO(akinsey): test cases on top of post creation
+  # * Ensure thread subsciption emails are sent out and are deleted properly after sending
+  # * Ensure user activity is updated properly
+  # * Ensure user watches thread if preference is set after creation
   def create(conn, attrs) do
     # Authorizations Checks
     with {:auth, user} <- {:auth, Guardian.Plug.current_resource(conn)},
@@ -61,15 +65,21 @@ defmodule EpochtalkServerWeb.Controllers.Post do
 
          # Hooks
          # 1) Auto Moderation (pre)
-         # 2) Update user Activity (post)
+
+         # 2) Update user Activity (post) (done)
+
          # 3) Mentions -> convert username to user id (pre)
          # 4) Mentions -> create mentions (post)
          # 5) Mentions -> correct text search vector after creating mentions (post)
-         # 6) Thread Subscriptions -> Email Subscribers (post) (wip)
+
+         # 6) Thread Subscriptions -> Email Subscribers (post) (done)
          # 7) Thread Subscriptions -> Subscribe to Thread (post) (done)
 
          # Data Queries
          {:ok, post_data} <- Post.create(attrs, user.id) do
+      # Update user activity
+      UserActivity.update_user_activity(user)
+
       # watch thread after post is created
       WatchThread.create(user, thread_id)
 

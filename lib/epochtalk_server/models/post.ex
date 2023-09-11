@@ -198,6 +198,25 @@ defmodule EpochtalkServer.Models.Post do
   end
 
   @doc """
+  Get number of posts by a specific user between two dates, used for `UserActivity` algorithm.
+  """
+  @spec count_by_user_id_in_range(
+          user_id :: non_neg_integer,
+          range_start :: NaiveDateTime.t(),
+          range_end :: NaiveDateTime.t()
+        ) ::
+          non_neg_integer
+  def count_by_user_id_in_range(user_id, range_start, range_end) do
+    query =
+      from p in Post,
+        select: count(p.id),
+        where:
+          p.user_id == ^user_id and p.created_at >= ^range_start and p.created_at <= ^range_end
+
+    Repo.one(query)
+  end
+
+  @doc """
   Paginates `Post` records for a given a `Thread`
   """
   @spec page_by_thread_id(

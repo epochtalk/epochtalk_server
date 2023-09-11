@@ -257,7 +257,7 @@ defmodule EpochtalkServer.Session do
     end
   end
 
-  defp update_user_info(user_id, username, opts \\ []) do
+  defp update_user_info(user_id, username, opts) do
     # save user info to redis hash under "user:{user_id}"
     user_key = generate_key(user_id, "user")
     avatar = opts[:avatar]

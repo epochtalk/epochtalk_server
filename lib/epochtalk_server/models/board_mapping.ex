@@ -25,7 +25,8 @@ defmodule EpochtalkServer.Models.BoardMapping do
              :category_id,
              :view_order,
              :stats,
-             :thread
+             :thread,
+             :sticky_thread_count
            ]}
   @primary_key false
   schema "board_mapping" do
@@ -35,6 +36,7 @@ defmodule EpochtalkServer.Models.BoardMapping do
     field :view_order, :integer
     field :stats, :map, virtual: true
     field :thread, :map, virtual: true
+    field :sticky_thread_count, :map, virtual: true
   end
 
   ## === Changesets Functions ===
@@ -80,10 +82,9 @@ defmodule EpochtalkServer.Models.BoardMapping do
 
   @doc """
   Returns BoardMapping with loaded boards and relevant metadata
-
-  TODO(akinsey): writing this assuming other models will update metadata board table properly.
-  Old implementation was querying metadata boards then filling in holes in the data after the fact.
   """
+  # TODO(akinsey): writing this assuming other models will update metadata board table properly.
+  # Old implementation was querying metadata boards then filling in holes in the data after the fact.
   @spec all(opts :: list() | nil) :: [t()]
   def all(opts \\ []) do
     stripped = Keyword.get(opts, :stripped, false)
@@ -97,11 +98,19 @@ defmodule EpochtalkServer.Models.BoardMapping do
             board: %{id: b.id, slug: b.slug, name: b.name, viewable_by: b.viewable_by}
           }
       else
+        sticky_count_subquery =
+          from t in Thread,
+            where: t.sticky == true,
+            select: %{board_id: t.board_id, sticky_thread_count: count(t.id)},
+            group_by: [t.board_id]
+
         from bm in BoardMapping,
           left_join: mb in MetadataBoard,
           on: bm.board_id == mb.board_id,
           left_join: t in Thread,
           on: mb.last_thread_id == t.id,
+          left_join: s in subquery(sticky_count_subquery),
+          on: bm.board_id == s.board_id,
           select_merge: %{
             stats: mb,
             thread: %{
@@ -109,7 +118,8 @@ defmodule EpochtalkServer.Models.BoardMapping do
               last_thread_post_count: t.post_count,
               last_thread_created_at: t.created_at,
               last_thread_updated_at: t.updated_at
-            }
+            },
+            sticky_thread_count: s.sticky_thread_count
           },
           preload: [:board]
       end

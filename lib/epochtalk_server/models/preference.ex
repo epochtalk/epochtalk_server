@@ -63,7 +63,7 @@ defmodule EpochtalkServer.Models.Preference do
   end
 
   @doc """
-  Creates a create changeset for `Preference` model
+  Creates an update changeset for `Preference` model
   """
   @spec update_changeset(preference :: t(), attrs :: map() | nil) :: Ecto.Changeset.t()
   def update_changeset(preference, attrs \\ %{}) do
@@ -147,4 +147,70 @@ defmodule EpochtalkServer.Models.Preference do
           {:ok, preference_changeset :: Ecto.Changeset.t()}
           | {:error, preference_changeset :: Ecto.Changeset.t()}
   def by_user_id(user_id) when is_integer(user_id), do: Repo.get_by(Preference, user_id: user_id)
+
+  @doc """
+  Returns boolean indicating if specific `User` has `notify_replied_threads` `Preference` set
+  """
+  @spec notify_replied_threads?(user_id :: integer) :: boolean
+  def notify_replied_threads?(user_id) when is_integer(user_id) do
+    query =
+      from p in Preference,
+        where: p.user_id == ^user_id,
+        select: p.notify_replied_threads
+
+    case Repo.one(query) do
+      true -> true
+      _ -> false
+    end
+  end
+
+  @doc """
+  Enables Email Notifications (`notify_replied_threads`) for `ThreadSubscription`
+  """
+  @spec toggle_notify_replied_threads(user_id :: integer, enabled :: boolean) ::
+          boolean | {:error, Ecto.Changeset.t()}
+  def toggle_notify_replied_threads(user_id, enabled)
+      when is_integer(user_id) and is_boolean(enabled) do
+    case Repo.insert(
+           %Preference{user_id: user_id, notify_replied_threads: enabled},
+           on_conflict: [set: [notify_replied_threads: enabled]],
+           conflict_target: [:user_id]
+         ) do
+      {:ok, _} -> enabled
+      {:error, err} -> {:error, err}
+    end
+  end
+
+  @doc """
+  Returns boolean indicating if specific `User` has `email_mentions` `Preference` set
+  """
+  @spec email_mentions?(user_id :: integer) :: boolean
+  def email_mentions?(user_id) when is_integer(user_id) do
+    query =
+      from p in Preference,
+        where: p.user_id == ^user_id,
+        select: p.email_mentions
+
+    case Repo.one(query) do
+      true -> true
+      _ -> false
+    end
+  end
+
+  @doc """
+  Enables Email Notifications (`email_mentions`) for `Mention`
+  """
+  @spec toggle_email_mentions(user_id :: integer, enabled :: boolean) ::
+          boolean | {:error, Ecto.Changeset.t()}
+  def toggle_email_mentions(user_id, enabled)
+      when is_integer(user_id) and is_boolean(enabled) do
+    case Repo.insert(
+           %Preference{user_id: user_id, email_mentions: enabled},
+           on_conflict: [set: [email_mentions: enabled]],
+           conflict_target: [:user_id]
+         ) do
+      {:ok, _} -> enabled
+      {:error, err} -> {:error, err}
+    end
+  end
 end

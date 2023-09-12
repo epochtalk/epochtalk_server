@@ -117,7 +117,7 @@ defmodule EpochtalkServerWeb.Helpers.Validate do
       :boolean -> to_bool(str, opts)
       :integer -> to_int(str, opts)
       # type not supported, return string
-      _ -> str
+      _ -> to_str(str, opts)
     end
   end
 
@@ -134,15 +134,22 @@ defmodule EpochtalkServerWeb.Helpers.Validate do
 
   defp to_int(str, opts) do
     case Integer.parse(str) do
-      {num, ""} -> validate_int_opts(num, opts)
+      {num, ""} -> validate_min_max_opts(num, opts)
       _ -> raise(InvalidPayload, opts)
     end
   end
 
-  defp validate_int_opts(value, opts), do: validate_int_opts(value, opts[:min], opts[:max], opts)
-  defp validate_int_opts(value, nil, nil, _opts), do: value
-  defp validate_int_opts(value, min, max, _opts) when value >= min and value <= max, do: value
-  defp validate_int_opts(value, min, nil, _opts) when value >= min, do: value
-  defp validate_int_opts(value, nil, max, _opts) when value <= max, do: value
-  defp validate_int_opts(_value, _min, _max, opts), do: raise(InvalidPayload, opts)
+  defp to_str(str, opts) do
+    str_len = String.length(str)
+    if str_len == validate_min_max_opts(str_len, opts), do: str
+  end
+
+  defp validate_min_max_opts(value, opts),
+    do: validate_min_max_opts(value, opts[:min], opts[:max], opts)
+
+  defp validate_min_max_opts(value, nil, nil, _opts), do: value
+  defp validate_min_max_opts(value, min, max, _opts) when value >= min and value <= max, do: value
+  defp validate_min_max_opts(value, min, nil, _opts) when value >= min, do: value
+  defp validate_min_max_opts(value, nil, max, _opts) when value <= max, do: value
+  defp validate_min_max_opts(_value, _min, _max, opts), do: raise(InvalidPayload, opts)
 end

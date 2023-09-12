@@ -36,7 +36,53 @@ defmodule EpochtalkServer.Mailer do
     |> subject("[#{website_title}] Account Confirmation")
     |> html_body(content)
     |> deliver()
-    |> case do
+    |> handle_delivered_email()
+  end
+
+  @doc """
+  Sends thread subscription email
+  """
+  @spec send_thread_subscription(email_data :: map) :: {:ok, term} | {:error, term}
+  def send_thread_subscription(%{
+        email: email,
+        id: last_post_id,
+        position: last_post_position,
+        thread_author: _thread_author,
+        thread_slug: thread_slug,
+        title: thread_title,
+        user_id: _user_id,
+        username: username
+      }) do
+    config = Application.get_env(:epochtalk_server, :frontend_config)
+    frontend_url = config["frontend_url"]
+    website_title = config["website"]["title"]
+    from_address = config["emailer"]["options"]["from_address"]
+
+    thread_url =
+      "#{frontend_url}/threads/#{thread_slug}?start=#{last_post_position}##{last_post_id}"
+
+    content =
+      generate_from_base_template(
+        """
+        <h3>New replies to thread "#{thread_title}"</h3>
+        Hello #{username}! Please visit the link below to view new thread replies.<br /><br />
+        <a href="#{thread_url}">View Replies</a><br /><br />
+        <small>Raw thread URL: #{thread_url}</small>
+        """,
+        config
+      )
+
+    new()
+    |> to({username, email})
+    |> from({website_title, from_address})
+    |> subject("[#{website_title}] New replies to thread #{thread_title}")
+    |> html_body(content)
+    |> deliver()
+    |> handle_delivered_email()
+  end
+
+  defp handle_delivered_email(result) do
+    case result do
       {:ok, email_metadata} ->
         {:ok, email_metadata}
 

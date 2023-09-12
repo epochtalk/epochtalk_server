@@ -84,7 +84,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.MentionJSON do
       }
     ]
 
-    pagination_data = %{page: 1, limit: 1, next: true, prev: false}
+    pagination_data = %{page: 1, per_page: 1, next: true, prev: false}
 
     result = %{
       data: [
@@ -195,7 +195,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.MentionJSON do
       }
     ]
 
-    pagination_data = %{page: 2, limit: 1, next: true, prev: true}
+    pagination_data = %{page: 2, per_page: 1, next: true, prev: true}
 
     result = %{
       data: [

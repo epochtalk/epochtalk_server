@@ -33,35 +33,12 @@ defmodule EpochtalkServerWeb.Helpers.ACL do
           error_msg :: String.t() | nil
         ) :: no_return | :ok
   def allow!(
-        %Plug.Conn{private: %{guardian_default_resource: user}} = _conn,
+        %Plug.Conn{private: %{guardian_default_resource: _user}} = conn,
         permission_path,
         error_msg
       )
       when is_binary(permission_path) do
-    # check if login is required to view forum
-    config = Application.get_env(:epochtalk_server, :frontend_config)
-    login_required = config[:login_required] || config["login_required"]
-    # default to user's roles > anonymous > private
-    user_roles =
-      if user == nil,
-        do:
-          if(login_required,
-            do: [Role.by_lookup("private")],
-            else: [Role.by_lookup("anonymous")]
-          ),
-        else: user.roles
-
-    authed_permissions = Role.get_masked_permissions(user_roles)
-
-    # convert path to array
-    path_list = String.split(permission_path, ".")
-    # append "allow" to array
-    path_list =
-      if List.last(path_list) != "allow",
-        do: path_list ++ ["allow"],
-        else: path_list
-
-    has_permission = Kernel.get_in(authed_permissions, path_list)
+    has_permission = has_permission(conn, permission_path)
     if !has_permission, do: raise(InvalidPermission, message: error_msg)
     :ok
   end
@@ -93,15 +70,71 @@ defmodule EpochtalkServerWeb.Helpers.ACL do
         )
 
   @doc """
+  Returns boolean indicating if supplied `User` or authenticated `Plug.Conn.t()` has the
+  a role with the supplied `Permission` path.
+  """
+  @spec has_permission(
+          Plug.Conn.t() | User.t() | any(),
+          permission_path :: String.t()
+        ) :: boolean
+  def has_permission(
+        %Plug.Conn{private: %{guardian_default_resource: user}} = _conn,
+        permission_path
+      )
+      when is_binary(permission_path) do
+    # check if login is required to view forum
+    config = Application.get_env(:epochtalk_server, :frontend_config)
+    login_required = config[:login_required] || config["login_required"]
+    # default to user's roles > anonymous > private
+    user_roles =
+      if user == nil,
+        do:
+          if(login_required,
+            do: [Role.by_lookup("private")],
+            else: [Role.by_lookup("anonymous")]
+          ),
+        else: user.roles
+
+    authed_permissions = Role.get_masked_permissions(user_roles)
+
+    # convert path to array
+    path_list = String.split(permission_path, ".")
+
+    # check provided permission path
+    has_permission = Kernel.get_in(authed_permissions, path_list)
+
+    # if has_permission is nil, append "allow" to provided permission
+    # path and try again
+    has_permission =
+      if is_nil(has_permission) and List.last(path_list) != "allow",
+        do: Kernel.get_in(authed_permissions, path_list ++ ["allow"]),
+        else: has_permission
+
+    # converts output to boolean, nil -> false, true -> true
+    !!has_permission
+  end
+
+  def has_permission(%Plug.Conn{}, permission_path) when is_binary(permission_path),
+    do: has_permission(%Plug.Conn{private: %{guardian_default_resource: nil}}, permission_path)
+
+  def has_permission(%User{} = user, permission_path) when is_binary(permission_path),
+    do: has_permission(%Plug.Conn{private: %{guardian_default_resource: user}}, permission_path)
+
+  def has_permission(%{} = user, permission_path) when is_binary(permission_path),
+    do: has_permission(%Plug.Conn{private: %{guardian_default_resource: user}}, permission_path)
+
+  def has_permission(nil, permission_path) when is_binary(permission_path),
+    do: has_permission(%Plug.Conn{private: %{guardian_default_resource: nil}}, permission_path)
+
+  @doc """
   Helper which returns the active User's priority.
 
   Will return priorty of role with highest permissions if the user is authenticated, otherwise anonymous priority
   is returned if `frontend_config.login_required` is false otherwise private role priority is returned. If
   user is banned the Banned role priority is returned.
-
-  TODO(akinsey): review chain of authenticated user's roles. See if banned and user roles are being defaulted
-  prior to calling this function or if this function should handle defaulting the user's roles
   """
+  # TODO(akinsey): review chain of authenticated user's roles. See if banned and user roles are being defaulted
+  # prior to calling this function or if this function should handle defaulting the user's roles
   @spec get_user_priority(Plug.Conn.t() | User.t()) :: non_neg_integer
   def get_user_priority(%{id: id, roles: roles} = _user) when not is_nil(id) and is_list(roles),
     do: Role.get_masked_permissions(roles).priority

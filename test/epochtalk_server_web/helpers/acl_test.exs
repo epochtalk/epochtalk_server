@@ -174,4 +174,71 @@ defmodule Test.EpochtalkServerWeb.Helpers.ACL do
       end
     end
   end
+
+  describe "has_permission/2" do
+    @tag :authenticated
+    test "returns true with valid 'User' role permissions", %{authed_user: authed_user} do
+      assert ACL.has_permission(authed_user, "boards.allCategories") == true
+      assert ACL.has_permission(authed_user, "posts.create") == true
+      assert ACL.has_permission(authed_user, "threads.create") == true
+      assert ACL.has_permission(authed_user, "boards.allCategories.allow") == true
+      assert ACL.has_permission(authed_user, "posts.create.allow") == true
+      assert ACL.has_permission(authed_user, "threads.create.allow") == true
+    end
+
+    test "defaults to 'anonymous' role if not authenticated" do
+      assert ACL.has_permission(
+               %Plug.Conn{private: %{guardian_default_resource: nil}},
+               "boards.allCategories"
+             ) == true
+
+      assert ACL.has_permission(
+               %Plug.Conn{private: %{guardian_default_resource: nil}},
+               "posts.byThread"
+             ) == true
+
+      assert ACL.has_permission(
+               %Plug.Conn{private: %{guardian_default_resource: nil}},
+               "posts.create"
+             ) == false
+    end
+
+    test "defaults to 'private' role if 'frontend_config.login_required' is true", %{conn: conn} do
+      frontend_config =
+        Application.get_env(:epochtalk_server, :frontend_config)
+        |> Map.put(:login_required, true)
+
+      Application.put_env(:epochtalk_server, :frontend_config, frontend_config)
+
+      assert ACL.has_permission(conn, "boards.allCategories") == false
+      assert ACL.has_permission(conn, "posts.create") == false
+
+      frontend_config =
+        Application.get_env(:epochtalk_server, :frontend_config)
+        |> Map.put(:login_required, false)
+
+      Application.put_env(:epochtalk_server, :frontend_config, frontend_config)
+    end
+
+    test "returns false with unauthenticated connection's `Anonymous` role" do
+      assert ACL.has_permission(
+               %Plug.Conn{private: %{guardian_default_resource: nil}},
+               "posts.create"
+             ) == false
+
+      assert ACL.has_permission(
+               %Plug.Conn{private: %{guardian_default_resource: nil}},
+               "threads.create"
+             ) == false
+    end
+
+    @tag :authenticated
+    test "returns false with invalid 'User' role permissions", %{
+      authed_user: authed_user
+    } do
+      assert ACL.has_permission(authed_user, "roles.update") == false
+      assert ACL.has_permission(authed_user, "roles.create") == false
+      assert ACL.has_permission(authed_user, "adminSettings.find") == false
+    end
+  end
 end

@@ -71,6 +71,7 @@ defmodule EpochtalkServer.Models.Ban do
   def unban_changeset(ban, attrs \\ %{}) do
     now = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
 
+    # set ban expiration to now when unbanning
     attrs =
       attrs
       |> Map.put(:expiration, now)
@@ -163,16 +164,15 @@ defmodule EpochtalkServer.Models.Ban do
   def unban_by_user_id(user_id) when is_integer(user_id) do
     Repo.transaction(fn ->
       # delete ban role from user
-      RoleUser.delete_user_role(Role.get_banned_role_id(), user_id)
+      RoleUser.delete_banned(user_id)
       # clear user malicious score
       User.clear_malicious_score_by_id(user_id)
 
+      # unban the user by updating ban table
       case Repo.get_by(Ban, user_id: user_id) do
         nil -> {:ok, nil}
         cs -> Repo.update!(unban_changeset(cs, %{user_id: user_id}))
       end
-
-      # unban the user
     end)
     |> case do
       {:ok, ban_changeset} ->

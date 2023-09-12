@@ -8,7 +8,7 @@ defmodule EpochtalkServerWeb.Controllers.MentionJSON do
   """
   def page(%{
         mentions: mentions,
-        pagination_data: %{page: page, limit: limit, next: next, prev: prev},
+        pagination_data: %{page: page, per_page: per_page, next: next, prev: prev},
         extended: extended
       }) do
     mentions =
@@ -46,7 +46,7 @@ defmodule EpochtalkServerWeb.Controllers.MentionJSON do
       next: next,
       prev: prev,
       page: page,
-      limit: limit
+      limit: per_page
     }
 
     if extended, do: Map.put(result, :extended, extended), else: result

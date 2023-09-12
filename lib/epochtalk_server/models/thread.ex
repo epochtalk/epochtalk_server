@@ -167,6 +167,19 @@ defmodule EpochtalkServer.Models.Thread do
   end
 
   @doc """
+  Returns boolean indicating if `Thread` is locked or nil if it does not exist
+  """
+  @spec is_locked(id :: non_neg_integer) :: boolean | nil
+  def is_locked(id) when is_integer(id) do
+    query =
+      from t in Thread,
+        where: t.id == ^id,
+        select: t.locked
+
+    Repo.one(query)
+  end
+
+  @doc """
   Increments the `post_count` field given a `Thread` id
   """
   @spec increment_post_count(id :: non_neg_integer) :: {non_neg_integer(), nil}
@@ -212,9 +225,8 @@ defmodule EpochtalkServer.Models.Thread do
 
   @doc """
   Returns recent threads accounting for user priority and user's ignored boards
-
-  TODO(akinsey): complete implementation for main view
   """
+  # TODO(akinsey): complete implementation for main view
   @spec recent(user :: User.t(), user_priority :: non_neg_integer, opts :: list() | nil) :: [t()]
   def recent(_user, _user_priority, opts \\ []) do
     limit = Keyword.get(opts, :limit, 5)
@@ -260,6 +272,109 @@ defmodule EpochtalkServer.Models.Thread do
   end
 
   @doc """
+  Returns a specific `Thread` given a valid `id` or `slug`
+  """
+  @spec find(id_or_slug :: non_neg_integer | String.t()) :: map() | nil
+  def find(id) when is_integer(id) do
+    initial_query =
+      from t in Thread,
+        where: t.id == ^id,
+        select: %{
+          id: t.id,
+          board_id: t.board_id,
+          slug: t.slug,
+          locked: t.locked,
+          sticky: t.sticky,
+          moderated: t.moderated,
+          post_count: t.post_count,
+          created_at: t.created_at,
+          updated_at: t.updated_at
+        }
+
+    find_shared(initial_query)
+  end
+
+  def find(slug) when is_binary(slug) do
+    initial_query =
+      from t in Thread,
+        where: t.slug == ^slug,
+        select: %{
+          id: t.id,
+          board_id: t.board_id,
+          slug: t.slug,
+          locked: t.locked,
+          sticky: t.sticky,
+          moderated: t.moderated,
+          post_count: t.post_count,
+          created_at: t.created_at,
+          updated_at: t.updated_at
+        }
+
+    find_shared(initial_query)
+  end
+
+  @doc """
+  Convert `Thread` `slug` to `id`
+  """
+  @spec slug_to_id(slug :: String.t()) ::
+          {:ok, id :: non_neg_integer} | {:error, :thread_does_not_exist}
+  def slug_to_id(slug) when is_binary(slug) do
+    query =
+      from t in Thread,
+        where: t.slug == ^slug,
+        select: t.id
+
+    id = Repo.one(query)
+
+    if id,
+      do: {:ok, id},
+      else: {:error, :thread_does_not_exist}
+  end
+
+  @doc """
+  Check if specific `Thread` is self moderated by a specific `User`
+  """
+  @spec is_self_moderated_by_user(id :: non_neg_integer, user_id :: non_neg_integer) ::
+          boolean
+  def is_self_moderated_by_user(id, user_id) do
+    query_first_thread_post =
+      from p in Post,
+        left_join: t in Thread,
+        on: t.id == p.thread_id,
+        order_by: [p.created_at],
+        limit: 1,
+        where: p.thread_id == ^id,
+        select: %{moderated: t.moderated, user_id: p.user_id}
+
+    first_post = Repo.one(query_first_thread_post)
+
+    first_post != nil and first_post.user_id == user_id and first_post.moderated
+  end
+
+  @doc """
+  Check if specific `Thread`, using a `post_id`, is self moderated by a specific `User`
+  """
+  @spec is_self_moderated_by_user_with_post_id(
+          post_id :: non_neg_integer,
+          user_id :: non_neg_integer
+        ) ::
+          boolean
+  def is_self_moderated_by_user_with_post_id(post_id, user_id) do
+    query_first_thread_post =
+      from p in Post,
+        left_join: t in Thread,
+        on: t.id == p.thread_id,
+        order_by: [p.created_at],
+        limit: 1,
+        where: p.id == ^post_id,
+        select: %{moderated: t.moderated, user_id: p.user_id}
+
+    first_post = Repo.one(query_first_thread_post)
+
+    first_post != nil and first_post.user_id == user_id and first_post.moderated
+  end
+
+  @doc """
   Used to obtain breadcrumb data for a specific `Thread` given it's `slug`
   """
   @spec breadcrumb(slug :: String.t()) ::
@@ -283,6 +398,45 @@ defmodule EpochtalkServer.Models.Thread do
   end
 
   ## === Private Helper Functions ===
+
+  defp find_shared(initial_query) do
+    query =
+      from(t in subquery(initial_query))
+      |> join(
+        :left_lateral,
+        [t],
+        p in fragment(
+          """
+            SELECT
+              p1.user_id, p1.content ->> \'title\' as title, u.username, u.deleted as user_deleted
+              FROM posts p1
+              LEFT JOIN users u on p1.user_id = u.id
+              WHERE p1.thread_id = ?
+              ORDER BY p1.created_at
+              LIMIT 1
+          """,
+          t.id
+        ),
+        on: true
+      )
+      |> select([t, p], %{
+        id: t.id,
+        board_id: t.board_id,
+        slug: t.slug,
+        locked: t.locked,
+        sticky: t.sticky,
+        moderated: t.moderated,
+        created_at: t.created_at,
+        updated_at: t.updated_at,
+        post_count: t.post_count,
+        user_id: p.user_id,
+        title: p.title,
+        username: p.username,
+        user_deleted: p.user_deleted
+      })
+
+    Repo.one(query)
+  end
 
   defp sticky_by_board_id(board_id, page, opts) when page == 1,
     do: generate_thread_query(board_id, true, opts) |> Repo.all()

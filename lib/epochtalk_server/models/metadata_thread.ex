@@ -1,6 +1,7 @@
 defmodule EpochtalkServer.Models.MetadataThread do
   use Ecto.Schema
   import Ecto.Changeset
+  import Ecto.Query
   alias EpochtalkServer.Repo
   alias EpochtalkServer.Models.Thread
   alias EpochtalkServer.Models.MetadataThread
@@ -53,4 +54,13 @@ defmodule EpochtalkServer.Models.MetadataThread do
   @spec insert(metadata_thread :: t()) ::
           {:ok, metadata_thread :: t()} | {:error, Ecto.Changeset.t()}
   def insert(%MetadataThread{} = metadata_thread), do: Repo.insert(metadata_thread)
+
+  @doc """
+  Increments a thread's view count by incrementing `views` field in associated `MetadataThread` model
+  """
+  @spec increment_view_count(thread_id :: non_neg_integer) :: {non_neg_integer(), nil}
+  def increment_view_count(thread_id) when is_integer(thread_id) do
+    query = from mt in MetadataThread, where: mt.thread_id == ^thread_id
+    Repo.update_all(query, inc: [views: 1])
+  end
 end

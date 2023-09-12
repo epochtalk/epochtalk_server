@@ -45,6 +45,18 @@ defmodule EpochtalkServerWeb.CustomErrors do
     defp gen_message(%{key: k, type: :integer, required: _, max: m}),
       do: "Invalid payload, key '#{k}' should be of type 'integer' and less than or equal to #{m}"
 
+    defp gen_message(%{key: k, type: :string, required: _, max: max, min: min}),
+      do:
+        "Invalid payload, key '#{k}' should be of type 'string' with length between #{min} and #{max}"
+
+    defp gen_message(%{key: k, type: :string, required: _, min: m}),
+      do:
+        "Invalid payload, key '#{k}' should be of type 'string' with length greater than or equal to #{m}"
+
+    defp gen_message(%{key: k, type: :string, required: _, max: m}),
+      do:
+        "Invalid payload, key '#{k}' should be of type 'string' with length less than or equal to #{m}"
+
     # Handle error messages for required (boolean)
     defp gen_message(%{key: k, type: t, required: _}),
       do: "Invalid payload, key '#{k}' should be of type '#{Atom.to_string(t)}'"

@@ -6,6 +6,7 @@ defmodule EpochtalkServer.Models.Board do
   alias EpochtalkServer.Models.Category
   alias EpochtalkServer.Models.BoardMapping
   alias EpochtalkServer.Models.Board
+  alias EpochtalkServer.Models.Thread
   alias EpochtalkServer.Models.MetadataBoard
 
   @moduledoc """
@@ -26,6 +27,21 @@ defmodule EpochtalkServer.Models.Board do
           imported_at: NaiveDateTime.t() | nil,
           meta: map() | nil
         }
+  @derive {Jason.Encoder,
+           only: [
+             :id,
+             :name,
+             :slug,
+             :description,
+             :post_count,
+             :thread_count,
+             :viewable_by,
+             :postable_by,
+             :right_to_left,
+             :created_at,
+             :imported_at,
+             :meta
+           ]}
   schema "boards" do
     field :name, :string
     field :slug, :string
@@ -124,9 +140,30 @@ defmodule EpochtalkServer.Models.Board do
   end
 
   @doc """
-  Determines if the provided `user_priority` has write access to the board with the specified `id`
+  Determines if the provided `user_priority` has write access to the board that contains the thread
+  the specified `thread_id`
+  """
+  # TODO(akinsey): Should this check against banned user_priority?
+  @spec get_write_access_by_thread_id(
+          thread_id :: non_neg_integer,
+          user_priority :: non_neg_integer
+        ) ::
+          {:ok, can_write :: boolean} | {:error, :board_does_not_exist}
+  def get_write_access_by_thread_id(thread_id, user_priority) do
+    query =
+      from b in Board,
+        left_join: t in Thread,
+        on: t.board_id == b.id,
+        where: t.id == ^thread_id,
+        select: %{postable_by: b.postable_by}
 
-  TODO(akinsey): Should this check against banned user_priority?
+    query
+    |> Repo.one()
+    |> get_write_access(user_priority)
+  end
+
+  @doc """
+  Determines if the provided `user_priority` has write access to the board with the specified `id`
   """
   @spec get_write_access_by_id(id :: non_neg_integer, user_priority :: non_neg_integer) ::
           {:ok, can_write :: boolean} | {:error, :board_does_not_exist}
@@ -136,21 +173,34 @@ defmodule EpochtalkServer.Models.Board do
         where: b.id == ^id,
         select: %{postable_by: b.postable_by}
 
-    board = Repo.one(query)
+    query
+    |> Repo.one()
+    |> get_write_access(user_priority)
+  end
 
-    if board do
-      # allow write if postable_by is nil
-      can_write = is_nil(board.postable_by)
-      # if postable_by is an integer, check against user priority
-      can_write =
-        if is_integer(board.postable_by),
-          do: user_priority <= board.postable_by,
-          else: can_write
+  @doc """
+  Determines if the provided `user_priority` has read access to the `Board` that contains the thread
+  with the specified `thread_id`. If the user doesn't have read access to the parent of the specified
+  `Board`, the user does not have read access to the `Board` either.
 
-      {:ok, can_write}
-    else
-      {:error, :board_does_not_exist}
-    end
+  DEVELOPER NOTE(akinsey): This method replaces Threads.getThreadsBoardInBoardMapping function from the node
+  server. The previous naming convention was confusing as this is just checking read access to the board
+  """
+  # TODO(akinsey): Should this check against banned user_priority?
+  @spec get_read_access_by_thread_id(
+          thread_id :: non_neg_integer,
+          user_priority :: non_neg_integer
+        ) ::
+          {:ok, can_read :: boolean} | {:error, :board_does_not_exist}
+  def get_read_access_by_thread_id(thread_id, user_priority) do
+    query =
+      from t in Thread,
+        where: t.id == ^thread_id,
+        select: t.board_id
+
+    id = Repo.one(query)
+
+    if id, do: get_read_access_by_id(id, user_priority), else: {:error, :board_does_not_exist}
   end
 
   @doc """
@@ -158,8 +208,10 @@ defmodule EpochtalkServer.Models.Board do
   If the user doesn't have read access to the parent of the specified `Board`, the user does not have
   read access to the `Board` either.
 
-  TODO(akinsey): Should this check against banned user_priority?
+  DEVELOPER NOTE(akinsey): This method replaces Boards.getBoardInBoardMapping function from the node
+  server. The previous naming convention was confusing as this is just checking read access to the board
   """
+  # TODO(akinsey): Should this check against banned user_priority?
   @spec get_read_access_by_id(id :: non_neg_integer, user_priority :: non_neg_integer) ::
           {:ok, can_read :: boolean} | {:error, :board_does_not_exist}
   def get_read_access_by_id(id, user_priority) do
@@ -216,6 +268,21 @@ defmodule EpochtalkServer.Models.Board do
   end
 
   @doc """
+  Find a `Board` by it's `id`
+  """
+  @spec find_by_id(id :: non_neg_integer) ::
+          {:ok, t()} | {:error, :board_does_not_exist}
+  def find_by_id(id) when is_integer(id) do
+    query = from b in Board, where: b.id == ^id
+
+    board = Repo.one(query)
+
+    if board,
+      do: {:ok, board},
+      else: {:error, :board_does_not_exist}
+  end
+
+  @doc """
   Used to obtain breadcrumb data for a specific `Board` given it's `slug`
   """
   @spec breadcrumb(slug :: String.t()) ::
@@ -251,7 +318,23 @@ defmodule EpochtalkServer.Models.Board do
     end
   end
 
-  ## === Private Helper Functions ===
+  ## ======== Private Helpers ========
+
+  defp get_write_access(board, user_priority) do
+    if board do
+      # allow write if postable_by is nil
+      can_write = is_nil(board.postable_by)
+      # if postable_by is an integer, check against user priority
+      can_write =
+        if is_integer(board.postable_by),
+          do: user_priority <= board.postable_by,
+          else: can_write
+
+      {:ok, can_write}
+    else
+      {:error, :board_does_not_exist}
+    end
+  end
 
   defp get_parent_query(id) when is_integer(id) do
     find_parent_initial_query =

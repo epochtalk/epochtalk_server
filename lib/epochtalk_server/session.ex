@@ -43,6 +43,35 @@ defmodule EpochtalkServer.Session do
   end
 
   @doc """
+  Update session performs the following actions for active session:
+  * Saves `User` session info to redis (avatar, roles, moderating, ban info, etc)
+  * returns {:ok, user}
+
+  DOES NOT change:
+  * User's session id, timestamp, ttl
+  * Guardian token
+  """
+  @spec update(user_id :: non_neg_integer) :: {:ok, user :: User.t()}
+  def update(user_id) do
+    {:ok, user} = User.by_id(user_id)
+    avatar = if is_nil(user.profile), do: nil, else: user.profile.avatar
+    update_user_info(user.id, user.username, avatar: avatar)
+    update_roles(user.id, user.roles)
+
+    ban_info =
+      if is_nil(user.ban_info), do: %{}, else: %{ban_expiration: user.ban_info.expiration}
+
+    ban_info =
+      if !is_nil(user.malicious_score) && user.malicious_score >= 1,
+        do: Map.put(ban_info, :malicious_score, user.malicious_score),
+        else: ban_info
+
+    update_ban_info(user.id, ban_info)
+    update_moderating(user.id, user.moderating)
+    {:ok, user}
+  end
+
+  @doc """
   Get the resource for a specified user_id and session_id if available
   Otherwise, return an error
   """
@@ -169,7 +198,7 @@ defmodule EpochtalkServer.Session do
 
   defp save(%User{} = user, session_id, ttl) do
     avatar = if is_nil(user.profile), do: nil, else: user.profile.avatar
-    update_user_info(user.id, user.username, avatar, ttl)
+    update_user_info(user.id, user.username, avatar: avatar, ttl: ttl)
     update_roles(user.id, user.roles, ttl)
 
     ban_info =
@@ -185,8 +214,7 @@ defmodule EpochtalkServer.Session do
     add_session(user.id, session_id, ttl)
   end
 
-  # use default role
-  defp update_roles(user_id, roles, ttl) when is_list(roles) do
+  defp update_roles(user_id, roles, ttl \\ nil) when is_list(roles) do
     # save/replace roles to redis under "user:{user_id}:roles"
     role_lookups = roles |> Enum.map(& &1.lookup)
     role_key = generate_key(user_id, "roles")
@@ -197,11 +225,17 @@ defmodule EpochtalkServer.Session do
     unless role_lookups == [],
       do: Enum.each(role_lookups, &Redix.command(:redix, ["SADD", role_key, &1]))
 
-    # set ttl
-    maybe_extend_ttl(role_key, ttl, old_ttl)
+    # if ttl is provided
+    if ttl do
+      # maybe extend ttl
+      maybe_extend_ttl(role_key, ttl, old_ttl)
+    else
+      # otherwise, re-set old_ttl
+      maybe_extend_ttl(role_key, old_ttl)
+    end
   end
 
-  defp update_moderating(user_id, moderating, ttl) do
+  defp update_moderating(user_id, moderating, ttl \\ nil) do
     # get list of board ids from user.moderating
     moderating = moderating |> Enum.map(& &1.board_id)
     # save/replace moderating boards to redis under "user:{user_id}:moderating"
@@ -213,33 +247,42 @@ defmodule EpochtalkServer.Session do
     unless moderating == [],
       do: Enum.each(moderating, &Redix.command(:redix, ["SADD", moderating_key, &1]))
 
-    # set ttl
-    maybe_extend_ttl(moderating_key, ttl, old_ttl)
+    # if ttl is provided
+    if ttl do
+      # maybe extend ttl
+      maybe_extend_ttl(moderating_key, ttl, old_ttl)
+    else
+      # otherwise, re-set old_ttl
+      maybe_extend_ttl(moderating_key, old_ttl)
+    end
   end
 
-  defp update_user_info(user_id, username, ttl) do
+  defp update_user_info(user_id, username, opts) do
+    # save user info to redis hash under "user:{user_id}"
     user_key = generate_key(user_id, "user")
-    # delete avatar from redis hash under "user:{user_id}"
-    Redix.command(:redix, ["HDEL", user_key, "avatar"])
-    # save username to redis hash under "user:{user_id}"
-    Redix.command(:redix, ["HSET", user_key, "username", username])
-    # set ttl
-    maybe_extend_ttl(user_key, ttl)
+    avatar = opts[:avatar]
+    ttl = opts[:ttl]
+    # if avatar not present
+    if is_nil(avatar) do
+      Redix.command(:redix, ["HDEL", user_key, "avatar"])
+      # delete avatar from redis hash
+      Redix.command(:redix, ["HDEL", user_key, "avatar"])
+      # save username to redis hash
+      Redix.command(:redix, ["HSET", user_key, "username", username])
+    else
+      # save username and avatar to redis hash
+      user_key = generate_key(user_id, "user")
+      Redix.command(:redix, ["HSET", user_key, "username", username, "avatar", avatar])
+    end
+
+    # if ttl is provided
+    if ttl do
+      # maybe extend ttl
+      maybe_extend_ttl(user_key, ttl)
+    end
   end
 
-  defp update_user_info(user_id, username, avatar, ttl) when is_nil(avatar) or avatar == "" do
-    update_user_info(user_id, username, ttl)
-  end
-
-  defp update_user_info(user_id, username, avatar, ttl) do
-    # save username, avatar to redis hash under "user:{user_id}"
-    user_key = generate_key(user_id, "user")
-    Redix.command(:redix, ["HSET", user_key, "username", username, "avatar", avatar])
-    # set ttl
-    maybe_extend_ttl(user_key, ttl)
-  end
-
-  defp update_ban_info(user_id, ban_info, ttl) do
+  defp update_ban_info(user_id, ban_info, ttl \\ nil) do
     # save/replace ban_expiration to redis under "user:{user_id}:baninfo"
     ban_key = generate_key(user_id, "baninfo")
     # get current TTL
@@ -252,8 +295,14 @@ defmodule EpochtalkServer.Session do
     if malicious_score = Map.get(ban_info, :malicious_score),
       do: Redix.command(:redix, ["HSET", ban_key, "malicious_score", malicious_score])
 
-    # set ttl
-    maybe_extend_ttl(ban_key, ttl, old_ttl)
+    # if ttl is provided
+    if ttl do
+      # maybe extend ttl
+      maybe_extend_ttl(ban_key, ttl, old_ttl)
+    else
+      # otherwise, re-set old_ttl
+      maybe_extend_ttl(ban_key, old_ttl)
+    end
   end
 
   # session storage uses "pseudo-expiry" (via redis sorted-set score)

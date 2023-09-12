@@ -105,15 +105,27 @@ defmodule EpochtalkServer.Models.Post do
     ])
     |> validate_required([:user_id, :thread_id, :content])
     |> validate_change(:content, fn _, content ->
-      has_key = fn key ->
+      string_not_blank = fn key ->
         case String.trim(content[key] || "") do
           "" -> [{key, "can't be blank"}]
           _ -> []
         end
       end
 
-      # validate content map has :title and :body, and they're not blank
-      has_key.(:title) ++ has_key.(:body)
+      is_string = fn key ->
+        case is_binary(content[key]) do
+          false -> [{key, "must be a string"}]
+          true -> []
+        end
+      end
+
+      # check that nested values at specified keys are strings
+      errors_list = is_string.(:title) ++ is_string.(:body)
+
+      # nested values are strings, check that values aren't blank, return errors
+      if errors_list == [],
+        do: string_not_blank.(:title) ++ string_not_blank.(:body),
+        else: errors_list
     end)
     |> unique_constraint(:id, name: :posts_pkey)
     |> foreign_key_constraint(:thread_id, name: :posts_thread_id_fkey)
@@ -122,12 +134,12 @@ defmodule EpochtalkServer.Models.Post do
   ## === Database Functions ===
 
   @doc """
-  Creates a new `Post` in the database
+  Creates a new `Post` in the database, used during `Thread` creation
   """
   @spec create(post_attrs :: map()) :: {:ok, post :: t()} | {:error, Ecto.Changeset.t()}
-  def create(post) do
+  def create(post_attrs) do
     Repo.transaction(fn ->
-      post_cs = create_changeset(%Post{}, post)
+      post_cs = create_changeset(%Post{}, post_attrs)
 
       case Repo.insert(post_cs) do
         # changeset valid, insert success, update metadata threads and return thread
@@ -155,6 +167,19 @@ defmodule EpochtalkServer.Models.Post do
   end
 
   @doc """
+  Creates a new `Post` in the database
+  """
+  @spec create(post_attrs :: map(), user_id :: non_neg_integer) ::
+          {:ok, post :: t()} | {:error, Ecto.Changeset.t()}
+  def create(post_attrs, user_id),
+    do:
+      create(%{
+        "thread_id" => post_attrs["thread_id"],
+        "user_id" => user_id,
+        "content" => %{title: post_attrs["title"], body: post_attrs["body"]}
+      })
+
+  @doc """
   Sets the `post_position` of a new `Post`, by querying the `post_count` of the
   parent `Thread` and adding one
   """
@@ -170,6 +195,25 @@ defmodule EpochtalkServer.Models.Post do
 
     from(p in Post, where: p.id == ^id)
     |> Repo.update_all(set: [position: thread_post_count + 1])
+  end
+
+  @doc """
+  Get number of posts by a specific `User` between two dates, used for `UserActivity` algorithm.
+  """
+  @spec count_by_user_id_in_range(
+          user_id :: non_neg_integer,
+          range_start :: NaiveDateTime.t(),
+          range_end :: NaiveDateTime.t()
+        ) ::
+          non_neg_integer
+  def count_by_user_id_in_range(user_id, range_start, range_end) do
+    query =
+      from p in Post,
+        select: count(p.id),
+        where:
+          p.user_id == ^user_id and p.created_at >= ^range_start and p.created_at <= ^range_end
+
+    Repo.one(query)
   end
 
   @doc """
@@ -304,5 +348,31 @@ defmodule EpochtalkServer.Models.Post do
         preload: [:thread, user: :profile]
 
     Repo.one(query)
+  end
+
+  @doc """
+  Used to correct the text search vector for post after being modified for mentions
+  """
+  # TODO(akinsey): add tsv column to post, verify this is working
+  @spec fix_text_search_vector(post :: map()) :: {non_neg_integer(), nil}
+  def fix_text_search_vector(post) do
+    query =
+      from p in Post,
+        update: [
+          set: [
+            tsv:
+              fragment(
+                """
+                  setweight(to_tsvector('simple', COALESCE(?,'')), 'A') ||
+                  setweight(to_tsvector('simple', COALESCE(?,'')), 'B')
+                """,
+                ^post.title,
+                ^post.body_original
+              )
+          ]
+        ],
+        where: p.id == ^post.id
+
+    Repo.update_all(query, [])
   end
 end

@@ -19,7 +19,7 @@ defmodule EpochtalkServer.Models.PollAnswer do
   schema "poll_answers" do
     belongs_to :poll, Poll
     field :answer, :string
-    has_many :poll_responses, PollResponse
+    has_many :poll_responses, PollResponse, foreign_key: :answer_id
   end
 
   ## === Changesets Functions ===

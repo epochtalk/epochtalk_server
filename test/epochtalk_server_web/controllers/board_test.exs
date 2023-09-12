@@ -82,6 +82,15 @@ defmodule Test.EpochtalkServerWeb.Controllers.Board do
       assert response_parent_board["postable_by"] == parent_board.postable_by
       assert response_parent_board["right_to_left"] == parent_board.right_to_left
 
+      assert response_parent_board["meta"]["disable_self_mod"] ==
+               parent_board.meta["disable_self_mod"]
+
+      assert response_parent_board["meta"]["disable_post_edit"] ==
+               parent_board.meta["disable_post_edit"]
+
+      assert response_parent_board["meta"]["disable_signature"] ==
+               parent_board.meta["disable_signature"]
+
       # extract child board
       response_parent_board_children = response_parent_board["children"]
       [response_child_board | response_parent_board_children] = response_parent_board_children
@@ -99,6 +108,15 @@ defmodule Test.EpochtalkServerWeb.Controllers.Board do
       assert response_child_board["viewable_by"] == child_board.viewable_by
       assert response_child_board["postable_by"] == child_board.postable_by
       assert response_child_board["right_to_left"] == child_board.right_to_left
+
+      assert response_child_board["meta"]["disable_self_mod"] ==
+               child_board.meta["disable_self_mod"]
+
+      assert response_child_board["meta"]["disable_post_edit"] ==
+               child_board.meta["disable_post_edit"]
+
+      assert response_child_board["meta"]["disable_signature"] ==
+               child_board.meta["disable_signature"]
     end
   end
 
@@ -125,6 +143,9 @@ defmodule Test.EpochtalkServerWeb.Controllers.Board do
       assert response["viewable_by"] == board.viewable_by
       assert response["postable_by"] == board.postable_by
       assert response["right_to_left"] == board.right_to_left
+      assert response["disable_self_mod"] == board.meta["disable_self_mod"]
+      assert response["disable_post_edit"] == board.meta["disable_post_edit"]
+      assert response["disable_signature"] == board.meta["disable_signature"]
     end
   end
 

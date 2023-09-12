@@ -156,11 +156,49 @@ defmodule EpochtalkServer.Models.User do
   @spec with_email_exists?(email :: String.t()) :: true | false
   def with_email_exists?(email), do: Repo.exists?(from u in User, where: u.email == ^email)
 
+  # TODO(boka): refactor to combine duplicate code with by_username and create
   @doc """
   Gets a `User` from the database by `id`
   """
-  @spec by_id(id :: integer) :: t() | nil
-  def by_id(id) when is_integer(id), do: Repo.get_by(User, id: id)
+  @spec by_id(id :: integer) :: {:ok, user :: t()} | {:error, :user_not_found}
+  def by_id(id) when is_integer(id) do
+    query =
+      from u in User,
+        where: u.id == ^id,
+        preload: [:preferences, :profile, :ban_info, :moderating, :roles]
+
+    if user = Repo.one(query),
+      do: {:ok, user |> Role.handle_empty_user_roles() |> Role.handle_banned_user_role()},
+      else: {:error, :user_not_found}
+  end
+
+  @doc """
+  Returns boolean indicating if `User` account is deleted
+  """
+  @spec is_active(id :: non_neg_integer) :: boolean
+  def is_active(id) when is_integer(id) do
+    query =
+      from u in User,
+        where: u.id == ^id,
+        select: u.deleted
+
+    is_deleted = Repo.one(query)
+
+    if is_deleted == nil, do: false, else: !is_deleted
+  end
+
+  @doc """
+  Gets `id` of `DefaultTrustList` `User` from the database
+  """
+  @spec get_default_trust_user_id() :: non_neg_integer | nil
+  def get_default_trust_user_id() do
+    query =
+      from u in User,
+        where: u.username == "DefaultTrustList",
+        select: u.id
+
+    Repo.one(query)
+  end
 
   @doc """
   Clears the malicious score of a `User` by `id`, from the database
@@ -183,6 +221,31 @@ defmodule EpochtalkServer.Models.User do
     if user = Repo.one(query),
       do: {:ok, user |> Role.handle_empty_user_roles() |> Role.handle_banned_user_role()},
       else: {:error, :user_not_found}
+  end
+
+  @doc """
+  Gets users by username, only returns `id`, `username` and `roles`
+  """
+  @spec by_usernames(usernames :: [String.t()]) :: [t()]
+  def by_usernames([]), do: []
+
+  def by_usernames(usernames = [username | _other_usernames]) when is_binary(username) do
+    query =
+      from u in User,
+        where: u.username in ^usernames,
+        preload: [:roles]
+
+    query
+    |> Repo.all()
+    |> Enum.map(fn user ->
+      u =
+        user
+        |> Role.handle_empty_user_roles()
+        |> Role.handle_banned_user_role()
+
+      # strip out unneeded sensitive data
+      %User{id: u.id, username: u.username, roles: u.roles}
+    end)
   end
 
   @doc """
@@ -257,9 +320,6 @@ defmodule EpochtalkServer.Models.User do
     #   but does not require password_confirmation to be supplied
     |> validate_confirmation(:password, message: "does not match password")
     |> validate_length(:password, min: 8, max: 72)
-    # |> validate_format(:password, ~r/[a-z]/, message: "at least one lower case character")
-    # |> validate_format(:password, ~r/[A-Z]/, message: "at least one upper case character")
-    # |> validate_format(:password, ~r/[!?@#$%^&*_0-9]/, message: "at least one digit or punctuation character")
     |> hash_password()
   end
 

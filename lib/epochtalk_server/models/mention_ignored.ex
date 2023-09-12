@@ -78,7 +78,7 @@ defmodule EpochtalkServer.Models.MentionIgnored do
   end
 
   @doc """
-  Check if `MentionIgnored` to see if `User` is being ignored specified `User
+  Check `MentionIgnored` records to see if mentioned (ignored_user_id) `User` is ignoring the metioning (user_id) `User
   """
   @spec is_user_ignored?(user_id :: non_neg_integer, ignored_user_id :: non_neg_integer) ::
           boolean

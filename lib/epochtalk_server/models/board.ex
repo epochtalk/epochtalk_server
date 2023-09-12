@@ -141,7 +141,7 @@ defmodule EpochtalkServer.Models.Board do
 
   @doc """
   Determines if the provided `user_priority` has write access to the board that contains the thread
-  the specified `thread_idid`
+  the specified `thread_id`
   """
   # TODO(akinsey): Should this check against banned user_priority?
   @spec get_write_access_by_thread_id(

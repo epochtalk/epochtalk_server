@@ -198,7 +198,7 @@ defmodule EpochtalkServer.Models.Post do
   end
 
   @doc """
-  Get number of posts by a specific user between two dates, used for `UserActivity` algorithm.
+  Get number of posts by a specific `User` between two dates, used for `UserActivity` algorithm.
   """
   @spec count_by_user_id_in_range(
           user_id :: non_neg_integer,

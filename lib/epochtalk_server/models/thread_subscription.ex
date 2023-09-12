@@ -153,6 +153,10 @@ defmodule EpochtalkServer.Models.ThreadSubscription do
 
   # === Public Helper Functions ===
 
+  @doc """
+  Emails all subscribers of a particular `Thread` when there are new replies
+  """
+  @spec email_subscribers(user :: map, thread_id :: non_neg_integer) :: :ok
   def email_subscribers(%{} = user, thread_id) do
     get_subscriber_email_data(user, thread_id)
     |> Enum.each(fn email_data ->

@@ -38,8 +38,8 @@ defmodule EpochtalkServer.Models.AutoModeration do
     field :name, :string
     field :description, :string
     field :message, :string
-    field :conditions, :map
-    field :actions, :map
+    field :conditions, {:array, :map}
+    field :actions, {:array, :string}
     field :options, :map
     field :created_at, :naive_datetime
     field :updated_at, :naive_datetime

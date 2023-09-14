@@ -1,6 +1,7 @@
 defmodule Test.EpochtalkServerWeb.Controllers.User do
   use Test.Support.ConnCase, async: true
-  use Mimic # for mocking
+  # for mocking,
+  use Mimic
   import Ecto.Changeset
   alias EpochtalkServer.Models.User
   alias EpochtalkServer.Models.Ban

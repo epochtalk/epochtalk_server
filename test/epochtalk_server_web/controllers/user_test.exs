@@ -1,5 +1,6 @@
 defmodule Test.EpochtalkServerWeb.Controllers.User do
   use Test.Support.ConnCase, async: true
+  use Mimic # for mocking
   import Ecto.Changeset
   alias EpochtalkServer.Models.User
   alias EpochtalkServer.Models.Ban
@@ -82,6 +83,9 @@ defmodule Test.EpochtalkServerWeb.Controllers.User do
         password: "password"
       }
 
+      mocked_date = ~N[2000-01-01 00:00:00.000000]
+      expect(NaiveDateTime, :utc_now, fn -> mocked_date end)
+
       response =
         conn
         |> post(Routes.user_path(conn, :register, register_attrs))
@@ -89,6 +93,8 @@ defmodule Test.EpochtalkServerWeb.Controllers.User do
 
       {:ok, registered_user} = User.by_username(register_attrs.username)
       assert response["id"] == registered_user.id
+      assert registered_user.created_at == mocked_date |> NaiveDateTime.truncate(:second)
+      assert registered_user.updated_at == mocked_date |> NaiveDateTime.truncate(:second)
     end
 
     test "when email is already taken, errors", %{

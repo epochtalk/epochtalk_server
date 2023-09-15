@@ -163,6 +163,9 @@ defmodule EpochtalkServer.Models.UserActivity do
               info.remaining_period_activity - posts_in_period
             )
 
+      # update current_period_offset to current date/time
+      info = Map.put(info, :current_period_offset, now)
+
       handle_upsert(user_id, info, db_total_activity)
     end
   end

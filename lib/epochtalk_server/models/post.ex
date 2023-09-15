@@ -211,7 +211,7 @@ defmodule EpochtalkServer.Models.Post do
       from p in Post,
         select: count(p.id),
         where:
-          p.user_id == ^user_id and p.created_at >= ^range_start and p.created_at <= ^range_end
+          p.user_id == ^user_id and p.created_at > ^range_start and p.created_at <= ^range_end
 
     Repo.one(query)
   end

@@ -24,6 +24,8 @@ defmodule EpochtalkServerWeb.Controllers.Post do
   alias EpochtalkServer.Models.WatchThread
   alias EpochtalkServer.Models.ThreadSubscription
 
+  @max_post_title_length 255
+
   @doc """
   Used to create posts
   """
@@ -41,6 +43,7 @@ defmodule EpochtalkServerWeb.Controllers.Post do
          post_max_length <-
            Application.get_env(:epochtalk_server, :frontend_config)["post_max_length"],
          thread_id <- Validate.cast(attrs, "thread_id", :integer, required: true),
+         _title <- Validate.cast(attrs, "title", :string, required: true, max: @max_post_title_length),
          _body <- Validate.cast(attrs, "body", :string, required: true, max: post_max_length),
          user_priority <- ACL.get_user_priority(conn),
          {:bypass_lock, true} <-
@@ -66,14 +69,14 @@ defmodule EpochtalkServerWeb.Controllers.Post do
          # Hooks
          # 1) Auto Moderation (pre)
 
-         # 2) Update user Activity (post) (done)
+         # 2) Update user Activity (post) (done) (write test)
 
          # 3) Mentions -> convert username to user id (pre)
          # 4) Mentions -> create mentions (post)
          # 5) Mentions -> correct text search vector after creating mentions (post)
 
-         # 6) Thread Subscriptions -> Email Subscribers (post) (done)
-         # 7) Thread Subscriptions -> Subscribe to Thread (post) (done)
+         # 6) Thread Subscriptions -> Email Subscribers (post) (done) (write test)
+         # 7) Thread Subscriptions -> Subscribe to Thread (post) (done) (write test)
 
          # Data Queries
          {:ok, post_data} <- Post.create(attrs, user.id) do

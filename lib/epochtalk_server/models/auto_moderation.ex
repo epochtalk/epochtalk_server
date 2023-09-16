@@ -149,4 +149,78 @@ defmodule EpochtalkServer.Models.AutoModeration do
     |> update_changeset(auto_moderation_attrs)
     |> Repo.update()
   end
+
+  ## === Public Helper Functions ===
+
+  @doc """
+  Executes `AutoModeration` rules
+
+  TODO(akinsey): Optimize and store rules in Redis so we dont have to query every request
+
+  ### Rule Anatomy
+  * Only works on posts
+  * = Name: Name for this rule (for admin readability)
+  * = Description: What this rule does (for admin readbility)
+  * = Message: Error reported back to the user on reject action
+  * = Conditions: condition regex will only work on
+  *   - body
+  *   - thread_id
+  *   - user_id
+  *   - title (although it's not much use)
+  *   == REGEX IS AN OBJECT with a pattern and flag property
+  *   Multiple conditions are allow but they all must pass to enable rule actions
+  * = Actions: reject, ban, edit, delete (filter not yet implemented)
+  * = Options:
+  *   - banInterval:
+  *      - Affects ban action.
+  *      - Leave blank for permanent
+  *      - Otherwise, JS date string
+  *   - edit:
+  *      - replace (replace chunks of text):
+  *        - regex: Regex used to match post body
+  *          - regex object has a pattern and flag property
+  *        - text: Text used to replace any matches
+  *      - template: String template used to add text above or below post body
+  """
+  @spec moderate(user :: map, post_attrs :: map) :: post_attrs :: map
+  def moderate(%{id: user_id} = user, post_attrs) do
+    rules = AutoModeration.all()
+    acc_init = %{
+      action_set: MapSet.new(),
+      messages: [],
+      ban_interval: nil,
+      edits: []
+    }
+    %{
+      action_set: action_set,
+      messages: messages,
+      ban_interval: ban_interval,
+      edits: edits
+    } = Enum.reduce(rules, acc_init, fn rule, acc ->
+      if condition_is_valid?(post_attrs, rule.conditions) do
+
+      else
+        acc
+      end
+    end)
+    post_attrs
+  end
+
+  ## === Private Helper Functions ===
+
+  defp condition_is_valid?(post_attrs, conditions) do
+    condition_valid = false
+
+    test_conditions = Enum.map(conditions, fn condition ->
+      test_param = post_attrs[condition["param"]]
+      test_pattern = condition["regex"]["pattern"]
+      test_flags = condition["regex"]["flags"]
+      # remove g flag, one match is good enough to determine if condition is valid
+      test_flags = Regex.replace(~r/g/, test_flags, "")
+      match_regex = Regex.compile!(test_pattern, test_flags)
+      Regex.match?(match_regex, test_flags)
+    end)
+
+    condition_valid
+  end
 end

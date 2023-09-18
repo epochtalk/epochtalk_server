@@ -198,7 +198,24 @@ defmodule EpochtalkServer.Models.AutoModeration do
       edits: edits
     } = Enum.reduce(rules, acc_init, fn rule, acc ->
       if condition_is_valid?(post_attrs, rule.conditions) do
+        # Aggregate all actions, using MapSet ensures actions are unique
+        action_set = (MapSet.to_list(acc.action_set) ++ rule.actions) |> MapSet.new()
 
+        # Aggregate all reject messages if applicable
+        messages = if Enum.member?(rule.actions, "reject") and is_binary(rule.message),
+          do: acc.messages ++ [rule.message]
+          else: acc.messages
+
+        # Pick the latest ban interval, in the event multiple are provided
+        ban_interval = if Enum.member?(rules.actions, "ban") and acc.ban_interval < ,
+          do:
+
+        %{
+          action_set: action_set,
+          messages: messages,
+          ban_interval: ban_interval,
+          edits: edits
+        }
       else
         acc
       end
@@ -209,9 +226,7 @@ defmodule EpochtalkServer.Models.AutoModeration do
   ## === Private Helper Functions ===
 
   defp condition_is_valid?(post_attrs, conditions) do
-    condition_valid = false
-
-    test_conditions = Enum.map(conditions, fn condition ->
+    matches = Enum.map(conditions, fn condition ->
       test_param = post_attrs[condition["param"]]
       test_pattern = condition["regex"]["pattern"]
       test_flags = condition["regex"]["flags"]
@@ -221,6 +236,7 @@ defmodule EpochtalkServer.Models.AutoModeration do
       Regex.match?(match_regex, test_flags)
     end)
 
-    condition_valid
+    # Only valid if every condition returns a valid regex match
+    !Enum.member?(matches, false)
   end
 end

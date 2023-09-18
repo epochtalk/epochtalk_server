@@ -43,7 +43,8 @@ defmodule EpochtalkServerWeb.Controllers.Post do
          post_max_length <-
            Application.get_env(:epochtalk_server, :frontend_config)["post_max_length"],
          thread_id <- Validate.cast(attrs, "thread_id", :integer, required: true),
-         _title <- Validate.cast(attrs, "title", :string, required: true, max: @max_post_title_length),
+         _title <-
+           Validate.cast(attrs, "title", :string, required: true, max: @max_post_title_length),
          _body <- Validate.cast(attrs, "body", :string, required: true, max: post_max_length),
          user_priority <- ACL.get_user_priority(conn),
          {:bypass_lock, true} <-

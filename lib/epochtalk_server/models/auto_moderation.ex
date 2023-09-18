@@ -185,56 +185,73 @@ defmodule EpochtalkServer.Models.AutoModeration do
   @spec moderate(user :: map, post_attrs :: map) :: post_attrs :: map
   def moderate(%{id: user_id} = user, post_attrs) do
     rules = AutoModeration.all()
+
     acc_init = %{
       action_set: MapSet.new(),
       messages: [],
       ban_interval: nil,
       edits: []
     }
+
     %{
       action_set: action_set,
       messages: messages,
       ban_interval: ban_interval,
       edits: edits
-    } = Enum.reduce(rules, acc_init, fn rule, acc ->
-      if condition_is_valid?(post_attrs, rule.conditions) do
-        # Aggregate all actions, using MapSet ensures actions are unique
-        action_set = (MapSet.to_list(acc.action_set) ++ rule.actions) |> MapSet.new()
+    } =
+      Enum.reduce(rules, acc_init, fn rule, acc ->
+        if condition_is_valid?(post_attrs, rule.conditions) do
+          # Aggregate all actions, using MapSet ensures actions are unique
+          action_set = (MapSet.to_list(acc.action_set) ++ rule.actions) |> MapSet.new()
 
-        # Aggregate all reject messages if applicable
-        messages = if Enum.member?(rule.actions, "reject") and is_binary(rule.message),
-          do: acc.messages ++ [rule.message]
-          else: acc.messages
+          # Aggregate all reject messages if applicable
+          messages =
+            if Enum.member?(rule.actions, "reject") and is_binary(rule.message),
+              do: acc.messages ++ [rule.message],
+              else: acc.messages
 
-        # Pick the latest ban interval, in the event multiple are provided
-        ban_interval = if Enum.member?(rules.actions, "ban") and acc.ban_interval < ,
-          do:
+          # attempt to set default value for acc.ban_interval if nil
+          acc = if is_nil(acc.ban_interval),
+            do: Map.put(acc, :ban_interval, rule.options["ban_interval"]),
+            else: acc
 
-        %{
-          action_set: action_set,
-          messages: messages,
-          ban_interval: ban_interval,
-          edits: edits
-        }
-      else
-        acc
-      end
-    end)
+          # Pick the latest ban interval, in the event multiple are provided
+          ban_interval =
+            if Enum.member?(rule.actions, "ban") and
+                 Map.has_key?(rule.options, "ban_interval") and
+                 acc.ban_interval < rule.options["ban_interval"],
+               do: rule.options["ban_interval"],
+               else: acc.ban_interval
+
+          edits = ""
+
+          %{
+            action_set: action_set,
+            messages: messages,
+            ban_interval: ban_interval,
+            edits: edits
+          }
+        else
+          acc
+        end
+      end)
+
     post_attrs
   end
 
   ## === Private Helper Functions ===
 
   defp condition_is_valid?(post_attrs, conditions) do
-    matches = Enum.map(conditions, fn condition ->
-      test_param = post_attrs[condition["param"]]
-      test_pattern = condition["regex"]["pattern"]
-      test_flags = condition["regex"]["flags"]
-      # remove g flag, one match is good enough to determine if condition is valid
-      test_flags = Regex.replace(~r/g/, test_flags, "")
-      match_regex = Regex.compile!(test_pattern, test_flags)
-      Regex.match?(match_regex, test_flags)
-    end)
+    matches =
+      Enum.map(conditions, fn condition ->
+        test_param = post_attrs[condition["param"]]
+        test_pattern = condition["regex"]["pattern"]
+        test_flags = condition["regex"]["flags"]
+        # remove g flag, one match is good enough to determine if condition is valid
+        test_flags = Regex.replace(~r/g/, test_flags, "")
+        match_regex = Regex.compile!(test_pattern, test_flags)
+        Regex.match?(match_regex, test_flags)
+      end)
 
     # Only valid if every condition returns a valid regex match
     !Enum.member?(matches, false)

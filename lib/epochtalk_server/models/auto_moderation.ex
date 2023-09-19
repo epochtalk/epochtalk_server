@@ -184,8 +184,6 @@ defmodule EpochtalkServer.Models.AutoModeration do
   """
   @spec moderate(user :: map, post_attrs :: map) :: post_attrs :: map
   def moderate(%{id: user_id} = user, post_attrs) do
-    rules = AutoModeration.all()
-
     acc_init = %{
       action_set: MapSet.new(),
       messages: [],
@@ -193,14 +191,11 @@ defmodule EpochtalkServer.Models.AutoModeration do
       edits: []
     }
 
-    %{
-      action_set: action_set,
-      messages: messages,
-      ban_interval: ban_interval,
-      edits: edits
-    } =
+    rules = AutoModeration.all()
+
+    rule_actions =
       Enum.reduce(rules, acc_init, fn rule, acc ->
-        if condition_is_valid?(post_attrs, rule.conditions) do
+        if rule_condition_is_valid?(post_attrs, rule.conditions) do
           # Aggregate all actions, using MapSet ensures actions are unique
           action_set = (MapSet.to_list(acc.action_set) ++ rule.actions) |> MapSet.new()
 
@@ -223,8 +218,13 @@ defmodule EpochtalkServer.Models.AutoModeration do
                do: rule.options["ban_interval"],
                else: acc.ban_interval
 
-          edits = ""
+          # Aggregate all edit options
+          edits =
+            if Enum.member?(rule.actions, "edit"),
+              do: acc.edits ++ [rule.options["edit"]],
+              else: acc.edits
 
+          # return updated acc
           %{
             action_set: action_set,
             messages: messages,
@@ -236,12 +236,19 @@ defmodule EpochtalkServer.Models.AutoModeration do
         end
       end)
 
+    # append user_id to post attributes
+    post_attrs = post_attrs |> Map.put("user_id", user_id)
+
+    # execute rule actions and return updated post_attributes
+    post_attrs = execute_rule_actions(rule_actions)
+
+    # return updated post attributes
     post_attrs
   end
 
   ## === Private Helper Functions ===
 
-  defp condition_is_valid?(post_attrs, conditions) do
+  defp rule_condition_is_valid?(post_attrs, conditions) do
     matches =
       Enum.map(conditions, fn condition ->
         test_param = post_attrs[condition["param"]]

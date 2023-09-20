@@ -248,6 +248,74 @@ defmodule EpochtalkServer.Models.AutoModeration do
 
   ## === Private Helper Functions ===
 
+  defp execute_rule_actions(post_attrs, %{
+      action_set: 0,
+      messages: _messages,
+      ban_interval: _ban_interval,
+      edits: _edits
+    } = _rule_actions), do: post_attrs
+  defp execute_rule_actions(post_attrs, %{
+      action_set: action_set,
+      messages: messages,
+      ban_interval: ban_interval,
+      edits: edits
+    } = _rule_actions) do
+
+    # handle rule actions that edit the post body
+    post_attrs = if MapSet.member?(action_set, "edit"),
+      do: Enum.reduce(action_set, post_attrs, fn edit, acc ->
+          post_body = post_attrs["body"]
+
+          # handle actions that replace text in post body
+          post_attrs = if is_map(edit["replace"]) do
+            replacement_text = edit["replace"]["text"]
+            test_pattern = edit["replace"]["regex"]["pattern"]
+            test_flags = edit["replace"]["regex"]["flags"]
+
+            # compensate for elixir not supporting /g/ flag
+            replace_globally = String.contains?(test_flags, "g")
+
+            # remove g flag (doesnt work in elixir), compensate later using string replace
+            test_flags = Regex.replace(~r/g/, test_flags, "")
+            match_regex = Regex.compile!(test_pattern, test_flags)
+
+            # update body of post with replacement text
+            updated_post_body = String.replace(post_body, match_regex, replacement_text, global: replace_globally)
+
+            # return post_attrs with updated post body
+            Map.put(post_attrs, "body", updated_post_body)
+          else
+            post_attrs
+          end
+
+          # handle actions that replace post body using a template
+          post_attrs = if is_binary(edit["template"]) do
+            # get new post body template
+            template = edit["template"]
+
+            # update post body using template
+            updated_post_body = String.replace(template, "{body}", post_body)
+
+            # return post_attrs with updated post body
+            Map.put(post_attrs, "body", updated_post_body)
+          else
+            post_attrs
+          end
+
+          # return post_attrs
+          post_attrs
+        end),
+      else: post_attrs
+
+    # handle rule actions that ban the user
+
+    # handle rule actions that shadow delete the post
+
+    # handle rule actions that reject the post entirely
+
+    post_attrs
+  end
+
   defp rule_condition_is_valid?(post_attrs, conditions) do
     matches =
       Enum.map(conditions, fn condition ->

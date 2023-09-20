@@ -45,30 +45,38 @@ defmodule EpochtalkServer.Session do
   @doc """
   Update session performs the following actions for active session:
   * Saves `User` session info to redis (avatar, roles, moderating, ban info, etc)
-  * returns {:ok, user}
+  * returns {:ok, user} on success
+  * returns {:error, reason} on failure
 
   DOES NOT change:
   * User's session id, timestamp, ttl
   * Guardian token
   """
   @spec update(user_id :: non_neg_integer) :: {:ok, user :: User.t()}
+          | {:error, reason :: String.t() | Postgrex.Error.t()}
   def update(user_id) do
-    {:ok, user} = User.by_id(user_id)
-    avatar = if is_nil(user.profile), do: nil, else: user.profile.avatar
-    update_user_info(user.id, user.username, avatar: avatar)
-    update_roles(user.id, user.roles)
+    with {:ok, user} <- User.by_id(user_id),
+         true <- has_sessions?(user_id)
+    do
+      avatar = if is_nil(user.profile), do: nil, else: user.profile.avatar
+      update_user_info(user.id, user.username, avatar: avatar)
+      update_roles(user.id, user.roles)
 
-    ban_info =
-      if is_nil(user.ban_info), do: %{}, else: %{ban_expiration: user.ban_info.expiration}
+      ban_info =
+        if is_nil(user.ban_info), do: %{}, else: %{ban_expiration: user.ban_info.expiration}
 
-    ban_info =
-      if !is_nil(user.malicious_score) && user.malicious_score >= 1,
-        do: Map.put(ban_info, :malicious_score, user.malicious_score),
-        else: ban_info
+      ban_info =
+        if !is_nil(user.malicious_score) && user.malicious_score >= 1,
+          do: Map.put(ban_info, :malicious_score, user.malicious_score),
+          else: ban_info
 
-    update_ban_info(user.id, ban_info)
-    update_moderating(user.id, user.moderating)
-    {:ok, user}
+      update_ban_info(user.id, ban_info)
+      update_moderating(user.id, user.moderating)
+      {:ok, user}
+    else
+      {:error, error} -> {:error, error}
+      false -> {:error, :no_sessions}
+    end
   end
 
   @doc """

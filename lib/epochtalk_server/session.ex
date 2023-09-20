@@ -154,6 +154,18 @@ defmodule EpochtalkServer.Session do
     Redix.command(:redix, ["ZRANGE", session_key, 0, -1])
   end
 
+  defp has_sessions?(user_id) do
+    session_key = generate_key(user_id, "sessions")
+    # check ZCARD for key
+    # returns number of sorted set elements at key
+    # returns 0 if key does not exist (set is empty)
+    case Redix.command(:redix, ["ZCARD", session_key]) do
+      {:error, error} -> {:error, error}
+      {:ok, 0} -> false
+      {:ok, _score} -> true
+    end
+  end
+
   defp is_active_for_user_id?(session_id, user_id) do
     session_key = generate_key(user_id, "sessions")
     # check ZSCORE for user_id:session_id pair

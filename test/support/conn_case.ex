@@ -15,6 +15,16 @@ defmodule Test.Support.ConnCase do
   this option is not recommended for other databases.
   """
 
+  # no_login username/email/password from user seed in `mix test` (see mix.exs)
+  @test_no_login_username "no_login"
+  @test_no_login_email "no_login@test.com"
+  @test_no_login_password "password"
+  @test_no_login_user_attrs %{
+    username: @test_no_login_username,
+    email: @test_no_login_email,
+    password: @test_no_login_password
+  }
+
   # username/email/password from user seed in `mix test` (see mix.exs)
   @test_username "user"
   @test_email "user@test.com"
@@ -75,6 +85,7 @@ defmodule Test.Support.ConnCase do
       Ecto.Adapters.SQL.Sandbox.mode(EpochtalkServer.Repo, {:shared, self()})
     end
 
+    {:ok, no_login_user} = User.by_username(@test_no_login_username)
     {:ok, user} = User.by_username(@test_username)
     {:ok, admin_user} = User.by_username(@test_admin_username)
     {:ok, super_admin_user} = User.by_username(@test_super_admin_username)
@@ -84,11 +95,13 @@ defmodule Test.Support.ConnCase do
       {:ok,
        [
          users: %{
+           no_login_user: no_login_user,
            user: user,
            admin_user: admin_user,
            super_admin_user: super_admin_user
          },
          user_attrs: %{
+           no_login_user: @test_no_login_user_attrs,
            user: @test_user_attrs,
            admin_user: @test_admin_user_attrs,
            super_admin_user: @test_super_admin_user_attrs

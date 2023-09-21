@@ -3,10 +3,16 @@ defmodule EpochtalkServer.Models.AutoModeration do
   import Ecto.Changeset
   import Ecto.Query
   alias EpochtalkServer.Repo
+  alias EpochtalkServer.Session
   alias EpochtalkServer.Models.AutoModeration
+  alias EpochtalkServer.Models.Ban
+  alias EpochtalkServerWeb.CustomErrors.AutoModeratorReject
 
   @postgres_varchar255_max 255
   @postgres_varchar1000_max 1000
+  @hours 24
+  @minutes 60
+  @seconds 60
 
   @moduledoc """
   `AutoModeration` model, for performing actions relating to `User` `AutoModeration`
@@ -183,7 +189,26 @@ defmodule EpochtalkServer.Models.AutoModeration do
   *      - template: String template used to add text above or below post body
   """
   @spec moderate(user :: map, post_attrs :: map) :: post_attrs :: map
-  def moderate(%{id: user_id} = user, post_attrs) do
+  def moderate(%{id: user_id} = _user, post_attrs) do
+    # query auto moderation rules from the db, check their validity then return them
+    rule_actions = get_rule_actions(post_attrs)
+
+    # append user_id to post attributes
+    post_attrs = post_attrs |> Map.put("user_id", user_id)
+
+    # execute rule actions if action set isn't empty, then return updated post_attributes
+    post_attrs =
+      if MapSet.size(rule_actions.action_set) > 0,
+        do: execute_rule_actions(post_attrs, rule_actions),
+        else: post_attrs
+
+    # return updated post attributes
+    post_attrs
+  end
+
+  ## === Private Helper Functions ===
+
+  defp get_rule_actions(post_attrs) do
     acc_init = %{
       action_set: MapSet.new(),
       messages: [],
@@ -193,125 +218,147 @@ defmodule EpochtalkServer.Models.AutoModeration do
 
     rules = AutoModeration.all()
 
-    rule_actions =
-      Enum.reduce(rules, acc_init, fn rule, acc ->
-        if rule_condition_is_valid?(post_attrs, rule.conditions) do
-          # Aggregate all actions, using MapSet ensures actions are unique
-          action_set = (MapSet.to_list(acc.action_set) ++ rule.actions) |> MapSet.new()
+    ret = Enum.reduce(rules, acc_init, fn rule, acc ->
+      if rule_condition_is_valid?(post_attrs, rule.conditions) do
+        # Aggregate all actions, using MapSet ensures actions are unique
+        action_set = (MapSet.to_list(acc.action_set) ++ rule.actions) |> MapSet.new()
 
-          # Aggregate all reject messages if applicable
-          messages =
-            if Enum.member?(rule.actions, "reject") and is_binary(rule.message),
-              do: acc.messages ++ [rule.message],
-              else: acc.messages
+        # Aggregate all reject messages if applicable
+        messages =
+          if Enum.member?(rule.actions, "reject") and is_binary(rule.message),
+            do: acc.messages ++ [rule.message],
+            else: acc.messages
 
-          # attempt to set default value for acc.ban_interval if nil
-          acc = if is_nil(acc.ban_interval),
+        # attempt to set default value for acc.ban_interval if nil
+        acc =
+          if is_nil(acc.ban_interval),
             do: Map.put(acc, :ban_interval, rule.options["ban_interval"]),
             else: acc
 
-          # Pick the latest ban interval, in the event multiple are provided
-          ban_interval =
-            if Enum.member?(rule.actions, "ban") and
-                 Map.has_key?(rule.options, "ban_interval") and
-                 acc.ban_interval < rule.options["ban_interval"],
-               do: rule.options["ban_interval"],
-               else: acc.ban_interval
+        # Pick the latest ban interval, in the event multiple are provided
+        ban_interval =
+          if Enum.member?(rule.actions, "ban") and
+               Map.has_key?(rule.options, "ban_interval") and
+               acc.ban_interval < rule.options["ban_interval"],
+             do: rule.options["ban_interval"],
+             else: acc.ban_interval
 
-          # Aggregate all edit options
-          edits =
-            if Enum.member?(rule.actions, "edit"),
-              do: acc.edits ++ [rule.options["edit"]],
-              else: acc.edits
+        # Aggregate all edit options
+        edits =
+          if Enum.member?(rule.actions, "edit"),
+            do: acc.edits ++ [rule.options["edit"]],
+            else: acc.edits
 
-          # return updated acc
-          %{
-            action_set: action_set,
-            messages: messages,
-            ban_interval: ban_interval,
-            edits: edits
-          }
-        else
-          acc
-        end
-      end)
-
-    # append user_id to post attributes
-    post_attrs = post_attrs |> Map.put("user_id", user_id)
-
-    # execute rule actions and return updated post_attributes
-    post_attrs = execute_rule_actions(rule_actions)
-
-    # return updated post attributes
-    post_attrs
+        # return updated acc
+        %{
+          action_set: action_set,
+          messages: messages,
+          ban_interval: ban_interval,
+          edits: edits
+        }
+      else
+        acc
+      end
+    end)
   end
 
-  ## === Private Helper Functions ===
-
-  defp execute_rule_actions(post_attrs, %{
-      action_set: 0,
-      messages: _messages,
-      ban_interval: _ban_interval,
-      edits: _edits
-    } = _rule_actions), do: post_attrs
-  defp execute_rule_actions(post_attrs, %{
-      action_set: action_set,
-      messages: messages,
-      ban_interval: ban_interval,
-      edits: edits
-    } = _rule_actions) do
-
+  defp execute_rule_actions(
+         post_attrs,
+         %{
+           action_set: action_set,
+           messages: messages,
+           ban_interval: ban_interval,
+           edits: edits
+         } = _rule_actions
+       ) do
     # handle rule actions that edit the post body
-    post_attrs = if MapSet.member?(action_set, "edit"),
-      do: Enum.reduce(action_set, post_attrs, fn edit, acc ->
-          post_body = post_attrs["body"]
+    post_attrs =
+      if MapSet.member?(action_set, "edit"),
+        do:
+          Enum.reduce(edits, post_attrs, fn edit, acc ->
+            post_body = acc["body"]
 
-          # handle actions that replace text in post body
-          post_attrs = if is_map(edit["replace"]) do
-            replacement_text = edit["replace"]["text"]
-            test_pattern = edit["replace"]["regex"]["pattern"]
-            test_flags = edit["replace"]["regex"]["flags"]
+            # handle actions that replace text in post body
+            acc =
+              if is_map(edit["replace"]) do
+                replacement_text = edit["replace"]["text"]
+                test_pattern = edit["replace"]["regex"]["pattern"]
+                test_flags = edit["replace"]["regex"]["flags"]
 
-            # compensate for elixir not supporting /g/ flag
-            replace_globally = String.contains?(test_flags, "g")
+                # compensate for elixir not supporting /g/ flag
+                replace_globally = String.contains?(test_flags, "g")
 
-            # remove g flag (doesnt work in elixir), compensate later using string replace
-            test_flags = Regex.replace(~r/g/, test_flags, "")
-            match_regex = Regex.compile!(test_pattern, test_flags)
+                # remove g flag (doesnt work in elixir), compensate later using string replace
+                test_flags = Regex.replace(~r/g/, test_flags, "")
+                match_regex = Regex.compile!(test_pattern, test_flags)
 
-            # update body of post with replacement text
-            updated_post_body = String.replace(post_body, match_regex, replacement_text, global: replace_globally)
+                # update body of post with replacement text
+                updated_post_body =
+                  String.replace(post_body, match_regex, replacement_text,
+                    global: replace_globally
+                  )
 
-            # return post_attrs with updated post body
-            Map.put(post_attrs, "body", updated_post_body)
-          else
-            post_attrs
-          end
+                # return acc with updated post body
+                Map.put(acc, "body", updated_post_body)
+              else
+                acc
+              end
 
-          # handle actions that replace post body using a template
-          post_attrs = if is_binary(edit["template"]) do
-            # get new post body template
-            template = edit["template"]
+            # handle actions that replace post body using a template
+            acc =
+              if is_binary(edit["template"]) do
+                # get new post body template
+                template = edit["template"]
 
-            # update post body using template
-            updated_post_body = String.replace(template, "{body}", post_body)
+                # update post body using template
+                updated_post_body = String.replace(template, "{body}", post_body)
 
-            # return post_attrs with updated post body
-            Map.put(post_attrs, "body", updated_post_body)
-          else
-            post_attrs
-          end
+                # return post_attrs with updated post body
+                Map.put(acc, "body", updated_post_body)
+              else
+                acc
+              end
 
-          # return post_attrs
-          post_attrs
-        end),
-      else: post_attrs
+            # return updated acc
+            acc
+          end),
+        else: post_attrs
 
     # handle rule actions that ban the user
+    if MapSet.member?(action_set, "ban") do
+      # ban period is utc now plus how ever many days ban_interval is
+      ban_period =
+        if ban_interval,
+          do:
+            DateTime.utc_now()
+            |> DateTime.add(ban_interval * @hours * @minutes * @seconds, :second)
+            |> DateTime.to_naive()
 
-    # handle rule actions that shadow delete the post
+      # get user_id from post_attrs
+      user_id = post_attrs["user_id"]
+
+      # ban the user, ban_period is either a date or nil (permanent)
+      Ban.ban_by_user_id(user_id, ban_period)
+
+      # update user session after banning
+      Session.update(user_id)
+
+      # send websocket notification to reauthenticate user
+      EpochtalkServerWeb.Endpoint.broadcast("user:#{user_id}", "reauthenticate", %{})
+    end
+
+    # handle rule actions that shadow delete the post (auto lock/delete)
+    post_attrs =
+      if MapSet.member?(action_set, "delete"),
+        do: post_attrs |> Map.put("deleted", true) |> Map.put("locked", true),
+        else: post_attrs
 
     # handle rule actions that reject the post entirely
+    if MapSet.member?(action_set, "reject"),
+      do:
+        raise(AutoModeratorReject,
+          message: "Post rejected by Auto Moderator: #{Enum.join(messages, ", ")}"
+        )
 
     post_attrs
   end
@@ -325,7 +372,7 @@ defmodule EpochtalkServer.Models.AutoModeration do
         # remove g flag, one match is good enough to determine if condition is valid
         test_flags = Regex.replace(~r/g/, test_flags, "")
         match_regex = Regex.compile!(test_pattern, test_flags)
-        Regex.match?(match_regex, test_flags)
+        Regex.match?(match_regex, test_param)
       end)
 
     # Only valid if every condition returns a valid regex match

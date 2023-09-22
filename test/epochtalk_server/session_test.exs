@@ -10,6 +10,7 @@ defmodule Test.EpochtalkServer.Session do
   @almost_four_weeks_in_seconds @four_weeks_in_seconds - 100
   alias EpochtalkServer.Session
   alias EpochtalkServer.Models.Profile
+  alias EpochtalkServer.Models.RoleUser
 
   describe "get_resource/2" do
     test "when session_id is invalid, errors", %{users: %{user: user}} do
@@ -377,6 +378,18 @@ defmodule Test.EpochtalkServer.Session do
       session_id = conn.private.guardian_default_claims["jti"]
       {:ok, resource_user} = Session.get_resource(authed_user.id, session_id)
       assert resource_user.avatar == updated_attrs.avatar
+    end
+    @tag :authenticated
+    test "given a valid user id, updates role to admin", %{conn: conn, authed_user: authed_user} do
+      authed_user_role = List.first(authed_user.roles)
+      assert authed_user_role.lookup == "user"
+      RoleUser.set_admin(authed_user.id)
+      Session.update(authed_user.id)
+      # get session_id (jti) from conn
+      session_id = conn.private.guardian_default_claims["jti"]
+      {:ok, resource_user} = Session.get_resource(authed_user.id, session_id)
+      resource_user_role = List.first(resource_user.roles)
+      assert resource_user_role.lookup == "superAdministrator"
     end
   end
 

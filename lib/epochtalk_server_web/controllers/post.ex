@@ -23,6 +23,7 @@ defmodule EpochtalkServerWeb.Controllers.Post do
   alias EpochtalkServer.Models.UserIgnored
   alias EpochtalkServer.Models.WatchThread
   alias EpochtalkServer.Models.ThreadSubscription
+  alias EpochtalkServer.Models.AutoModeration
 
   @max_post_title_length 255
 
@@ -55,7 +56,7 @@ defmodule EpochtalkServerWeb.Controllers.Post do
            {:can_read, Board.get_read_access_by_thread_id(thread_id, user_priority)},
          {:can_write, {:ok, true}} <-
            {:can_write, Board.get_write_access_by_thread_id(thread_id, user_priority)},
-         # attrs <- AutoModerator.moderate(user, attrs),
+         attrs <- AutoModeration.moderate(user, attrs),
          # TODO(akinsey): Implement the following for completion
          # Plugins
          # 1) Track IP

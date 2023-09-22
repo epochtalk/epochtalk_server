@@ -4,7 +4,7 @@ defmodule Test.EpochtalkServer.Models.Profile do
   alias EpochtalkServer.Models.User
 
   describe "upsert/2" do
-    test "given valid user_id, updates user's avatar", %{users: %{user: user}} do
+    test "given valid user_id, updates user's profile", %{users: %{user: user}} do
       # check default fields
       assert user.profile.avatar == ""
       assert user.profile.position == nil
@@ -14,9 +14,18 @@ defmodule Test.EpochtalkServer.Models.Profile do
       assert user.profile.raw_signature == nil
       assert user.profile.last_active == nil
 
-      Profile.upsert(user.id, %{avatar: "image.png"})
+      updated_attrs = %{
+        avatar: "image.png",
+        position: "position",
+        signature: "signature",
+        raw_signature: "raw_signature"
+      }
+      Profile.upsert(user.id, updated_attrs)
       {:ok, updated_user} = User.by_id(user.id)
-      assert updated_user.profile.avatar == "image.png"
+      assert updated_user.profile.avatar == updated_attrs.avatar
+      assert updated_user.profile.position == updated_attrs.position
+      assert updated_user.profile.signature == updated_attrs.signature
+      assert updated_user.profile.raw_signature == updated_attrs.raw_signature
     end
   end
   describe "create/2" do

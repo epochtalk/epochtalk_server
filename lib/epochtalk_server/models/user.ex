@@ -84,6 +84,14 @@ defmodule EpochtalkServer.Models.User do
   """
   @spec registration_changeset(user :: t(), attrs :: map() | nil) :: Ecto.Changeset.t()
   def registration_changeset(user, attrs) do
+    now = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
+
+    # set timestamps
+    user =
+      user
+      |> Map.put(:created_at, now)
+      |> Map.put(:updated_at, now)
+
     user
     |> cast(attrs, [
       :id,

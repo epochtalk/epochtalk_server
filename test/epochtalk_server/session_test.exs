@@ -9,6 +9,7 @@ defmodule Test.EpochtalkServer.Session do
   @four_weeks_in_seconds 4 * 7 * @one_day_in_seconds
   @almost_four_weeks_in_seconds @four_weeks_in_seconds - 100
   alias EpochtalkServer.Session
+  alias EpochtalkServer.Models.Profile
 
   describe "get_resource/2" do
     test "when session_id is invalid, errors", %{users: %{user: user}} do
@@ -366,6 +367,16 @@ defmodule Test.EpochtalkServer.Session do
     end
     test "given user id without sessions, errors with :no_sessions", %{conn: conn, users: %{no_login_user: user}} do
       assert Session.update(user.id) == {:error, :no_sessions}
+    end
+    @tag :authenticated
+    test "given a valid user id, updates avatar", %{conn: conn, authed_user: authed_user} do
+      updated_attrs = %{avatar: "image.png"}
+      Profile.upsert(authed_user.id, updated_attrs)
+      Session.update(authed_user.id)
+      # get session_id (jti) from conn
+      session_id = conn.private.guardian_default_claims["jti"]
+      {:ok, resource_user} = Session.get_resource(authed_user.id, session_id)
+      assert resource_user.avatar == updated_attrs.avatar
     end
   end
 

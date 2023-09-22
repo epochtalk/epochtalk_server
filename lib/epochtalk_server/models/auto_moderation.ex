@@ -218,7 +218,7 @@ defmodule EpochtalkServer.Models.AutoModeration do
 
     rules = AutoModeration.all()
 
-    ret = Enum.reduce(rules, acc_init, fn rule, acc ->
+    Enum.reduce(rules, acc_init, fn rule, acc ->
       if rule_condition_is_valid?(post_attrs, rule.conditions) do
         # Aggregate all actions, using MapSet ensures actions are unique
         action_set = (MapSet.to_list(acc.action_set) ++ rule.actions) |> MapSet.new()

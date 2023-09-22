@@ -11,5 +11,12 @@ defmodule Test.EpochtalkServer.Models.Profile do
                      Profile.create(invalid_user_id)
                    end
     end
+    test "given an existing user_id, errors with Ecto.ConstraintError", %{users: %{user: user}} do
+      assert_raise Ecto.ConstraintError,
+                   ~r/profiles_user_id_index/,
+                   fn ->
+                     Profile.create(user.id)
+                   end
+    end
   end
 end

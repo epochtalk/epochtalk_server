@@ -392,6 +392,19 @@ defmodule Test.EpochtalkServer.Session do
       resource_user_role = List.first(resource_user.roles)
       assert resource_user_role == RoleCache.by_lookup("superAdministrator")
     end
+    @tag authenticated: :super_admin
+    test "given a valid superAdministrator id, updates role to user", %{conn: conn, authed_user: authed_user} do
+      authed_user_role = List.first(authed_user.roles)
+      assert authed_user_role == RoleCache.by_lookup("superAdministrator")
+      user_role = RoleCache.by_lookup("user")
+      RoleUser.set_user_role(user_role.id, authed_user.id)
+      Session.update(authed_user.id)
+      # get session_id (jti) from conn
+      session_id = conn.private.guardian_default_claims["jti"]
+      {:ok, resource_user} = Session.get_resource(authed_user.id, session_id)
+      resource_user_role = List.first(resource_user.roles)
+      assert resource_user_role == user_role
+    end
   end
 
   defp flush_redis(_) do

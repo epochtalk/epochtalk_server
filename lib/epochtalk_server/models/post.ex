@@ -88,8 +88,8 @@ defmodule EpochtalkServer.Models.Post do
     # set default values and timestamps
     post =
       post
-      |> Map.put(:deleted, false)
-      |> Map.put(:locked, false)
+      |> Map.put(:deleted, attrs["deleted"] || false)
+      |> Map.put(:locked, attrs["locked"] || false)
       |> Map.put(:created_at, now)
       |> Map.put(:updated_at, now)
 
@@ -176,7 +176,9 @@ defmodule EpochtalkServer.Models.Post do
       create(%{
         "thread_id" => post_attrs["thread_id"],
         "user_id" => user_id,
-        "content" => %{title: post_attrs["title"], body: post_attrs["body"]}
+        "content" => %{title: post_attrs["title"], body: post_attrs["body"]},
+        "deleted" => post_attrs["deleted"],
+        "locked" => post_attrs["locked"]
       })
 
   @doc """

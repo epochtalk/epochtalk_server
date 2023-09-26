@@ -152,7 +152,7 @@ defmodule EpochtalkServerWeb.Controllers.PostJSON do
       )
 
     # delete posts that are marked deleted, the user was deleted, or the board is not visible
-    post_is_deleted = post.deleted or post.user.deleted or Map.get(post, :board_visible) == false
+    post_is_deleted = post.deleted || post.user.deleted || Map.get(post, :board_visible) == false
 
     # only hide deleted posts if user does not has permissions to see them
     post = maybe_delete_post_data(post, post_is_viewable, post_is_deleted)

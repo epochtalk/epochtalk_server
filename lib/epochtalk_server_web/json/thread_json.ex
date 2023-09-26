@@ -157,7 +157,7 @@ defmodule EpochtalkServerWeb.Controllers.ThreadJSON do
 
   defp format_last_post_user_data(thread) do
     thread =
-      if thread.last_post_deleted or thread.last_post_user_deleted do
+      if thread.last_post_deleted || thread.last_post_user_deleted do
         thread
         |> Map.put(:last_deleted, true)
         |> Map.delete(:last_post_username)

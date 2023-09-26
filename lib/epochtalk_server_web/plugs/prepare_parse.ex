@@ -2,6 +2,7 @@ defmodule EpochtalkServerWeb.Plugs.PrepareParse do
   @moduledoc """
   Plug that pre-parses request body and raises errors if there are problems
   """
+  use Plug.Builder
   alias EpochtalkServerWeb.CustomErrors.{
     MalformedPayload,
     OversizedPayload
@@ -10,17 +11,13 @@ defmodule EpochtalkServerWeb.Plugs.PrepareParse do
   @env Mix.env()
   @methods ~w(POST PUT PATCH)
 
-  @doc """
-  default Plug init function
-  """
-  def init(opts), do: opts
+  plug(:check_valid_payload_body)
 
   @doc """
   Pre-parses request body and checks for errors with payload. (ex: Malformed JSON or Payload too large)
   """
-  def call(conn, opts) do
+  def check_valid_payload_body(conn, opts) do
     %{method: method} = conn
-
     if method in @methods and @env != :test do
       case Plug.Conn.read_body(conn, opts) do
         {:error, :timeout} -> raise Plug.TimeoutError

@@ -157,6 +157,8 @@ defmodule Test.Support.ConnCase do
     context_updates =
       if context[:banned] do
         {:ok, banned_user_changeset} = Ban.ban(user)
+        # update ban info in session
+        Session.update(user.id)
         {:ok, k_list} = context_updates
         {:ok, [banned_user_changeset: banned_user_changeset] ++ k_list}
       else

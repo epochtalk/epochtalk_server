@@ -424,6 +424,23 @@ defmodule Test.EpochtalkServer.Session do
       {:ok, banned_resource_user} = Session.get_resource(authed_user.id, session_id)
       assert Enum.any?(banned_resource_user.roles, &(&1.lookup == "banned")) == true
     end
+    @tag [authenticated: true, banned: true]
+    test "given a banned user's id, when user is unbanned, updates role to delete ban info", %{conn: conn, authed_user: authed_user} do
+      # get session_id (jti) from conn
+      session_id = conn.private.guardian_default_claims["jti"]
+      # check that session user has banned role
+      Session.update(authed_user.id)
+      {:ok, banned_resource_user} = Session.get_resource(authed_user.id, session_id)
+      assert Enum.any?(banned_resource_user.roles, &(&1.lookup == "banned")) == true
+
+      # unban user
+      Ban.unban_by_user_id(authed_user.id)
+
+      # check that session user does not have banned role
+      Session.update(authed_user.id)
+      {:ok, unbanned_resource_user} = Session.get_resource(authed_user.id, session_id)
+      assert Enum.any?(unbanned_resource_user.roles, &(&1.lookup == "banned")) == false
+    end
   end
 
   defp flush_redis(_) do

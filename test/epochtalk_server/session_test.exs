@@ -409,7 +409,7 @@ defmodule Test.EpochtalkServer.Session do
     end
 
     @tag :authenticated
-    test "given a not banned user's id, when user is banned, updates role to add ban info", %{conn: conn, authed_user: authed_user} do
+    test "given a not banned user's id, when user is banned, adds banned role", %{conn: conn, authed_user: authed_user} do
       # get session_id (jti) from conn
       session_id = conn.private.guardian_default_claims["jti"]
       # check that session user does not have banned role
@@ -425,7 +425,7 @@ defmodule Test.EpochtalkServer.Session do
       assert Enum.any?(banned_resource_user.roles, &(&1.lookup == "banned")) == true
     end
     @tag [authenticated: true, banned: true]
-    test "given a banned user's id, when user is unbanned, updates role to delete ban info", %{conn: conn, authed_user: authed_user} do
+    test "given a banned user's id, when user is unbanned, deletes banned role", %{conn: conn, authed_user: authed_user} do
       # get session_id (jti) from conn
       session_id = conn.private.guardian_default_claims["jti"]
       # check that session user has banned role

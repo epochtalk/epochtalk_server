@@ -12,6 +12,7 @@ defmodule Test.EpochtalkServer.Session do
   alias EpochtalkServer.Models.Profile
   alias EpochtalkServer.Models.RoleUser
   alias EpochtalkServer.Cache.Role, as: RoleCache
+  alias EpochtalkServer.Models.Ban
 
   describe "get_resource/2" do
     test "when session_id is invalid, errors", %{users: %{user: user}} do
@@ -405,6 +406,23 @@ defmodule Test.EpochtalkServer.Session do
       resource_user_role = List.first(resource_user.roles)
       user_role = RoleCache.by_lookup("user")
       assert resource_user_role == user_role
+    end
+
+    @tag :authenticated
+    test "given a not banned user's id, when user is banned, updates role to add ban info", %{conn: conn, authed_user: authed_user} do
+      # get session_id (jti) from conn
+      session_id = conn.private.guardian_default_claims["jti"]
+      # check that session user does not have banned role
+      {:ok, resource_user} = Session.get_resource(authed_user.id, session_id)
+      assert Enum.any?(resource_user.roles, &(&1.lookup == "banned")) == false
+
+      # ban user
+      Ban.ban(authed_user)
+
+      # check that session user has banned role
+      Session.update(authed_user.id)
+      {:ok, banned_resource_user} = Session.get_resource(authed_user.id, session_id)
+      assert Enum.any?(banned_resource_user.roles, &(&1.lookup == "banned")) == true
     end
   end
 

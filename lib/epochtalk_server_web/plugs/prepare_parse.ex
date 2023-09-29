@@ -3,6 +3,7 @@ defmodule EpochtalkServerWeb.Plugs.PrepareParse do
   Plug that pre-parses request body and raises errors if there are problems
   """
   use Plug.Builder
+
   alias EpochtalkServerWeb.CustomErrors.{
     MalformedPayload,
     OversizedPayload
@@ -18,6 +19,7 @@ defmodule EpochtalkServerWeb.Plugs.PrepareParse do
   """
   def check_valid_payload_body(conn, opts) do
     %{method: method} = conn
+
     if method in @methods and @env != :test do
       case Plug.Conn.read_body(conn, opts) do
         {:error, :timeout} -> raise Plug.TimeoutError

@@ -91,7 +91,7 @@ defmodule EpochtalkServerWeb.Controllers.BoardJSON do
         |> Map.delete(:id)
       )
       |> Map.merge(board.thread)
-      |> Map.merge(board.board.meta)
+      |> Map.merge(board.board.meta || board.stats)
       |> Map.delete(:meta)
 
     # delete unneeded properties

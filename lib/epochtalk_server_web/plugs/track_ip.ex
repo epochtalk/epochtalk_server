@@ -19,15 +19,15 @@ defmodule EpochtalkServerWeb.Plugs.TrackIp do
     %{method: method} = conn
 
     if method in @methods and @env != :test,
-      do: save_user_ip_to_database(conn),
+      do: maybe_save_user_ip_to_database(conn),
       else: conn
   end
 
-  defp save_user_ip_to_database(conn) do
+  defp maybe_save_user_ip_to_database(conn) do
     register_before_send(conn, fn conn ->
       user = Guardian.Plug.current_resource(conn)
       user_ip = conn.remote_ip |> :inet_parse.ntoa() |> to_string
-      if user != nil, do: UserIp.track(user.id, user_ip)
+      UserIp.maybe_track(user, user_ip)
       conn
     end)
   end

@@ -31,14 +31,17 @@ defmodule EpochtalkServer.Models.UserIp do
   @doc """
   Inserts `UserIp` record into the database if it doesn't already exist
   """
-  @spec track(user_id :: non_neg_integer, user_ip :: String.t()) ::
-          {:ok, t()} | {:error, Ecto.Changeset.t()}
-  def track(user_id, user_ip) do
+  @spec maybe_track(user :: map | nil, user_ip :: String.t()) ::
+          {:ok, t()} | {:error, Ecto.Changeset.t()} | {:ok, nil}
+  def maybe_track(nil, _user_ip), do: {:ok, nil}
+  def maybe_track(%{user_id: user_id} = _user, user_ip), do: maybe_track(%{id: user_id}, user_ip)
+
+  def maybe_track(%{id: user_id} = _user, user_ip) do
     Repo.insert(
       %UserIp{
         user_id: user_id,
         user_ip: user_ip,
-        created_at: NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
+        created_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
       },
       on_conflict: :nothing,
       conflict_target: [:user_id, :user_ip]

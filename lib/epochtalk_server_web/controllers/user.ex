@@ -80,7 +80,7 @@ defmodule EpochtalkServerWeb.Controllers.User do
   defp register_with_verify(conn, attrs) do
     # add confirmation token
     attrs =
-      attrs |> Map.put("confirmation_token", :crypto.strong_rand_bytes(20) |> Base.encode64())
+      attrs |> Map.put("confirmation_token", :crypto.strong_rand_bytes(16) |> Base.encode16())
 
     # create user
     with {:ok, user} <- User.create(attrs),

@@ -152,6 +152,25 @@ defmodule EpochtalkServer.Models.User do
   end
 
   @doc """
+  Check if `confirmation_token` is a match for `User`
+  If it is a match, return `true` and delete `confirmation_token` from `User`
+  Otherwise, return `false`
+  """
+  @spec maybe_confirm?(user :: User.t(), token :: String.t()) :: boolean
+  def maybe_confirm?(user, token) do
+    if user.confirmation_token == token do
+      query =
+        from u in User,
+        where: u.id == ^user.id
+
+        Repo.update_all(query, set: [confirmation_token: nil])
+      true
+    else
+      false
+    end
+  end
+
+  @doc """
   Checks if `User` with `username` exists in the database
   """
   @spec with_username_exists?(username :: String.t()) :: true | false

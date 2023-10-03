@@ -5,9 +5,6 @@ defmodule EpochtalkServerWeb.Endpoint do
   # get x-forwarded ip
   plug RemoteIp
 
-  # Track IP address of users making POST, PUT or PATCH requests
-  plug EpochtalkServerWeb.Plugs.TrackIp
-
   # cors configuration
   plug Corsica, origins: "*", allow_headers: :all, expose_headers: ["epoch-viewer"]
 

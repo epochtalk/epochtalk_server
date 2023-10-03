@@ -10,6 +10,7 @@ defmodule EpochtalkServer.Models.Mention do
   alias EpochtalkServer.Models.User
   alias EpochtalkServer.Models.Notification
   alias EpochtalkServerWeb.Helpers.Pagination
+  alias EpochtalkServerWeb.Helpers.ACL
 
   @moduledoc """
   `Mention` model, for performing actions relating to forum categories
@@ -135,7 +136,20 @@ defmodule EpochtalkServer.Models.Mention do
     {:ok, num_deleted > 0}
   end
 
-  ## === Helper Functions ===
+  ## === Public Helper Functions ===
+  @doc """
+  Iterates through list of `Post`, converts mentioned `User` usernames to a `User` ids within the body of posts
+  """
+  @spec username_to_user_id(conn :: Plug.Conn.t(), post_attrs :: map()) :: updated_post_attrs :: map()
+  def username_to_user_id(conn, post_attrs) do
+    with :ok <- ACL.allow!(conn, "mentions.create") do
+      post_attrs
+    else
+      _ -> post_attrs
+    end
+  end
+
+  ## === Private Helper Functions ===
 
   # doesn't load board association
   defp page_query(user_id, nil = _extended), do: page_query(user_id, false)

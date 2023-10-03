@@ -59,7 +59,7 @@ defmodule EpochtalkServerWeb.Controllers.Post do
          attrs <- AutoModeration.moderate(user, attrs),
          # TODO(akinsey): Implement the following for completion
          # Plugins
-         # 1) Track IP
+         # 1) Track IP (done)
 
          # Pre Processing
 
@@ -69,11 +69,11 @@ defmodule EpochtalkServerWeb.Controllers.Post do
          # 4) handle filtering out newbie images
 
          # Hooks
-         # 1) Auto Moderation (pre)
+         # 1) Auto Moderation (pre) (done) (write tests)
 
          # 2) Update user Activity (post) (done) (write test)
 
-         # 3) Mentions -> convert username to user id (pre)
+         # 3) Mentions -> convert username to user id (pre) (wip)
          # 4) Mentions -> create mentions (post)
          # 5) Mentions -> correct text search vector after creating mentions (post)
 

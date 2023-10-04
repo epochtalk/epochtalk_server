@@ -12,6 +12,9 @@ defmodule EpochtalkServer.Models.Mention do
   alias EpochtalkServerWeb.Helpers.Pagination
   alias EpochtalkServerWeb.Helpers.ACL
 
+  # TODO(akinsey): this is insufficient for matching usernames, we also need to ignore mentions in code blocks
+  @username_mention_regex ~r/@[[:alnum:]]+/
+
   @moduledoc """
   `Mention` model, for performing actions relating to forum categories
   """
@@ -140,10 +143,23 @@ defmodule EpochtalkServer.Models.Mention do
   @doc """
   Iterates through list of `Post`, converts mentioned `User` usernames to a `User` ids within the body of posts
   """
-  @spec username_to_user_id(conn :: Plug.Conn.t(), post_attrs :: map()) :: updated_post_attrs :: map()
+  @spec username_to_user_id(conn :: Plug.Conn.t(), post_attrs :: map()) ::
+          updated_post_attrs :: map()
   def username_to_user_id(conn, post_attrs) do
     with :ok <- ACL.allow!(conn, "mentions.create") do
-      post_attrs
+      body = post_attrs["body"]
+
+      usernames_list =
+        Regex.scan(@username_mention_regex, body)
+        # only need unique list of usernames
+        |> Enum.uniq()
+        # remove "@" from mention
+        |> Enum.map(&String.slice(&1, 1..-1))
+
+      Enum.reduce(username_list, post_attrs, fn usernamea, acc ->
+
+        acc
+      end)
     else
       _ -> post_attrs
     end

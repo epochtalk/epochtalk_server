@@ -161,9 +161,9 @@ defmodule EpochtalkServer.Models.User do
     if user.confirmation_token == token do
       query =
         from u in User,
-        where: u.id == ^user.id
+          where: u.id == ^user.id
 
-        Repo.update_all(query, set: [confirmation_token: nil])
+      Repo.update_all(query, set: [confirmation_token: nil])
       true
     else
       false

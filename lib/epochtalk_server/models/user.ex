@@ -276,6 +276,22 @@ defmodule EpochtalkServer.Models.User do
   end
 
   @doc """
+  Gets list of `User` ids given a list of usernames.
+  """
+  @spec ids_from_usernames(usernames :: [String.t()]) :: [t()]
+  def ids_from_usernames([]), do: []
+
+  def ids_from_usernames(usernames = [username | _other_usernames]) when is_binary(username) do
+    query =
+      from u in User,
+        where: u.username in ^usernames,
+        select: [:id, :username]
+
+    query
+    |> Repo.all()
+  end
+
+  @doc """
   Checks if the provided `User` is malicious using the provided `ip`. If the `User`
   is found to be malicious after checking `BannedAddress` records, the user's
   `malicious_score` is updated and is assigned the `banned` `Role`, in the database

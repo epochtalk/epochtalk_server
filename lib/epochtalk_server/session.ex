@@ -31,7 +31,7 @@ defmodule EpochtalkServer.Session do
     # sign user in and get encoded token
     conn = Guardian.Plug.sign_in(conn, resource, claims, ttl: guardian_ttl)
     encoded_token = Guardian.Plug.current_token(conn)
-    # jti is a unique identifier for the jwt token, use it as session_id
+    # get session_id from jti; a unique identifier for the jwt token
     %{claims: %{"jti" => session_id}} = Guardian.peek(encoded_token)
 
     redis_ttl = if remember_me, do: @four_weeks_in_seconds, else: @one_day_in_seconds

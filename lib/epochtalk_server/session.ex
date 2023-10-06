@@ -37,7 +37,12 @@ defmodule EpochtalkServer.Session do
     redis_ttl = if remember_me, do: @four_weeks_in_seconds, else: @one_day_in_seconds
     # save session
     case save(user, session_id, redis_ttl) do
-      {:ok, _} -> {:ok, user, encoded_token, conn}
+      {:ok, _} ->
+        # update resource with current session info
+        {:ok, resource} = get_resource(user.id, session_id)
+        conn = Guardian.Plug.put_current_resource(conn, resource)
+        # return user, token, conn
+        {:ok, user, encoded_token, conn}
       {:error, error} -> {:error, error}
     end
   end

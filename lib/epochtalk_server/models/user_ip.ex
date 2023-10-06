@@ -34,7 +34,6 @@ defmodule EpochtalkServer.Models.UserIp do
   @spec maybe_track(user :: map | nil, user_ip :: String.t()) ::
           {:ok, t()} | {:error, Ecto.Changeset.t()} | {:ok, nil}
   def maybe_track(nil, _user_ip), do: {:ok, nil}
-  def maybe_track(%{user_id: user_id} = _user, user_ip), do: maybe_track(%{id: user_id}, user_ip)
 
   def maybe_track(%{id: user_id} = _user, user_ip) do
     Repo.insert(

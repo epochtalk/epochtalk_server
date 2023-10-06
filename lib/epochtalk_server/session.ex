@@ -22,14 +22,14 @@ defmodule EpochtalkServer.Session do
           conn :: Plug.Conn.t()
         ) :: {:ok, user :: User.t(), encoded_token :: String.t(), conn :: Plug.Conn.t()}
   def create(%User{} = user, remember_me, conn) do
-    datetime = NaiveDateTime.utc_now()
-    decoded_token = %{user_id: user.id, timestamp: datetime}
-
+    # set resource (for guardian subject)
+    resource = %{id: user.id}
+    # set claims
+    claims = %{}
     # set token expiration based on rememberMe
     guardian_ttl = if remember_me, do: {4, :weeks}, else: {1, :day}
-
     # sign user in and get encoded token
-    conn = Guardian.Plug.sign_in(conn, decoded_token, %{}, ttl: guardian_ttl)
+    conn = Guardian.Plug.sign_in(conn, resource, claims, ttl: guardian_ttl)
     encoded_token = Guardian.Plug.current_token(conn)
     # jti is a unique identifier for the jwt token, use it as session_id
     %{claims: %{"jti" => session_id}} = Guardian.peek(encoded_token)

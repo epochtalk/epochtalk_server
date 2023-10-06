@@ -43,7 +43,9 @@ defmodule EpochtalkServer.Session do
         conn = Guardian.Plug.put_current_resource(conn, resource)
         # return user, token, conn
         {:ok, user, encoded_token, conn}
-      {:error, error} -> {:error, error}
+
+      {:error, error} ->
+        {:error, error}
     end
   end
 

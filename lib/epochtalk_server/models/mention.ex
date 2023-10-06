@@ -149,6 +149,16 @@ defmodule EpochtalkServer.Models.Mention do
     with :ok <- ACL.allow!(conn, "mentions.create") do
       body = post_attrs["body"]
 
+      # store original body, before modifying mentions
+      post_attrs = Map.put(post_attrs, "body_original", body)
+
+      # replace "@UsErNamE" mention with "{@username}""
+      body = String.replace(body, @username_mention_regex, &"{#{String.downcase(&1)}}")
+
+      # update post_attrs with modified body
+      post_attrs = Map.put(post_attrs, "body", body)
+
+      # get list of usernames that were mentioned in the post body
       usernames_list =
         Regex.scan(@username_mention_regex, body)
         # only need unique list of usernames
@@ -156,11 +166,29 @@ defmodule EpochtalkServer.Models.Mention do
         # remove "@" from mention
         |> Enum.map(&String.slice(&1, 1..-1))
 
-      Enum.reduce(username_list, post_attrs, fn usernamea, acc ->
+      mentioned_users = User.ids_from_usernames(usernames_list)
 
+      # update post body, converting username mentions to user id mentions
+      # and add mentioned_ids, return post attrs
+      Enum.reduce(mentioned_users, post_attrs, fn %User{id: user_id, username: username}, acc ->
+        username_mention = "{@#{String.downcase(username)}}"
+        user_id_mention = "{@#{user_id}}"
+
+        # replace usernames mentions in body with user id mention
+        body = acc["body"]
+        body = String.replace(body, username_mention, user_id_mention)
+
+        # update unique list of user ids mentioned in the post body
+        mentioned_ids = acc["mentioned_ids"] || []
+        mentioned_ids = mentioned_ids ++ [user_id]
+
+        # update post_body, iterate
         acc
+        |> Map.put("body", body)
+        |> Map.put("mentioned_ids", mentioned_ids)
       end)
     else
+      # no permissions to create mentions, do nothing
       _ -> post_attrs
     end
   end

@@ -356,8 +356,8 @@ defmodule EpochtalkServer.Models.Post do
   Used to correct the text search vector for post after being modified for mentions
   """
   # TODO(akinsey): add tsv column to post, verify this is working
-  @spec fix_text_search_vector(post :: map()) :: {non_neg_integer(), nil}
-  def fix_text_search_vector(post) do
+  @spec fix_text_search_vector(post_attrs :: map()) :: {non_neg_integer(), nil}
+  def fix_text_search_vector(post_attrs) do
     query =
       from p in Post,
         update: [
@@ -368,12 +368,12 @@ defmodule EpochtalkServer.Models.Post do
                   setweight(to_tsvector('simple', COALESCE(?,'')), 'A') ||
                   setweight(to_tsvector('simple', COALESCE(?,'')), 'B')
                 """,
-                ^post.title,
-                ^post.body_original
+                ^post_attrs["title"],
+                ^post_attrs["body_original"]
               )
           ]
         ],
-        where: p.id == ^post.id
+        where: p.id == ^post_attrs["id"]
 
     Repo.update_all(query, [])
   end

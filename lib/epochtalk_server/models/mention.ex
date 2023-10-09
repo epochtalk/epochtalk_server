@@ -140,6 +140,7 @@ defmodule EpochtalkServer.Models.Mention do
   end
 
   ## === Public Helper Functions ===
+
   @doc """
   Iterates through list of `Post`, converts mentioned `User` usernames to a `User` ids within the body of posts
   """
@@ -191,6 +192,23 @@ defmodule EpochtalkServer.Models.Mention do
       # no permissions to create mentions, do nothing
       _ -> post_attrs
     end
+  end
+
+
+  @doc """
+  Handles logic tied to the creation of `Mention`. Performs the following actions:
+
+  * Checks that `User` has permission to create `Mention`
+  * Iterates though each mentioned `User`
+    * Checks that mentioned `User` is not ignoring the authenticated `User`
+    * Creates mentions
+    * Sends websocket notification
+    * Checks mention email settings
+      * Sends email to mentioned user if applicable
+  """
+  @spec handle_user_mention_creation(conn :: Plug.Conn.t(), post_attrs :: map(), post :: Post.t()) :: :ok
+  def handle_user_mention_creation(_conn, _post_attrs, _post) do
+    :ok
   end
 
   ## === Private Helper Functions ===

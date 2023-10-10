@@ -366,13 +366,20 @@ defmodule EpochtalkServer.Session do
     maybe_extend_ttl(key, ttl, ttl)
   end
 
+  # set ttl to max of old_ttl, new_ttl, and existing ttl
+  # - or @four_weeks_in_seconds if old and new ttl's are invalid
   defp maybe_extend_ttl(key, new_ttl, old_ttl) do
-    if old_ttl > -1 do
-      # re-set old expiry only if old expiry was valid and key has no expiry
-      Redix.command(:redix, ["EXPIRE", key, old_ttl, "NX"])
-    else
-      # if old expiry was invalid, set new expiry only if key has no expiry
-      Redix.command(:redix, ["EXPIRE", key, new_ttl, "NX"])
+    cond do
+      old_ttl > -1 ->
+        # re-set old expiry only if old expiry was valid and key has no expiry
+        Redix.command(:redix, ["EXPIRE", key, old_ttl, "NX"])
+      new_ttl > -1 ->
+        # if old expiry was invalid, set new expiry only if new expiry is valid and key has no expiry
+        Redix.command(:redix, ["EXPIRE", key, new_ttl, "NX"])
+      true ->
+        # catch-all, in case both given expiries are invalid
+        # if neither expiry is valid, set ttl to max
+        Redix.command(:redix, ["EXPIRE", key, @four_weeks_in_seconds])
     end
 
     # set expiry only if new expiry is greater than current (GT)

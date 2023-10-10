@@ -5,6 +5,7 @@ defmodule EpochtalkServer.Session do
   @moduledoc """
   Manages `User` sessions in Redis. Used by Auth related `User` actions.
   """
+  require Logger
   alias EpochtalkServer.Auth.Guardian
   alias EpochtalkServer.Models.User
   alias EpochtalkServer.Models.Role
@@ -378,6 +379,10 @@ defmodule EpochtalkServer.Session do
         Redix.command(:redix, ["EXPIRE", key, new_ttl, "NX"])
       true ->
         # catch-all, in case both given expiries are invalid
+        Logger.warning("Invalid TTL's, setting max expiry", %{
+          module: __MODULE__,
+          parameters: "[old_ttl: #{old_ttl}, new_ttl: #{new_ttl}, key: #{key}]"
+        })
         # if neither expiry is valid, set ttl to max
         Redix.command(:redix, ["EXPIRE", key, @four_weeks_in_seconds])
     end

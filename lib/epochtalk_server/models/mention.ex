@@ -4,9 +4,11 @@ defmodule EpochtalkServer.Models.Mention do
   import Ecto.Query
   alias EpochtalkServer.Repo
   alias EpochtalkServer.Models.Mention
+  alias EpochtalkServer.Models.MentionIgnored
   alias EpochtalkServer.Models.Thread
   alias EpochtalkServer.Models.Board
   alias EpochtalkServer.Models.Post
+  alias EpochtalkServer.Models.Preference
   alias EpochtalkServer.Models.User
   alias EpochtalkServer.Models.Notification
   alias EpochtalkServerWeb.Helpers.Pagination
@@ -220,9 +222,57 @@ defmodule EpochtalkServer.Models.Mention do
     * Checks mention email settings
       * Sends email to mentioned user if applicable
   """
-  @spec handle_user_mention_creation(conn :: Plug.Conn.t(), post_attrs :: map(), post :: Post.t()) :: :ok
-  def handle_user_mention_creation(_conn, _post_attrs, _post) do
-    :ok
+  @spec handle_user_mention_creation(conn :: Plug.Conn.t(), post_attrs :: map(), post :: Post.t()) ::
+          :ok
+  def handle_user_mention_creation(conn, post_attrs, post) do
+    with :ok <- ACL.allow!(conn, "mentions.create") do
+      mentioned_ids = post_attrs["mentioned_ids"] || []
+
+      # iterate through each mentioned user id
+      Enum.each(mentioned_ids, fn mentionee_id ->
+        # check that authed user isn't being ignored by the mentioned user
+        authed_user_ignored = MentionIgnored.is_user_ignored?(mentionee_id, post.user_id)
+
+        # check that user isn't mentioning themselves and that they aren't ignored
+        if post.user_id != mentionee_id && authed_user_ignored == false do
+          mention = %{
+            "thread_id" => post.thread_id,
+            "post_id" => post.id,
+            "mentioner_id" => post.user_id,
+            "mentionee_id" => mentionee_id
+          }
+
+          # create mention
+          {:ok, mention} = Mention.create(mention)
+
+          notification = %{
+            "sender_id" => post.user_id,
+            "receiver_id" => mentionee_id,
+            "type" => "user",
+            "data" => %{
+              action: "refreshMentions",
+              mention_id: mention.id
+            }
+          }
+
+          # create notification associated with mention (for mentions dropdown)
+          Notification.create(notification)
+
+          # send websocket notifcation to mentionee
+          EpochtalkServerWeb.Endpoint.broadcast("user:#{mentionee_id}", "refreshMentions", %{})
+
+          # check mentionee's email settings for mentions and then maybe send email
+          if Preference.email_mentions?(mentionee_id) do
+            #send email
+          end
+        end
+      end)
+
+      :ok
+    else
+      # no permissions to create mentions, do nothing
+      _ -> :ok
+    end
   end
 
   ## === Private Helper Functions ===

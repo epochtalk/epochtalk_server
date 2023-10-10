@@ -194,6 +194,20 @@ defmodule EpochtalkServer.Models.Mention do
     end
   end
 
+  @doc """
+  Fixes text search vector, since usernames are being converted to user ids before
+  `Post` is created, the created `Post` will have the ids in the tsv field. To correct
+  this we recreate the tsv field using the original `Post` body.
+  """
+  @spec correct_text_search_vector(post_attrs :: map()) ::
+          :ok | {non_neg_integer(), nil}
+  def correct_text_search_vector(post_attrs) do
+    mentioned_ids = post_attrs["mentioned_ids"] || []
+
+    if mentioned_ids == [],
+      do: :ok,
+      else: Post.fix_text_search_vector(post_attrs)
+  end
 
   @doc """
   Handles logic tied to the creation of `Mention`. Performs the following actions:

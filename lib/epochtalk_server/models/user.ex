@@ -183,6 +183,19 @@ defmodule EpochtalkServer.Models.User do
   @spec with_email_exists?(email :: String.t()) :: true | false
   def with_email_exists?(email), do: Repo.exists?(from u in User, where: u.email == ^email)
 
+  @doc """
+  Gets a `User` email from the database by `id`
+  """
+  @spec email_by_id(id :: integer) :: email :: String.t() | nil
+  def email_by_id(id) when is_integer(id) do
+    query =
+      from u in User,
+        where: u.id == ^id,
+        select: u.email
+
+    Repo.one(query)
+  end
+
   # TODO(boka): refactor to combine duplicate code with by_username and create
   @doc """
   Gets a `User` from the database by `id`

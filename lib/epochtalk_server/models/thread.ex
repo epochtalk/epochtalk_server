@@ -397,6 +397,60 @@ defmodule EpochtalkServer.Models.Thread do
       else: {:error, :thread_does_not_exist}
   end
 
+  @doc """
+  Used to get first `Post` data given a `Thread` id
+  """
+  @spec get_first_post_data_by_id(id :: non_neg_integer) ::
+          post_data :: map() | nil
+  def get_first_post_data_by_id(id) when is_integer(id) do
+    query_first_thread_post_data =
+      from p in Post,
+        left_join: t in Thread,
+        on: t.id == p.thread_id,
+        left_join: u in User,
+        on: u.id == p.user_id,
+        where: p.thread_id == ^id,
+        order_by: [p.created_at],
+        limit: 1,
+        select: %{
+          id: p.id,
+          title: p.content["title"],
+          body: p.content["body"],
+          thread_id: p.thread_id,
+          thread_slug: t.slug,
+          username: u.username
+        }
+
+    Repo.one(query_first_thread_post_data)
+  end
+
+  @doc """
+  Used to get first `Post` data given a `Thread` slug
+  """
+  @spec get_first_post_data_by_id(slug :: String.t()) ::
+          post_data :: map() | nil
+  def get_first_post_data_by_slug(slug) when is_binary(slug) do
+    query_first_thread_post_data =
+      from p in Post,
+        left_join: t in Thread,
+        on: t.id == p.thread_id,
+        left_join: u in User,
+        on: u.id == p.user_id,
+        where: t.slug == ^slug,
+        order_by: [p.created_at],
+        limit: 1,
+        select: %{
+          id: p.id,
+          title: p.content["title"],
+          body: p.content["body"],
+          thread_id: p.thread_id,
+          thread_slug: t.slug,
+          username: u.username
+        }
+
+    Repo.one(query_first_thread_post_data)
+  end
+
   ## === Private Helper Functions ===
 
   defp find_shared(initial_query) do

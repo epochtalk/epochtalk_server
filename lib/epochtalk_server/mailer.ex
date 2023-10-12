@@ -96,8 +96,7 @@ defmodule EpochtalkServer.Mailer do
     website_title = config["website"]["title"]
     from_address = config["emailer"]["options"]["from_address"]
 
-    thread_url =
-      "#{frontend_url}/threads/#{thread_slug}?start=#{post_position}##{post_id}"
+    thread_url = "#{frontend_url}/threads/#{thread_slug}?start=#{post_position}##{post_id}"
 
     content =
       generate_from_base_template(
@@ -111,7 +110,7 @@ defmodule EpochtalkServer.Mailer do
       )
 
     new()
-    |> to({username, email})
+    |> to(email)
     |> from({website_title, from_address})
     |> subject("[#{website_title}] New replies to thread #{thread_title}")
     |> html_body(content)

@@ -3,6 +3,7 @@ defmodule EpochtalkServer.Models.Mention do
   import Ecto.Changeset
   import Ecto.Query
   alias EpochtalkServer.Repo
+  alias EpochtalkServer.Mailer
   alias EpochtalkServer.Models.Mention
   alias EpochtalkServer.Models.MentionIgnored
   alias EpochtalkServer.Models.Thread
@@ -263,7 +264,22 @@ defmodule EpochtalkServer.Models.Mention do
 
           # check mentionee's email settings for mentions and then maybe send email
           if Preference.email_mentions?(mentionee_id) do
-            #send email
+            thread_post_data = Thread.get_first_post_data_by_id(post.thread_id)
+            # get mentionee's email
+            mentionee_email = User.email_by_id(mentionee_id)
+
+            # get authed user
+            authed_user = Guardian.Plug.current_resource(conn)
+
+            # send email
+            Mailer.send_mention_notification(%{
+              email: mentionee_email,
+              post_id: post.id,
+              post_position: post.position,
+              post_author: authed_user.username,
+              thread_slug: post.thread_slug,
+              thread_title: thread_post_data.title
+            })
           end
         end
       end)

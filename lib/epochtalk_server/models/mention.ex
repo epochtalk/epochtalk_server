@@ -16,7 +16,8 @@ defmodule EpochtalkServer.Models.Mention do
   alias EpochtalkServerWeb.Helpers.ACL
 
   # TODO(akinsey): this is insufficient for matching usernames, we also need to ignore mentions in code blocks
-  @username_mention_regex ~r/@[[:alnum:]]+/
+  @username_mention_regex ~r/@^[[:alnum:]]+/
+  @user_id_regex ~r/{@^[[:digit:]]+}/
 
   @moduledoc """
   `Mention` model, for performing actions relating to forum categories
@@ -145,7 +146,54 @@ defmodule EpochtalkServer.Models.Mention do
   ## === Public Helper Functions ===
 
   @doc """
-  Iterates through list of `Post`, converts mentioned `User` usernames to a `User` ids within the body of posts
+  Iterates through list of `Post`, converts mentioned `User` id to a `User` usernames within the body of posts.
+  Used when retreiving posts from the database
+  """
+  @spec user_id_to_username(conn :: Plug.Conn.t(), posts :: map() | [map()]) ::
+          updated_posts :: [map()]
+  def user_id_to_username(conn, post) when is_map(post),
+    do: user_id_to_username(conn, [post])
+
+  def user_id_to_username(_conn, posts) when is_list(posts) do
+    # iterate over each post
+    Enum.map(posts, fn post ->
+      # move post_body to body and body_html so it is processed properly
+      post = if Map.has_key?(post, :post_body),
+        do: post |> Map.put(:body, post.post_body) |> Map.put(:body_html, post.post_body),
+        else: post
+
+      if Map.has_key?(post, :body) do
+        user_ids = Regex.scan(@user_id_regex, post.body)
+          # only need unique list of user_ids
+          |> Enum.uniq()
+          # remove "{@}" from mentioned user_id
+          |> Enum.map(&String.slice(&1, 2..-1))
+
+        Enum.reduce(user_ids, post, fn (user_id, modified_post) ->
+          username = User.username_by_id(user_id)
+
+          profile_link = "<router-link :to=\"{path: '/profile/#{String.downcase(username)}'}\">@#{username}</router-link>"
+
+          # swap {@user_id} for @username in post_body
+          updated_body = String.replace(modified_post.body, "{@#{user_id}}", "@#{username}"
+
+          updated_body_html = String.replace(modified_post.body_html, @user_id_regex, "@#{username}")
+
+          modified_post = Map.put(modified_post, :body, updated_body) |> Map.put(:body_html, updated_body_html)
+
+          if Map.has_key?(post, :post_body),
+            do: modified_post |> Map.put(:post_body, modified_post.body_html) |> Map.delete(:body) |> Map.delete(:body_html),
+            else: modified_post
+        end)
+      else
+        post
+      end
+    end)
+  end
+
+  @doc """
+  Within `Post`, converts mentioned `User` usernames to a `User` ids within the body of posts.
+  Used before storing `Post` in the database
   """
   @spec username_to_user_id(conn :: Plug.Conn.t(), post_attrs :: map()) ::
           updated_post_attrs :: map()

@@ -53,12 +53,12 @@ defmodule EpochtalkServer.Session do
   * User's session id, timestamp, ttl
   * Guardian token
   """
-  @spec update(user_id :: non_neg_integer) :: {:ok, user :: User.t()}
+  @spec update(user_id :: non_neg_integer) ::
+          {:ok, user :: User.t()}
           | {:error, reason :: String.t() | Postgrex.Error.t()}
   def update(user_id) do
     with {:ok, user} <- User.by_id(user_id),
-         true <- has_sessions?(user_id)
-    do
+         true <- has_sessions?(user_id) do
       avatar = if is_nil(user.profile), do: nil, else: user.profile.avatar
       update_user_info(user.id, user.username, avatar: avatar)
       update_roles(user.id, user.roles)
@@ -310,8 +310,9 @@ defmodule EpochtalkServer.Session do
     {:ok, old_ttl} = Redix.command(:redix, ["TTL", ban_key])
     Redix.command(:redix, ["HDEL", ban_key, "ban_expiration", "malicious_score"])
 
-    if ban_exp = Map.get(ban_info, :ban_expiration),
-      do: Redix.command(:redix, ["HSET", ban_key, "ban_expiration", ban_exp])
+    if ban_exp = Map.get(ban_info, :ban_expiration) do
+      Redix.command(:redix, ["HSET", ban_key, "ban_expiration", ban_exp])
+    end
 
     if malicious_score = Map.get(ban_info, :malicious_score),
       do: Redix.command(:redix, ["HSET", ban_key, "malicious_score", malicious_score])
@@ -374,15 +375,18 @@ defmodule EpochtalkServer.Session do
       old_ttl > -1 ->
         # re-set old expiry only if old expiry was valid and key has no expiry
         Redix.command(:redix, ["EXPIRE", key, old_ttl, "NX"])
+
       new_ttl > -1 ->
         # if old expiry was invalid, set new expiry only if new expiry is valid and key has no expiry
         Redix.command(:redix, ["EXPIRE", key, new_ttl, "NX"])
+
       true ->
         # catch-all, in case both given expiries are invalid
         Logger.warning("Invalid TTL's, setting max expiry", %{
           module: __MODULE__,
           parameters: "[old_ttl: #{old_ttl}, new_ttl: #{new_ttl}, key: #{key}]"
         })
+
         # if neither expiry is valid, set ttl to max
         Redix.command(:redix, ["EXPIRE", key, @four_weeks_in_seconds])
     end

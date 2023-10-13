@@ -175,7 +175,7 @@ defmodule EpochtalkServer.Models.Mention do
           profile_link = "<router-link :to=\"{path: '/profile/#{String.downcase(username)}'}\">@#{username}</router-link>"
 
           # swap {@user_id} for @username in post_body
-          updated_body = String.replace(modified_post.body, "{@#{user_id}}", "@#{username}"
+          updated_body = String.replace(modified_post.body, "{@#{user_id}}", "@#{username}")
 
           updated_body_html = String.replace(modified_post.body_html, @user_id_regex, "@#{username}")
 

@@ -20,6 +20,7 @@ defmodule Test.EpochtalkServer.Models.Profile do
         signature: "signature",
         raw_signature: "raw_signature"
       }
+
       Profile.upsert(user.id, updated_attrs)
       {:ok, updated_user} = User.by_id(user.id)
       assert updated_user.profile.avatar == updated_attrs.avatar
@@ -28,15 +29,18 @@ defmodule Test.EpochtalkServer.Models.Profile do
       assert updated_user.profile.raw_signature == updated_attrs.raw_signature
     end
   end
+
   describe "create/2" do
     test "given invalid user_id, errors with Ecto.ConstraintError" do
       invalid_user_id = 0
+
       assert_raise Ecto.ConstraintError,
                    ~r/profiles_user_id_fkey/,
                    fn ->
                      Profile.create(invalid_user_id)
                    end
     end
+
     test "given an existing user_id, errors with Ecto.ConstraintError", %{users: %{user: user}} do
       assert_raise Ecto.ConstraintError,
                    ~r/profiles_user_id_index/,

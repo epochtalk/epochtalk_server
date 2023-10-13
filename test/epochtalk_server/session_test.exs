@@ -368,9 +368,14 @@ defmodule Test.EpochtalkServer.Session do
     test "given invalid user id, errors with :user_not_found", %{conn: conn} do
       assert Session.update(0) == {:error, :user_not_found}
     end
-    test "given user id without sessions, errors with :no_sessions", %{conn: conn, users: %{no_login_user: user}} do
+
+    test "given user id without sessions, errors with :no_sessions", %{
+      conn: conn,
+      users: %{no_login_user: user}
+    } do
       assert Session.update(user.id) == {:error, :no_sessions}
     end
+
     @tag :authenticated
     test "given a valid user id, updates avatar", %{conn: conn, authed_user: authed_user} do
       updated_attrs = %{avatar: "image.png"}
@@ -381,6 +386,7 @@ defmodule Test.EpochtalkServer.Session do
       {:ok, resource_user} = Session.get_resource(authed_user.id, session_id)
       assert resource_user.avatar == updated_attrs.avatar
     end
+
     @tag :authenticated
     test "given a valid user id, updates role to admin", %{conn: conn, authed_user: authed_user} do
       authed_user_role = List.first(authed_user.roles)
@@ -393,8 +399,12 @@ defmodule Test.EpochtalkServer.Session do
       resource_user_role = List.first(resource_user.roles)
       assert resource_user_role == RoleCache.by_lookup("superAdministrator")
     end
+
     @tag authenticated: :super_admin
-    test "given a valid superAdministrator id, updates role to delete admin + add user", %{conn: conn, authed_user: authed_user} do
+    test "given a valid superAdministrator id, updates role to delete admin + add user", %{
+      conn: conn,
+      authed_user: authed_user
+    } do
       authed_user_role = List.first(authed_user.roles)
       super_administrator_role = RoleCache.by_lookup("superAdministrator")
       assert authed_user_role == super_administrator_role
@@ -409,7 +419,10 @@ defmodule Test.EpochtalkServer.Session do
     end
 
     @tag :authenticated
-    test "given a not banned user's id, when user is banned, adds banned role", %{conn: conn, authed_user: authed_user} do
+    test "given a not banned user's id, when user is banned, adds banned role", %{
+      conn: conn,
+      authed_user: authed_user
+    } do
       # get session_id (jti) from conn
       session_id = conn.private.guardian_default_claims["jti"]
       # check that session user does not have banned role
@@ -424,8 +437,12 @@ defmodule Test.EpochtalkServer.Session do
       {:ok, banned_resource_user} = Session.get_resource(authed_user.id, session_id)
       assert Enum.any?(banned_resource_user.roles, &(&1.lookup == "banned")) == true
     end
+
     @tag [authenticated: true, banned: true]
-    test "given a banned user's id, when user is unbanned, deletes banned role", %{conn: conn, authed_user: authed_user} do
+    test "given a banned user's id, when user is unbanned, deletes banned role", %{
+      conn: conn,
+      authed_user: authed_user
+    } do
       # get session_id (jti) from conn
       session_id = conn.private.guardian_default_claims["jti"]
       # check that session user has banned role

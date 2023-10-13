@@ -25,7 +25,8 @@ config :epochtalk_server, EpochtalkServer.Mailer, adapter: Swoosh.Adapters.Test
 
 # Print only warnings and errors during test
 # Accept module and parameters
-config :logger, :console, level: :warning,
+config :logger, :console,
+  level: :warning,
   format: "[$level] $message $metadata\n",
   metadata: [:module, :parameters]
 

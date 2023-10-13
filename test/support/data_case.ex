@@ -74,22 +74,23 @@ defmodule Test.Support.DataCase do
     {:ok, user} = User.by_username(@test_username)
     {:ok, admin_user} = User.by_username(@test_admin_username)
     {:ok, super_admin_user} = User.by_username(@test_super_admin_username)
+
     {
       :ok,
-       [
-         users: %{
-           no_login_user: no_login_user,
-           user: user,
-           admin_user: admin_user,
-           super_admin_user: super_admin_user
-         },
-         user_attrs: %{
-           no_login_user: @test_no_login_user_attrs,
-           user: @test_user_attrs,
-           admin_user: @test_admin_user_attrs,
-           super_admin_user: @test_super_admin_user_attrs
-         }
-       ]
+      [
+        users: %{
+          no_login_user: no_login_user,
+          user: user,
+          admin_user: admin_user,
+          super_admin_user: super_admin_user
+        },
+        user_attrs: %{
+          no_login_user: @test_no_login_user_attrs,
+          user: @test_user_attrs,
+          admin_user: @test_admin_user_attrs,
+          super_admin_user: @test_super_admin_user_attrs
+        }
+      ]
     }
   end
 

@@ -210,19 +210,19 @@ defmodule EpochtalkServer.Models.Mention do
       # update post_attrs with modified body
       post_attrs = Map.put(post_attrs, "body", body)
 
-      # get list of usernames that were mentioned in the post body
-      usernames_list =
+      # get list of unique usernames that were mentioned in the post body
+      unique_usernames =
         Regex.scan(@username_mention_regex, body)
         # only need unique list of usernames
         |> Enum.uniq()
         # remove "@" from mention
         |> Enum.map(&String.slice(&1, 1..-1))
-
-      mentioned_users = User.ids_from_usernames(usernames_list)
+        # get list of ids from list of usernames
+        |> User.ids_from_usernames()
 
       # update post body, converting username mentions to user id mentions
       # and add mentioned_ids, return post attrs
-      Enum.reduce(mentioned_users, post_attrs, fn %User{id: user_id, username: username}, acc ->
+      Enum.reduce(unique_usernames, post_attrs, fn %User{id: user_id, username: username}, acc ->
         username_mention = "{@#{String.downcase(username)}}"
         user_id_mention = "{@#{user_id}}"
 

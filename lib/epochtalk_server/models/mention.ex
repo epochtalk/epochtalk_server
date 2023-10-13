@@ -204,7 +204,7 @@ defmodule EpochtalkServer.Models.Mention do
       # store original body, before modifying mentions
       post_attrs = Map.put(post_attrs, "body_original", body)
 
-      # replace "@UsErNamE" mention with "{@username}""
+      # replace "@UsErNamE" mention with "{@username}"
       body = String.replace(body, @username_mention_regex, &"{#{String.downcase(&1)}}")
 
       # update post_attrs with modified body

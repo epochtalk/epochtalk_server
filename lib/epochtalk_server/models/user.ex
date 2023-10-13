@@ -196,6 +196,19 @@ defmodule EpochtalkServer.Models.User do
     Repo.one(query)
   end
 
+  @doc """
+  Gets a `User` username from the database by `id`
+  """
+  @spec username_by_id(id :: integer) :: username :: String.t() | nil
+  def username_by_id(id) when is_integer(id) do
+    query =
+      from u in User,
+        where: u.id == ^id,
+        select: u.username
+
+    Repo.one(query)
+  end
+
   # TODO(boka): refactor to combine duplicate code with by_username and create
   @doc """
   Gets a `User` from the database by `id`

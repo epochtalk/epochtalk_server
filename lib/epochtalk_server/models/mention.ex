@@ -16,7 +16,7 @@ defmodule EpochtalkServer.Models.Mention do
   alias EpochtalkServerWeb.Helpers.ACL
 
   # TODO(akinsey): this is insufficient for matching usernames, we also need to ignore mentions in code blocks
-  @username_mention_regex ~r/@^[[:alnum:]]+/
+  @username_mention_regex ~r/\[code\].*\[\/code\](*SKIP)(*FAIL)|(?<=^|\s)@([a-zA-Z0-9\-_.]+)/i
   @user_id_regex ~r/{@^[[:digit:]]+}/
 
   @moduledoc """

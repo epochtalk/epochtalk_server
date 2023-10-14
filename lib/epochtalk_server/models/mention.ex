@@ -196,10 +196,10 @@ defmodule EpochtalkServer.Models.Mention do
   Within `Post`, converts mentioned `User` usernames to a `User` ids within the body of posts.
   Used before storing `Post` in the database
   """
-  @spec username_to_user_id(conn :: Plug.Conn.t(), post_attrs :: map()) ::
+  @spec username_to_user_id(user :: map(), post_attrs :: map()) ::
           updated_post_attrs :: map()
-  def username_to_user_id(conn, post_attrs) do
-    with :ok <- ACL.allow!(conn, "mentions.create") do
+  def username_to_user_id(user, post_attrs) do
+    with :ok <- ACL.allow!(user, "mentions.create") do
       body = post_attrs["body"]
 
       # store original body, before modifying mentions

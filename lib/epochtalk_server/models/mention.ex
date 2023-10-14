@@ -178,7 +178,7 @@ defmodule EpochtalkServer.Models.Mention do
           # swap {@user_id} for @username in post_body
           updated_body = String.replace(modified_post.body, "{@#{user_id}}", "@#{username}")
 
-          updated_body_html = String.replace(modified_post.body_html, @user_id_regex, "@#{username}")
+          updated_body_html = String.replace(modified_post.body_html, @user_id_regex, profile_link)
 
           modified_post = Map.put(modified_post, :body, updated_body) |> Map.put(:body_html, updated_body_html)
 

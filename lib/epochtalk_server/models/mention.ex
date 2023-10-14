@@ -17,6 +17,7 @@ defmodule EpochtalkServer.Models.Mention do
 
   # TODO(akinsey): this is insufficient for matching usernames, we also need to ignore mentions in code blocks
   @username_mention_regex ~r/\[code\].*\[\/code\](*SKIP)(*FAIL)|(?<=^|\s)@([a-zA-Z0-9\-_.]+)/i
+  @username_mention_regex_curly ~r/\[code\].*\[\/code\](*SKIP)(*FAIL)|{@([a-zA-Z0-9\-_.]+)}/i
   @user_id_regex ~r/{@^[[:digit:]]+}/
 
   @moduledoc """
@@ -212,7 +213,7 @@ defmodule EpochtalkServer.Models.Mention do
 
       # get list of unique usernames that were mentioned in the post body
       unique_usernames =
-        Regex.scan(@username_mention_regex, body)
+        Regex.scan(@username_mention_regex_curly, body)
         # only need unique list of usernames
         |> Enum.uniq()
         # remove "@" from mention

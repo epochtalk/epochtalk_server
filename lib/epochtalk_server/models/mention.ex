@@ -211,30 +211,51 @@ defmodule EpochtalkServer.Models.Mention do
       post_attrs = Map.put(post_attrs, "body", body)
 
       # get list of unique usernames that were mentioned in the post body
-      unique_usernames =
+      possible_usernames =
         Regex.scan(@username_mention_regex_curly, body)
         # only need unique list of usernames
         |> Enum.uniq()
-        # remove "@" from mention
-        |> Enum.map(&String.slice(&1, 1..-1))
-        # get list of ids from list of usernames
+        # extract username from regex scan
+        |> Enum.map(fn [_match, username] -> username end)
+
+      # get map of ids from list of possible_usernames
+      # to determine if a possible_username should be replaced
+      mentioned_usernames_to_id_map =
+        possible_usernames
+        # get ids for usernames that exist
         |> User.ids_from_usernames()
+        # map usernames to user_ids
+        |> Enum.reduce(%{}, fn %User{id: user_id, username: username}, acc ->
+          Map.put(acc, username, user_id)
+        end)
+
+      # initialize mentioned_ids to empty
+      post_attrs = Map.put(post_attrs, "mentioned_ids", [])
 
       # update post body, converting username mentions to user id mentions
+      # and unmatched possible_usernames back to unused mentions
       # and add mentioned_ids, return post attrs
-      Enum.reduce(unique_usernames, post_attrs, fn %User{id: user_id, username: username}, acc ->
-        username_mention = "{@#{String.downcase(username)}}"
-        user_id_mention = "{@#{user_id}}"
+      Enum.reduce(possible_usernames, post_attrs, fn possible_username, acc ->
+        # check if possible_username is mapped in mentioned_usernames_to_id_map
+        {replacement, user_id} = case Map.get(mentioned_usernames_to_id_map, possible_username) do
+          # username was invalid, replace with original text
+          nil -> {"@#{possible_username}", nil}
+          # username was valid, replace with user id bracket
+          user_id -> {"{@#{user_id}}", user_id}
+        end
 
-        # replace usernames mentions in body with user id mention
+        # get downcased version of username for replacement matching
+        username_mention = "{@#{String.downcase(possible_username)}}"
+
+        # replace usernames mentions in body with user id mention OR original text
         body = acc["body"]
-        body = String.replace(body, username_mention, user_id_mention)
+        body = String.replace(body, username_mention, replacement)
 
-        # update unique list of user ids mentioned in the post body
-        mentioned_ids = acc["mentioned_ids"] || []
-        mentioned_ids = mentioned_ids ++ [user_id]
+        # if mention was valid, update list of unique user ids mentioned in the post body
+        mentioned_ids = acc["mentioned_ids"]
+        mentioned_ids = if user_id != nil, do: mentioned_ids ++ [user_id], else: mentioned_ids
 
-        # update post_body, iterate
+        # update post_attrs
         acc
         |> Map.put("body", body)
         |> Map.put("mentioned_ids", mentioned_ids)

@@ -15,7 +15,6 @@ defmodule EpochtalkServer.Models.Mention do
   alias EpochtalkServerWeb.Helpers.Pagination
   alias EpochtalkServerWeb.Helpers.ACL
 
-  # TODO(akinsey): this is insufficient for matching usernames, we also need to ignore mentions in code blocks
   @username_mention_regex ~r/\[code\].*\[\/code\](*SKIP)(*FAIL)|(?<=^|\s)@([a-zA-Z0-9\-_.]+)/i
   @username_mention_regex_curly ~r/\[code\].*\[\/code\](*SKIP)(*FAIL)|{@([a-zA-Z0-9\-_.]+)}/i
   @user_id_regex ~r/{@^[[:digit:]]+}/

@@ -150,12 +150,12 @@ defmodule EpochtalkServer.Models.Mention do
   Iterates through list of `Post`, converts mentioned `User` id to a `User` usernames within the body of posts.
   Used when retreiving posts from the database
   """
-  @spec user_id_to_username(conn :: Plug.Conn.t(), posts :: map() | [map()]) ::
+  @spec user_id_to_username(posts :: map() | [map()]) ::
           updated_posts :: [map()]
-  def user_id_to_username(conn, post) when is_map(post),
-    do: user_id_to_username(conn, [post])
+  def user_id_to_username(post) when is_map(post),
+    do: user_id_to_username([post])
 
-  def user_id_to_username(_conn, posts) when is_list(posts) do
+  def user_id_to_username(posts) when is_list(posts) do
     # iterate over each post
     Enum.map(posts, fn post ->
       # move post_body to body and body_html so it is processed properly

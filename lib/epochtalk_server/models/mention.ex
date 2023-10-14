@@ -272,10 +272,10 @@ defmodule EpochtalkServer.Models.Mention do
     * Checks mention email settings
       * Sends email to mentioned user if applicable
   """
-  @spec handle_user_mention_creation(conn :: Plug.Conn.t(), post_attrs :: map(), post :: Post.t()) ::
+  @spec handle_user_mention_creation(user :: map(), post_attrs :: map(), post :: Post.t()) ::
           :ok
-  def handle_user_mention_creation(conn, post_attrs, post) do
-    with :ok <- ACL.allow!(conn, "mentions.create") do
+  def handle_user_mention_creation(user, post_attrs, post) do
+    with :ok <- ACL.allow!(user, "mentions.create") do
       mentioned_ids = post_attrs["mentioned_ids"] || []
 
       # iterate through each mentioned user id
@@ -317,15 +317,12 @@ defmodule EpochtalkServer.Models.Mention do
             # get mentionee's email
             mentionee_email = User.email_by_id(mentionee_id)
 
-            # get authed user
-            authed_user = Guardian.Plug.current_resource(conn)
-
             # send email
             Mailer.send_mention_notification(%{
               email: mentionee_email,
               post_id: post.id,
               post_position: post.position,
-              post_author: authed_user.username,
+              post_author: user.username,
               thread_slug: post.thread_slug,
               thread_title: thread_post_data.title
             })

@@ -15,6 +15,7 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
   alias EpochtalkServer.Models.BoardModerator
   alias EpochtalkServer.Models.UserThreadView
   alias EpochtalkServer.Models.MetadataThread
+  alias EpochtalkServer.Models.WatchBoard
 
   @doc """
   Used to retrieve recent threads
@@ -59,7 +60,6 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
   @doc """
   Used to retrieve threads by board
   """
-  # TODO(akinsey): implement thread.byBoard hooks (ex: watchingBoard)
   def by_board(conn, attrs) do
     with board_id <- Validate.cast(attrs, "board_id", :integer, required: true),
          page <- Validate.cast(attrs, "page", :integer, default: 1),
@@ -73,6 +73,7 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
            {:can_read, Board.get_read_access_by_id(board_id, user_priority)},
          {:ok, write_access} <- Board.get_write_access_by_id(board_id, user_priority),
          {:ok, board_banned} <- BoardBan.is_banned_from_board(user, board_id: board_id),
+         {:ok, watching_board} <- WatchBoard.is_watching(user, board_id),
          board_mapping <- BoardMapping.all(),
          board_moderators <- BoardModerator.all(),
          threads <-
@@ -91,6 +92,7 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
         board_id: board_id,
         board_mapping: board_mapping,
         board_moderators: board_moderators,
+        watched: watching_board,
         page: page,
         field: field,
         limit: limit,

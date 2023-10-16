@@ -52,6 +52,7 @@ defmodule EpochtalkServerWeb.Controllers.ThreadJSON do
         user_priority: user_priority,
         write_access: write_access,
         board_banned: board_banned,
+        watched: watched,
         page: page,
         field: field,
         limit: limit,
@@ -65,6 +66,7 @@ defmodule EpochtalkServerWeb.Controllers.ThreadJSON do
         board_id,
         user_priority
       )
+      |> Map.put(:watched, watched)
 
     # format thread data
     user_id = if is_nil(user), do: nil, else: user.id

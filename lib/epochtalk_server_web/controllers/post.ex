@@ -24,6 +24,7 @@ defmodule EpochtalkServerWeb.Controllers.Post do
   alias EpochtalkServer.Models.WatchThread
   alias EpochtalkServer.Models.ThreadSubscription
   alias EpochtalkServer.Models.AutoModeration
+  alias EpochtalkServer.Models.Mention
 
   @max_post_title_length 255
 
@@ -57,6 +58,7 @@ defmodule EpochtalkServerWeb.Controllers.Post do
          {:can_write, {:ok, true}} <-
            {:can_write, Board.get_write_access_by_thread_id(thread_id, user_priority)},
          attrs <- AutoModeration.moderate(user, attrs),
+         attrs <- Mention.username_to_user_id(user, attrs),
          # TODO(akinsey): Implement the following for completion
          # Plugins
          # 1) Track IP (done)
@@ -82,6 +84,12 @@ defmodule EpochtalkServerWeb.Controllers.Post do
 
          # Data Queries
          {:ok, post_data} <- Post.create(attrs, user.id) do
+      # Create Mention notification
+      Mention.handle_user_mention_creation(user, attrs, post_data)
+
+      # Correct TSV
+      Mention.correct_text_search_vector(attrs)
+
       # Update user activity
       UserActivity.update_user_activity(user)
 

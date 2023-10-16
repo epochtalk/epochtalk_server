@@ -15,8 +15,8 @@ defmodule EpochtalkServer.Models.Mention do
   alias EpochtalkServerWeb.Helpers.Pagination
   alias EpochtalkServerWeb.Helpers.ACL
 
-  # TODO(akinsey): this is insufficient for matching usernames, we also need to ignore mentions in code blocks
-  @username_mention_regex ~r/@^[[:alnum:]]+/
+  @username_mention_regex ~r/\[code\].*\[\/code\](*SKIP)(*FAIL)|(?<=^|\s)@([a-zA-Z0-9\-_.]+)/i
+  @username_mention_regex_curly ~r/\[code\].*\[\/code\](*SKIP)(*FAIL)|{@([a-zA-Z0-9\-_.]+)}/i
   @user_id_regex ~r/{@^[[:digit:]]+}/
 
   @moduledoc """
@@ -149,12 +149,12 @@ defmodule EpochtalkServer.Models.Mention do
   Iterates through list of `Post`, converts mentioned `User` id to a `User` usernames within the body of posts.
   Used when retreiving posts from the database
   """
-  @spec user_id_to_username(conn :: Plug.Conn.t(), posts :: map() | [map()]) ::
+  @spec user_id_to_username(posts :: map() | [map()]) ::
           updated_posts :: [map()]
-  def user_id_to_username(conn, post) when is_map(post),
-    do: user_id_to_username(conn, [post])
+  def user_id_to_username(post) when is_map(post),
+    do: user_id_to_username([post])
 
-  def user_id_to_username(_conn, posts) when is_list(posts) do
+  def user_id_to_username(posts) when is_list(posts) do
     # iterate over each post
     Enum.map(posts, fn post ->
       # move post_body to body and body_html so it is processed properly
@@ -175,9 +175,9 @@ defmodule EpochtalkServer.Models.Mention do
           profile_link = "<router-link :to=\"{path: '/profile/#{String.downcase(username)}'}\">@#{username}</router-link>"
 
           # swap {@user_id} for @username in post_body
-          updated_body = String.replace(modified_post.body, "{@#{user_id}}", "@#{username}"
+          updated_body = String.replace(modified_post.body, "{@#{user_id}}", "@#{username}")
 
-          updated_body_html = String.replace(modified_post.body_html, @user_id_regex, "@#{username}")
+          updated_body_html = String.replace(modified_post.body_html, @user_id_regex, profile_link)
 
           modified_post = Map.put(modified_post, :body, updated_body) |> Map.put(:body_html, updated_body_html)
 
@@ -195,46 +195,68 @@ defmodule EpochtalkServer.Models.Mention do
   Within `Post`, converts mentioned `User` usernames to a `User` ids within the body of posts.
   Used before storing `Post` in the database
   """
-  @spec username_to_user_id(conn :: Plug.Conn.t(), post_attrs :: map()) ::
+  @spec username_to_user_id(user :: map(), post_attrs :: map()) ::
           updated_post_attrs :: map()
-  def username_to_user_id(conn, post_attrs) do
-    with :ok <- ACL.allow!(conn, "mentions.create") do
+  def username_to_user_id(user, post_attrs) do
+    with :ok <- ACL.allow!(user, "mentions.create") do
       body = post_attrs["body"]
 
       # store original body, before modifying mentions
       post_attrs = Map.put(post_attrs, "body_original", body)
 
-      # replace "@UsErNamE" mention with "{@username}""
+      # replace "@UsErNamE" mention with "{@username}"
       body = String.replace(body, @username_mention_regex, &"{#{String.downcase(&1)}}")
 
       # update post_attrs with modified body
       post_attrs = Map.put(post_attrs, "body", body)
 
-      # get list of usernames that were mentioned in the post body
-      usernames_list =
-        Regex.scan(@username_mention_regex, body)
+      # get list of unique usernames that were mentioned in the post body
+      possible_usernames =
+        Regex.scan(@username_mention_regex_curly, body)
         # only need unique list of usernames
         |> Enum.uniq()
-        # remove "@" from mention
-        |> Enum.map(&String.slice(&1, 1..-1))
+        # extract username from regex scan
+        |> Enum.map(fn [_match, username] -> username end)
 
-      mentioned_users = User.ids_from_usernames(usernames_list)
+      # get map of ids from list of possible_usernames
+      # to determine if a possible_username should be replaced
+      mentioned_usernames_to_id_map =
+        possible_usernames
+        # get ids for usernames that exist
+        |> User.ids_from_usernames()
+        # map usernames to user_ids
+        |> Enum.reduce(%{}, fn %User{id: user_id, username: username}, acc ->
+          Map.put(acc, username, user_id)
+        end)
+
+      # initialize mentioned_ids to empty
+      post_attrs = Map.put(post_attrs, "mentioned_ids", [])
 
       # update post body, converting username mentions to user id mentions
+      # and unmatched possible_usernames back to unused mentions
       # and add mentioned_ids, return post attrs
-      Enum.reduce(mentioned_users, post_attrs, fn %User{id: user_id, username: username}, acc ->
-        username_mention = "{@#{String.downcase(username)}}"
-        user_id_mention = "{@#{user_id}}"
+      Enum.reduce(possible_usernames, post_attrs, fn possible_username, acc ->
+        # check if possible_username is mapped in mentioned_usernames_to_id_map
+        {replacement, user_id} =
+          case Map.get(mentioned_usernames_to_id_map, possible_username) do
+            # username was invalid, replace with original text
+            nil -> {"@#{possible_username}", nil}
+            # username was valid, replace with user id bracket
+            user_id -> {"{@#{user_id}}", user_id}
+          end
 
-        # replace usernames mentions in body with user id mention
+        # get downcased version of username for replacement matching
+        username_mention = "{@#{String.downcase(possible_username)}}"
+
+        # replace usernames mentions in body with user id mention OR original text
         body = acc["body"]
-        body = String.replace(body, username_mention, user_id_mention)
+        body = String.replace(body, username_mention, replacement)
 
-        # update unique list of user ids mentioned in the post body
-        mentioned_ids = acc["mentioned_ids"] || []
-        mentioned_ids = mentioned_ids ++ [user_id]
+        # if mention was valid, update list of unique user ids mentioned in the post body
+        mentioned_ids = acc["mentioned_ids"]
+        mentioned_ids = if user_id != nil, do: mentioned_ids ++ [user_id], else: mentioned_ids
 
-        # update post_body, iterate
+        # update post_attrs
         acc
         |> Map.put("body", body)
         |> Map.put("mentioned_ids", mentioned_ids)
@@ -271,10 +293,10 @@ defmodule EpochtalkServer.Models.Mention do
     * Checks mention email settings
       * Sends email to mentioned user if applicable
   """
-  @spec handle_user_mention_creation(conn :: Plug.Conn.t(), post_attrs :: map(), post :: Post.t()) ::
+  @spec handle_user_mention_creation(user :: map(), post_attrs :: map(), post :: Post.t()) ::
           :ok
-  def handle_user_mention_creation(conn, post_attrs, post) do
-    with :ok <- ACL.allow!(conn, "mentions.create") do
+  def handle_user_mention_creation(user, post_attrs, post) do
+    with :ok <- ACL.allow!(user, "mentions.create") do
       mentioned_ids = post_attrs["mentioned_ids"] || []
 
       # iterate through each mentioned user id
@@ -316,15 +338,12 @@ defmodule EpochtalkServer.Models.Mention do
             # get mentionee's email
             mentionee_email = User.email_by_id(mentionee_id)
 
-            # get authed user
-            authed_user = Guardian.Plug.current_resource(conn)
-
             # send email
             Mailer.send_mention_notification(%{
               email: mentionee_email,
               post_id: post.id,
               post_position: post.position,
-              post_author: authed_user.username,
+              post_author: user.username,
               thread_slug: post.thread_slug,
               thread_title: thread_post_data.title
             })

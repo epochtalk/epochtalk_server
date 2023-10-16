@@ -35,6 +35,7 @@ defmodule EpochtalkServerWeb.Controllers.Post do
   # * Ensure thread subsciption emails are sent out and are deleted properly after sending
   # * Ensure user activity is updated properly
   # * Ensure user watches thread if preference is set after creation
+  # * Ensure mentions and notifications are created
   def create(conn, attrs) do
     # Authorizations Checks
     with {:auth, user} <- {:auth, Guardian.Plug.current_resource(conn)},
@@ -87,7 +88,7 @@ defmodule EpochtalkServerWeb.Controllers.Post do
       # Create Mention notification
       Mention.handle_user_mention_creation(user, attrs, post_data)
 
-      # Correct TSV
+      # Correct TSV due to mentions converting username to user id
       Mention.correct_text_search_vector(attrs)
 
       # Update user activity

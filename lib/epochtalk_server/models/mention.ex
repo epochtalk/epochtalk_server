@@ -237,12 +237,13 @@ defmodule EpochtalkServer.Models.Mention do
       # and add mentioned_ids, return post attrs
       Enum.reduce(possible_usernames, post_attrs, fn possible_username, acc ->
         # check if possible_username is mapped in mentioned_usernames_to_id_map
-        {replacement, user_id} = case Map.get(mentioned_usernames_to_id_map, possible_username) do
-          # username was invalid, replace with original text
-          nil -> {"@#{possible_username}", nil}
-          # username was valid, replace with user id bracket
-          user_id -> {"{@#{user_id}}", user_id}
-        end
+        {replacement, user_id} =
+          case Map.get(mentioned_usernames_to_id_map, possible_username) do
+            # username was invalid, replace with original text
+            nil -> {"@#{possible_username}", nil}
+            # username was valid, replace with user id bracket
+            user_id -> {"{@#{user_id}}", user_id}
+          end
 
         # get downcased version of username for replacement matching
         username_mention = "{@#{String.downcase(possible_username)}}"

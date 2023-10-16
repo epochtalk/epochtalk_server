@@ -84,7 +84,6 @@ defmodule EpochtalkServerWeb.Controllers.Post do
 
          # Data Queries
          {:ok, post_data} <- Post.create(attrs, user.id) do
-
       # Create Mention notification
       Mention.handle_user_mention_creation(user, attrs, post_data)
 

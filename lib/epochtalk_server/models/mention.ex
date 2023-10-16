@@ -158,32 +158,36 @@ defmodule EpochtalkServer.Models.Mention do
     # iterate over each post
     Enum.map(posts, fn post ->
       # move post_body to body and body_html so it is processed properly
-      post = if Map.has_key?(post, :post_body),
-        do: post |> Map.put(:body, post.post_body) |> Map.put(:body_html, post.post_body),
-        else: post
+      post =
+        if Map.has_key?(post, :post_body),
+          do: post |> Map.put(:body, post.post_body) |> Map.put(:body_html, post.post_body),
+          else: post
 
       if Map.has_key?(post, :body) do
-        user_ids = Regex.scan(@user_id_regex, post.body)
+        user_ids =
+          Regex.scan(@user_id_regex, post.body)
           # only need unique list of user_ids
           |> Enum.uniq()
           # remove "{@}" from mentioned user_id
           |> Enum.map(&String.slice(&1, 2..-1))
 
-        Enum.reduce(user_ids, post, fn (user_id, modified_post) ->
+        Enum.reduce(user_ids, post, fn user_id, modified_post ->
           username = User.username_by_id(user_id)
 
-          profile_link = "<router-link :to=\"{path: '/profile/#{String.downcase(username)}'}\">@#{username}</router-link>"
+          profile_link =
+            "<router-link :to=\"{path: '/profile/#{String.downcase(username)}'}\">@#{username}</router-link>"
 
           # swap {@user_id} for @username in post_body
           updated_body = String.replace(modified_post.body, "{@#{user_id}}", "@#{username}")
 
-          updated_body_html = String.replace(modified_post.body_html, @user_id_regex, profile_link)
+          updated_body_html =
+            String.replace(modified_post.body_html, @user_id_regex, profile_link)
 
-          modified_post = Map.put(modified_post, :body, updated_body) |> Map.put(:body_html, updated_body_html)
+          modified_post =
+            Map.put(modified_post, :body, updated_body) |> Map.put(:body_html, updated_body_html)
 
-          if Map.has_key?(post, :post_body),
-            do: modified_post |> Map.put(:post_body, modified_post.body_html) |> Map.delete(:body) |> Map.delete(:body_html),
-            else: modified_post
+          # returns modified post, but handles case where post_body exists
+          handle_post_body(post, modified_post)
         end)
       else
         post
@@ -359,6 +363,16 @@ defmodule EpochtalkServer.Models.Mention do
   end
 
   ## === Private Helper Functions ===
+
+  defp handle_post_body(post, modified_post) do
+    if Map.has_key?(post, :post_body),
+      do:
+        modified_post
+        |> Map.put(:post_body, modified_post.body_html)
+        |> Map.delete(:body)
+        |> Map.delete(:body_html),
+      else: modified_post
+  end
 
   # doesn't load board association
   defp page_query(user_id, nil = _extended), do: page_query(user_id, false)

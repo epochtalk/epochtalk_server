@@ -8,7 +8,7 @@ defmodule Test.EpochtalkServer.Regex do
   Soft fork proof-of-work@gmail.com block reward mempool @hodl,
   @__decentralized-deflationary_monetary.policy__full..node.
 
-  @Hodl halvening genesis block outputs, @blockchain public key
+  @Hodl halvening genesis block outputs, @BloCkchAIn public key
   @satoshis[code]double-spend @problem[/code] @volatility
   [code][code]Block height @satoshis segwit UTXO electronic cash[/code][/code]
   Digital @signature@UTXO.soft fork UTXO money printer go @brrrrr, price action
@@ -22,7 +22,7 @@ defmodule Test.EpochtalkServer.Regex do
     "hodl",
     "__decentralized-deflationary_monetary.policy__full..node.",
     "Hodl",
-    "blockchain",
+    "BloCkchAIn",
     "satoshis",
     "volatility",
     "signature",

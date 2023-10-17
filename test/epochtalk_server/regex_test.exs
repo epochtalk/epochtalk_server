@@ -36,6 +36,7 @@ defmodule Test.EpochtalkServer.Regex do
       assert EpochtalkServer.Regex.pattern(:username_mention_curly) != nil
       assert EpochtalkServer.Regex.pattern(:user_id) != nil
     end
+
     test "given invalid atom, returns nil" do
       assert EpochtalkServer.Regex.pattern(:bad_atom) == nil
     end
@@ -50,14 +51,19 @@ defmodule Test.EpochtalkServer.Regex do
         assert match == ["@" <> username, username]
       end)
     end
+
     test "given :username_mention_curly, scans string with curly brace replacements correctly" do
       # replace mentions with curly brace format
       curly_test_string =
         @test_string
-        |> String.replace(EpochtalkServer.Regex.pattern(:username_mention), &"{#{String.downcase(&1)}}")
+        |> String.replace(
+          EpochtalkServer.Regex.pattern(:username_mention),
+          &"{#{String.downcase(&1)}}"
+        )
 
       # get possible username matches
-      matches = Regex.scan(EpochtalkServer.Regex.pattern(:username_mention_curly), curly_test_string)
+      matches =
+        Regex.scan(EpochtalkServer.Regex.pattern(:username_mention_curly), curly_test_string)
 
       # check usernames appear in matches
       Enum.zip(matches, @usernames)

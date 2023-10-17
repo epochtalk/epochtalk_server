@@ -76,9 +76,9 @@ defmodule EpochtalkServerWeb.Controllers.Post do
 
          # 2) Update user Activity (post) (done) (write test)
 
-         # 3) Mentions -> convert username to user id (pre) (wip)
-         # 4) Mentions -> create mentions (post)
-         # 5) Mentions -> correct text search vector after creating mentions (post)
+         # 3) Mentions -> convert username to user id (pre) (done) (write tests)
+         # 4) Mentions -> create mentions (post) (done) (write tests)
+         # 5) Mentions -> correct text search vector after creating mentions (post) (done) (write tests)
 
          # 6) Thread Subscriptions -> Email Subscribers (post) (done) (write test)
          # 7) Thread Subscriptions -> Subscribe to Thread (post) (done) (write test)

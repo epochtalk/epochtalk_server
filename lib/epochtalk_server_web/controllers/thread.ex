@@ -44,6 +44,25 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
   def create(conn, attrs) do
     with {:auth, user} <- {:auth, Guardian.Plug.current_resource(conn)},
          {:ok, thread_data} <- Thread.create(attrs, user.id) do
+      # TODO(akinsey): Implement the following for completion
+      # Pre Processing
+
+      # 1) check permissions for thread create
+      # 2) clean post (html_sanitize_ex)
+      # 3) parse post
+      # 4) handle uploaded images
+      # 5) handle filtering out newbie images
+
+      # Hooks
+      # 1) Auto Moderation moderate (pre)
+
+      # 2) Update user Activity (post) (note: this was missing in old code)
+
+      # 3) Mentions -> convert username to user id (pre)
+      # 4) Mentions -> create mentions (post)
+      # 5) Mentions -> correct text search vector after creating mentions (post)
+
+      # 6) Thread Subscriptions -> Subscribe to Thread (post)
       render(conn, :create, %{thread_data: thread_data})
     else
       {:error, %Ecto.Changeset{} = cs} ->

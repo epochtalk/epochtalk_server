@@ -228,8 +228,8 @@ defmodule EpochtalkServer.Models.User do
   @doc """
   Returns boolean indicating if `User` account is deleted
   """
-  @spec is_active(id :: non_neg_integer) :: boolean
-  def is_active(id) when is_integer(id) do
+  @spec is_active?(id :: non_neg_integer) :: boolean
+  def is_active?(id) when is_integer(id) do
     query =
       from u in User,
         where: u.id == ^id,

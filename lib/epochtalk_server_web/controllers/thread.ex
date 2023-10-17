@@ -9,6 +9,7 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
   alias EpochtalkServerWeb.Helpers.Validate
   alias EpochtalkServerWeb.Helpers.ACL
   alias EpochtalkServer.Models.Thread
+  alias EpochtalkServer.Models.User
   alias EpochtalkServer.Models.Board
   alias EpochtalkServer.Models.BoardBan
   alias EpochtalkServer.Models.BoardMapping
@@ -51,6 +52,8 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
            {:can_read, Board.get_read_access_by_id(board_id, user_priority)},
          {:can_write, {:ok, true}} <-
            {:can_write, Board.get_write_access_by_id(board_id, user_priority)},
+         {:is_active, true} <-
+           {:is_active, User.is_active?(user.id)},
 
          # thread creation
          {:ok, thread_data} <- Thread.create(attrs, user.id) do
@@ -59,7 +62,7 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
       # 1) Check base permissions (done)
       # 2) Check can read board (done)
       # 3) Check can write board (done)
-      # 4) Is requester active
+      # 4) Is requester active (done)
       # 5) check board allows self mod
       # 6) check user not banned from board
       # 7) poll authorization (Poll creation should handle this?)
@@ -95,6 +98,9 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
 
       {:can_write, {:ok, false}} ->
         ErrorHelpers.render_json_error(conn, 403, "Unauthorized, you do not have permission")
+
+      {:is_active, false} ->
+        ErrorHelpers.render_json_error(conn, 400, "Account must be active to create threads")
 
       {:auth, nil} ->
         ErrorHelpers.render_json_error(conn, 400, "Not logged in, cannot create thread")

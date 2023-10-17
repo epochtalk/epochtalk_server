@@ -53,7 +53,7 @@ defmodule EpochtalkServerWeb.Controllers.Post do
          {:bypass_lock, true} <-
            {:bypass_lock, can_authed_user_bypass_thread_lock(user, thread_id)},
          {:is_active, true} <-
-           {:is_active, User.is_active(user.id)},
+           {:is_active, User.is_active?(user.id)},
          {:can_read, {:ok, true}} <-
            {:can_read, Board.get_read_access_by_thread_id(thread_id, user_priority)},
          {:can_write, {:ok, true}} <-

@@ -16,6 +16,20 @@ defmodule Test.EpochtalkServer.Regex do
   soft fork Merkle Tree halvening digital @signature.
   """
 
+  @usernames [
+    "blockchain",
+    "hodl",
+    "__decentralized-deflationary_monetary.policy__full..node.",
+    "Hodl",
+    "blockchain",
+    "satoshis",
+    "volatility",
+    "signature",
+    "lambo",
+    "volatility",
+    "signature."
+  ]
+
   describe "pattern/1" do
     test "given valid atom, gets pattern" do
       assert EpochtalkServer.Regex.pattern(:username_mention) != nil
@@ -27,23 +41,11 @@ defmodule Test.EpochtalkServer.Regex do
     end
 
     test "given :username_mention, scans string correctly" do
+      # scan test string for mentions
       matches = Regex.scan(EpochtalkServer.Regex.pattern(:username_mention), @test_string)
-      usernames = [
-        "blockchain",
-        "hodl",
-        "__decentralized-deflationary_monetary.policy__full..node.",
-        "Hodl",
-        "blockchain",
-        "satoshis",
-        "volatility",
-        "signature",
-        "lambo",
-        "volatility",
-        "signature."
-      ]
 
       # check usernames appear in matches
-      Enum.zip(matches, usernames)
+      Enum.zip(matches, @usernames)
       |> Enum.each(fn {match, username} ->
         assert match == ["@" <> username, username]
       end)

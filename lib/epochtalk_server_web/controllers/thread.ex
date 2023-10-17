@@ -42,14 +42,23 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
   # - does createImageReferences need to be called here? was this missing from the old code?
   # - does updateUserActivity need to be called here? was this missing from the old code?
   def create(conn, attrs) do
+    # authorization checks
     with :ok <- ACL.allow!(conn, "threads.create"),
+         board_id <- Validate.cast(attrs, "board_id", :integer, required: true),
          {:auth, user} <- {:auth, Guardian.Plug.current_resource(conn)},
+         user_priority <- ACL.get_user_priority(conn),
+         {:can_read, {:ok, true}} <-
+           {:can_read, Board.get_read_access_by_id(board_id, user_priority)},
+         {:can_write, {:ok, true}} <-
+           {:can_write, Board.get_write_access_by_id(board_id, user_priority)},
+
+         # thread creation
          {:ok, thread_data} <- Thread.create(attrs, user.id) do
       # TODO(akinsey): Implement the following for completion
       # Authorizations
-      # 1) Check base permissions
-      # 2) Check can read board
-      # 3) Check can write board
+      # 1) Check base permissions (done)
+      # 2) Check can read board (done)
+      # 3) Check can write board (done)
       # 4) Is requester active
       # 5) check board allows self mod
       # 6) check user not banned from board
@@ -61,11 +70,10 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
 
       # Pre Processing
 
-      # 1) check permissions for thread create
-      # 2) clean post (html_sanitize_ex)
-      # 3) parse post
-      # 4) handle uploaded images
-      # 5) handle filtering out newbie images
+      # 1) clean post (html_sanitize_ex)
+      # 2) parse post
+      # 3) handle uploaded images
+      # 4) handle filtering out newbie images
 
       # Hooks
       # 1) Auto Moderation moderate (pre)
@@ -81,6 +89,12 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
     else
       {:error, %Ecto.Changeset{} = cs} ->
         ErrorHelpers.render_json_error(conn, 400, cs)
+
+      {:can_read, {:ok, false}} ->
+        ErrorHelpers.render_json_error(conn, 403, "Unauthorized, you do not have permission")
+
+      {:can_write, {:ok, false}} ->
+        ErrorHelpers.render_json_error(conn, 403, "Unauthorized, you do not have permission")
 
       {:auth, nil} ->
         ErrorHelpers.render_json_error(conn, 400, "Not logged in, cannot create thread")

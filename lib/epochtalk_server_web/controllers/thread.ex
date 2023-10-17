@@ -42,9 +42,23 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
   # - does createImageReferences need to be called here? was this missing from the old code?
   # - does updateUserActivity need to be called here? was this missing from the old code?
   def create(conn, attrs) do
-    with {:auth, user} <- {:auth, Guardian.Plug.current_resource(conn)},
+    with :ok <- ACL.allow!(conn, "threads.create"),
+         {:auth, user} <- {:auth, Guardian.Plug.current_resource(conn)},
          {:ok, thread_data} <- Thread.create(attrs, user.id) do
       # TODO(akinsey): Implement the following for completion
+      # Authorizations
+      # 1) Check base permissions
+      # 2) Check can read board
+      # 3) Check can write board
+      # 4) Is requester active
+      # 5) check board allows self mod
+      # 6) check user not banned from board
+      # 7) poll authorization (Poll creation should handle this?)
+      #   - poll creatable permissions check (Poll creation should handle this?)
+      #   - poll validate max answers (Poll creation should handle this?)
+      #   - poll validate display mode (Poll creation should handle this?)
+      # 8) can user moderate this thread
+
       # Pre Processing
 
       # 1) check permissions for thread create

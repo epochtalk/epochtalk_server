@@ -25,5 +25,31 @@ defmodule Test.EpochtalkServer.Regex do
     test "given invalid atom, returns nil" do
       assert EpochtalkServer.Regex.pattern(:bad_atom) == nil
     end
+
+    test "given :username_mention, scans string correctly" do
+      matches = Regex.scan(EpochtalkServer.Regex.pattern(:username_mention), @test_string)
+      [username | matches] = matches
+      assert username == ["@blockchain", "blockchain"]
+      [username | matches] = matches
+      assert username == ["@hodl", "hodl"]
+      [username | matches] = matches
+      assert username == ["@__decentralized-deflationary_monetary.policy__full..node.", "__decentralized-deflationary_monetary.policy__full..node."]
+      [username | matches] = matches
+      assert username == ["@Hodl", "Hodl"]
+      [username | matches] = matches
+      assert username == ["@blockchain", "blockchain"]
+      [username | matches] = matches
+      assert username == ["@satoshis", "satoshis"]
+      [username | matches] = matches
+      assert username == ["@volatility", "volatility"]
+      [username | matches] = matches
+      assert username == ["@signature", "signature"]
+      [username | matches] = matches
+      assert username == ["@lambo", "lambo"]
+      [username | matches] = matches
+      assert username == ["@volatility", "volatility"]
+      [username | matches] = matches
+      assert username == ["@signature.", "signature."]
+    end
   end
 end

@@ -109,6 +109,7 @@ defmodule EpochtalkServer.Models.Poll do
       |> validate_naivedatetime(:expiration, after: :utc_now)
       |> validate_number(:max_answers, greater_than: 0, less_than_or_equal_to: poll_answers_len)
       |> validate_length(:question, min: 1, max: 255)
+      # TODO(akinsey): validate display mode
       |> unique_constraint(:id, name: :polls_pkey)
       |> unique_constraint(:thread_id, name: :polls_thread_id_index)
       |> foreign_key_constraint(:thread_id, name: :polls_thread_id_fkey)

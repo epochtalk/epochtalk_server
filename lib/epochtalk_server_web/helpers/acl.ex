@@ -23,6 +23,9 @@ defmodule EpochtalkServerWeb.Helpers.ACL do
   def allow!(%User{} = user, permission_path) when is_binary(permission_path),
     do: allow!(%Plug.Conn{private: %{guardian_default_resource: user}}, permission_path, nil)
 
+  def allow!(%{} = user, permission_path) when is_binary(permission_path),
+    do: allow!(%Plug.Conn{private: %{guardian_default_resource: user}}, permission_path, nil)
+
   @doc """
   Same as `ACL.allow!/2` but allows a custom error message to be raised if the
   `User` does not have the proper permissions.

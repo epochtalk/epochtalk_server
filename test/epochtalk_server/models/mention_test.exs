@@ -17,6 +17,20 @@ defmodule Test.EpochtalkServer.Models.Mention do
   end
 
   describe "username_to_user_id/2" do
+    test "given an empty user, errors", %{thread: thread} do
+      attrs = %{
+        "thread" => thread.id,
+        "title" => "title",
+        "body" => """
+        (invalid user)
+        """
+      }
+      assert_raise FunctionClauseError,
+        ~r/no function clause matching/,
+        fn ->
+          Mention.username_to_user_id(%{}, attrs)
+        end
+    end
     test "given a body with invalid mentions, does not generate mentions", %{thread: thread, users: %{user: user}} do
       attrs = %{
         "thread" => thread.id,

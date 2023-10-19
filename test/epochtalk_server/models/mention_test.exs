@@ -40,6 +40,17 @@ defmodule Test.EpochtalkServer.Models.Mention do
       assert result["body_original"] == attrs["body"]
       assert result["mentioned_ids"] == []
     end
+    test "given an empty title, succeeds", %{thread: thread, users: %{user: user}} do
+      attrs = %{
+        "thread" => thread.id,
+        "title" => "",
+        "body" => "body"
+      }
+      result = Mention.username_to_user_id(user, attrs)
+      assert result["body"] == attrs["body"]
+      assert result["body_original"] == attrs["body"]
+      assert result["mentioned_ids"] == []
+    end
     test "given an empty body, succeeds", %{thread: thread, users: %{user: user}} do
       attrs = %{
         "thread" => thread.id,

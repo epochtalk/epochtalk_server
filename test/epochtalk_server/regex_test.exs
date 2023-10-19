@@ -42,7 +42,9 @@ defmodule Test.EpochtalkServer.Regex do
     test "given invalid atom, returns nil" do
       assert EpochtalkServer.Regex.pattern(:bad_atom) == nil
     end
+  end
 
+  describe "pattern/1 mentions" do
     test "given :username_mention, scans string correctly" do
       # scan test string for mentions
       matches = Regex.scan(EpochtalkServer.Regex.pattern(:username_mention), @test_string)

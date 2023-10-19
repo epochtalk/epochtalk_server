@@ -54,9 +54,10 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
            {:can_write, Board.get_write_access_by_id(board_id, user_priority)},
          {:is_active, true} <-
            {:is_active, User.is_active?(user.id)},
-
+         {:allows_self_mod, true} <-
+           {:allows_self_mod, Board.allows_self_moderation?(board_id, attrs["moderated"])},
          # thread creation
-         {:ok, thread_data} <- Thread.create(attrs, user.id) do
+         {:ok, thread_data} <- Thread.create(attrs, user) do
       # TODO(akinsey): Implement the following for completion
       # Authorizations
       # 1) Check base permissions (done)
@@ -98,6 +99,13 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
 
       {:can_write, {:ok, false}} ->
         ErrorHelpers.render_json_error(conn, 403, "Unauthorized, you do not have permission")
+
+      {:allows_self_mod, false} ->
+        ErrorHelpers.render_json_error(
+          conn,
+          400,
+          "This board does not allow self moderated threads"
+        )
 
       {:is_active, false} ->
         ErrorHelpers.render_json_error(conn, 400, "Account must be active to create threads")

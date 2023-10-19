@@ -29,6 +29,17 @@ defmodule Test.EpochtalkServer.Models.Mention do
           Mention.username_to_user_id(%{}, attrs)
         end
     end
+    test "given an invalid thread id, succeeds", %{users: %{user: user}} do
+      attrs = %{
+        "thread" => -1,
+        "title" => "title",
+        "body" => "(invalid)"
+      }
+      result = Mention.username_to_user_id(user, attrs)
+      assert result["body"] == attrs["body"]
+      assert result["body_original"] == attrs["body"]
+      assert result["mentioned_ids"] == []
+    end
     test "given a body with invalid mentions, does not generate mentions", %{thread: thread, users: %{user: user}} do
       attrs = %{
         "thread" => thread.id,

@@ -134,7 +134,7 @@ defmodule EpochtalkServer.Models.Thread do
            # create poll, if necessary
            db_poll = handle_create_poll(db_thread.id, thread_attrs["poll"], user)
            # create post
-           db_post = handle_create_post(db_thread.id, user, thread_attrs)
+           db_post = handle_create_post(db_thread.id, thread_attrs, user)
            # return post (preloaded thread) and poll data
            %{post: db_post, poll: db_poll}
          end) do
@@ -699,7 +699,7 @@ defmodule EpochtalkServer.Models.Thread do
     end
   end
 
-  defp handle_create_post(thread_id, user, thread_attrs) do
+  defp handle_create_post(thread_id, thread_attrs, user) do
     post_attrs = %{
       thread_id: thread_id,
       user_id: user.id,

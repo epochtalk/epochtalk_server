@@ -177,7 +177,11 @@ defmodule EpochtalkServer.Models.Mention do
           updated_body = String.replace(modified_post.body, "{@#{user_id}}", "@#{username}")
 
           updated_body_html =
-            String.replace(modified_post.body_html, EpochtalkServer.Regex.pattern(:user_id), profile_link)
+            String.replace(
+              modified_post.body_html,
+              EpochtalkServer.Regex.pattern(:user_id),
+              profile_link
+            )
 
           modified_post =
             Map.put(modified_post, :body, updated_body) |> Map.put(:body_html, updated_body_html)
@@ -205,7 +209,12 @@ defmodule EpochtalkServer.Models.Mention do
       post_attrs = Map.put(post_attrs, "body_original", body)
 
       # replace "@UsErNamE" mention with "{@username}"
-      body = String.replace(body, EpochtalkServer.Regex.pattern(:username_mention), &"{#{String.downcase(&1)}}")
+      body =
+        String.replace(
+          body,
+          EpochtalkServer.Regex.pattern(:username_mention),
+          &"{#{String.downcase(&1)}}"
+        )
 
       # update post_attrs with modified body
       post_attrs = Map.put(post_attrs, "body", body)

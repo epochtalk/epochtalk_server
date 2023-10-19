@@ -15,10 +15,6 @@ defmodule EpochtalkServer.Models.Mention do
   alias EpochtalkServerWeb.Helpers.Pagination
   alias EpochtalkServerWeb.Helpers.ACL
 
-  @username_mention_regex ~r/\[code\].*\[\/code\](*SKIP)(*FAIL)|(?<=^|\s)@([a-zA-Z0-9\-_.]+)/i
-  @username_mention_regex_curly ~r/\[code\].*\[\/code\](*SKIP)(*FAIL)|{@([a-zA-Z0-9\-_.]+)}/i
-  @user_id_regex ~r/{@^[[:digit:]]+}/
-
   @moduledoc """
   `Mention` model, for performing actions relating to forum categories
   """
@@ -165,7 +161,7 @@ defmodule EpochtalkServer.Models.Mention do
 
       if Map.has_key?(post, :body) do
         user_ids =
-          Regex.scan(@user_id_regex, post.body)
+          Regex.scan(EpochtalkServer.Regex.pattern(:user_id), post.body)
           # only need unique list of user_ids
           |> Enum.uniq()
           # remove "{@}" from mentioned user_id
@@ -181,7 +177,7 @@ defmodule EpochtalkServer.Models.Mention do
           updated_body = String.replace(modified_post.body, "{@#{user_id}}", "@#{username}")
 
           updated_body_html =
-            String.replace(modified_post.body_html, @user_id_regex, profile_link)
+            String.replace(modified_post.body_html, EpochtalkServer.Regex.pattern(:user_id), profile_link)
 
           modified_post =
             Map.put(modified_post, :body, updated_body) |> Map.put(:body_html, updated_body_html)
@@ -209,14 +205,14 @@ defmodule EpochtalkServer.Models.Mention do
       post_attrs = Map.put(post_attrs, "body_original", body)
 
       # replace "@UsErNamE" mention with "{@username}"
-      body = String.replace(body, @username_mention_regex, &"{#{String.downcase(&1)}}")
+      body = String.replace(body, EpochtalkServer.Regex.pattern(:username_mention), &"{#{String.downcase(&1)}}")
 
       # update post_attrs with modified body
       post_attrs = Map.put(post_attrs, "body", body)
 
       # get list of unique usernames that were mentioned in the post body
       possible_usernames =
-        Regex.scan(@username_mention_regex_curly, body)
+        Regex.scan(EpochtalkServer.Regex.pattern(:username_mention_curly), body)
         # only need unique list of usernames
         |> Enum.uniq()
         # extract username from regex scan

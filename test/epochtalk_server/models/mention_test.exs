@@ -50,7 +50,7 @@ defmodule Test.EpochtalkServer.Models.Mention do
       result = Mention.username_to_user_id(user, attrs)
       assert result["body_original"] == attrs["body"]
       assert result["body"] == expected_body
-      assert Enum.count(result["mentioned_ids"]) == 3
+      assert Enum.sort(result["mentioned_ids"]) == Enum.sort([user.id, admin_user.id, super_admin_user.id])
     end
   end
 end

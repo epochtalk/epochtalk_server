@@ -74,5 +74,51 @@ defmodule Test.EpochtalkServer.Regex do
         assert match == ["{@" <> username <> "}", username]
       end)
     end
+
+    test "given :user_id, scans string with curly brace id replacements correctly" do
+      # form keyword list of downcased unique usernames with index
+      # (provides pseudo user_id)
+      unique_usernames_with_index =
+        @usernames
+        |> Enum.map(&(String.downcase(&1)))
+        |> Enum.uniq()
+        |> Enum.with_index()
+      # create username to pseudo user_id map
+      username_to_id_map =
+        unique_usernames_with_index
+        |> Enum.into(%{})
+      # create pseudo user_id to username map
+      id_to_username_map =
+        unique_usernames_with_index
+        |> Enum.into(%{}, fn {k, v} -> {v, k} end)
+      # replace mentions with curly brace format
+      username_mentions_string =
+        @test_string
+        |> String.replace(
+          EpochtalkServer.Regex.pattern(:username_mention),
+          &"{#{String.downcase(&1)}}"
+        )
+      # replace username mentions with user_id mentions
+      user_id_mentions_string =
+        unique_usernames_with_index
+        |> Enum.reduce(username_mentions_string, fn {username, user_id}, acc ->
+          username_mention = "{@#{username}}"
+          user_id_mention = "{@#{user_id}}"
+
+          acc
+          |> String.replace(username_mention, user_id_mention)
+        end)
+
+      # create pseudo user_id mentions list from usernames list for checking mentions scan
+      user_id_mentions_list =
+        @usernames
+        |> Enum.map(fn username -> username_to_id_map[String.downcase(username)] end)
+      # check user_id's appear in matches()
+      Regex.scan(EpochtalkServer.Regex.pattern(:user_id), user_id_mentions_string)
+      |> Enum.zip(user_id_mentions_list)
+      |> Enum.each(fn {match, id} ->
+        assert match == ["{@" <> Integer.to_string(id) <> "}"]
+      end)
+    end
   end
 end

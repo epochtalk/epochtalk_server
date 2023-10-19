@@ -1,7 +1,7 @@
 defmodule Test.EpochtalkServer.Regex do
   use Test.Support.ConnCase, async: true
 
-  @test_string """
+  @mentions_string """
   Money printer go @brrrrr genesis block proof-of-work @blockchain Bitcoin
   Improvement Proposal bitcoin@Bitcoin.com Improvement Proposal segwit sats.
   Hard fork to the moon hard fork soft fork key pair soft fork mining.
@@ -16,7 +16,7 @@ defmodule Test.EpochtalkServer.Regex do
   soft fork Merkle Tree halvening digital @signature.
   """
 
-  @usernames [
+  @mentions_usernames [
     "brrrrr",
     "blockchain",
     "hodl",
@@ -47,10 +47,10 @@ defmodule Test.EpochtalkServer.Regex do
   describe "pattern/1 mentions" do
     test "given :username_mention, scans string correctly" do
       # scan test string for mentions
-      matches = Regex.scan(EpochtalkServer.Regex.pattern(:username_mention), @test_string)
+      matches = Regex.scan(EpochtalkServer.Regex.pattern(:username_mention), @mentions_string)
 
       # check usernames appear in matches
-      Enum.zip(matches, @usernames)
+      Enum.zip(matches, @mentions_usernames)
       |> Enum.each(fn {match, username} ->
         assert match == ["@" <> username, username]
       end)
@@ -59,7 +59,7 @@ defmodule Test.EpochtalkServer.Regex do
     test "given :username_mention_curly, scans string with curly brace replacements correctly" do
       # replace mentions with curly brace format
       curly_test_string =
-        @test_string
+        @mentions_string
         |> String.replace(
           EpochtalkServer.Regex.pattern(:username_mention),
           &"{#{String.downcase(&1)}}"
@@ -70,7 +70,7 @@ defmodule Test.EpochtalkServer.Regex do
         Regex.scan(EpochtalkServer.Regex.pattern(:username_mention_curly), curly_test_string)
 
       # check usernames appear in matches
-      Enum.zip(matches, @usernames)
+      Enum.zip(matches, @mentions_usernames)
       |> Enum.each(fn {match, username} ->
         username = String.downcase(username)
         assert match == ["{@" <> username <> "}", username]
@@ -81,7 +81,7 @@ defmodule Test.EpochtalkServer.Regex do
       # form keyword list of downcased unique usernames with index
       # (provides pseudo user_id)
       unique_usernames_with_index =
-        @usernames
+        @mentions_usernames
         |> Enum.map(&(String.downcase(&1)))
         |> Enum.uniq()
         |> Enum.with_index()
@@ -95,7 +95,7 @@ defmodule Test.EpochtalkServer.Regex do
         |> Enum.into(%{}, fn {k, v} -> {v, k} end)
       # replace mentions with curly brace format
       username_mentions_string =
-        @test_string
+        @mentions_string
         |> String.replace(
           EpochtalkServer.Regex.pattern(:username_mention),
           &"{#{String.downcase(&1)}}"
@@ -113,7 +113,7 @@ defmodule Test.EpochtalkServer.Regex do
 
       # create pseudo user_id mentions list from usernames list for checking mentions scan
       user_id_mentions_list =
-        @usernames
+        @mentions_usernames
         |> Enum.map(fn username -> username_to_id_map[String.downcase(username)] end)
       # check user_id's appear in matches()
       Regex.scan(EpochtalkServer.Regex.pattern(:user_id), user_id_mentions_string)

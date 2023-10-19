@@ -31,5 +31,26 @@ defmodule Test.EpochtalkServer.Models.Mention do
       assert result["body_original"] == attrs["body"]
       assert result["mentioned_ids"] == []
     end
+    test "given a body with valid mentions, generates unique mentions", %{thread: thread, users: %{user: user, admin_user: admin_user, super_admin_user: super_admin_user}} do
+      attrs = %{
+        "thread" => thread.id,
+        "title" => "title",
+        "body" => """
+        @#{admin_user.username} this post should mention three users @#{user.username}
+        @#{super_admin_user.username}, followed by invalids @not_valid @no_user
+        hello admin!  @#{admin_user.username} @mentions
+        """
+      }
+      expected_body = """
+      {@#{admin_user.id}} this post should mention three users {@#{user.id}}
+      {@#{super_admin_user.id}}, followed by invalids @not_valid @no_user
+      hello admin!  {@#{admin_user.id}} @mentions
+      """
+
+      result = Mention.username_to_user_id(user, attrs)
+      assert result["body_original"] == attrs["body"]
+      assert result["body"] == expected_body
+      assert Enum.count(result["mentioned_ids"]) == 3
+    end
   end
 end

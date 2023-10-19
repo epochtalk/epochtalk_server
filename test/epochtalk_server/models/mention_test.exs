@@ -51,6 +51,20 @@ defmodule Test.EpochtalkServer.Models.Mention do
       assert result["body_original"] == attrs["body"]
       assert result["mentioned_ids"] == []
     end
+    @tag :banned
+    test "given a user without acl permission, errors", %{thread: thread} do
+      {:ok, user} = EpochtalkServer.Models.User.by_username("user")
+      attrs = %{
+        "thread" => thread.id,
+        "title" => "title",
+        "body" => ""
+      }
+      assert_raise EpochtalkServerWeb.CustomErrors.InvalidPermission,
+        ~r/Forbidden, invalid permissions to perform this action/,
+        fn ->
+          Mention.username_to_user_id(user, attrs)
+        end
+    end
     test "given a body with invalid mentions, does not generate mentions", %{thread: thread, users: %{user: user}} do
       attrs = %{
         "thread" => thread.id,

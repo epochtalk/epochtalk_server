@@ -82,17 +82,20 @@ defmodule Test.EpochtalkServer.Regex do
       # (provides pseudo user_id)
       unique_usernames_with_index =
         @mentions_usernames
-        |> Enum.map(&(String.downcase(&1)))
+        |> Enum.map(&String.downcase(&1))
         |> Enum.uniq()
         |> Enum.with_index()
+
       # create username to pseudo user_id map
       username_to_id_map =
         unique_usernames_with_index
         |> Enum.into(%{})
+
       # create pseudo user_id to username map
       id_to_username_map =
         unique_usernames_with_index
         |> Enum.into(%{}, fn {k, v} -> {v, k} end)
+
       # replace mentions with curly brace format
       username_mentions_string =
         @mentions_string
@@ -100,6 +103,7 @@ defmodule Test.EpochtalkServer.Regex do
           EpochtalkServer.Regex.pattern(:username_mention),
           &"{#{String.downcase(&1)}}"
         )
+
       # replace username mentions with user_id mentions
       user_id_mentions_string =
         unique_usernames_with_index
@@ -115,6 +119,7 @@ defmodule Test.EpochtalkServer.Regex do
       user_id_mentions_list =
         @mentions_usernames
         |> Enum.map(fn username -> username_to_id_map[String.downcase(username)] end)
+
       # check user_id's appear in matches()
       Regex.scan(EpochtalkServer.Regex.pattern(:user_id), user_id_mentions_string)
       |> Enum.zip(user_id_mentions_list)

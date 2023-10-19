@@ -21,9 +21,7 @@ defmodule Test.EpochtalkServer.Models.Mention do
       attrs = %{
         "thread" => thread.id,
         "title" => "title",
-        "body" => """
-        (invalid user)
-        """
+        "body" => "(invalid)"
       }
       assert_raise FunctionClauseError,
         ~r/no function clause matching/,

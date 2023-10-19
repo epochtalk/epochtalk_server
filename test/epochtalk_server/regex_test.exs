@@ -91,11 +91,6 @@ defmodule Test.EpochtalkServer.Regex do
         unique_usernames_with_index
         |> Enum.into(%{})
 
-      # create pseudo user_id to username map
-      id_to_username_map =
-        unique_usernames_with_index
-        |> Enum.into(%{}, fn {k, v} -> {v, k} end)
-
       # replace mentions with curly brace format
       username_mentions_string =
         @mentions_string

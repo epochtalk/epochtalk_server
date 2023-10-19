@@ -86,13 +86,13 @@ defmodule Test.EpochtalkServer.Models.Mention do
         "body" => """
         @#{admin_user.username} this post should mention three users @#{user.username}
         @#{super_admin_user.username}, followed by invalids @not_valid @no_user
-        hello admin!  @#{admin_user.username} @mentions
+        hello admin!  (duplicate mention) @#{admin_user.username} @mentions
         """
       }
       expected_body = """
       {@#{admin_user.id}} this post should mention three users {@#{user.id}}
       {@#{super_admin_user.id}}, followed by invalids @not_valid @no_user
-      hello admin!  {@#{admin_user.id}} @mentions
+      hello admin!  (duplicate mention) {@#{admin_user.id}} @mentions
       """
 
       result = Mention.username_to_user_id(user, attrs)

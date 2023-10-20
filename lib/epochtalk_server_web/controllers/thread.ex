@@ -235,7 +235,7 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
   ## === Private Helper Functions ===
 
   defp handle_check_user_can_moderate(user, moderated) do
-     if moderated,
+    if moderated,
       do: :ok == ACL.allow!(user, "threads.moderated"),
       else: true
   end

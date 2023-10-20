@@ -52,10 +52,14 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
            {:can_read, Board.get_read_access_by_id(board_id, user_priority)},
          {:can_write, {:ok, true}} <-
            {:can_write, Board.get_write_access_by_id(board_id, user_priority)},
+         {:board_banned, {:ok, false}} <-
+           {:board_banned, BoardBan.is_banned_from_board(user, board_id: board_id)},
          {:is_active, true} <-
            {:is_active, User.is_active?(user.id)},
          {:allows_self_mod, true} <-
            {:allows_self_mod, Board.allows_self_moderation?(board_id, attrs["moderated"])},
+         {:user_can_moderate, true} <-
+           {:user_can_moderate, handle_check_user_can_moderate(user, attrs["moderated"])},
          # thread creation
          {:ok, thread_data} <- Thread.create(attrs, user) do
       # TODO(akinsey): Implement the following for completion
@@ -64,12 +68,12 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
       # 2) Check can read board (done)
       # 3) Check can write board (done)
       # 4) Is requester active (done)
-      # 5) check board allows self mod
-      # 6) check user not banned from board
-      # 7) poll authorization (Poll creation should handle this?)
-      #   - poll creatable permissions check (Poll creation should handle this?)
-      #   - poll validate max answers (Poll creation should handle this?)
-      #   - poll validate display mode (Poll creation should handle this?)
+      # 5) check board allows self mod (done)
+      # 6) check user not banned from board (done)
+      # 7) poll authorization (Poll creation should handle this? Yes.)
+      #   - poll creatable permissions check (done in Thread model in handle poll creation)
+      #   - poll validate max answers (done in Poll changeset)
+      #   - poll validate display mode (done in Poll changeset)
       # 8) can user moderate this thread
 
       # Pre Processing
@@ -112,6 +116,9 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
 
       {:auth, nil} ->
         ErrorHelpers.render_json_error(conn, 400, "Not logged in, cannot create thread")
+
+      {:board_banned, {:ok, true}} ->
+        ErrorHelpers.render_json_error(conn, 403, "Unauthorized, you are banned from this board")
 
       _ ->
         ErrorHelpers.render_json_error(conn, 400, "Error, cannot create thread")
@@ -226,6 +233,12 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
   end
 
   ## === Private Helper Functions ===
+
+  defp handle_check_user_can_moderate(user, moderated) do
+     if moderated,
+      do: :ok == ACL.allow!(user, "threads.moderated"),
+      else: true
+  end
 
   defp maybe_update_thread_view_count(conn, thread_id) do
     viewer_id =

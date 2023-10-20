@@ -74,7 +74,7 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
       #   - poll creatable permissions check (done in Thread model in handle poll creation)
       #   - poll validate max answers (done in Poll changeset)
       #   - poll validate display mode (done in Poll changeset)
-      # 8) can user moderate this thread
+      # 8) can user moderate this thread (done)
 
       # Pre Processing
 

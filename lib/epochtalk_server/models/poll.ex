@@ -160,8 +160,14 @@ defmodule EpochtalkServer.Models.Poll do
   defp validate_display_mode(changeset) do
     expiration = get_field(changeset, :expiration)
     display_mode = get_field(changeset, :display_mode)
+
     if display_mode == :expired && expiration == nil,
-      do: add_error(changeset, :display_mode, "set to 'expired' requires that the poll has an expiration"),
+      do:
+        add_error(
+          changeset,
+          :display_mode,
+          "set to 'expired' requires that the poll has an expiration"
+        ),
       else: changeset
   end
 end

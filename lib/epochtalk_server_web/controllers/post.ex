@@ -58,6 +58,8 @@ defmodule EpochtalkServerWeb.Controllers.Post do
            {:can_read, Board.get_read_access_by_thread_id(thread_id, user_priority)},
          {:can_write, {:ok, true}} <-
            {:can_write, Board.get_write_access_by_thread_id(thread_id, user_priority)},
+         {:board_banned, {:ok, false}} <-
+           {:board_banned, BoardBan.is_banned_from_board(user, thread_id: thread_id)},
          attrs <- AutoModeration.moderate(user, attrs),
          attrs <- Mention.username_to_user_id(user, attrs),
          # TODO(akinsey): Implement the following for completion
@@ -123,6 +125,9 @@ defmodule EpochtalkServerWeb.Controllers.Post do
 
       {:can_write, {:ok, false}} ->
         ErrorHelpers.render_json_error(conn, 403, "Unauthorized, you do not have permission")
+
+      {:board_banned, {:ok, true}} ->
+        ErrorHelpers.render_json_error(conn, 403, "Unauthorized, you are banned from this board")
 
       _ ->
         ErrorHelpers.render_json_error(conn, 400, "Error, cannot create post")

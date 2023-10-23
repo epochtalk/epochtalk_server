@@ -17,6 +17,10 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
   alias EpochtalkServer.Models.UserThreadView
   alias EpochtalkServer.Models.MetadataThread
   alias EpochtalkServer.Models.WatchBoard
+  alias EpochtalkServer.Models.AutoModeration
+  alias EpochtalkServer.Models.UserActivity
+  alias EpochtalkServer.Models.ThreadSubscription
+  alias EpochtalkServer.Models.Mention
 
   @doc """
   Used to retrieve recent threads
@@ -60,8 +64,29 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
            {:allows_self_mod, Board.allows_self_moderation?(board_id, attrs["moderated"])},
          {:user_can_moderate, true} <-
            {:user_can_moderate, handle_check_user_can_moderate(user, attrs["moderated"])},
+         # pre processing
+
+         # pre/parallel hooks
+         attrs <- AutoModeration.moderate(user, attrs),
+         attrs <- Mention.username_to_user_id(user, attrs),
+
          # thread creation
          {:ok, thread_data} <- Thread.create(attrs, user) do
+      # post hooks
+
+      # Create Mention notification
+      Mention.handle_user_mention_creation(user, attrs, thread_data.post)
+
+      # Correct TSV due to mentions converting username to user id,
+      # append post id to attrs since this is thread creation
+      Mention.correct_text_search_vector(attrs |> Map.put("id", thread_data.post.id))
+
+      # Update user activity
+      UserActivity.update_user_activity(user)
+
+      # Subscribe to Thread (this will check user preferences)
+      ThreadSubscription.create(user, thread_data.post.thread_id)
+
       # TODO(akinsey): Implement the following for completion
       # Authorizations
       # 1) Check base permissions (done)
@@ -84,15 +109,15 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
       # 4) handle filtering out newbie images
 
       # Hooks
-      # 1) Auto Moderation moderate (pre)
+      # 1) Auto Moderation moderate (pre) (done)
 
-      # 2) Update user Activity (post) (note: this was missing in old code)
+      # 2) Update user Activity (post) (note: this was missing in old code) (done)
 
-      # 3) Mentions -> convert username to user id (pre)
-      # 4) Mentions -> create mentions (post)
-      # 5) Mentions -> correct text search vector after creating mentions (post)
+      # 3) Mentions -> convert username to user id (pre) (done)
+      # 4) Mentions -> create mentions (post) (done)
+      # 5) Mentions -> correct text search vector after creating mentions (post) (done)
 
-      # 6) Thread Subscriptions -> Subscribe to Thread (post)
+      # 6) Thread Subscriptions -> Subscribe to Thread (post) (done)
       render(conn, :create, %{thread_data: thread_data})
     else
       {:error, %Ecto.Changeset{} = cs} ->

@@ -73,19 +73,20 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
          # thread creation
          {:ok, thread_data} <- Thread.create(attrs, user) do
       # post hooks
+      post = Map.get(thread_data, :post)
 
       # Create Mention notification
-      Mention.handle_user_mention_creation(user, attrs, thread_data.post)
+      Mention.handle_user_mention_creation(user, attrs, post)
 
       # Correct TSV due to mentions converting username to user id,
       # append post id to attrs since this is thread creation
-      Mention.correct_text_search_vector(attrs |> Map.put("id", thread_data.post.id))
+      Mention.correct_text_search_vector(attrs |> Map.put("id", post.id))
 
       # Update user activity
       UserActivity.update_user_activity(user)
 
       # Subscribe to Thread (this will check user preferences)
-      ThreadSubscription.create(user, thread_data.post.thread_id)
+      ThreadSubscription.create(user, post.thread_id)
 
       # TODO(akinsey): Implement the following for completion
       # Authorizations

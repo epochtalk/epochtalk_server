@@ -18,7 +18,7 @@ defmodule EpochtalkServerWeb.Controllers.ThreadJSON do
   end
 
   @doc """
-  Renders `Thread` for find query.
+  Renders `Thread` for create.
   """
   def create(%{
         thread_data: thread_data

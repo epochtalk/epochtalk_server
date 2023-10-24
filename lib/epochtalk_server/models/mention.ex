@@ -201,7 +201,7 @@ defmodule EpochtalkServer.Models.Mention do
   """
   @spec username_to_user_id(user :: map(), post_attrs :: map()) ::
           updated_post_attrs :: map()
-  def username_to_user_id(user, post_attrs) do
+  def username_to_user_id(%{id: _id, roles: _roles} = user, post_attrs) do
     with :ok <- ACL.allow!(user, "mentions.create") do
       body = post_attrs["body"]
 

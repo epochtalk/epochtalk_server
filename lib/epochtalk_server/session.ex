@@ -307,8 +307,10 @@ defmodule EpochtalkServer.Session do
   defp update_ban_info(user_id, ban_info, ttl \\ nil) do
     # save/replace ban_expiration to redis under "user:{user_id}:baninfo"
     ban_key = generate_key(user_id, "baninfo")
-    # get current TTL
-    {:ok, old_ttl} = Redix.command(:redix, ["TTL", ban_key])
+    # use user_key for base ttl, since baninfo may not be populated (TTL == -2)
+    user_key = generate_key(user_id, "user")
+    # get current TTL of session
+    {:ok, session_ttl} = Redix.command(:redix, ["TTL", user_key])
     Redix.command(:redix, ["HDEL", ban_key, "ban_expiration", "malicious_score"])
 
     if ban_exp = Map.get(ban_info, :ban_expiration) do
@@ -321,10 +323,10 @@ defmodule EpochtalkServer.Session do
     # if ttl is provided
     if ttl do
       # maybe extend ttl
-      maybe_extend_ttl(ban_key, ttl, old_ttl)
+      maybe_extend_ttl(ban_key, ttl, session_ttl)
     else
-      # otherwise, re-set old_ttl
-      maybe_extend_ttl(ban_key, old_ttl)
+      # otherwise, re-set session_ttl from user_key
+      maybe_extend_ttl(ban_key, session_ttl)
     end
   end
 

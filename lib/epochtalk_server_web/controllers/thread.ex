@@ -125,10 +125,10 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
         ErrorHelpers.render_json_error(conn, 400, cs)
 
       {:can_read, {:ok, false}} ->
-        ErrorHelpers.render_json_error(conn, 403, "Unauthorized, you do not have permission")
+        ErrorHelpers.render_json_error(conn, 403, "Unauthorized, you do not have permission to read")
 
       {:can_write, {:ok, false}} ->
-        ErrorHelpers.render_json_error(conn, 403, "Unauthorized, you do not have permission")
+        ErrorHelpers.render_json_error(conn, 403, "Unauthorized, you do not have permission to write")
 
       {:allows_self_mod, false} ->
         ErrorHelpers.render_json_error(

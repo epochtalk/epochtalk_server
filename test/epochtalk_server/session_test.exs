@@ -365,12 +365,11 @@ defmodule Test.EpochtalkServer.Session do
   end
 
   describe "update/1" do
-    test "given invalid user id, errors with :user_not_found", %{conn: conn} do
+    test "given invalid user id, errors with :user_not_found" do
       assert Session.update(0) == {:error, :user_not_found}
     end
 
     test "given user id without sessions, errors with :no_sessions", %{
-      conn: conn,
       users: %{no_login_user: user}
     } do
       assert Session.update(user.id) == {:error, :no_sessions}

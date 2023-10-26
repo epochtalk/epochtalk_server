@@ -4,6 +4,7 @@ defmodule Test.EpochtalkServer.Session do
   run into concurrency issues when run alongside other tests
   """
   use Test.Support.ConnCase, async: false
+  import Test.Support.Factory
   @one_day_in_seconds 1 * 24 * 60 * 60
   @almost_one_day_in_seconds @one_day_in_seconds - 100
   @four_weeks_in_seconds 4 * 7 * @one_day_in_seconds
@@ -11,6 +12,7 @@ defmodule Test.EpochtalkServer.Session do
   @max_date "9999-12-31 00:00:00"
   alias EpochtalkServer.Session
   alias EpochtalkServer.Models.Profile
+  alias EpochtalkServer.Models.User
   alias EpochtalkServer.Models.RoleUser
   alias EpochtalkServer.Cache.Role, as: RoleCache
   alias EpochtalkServer.Models.Ban
@@ -462,6 +464,34 @@ defmodule Test.EpochtalkServer.Session do
       now = NaiveDateTime.utc_now()
       {:ok, ban_expiration} = unbanned_resource_user.ban_expiration |> NaiveDateTime.from_iso8601()
       assert NaiveDateTime.compare(ban_expiration, now) == :lt
+    end
+
+    @tag :authenticated
+    test "given a not malicious user's id, when user is marked malicious, adds malicious score", %{
+      conn: conn,
+      authed_user: authed_user
+    } do
+      # get session_id (jti) from conn
+      session_id = conn.private.guardian_default_claims["jti"]
+      # check that session user does not have banned role
+      {:ok, resource_user} = Session.get_resource(authed_user.id, session_id)
+      assert Enum.any?(resource_user.roles, &(&1.lookup == "banned")) == false
+      assert Map.get(resource_user, :malicious_score) == nil
+      assert Map.get(resource_user, :ban_expiration) == nil
+
+      # update user malicious
+      build(:banned_address, ip: "127.0.0.1", weight: 1.0)
+      build(:banned_address, hostname: "localhost", weight: 1.0)
+      User.handle_malicious_user(authed_user, conn.remote_ip)
+
+      # check that session user has banned role
+      Session.update(authed_user.id)
+      {:ok, malicious_resource_user} = Session.get_resource(authed_user.id, session_id)
+      assert Enum.any?(malicious_resource_user.roles, &(&1.lookup == "banned")) == true
+      # check ban is active
+      assert malicious_resource_user.ban_expiration == @max_date
+      # check malicious score is active
+      assert malicious_resource_user.malicious_score != nil
     end
   end
 

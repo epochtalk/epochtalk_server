@@ -10,9 +10,9 @@ defmodule EpochtalkServer.Models.AutoModeration do
 
   @postgres_varchar255_max 255
   @postgres_varchar1000_max 1000
-  @hours 24
-  @minutes 60
-  @seconds 60
+  @hours_per_day 24
+  @minutes_per_hour 60
+  @seconds_per_minute 60
 
   @moduledoc """
   `AutoModeration` model, for performing actions relating to `User` `AutoModeration`
@@ -331,7 +331,7 @@ defmodule EpochtalkServer.Models.AutoModeration do
         if ban_interval,
           do:
             DateTime.utc_now()
-            |> DateTime.add(ban_interval * @hours * @minutes * @seconds, :second)
+            |> DateTime.add(ban_interval * @hours_per_day * @minutes_per_hour * @seconds_per_minute, :second)
             |> DateTime.to_naive()
 
       # get user_id from post_attrs

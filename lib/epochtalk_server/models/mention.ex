@@ -338,7 +338,7 @@ defmodule EpochtalkServer.Models.Mention do
           # create notification associated with mention (for mentions dropdown)
           Notification.create(notification)
 
-          # send websocket notifcation to mentionee
+          # send websocket notification to mentionee
           EpochtalkServerWeb.Endpoint.broadcast("user:#{mentionee_id}", "refreshMentions", %{})
 
           # check mentionee's email settings for mentions and then maybe send email

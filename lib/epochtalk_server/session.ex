@@ -124,10 +124,11 @@ defmodule EpochtalkServer.Session do
             else: resource
 
         ban_key = generate_key(user_id, "baninfo")
-        ban_expiration = Redix.command!(:redix, ["HEXISTS", ban_key, "ban_expiration"])
+        ban_expiration_exists = Redix.command!(:redix, ["HEXISTS", ban_key, "ban_expiration"])
+        ban_expiration = Redix.command!(:redix, ["HGET", ban_key, "ban_expiration"])
 
         resource =
-          if ban_expiration != 0,
+          if ban_expiration_exists != 0,
             do: Map.put(resource, :ban_expiration, ban_expiration),
             else: resource
 

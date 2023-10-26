@@ -132,10 +132,11 @@ defmodule EpochtalkServer.Session do
             do: Map.put(resource, :ban_expiration, ban_expiration),
             else: resource
 
-        malicious_score = Redix.command!(:redix, ["HEXISTS", ban_key, "malicious_score"])
+        malicious_score_exists = Redix.command!(:redix, ["HEXISTS", ban_key, "malicious_score"])
+        malicious_score = Redix.command!(:redix, ["HGET", ban_key, "malicious_score"])
 
         resource =
-          if malicious_score != 0,
+          if malicious_score_exists != 0,
             do: Map.put(resource, :malicious_score, malicious_score),
             else: resource
 

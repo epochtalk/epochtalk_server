@@ -130,7 +130,7 @@ defmodule EpochtalkServer.Auth.Guardian do
   The subject should be a short identifier that can be used to identify
   the resource.
   """
-  def subject_for_token(%{user_id: user_id}, _claims) do
+  def subject_for_token(%{id: user_id}, _claims) do
     # You can use any value for the subject of your token but
     # it should be useful in retrieving the resource later, see
     # how it being used on `resource_from_claims/1` function.

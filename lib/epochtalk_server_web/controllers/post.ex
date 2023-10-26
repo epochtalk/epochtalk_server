@@ -23,6 +23,10 @@ defmodule EpochtalkServerWeb.Controllers.Post do
   alias EpochtalkServer.Models.UserIgnored
   alias EpochtalkServer.Models.WatchThread
   alias EpochtalkServer.Models.ThreadSubscription
+  alias EpochtalkServer.Models.AutoModeration
+  alias EpochtalkServer.Models.Mention
+
+  @max_post_title_length 255
 
   @doc """
   Used to create posts
@@ -31,6 +35,7 @@ defmodule EpochtalkServerWeb.Controllers.Post do
   # * Ensure thread subsciption emails are sent out and are deleted properly after sending
   # * Ensure user activity is updated properly
   # * Ensure user watches thread if preference is set after creation
+  # * Ensure mentions and notifications are created
   def create(conn, attrs) do
     # Authorizations Checks
     with {:auth, user} <- {:auth, Guardian.Plug.current_resource(conn)},
@@ -41,20 +46,25 @@ defmodule EpochtalkServerWeb.Controllers.Post do
          post_max_length <-
            Application.get_env(:epochtalk_server, :frontend_config)["post_max_length"],
          thread_id <- Validate.cast(attrs, "thread_id", :integer, required: true),
+         _title <-
+           Validate.cast(attrs, "title", :string, required: true, max: @max_post_title_length),
          _body <- Validate.cast(attrs, "body", :string, required: true, max: post_max_length),
          user_priority <- ACL.get_user_priority(conn),
          {:bypass_lock, true} <-
            {:bypass_lock, can_authed_user_bypass_thread_lock(user, thread_id)},
          {:is_active, true} <-
-           {:is_active, User.is_active(user.id)},
+           {:is_active, User.is_active?(user.id)},
          {:can_read, {:ok, true}} <-
            {:can_read, Board.get_read_access_by_thread_id(thread_id, user_priority)},
          {:can_write, {:ok, true}} <-
            {:can_write, Board.get_write_access_by_thread_id(thread_id, user_priority)},
-
+         {:board_banned, {:ok, false}} <-
+           {:board_banned, BoardBan.is_banned_from_board(user, thread_id: thread_id)},
+         attrs <- AutoModeration.moderate(user, attrs),
+         attrs <- Mention.username_to_user_id(user, attrs),
          # TODO(akinsey): Implement the following for completion
          # Plugins
-         # 1) Track IP
+         # 1) Track IP (done)
 
          # Pre Processing
 
@@ -64,19 +74,25 @@ defmodule EpochtalkServerWeb.Controllers.Post do
          # 4) handle filtering out newbie images
 
          # Hooks
-         # 1) Auto Moderation (pre)
+         # 1) Auto Moderation (pre) (done) (write tests)
 
-         # 2) Update user Activity (post) (done)
+         # 2) Update user Activity (post) (done) (write test)
 
-         # 3) Mentions -> convert username to user id (pre)
-         # 4) Mentions -> create mentions (post)
-         # 5) Mentions -> correct text search vector after creating mentions (post)
+         # 3) Mentions -> convert username to user id (pre) (done) (write tests)
+         # 4) Mentions -> create mentions (post) (done) (write tests)
+         # 5) Mentions -> correct text search vector after creating mentions (post) (done) (write tests)
 
-         # 6) Thread Subscriptions -> Email Subscribers (post) (done)
-         # 7) Thread Subscriptions -> Subscribe to Thread (post) (done)
+         # 6) Thread Subscriptions -> Email Subscribers (post) (done) (write test)
+         # 7) Thread Subscriptions -> Subscribe to Thread (post) (done) (write test)
 
          # Data Queries
          {:ok, post_data} <- Post.create(attrs, user.id) do
+      # Create Mention notification
+      Mention.handle_user_mention_creation(user, attrs, post_data)
+
+      # Correct TSV due to mentions converting username to user id
+      Mention.correct_text_search_vector(attrs)
+
       # Update user activity
       UserActivity.update_user_activity(user)
 
@@ -109,6 +125,9 @@ defmodule EpochtalkServerWeb.Controllers.Post do
 
       {:can_write, {:ok, false}} ->
         ErrorHelpers.render_json_error(conn, 403, "Unauthorized, you do not have permission")
+
+      {:board_banned, {:ok, true}} ->
+        ErrorHelpers.render_json_error(conn, 403, "Unauthorized, you are banned from this board")
 
       _ ->
         ErrorHelpers.render_json_error(conn, 400, "Error, cannot create post")

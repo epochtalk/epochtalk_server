@@ -36,5 +36,5 @@ defmodule EpochtalkServer.Models.MetricRankMap do
   Query and merge all `MetricRankMap` models
   """
   @spec all_merged() :: [Ecto.Changeset.t()] | nil
-  def all_merged(), do: Repo.all(from(MetricRankMap)) |> Enum.reduce(&Map.merge/2)
+  def all_merged(), do: Repo.all(from(MetricRankMap)) || [] |> Enum.reduce(&Map.merge/2)
 end

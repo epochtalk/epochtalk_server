@@ -140,6 +140,25 @@ defmodule EpochtalkServer.Models.Board do
   end
 
   @doc """
+  Given an id and moderated property, returns boolean indicating if `Board` allows self moderation
+  """
+  @spec allows_self_moderation?(id :: non_neg_integer, moderated :: boolean) ::
+          allowed :: boolean
+  def allows_self_moderation?(id, true) do
+    query =
+      from b in Board,
+        where: b.id == ^id,
+        select: b.meta["disable_self_mod"]
+
+    query
+    |> Repo.one() || false
+  end
+
+  # pass through if model being created doesn't have "moderated" property set
+  def allows_self_moderation?(_id, false), do: true
+  def allows_self_moderation?(_id, nil), do: true
+
+  @doc """
   Determines if the provided `user_priority` has write access to the board that contains the thread
   the specified `thread_id`
   """

@@ -80,4 +80,46 @@ defmodule EpochtalkServer.Models.Profile do
       do: db_profile |> changeset(attrs) |> Repo.update(),
       else: create(user_id, attrs)
   end
+
+  @doc """
+  Updates the last active date of a `User` if minutes have past since last update
+  """
+  @spec maybe_update_last_active(user :: map() | nil) ::
+          {:ok, any()}
+          | {:error, any()}
+          | {:error, Ecto.Multi.name(), any(), %{required(Ecto.Multi.name()) => any()}}
+  def maybe_update_last_active(nil), do: {:ok, nil}
+  def maybe_update_last_active(%{user_id: user_id}), do: maybe_update_last_active(%{id: user_id})
+
+  def maybe_update_last_active(%{id: user_id} = user) when is_map(user) do
+    Repo.transaction(fn ->
+      query = from p in Profile, where: p.user_id == ^user_id, select: p.last_active
+      last_active = Repo.one(query)
+
+      if is_nil(last_active),
+        do: update_last_active(user_id),
+        else: update_if_more_than_one_minute_has_passed(user_id, last_active)
+    end)
+  end
+
+  ## === Private Helper Functions ===
+
+  defp update_last_active(user_id) do
+    from(p in Profile, where: p.user_id == ^user_id)
+    |> Repo.update_all(
+      set: [
+        last_active: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
+      ]
+    )
+  end
+
+  defp update_if_more_than_one_minute_has_passed(user_id, last_active) do
+    now = NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
+    last_active_plus_one_minute = NaiveDateTime.add(last_active, 1, :minute)
+
+    at_least_one_minute_has_passed =
+      NaiveDateTime.compare(last_active_plus_one_minute, now) == :lt
+
+    if at_least_one_minute_has_passed, do: update_last_active(user_id)
+  end
 end

@@ -35,13 +35,31 @@ defmodule EpochtalkServer.Models.Notification do
   ## === Changesets Functions ===
 
   @doc """
-  Create generic changeset for `Notification` model
+  Create changeset for `Notification` model
   """
-  @spec changeset(notification :: t(), attrs :: map() | nil) :: Ecto.Changeset.t()
-  def changeset(notification, attrs) do
+  @spec create_changeset(notification :: t(), notification_attrs :: map() | nil) ::
+          Ecto.Changeset.t()
+  def create_changeset(notification, notification_attrs) do
     notification
-    |> cast(attrs, [:id, :sender_id, :receiver_id, :data, :viewed, :type, :created_at])
+    |> cast(notification_attrs, [
+      :id,
+      :sender_id,
+      :receiver_id,
+      :data,
+      :viewed,
+      :type,
+      :created_at
+    ])
     |> unique_constraint(:id, name: :notifications_pkey)
+  end
+
+  @doc """
+  Used to create a new `Notification`
+  """
+  @spec create(notification_attrs :: map) ::
+          {:ok, notification :: t()} | {:error, Ecto.Changeset.t()}
+  def create(notification_attrs) do
+    create_changeset(%Notification{}, notification_attrs) |> Repo.insert(returning: true)
   end
 
   @doc """

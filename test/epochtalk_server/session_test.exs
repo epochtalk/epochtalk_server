@@ -436,6 +436,8 @@ defmodule Test.EpochtalkServer.Session do
       Session.update(authed_user.id)
       {:ok, banned_resource_user} = Session.get_resource(authed_user.id, session_id)
       assert Enum.any?(banned_resource_user.roles, &(&1.lookup == "banned")) == true
+      # check ban is active
+      assert banned_resource_user.ban_expiration == @max_date
     end
 
     @tag [authenticated: true, banned: true]

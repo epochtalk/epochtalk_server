@@ -262,8 +262,10 @@ defmodule EpochtalkServer.Session do
     moderating = moderating |> Enum.map(& &1.board_id)
     # save/replace moderating boards to redis under "user:{user_id}:moderating"
     moderating_key = generate_key(user_id, "moderating")
-    # get current TTL
-    {:ok, old_ttl} = Redix.command(:redix, ["TTL", moderating_key])
+    # use user_key for base ttl, since moderating may not be populated (TTL == -2)
+    user_key = generate_key(user_id, "user")
+    # get current TTL of session
+    {:ok, session_ttl} = Redix.command(:redix, ["TTL", user_key])
     Redix.command(:redix, ["DEL", moderating_key])
 
     unless moderating == [],
@@ -272,10 +274,10 @@ defmodule EpochtalkServer.Session do
     # if ttl is provided
     if ttl do
       # maybe extend ttl
-      maybe_extend_ttl(moderating_key, ttl, old_ttl)
+      maybe_extend_ttl(moderating_key, ttl, session_ttl)
     else
-      # otherwise, re-set old_ttl
-      maybe_extend_ttl(moderating_key, old_ttl)
+      # otherwise, re-set session_ttl from user_key
+      maybe_extend_ttl(moderating_key, session_ttl)
     end
   end
 

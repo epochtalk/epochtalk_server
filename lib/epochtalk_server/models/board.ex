@@ -274,16 +274,31 @@ defmodule EpochtalkServer.Models.Board do
   """
   @spec movelist(user_priority :: non_neg_integer) :: [Board.t()] | []
   def movelist(user_priority) when is_integer(user_priority) do
-    # query =
-    #   from b in BoardMapping,
-    #     select: fragment("CASE WHEN category_id IS NULL THEN parent_id ELSE category_id END as parent_id, board_id as id, (SELECT viewable_by FROM boards WHERE board_id = id), (SELECT name FROM boards WHERE board_id = id), CASE WHEN category_id IS NULL THEN (SELECT name FROM boards WHERE parent_id = id) ELSE (SELECT name FROM categories WHERE category_id = id) END as parent_name, view_order")
-    #     join Board
-    # Repo.all(query)
-
+    # fetches board data, handles fetching parent_id of when parent is a board or category
     query = """
     SELECT CASE WHEN category_id IS NULL THEN parent_id ELSE category_id END as parent_id, board_id as id, (SELECT viewable_by FROM boards WHERE board_id = id), (SELECT name FROM boards WHERE board_id = id), CASE WHEN category_id IS NULL THEN (SELECT name FROM boards WHERE parent_id = id) ELSE (SELECT name FROM categories WHERE category_id = id) END as parent_name, view_order FROM board_mapping
     """
-    raw_postgres_data = Ecto.Adapters.SQL.query!(Repo, query)
+
+    # cannot recreate "CASE WHEN" statement with ecto syntax, quering raw sql data instead
+    raw_data = Ecto.Adapters.SQL.query!(Repo, query)
+
+    # convert raw sql query results into list of board maps
+    Enum.reduce(raw_data.rows, [], fn row, boards ->
+      board_data =
+        raw_data.columns
+        |> Enum.with_index()
+        |> Enum.reduce(%{}, fn {key, row_index}, board_map ->
+          Map.put(board_map, String.to_atom(key), Enum.at(row, row_index))
+        end)
+
+      boards ++ [board_data]
+    end)
+    # filter out boards that user doesn't have permission to see
+    |> Enum.filter(fn board ->
+      if board.viewable_by != 0 && is_nil(board.viewable_by),
+        do: true,
+        else: user_priority <= board.viewable_by
+    end)
   end
 
   @doc """

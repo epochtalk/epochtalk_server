@@ -8,6 +8,7 @@ defmodule Test.EpochtalkServer.Session do
   @almost_one_day_in_seconds @one_day_in_seconds - 100
   @four_weeks_in_seconds 4 * 7 * @one_day_in_seconds
   @almost_four_weeks_in_seconds @four_weeks_in_seconds - 100
+  @max_date "9999-12-31 00:00:00"
   alias EpochtalkServer.Session
   alias EpochtalkServer.Models.Profile
   alias EpochtalkServer.Models.RoleUser
@@ -271,7 +272,7 @@ defmodule Test.EpochtalkServer.Session do
         Redix.command!(:redix, ["HGET", "user:#{user.id}:baninfo", "ban_expiration"])
 
       assert pre_ban_ban_expiration == nil
-      assert ban_expiration == "9999-12-31 00:00:00"
+      assert ban_expiration == @max_date
       assert pre_ban_baninfo_ttl == -2
       assert baninfo_ttl <= @one_day_in_seconds
       assert baninfo_ttl > @almost_one_day_in_seconds
@@ -303,7 +304,7 @@ defmodule Test.EpochtalkServer.Session do
         Redix.command!(:redix, ["HGET", "user:#{user.id}:baninfo", "ban_expiration"])
 
       assert pre_ban_ban_expiration == nil
-      assert ban_expiration == "9999-12-31 00:00:00"
+      assert ban_expiration == @max_date
       assert pre_ban_baninfo_ttl == -2
       assert baninfo_ttl <= @four_weeks_in_seconds
       assert baninfo_ttl > @almost_four_weeks_in_seconds

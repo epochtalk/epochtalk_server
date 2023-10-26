@@ -458,6 +458,10 @@ defmodule Test.EpochtalkServer.Session do
       Session.update(authed_user.id)
       {:ok, unbanned_resource_user} = Session.get_resource(authed_user.id, session_id)
       assert Enum.any?(unbanned_resource_user.roles, &(&1.lookup == "banned")) == false
+      # check ban is expired
+      now = NaiveDateTime.utc_now()
+      {:ok, ban_expiration} = unbanned_resource_user.ban_expiration |> NaiveDateTime.from_iso8601()
+      assert NaiveDateTime.compare(ban_expiration, now) == :lt
     end
   end
 

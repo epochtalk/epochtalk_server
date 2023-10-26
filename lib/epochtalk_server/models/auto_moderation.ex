@@ -331,7 +331,10 @@ defmodule EpochtalkServer.Models.AutoModeration do
         if ban_interval,
           do:
             DateTime.utc_now()
-            |> DateTime.add(ban_interval * @hours_per_day * @minutes_per_hour * @seconds_per_minute, :second)
+            |> DateTime.add(
+              ban_interval * @hours_per_day * @minutes_per_hour * @seconds_per_minute,
+              :second
+            )
             |> DateTime.to_naive()
 
       # get user_id from post_attrs

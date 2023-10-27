@@ -202,11 +202,11 @@ defmodule Test.EpochtalkServerWeb.Controllers.Board do
         |> get(Routes.board_path(conn, :movelist))
         |> json_response(200)
 
-      assert response_boards |> Enum.count() == 3
+      [response_parent_board | response_boards] = response_boards
+      [response_child_board | response_boards] = response_boards
+      [response_admin_board | response_boards] = response_boards
 
-      response_parent_board = Enum.at(response_boards, 0)
-      response_child_board = Enum.at(response_boards, 1)
-      response_admin_board = Enum.at(response_boards, 2)
+      assert response_boards == []
 
       assert response_parent_board["id"] != super_admin_board.id
       assert response_child_board["id"] != super_admin_board.id
@@ -227,12 +227,12 @@ defmodule Test.EpochtalkServerWeb.Controllers.Board do
         |> get(Routes.board_path(conn, :movelist))
         |> json_response(200)
 
-      assert response_boards |> Enum.count() == 4
+      [response_parent_board | response_boards] = response_boards
+      [response_child_board | response_boards] = response_boards
+      [response_admin_board | response_boards] = response_boards
+      [response_super_admin_board | response_boards] = response_boards
 
-      response_parent_board = Enum.at(response_boards, 0)
-      response_child_board = Enum.at(response_boards, 1)
-      response_admin_board = Enum.at(response_boards, 2)
-      response_super_admin_board = Enum.at(response_boards, 3)
+      assert response_boards == []
 
       assert response_parent_board["id"] != super_admin_board.id
       assert response_child_board["id"] != super_admin_board.id

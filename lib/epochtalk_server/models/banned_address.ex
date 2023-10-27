@@ -6,6 +6,10 @@ defmodule EpochtalkServer.Models.BannedAddress do
   alias EpochtalkServer.Repo
   alias EpochtalkServer.Models.BannedAddress
 
+  @one_week_in_ms 1000 * 60 * 60 * 24 * 7
+  @inital_amount 0.8897
+  @rate_of_decay 0.9644
+
   @moduledoc """
   `BannedAddress` model, for performing actions relating to banning by ip/hostname
   """
@@ -310,11 +314,8 @@ defmodule EpochtalkServer.Models.BannedAddress do
   # in ms since the weight was last updated
   defp decay_for_time(time, weight) do
     weight = Decimal.to_float(weight)
-    one_week = 1000 * 60 * 60 * 24 * 7
-    weeks = time / one_week
-    a = 0.8897
-    r = 0.9644
-    a ** ((r ** weeks - 1) / (r - 1)) * weight ** (r ** weeks)
+    weeks = time / @one_week_in_ms
+    @inital_amount ** ((@rate_of_decay ** weeks - 1) / (@rate_of_decay - 1)) * weight ** (@rate_of_decay ** weeks)
   end
 
   # returns the decayed score given a banned address

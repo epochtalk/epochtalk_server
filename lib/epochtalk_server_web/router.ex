@@ -47,6 +47,7 @@ defmodule EpochtalkServerWeb.Router do
     put "/admin/roles/update", Role, :update
     post "/threads", Thread, :create
     get "/admin/modlog", ModerationLog, :page
+    get "/boards/movelist", Board, :movelist
   end
 
   scope "/api", EpochtalkServerWeb.Controllers do

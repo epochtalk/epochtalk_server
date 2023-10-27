@@ -68,6 +68,11 @@ defmodule EpochtalkServerWeb.Controllers.BoardJSON do
   end
 
   @doc """
+  Renders `Board` data for movelist route
+  """
+  def movelist(%{movelist: movelist}), do: movelist
+
+  @doc """
   Board view helper method for mapping childboards and other metadata to board using board mapping and user priority
   """
   def format_board_data_for_find(board_moderators, board_mapping, board_id, user_priority) do

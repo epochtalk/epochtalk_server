@@ -12,11 +12,11 @@ defmodule Test.EpochtalkServerWeb.Controllers.Board do
 
     build(:board_mapping,
       attributes: [
-        [category: category, view_order: 1],
-        [board: parent_board, category: category, view_order: 1],
-        [board: child_board, parent: parent_board, view_order: 1],
-        [board: admin_board, category: category, view_order: 2],
-        [board: super_admin_board, category: category, view_order: 3]
+        [category: category, view_order: 0],
+        [board: parent_board, category: category, view_order: 0],
+        [board: child_board, parent: parent_board, view_order: 0],
+        [board: admin_board, category: category, view_order: 1],
+        [board: super_admin_board, category: category, view_order: 2]
       ]
     )
 
@@ -62,7 +62,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Board do
       # check category/board info
       assert response_category_id == category.id
       assert response_category_name == category.name
-      assert response_category_view_order == 1
+      assert response_category_view_order == 0
 
       # extract parent board
       [response_parent_board | response_boards] = response_boards
@@ -75,7 +75,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Board do
       assert response_parent_board["parent_id"] == nil
       assert response_parent_board["children"] |> Enum.count() == 1
       assert response_parent_board["description"] == parent_board.description
-      assert response_parent_board["view_order"] == 1
+      assert response_parent_board["view_order"] == 0
       assert response_parent_board["slug"] == parent_board.slug
       assert response_parent_board["viewable_by"] == parent_board.viewable_by
       assert response_parent_board["postable_by"] == parent_board.postable_by
@@ -102,7 +102,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Board do
       assert response_child_board["parent_id"] == parent_board.id
       assert response_child_board["children"] |> Enum.count() == 0
       assert response_child_board["description"] == child_board.description
-      assert response_child_board["view_order"] == 1
+      assert response_child_board["view_order"] == 0
       assert response_child_board["slug"] == child_board.slug
       assert response_child_board["viewable_by"] == child_board.viewable_by
       assert response_child_board["postable_by"] == child_board.postable_by

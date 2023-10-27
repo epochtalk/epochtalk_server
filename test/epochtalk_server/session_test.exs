@@ -476,6 +476,7 @@ defmodule Test.EpochtalkServer.Session do
       # check that session user does not have banned role
       {:ok, resource_user} = Session.get_resource(authed_user.id, session_id)
       assert Enum.any?(resource_user.roles, &(&1.lookup == "banned")) == false
+      # check user does not have malicious score or ban expiration
       assert Map.get(resource_user, :malicious_score) == nil
       assert Map.get(resource_user, :ban_expiration) == nil
 
@@ -488,10 +489,11 @@ defmodule Test.EpochtalkServer.Session do
       Session.update(authed_user.id)
       {:ok, malicious_resource_user} = Session.get_resource(authed_user.id, session_id)
       assert Enum.any?(malicious_resource_user.roles, &(&1.lookup == "banned")) == true
-      # check ban is active
-      assert malicious_resource_user.ban_expiration == @max_date
-      # check malicious score is active
+      # check malicious score and ban are active
       assert malicious_resource_user.malicious_score != nil
+      assert malicious_resource_user.malicious_score > 1
+      assert malicious_resource_user.ban_expiration == @max_date
+    end
     end
   end
 

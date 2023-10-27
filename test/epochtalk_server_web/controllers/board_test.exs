@@ -170,7 +170,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Board do
   end
 
   describe "movelist/2" do
-    test "when unauthenticated, returns InvalidPermission error", %{conn: conn} do
+    test "when unauthenticated, returns Unauthorized error", %{conn: conn} do
       response_boards =
         conn
         |> get(Routes.board_path(conn, :movelist))
@@ -181,7 +181,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Board do
     end
 
     @tag :authenticated
-    test "when authenticated with invalid permissions, returns InvalidPermission error", %{
+    test "when authenticated with invalid permissions, raises InvalidPermission error", %{
       conn: conn
     } do
       assert_raise InvalidPermission,

@@ -1,33 +1,26 @@
 defmodule Test.EpochtalkServerWeb.Controllers.Board do
   use Test.Support.ConnCase, async: true
   import Test.Support.Factory
+  alias EpochtalkServerWeb.CustomErrors.InvalidPermission
 
   setup %{conn: conn} do
     category = insert(:category)
-
-    parent_board =
-      insert(:board,
-        viewable_by: 10,
-        postable_by: 10,
-        right_to_left: false
-      )
-
-    child_board =
-      insert(:board,
-        viewable_by: 10,
-        postable_by: 10,
-        right_to_left: false
-      )
+    parent_board = insert(:board)
+    child_board = insert(:board)
+    admin_board = insert(:board, viewable_by: 1)
+    super_admin_board = insert(:board, viewable_by: 0)
 
     build(:board_mapping,
       attributes: [
-        [category: category, view_order: 0],
+        [category: category, view_order: 1],
         [board: parent_board, category: category, view_order: 1],
-        [board: child_board, parent: parent_board, view_order: 2]
+        [board: child_board, parent: parent_board, view_order: 1],
+        [board: admin_board, category: category, view_order: 2],
+        [board: super_admin_board, category: category, view_order: 3]
       ]
     )
 
-    {:ok, conn: conn, parent_board: parent_board, child_board: child_board, category: category}
+    {:ok, conn: conn, parent_board: parent_board, child_board: child_board, category: category, admin_board: admin_board, super_admin_board: super_admin_board}
   end
 
   describe "by_category/2" do
@@ -50,7 +43,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Board do
       seeded_category = response |> Enum.at(0)
 
       # check number of boards under category
-      assert seeded_category |> Map.get("boards") |> Enum.count() == 1
+      assert seeded_category |> Map.get("boards") |> Enum.count() == 3
 
       # extract category/board info
       %{
@@ -63,11 +56,11 @@ defmodule Test.EpochtalkServerWeb.Controllers.Board do
       # check category/board info
       assert response_category_id == category.id
       assert response_category_name == category.name
-      assert response_category_view_order == 0
+      assert response_category_view_order == 1
 
       # extract parent board
       [response_parent_board | response_boards] = response_boards
-      assert response_boards == []
+      assert response_boards |> Enum.count() == 2
 
       # check parent board
       assert response_parent_board["id"] == parent_board.id
@@ -103,7 +96,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Board do
       assert response_child_board["parent_id"] == parent_board.id
       assert response_child_board["children"] |> Enum.count() == 0
       assert response_child_board["description"] == child_board.description
-      assert response_child_board["view_order"] == 2
+      assert response_child_board["view_order"] == 1
       assert response_child_board["slug"] == child_board.slug
       assert response_child_board["viewable_by"] == child_board.viewable_by
       assert response_child_board["postable_by"] == child_board.postable_by
@@ -167,6 +160,72 @@ defmodule Test.EpochtalkServerWeb.Controllers.Board do
         |> json_response(200)
 
       assert response["id"] == board.id
+    end
+  end
+
+  describe "movelist/2" do
+    test "when unauthenticated, returns InvalidPermission error", %{conn: conn} do
+      response_boards =
+        conn
+        |> get(Routes.board_path(conn, :movelist))
+        |> json_response(401)
+
+      assert response_boards["error"] == "Unauthorized"
+      assert response_boards["message"] == "No resource found"
+    end
+
+    @tag :authenticated
+    test "when authenticated with invalid permissions, returns InvalidPermission error", %{conn: conn} do
+      assert_raise InvalidPermission,
+                   ~r/^Forbidden, invalid permissions to perform this action/,
+                   fn ->
+                      get(conn, Routes.board_path(conn, :movelist))
+                   end
+    end
+
+    @tag authenticated: :admin
+    test "when authenticated as admin user, returns movelist with viewable boards", %{conn: conn, admin_board: admin_board, super_admin_board: super_admin_board} do
+      response_boards =
+        conn
+        |> get(Routes.board_path(conn, :movelist))
+        |> json_response(200)
+
+      assert response_boards |> Enum.count() == 3
+
+      response_parent_board = Enum.at(response_boards, 0)
+      response_child_board = Enum.at(response_boards, 1)
+      response_admin_board = Enum.at(response_boards, 2)
+
+      assert response_parent_board["id"] != super_admin_board.id
+      assert response_child_board["id"] != super_admin_board.id
+
+      assert response_admin_board["viewable_by"] == admin_board.viewable_by
+      assert response_admin_board["id"] == admin_board.id
+      assert response_admin_board["id"] != super_admin_board.id
+    end
+
+    @tag authenticated: :super_admin
+    test "when authenticated as super admin user, returns movelist with viewable boards", %{conn: conn, admin_board: admin_board, super_admin_board: super_admin_board} do
+      response_boards =
+        conn
+        |> get(Routes.board_path(conn, :movelist))
+        |> json_response(200)
+
+      assert response_boards |> Enum.count() == 4
+
+      response_parent_board = Enum.at(response_boards, 0)
+      response_child_board = Enum.at(response_boards, 1)
+      response_admin_board = Enum.at(response_boards, 2)
+      response_super_admin_board = Enum.at(response_boards, 3)
+
+      assert response_parent_board["id"] != super_admin_board.id
+      assert response_child_board["id"] != super_admin_board.id
+
+      assert response_admin_board["viewable_by"] == admin_board.viewable_by
+      assert response_admin_board["id"] == admin_board.id
+
+      assert response_super_admin_board["viewable_by"] == super_admin_board.viewable_by
+      assert response_super_admin_board["id"] == super_admin_board.id
     end
   end
 end

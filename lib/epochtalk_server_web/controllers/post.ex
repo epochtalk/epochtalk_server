@@ -149,7 +149,8 @@ defmodule EpochtalkServerWeb.Controllers.Post do
   9) Ignored users posts are hidden properly
   10) Rank and activity are calculated for each post
   """
-  # TODO(akinsey): Implement mentions hook and parser for completion
+  # TODO(akinsey): Implement for completion
+  # - parser
   # - Implement guard in Validate that prevents passing in page and start at the same time
   def by_thread(conn, attrs) do
     # Parameter Validation
@@ -189,6 +190,7 @@ defmodule EpochtalkServerWeb.Controllers.Post do
          posts <- UserIgnored.append_user_ignored_data_to_posts(posts, user),
          metric_rank_maps <- MetricRankMap.all_merged(),
          ranks <- Rank.all(),
+         posts <- Mention.user_id_to_username(posts),
          {:ok, watching_thread} <- WatchThread.is_watching(user, thread_id) do
       render(conn, :by_thread, %{
         posts: posts,

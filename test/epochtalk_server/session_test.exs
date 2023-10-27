@@ -333,7 +333,7 @@ defmodule Test.EpochtalkServer.Session do
         Redix.command!(:redix, ["HGET", "user:#{authed_user.id}:baninfo", "malicious_score"])
 
       assert pre_malicious_malicious_score == nil
-      assert malicious_score == "4.0416"
+      assert malicious_score == "2.0416"
       assert pre_malicious_baninfo_ttl == -2
       assert malicious_score_ttl <= @one_day_in_seconds
       assert malicious_score_ttl > @almost_one_day_in_seconds
@@ -360,7 +360,7 @@ defmodule Test.EpochtalkServer.Session do
         Redix.command!(:redix, ["HGET", "user:#{authed_user.id}:baninfo", "malicious_score"])
 
       assert pre_malicious_malicious_score == nil
-      assert malicious_score == "4.0416"
+      assert malicious_score == "2.0416"
       assert pre_malicious_baninfo_ttl == -2
       assert malicious_score_ttl <= @four_weeks_in_seconds
       assert malicious_score_ttl > @almost_four_weeks_in_seconds

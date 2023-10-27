@@ -20,7 +20,13 @@ defmodule Test.EpochtalkServerWeb.Controllers.Board do
       ]
     )
 
-    {:ok, conn: conn, parent_board: parent_board, child_board: child_board, category: category, admin_board: admin_board, super_admin_board: super_admin_board}
+    {:ok,
+     conn: conn,
+     parent_board: parent_board,
+     child_board: child_board,
+     category: category,
+     admin_board: admin_board,
+     super_admin_board: super_admin_board}
   end
 
   describe "by_category/2" do
@@ -175,16 +181,22 @@ defmodule Test.EpochtalkServerWeb.Controllers.Board do
     end
 
     @tag :authenticated
-    test "when authenticated with invalid permissions, returns InvalidPermission error", %{conn: conn} do
+    test "when authenticated with invalid permissions, returns InvalidPermission error", %{
+      conn: conn
+    } do
       assert_raise InvalidPermission,
                    ~r/^Forbidden, invalid permissions to perform this action/,
                    fn ->
-                      get(conn, Routes.board_path(conn, :movelist))
+                     get(conn, Routes.board_path(conn, :movelist))
                    end
     end
 
     @tag authenticated: :admin
-    test "when authenticated as admin user, returns movelist with viewable boards", %{conn: conn, admin_board: admin_board, super_admin_board: super_admin_board} do
+    test "when authenticated as admin user, returns movelist with viewable boards", %{
+      conn: conn,
+      admin_board: admin_board,
+      super_admin_board: super_admin_board
+    } do
       response_boards =
         conn
         |> get(Routes.board_path(conn, :movelist))
@@ -205,7 +217,11 @@ defmodule Test.EpochtalkServerWeb.Controllers.Board do
     end
 
     @tag authenticated: :super_admin
-    test "when authenticated as super admin user, returns movelist with viewable boards", %{conn: conn, admin_board: admin_board, super_admin_board: super_admin_board} do
+    test "when authenticated as super admin user, returns movelist with viewable boards", %{
+      conn: conn,
+      admin_board: admin_board,
+      super_admin_board: super_admin_board
+    } do
       response_boards =
         conn
         |> get(Routes.board_path(conn, :movelist))

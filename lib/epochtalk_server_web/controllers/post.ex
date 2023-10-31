@@ -151,7 +151,6 @@ defmodule EpochtalkServerWeb.Controllers.Post do
   """
   # TODO(akinsey): Implement for completion
   # - parser
-  # - Implement guard in Validate that prevents passing in page and start at the same time
   def by_thread(conn, attrs) do
     # Parameter Validation
     with thread_id <- Validate.cast(attrs, "thread_id", :integer, required: true),

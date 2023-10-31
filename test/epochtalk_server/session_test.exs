@@ -388,7 +388,9 @@ defmodule Test.EpochtalkServer.Session do
       {:ok, resource_user} = Session.get_resource(authed_user.id, session_id)
       assert resource_user.avatar == updated_attrs.avatar
     end
+  end
 
+  describe "update/1 role" do
     @tag :authenticated
     test "given a valid user id, updates role to admin", %{conn: conn, authed_user: authed_user} do
       authed_user_role = List.first(authed_user.roles)
@@ -419,7 +421,9 @@ defmodule Test.EpochtalkServer.Session do
       user_role = RoleCache.by_lookup("user")
       assert resource_user_role == user_role
     end
+  end
 
+  describe "update/1 baninfo" do
     @tag :authenticated
     test "given a not banned user's id, when user is banned, adds banned role", %{
       conn: conn,

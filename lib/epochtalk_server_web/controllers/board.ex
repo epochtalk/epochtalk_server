@@ -37,7 +37,8 @@ defmodule EpochtalkServerWeb.Controllers.Board do
   Used to find a specific board
   """
   def find(conn, attrs) do
-    with id <- Validate.cast(attrs, "id", :integer, required: true),
+    with :ok <- ACL.allow!(conn, "boards.find"),
+         id <- Validate.cast(attrs, "id", :integer, required: true),
          user_priority <- ACL.get_user_priority(conn),
          board_mapping <- BoardMapping.all(),
          board_moderators <- BoardModerator.all(),

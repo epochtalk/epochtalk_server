@@ -40,6 +40,8 @@ defmodule EpochtalkServerWeb.Controllers.Board do
     with :ok <- ACL.allow!(conn, "boards.find"),
          id <- Validate.cast(attrs, "id", :integer, required: true),
          user_priority <- ACL.get_user_priority(conn),
+         {:can_read, {:ok, true}} <-
+           {:can_read, Board.get_read_access_by_id(id, user_priority)},
          board_mapping <- BoardMapping.all(),
          board_moderators <- BoardModerator.all(),
          {:board, [_board]} <-
@@ -51,6 +53,14 @@ defmodule EpochtalkServerWeb.Controllers.Board do
         user_priority: user_priority
       })
     else
+      # if user can't read board, return 404, user doesn't need to know hidden board exists
+      {:can_read, {:ok, false}} ->
+        ErrorHelpers.render_json_error(
+          conn,
+          404,
+          "Board not found"
+        )
+
       {:board, []} -> ErrorHelpers.render_json_error(conn, 400, "Error, board does not exist")
       _ -> ErrorHelpers.render_json_error(conn, 400, "Error, cannot fetch boards")
     end

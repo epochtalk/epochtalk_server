@@ -467,15 +467,19 @@ defmodule Test.EpochtalkServer.Session do
       assert Enum.any?(unbanned_resource_user.roles, &(&1.lookup == "banned")) == false
       # check ban is expired
       now = NaiveDateTime.utc_now()
-      {:ok, ban_expiration} = unbanned_resource_user.ban_expiration |> NaiveDateTime.from_iso8601()
+
+      {:ok, ban_expiration} =
+        unbanned_resource_user.ban_expiration |> NaiveDateTime.from_iso8601()
+
       assert NaiveDateTime.compare(ban_expiration, now) == :lt
     end
 
     @tag :authenticated
-    test "given a not malicious user's id, when user is marked malicious, adds malicious score", %{
-      conn: conn,
-      authed_user: authed_user
-    } do
+    test "given a not malicious user's id, when user is marked malicious, adds malicious score",
+         %{
+           conn: conn,
+           authed_user: authed_user
+         } do
       # get session_id (jti) from conn
       session_id = conn.private.guardian_default_claims["jti"]
       # check that session user does not have banned role
@@ -500,6 +504,7 @@ defmodule Test.EpochtalkServer.Session do
       assert malicious_resource_user.ban_expiration == @max_date
     end
   end
+
   describe "update/1 moderating" do
     @tag :authenticated
     test "when a user is added/removed as moderator, updates moderating", %{

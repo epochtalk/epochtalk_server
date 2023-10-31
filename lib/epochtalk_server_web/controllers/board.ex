@@ -16,7 +16,8 @@ defmodule EpochtalkServerWeb.Controllers.Board do
   Used to retrieve categorized boards
   """
   def by_category(conn, attrs) do
-    with stripped <- Validate.cast(attrs, "stripped", :boolean, default: false),
+    with :ok <- ACL.allow!(conn, "boards.allCategories"),
+         stripped <- Validate.cast(attrs, "stripped", :boolean, default: false),
          user_priority <- ACL.get_user_priority(conn),
          board_mapping <- BoardMapping.all(stripped: stripped),
          board_moderators <- BoardModerator.all(),

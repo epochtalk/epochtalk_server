@@ -159,6 +159,7 @@ defmodule EpochtalkServerWeb.Controllers.Post do
          start <- Validate.cast(attrs, "start", :integer, min: 1),
          limit <- Validate.cast(attrs, "limit", :integer, default: 25, min: 1, max: 100),
          desc <- Validate.cast(attrs, "desc", :boolean, default: true),
+         :ok <- Validate.mutually_exclusive!(attrs, ["page", "start"]),
          user <- Guardian.Plug.current_resource(conn),
          user_priority <- ACL.get_user_priority(conn),
 

@@ -7,6 +7,23 @@ defmodule EpochtalkServerWeb.Helpers.Validate do
   alias EpochtalkServerWeb.CustomErrors.InvalidPayload
 
   @doc """
+  Ensure that `keys` provided in list are mutually exlusive withing `attrs` map.
+  """
+  @spec mutually_exclusive!(attrs :: map, keys :: [String.t()]) :: :ok | no_return
+  def mutually_exclusive!(attrs, keys) when is_map(attrs) and is_list(keys) do
+    contains_all_keys =
+      Enum.reduce(keys, true, fn key, acc -> acc && Map.has_key?(attrs, key) end)
+
+    if contains_all_keys && length(keys) > 1,
+      do:
+        raise(InvalidPayload,
+          message:
+            "The following payload parameters cannot be passed at the same time: #{Enum.join(keys, ", ")}"
+        ),
+      else: :ok
+  end
+
+  @doc """
   Helper used to validate and cast request parameters directly out of the incoming
   paylod map (usually a controller function's `attrs` parameter) to the specified type.
   Will raise an `EpochtalkServerWeb.CustomErrors.InvalidPayload` exception if map value does

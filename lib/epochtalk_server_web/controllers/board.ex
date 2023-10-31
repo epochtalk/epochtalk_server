@@ -70,6 +70,7 @@ defmodule EpochtalkServerWeb.Controllers.Board do
   @doc """
   Used to convert `Board` slug to id
   """
+  # TODO(akinsey): allow validate cast to match a regex, for completeness validate slug format
   def slug_to_id(conn, attrs) do
     with slug <- Validate.cast(attrs, "slug", :string, required: true),
          {:ok, id} <- Board.slug_to_id(slug) do

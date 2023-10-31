@@ -61,6 +61,9 @@ defmodule EpochtalkServerWeb.Controllers.Board do
           "Board not found"
         )
 
+      {:can_read, {:error, :board_does_not_exist}} ->
+        ErrorHelpers.render_json_error(conn, 400, "Error, board does not exist")
+
       {:board, []} ->
         ErrorHelpers.render_json_error(conn, 400, "Error, board does not exist")
 

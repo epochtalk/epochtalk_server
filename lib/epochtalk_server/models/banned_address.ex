@@ -229,13 +229,12 @@ defmodule EpochtalkServer.Models.BannedAddress do
               0
           end
 
-        ip32_score = calculate_ip32_score(ip)
-        ip24_score = calculate_ip24_score(ip)
-        ip16_score = calculate_ip16_score(ip)
+        # calculate ip scores with weight constants
+        ip32_score = calculate_ip32_score(ip) * @ip32_weight
+        ip24_score = calculate_ip24_score(ip) * @ip24_weight
+        ip16_score = calculate_ip16_score(ip) * @ip16_weight
         # calculate malicious score using all scores
-        malicious_score =
-          hostname_score + @ip32_weight * ip32_score + @ip24_weight * ip24_score +
-            @ip16_weight * ip16_score
+        malicious_score = hostname_score + ip32_score + ip24_score + ip16_score
 
         if malicious_score < 1, do: nil, else: malicious_score
 

@@ -11,10 +11,7 @@ defmodule EpochtalkServerWeb.Helpers.Validate do
   """
   @spec mutually_exclusive!(attrs :: map, keys :: [String.t()]) :: :ok | no_return
   def mutually_exclusive!(attrs, keys) when is_map(attrs) and is_list(keys) do
-    contains_all_keys =
-      Enum.reduce(keys, true, fn key, acc -> acc && Map.has_key?(attrs, key) end)
-
-    if contains_all_keys && length(keys) > 1,
+    if map_contains_any_two_keys_in_list?(attrs, keys),
       do:
         raise(InvalidPayload,
           message:
@@ -136,6 +133,25 @@ defmodule EpochtalkServerWeb.Helpers.Validate do
       # type not supported, return string
       _ -> to_str(str, opts)
     end
+  end
+
+  # entrypoint
+  defp map_contains_any_two_keys_in_list?(map, list), do: map_contains_any_two_keys_in_list?(map, list, false)
+  # if map is empty, return false
+  defp map_contains_any_two_keys_in_list?(map, _list, _key_found?) when map == %{}, do: false
+  # if list is empty, return false
+  defp map_contains_any_two_keys_in_list?(_map, [], _key_found?), do: false
+  # if key_found? is false
+  defp map_contains_any_two_keys_in_list?(map, [key | keys] = _list, false = _key_found?) do
+    # check next key with updated key_found?
+    map_contains_any_two_keys_in_list?(map, keys, Map.has_key?(map, key))
+  end
+  # if key_found? is true
+  defp map_contains_any_two_keys_in_list?(map, [key | keys] = _list, true = key_found?) do
+    # if current key is in map, return true
+    if Map.has_key?(map, key), do: true,
+    # otherwise, check next key
+    else: map_contains_any_two_keys_in_list?(map, keys, key_found?)
   end
 
   defp to_bool(str, opts) do

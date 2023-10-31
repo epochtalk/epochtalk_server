@@ -8,6 +8,20 @@ defmodule EpochtalkServerWeb.Helpers.Validate do
 
   @doc """
   Ensure that `keys` provided in list are mutually exlusive withing `attrs` map.
+
+  ## Example
+    iex> alias EpochtalkServerWeb.Helpers.Validate
+    iex> attrs = %{"page" => 1}
+    iex> Validate.mutually_exclusive!(attrs, ["page", "start"])
+    :ok
+    iex> attrs = %{"start" => 1}
+    iex> Validate.mutually_exclusive!(attrs, ["page", "start"])
+    :ok
+    iex> Validate.mutually_exclusive!(attrs, ["start"])
+    :ok
+    iex> attrs = %{"page" => 1, "start" => 1}
+    iex> Validate.mutually_exclusive!(attrs, ["page", "start"])
+    ** (EpochtalkServerWeb.CustomErrors.InvalidPayload) The following payload parameters cannot be passed at the same time: page, start
   """
   @spec mutually_exclusive!(attrs :: map, keys :: [String.t()]) :: :ok | no_return
   def mutually_exclusive!(attrs, keys) when is_map(attrs) and is_list(keys) do

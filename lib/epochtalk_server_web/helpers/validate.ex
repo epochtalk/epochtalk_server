@@ -7,7 +7,7 @@ defmodule EpochtalkServerWeb.Helpers.Validate do
   alias EpochtalkServerWeb.CustomErrors.InvalidPayload
 
   @doc """
-  Ensure that `keys` provided in list are mutually exlusive withing `attrs` map.
+  Ensure that `keys` provided in list are mutually exclusive within `attrs` map.
 
   ## Example
     iex> alias EpochtalkServerWeb.Helpers.Validate

@@ -136,7 +136,9 @@ defmodule EpochtalkServerWeb.Helpers.Validate do
   end
 
   # entrypoint
-  defp map_contains_any_two_keys_in_list?(map, list), do: map_contains_any_two_keys_in_list?(map, list, false)
+  defp map_contains_any_two_keys_in_list?(map, list),
+    do: map_contains_any_two_keys_in_list?(map, list, false)
+
   # if map is empty, return false
   defp map_contains_any_two_keys_in_list?(map, _list, _key_found?) when map == %{}, do: false
   # if list is empty, return false
@@ -146,12 +148,14 @@ defmodule EpochtalkServerWeb.Helpers.Validate do
     # check next key with updated key_found?
     map_contains_any_two_keys_in_list?(map, keys, Map.has_key?(map, key))
   end
+
   # if key_found? is true
   defp map_contains_any_two_keys_in_list?(map, [key | keys] = _list, true = key_found?) do
     # if current key is in map, return true
-    if Map.has_key?(map, key), do: true,
-    # otherwise, check next key
-    else: map_contains_any_two_keys_in_list?(map, keys, key_found?)
+    if Map.has_key?(map, key),
+      do: true,
+      # otherwise, check next key
+      else: map_contains_any_two_keys_in_list?(map, keys, key_found?)
   end
 
   defp to_bool(str, opts) do

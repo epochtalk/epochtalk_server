@@ -43,9 +43,7 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
   # TODO(akinsey): Post pre processing, authorizations, image processing, hooks. Things to consider:
   # - does html sanitizer need to run on the front end too
   # - how do we run the same parser/sanitizer on the elixir back end as the node frontend
-  # - processing mentions
   # - does createImageReferences need to be called here? was this missing from the old code?
-  # - does updateUserActivity need to be called here? was this missing from the old code?
   def create(conn, attrs) do
     # authorization checks
     with :ok <- ACL.allow!(conn, "threads.create"),

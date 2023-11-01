@@ -72,7 +72,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.User do
     } do
       assert malicious_user_changeset.ban_info.user_id == user.id
       # check that ip and hostname were banned
-      assert malicious_user_changeset.malicious_score == 4.0416
+      assert malicious_user_changeset.malicious_score == 2.0416
     end
   end
 

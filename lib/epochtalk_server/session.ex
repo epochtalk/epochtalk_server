@@ -5,6 +5,7 @@ defmodule EpochtalkServer.Session do
   @moduledoc """
   Manages `User` sessions in Redis. Used by Auth related `User` actions.
   """
+  require Logger
   alias EpochtalkServer.Auth.Guardian
   alias EpochtalkServer.Models.User
   alias EpochtalkServer.Models.Role
@@ -52,30 +53,38 @@ defmodule EpochtalkServer.Session do
   @doc """
   Update session performs the following actions for active session:
   * Saves `User` session info to redis (avatar, roles, moderating, ban info, etc)
-  * returns {:ok, user}
+  * returns {:ok, user} on success
+  * returns {:error, reason} on failure
 
   DOES NOT change:
   * User's session id, timestamp, ttl
   * Guardian token
   """
-  @spec update(user_id :: non_neg_integer) :: {:ok, user :: User.t()}
+  @spec update(user_id :: non_neg_integer) ::
+          {:ok, user :: User.t()}
+          | {:error, reason :: String.t() | Postgrex.Error.t()}
   def update(user_id) do
-    {:ok, user} = User.by_id(user_id)
-    avatar = if is_nil(user.profile), do: nil, else: user.profile.avatar
-    update_user_info(user.id, user.username, avatar: avatar)
-    update_roles(user.id, user.roles)
+    with {:ok, user} <- User.by_id(user_id),
+         true <- has_sessions?(user_id) do
+      avatar = if is_nil(user.profile), do: nil, else: user.profile.avatar
+      update_user_info(user.id, user.username, avatar: avatar)
+      update_roles(user.id, user.roles)
 
-    ban_info =
-      if is_nil(user.ban_info), do: %{}, else: %{ban_expiration: user.ban_info.expiration}
+      ban_info =
+        if is_nil(user.ban_info), do: %{}, else: %{ban_expiration: user.ban_info.expiration}
 
-    ban_info =
-      if !is_nil(user.malicious_score) && user.malicious_score >= 1,
-        do: Map.put(ban_info, :malicious_score, user.malicious_score),
-        else: ban_info
+      ban_info =
+        if !is_nil(user.malicious_score) && user.malicious_score >= 1,
+          do: Map.put(ban_info, :malicious_score, user.malicious_score),
+          else: ban_info
 
-    update_ban_info(user.id, ban_info)
-    update_moderating(user.id, user.moderating)
-    {:ok, user}
+      update_ban_info(user.id, ban_info)
+      update_moderating(user.id, user.moderating)
+      {:ok, user}
+    else
+      {:error, error} -> {:error, error}
+      false -> {:error, :no_sessions}
+    end
   end
 
   @doc """
@@ -87,7 +96,7 @@ defmodule EpochtalkServer.Session do
           | {:error, reason :: String.t() | Redix.Error.t() | Redix.ConnectionError.t()}
   def get_resource(user_id, session_id) do
     # check if session is active in redis
-    is_active_for_user_id(session_id, user_id)
+    is_active_for_user_id?(session_id, user_id)
     |> case do
       {:error, error} ->
         {:error, "Error finding resource from claims #{inspect(error)}"}
@@ -122,17 +131,19 @@ defmodule EpochtalkServer.Session do
             else: resource
 
         ban_key = generate_key(user_id, "baninfo")
-        ban_expiration = Redix.command!(:redix, ["HEXISTS", ban_key, "ban_expiration"])
+        ban_expiration_exists = Redix.command!(:redix, ["HEXISTS", ban_key, "ban_expiration"])
+        ban_expiration = Redix.command!(:redix, ["HGET", ban_key, "ban_expiration"])
 
         resource =
-          if ban_expiration != 0,
+          if ban_expiration_exists != 0,
             do: Map.put(resource, :ban_expiration, ban_expiration),
             else: resource
 
-        malicious_score = Redix.command!(:redix, ["HEXISTS", ban_key, "malicious_score"])
+        malicious_score_exists = Redix.command!(:redix, ["HEXISTS", ban_key, "malicious_score"])
+        malicious_score = Redix.command!(:redix, ["HGET", ban_key, "malicious_score"])
 
         resource =
-          if malicious_score != 0,
+          if malicious_score_exists != 0,
             do: Map.put(resource, :malicious_score, malicious_score),
             else: resource
 
@@ -153,7 +164,19 @@ defmodule EpochtalkServer.Session do
     Redix.command(:redix, ["ZRANGE", session_key, 0, -1])
   end
 
-  defp is_active_for_user_id(session_id, user_id) do
+  defp has_sessions?(user_id) do
+    session_key = generate_key(user_id, "sessions")
+    # check ZCARD for key
+    # returns number of sorted set elements at key
+    # returns 0 if key does not exist (set is empty)
+    case Redix.command(:redix, ["ZCARD", session_key]) do
+      {:error, error} -> {:error, error}
+      {:ok, 0} -> false
+      {:ok, _score} -> true
+    end
+  end
+
+  defp is_active_for_user_id?(session_id, user_id) do
     session_key = generate_key(user_id, "sessions")
     # check ZSCORE for user_id:session_id pair
     # returns score if it is a member of the set
@@ -247,8 +270,10 @@ defmodule EpochtalkServer.Session do
     moderating = moderating |> Enum.map(& &1.board_id)
     # save/replace moderating boards to redis under "user:{user_id}:moderating"
     moderating_key = generate_key(user_id, "moderating")
-    # get current TTL
-    {:ok, old_ttl} = Redix.command(:redix, ["TTL", moderating_key])
+    # use user_key for base ttl, since moderating may not be populated (TTL == -2)
+    user_key = generate_key(user_id, "user")
+    # get current TTL of session
+    {:ok, session_ttl} = Redix.command(:redix, ["TTL", user_key])
     Redix.command(:redix, ["DEL", moderating_key])
 
     unless moderating == [],
@@ -257,10 +282,10 @@ defmodule EpochtalkServer.Session do
     # if ttl is provided
     if ttl do
       # maybe extend ttl
-      maybe_extend_ttl(moderating_key, ttl, old_ttl)
+      maybe_extend_ttl(moderating_key, ttl, session_ttl)
     else
-      # otherwise, re-set old_ttl
-      maybe_extend_ttl(moderating_key, old_ttl)
+      # otherwise, re-set session_ttl from user_key
+      maybe_extend_ttl(moderating_key, session_ttl)
     end
   end
 
@@ -292,12 +317,15 @@ defmodule EpochtalkServer.Session do
   defp update_ban_info(user_id, ban_info, ttl \\ nil) do
     # save/replace ban_expiration to redis under "user:{user_id}:baninfo"
     ban_key = generate_key(user_id, "baninfo")
-    # get current TTL
-    {:ok, old_ttl} = Redix.command(:redix, ["TTL", ban_key])
+    # use user_key for base ttl, since baninfo may not be populated (TTL == -2)
+    user_key = generate_key(user_id, "user")
+    # get current TTL of session
+    {:ok, session_ttl} = Redix.command(:redix, ["TTL", user_key])
     Redix.command(:redix, ["HDEL", ban_key, "ban_expiration", "malicious_score"])
 
-    if ban_exp = Map.get(ban_info, :ban_expiration),
-      do: Redix.command(:redix, ["HSET", ban_key, "ban_expiration", ban_exp])
+    if ban_exp = Map.get(ban_info, :ban_expiration) do
+      Redix.command(:redix, ["HSET", ban_key, "ban_expiration", ban_exp])
+    end
 
     if malicious_score = Map.get(ban_info, :malicious_score),
       do: Redix.command(:redix, ["HSET", ban_key, "malicious_score", malicious_score])
@@ -305,10 +333,10 @@ defmodule EpochtalkServer.Session do
     # if ttl is provided
     if ttl do
       # maybe extend ttl
-      maybe_extend_ttl(ban_key, ttl, old_ttl)
+      maybe_extend_ttl(ban_key, ttl, session_ttl)
     else
-      # otherwise, re-set old_ttl
-      maybe_extend_ttl(ban_key, old_ttl)
+      # otherwise, re-set session_ttl from user_key
+      maybe_extend_ttl(ban_key, session_ttl)
     end
   end
 
@@ -353,13 +381,27 @@ defmodule EpochtalkServer.Session do
     maybe_extend_ttl(key, ttl, ttl)
   end
 
+  # set ttl to max of old_ttl, new_ttl, and existing ttl
+  # - or @four_weeks_in_seconds if old and new ttl's are invalid
   defp maybe_extend_ttl(key, new_ttl, old_ttl) do
-    if old_ttl > -1 do
-      # re-set old expiry only if old expiry was valid and key has no expiry
-      Redix.command(:redix, ["EXPIRE", key, old_ttl, "NX"])
-    else
-      # if old expiry was invalid, set new expiry only if key has no expiry
-      Redix.command(:redix, ["EXPIRE", key, new_ttl, "NX"])
+    cond do
+      old_ttl > -1 ->
+        # re-set old expiry only if old expiry was valid and key has no expiry
+        Redix.command(:redix, ["EXPIRE", key, old_ttl, "NX"])
+
+      new_ttl > -1 ->
+        # if old expiry was invalid, set new expiry only if new expiry is valid and key has no expiry
+        Redix.command(:redix, ["EXPIRE", key, new_ttl, "NX"])
+
+      true ->
+        # catch-all, in case both given expiries are invalid
+        Logger.warning("Invalid TTL's, setting max expiry", %{
+          module: __MODULE__,
+          parameters: "[old_ttl: #{old_ttl}, new_ttl: #{new_ttl}, key: #{key}]"
+        })
+
+        # if neither expiry is valid, set ttl to max
+        Redix.command(:redix, ["EXPIRE", key, @four_weeks_in_seconds])
     end
 
     # set expiry only if new expiry is greater than current (GT)

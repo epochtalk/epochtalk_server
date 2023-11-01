@@ -128,7 +128,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
   end
 
   describe "page/1, action types" do
-    @tag :authenticated
+    @tag authenticated: :admin
     test "when action_type is 'adminBoards.updateCategories', gets page", %{conn: conn} do
       factory_moderation_log =
         build(:moderation_log, %{
@@ -143,7 +143,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert compare(response_moderation_log, factory_moderation_log)
     end
 
-    @tag :authenticated
+    @tag authenticated: :admin
     test "when action_type is 'adminModerators.add', gets page", %{
       conn: conn,
       users: %{user: user}
@@ -169,7 +169,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
                "threads.data({ boardSlug: '#{board.slug}' })"
     end
 
-    @tag :authenticated
+    @tag authenticated: :admin
     test "when action_type is 'adminModerators.remove', gets page", %{
       conn: conn,
       users: %{user: user}
@@ -195,7 +195,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
                "threads.data({ boardSlug: '#{board.slug}' })"
     end
 
-    @tag :authenticated
+    @tag authenticated: :admin
     test "when action_type is 'reports.updateMessageReport', gets page", %{conn: conn} do
       message_report_id = 10
 
@@ -218,7 +218,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
                "^.messages({ reportId: '#{message_report_id}' })"
     end
 
-    @tag :authenticated
+    @tag authenticated: :admin
     test "when action_type is 'reports.createMessageReportNote', gets page", %{conn: conn} do
       message_report_id = 10
 
@@ -241,7 +241,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
                "^.messages({ reportId: '#{message_report_id}' })"
     end
 
-    @tag :authenticated
+    @tag authenticated: :admin
     test "when action_type is 'reports.updateMessageReportNote', gets page", %{conn: conn} do
       message_report_id = 10
 
@@ -264,7 +264,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
                "^.messages({ reportId: '#{message_report_id}' })"
     end
 
-    @tag :authenticated
+    @tag authenticated: :admin
     test "when action_type is 'reports.updatePostReport', gets page", %{conn: conn} do
       post_report_id = 20
 
@@ -287,7 +287,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
                "^.messages({ reportId: '#{post_report_id}' })"
     end
 
-    @tag :authenticated
+    @tag authenticated: :admin
     test "when action_type is 'reports.createPostReportNote', gets page", %{conn: conn} do
       post_report_id = 20
 
@@ -308,7 +308,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
                "^.messages({ reportId: '#{post_report_id}' })"
     end
 
-    @tag :authenticated
+    @tag authenticated: :admin
     test "when action_type is 'reports.updatePostReportNote', gets page", %{conn: conn} do
       post_report_id = 20
 
@@ -331,7 +331,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
                "^.messages({ reportId: '#{post_report_id}' })"
     end
 
-    @tag :authenticated
+    @tag authenticated: :admin
     test "when action_type is 'reports.updateUserReport', gets page", %{conn: conn} do
       user_report_id = 30
 
@@ -354,7 +354,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
                "^.messages({ reportId: '#{user_report_id}' })"
     end
 
-    @tag :authenticated
+    @tag authenticated: :admin
     test "when action_type is 'reports.createUserReportNote', gets page", %{conn: conn} do
       user_report_id = 30
 
@@ -375,7 +375,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
                "^.messages({ reportId: '#{user_report_id}' })"
     end
 
-    @tag :authenticated
+    @tag authenticated: :admin
     test "when action_type is 'reports.updateUserReportNote', gets page", %{conn: conn} do
       user_report_id = 30
 
@@ -398,7 +398,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
                "^.messages({ reportId: '#{user_report_id}' })"
     end
 
-    @tag :authenticated
+    @tag authenticated: :admin
     test "when action_type is 'adminRoles.add', gets page", %{conn: conn} do
       super_admin_role = %{id: 1, name: "Super Administrator"}
 
@@ -421,7 +421,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
                "admin-management.roles({ roleId: '#{super_admin_role.id}' })"
     end
 
-    @tag :authenticated
+    @tag authenticated: :admin
     test "when action_type is 'adminRoles.remove', gets page", %{conn: conn} do
       super_admin_role = %{id: 1, name: "Super Administrator"}
 
@@ -443,7 +443,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert response_moderation_log["action_display_url"] == "admin-management.roles"
     end
 
-    @tag :authenticated
+    @tag authenticated: :admin
     test "when action_type is 'adminRoles.update', gets page", %{conn: conn} do
       super_admin_role = %{id: 1, name: "Super Administrator"}
 
@@ -466,7 +466,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
                "admin-management.roles({ roleId: '#{super_admin_role.id}' })"
     end
 
-    @tag :authenticated
+    @tag authenticated: :admin
     test "when action_type is 'adminRoles.reprioritize', gets page", %{conn: conn} do
       factory_moderation_log =
         build(:moderation_log, %{
@@ -483,7 +483,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert response_moderation_log["action_display_url"] == "admin-management.roles"
     end
 
-    @tag :authenticated
+    @tag authenticated: :admin
     test "when action_type is 'adminSettings.update', gets page", %{conn: conn} do
       factory_moderation_log =
         build(:moderation_log, %{
@@ -500,7 +500,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert response_moderation_log["action_display_url"] == "admin-settings"
     end
 
-    @tag :authenticated
+    @tag authenticated: :admin
     test "when action_type is 'adminSettings.addToBlacklist', gets page", %{conn: conn} do
       factory_moderation_log =
         build(:moderation_log, %{
@@ -520,7 +520,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert response_moderation_log["action_display_url"] == "admin-settings.advanced"
     end
 
-    @tag :authenticated
+    @tag authenticated: :admin
     test "when action_type is 'adminSettings.updateBlacklist', gets page", %{conn: conn} do
       factory_moderation_log =
         build(:moderation_log, %{
@@ -540,7 +540,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert response_moderation_log["action_display_url"] == "admin-settings.advanced"
     end
 
-    @tag :authenticated
+    @tag authenticated: :admin
     test "when action_type is 'adminSettings.deleteFromBlacklist', gets page", %{conn: conn} do
       factory_moderation_log =
         build(:moderation_log, %{
@@ -560,7 +560,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert response_moderation_log["action_display_url"] == "admin-settings.advanced"
     end
 
-    @tag :authenticated
+    @tag authenticated: :admin
     test "when action_type is 'adminSettings.setTheme', gets page", %{conn: conn} do
       factory_moderation_log =
         build(:moderation_log, %{
@@ -577,7 +577,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert response_moderation_log["action_display_url"] == "admin-settings.theme"
     end
 
-    @tag :authenticated
+    @tag authenticated: :admin
     test "when action_type is 'adminSettings.resetTheme', gets page", %{conn: conn} do
       factory_moderation_log =
         build(:moderation_log, %{
@@ -597,7 +597,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert response_moderation_log["action_display_url"] == "admin-settings.theme"
     end
 
-    @tag :authenticated
+    @tag authenticated: :admin
     test "when action_type is 'adminUsers.addRoles', gets page", %{
       conn: conn,
       users: %{user: user}
@@ -623,7 +623,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
                "admin-management.roles({ roleId: '#{super_admin_role.id}' })"
     end
 
-    @tag :authenticated
+    @tag authenticated: :admin
     test "when action_type is 'adminUsers.removeRoles', gets page", %{
       conn: conn,
       users: %{user: user}
@@ -649,7 +649,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
                "admin-management.roles({ roleId: '#{super_admin_role.id}' })"
     end
 
-    @tag :authenticated
+    @tag authenticated: :admin
     test "when action_type is 'userNotes.create', gets page", %{conn: conn, users: %{user: user}} do
       factory_moderation_log =
         build(:moderation_log, %{
@@ -670,7 +670,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
                "profile({ username: '#{user.username}' })"
     end
 
-    @tag :authenticated
+    @tag authenticated: :admin
     test "when action_type is 'userNotes.update', gets page", %{conn: conn, users: %{user: user}} do
       factory_moderation_log =
         build(:moderation_log, %{
@@ -691,7 +691,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
                "profile({ username: '#{user.username}' })"
     end
 
-    @tag :authenticated
+    @tag authenticated: :admin
     test "when action_type is 'userNotes.delete', gets page", %{conn: conn, users: %{user: user}} do
       factory_moderation_log =
         build(:moderation_log, %{
@@ -712,7 +712,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
                "profile({ username: '#{user.username}' })"
     end
 
-    @tag :authenticated
+    @tag authenticated: :admin
     test "when action_type is 'bans.addAddresses', gets page", %{conn: conn} do
       hostname = nil
       banned_address = "127.0.0.1"
@@ -735,7 +735,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert response_moderation_log["action_display_url"] == "admin-management.banned-addresses"
     end
 
-    @tag :authenticated
+    @tag authenticated: :admin
     test "when action_type is 'bans.editAddress', gets page", %{conn: conn} do
       hostname = nil
       banned_address = "127.0.0.1"
@@ -761,7 +761,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
                "admin-management.banned-addresses({ search: '#{banned_address}' })"
     end
 
-    @tag :authenticated
+    @tag authenticated: :admin
     test "when action_type is 'bans.deleteAddress', gets page", %{conn: conn} do
       hostname = nil
       banned_address = "127.0.0.1"
@@ -784,7 +784,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert response_moderation_log["action_display_url"] == "admin-management.banned-addresses"
     end
 
-    @tag :authenticated
+    @tag authenticated: :admin
     test "when action_type is 'bans.ban', gets page", %{conn: conn, users: %{user: user}} do
       ban_expiration_input = ~N[2030-12-31 00:00:00.000]
       ban_expiration_output = "31 Dec 2030"
@@ -808,7 +808,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
                "profile({ username: '#{user.username}' })"
     end
 
-    @tag :authenticated
+    @tag authenticated: :admin
     test "when action_type is 'bans.unban', gets page", %{conn: conn, users: %{user: user}} do
       factory_moderation_log =
         build(:moderation_log, %{
@@ -827,7 +827,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
                "profile({ username: '#{user.username}' })"
     end
 
-    @tag :authenticated
+    @tag authenticated: :admin
     test "when action_type is 'bans.banFromBoards', gets page", %{
       conn: conn,
       users: %{user: user}
@@ -852,7 +852,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert response_moderation_log["action_display_url"] == "^.board-bans"
     end
 
-    @tag :authenticated
+    @tag authenticated: :admin
     test "when action_type is 'bans.unbanFromBoards', gets page", %{
       conn: conn,
       users: %{user: user}
@@ -877,7 +877,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert response_moderation_log["action_display_url"] == "^.board-bans"
     end
 
-    @tag :authenticated
+    @tag authenticated: :admin
     test "when action_type is 'boards.create', gets page", %{conn: conn} do
       board = insert(:board)
 
@@ -899,7 +899,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert response_moderation_log["action_display_url"] == "admin-management.boards"
     end
 
-    @tag :authenticated
+    @tag authenticated: :admin
     test "when action_type is 'boards.update', gets page", %{conn: conn} do
       board = insert(:board)
 
@@ -921,7 +921,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert response_moderation_log["action_display_url"] == "admin-management.boards"
     end
 
-    @tag :authenticated
+    @tag authenticated: :admin
     test "when action_type is 'boards.delete', gets page", %{conn: conn} do
       board = insert(:board)
 
@@ -943,7 +943,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert response_moderation_log["action_display_url"] == "admin-management.boards"
     end
 
-    @tag :authenticated
+    @tag authenticated: :admin
     test "when action_type is 'threads.title', gets page", %{conn: conn, users: %{user: user}} do
       board = insert(:board)
       thread = build(:thread, board: board, user: user)
@@ -970,7 +970,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
                "posts.data({ slug: '#{thread_slug}' })"
     end
 
-    @tag :authenticated
+    @tag authenticated: :admin
     test "when action_type is 'threads.lock', gets page", %{conn: conn, users: %{user: user}} do
       board = insert(:board)
       thread = build(:thread, board: board, user: user)
@@ -997,7 +997,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
                "posts.data({ slug: '#{thread_slug}' })"
     end
 
-    @tag :authenticated
+    @tag authenticated: :admin
     test "when action_type is 'threads.sticky', gets page", %{conn: conn, users: %{user: user}} do
       board = insert(:board)
       thread = build(:thread, board: board, user: user)
@@ -1024,7 +1024,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
                "posts.data({ slug: '#{thread_slug}' })"
     end
 
-    @tag :authenticated
+    @tag authenticated: :admin
     test "when action_type is 'threads.move', gets page", %{conn: conn, users: %{user: user}} do
       board = insert(:board)
       thread = build(:thread, board: board, user: user)
@@ -1058,7 +1058,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
                "posts.data({ slug: '#{thread_slug}' })"
     end
 
-    @tag :authenticated
+    @tag authenticated: :admin
     test "when action_type is 'threads.purge', gets page", %{conn: conn, users: %{user: user}} do
       board = insert(:board)
       thread = build(:thread, board: board, user: user)
@@ -1086,7 +1086,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert response_moderation_log["action_display_url"] == nil
     end
 
-    @tag :authenticated
+    @tag authenticated: :admin
     test "when action_type is 'threads.editPoll', gets page", %{conn: conn, users: %{user: user}} do
       board = insert(:board)
       thread = build(:thread, board: board, user: user)
@@ -1113,7 +1113,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
                "posts.data({ slug: '#{thread_slug}' })"
     end
 
-    @tag :authenticated
+    @tag authenticated: :admin
     test "when action_type is 'threads.createPoll', gets page", %{
       conn: conn,
       users: %{user: user}
@@ -1143,7 +1143,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
                "posts.data({ slug: '#{thread_slug}' })"
     end
 
-    @tag :authenticated
+    @tag authenticated: :admin
     test "when action_type is 'threads.lockPoll', gets page", %{conn: conn, users: %{user: user}} do
       board = insert(:board)
       thread = build(:thread, board: board, user: user)
@@ -1170,7 +1170,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
                "posts.data({ slug: '#{thread_slug}' })"
     end
 
-    @tag :authenticated
+    @tag authenticated: :admin
     test "when action_type is 'posts.update', gets page", %{conn: conn, users: %{user: user}} do
       board = insert(:board)
       thread = build(:thread, board: board, user: user)
@@ -1197,7 +1197,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
                "posts.data({ slug: '#{thread_slug}', start: '1', '#': '#{post_id}' })"
     end
 
-    @tag :authenticated
+    @tag authenticated: :admin
     test "when action_type is 'posts.delete', gets page", %{conn: conn, users: %{user: user}} do
       board = insert(:board)
       thread = build(:thread, board: board, user: user)
@@ -1224,7 +1224,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
                "posts.data({ slug: '#{thread_slug}', start: '1', '#': '#{post_id}' })"
     end
 
-    @tag :authenticated
+    @tag authenticated: :admin
     test "when action_type is 'posts.undelete', gets page", %{conn: conn, users: %{user: user}} do
       board = insert(:board)
       thread = build(:thread, board: board, user: user)
@@ -1251,7 +1251,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
                "posts.data({ slug: '#{thread_slug}', start: '1', '#': '#{post_id}' })"
     end
 
-    @tag :authenticated
+    @tag authenticated: :admin
     test "when action_type is 'posts.purge', gets page", %{conn: conn, users: %{user: user}} do
       board = insert(:board)
       thread = build(:thread, board: board, user: user)
@@ -1278,7 +1278,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
                "posts.data({ slug: '#{thread_slug}' })"
     end
 
-    @tag :authenticated
+    @tag authenticated: :admin
     test "when action_type is 'users.update', gets page", %{conn: conn, users: %{user: user}} do
       factory_moderation_log =
         build(:moderation_log, %{
@@ -1299,7 +1299,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
                "profile({ username: '#{user.username}' })"
     end
 
-    @tag :authenticated
+    @tag authenticated: :admin
     test "when action_type is 'users.deactivate', gets page", %{conn: conn, users: %{user: user}} do
       factory_moderation_log =
         build(:moderation_log, %{
@@ -1320,7 +1320,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
                "profile({ username: '#{user.username}' })"
     end
 
-    @tag :authenticated
+    @tag authenticated: :admin
     test "when action_type is 'users.reactivate', gets page", %{conn: conn, users: %{user: user}} do
       factory_moderation_log =
         build(:moderation_log, %{
@@ -1341,7 +1341,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
                "profile({ username: '#{user.username}' })"
     end
 
-    @tag :authenticated
+    @tag authenticated: :admin
     test "when action_type is 'users.delete', gets page", %{conn: conn, users: %{user: user}} do
       factory_moderation_log =
         build(:moderation_log, %{
@@ -1361,7 +1361,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert response_moderation_log["action_display_url"] == nil
     end
 
-    @tag :authenticated
+    @tag authenticated: :admin
     test "when action_type is 'conversations.delete', gets page", %{
       conn: conn,
       users: %{user: user, admin_user: admin_user}
@@ -1387,7 +1387,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert response_moderation_log["action_display_url"] == nil
     end
 
-    @tag :authenticated
+    @tag authenticated: :admin
     test "when action_type is 'messages.delete', gets page", %{
       conn: conn,
       users: %{user: user, admin_user: admin_user}
@@ -1415,7 +1415,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
   end
 
   describe "page/1, mod_id" do
-    @tag :authenticated
+    @tag authenticated: :admin
     test "given a valid id for 'mod', returns correct moderation_log entry", %{conn: conn} do
       factory_moderation_log =
         build(:moderation_log, %{
@@ -1430,7 +1430,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert compare(response_moderation_log, factory_moderation_log)
     end
 
-    @tag :authenticated
+    @tag authenticated: :admin
     test "given an invalid id for 'mod', returns an empty list", %{conn: conn} do
       invalid_mod_id = 0
       assert conn |> page_response_list(%{"mod" => invalid_mod_id}) |> Enum.empty?() == true
@@ -1438,7 +1438,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
   end
 
   describe "page/1, mod_username" do
-    @tag :authenticated
+    @tag authenticated: :admin
     test "given a valid username for 'mod', returns correct moderation_log entry", %{conn: conn} do
       factory_moderation_log =
         build(:moderation_log, %{
@@ -1454,7 +1454,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert compare(response_moderation_log, factory_moderation_log)
     end
 
-    @tag :authenticated
+    @tag authenticated: :admin
     test "given an invalid string for 'mod', returns an empty list", %{conn: conn} do
       invalid_mod_username = ""
       assert conn |> page_response_list(%{"mod" => invalid_mod_username}) |> Enum.empty?() == true
@@ -1462,7 +1462,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
   end
 
   describe "page/1, action_type" do
-    @tag :authenticated
+    @tag authenticated: :admin
     test "given a valid action_type 'action', returns correct moderation_log entry", %{
       conn: conn,
       users: %{user: user}
@@ -1483,7 +1483,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert compare(response_moderation_log, factory_moderation_log)
     end
 
-    @tag :authenticated
+    @tag authenticated: :admin
     test "given an unpopulated action_type 'action', returns an empty list", %{conn: conn} do
       unpopulated_action_type = "adminBoards.updateCategories"
 
@@ -1491,7 +1491,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
                true
     end
 
-    @tag :authenticated
+    @tag authenticated: :admin
     test "given an invalid action_type 'action', returns an empty list", %{conn: conn} do
       invalid_action_type = ""
 
@@ -1502,7 +1502,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
   end
 
   describe "page/1, action_display_text" do
-    @tag :authenticated
+    @tag authenticated: :admin
     test "given a valid action_display_text 'keyword', returns correct moderation_log entry", %{
       conn: conn
     } do
@@ -1520,7 +1520,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert compare(response_moderation_log, factory_moderation_log)
     end
 
-    @tag :authenticated
+    @tag authenticated: :admin
     test "given an invalid 'keyword', returns an empty list", %{conn: conn} do
       invalid_keyword = ""
       assert conn |> page_response_list(%{"keyword" => invalid_keyword}) |> Enum.empty?() == true
@@ -1542,7 +1542,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       {:ok, logs: logs, number_of_logs: number_of_logs}
     end
 
-    @tag :authenticated
+    @tag authenticated: :admin
     test "given a future 'before date', returns correct moderation_log entries", %{
       conn: conn,
       number_of_logs: number_of_logs
@@ -1561,7 +1561,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert length(response_moderation_log) == number_of_logs
     end
 
-    @tag :authenticated
+    @tag authenticated: :admin
     test "given a past 'before date', returns an empty list", %{conn: conn} do
       two_days_ago = NaiveDateTime.to_string(NaiveDateTime.add(NaiveDateTime.utc_now(), -2, :day))
 
@@ -1574,7 +1574,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert Enum.empty?(response_moderation_log) == true
     end
 
-    @tag :authenticated
+    @tag authenticated: :admin
     test "given a past 'after date', returns correct moderation_log entries", %{conn: conn} do
       two_days_ago = NaiveDateTime.to_string(NaiveDateTime.add(NaiveDateTime.utc_now(), -2, :day))
 
@@ -1589,7 +1589,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert length(response_moderation_log) == 58
     end
 
-    @tag :authenticated
+    @tag authenticated: :admin
     test "given a future 'after date', returns an empty list", %{conn: conn} do
       two_days_from_now =
         NaiveDateTime.to_string(NaiveDateTime.add(NaiveDateTime.utc_now(), 2, :day))
@@ -1603,7 +1603,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert Enum.empty?(response_moderation_log) == true
     end
 
-    @tag :authenticated
+    @tag authenticated: :admin
     test "given a valid date range, returns correct moderation_log entries", %{conn: conn} do
       two_days_ago = NaiveDateTime.to_string(NaiveDateTime.add(NaiveDateTime.utc_now(), -2, :day))
 
@@ -1622,7 +1622,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert length(response_moderation_log) == 58
     end
 
-    @tag :authenticated
+    @tag authenticated: :admin
     test "given an invalid date range, returns an empty list", %{conn: conn} do
       two_days_from_now =
         NaiveDateTime.to_string(NaiveDateTime.add(NaiveDateTime.utc_now(), 2, :day))
@@ -1640,7 +1640,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert Enum.empty?(response_moderation_log) == true
     end
 
-    @tag :authenticated
+    @tag authenticated: :admin
     test "given an valid id and date range, returns correct moderation_log", %{
       conn: conn,
       logs: logs
@@ -1663,7 +1663,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       assert List.first(response_moderation_log)["mod_id"] == first_log.mod_id
     end
 
-    @tag :authenticated
+    @tag authenticated: :admin
     test "given a valid username and date range, returns correct moderation_log", %{
       conn: conn,
       logs: logs

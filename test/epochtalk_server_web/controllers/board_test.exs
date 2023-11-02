@@ -185,6 +185,27 @@ defmodule Test.EpochtalkServerWeb.Controllers.Board do
 
       assert response["name"] == board.name
     end
+
+    @tag authenticated: :admin
+    test "when authenticated as admin, given an existing id at read access, finds board", %{conn: conn, admin_board: admin_board} do
+      response =
+        conn
+        |> get(Routes.board_path(conn, :find, admin_board.id))
+        |> json_response(200)
+
+      assert response["name"] == admin_board.name
+    end
+
+    @tag authenticated: :admin
+    test "when authenticated as admin, given an existing id above read access, errors", %{conn: conn, super_admin_board: super_admin_board} do
+      response =
+        conn
+        |> get(Routes.board_path(conn, :find, super_admin_board.id))
+        |> json_response(404)
+
+      assert response["error"] == "Not Found"
+      assert response["message"] == "Board not found"
+    end
   end
 
   describe "slug_to_id/2" do

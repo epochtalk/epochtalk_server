@@ -72,10 +72,7 @@ defmodule Test.EpochtalkServer.Models.Mention do
       assert result["mentioned_ids"] == []
     end
 
-    @tag :banned
-    test "given a user without acl permission, errors", %{thread: thread} do
-      {:ok, user} = EpochtalkServer.Models.User.by_username("user")
-
+    test "given a user without acl permission, errors", %{thread: thread, users: %{private_user: user}} do
       attrs = %{
         "thread" => thread.id,
         "title" => "title",

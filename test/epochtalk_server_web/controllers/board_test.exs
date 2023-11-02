@@ -148,7 +148,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Board do
       assert response["message"] == "Board not found"
     end
 
-    test "given an existing id, finds a board", %{conn: conn, parent_board: board} do
+    test "when unauthenticated, given an existing id within read access, finds a board", %{conn: conn, parent_board: board} do
       response =
         conn
         |> get(Routes.board_path(conn, :find, board.id))

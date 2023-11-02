@@ -72,7 +72,10 @@ defmodule Test.EpochtalkServer.Models.Mention do
       assert result["mentioned_ids"] == []
     end
 
-    test "given a user without acl permission, errors", %{thread: thread, users: %{private_user: user}} do
+    test "given a user without acl permission, errors", %{
+      thread: thread,
+      users: %{private_user: user}
+    } do
       attrs = %{
         "thread" => thread.id,
         "title" => "title",

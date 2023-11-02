@@ -25,6 +25,16 @@ defmodule Test.Support.ConnCase do
     password: @test_no_login_password
   }
 
+  # private username/email/password from user seed in `mix test` (see mix.exs)
+  @test_private_username "private"
+  @test_private_email "private@test.com"
+  @test_private_password "password"
+  @test_private_user_attrs %{
+    username: @test_private_username,
+    email: @test_private_email,
+    password: @test_private_password
+  }
+
   # username/email/password from user seed in `mix test` (see mix.exs)
   @test_username "user"
   @test_email "user@test.com"
@@ -86,6 +96,7 @@ defmodule Test.Support.ConnCase do
     end
 
     {:ok, no_login_user} = User.by_username(@test_no_login_username)
+    {:ok, private_user} = User.by_username(@test_private_username)
     {:ok, user} = User.by_username(@test_username)
     {:ok, admin_user} = User.by_username(@test_admin_username)
     {:ok, super_admin_user} = User.by_username(@test_super_admin_username)
@@ -96,12 +107,14 @@ defmodule Test.Support.ConnCase do
        [
          users: %{
            no_login_user: no_login_user,
+           private_user: private_user,
            user: user,
            admin_user: admin_user,
            super_admin_user: super_admin_user
          },
          user_attrs: %{
            no_login_user: @test_no_login_user_attrs,
+           private_user: @test_private_user_attrs,
            user: @test_user_attrs,
            admin_user: @test_admin_user_attrs,
            super_admin_user: @test_super_admin_user_attrs
@@ -120,6 +133,17 @@ defmodule Test.Support.ConnCase do
           k_list = [authed_user: user] ++ k_list
           k_list = [token: token] ++ k_list
           k_list = [authed_user_attrs: @test_user_attrs] ++ k_list
+          {:ok, k_list}
+
+        :private ->
+          remember_me = false
+          {:ok, private_user, token, authed_conn} = Session.create(private_user, remember_me, conn)
+
+          {:ok, k_list} = context_updates
+          k_list = [conn: authed_conn] ++ k_list
+          k_list = [authed_user: private_user] ++ k_list
+          k_list = [token: token] ++ k_list
+          k_list = [authed_user_attrs: @test_private_user_attrs] ++ k_list
           {:ok, k_list}
 
         :admin ->

@@ -12,6 +12,10 @@ test_user_username = "user"
 test_user_email = "user@test.com"
 test_user_password = "password"
 
+test_private_user_username = "private"
+test_private_user_email = "private@test.com"
+test_private_user_password = "password"
+
 test_no_login_user_username = "no_login"
 test_no_login_user_email = "no_login@test.com"
 test_no_login_user_password = "password"
@@ -35,6 +39,13 @@ build(:user,
   email: test_user_email,
   password: test_user_password
 )
+
+build(:user,
+  username: test_private_user_username,
+  email: test_private_user_email,
+  password: test_private_user_password
+)
+|> with_role_id(10)
 
 build(:user,
   username: test_no_login_user_username,

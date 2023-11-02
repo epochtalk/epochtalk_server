@@ -30,6 +30,14 @@ defmodule Test.EpochtalkServerWeb.Controllers.Board do
   end
 
   describe "by_category/2" do
+    @tag authenticated: :private
+    test "when authenticated with invalid permissions, raises InvalidPermission error", %{conn: conn} do
+      assert_raise InvalidPermission,
+                   ~r/^Forbidden, invalid permissions to perform this action/,
+                   fn ->
+                     get(conn, Routes.board_path(conn, :by_category))
+                   end
+    end
     test "finds all active boards", %{
       conn: conn,
       category: category,

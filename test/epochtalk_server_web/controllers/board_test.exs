@@ -164,6 +164,27 @@ defmodule Test.EpochtalkServerWeb.Controllers.Board do
       assert response["disable_post_edit"] == board.meta["disable_post_edit"]
       assert response["disable_signature"] == board.meta["disable_signature"]
     end
+
+    @tag :authenticated
+    test "when authenticated, given an existing id above read access, errors", %{conn: conn, admin_board: admin_board} do
+      response =
+        conn
+        |> get(Routes.board_path(conn, :find, admin_board.id))
+        |> json_response(404)
+
+      assert response["error"] == "Not Found"
+      assert response["message"] == "Board not found"
+    end
+
+    @tag :authenticated
+    test "when authenticated, given an existing id at read access, finds board", %{conn: conn, parent_board: board} do
+      response =
+        conn
+        |> get(Routes.board_path(conn, :find, board.id))
+        |> json_response(200)
+
+      assert response["name"] == board.name
+    end
   end
 
   describe "slug_to_id/2" do

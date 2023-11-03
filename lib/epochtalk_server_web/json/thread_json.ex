@@ -18,7 +18,7 @@ defmodule EpochtalkServerWeb.Controllers.ThreadJSON do
   end
 
   @doc """
-  Renders `Thread` for find query.
+  Renders `Thread` for create.
   """
   def create(%{
         thread_data: thread_data
@@ -52,6 +52,7 @@ defmodule EpochtalkServerWeb.Controllers.ThreadJSON do
         user_priority: user_priority,
         write_access: write_access,
         board_banned: board_banned,
+        watched: watched,
         page: page,
         field: field,
         limit: limit,
@@ -65,6 +66,7 @@ defmodule EpochtalkServerWeb.Controllers.ThreadJSON do
         board_id,
         user_priority
       )
+      |> Map.put(:watched, watched)
 
     # format thread data
     user_id = if is_nil(user), do: nil, else: user.id
@@ -157,7 +159,7 @@ defmodule EpochtalkServerWeb.Controllers.ThreadJSON do
 
   defp format_last_post_user_data(thread) do
     thread =
-      if thread.last_post_deleted or thread.last_post_user_deleted do
+      if thread.last_post_deleted || thread.last_post_user_deleted do
         thread
         |> Map.put(:last_deleted, true)
         |> Map.delete(:last_post_username)

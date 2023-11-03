@@ -23,7 +23,7 @@ defmodule Test.Support.Factories.Thread do
       def thread_factory(%{user: user} = attrs) do
         attributes = build(:thread_attributes, attrs)
 
-        Thread.create(attributes, user.id)
+        Thread.create(attributes, user)
         |> case do
           {:ok, thread} -> thread |> Map.put(:attributes, attributes)
         end

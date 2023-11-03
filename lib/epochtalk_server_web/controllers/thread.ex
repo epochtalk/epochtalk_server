@@ -9,12 +9,18 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
   alias EpochtalkServerWeb.Helpers.Validate
   alias EpochtalkServerWeb.Helpers.ACL
   alias EpochtalkServer.Models.Thread
+  alias EpochtalkServer.Models.User
   alias EpochtalkServer.Models.Board
   alias EpochtalkServer.Models.BoardBan
   alias EpochtalkServer.Models.BoardMapping
   alias EpochtalkServer.Models.BoardModerator
   alias EpochtalkServer.Models.UserThreadView
   alias EpochtalkServer.Models.MetadataThread
+  alias EpochtalkServer.Models.WatchBoard
+  alias EpochtalkServer.Models.AutoModeration
+  alias EpochtalkServer.Models.UserActivity
+  alias EpochtalkServer.Models.ThreadSubscription
+  alias EpochtalkServer.Models.Mention
 
   @doc """
   Used to retrieve recent threads
@@ -37,19 +43,114 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
   # TODO(akinsey): Post pre processing, authorizations, image processing, hooks. Things to consider:
   # - does html sanitizer need to run on the front end too
   # - how do we run the same parser/sanitizer on the elixir back end as the node frontend
-  # - processing mentions
   # - does createImageReferences need to be called here? was this missing from the old code?
-  # - does updateUserActivity need to be called here? was this missing from the old code?
   def create(conn, attrs) do
-    with {:auth, user} <- {:auth, Guardian.Plug.current_resource(conn)},
-         {:ok, thread_data} <- Thread.create(attrs, user.id) do
+    # authorization checks
+    with :ok <- ACL.allow!(conn, "threads.create"),
+         board_id <- Validate.cast(attrs, "board_id", :integer, required: true),
+         {:auth, user} <- {:auth, Guardian.Plug.current_resource(conn)},
+         user_priority <- ACL.get_user_priority(conn),
+         {:can_read, {:ok, true}} <-
+           {:can_read, Board.get_read_access_by_id(board_id, user_priority)},
+         {:can_write, {:ok, true}} <-
+           {:can_write, Board.get_write_access_by_id(board_id, user_priority)},
+         {:board_banned, {:ok, false}} <-
+           {:board_banned, BoardBan.is_banned_from_board(user, board_id: board_id)},
+         {:is_active, true} <-
+           {:is_active, User.is_active?(user.id)},
+         {:allows_self_mod, true} <-
+           {:allows_self_mod, Board.allows_self_moderation?(board_id, attrs["moderated"])},
+         {:user_can_moderate, true} <-
+           {:user_can_moderate, handle_check_user_can_moderate(user, attrs["moderated"])},
+         # pre processing
+
+         # pre/parallel hooks
+         attrs <- AutoModeration.moderate(user, attrs),
+         attrs <- Mention.username_to_user_id(user, attrs),
+
+         # thread creation
+         {:ok, thread_data} <- Thread.create(attrs, user) do
+      # post hooks
+      post = Map.get(thread_data, :post)
+
+      # Create Mention notification
+      Mention.handle_user_mention_creation(user, attrs, post)
+
+      # Correct TSV due to mentions converting username to user id,
+      # append post id to attrs since this is thread creation
+      Mention.correct_text_search_vector(attrs |> Map.put("id", post.id))
+
+      # Update user activity
+      UserActivity.update_user_activity(user)
+
+      # Subscribe to Thread (this will check user preferences)
+      ThreadSubscription.create(user, post.thread_id)
+
+      # TODO(akinsey): Implement the following for completion
+      # Authorizations
+      # 1) Check base permissions (done)
+      # 2) Check can read board (done)
+      # 3) Check can write board (done)
+      # 4) Is requester active (done)
+      # 5) check board allows self mod (done)
+      # 6) check user not banned from board (done)
+      # 7) poll authorization (Poll creation should handle this? Yes.)
+      #   - poll creatable permissions check (done in Thread model in handle poll creation)
+      #   - poll validate max answers (done in Poll changeset)
+      #   - poll validate display mode (done in Poll changeset)
+      # 8) can user moderate this thread (done)
+
+      # Pre Processing
+
+      # 1) clean post (html_sanitize_ex)
+      # 2) parse post
+      # 3) handle uploaded images
+      # 4) handle filtering out newbie images
+
+      # Hooks
+      # 1) Auto Moderation moderate (pre) (done)
+
+      # 2) Update user Activity (post) (note: this was missing in old code) (done)
+
+      # 3) Mentions -> convert username to user id (pre) (done)
+      # 4) Mentions -> create mentions (post) (done)
+      # 5) Mentions -> correct text search vector after creating mentions (post) (done)
+
+      # 6) Thread Subscriptions -> Subscribe to Thread (post) (done)
       render(conn, :create, %{thread_data: thread_data})
     else
       {:error, %Ecto.Changeset{} = cs} ->
         ErrorHelpers.render_json_error(conn, 400, cs)
 
+      {:can_read, {:ok, false}} ->
+        ErrorHelpers.render_json_error(
+          conn,
+          403,
+          "Unauthorized, you do not have permission to read"
+        )
+
+      {:can_write, {:ok, false}} ->
+        ErrorHelpers.render_json_error(
+          conn,
+          403,
+          "Unauthorized, you do not have permission to write"
+        )
+
+      {:allows_self_mod, false} ->
+        ErrorHelpers.render_json_error(
+          conn,
+          400,
+          "This board does not allow self moderated threads"
+        )
+
+      {:is_active, false} ->
+        ErrorHelpers.render_json_error(conn, 400, "Account must be active to create threads")
+
       {:auth, nil} ->
         ErrorHelpers.render_json_error(conn, 400, "Not logged in, cannot create thread")
+
+      {:board_banned, {:ok, true}} ->
+        ErrorHelpers.render_json_error(conn, 403, "Unauthorized, you are banned from this board")
 
       _ ->
         ErrorHelpers.render_json_error(conn, 400, "Error, cannot create thread")
@@ -59,7 +160,6 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
   @doc """
   Used to retrieve threads by board
   """
-  # TODO(akinsey): implement thread.byBoard hooks (ex: watchingBoard)
   def by_board(conn, attrs) do
     with board_id <- Validate.cast(attrs, "board_id", :integer, required: true),
          page <- Validate.cast(attrs, "page", :integer, default: 1),
@@ -73,6 +173,7 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
            {:can_read, Board.get_read_access_by_id(board_id, user_priority)},
          {:ok, write_access} <- Board.get_write_access_by_id(board_id, user_priority),
          {:ok, board_banned} <- BoardBan.is_banned_from_board(user, board_id: board_id),
+         {:ok, watching_board} <- WatchBoard.is_watching(user, board_id),
          board_mapping <- BoardMapping.all(),
          board_moderators <- BoardModerator.all(),
          threads <-
@@ -91,6 +192,7 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
         board_id: board_id,
         board_mapping: board_mapping,
         board_moderators: board_moderators,
+        watched: watching_board,
         page: page,
         field: field,
         limit: limit,
@@ -163,6 +265,12 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
   end
 
   ## === Private Helper Functions ===
+
+  defp handle_check_user_can_moderate(user, moderated) do
+    if moderated,
+      do: :ok == ACL.allow!(user, "threads.moderated"),
+      else: true
+  end
 
   defp maybe_update_thread_view_count(conn, thread_id) do
     viewer_id =

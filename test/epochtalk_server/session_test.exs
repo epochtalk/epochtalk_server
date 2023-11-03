@@ -4,11 +4,19 @@ defmodule Test.EpochtalkServer.Session do
   run into concurrency issues when run alongside other tests
   """
   use Test.Support.ConnCase, async: false
+  import Test.Support.Factory
   @one_day_in_seconds 1 * 24 * 60 * 60
   @almost_one_day_in_seconds @one_day_in_seconds - 100
   @four_weeks_in_seconds 4 * 7 * @one_day_in_seconds
   @almost_four_weeks_in_seconds @four_weeks_in_seconds - 100
+  @max_date "9999-12-31 00:00:00"
   alias EpochtalkServer.Session
+  alias EpochtalkServer.Models.Profile
+  alias EpochtalkServer.Models.User
+  alias EpochtalkServer.Models.RoleUser
+  alias EpochtalkServer.Cache.Role, as: RoleCache
+  alias EpochtalkServer.Models.Ban
+  alias EpochtalkServer.Models.BoardModerator
 
   describe "get_resource/2" do
     test "when session_id is invalid, errors", %{users: %{user: user}} do
@@ -267,7 +275,7 @@ defmodule Test.EpochtalkServer.Session do
         Redix.command!(:redix, ["HGET", "user:#{user.id}:baninfo", "ban_expiration"])
 
       assert pre_ban_ban_expiration == nil
-      assert ban_expiration == "9999-12-31 00:00:00"
+      assert ban_expiration == @max_date
       assert pre_ban_baninfo_ttl == -2
       assert baninfo_ttl <= @one_day_in_seconds
       assert baninfo_ttl > @almost_one_day_in_seconds
@@ -299,7 +307,7 @@ defmodule Test.EpochtalkServer.Session do
         Redix.command!(:redix, ["HGET", "user:#{user.id}:baninfo", "ban_expiration"])
 
       assert pre_ban_ban_expiration == nil
-      assert ban_expiration == "9999-12-31 00:00:00"
+      assert ban_expiration == @max_date
       assert pre_ban_baninfo_ttl == -2
       assert baninfo_ttl <= @four_weeks_in_seconds
       assert baninfo_ttl > @almost_four_weeks_in_seconds
@@ -326,7 +334,7 @@ defmodule Test.EpochtalkServer.Session do
         Redix.command!(:redix, ["HGET", "user:#{authed_user.id}:baninfo", "malicious_score"])
 
       assert pre_malicious_malicious_score == nil
-      assert malicious_score == "4.0416"
+      assert malicious_score == "2.0416"
       assert pre_malicious_baninfo_ttl == -2
       assert malicious_score_ttl <= @one_day_in_seconds
       assert malicious_score_ttl > @almost_one_day_in_seconds
@@ -353,10 +361,180 @@ defmodule Test.EpochtalkServer.Session do
         Redix.command!(:redix, ["HGET", "user:#{authed_user.id}:baninfo", "malicious_score"])
 
       assert pre_malicious_malicious_score == nil
-      assert malicious_score == "4.0416"
+      assert malicious_score == "2.0416"
       assert pre_malicious_baninfo_ttl == -2
       assert malicious_score_ttl <= @four_weeks_in_seconds
       assert malicious_score_ttl > @almost_four_weeks_in_seconds
+    end
+  end
+
+  describe "update/1" do
+    test "given invalid user id, errors with :user_not_found" do
+      assert Session.update(0) == {:error, :user_not_found}
+    end
+
+    test "given user id without sessions, errors with :no_sessions", %{
+      users: %{no_login_user: user}
+    } do
+      assert Session.update(user.id) == {:error, :no_sessions}
+    end
+
+    @tag :authenticated
+    test "given a valid user id, updates avatar", %{conn: conn, authed_user: authed_user} do
+      updated_attrs = %{avatar: "image.png"}
+      Profile.upsert(authed_user.id, updated_attrs)
+      Session.update(authed_user.id)
+      # get session_id (jti) from conn
+      session_id = conn.private.guardian_default_claims["jti"]
+      {:ok, resource_user} = Session.get_resource(authed_user.id, session_id)
+      assert resource_user.avatar == updated_attrs.avatar
+    end
+  end
+
+  describe "update/1 role" do
+    @tag :authenticated
+    test "given a valid user id, updates role to admin", %{conn: conn, authed_user: authed_user} do
+      authed_user_role = List.first(authed_user.roles)
+      assert authed_user_role == RoleCache.by_lookup("user")
+      RoleUser.set_admin(authed_user.id)
+      Session.update(authed_user.id)
+      # get session_id (jti) from conn
+      session_id = conn.private.guardian_default_claims["jti"]
+      {:ok, resource_user} = Session.get_resource(authed_user.id, session_id)
+      resource_user_role = List.first(resource_user.roles)
+      assert resource_user_role == RoleCache.by_lookup("superAdministrator")
+    end
+
+    @tag authenticated: :super_admin
+    test "given a valid superAdministrator id, updates role to delete admin + add user", %{
+      conn: conn,
+      authed_user: authed_user
+    } do
+      authed_user_role = List.first(authed_user.roles)
+      super_administrator_role = RoleCache.by_lookup("superAdministrator")
+      assert authed_user_role == super_administrator_role
+      RoleUser.delete(super_administrator_role.id, authed_user.id)
+      Session.update(authed_user.id)
+      # get session_id (jti) from conn
+      session_id = conn.private.guardian_default_claims["jti"]
+      {:ok, resource_user} = Session.get_resource(authed_user.id, session_id)
+      resource_user_role = List.first(resource_user.roles)
+      user_role = RoleCache.by_lookup("user")
+      assert resource_user_role == user_role
+    end
+  end
+
+  describe "update/1 baninfo" do
+    @tag :authenticated
+    test "given a not banned user's id, when user is banned, adds banned role", %{
+      conn: conn,
+      authed_user: authed_user
+    } do
+      # get session_id (jti) from conn
+      session_id = conn.private.guardian_default_claims["jti"]
+      # check that session user does not have banned role
+      {:ok, resource_user} = Session.get_resource(authed_user.id, session_id)
+      assert Enum.any?(resource_user.roles, &(&1.lookup == "banned")) == false
+
+      # ban user
+      Ban.ban(authed_user)
+
+      # check that session user has banned role
+      Session.update(authed_user.id)
+      {:ok, banned_resource_user} = Session.get_resource(authed_user.id, session_id)
+      assert Enum.any?(banned_resource_user.roles, &(&1.lookup == "banned")) == true
+      # check ban is active
+      assert banned_resource_user.ban_expiration == @max_date
+    end
+
+    @tag [authenticated: true, banned: true]
+    test "given a banned user's id, when user is unbanned, deletes banned role", %{
+      conn: conn,
+      authed_user: authed_user
+    } do
+      # get session_id (jti) from conn
+      session_id = conn.private.guardian_default_claims["jti"]
+      # check that session user has banned role
+      {:ok, banned_resource_user} = Session.get_resource(authed_user.id, session_id)
+      assert Enum.any?(banned_resource_user.roles, &(&1.lookup == "banned")) == true
+
+      # unban user
+      Ban.unban_by_user_id(authed_user.id)
+
+      # check that session user does not have banned role
+      Session.update(authed_user.id)
+      {:ok, unbanned_resource_user} = Session.get_resource(authed_user.id, session_id)
+      assert Enum.any?(unbanned_resource_user.roles, &(&1.lookup == "banned")) == false
+      # check ban is expired
+      now = NaiveDateTime.utc_now()
+
+      {:ok, ban_expiration} =
+        unbanned_resource_user.ban_expiration |> NaiveDateTime.from_iso8601()
+
+      assert NaiveDateTime.compare(ban_expiration, now) == :lt
+    end
+
+    @tag :authenticated
+    test "given a not malicious user's id, when user is marked malicious, adds malicious score",
+         %{
+           conn: conn,
+           authed_user: authed_user
+         } do
+      # get session_id (jti) from conn
+      session_id = conn.private.guardian_default_claims["jti"]
+      # check that session user does not have banned role
+      {:ok, resource_user} = Session.get_resource(authed_user.id, session_id)
+      assert Enum.any?(resource_user.roles, &(&1.lookup == "banned")) == false
+      # check user does not have malicious score or ban expiration
+      assert Map.get(resource_user, :malicious_score) == nil
+      assert Map.get(resource_user, :ban_expiration) == nil
+
+      # update user malicious
+      build(:banned_address, ip: "127.0.0.1", weight: 1.0)
+      build(:banned_address, hostname: "localhost", weight: 1.0)
+      User.handle_malicious_user(authed_user, conn.remote_ip)
+
+      # check that session user has banned role
+      Session.update(authed_user.id)
+      {:ok, malicious_resource_user} = Session.get_resource(authed_user.id, session_id)
+      assert Enum.any?(malicious_resource_user.roles, &(&1.lookup == "banned")) == true
+      # check malicious score and ban are active
+      assert malicious_resource_user.malicious_score != nil
+      assert malicious_resource_user.malicious_score > 1
+      assert malicious_resource_user.ban_expiration == @max_date
+    end
+  end
+
+  describe "update/1 moderating" do
+    @tag :authenticated
+    test "when a user is added/removed as moderator, updates moderating", %{
+      conn: conn,
+      authed_user: authed_user
+    } do
+      # get session_id (jti) from conn
+      session_id = conn.private.guardian_default_claims["jti"]
+      # check that session user's moderating list is empty
+      {:ok, resource_user} = Session.get_resource(authed_user.id, session_id)
+      assert Map.get(resource_user, :moderating) == nil
+
+      # create board and add user as moderator
+      board = insert(:board)
+      BoardModerator.add_moderators_by_username(board.id, [authed_user.username])
+
+      # check session user updates with moderating
+      Session.update(authed_user.id)
+      {:ok, moderator_resource_user} = Session.get_resource(authed_user.id, session_id)
+      # check moderating list contains new board
+      assert Map.get(moderator_resource_user, :moderating) == [Integer.to_string(board.id)]
+
+      # remove user as moderator
+      BoardModerator.remove_moderators_by_username(board.id, [authed_user.username])
+
+      # check session user updates with moderating
+      Session.update(authed_user.id)
+      {:ok, moderator_resource_user} = Session.get_resource(authed_user.id, session_id)
+      # check moderating list contains new board
+      assert Map.get(moderator_resource_user, :moderating) == nil
     end
   end
 

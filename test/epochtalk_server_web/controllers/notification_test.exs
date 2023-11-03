@@ -1,7 +1,6 @@
 defmodule Test.EpochtalkServerWeb.Controllers.Notification do
   use Test.Support.ConnCase, async: true
   import Test.Support.Factory
-  alias EpochtalkServer.Models.Mention
   alias EpochtalkServer.Models.Notification
 
   setup %{users: %{user: user, admin_user: admin_user}} do
@@ -20,15 +19,12 @@ defmodule Test.EpochtalkServerWeb.Controllers.Notification do
     post_id = thread_data.post.id
     thread_id = thread_data.post.thread_id
 
-    mention = %{
-      "thread_id" => thread_id,
-      "post_id" => post_id,
-      "mentioner_id" => user.id,
-      "mentionee_id" => admin_user.id
-    }
-
-    # create mention
-    {:ok, mention} = Mention.create(mention)
+    mention = build(:mention, %{
+      thread_id: thread_id,
+      post_id: post_id,
+      mentioner_id: user.id,
+      mentionee_id: admin_user.id
+    })
 
     notification = %{
       "sender_id" => user.id,

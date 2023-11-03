@@ -88,8 +88,8 @@ defmodule EpochtalkServer.Models.Post do
     # set default values and timestamps
     post =
       post
-      |> Map.put(:deleted, false)
-      |> Map.put(:locked, false)
+      |> Map.put(:deleted, attrs["deleted"] || false)
+      |> Map.put(:locked, attrs["locked"] || false)
       |> Map.put(:created_at, now)
       |> Map.put(:updated_at, now)
 
@@ -176,7 +176,9 @@ defmodule EpochtalkServer.Models.Post do
       create(%{
         "thread_id" => post_attrs["thread_id"],
         "user_id" => user_id,
-        "content" => %{title: post_attrs["title"], body: post_attrs["body"]}
+        "content" => %{title: post_attrs["title"], body: post_attrs["body"]},
+        "deleted" => post_attrs["deleted"],
+        "locked" => post_attrs["locked"]
       })
 
   @doc """
@@ -211,7 +213,7 @@ defmodule EpochtalkServer.Models.Post do
       from p in Post,
         select: count(p.id),
         where:
-          p.user_id == ^user_id and p.created_at >= ^range_start and p.created_at <= ^range_end
+          p.user_id == ^user_id and p.created_at > ^range_start and p.created_at <= ^range_end
 
     Repo.one(query)
   end
@@ -354,8 +356,8 @@ defmodule EpochtalkServer.Models.Post do
   Used to correct the text search vector for post after being modified for mentions
   """
   # TODO(akinsey): add tsv column to post, verify this is working
-  @spec fix_text_search_vector(post :: map()) :: {non_neg_integer(), nil}
-  def fix_text_search_vector(post) do
+  @spec fix_text_search_vector(post_attrs :: map()) :: {non_neg_integer(), nil}
+  def fix_text_search_vector(post_attrs) do
     query =
       from p in Post,
         update: [
@@ -366,12 +368,12 @@ defmodule EpochtalkServer.Models.Post do
                   setweight(to_tsvector('simple', COALESCE(?,'')), 'A') ||
                   setweight(to_tsvector('simple', COALESCE(?,'')), 'B')
                 """,
-                ^post.title,
-                ^post.body_original
+                ^post_attrs["title"],
+                ^post_attrs["body_original"]
               )
           ]
         ],
-        where: p.id == ^post.id
+        where: p.id == ^post_attrs["id"]
 
     Repo.update_all(query, [])
   end

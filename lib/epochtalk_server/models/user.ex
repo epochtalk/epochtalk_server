@@ -152,6 +152,25 @@ defmodule EpochtalkServer.Models.User do
   end
 
   @doc """
+  Check if `confirmation_token` is a match for `User`
+  If it is a match, return `true` and delete `confirmation_token` from `User`
+  Otherwise, return `false`
+  """
+  @spec maybe_confirm?(user :: User.t(), token :: String.t()) :: boolean
+  def maybe_confirm?(user, token) do
+    if user.confirmation_token == token do
+      query =
+        from u in User,
+          where: u.id == ^user.id
+
+      Repo.update_all(query, set: [confirmation_token: nil])
+      true
+    else
+      false
+    end
+  end
+
+  @doc """
   Checks if `User` with `username` exists in the database
   """
   @spec with_username_exists?(username :: String.t()) :: true | false
@@ -163,6 +182,32 @@ defmodule EpochtalkServer.Models.User do
   """
   @spec with_email_exists?(email :: String.t()) :: true | false
   def with_email_exists?(email), do: Repo.exists?(from u in User, where: u.email == ^email)
+
+  @doc """
+  Gets a `User` email from the database by `id`
+  """
+  @spec email_by_id(id :: integer) :: email :: String.t() | nil
+  def email_by_id(id) when is_integer(id) do
+    query =
+      from u in User,
+        where: u.id == ^id,
+        select: u.email
+
+    Repo.one(query)
+  end
+
+  @doc """
+  Gets a `User` username from the database by `id`
+  """
+  @spec username_by_id(id :: integer) :: username :: String.t() | nil
+  def username_by_id(id) when is_integer(id) do
+    query =
+      from u in User,
+        where: u.id == ^id,
+        select: u.username
+
+    Repo.one(query)
+  end
 
   # TODO(boka): refactor to combine duplicate code with by_username and create
   @doc """
@@ -183,8 +228,8 @@ defmodule EpochtalkServer.Models.User do
   @doc """
   Returns boolean indicating if `User` account is deleted
   """
-  @spec is_active(id :: non_neg_integer) :: boolean
-  def is_active(id) when is_integer(id) do
+  @spec is_active?(id :: non_neg_integer) :: boolean
+  def is_active?(id) when is_integer(id) do
     query =
       from u in User,
         where: u.id == ^id,
@@ -254,6 +299,22 @@ defmodule EpochtalkServer.Models.User do
       # strip out unneeded sensitive data
       %User{id: u.id, username: u.username, roles: u.roles}
     end)
+  end
+
+  @doc """
+  Gets list of `User` ids given a list of usernames.
+  """
+  @spec ids_from_usernames(usernames :: [String.t()]) :: [t()]
+  def ids_from_usernames([]), do: []
+
+  def ids_from_usernames(usernames = [username | _other_usernames]) when is_binary(username) do
+    query =
+      from u in User,
+        where: u.username in ^usernames,
+        select: [:id, :username]
+
+    query
+    |> Repo.all()
   end
 
   @doc """

@@ -1,4 +1,23 @@
 defmodule EpochtalkServerWeb.CustomErrors do
+  # Auto Moderator Error Handling
+  # credo:disable-for-next-line
+  defmodule AutoModeratorReject do
+    @moduledoc """
+    Exception raised when api request payload is incorrect
+    """
+    @default_message "Post rejected by Auto Moderator"
+    defexception plug_status: 400, message: @default_message
+
+    @impl true
+    def exception(value) do
+      case value do
+        [message: nil] -> %AutoModeratorReject{}
+        [message: message] -> %AutoModeratorReject{message: message}
+        _ -> %AutoModeratorReject{}
+      end
+    end
+  end
+
   # ACL Permissions
   # credo:disable-for-next-line
   defmodule InvalidPermission do
@@ -30,6 +49,7 @@ defmodule EpochtalkServerWeb.CustomErrors do
     def exception(value) do
       case value do
         [] -> %InvalidPayload{}
+        [message: message] -> %InvalidPayload{message: message}
         _ -> %InvalidPayload{message: gen_message(Enum.into(value, %{required: false}))}
       end
     end

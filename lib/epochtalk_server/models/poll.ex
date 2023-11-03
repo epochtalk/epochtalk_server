@@ -109,6 +109,7 @@ defmodule EpochtalkServer.Models.Poll do
       |> validate_naivedatetime(:expiration, after: :utc_now)
       |> validate_number(:max_answers, greater_than: 0, less_than_or_equal_to: poll_answers_len)
       |> validate_length(:question, min: 1, max: 255)
+      |> validate_display_mode()
       |> unique_constraint(:id, name: :polls_pkey)
       |> unique_constraint(:thread_id, name: :polls_thread_id_index)
       |> foreign_key_constraint(:thread_id, name: :polls_thread_id_fkey)
@@ -152,5 +153,21 @@ defmodule EpochtalkServer.Models.Poll do
         preload: [poll_answers: :poll_responses]
 
     Repo.one(query)
+  end
+
+  # === Private Helper Functions ===
+
+  defp validate_display_mode(changeset) do
+    expiration = get_field(changeset, :expiration)
+    display_mode = get_field(changeset, :display_mode)
+
+    if display_mode == :expired && expiration == nil,
+      do:
+        add_error(
+          changeset,
+          :display_mode,
+          "set to 'expired' requires that the poll has an expiration"
+        ),
+      else: changeset
   end
 end

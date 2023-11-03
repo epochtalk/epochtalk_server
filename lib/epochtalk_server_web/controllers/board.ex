@@ -55,6 +55,19 @@ defmodule EpochtalkServerWeb.Controllers.Board do
   end
 
   @doc """
+  Used to retrieve `Board` movelist for moderators
+  """
+  def movelist(conn, _attrs) do
+    with :ok <- ACL.allow!(conn, "boards.moveList"),
+         user_priority <- ACL.get_user_priority(conn),
+         movelist <- Board.movelist(user_priority) do
+      render(conn, :movelist, %{movelist: movelist})
+    else
+      _ -> ErrorHelpers.render_json_error(conn, 400, "Error, cannot fetch board movelist")
+    end
+  end
+
+  @doc """
   Used to convert `Board` slug to id
   """
   def slug_to_id(conn, attrs) do

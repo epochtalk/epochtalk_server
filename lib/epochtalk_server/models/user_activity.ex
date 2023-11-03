@@ -108,7 +108,8 @@ defmodule EpochtalkServer.Models.UserActivity do
           current_period_offset: db_info.registered_at,
           current_period_start: db_info.registered_at,
           remaining_period_activity: 14,
-          user_id: user_id
+          user_id: user_id,
+          total_activity: 0
         }
 
     period_start_unix = to_unix(info.current_period_start)
@@ -161,6 +162,9 @@ defmodule EpochtalkServer.Models.UserActivity do
               :remaining_period_activity,
               info.remaining_period_activity - posts_in_period
             )
+
+      # update current_period_offset to current date/time
+      info = Map.put(info, :current_period_offset, now)
 
       handle_upsert(user_id, info, db_total_activity)
     end

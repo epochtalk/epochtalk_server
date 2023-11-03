@@ -1,6 +1,9 @@
 defmodule EpochtalkServer.Session do
   @one_day_in_seconds 1 * 24 * 60 * 60
   @four_weeks_in_seconds 4 * 7 * @one_day_in_seconds
+  # in redis, if a key exists and has no expiration, its TTL value is -1
+  # if the key does not exist, its TTL value is -2
+  @redis_ttl_no_expire_with_key -1
 
   @moduledoc """
   Manages `User` sessions in Redis. Used by Auth related `User` actions.
@@ -385,11 +388,11 @@ defmodule EpochtalkServer.Session do
   # - or @four_weeks_in_seconds if old and new ttl's are invalid
   defp maybe_extend_ttl(key, new_ttl, old_ttl) do
     cond do
-      old_ttl > -1 ->
+      old_ttl > @redis_ttl_no_expire_with_key ->
         # re-set old expiry only if old expiry was valid and key has no expiry
         Redix.command(:redix, ["EXPIRE", key, old_ttl, "NX"])
 
-      new_ttl > -1 ->
+      new_ttl > @redis_ttl_no_expire_with_key ->
         # if old expiry was invalid, set new expiry only if new expiry is valid and key has no expiry
         Redix.command(:redix, ["EXPIRE", key, new_ttl, "NX"])
 

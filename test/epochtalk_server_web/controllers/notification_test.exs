@@ -42,7 +42,6 @@ defmodule Test.EpochtalkServerWeb.Controllers.Notification do
 
     # create notification associated with mention (for mentions dropdown)
     Notification.create(notification)
-
     :ok
   end
 
@@ -58,13 +57,24 @@ defmodule Test.EpochtalkServerWeb.Controllers.Notification do
     end
 
     @tag :authenticated
-    test "when authenticated, returns number of notifications user has", %{conn: conn} do
+    test "when authenticated as notification sender, returns correct number of notifications user has", %{conn: conn} do
       response =
         conn
         |> get(Routes.notification_path(conn, :counts))
         |> json_response(200)
 
-      assert response["mentions"] == 0
+      assert response["mention"] == 0
+      assert response["message"] == 0
+    end
+
+    @tag authenticated: :admin
+    test "when authenticated as notification receiver, returns correct number of notifications user has", %{conn: conn} do
+      response =
+        conn
+        |> get(Routes.notification_path(conn, :counts))
+        |> json_response(200)
+
+      assert response["mention"] == 1
       assert response["message"] == 0
     end
   end

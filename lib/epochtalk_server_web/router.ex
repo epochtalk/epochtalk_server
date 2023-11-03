@@ -16,6 +16,10 @@ defmodule EpochtalkServerWeb.Router do
     plug Guardian.Plug.VerifyHeader, claims: %{"typ" => "access"}
     # Load the user if either of the verifications worked
     plug Guardian.Plug.LoadResource, allow_blank: true
+    # Track IP address of users making POST, PUT or PATCH requests
+    plug EpochtalkServerWeb.Plugs.TrackIp
+    # Track user last active
+    plug EpochtalkServerWeb.Plugs.UserLastActive
   end
 
   pipeline :enforce_auth do
@@ -26,6 +30,10 @@ defmodule EpochtalkServerWeb.Router do
     plug Guardian.Plug.VerifyHeader, claims: %{"typ" => "access"}
     plug Guardian.Plug.LoadResource, allow_blank: false
     plug Guardian.Plug.EnsureAuthenticated
+    # Track IP address of users making POST, PUT or PATCH requests
+    plug EpochtalkServerWeb.Plugs.TrackIp
+    # Track user last active
+    plug EpochtalkServerWeb.Plugs.UserLastActive
   end
 
   scope "/api", EpochtalkServerWeb.Controllers do
@@ -39,6 +47,7 @@ defmodule EpochtalkServerWeb.Router do
     put "/admin/roles/update", Role, :update
     post "/threads", Thread, :create
     get "/admin/modlog", ModerationLog, :page
+    get "/boards/movelist", Board, :movelist
   end
 
   scope "/api", EpochtalkServerWeb.Controllers do

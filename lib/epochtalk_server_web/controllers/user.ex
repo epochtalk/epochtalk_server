@@ -80,7 +80,7 @@ defmodule EpochtalkServerWeb.Controllers.User do
   defp register_with_verify(conn, attrs) do
     # add confirmation token
     attrs =
-      attrs |> Map.put("confirmation_token", :crypto.strong_rand_bytes(20) |> Base.encode64())
+      attrs |> Map.put("confirmation_token", :crypto.strong_rand_bytes(16) |> Base.encode16())
 
     # create user
     with {:ok, user} <- User.create(attrs),
@@ -115,8 +115,8 @@ defmodule EpochtalkServerWeb.Controllers.User do
   def confirm(conn, %{"username" => username, "token" => token}) do
     # create user
     with {:ok, user} <- User.by_username(username),
-         # check confirmation token
-         {:token_valid, true} <- {:token_valid, user.confirmation_token == token},
+         # submit confirmation token for checking and update user if confirmed
+         {:token_valid, true} <- {:token_valid, User.maybe_confirm?(user, token)},
          # ban if malicious
          {:ok, user} <- User.handle_malicious_user(user, conn.remote_ip),
          # create session

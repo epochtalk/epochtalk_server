@@ -47,10 +47,8 @@ defmodule EpochtalkServer.Mailer do
         email: email,
         id: last_post_id,
         position: last_post_position,
-        thread_author: _thread_author,
         thread_slug: thread_slug,
         title: thread_title,
-        user_id: _user_id,
         username: username
       }) do
     config = Application.get_env(:epochtalk_server, :frontend_config)
@@ -74,6 +72,45 @@ defmodule EpochtalkServer.Mailer do
 
     new()
     |> to({username, email})
+    |> from({website_title, from_address})
+    |> subject("[#{website_title}] New replies to thread #{thread_title}")
+    |> html_body(content)
+    |> deliver()
+    |> handle_delivered_email()
+  end
+
+  @doc """
+  Sends mention notification email
+  """
+  @spec send_mention_notification(email_data :: map) :: {:ok, term} | {:error, term}
+  def send_mention_notification(%{
+        email: email,
+        post_id: post_id,
+        post_position: post_position,
+        post_author: post_author,
+        thread_slug: thread_slug,
+        thread_title: thread_title
+      }) do
+    config = Application.get_env(:epochtalk_server, :frontend_config)
+    frontend_url = config["frontend_url"]
+    website_title = config["website"]["title"]
+    from_address = config["emailer"]["options"]["from_address"]
+
+    thread_url = "#{frontend_url}/threads/#{thread_slug}?start=#{post_position}##{post_id}"
+
+    content =
+      generate_from_base_template(
+        """
+        <h3>#{post_author} mentioned you in the thread "#{thread_title}"</h3>
+        Please visit the link below to view the post you were mentioned in.<br /><br />
+        <a href="#{thread_url}">View Mention</a>
+        <small>Raw thread URL: #{thread_url}</small>
+        """,
+        config
+      )
+
+    new()
+    |> to(email)
     |> from({website_title, from_address})
     |> subject("[#{website_title}] New replies to thread #{thread_title}")
     |> html_body(content)

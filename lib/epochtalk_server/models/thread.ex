@@ -3,6 +3,7 @@ defmodule EpochtalkServer.Models.Thread do
   import Ecto.Changeset
   import Ecto.Query
   alias EpochtalkServer.Repo
+  alias EpochtalkServerWeb.Helpers.ACL
   alias EpochtalkServer.Models.User
   alias EpochtalkServer.Models.Thread
   alias EpochtalkServer.Models.MetadataThread
@@ -115,9 +116,9 @@ defmodule EpochtalkServer.Models.Thread do
   @doc """
   Creates a new `Thread` in the database
   """
-  @spec create(thread_attrs :: map(), user_id :: non_neg_integer) ::
+  @spec create(thread_attrs :: map(), user :: map()) ::
           {:ok, thread :: t()} | {:error, Ecto.Changeset.t()}
-  def create(thread_attrs, user_id) do
+  def create(thread_attrs, user) do
     thread_cs = create_changeset(%Thread{}, thread_attrs)
 
     case Repo.transaction(fn ->
@@ -131,9 +132,9 @@ defmodule EpochtalkServer.Models.Thread do
            # create thread metadata
            MetadataThread.insert(%MetadataThread{thread_id: db_thread.id, views: 0})
            # create poll, if necessary
-           db_poll = handle_create_poll(db_thread.id, thread_attrs["poll"])
+           db_poll = handle_create_poll(db_thread.id, thread_attrs["poll"], user)
            # create post
-           db_post = handle_create_post(db_thread.id, user_id, thread_attrs)
+           db_post = handle_create_post(db_thread.id, thread_attrs, user)
            # return post (preloaded thread) and poll data
            %{post: db_post, poll: db_poll}
          end) do
@@ -158,7 +159,7 @@ defmodule EpochtalkServer.Models.Thread do
 
         hashed_slug = "#{Map.get(thread_attrs, "slug")}-#{hash}"
         thread_attrs = thread_attrs |> Map.put("slug", hashed_slug)
-        create(thread_attrs, user_id)
+        create(thread_attrs, user)
 
       # some other error
       {:error, cs} ->
@@ -397,6 +398,60 @@ defmodule EpochtalkServer.Models.Thread do
       else: {:error, :thread_does_not_exist}
   end
 
+  @doc """
+  Used to get first `Post` data given a `Thread` id
+  """
+  @spec get_first_post_data_by_id(id :: non_neg_integer) ::
+          post_data :: map() | nil
+  def get_first_post_data_by_id(id) when is_integer(id) do
+    query_first_thread_post_data =
+      from p in Post,
+        left_join: t in Thread,
+        on: t.id == p.thread_id,
+        left_join: u in User,
+        on: u.id == p.user_id,
+        where: p.thread_id == ^id,
+        order_by: [p.created_at],
+        limit: 1,
+        select: %{
+          id: p.id,
+          title: p.content["title"],
+          body: p.content["body"],
+          thread_id: p.thread_id,
+          thread_slug: t.slug,
+          username: u.username
+        }
+
+    Repo.one(query_first_thread_post_data)
+  end
+
+  @doc """
+  Used to get first `Post` data given a `Thread` slug
+  """
+  @spec get_first_post_data_by_id(slug :: String.t()) ::
+          post_data :: map() | nil
+  def get_first_post_data_by_slug(slug) when is_binary(slug) do
+    query_first_thread_post_data =
+      from p in Post,
+        left_join: t in Thread,
+        on: t.id == p.thread_id,
+        left_join: u in User,
+        on: u.id == p.user_id,
+        where: t.slug == ^slug,
+        order_by: [p.created_at],
+        limit: 1,
+        select: %{
+          id: p.id,
+          title: p.content["title"],
+          body: p.content["body"],
+          thread_id: p.thread_id,
+          thread_slug: t.slug,
+          username: u.username
+        }
+
+    Repo.one(query_first_thread_post_data)
+  end
+
   ## === Private Helper Functions ===
 
   defp find_shared(initial_query) do
@@ -626,9 +681,12 @@ defmodule EpochtalkServer.Models.Thread do
     |> order_by([tlist], [{^sort_order, field(tlist, ^field)}])
   end
 
-  defp handle_create_poll(_thread_id, nil), do: nil
+  defp handle_create_poll(_thread_id, nil, _user), do: nil
 
-  defp handle_create_poll(thread_id, poll_attrs) when is_map(poll_attrs) do
+  defp handle_create_poll(thread_id, poll_attrs, user) when is_map(poll_attrs) do
+    # check if user has permissions to create poll
+    ACL.allow!(user, "threads.createPoll")
+
     # append thread_id
     poll_attrs = Map.put(poll_attrs, "thread_id", thread_id)
 
@@ -641,10 +699,10 @@ defmodule EpochtalkServer.Models.Thread do
     end
   end
 
-  defp handle_create_post(thread_id, user_id, thread_attrs) do
+  defp handle_create_post(thread_id, thread_attrs, user) do
     post_attrs = %{
       thread_id: thread_id,
-      user_id: user_id,
+      user_id: user.id,
       content: %{title: thread_attrs["title"], body: thread_attrs["body"]}
     }
 

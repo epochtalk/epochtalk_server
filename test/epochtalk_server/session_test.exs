@@ -16,6 +16,7 @@ defmodule Test.EpochtalkServer.Session do
   alias EpochtalkServer.Models.RoleUser
   alias EpochtalkServer.Cache.Role, as: RoleCache
   alias EpochtalkServer.Models.Ban
+  alias EpochtalkServer.Models.BoardModerator
 
   describe "get_resource/2" do
     test "when session_id is invalid, errors", %{users: %{user: user}} do
@@ -388,7 +389,9 @@ defmodule Test.EpochtalkServer.Session do
       {:ok, resource_user} = Session.get_resource(authed_user.id, session_id)
       assert resource_user.avatar == updated_attrs.avatar
     end
+  end
 
+  describe "update/1 role" do
     @tag :authenticated
     test "given a valid user id, updates role to admin", %{conn: conn, authed_user: authed_user} do
       authed_user_role = List.first(authed_user.roles)
@@ -419,7 +422,9 @@ defmodule Test.EpochtalkServer.Session do
       user_role = RoleCache.by_lookup("user")
       assert resource_user_role == user_role
     end
+  end
 
+  describe "update/1 baninfo" do
     @tag :authenticated
     test "given a not banned user's id, when user is banned, adds banned role", %{
       conn: conn,
@@ -462,15 +467,19 @@ defmodule Test.EpochtalkServer.Session do
       assert Enum.any?(unbanned_resource_user.roles, &(&1.lookup == "banned")) == false
       # check ban is expired
       now = NaiveDateTime.utc_now()
-      {:ok, ban_expiration} = unbanned_resource_user.ban_expiration |> NaiveDateTime.from_iso8601()
+
+      {:ok, ban_expiration} =
+        unbanned_resource_user.ban_expiration |> NaiveDateTime.from_iso8601()
+
       assert NaiveDateTime.compare(ban_expiration, now) == :lt
     end
 
     @tag :authenticated
-    test "given a not malicious user's id, when user is marked malicious, adds malicious score", %{
-      conn: conn,
-      authed_user: authed_user
-    } do
+    test "given a not malicious user's id, when user is marked malicious, adds malicious score",
+         %{
+           conn: conn,
+           authed_user: authed_user
+         } do
       # get session_id (jti) from conn
       session_id = conn.private.guardian_default_claims["jti"]
       # check that session user does not have banned role
@@ -494,6 +503,38 @@ defmodule Test.EpochtalkServer.Session do
       assert malicious_resource_user.malicious_score > 1
       assert malicious_resource_user.ban_expiration == @max_date
     end
+  end
+
+  describe "update/1 moderating" do
+    @tag :authenticated
+    test "when a user is added/removed as moderator, updates moderating", %{
+      conn: conn,
+      authed_user: authed_user
+    } do
+      # get session_id (jti) from conn
+      session_id = conn.private.guardian_default_claims["jti"]
+      # check that session user's moderating list is empty
+      {:ok, resource_user} = Session.get_resource(authed_user.id, session_id)
+      assert Map.get(resource_user, :moderating) == nil
+
+      # create board and add user as moderator
+      board = insert(:board)
+      BoardModerator.add_moderators_by_username(board.id, [authed_user.username])
+
+      # check session user updates with moderating
+      Session.update(authed_user.id)
+      {:ok, moderator_resource_user} = Session.get_resource(authed_user.id, session_id)
+      # check moderating list contains new board
+      assert Map.get(moderator_resource_user, :moderating) == [Integer.to_string(board.id)]
+
+      # remove user as moderator
+      BoardModerator.remove_moderators_by_username(board.id, [authed_user.username])
+
+      # check session user updates with moderating
+      Session.update(authed_user.id)
+      {:ok, moderator_resource_user} = Session.get_resource(authed_user.id, session_id)
+      # check moderating list contains new board
+      assert Map.get(moderator_resource_user, :moderating) == nil
     end
   end
 

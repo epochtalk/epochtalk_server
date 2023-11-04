@@ -6,12 +6,14 @@ defmodule Test.Support.Factories.Mention do
 
   defmacro __using__(_opts) do
     quote do
-      def mention_factory(%{
-          thread_id: thread_id,
-          post_id: post_id,
-          mentioner_id: mentioner_id,
-          mentionee_id: mentionee_id
-        } = attrs) do
+      def mention_factory(
+            %{
+              thread_id: thread_id,
+              post_id: post_id,
+              mentioner_id: mentioner_id,
+              mentionee_id: mentionee_id
+            } = attrs
+          ) do
         mention_attributes = %{
           "thread_id" => thread_id,
           "post_id" => post_id,

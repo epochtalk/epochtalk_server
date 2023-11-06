@@ -115,6 +115,16 @@ defmodule Test.Support.ConnCase do
     password: @test_private_password
   }
 
+  # no_login username/email/password from user seed in `mix test` (see mix.exs)
+  @test_no_login_username "no_login"
+  @test_no_login_email "no_login@test.com"
+  @test_no_login_password "password"
+  @test_no_login_user_attrs %{
+    username: @test_no_login_username,
+    email: @test_no_login_email,
+    password: @test_no_login_password
+  }
+
   use ExUnit.CaseTemplate
 
   using do
@@ -155,6 +165,7 @@ defmodule Test.Support.ConnCase do
     {:ok, banned_user} = User.by_username(@test_banned_username)
     {:ok, anonymous_user} = User.by_username(@test_anonymous_username)
     {:ok, private_user} = User.by_username(@test_private_username)
+    {:ok, no_login_user} = User.by_username(@test_no_login_username)
 
     conn = Phoenix.ConnTest.build_conn()
 
@@ -171,7 +182,8 @@ defmodule Test.Support.ConnCase do
            newbie_user: newbie_user,
            banned_user: banned_user,
            anonymous_user: anonymous_user,
-           private_user: private_user
+           private_user: private_user,
+           no_login_user: no_login_user
          },
          user_attrs: %{
            super_admin_user: @test_super_admin_user_attrs,
@@ -183,7 +195,8 @@ defmodule Test.Support.ConnCase do
            newbie_user: @test_newbie_user_attrs,
            banned_user: @test_banned_user_attrs,
            anonymous_user: @test_anonymous_user_attrs,
-           private_user: @test_private_user_attrs
+           private_user: @test_private_user_attrs,
+           no_login_user: @test_no_login_user_attrs
          }
        ]}
 
@@ -322,6 +335,8 @@ defmodule Test.Support.ConnCase do
     context_updates =
       if context[:banned] do
         {:ok, banned_user_changeset} = Ban.ban(banned_user)
+        # update ban info in session
+        Session.update(banned_user.id)
         {:ok, k_list} = context_updates
         {:ok, [banned_user_changeset: banned_user_changeset] ++ k_list}
       else

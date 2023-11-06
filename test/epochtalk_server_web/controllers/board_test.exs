@@ -30,6 +30,17 @@ defmodule Test.EpochtalkServerWeb.Controllers.Board do
   end
 
   describe "by_category/2" do
+    @tag authenticated: :private
+    test "when authenticated with invalid permissions, raises InvalidPermission error", %{
+      conn: conn
+    } do
+      assert_raise InvalidPermission,
+                   ~r/^Forbidden, invalid permissions to perform this action/,
+                   fn ->
+                     get(conn, Routes.board_path(conn, :by_category))
+                   end
+    end
+
     test "finds all active boards", %{
       conn: conn,
       category: category,
@@ -130,7 +141,23 @@ defmodule Test.EpochtalkServerWeb.Controllers.Board do
       assert response["message"] == "Error, board does not exist"
     end
 
-    test "given an existing id, finds a board", %{conn: conn, parent_board: board} do
+    test "when unauthenticated, given an existing id above read access, errors", %{
+      conn: conn,
+      admin_board: admin_board
+    } do
+      response =
+        conn
+        |> get(Routes.board_path(conn, :find, admin_board.id))
+        |> json_response(404)
+
+      assert response["error"] == "Not Found"
+      assert response["message"] == "Board not found"
+    end
+
+    test "when unauthenticated, given an existing id within read access, finds a board", %{
+      conn: conn,
+      parent_board: board
+    } do
       response =
         conn
         |> get(Routes.board_path(conn, :find, board.id))
@@ -145,6 +172,73 @@ defmodule Test.EpochtalkServerWeb.Controllers.Board do
       assert response["disable_self_mod"] == board.meta["disable_self_mod"]
       assert response["disable_post_edit"] == board.meta["disable_post_edit"]
       assert response["disable_signature"] == board.meta["disable_signature"]
+    end
+
+    @tag :authenticated
+    test "when authenticated, given an existing id above read access, errors", %{
+      conn: conn,
+      admin_board: admin_board
+    } do
+      response =
+        conn
+        |> get(Routes.board_path(conn, :find, admin_board.id))
+        |> json_response(404)
+
+      assert response["error"] == "Not Found"
+      assert response["message"] == "Board not found"
+    end
+
+    @tag :authenticated
+    test "when authenticated, given an existing id at read access, finds board", %{
+      conn: conn,
+      parent_board: board
+    } do
+      response =
+        conn
+        |> get(Routes.board_path(conn, :find, board.id))
+        |> json_response(200)
+
+      assert response["name"] == board.name
+    end
+
+    @tag authenticated: :admin
+    test "when authenticated as admin, given an existing id at read access, finds board", %{
+      conn: conn,
+      admin_board: admin_board
+    } do
+      response =
+        conn
+        |> get(Routes.board_path(conn, :find, admin_board.id))
+        |> json_response(200)
+
+      assert response["name"] == admin_board.name
+    end
+
+    @tag authenticated: :admin
+    test "when authenticated as admin, given an existing id above read access, errors", %{
+      conn: conn,
+      super_admin_board: super_admin_board
+    } do
+      response =
+        conn
+        |> get(Routes.board_path(conn, :find, super_admin_board.id))
+        |> json_response(404)
+
+      assert response["error"] == "Not Found"
+      assert response["message"] == "Board not found"
+    end
+
+    @tag authenticated: :super_admin
+    test "when authenticated as super admin, given an existing id at read access, finds board", %{
+      conn: conn,
+      super_admin_board: super_admin_board
+    } do
+      response =
+        conn
+        |> get(Routes.board_path(conn, :find, super_admin_board.id))
+        |> json_response(200)
+
+      assert response["name"] == super_admin_board.name
     end
   end
 

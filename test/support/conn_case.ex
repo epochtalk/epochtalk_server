@@ -155,8 +155,6 @@ defmodule Test.Support.ConnCase do
       Ecto.Adapters.SQL.Sandbox.mode(EpochtalkServer.Repo, {:shared, self()})
     end
 
-    {:ok, user} = User.by_username(@test_username)
-    {:ok, admin_user} = User.by_username(@test_admin_username)
     {:ok, super_admin_user} = User.by_username(@test_super_admin_username)
     {:ok, admin_user} = User.by_username(@test_admin_username)
     {:ok, global_mod_user} = User.by_username(@test_global_mod_username)

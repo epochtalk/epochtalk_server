@@ -447,7 +447,7 @@ defmodule Test.EpochtalkServer.Session do
       assert banned_resource_user.ban_expiration == @max_date
     end
 
-    @tag [authenticated: true, banned: true]
+    @tag [authenticated: :banned, banned: true]
     test "given a banned user's id, when user is unbanned, deletes banned role", %{
       conn: conn,
       authed_user: authed_user

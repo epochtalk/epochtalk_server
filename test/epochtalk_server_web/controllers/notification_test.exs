@@ -1,7 +1,6 @@
 defmodule Test.EpochtalkServerWeb.Controllers.Notification do
-  use Test.Support.ConnCase, async: true
+  use Test.Support.ConnCase, async: false
   import Test.Support.Factory
-  alias EpochtalkServer.Models.Notification
 
   setup %{users: %{user: user, admin_user: admin_user}} do
     board = insert(:board)
@@ -14,31 +13,27 @@ defmodule Test.EpochtalkServerWeb.Controllers.Notification do
       ]
     )
 
-    [thread_data] = build_list(1, :thread, board: board, user: user)
+    thread_data = build(:thread, board: board, user: user)
 
-    post_id = thread_data.post.id
-    thread_id = thread_data.post.thread_id
+    mentions =
+      build_list(2, :mention, %{
+        thread_id: thread_data.post.id,
+        post_id: thread_data.post.thread_id,
+        mentioner_id: user.id,
+        mentionee_id: admin_user.id
+      })
 
-    mention = build(:mention, %{
-      thread_id: thread_id,
-      post_id: post_id,
-      mentioner_id: user.id,
-      mentionee_id: admin_user.id
-    })
-
-    notification = %{
-      "sender_id" => user.id,
-      "receiver_id" => admin_user.id,
-      "type" => "user",
-      "data" => %{
+    Enum.each(mentions, fn mention ->
+      build(:notification, %{
+        mention_id: mention.id,
+        type: "user",
         action: "refreshMentions",
-        mention_id: mention.id
-      }
-    }
+        sender_id: user.id,
+        receiver_id: admin_user.id
+      })
+    end)
 
-    # create notification associated with mention (for mentions dropdown)
-    Notification.create(notification)
-    :ok
+    {:ok, mentions_count: Enum.count(mentions)}
   end
 
   describe "counts/2" do
@@ -53,7 +48,8 @@ defmodule Test.EpochtalkServerWeb.Controllers.Notification do
     end
 
     @tag :authenticated
-    test "when authenticated as notification sender, returns correct number of notifications user has", %{conn: conn} do
+    test "when authenticated as notification sender, returns correct number of notifications user has",
+         %{conn: conn} do
       response =
         conn
         |> get(Routes.notification_path(conn, :counts))
@@ -64,13 +60,28 @@ defmodule Test.EpochtalkServerWeb.Controllers.Notification do
     end
 
     @tag authenticated: :admin
-    test "when authenticated as notification receiver, returns correct number of notifications user has", %{conn: conn} do
+    test "when authenticated as notification receiver, returns correct number of notifications user has",
+         %{conn: conn, mentions_count: mentions_count} do
       response =
         conn
         |> get(Routes.notification_path(conn, :counts))
         |> json_response(200)
 
-      assert response["mention"] == 1
+      assert response["mention"] == mentions_count
+      assert response["message"] == 0
+    end
+
+    @tag authenticated: :admin
+    test "when authenticated as notification receiver and with max parameter set, returns correct number of notifications user has",
+         %{conn: conn} do
+      max_count = 1
+
+      response =
+        conn
+        |> get(Routes.notification_path(conn, :counts), %{max: max_count})
+        |> json_response(200)
+
+      assert response["mention"] == "#{max_count}+"
       assert response["message"] == 0
     end
   end

@@ -40,7 +40,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Notification do
     end
 
     @tag :authenticated
-    test "when authenticated as notification sender, returns correct number of notifications user has",
+    test "when authenticated as notification sender with no notifications, returns no mentions",
          %{conn: conn} do
       response =
         conn
@@ -52,7 +52,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Notification do
     end
 
     @tag authenticated: :admin
-    test "when authenticated as notification receiver, returns correct number of notifications user has",
+    test "when authenticated as notification receiver, returns mentions count",
          %{conn: conn} do
       response =
         conn
@@ -64,7 +64,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Notification do
     end
 
     @tag authenticated: :admin
-    test "when authenticated as notification receiver and notifications exceed max, returns max+",
+    test "when authenticated as notification receiver and notifications exceed default max, returns max+",
          %{conn: conn, users: %{user: user, admin_user: admin_user}, thread_data: thread_data} do
       build(:mention, %{
         thread_id: thread_data.post.id,
@@ -82,7 +82,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Notification do
     end
 
     @tag authenticated: :admin
-    test "when authenticated as notification receiver and with max parameter set, returns correct number of notifications user has",
+    test "when authenticated as notification receiver with max parameter set and notifications exceed max, returns max+",
          %{conn: conn} do
       max_count = @mentions_count - 1
 
@@ -97,7 +97,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Notification do
   end
 
   describe "dismiss/2" do
-    test "when unauthenticated", %{conn: conn} do
+    test "when unauthenticated, returns Unauthorized error", %{conn: conn} do
       response =
         conn
         |> get(Routes.notification_path(conn, :counts))
@@ -108,7 +108,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Notification do
     end
 
     @tag authenticated: :admin
-    test "when authenticated as notification receiver, after dismiss by type, returns correct number of notifications user has",
+    test "when authenticated as notification receiver with no mentions, after dismiss by type, returns no mentions",
          %{conn: conn} do
       dismiss_response =
         conn
@@ -127,7 +127,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Notification do
     end
 
     @tag authenticated: :admin
-    test "when authenticated as notification receiver, after dismiss of incorrect type, returns correct number of notifications user has",
+    test "when authenticated as notification receiver, after dismiss of incorrect type, returns unchanged mentions count",
          %{conn: conn} do
       dismiss_response =
         conn
@@ -146,7 +146,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Notification do
     end
 
     @tag authenticated: :admin
-    test "when authenticated as notification receiver, after dismiss by mention id, returns correct number of notifications user has",
+    test "when authenticated as notification receiver, after dismiss by mention id, returns updated mentions count",
     %{conn: conn, mentions: mentions} do
       Enum.reduce(mentions, @mentions_count, fn mention, count ->
         dismiss_response =

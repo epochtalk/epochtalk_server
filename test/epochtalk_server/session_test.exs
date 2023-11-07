@@ -253,8 +253,8 @@ defmodule Test.EpochtalkServer.Session do
     @tag :banned
     test "without remember me, handles baninfo ttl and ban_expiration (< 1 day ttl)", %{
       conn: conn,
-      user_attrs: %{user: user_attrs},
-      users: %{user: user}
+      user_attrs: %{banned_user: user_attrs},
+      users: %{banned_user: user}
     } do
       pre_ban_baninfo_ttl = Redix.command!(:redix, ["TTL", "user:#{user.id}:baninfo"])
 
@@ -284,8 +284,8 @@ defmodule Test.EpochtalkServer.Session do
     @tag :banned
     test "with remember me, handles baninfo ttl and ban_expiration (< 4 weeks ttl)", %{
       conn: conn,
-      user_attrs: %{user: user_attrs},
-      users: %{user: user}
+      user_attrs: %{banned_user: user_attrs},
+      users: %{banned_user: user}
     } do
       pre_ban_baninfo_ttl = Redix.command!(:redix, ["TTL", "user:#{user.id}:baninfo"])
 
@@ -447,7 +447,7 @@ defmodule Test.EpochtalkServer.Session do
       assert banned_resource_user.ban_expiration == @max_date
     end
 
-    @tag [authenticated: true, banned: true]
+    @tag [authenticated: :banned, banned: true]
     test "given a banned user's id, when user is unbanned, deletes banned role", %{
       conn: conn,
       authed_user: authed_user

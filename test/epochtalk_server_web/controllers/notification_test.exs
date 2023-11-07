@@ -1,5 +1,5 @@
 defmodule Test.EpochtalkServerWeb.Controllers.Notification do
-  use Test.Support.ConnCase, async: false
+  use Test.Support.ConnCase, async: true
   import Test.Support.Factory
 
   @number_of_mentions 99

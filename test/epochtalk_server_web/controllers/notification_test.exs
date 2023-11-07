@@ -72,6 +72,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Notification do
         mentioner_id: user.id,
         mentionee_id: admin_user.id
       })
+
       response =
         conn
         |> get(Routes.notification_path(conn, :counts))
@@ -147,7 +148,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Notification do
 
     @tag authenticated: :admin
     test "when authenticated as notification receiver, after dismiss by mention id, returns updated mentions count",
-    %{conn: conn, mentions: mentions} do
+         %{conn: conn, mentions: mentions} do
       Enum.reduce(mentions, @mentions_count, fn mention, count ->
         dismiss_response =
           conn

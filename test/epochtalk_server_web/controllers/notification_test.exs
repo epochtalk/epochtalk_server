@@ -25,7 +25,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Notification do
         mentionee_id: admin_user.id
       })
 
-    {:ok, mentions_count: @number_of_mentions, mentions: mentions}
+    {:ok, mentions_count: @number_of_mentions, mentions: mentions, thread_data: thread_data}
   end
 
   describe "counts/2" do
@@ -60,6 +60,24 @@ defmodule Test.EpochtalkServerWeb.Controllers.Notification do
         |> json_response(200)
 
       assert response["mention"] == mentions_count
+      assert response["message"] == 0
+    end
+
+    @tag authenticated: :admin
+    test "when authenticated as notification receiver and notifications exceed max, returns max+",
+         %{conn: conn, users: %{user: user, admin_user: admin_user}, thread_data: thread_data} do
+      build(:mention, %{
+        thread_id: thread_data.post.id,
+        post_id: thread_data.post.thread_id,
+        mentioner_id: user.id,
+        mentionee_id: admin_user.id
+      })
+      response =
+        conn
+        |> get(Routes.notification_path(conn, :counts))
+        |> json_response(200)
+
+      assert response["mention"] == "#{@number_of_mentions}+"
       assert response["message"] == 0
     end
 

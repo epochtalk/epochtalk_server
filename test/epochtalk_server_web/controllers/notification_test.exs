@@ -139,39 +139,25 @@ defmodule Test.EpochtalkServerWeb.Controllers.Notification do
 
     @tag authenticated: :admin
     test "when authenticated as notification receiver, after dismiss by user id, returns correct number of notifications user has",
-         %{conn: conn, mentions: mentions} do
-      mention_one_id = Enum.at(mentions, 0).id
-      mention_two_id = Enum.at(mentions, 1).id
+    %{conn: conn, mentions: mentions, mentions_count: mentions_count} do
+      mentions
+      |> Enum.reduce(mentions_count, fn mention, count ->
+        dismiss_response =
+          conn
+          |> post(Routes.notification_path(conn, :dismiss), %{"id" => mention.id})
+          |> json_response(200)
 
-      dismiss_response =
-        conn
-        |> post(Routes.notification_path(conn, :dismiss), %{"id" => mention_one_id})
-        |> json_response(200)
+        assert dismiss_response == %{"success" => true}
 
-      assert dismiss_response == %{"success" => true}
+        response =
+          conn
+          |> get(Routes.notification_path(conn, :counts), %{})
+          |> json_response(200)
 
-      response =
-        conn
-        |> get(Routes.notification_path(conn, :counts), %{})
-        |> json_response(200)
-
-      assert response["mention"] == 1
-      assert response["message"] == 0
-
-      dismiss_response =
-        conn
-        |> post(Routes.notification_path(conn, :dismiss), %{"id" => mention_two_id})
-        |> json_response(200)
-
-      assert dismiss_response == %{"success" => true}
-
-      response =
-        conn
-        |> get(Routes.notification_path(conn, :counts), %{})
-        |> json_response(200)
-
-      assert response["mention"] == 0
-      assert response["message"] == 0
+        assert response["mention"] == count - 1
+        assert response["message"] == 0
+        count - 1
+      end)
     end
   end
 end

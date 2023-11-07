@@ -100,7 +100,6 @@ defmodule Test.EpochtalkServerWeb.Controllers.Notification do
     @tag authenticated: :admin
     test "when authenticated as notification receiver, after dismiss by type, returns correct number of notifications user has",
          %{conn: conn} do
-
       dismiss_response =
         conn
         |> post(Routes.notification_path(conn, :dismiss), %{"type" => "mention"})
@@ -120,7 +119,6 @@ defmodule Test.EpochtalkServerWeb.Controllers.Notification do
     @tag authenticated: :admin
     test "when authenticated as notification receiver, after dismiss of incorrect type, returns correct number of notifications user has",
          %{conn: conn} do
-
       dismiss_response =
         conn
         |> post(Routes.notification_path(conn, :dismiss), %{"type" => "message"})
@@ -137,12 +135,12 @@ defmodule Test.EpochtalkServerWeb.Controllers.Notification do
       assert response["message"] == 0
     end
 
-
     @tag authenticated: :admin
     test "when authenticated as notification receiver, after dismiss by user id, returns correct number of notifications user has",
          %{conn: conn, mentions: mentions} do
       mention_one_id = Enum.at(mentions, 0).id
       mention_two_id = Enum.at(mentions, 1).id
+
       dismiss_response =
         conn
         |> post(Routes.notification_path(conn, :dismiss), %{"id" => mention_one_id})
@@ -173,7 +171,5 @@ defmodule Test.EpochtalkServerWeb.Controllers.Notification do
       assert response["mention"] == 0
       assert response["message"] == 0
     end
-
   end
-
 end

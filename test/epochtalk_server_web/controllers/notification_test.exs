@@ -148,8 +148,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Notification do
     @tag authenticated: :admin
     test "when authenticated as notification receiver, after dismiss by mention id, returns correct number of notifications user has",
     %{conn: conn, mentions: mentions, mentions_count: mentions_count} do
-      mentions
-      |> Enum.reduce(mentions_count, fn mention, count ->
+      Enum.reduce(mentions, mentions_count, fn mention, count ->
         dismiss_response =
           conn
           |> post(Routes.notification_path(conn, :dismiss), %{"id" => mention.id})

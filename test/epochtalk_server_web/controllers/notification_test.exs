@@ -26,7 +26,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Notification do
     Enum.each(mentions, fn mention ->
       build(:notification, %{
         mention_id: mention.id,
-        type: "user",
+        type: "mention",
         action: "refreshMentions",
         sender_id: user.id,
         receiver_id: admin_user.id
@@ -85,4 +85,58 @@ defmodule Test.EpochtalkServerWeb.Controllers.Notification do
       assert response["message"] == 0
     end
   end
+
+  describe "dismiss/2" do
+    test "when unauthenticated", %{conn: conn} do
+      response =
+        conn
+        |> get(Routes.notification_path(conn, :counts))
+        |> json_response(401)
+
+      assert response["error"] == "Unauthorized"
+      assert response["message"] == "No resource found"
+    end
+
+
+    @tag authenticated: :admin
+    test "when authenticated as notification receiver, after dismiss, returns correct number of notifications user has",
+         %{conn: conn} do
+
+      dismiss_response =
+        conn
+        |> post(Routes.notification_path(conn, :dismiss), %{"type" => "mention"})
+        |> json_response(200)
+
+      assert dismiss_response == %{"success" => true}
+
+      response =
+        conn
+        |> get(Routes.notification_path(conn, :counts), %{})
+        |> json_response(200)
+
+      assert response["mention"] == 0
+      assert response["message"] == 0
+    end
+
+    @tag authenticated: :admin
+    test "when authenticated as notification receiver, after dismiss of incorrect type, returns correct number of notifications user has",
+         %{conn: conn} do
+
+      dismiss_response =
+        conn
+        |> post(Routes.notification_path(conn, :dismiss), %{"type" => "message"})
+        |> json_response(200)
+
+      assert dismiss_response == %{"success" => true}
+
+      response =
+        conn
+        |> get(Routes.notification_path(conn, :counts), %{})
+        |> json_response(200)
+
+      assert response["mention"] == 2
+      assert response["message"] == 0
+    end
+  end
+
 end

@@ -33,7 +33,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Notification do
       })
     end)
 
-    {:ok, mentions_count: Enum.count(mentions)}
+    {:ok, mentions_count: Enum.count(mentions), mentions: mentions}
   end
 
   describe "counts/2" do
@@ -97,9 +97,8 @@ defmodule Test.EpochtalkServerWeb.Controllers.Notification do
       assert response["message"] == "No resource found"
     end
 
-
     @tag authenticated: :admin
-    test "when authenticated as notification receiver, after dismiss, returns correct number of notifications user has",
+    test "when authenticated as notification receiver, after dismiss by type, returns correct number of notifications user has",
          %{conn: conn} do
 
       dismiss_response =
@@ -137,6 +136,44 @@ defmodule Test.EpochtalkServerWeb.Controllers.Notification do
       assert response["mention"] == 2
       assert response["message"] == 0
     end
+
+
+    @tag authenticated: :admin
+    test "when authenticated as notification receiver, after dismiss by user id, returns correct number of notifications user has",
+         %{conn: conn, mentions: mentions} do
+      mention_one_id = Enum.at(mentions, 0).id
+      mention_two_id = Enum.at(mentions, 1).id
+      dismiss_response =
+        conn
+        |> post(Routes.notification_path(conn, :dismiss), %{"id" => mention_one_id})
+        |> json_response(200)
+
+      assert dismiss_response == %{"success" => true}
+
+      response =
+        conn
+        |> get(Routes.notification_path(conn, :counts), %{})
+        |> json_response(200)
+
+      assert response["mention"] == 1
+      assert response["message"] == 0
+
+      dismiss_response =
+        conn
+        |> post(Routes.notification_path(conn, :dismiss), %{"id" => mention_two_id})
+        |> json_response(200)
+
+      assert dismiss_response == %{"success" => true}
+
+      response =
+        conn
+        |> get(Routes.notification_path(conn, :counts), %{})
+        |> json_response(200)
+
+      assert response["mention"] == 0
+      assert response["message"] == 0
+    end
+
   end
 
 end

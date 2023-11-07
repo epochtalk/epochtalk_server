@@ -25,16 +25,6 @@ defmodule Test.EpochtalkServerWeb.Controllers.Notification do
         mentionee_id: admin_user.id
       })
 
-    Enum.each(mentions, fn mention ->
-      build(:notification, %{
-        mention_id: mention.id,
-        type: "mention",
-        action: "refreshMentions",
-        sender_id: user.id,
-        receiver_id: admin_user.id
-      })
-    end)
-
     {:ok, mentions_count: @number_of_mentions, mentions: mentions}
   end
 

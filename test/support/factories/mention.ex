@@ -23,7 +23,16 @@ defmodule Test.Support.Factories.Mention do
 
         Mention.create(mention_attributes)
         |> case do
-          {:ok, mention} -> mention
+
+          {:ok, mention} ->
+            build(:notification, %{
+              mention_id: mention.id,
+              type: "mention",
+              action: "refreshMentions",
+              sender_id: mentioner_id,
+              receiver_id: mentionee_id
+            })
+            mention
         end
       end
     end

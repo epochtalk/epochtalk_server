@@ -2,6 +2,8 @@ defmodule Test.EpochtalkServerWeb.Controllers.Notification do
   use Test.Support.ConnCase, async: false
   import Test.Support.Factory
 
+  @number_of_mentions 99
+
   setup %{users: %{user: user, admin_user: admin_user}} do
     board = insert(:board)
     category = insert(:category)
@@ -16,7 +18,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Notification do
     thread_data = build(:thread, board: board, user: user)
 
     mentions =
-      build_list(2, :mention, %{
+      build_list(@number_of_mentions, :mention, %{
         thread_id: thread_data.post.id,
         post_id: thread_data.post.thread_id,
         mentioner_id: user.id,
@@ -33,7 +35,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Notification do
       })
     end)
 
-    {:ok, mentions_count: Enum.count(mentions), mentions: mentions}
+    {:ok, mentions_count: @number_of_mentions, mentions: mentions}
   end
 
   describe "counts/2" do

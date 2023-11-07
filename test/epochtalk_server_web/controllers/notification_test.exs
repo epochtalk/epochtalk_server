@@ -66,7 +66,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Notification do
     @tag authenticated: :admin
     test "when authenticated as notification receiver and with max parameter set, returns correct number of notifications user has",
          %{conn: conn} do
-      max_count = 1
+      max_count = @number_of_mentions - 1
 
       response =
         conn

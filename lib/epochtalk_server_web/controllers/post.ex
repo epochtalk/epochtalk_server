@@ -46,7 +46,7 @@ defmodule EpochtalkServerWeb.Controllers.Post do
          post_max_length <-
            Application.get_env(:epochtalk_server, :frontend_config)["post_max_length"],
          thread_id <- Validate.cast(attrs, "thread_id", :integer, required: true),
-         _title <-
+         title <-
            Validate.cast(attrs, "title", :string, required: true, max: @max_post_title_length),
          _body <- Validate.cast(attrs, "body", :string, required: true, max: post_max_length),
          user_priority <- ACL.get_user_priority(conn),
@@ -62,14 +62,16 @@ defmodule EpochtalkServerWeb.Controllers.Post do
            {:board_banned, BoardBan.is_banned_from_board(user, thread_id: thread_id)},
          attrs <- AutoModeration.moderate(user, attrs),
          attrs <- Mention.username_to_user_id(user, attrs),
+         stripped_title <- HtmlSanitizeEx.strip_tags(title),
+         attrs <- Map.put(attrs, "title", stripped_title),
          # TODO(akinsey): Implement the following for completion
          # Plugins
          # 1) Track IP (done)
 
          # Pre Processing
 
-         # 1) clean post (html_sanitize_ex)
-         # 2) parse post
+         # 1) clean post title (html_sanitize_ex) (done)
+         # 2) parse/clean post body
          # 3) handle uploaded images
          # 4) handle filtering out newbie images
 

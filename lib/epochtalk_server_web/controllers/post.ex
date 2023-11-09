@@ -8,6 +8,7 @@ defmodule EpochtalkServerWeb.Controllers.Post do
   alias EpochtalkServerWeb.ErrorHelpers
   alias EpochtalkServerWeb.Helpers.Validate
   alias EpochtalkServerWeb.Helpers.ACL
+  alias EpochtalkServerWeb.Helpers.Sanitize
   alias EpochtalkServer.Models.Post
   alias EpochtalkServer.Models.Poll
   alias EpochtalkServer.Models.Thread
@@ -62,8 +63,7 @@ defmodule EpochtalkServerWeb.Controllers.Post do
            {:board_banned, BoardBan.is_banned_from_board(user, thread_id: thread_id)},
          attrs <- AutoModeration.moderate(user, attrs),
          attrs <- Mention.username_to_user_id(user, attrs),
-         stripped_title <- HtmlSanitizeEx.strip_tags(title),
-         attrs <- Map.put(attrs, "title", stripped_title),
+         attrs <- Sanitize.strip_html_from_title(title, attrs),
          # TODO(akinsey): Implement the following for completion
          # Plugins
          # 1) Track IP (done)

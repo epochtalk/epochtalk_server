@@ -8,6 +8,7 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
   alias EpochtalkServerWeb.ErrorHelpers
   alias EpochtalkServerWeb.Helpers.Validate
   alias EpochtalkServerWeb.Helpers.ACL
+  alias EpochtalkServerWeb.Helpers.Sanitize
   alias EpochtalkServer.Models.Thread
   alias EpochtalkServer.Models.User
   alias EpochtalkServer.Models.Board
@@ -67,6 +68,7 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
          # pre/parallel hooks
          attrs <- AutoModeration.moderate(user, attrs),
          attrs <- Mention.username_to_user_id(user, attrs),
+         attrs <- Sanitize.strip_html_from_title(attrs["title"], attrs),
 
          # thread creation
          {:ok, thread_data} <- Thread.create(attrs, user) do

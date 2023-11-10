@@ -49,7 +49,7 @@ defmodule EpochtalkServerWeb.Controllers.Post do
          thread_id <- Validate.cast(attrs, "thread_id", :integer, required: true),
          title <-
            Validate.cast(attrs, "title", :string, required: true, max: @max_post_title_length),
-         _body <- Validate.cast(attrs, "body", :string, required: true, max: post_max_length),
+         body <- Validate.cast(attrs, "body", :string, required: true, max: post_max_length),
          user_priority <- ACL.get_user_priority(conn),
          {:bypass_lock, true} <-
            {:bypass_lock, can_authed_user_bypass_thread_lock(user, thread_id)},
@@ -64,6 +64,7 @@ defmodule EpochtalkServerWeb.Controllers.Post do
          attrs <- AutoModeration.moderate(user, attrs),
          attrs <- Mention.username_to_user_id(user, attrs),
          attrs <- Sanitize.strip_html_from_title(title, attrs),
+         attrs <- Sanitize.strip_html_from_body(body, attrs),
          # TODO(akinsey): Implement the following for completion
          # Plugins
          # 1) Track IP (done)

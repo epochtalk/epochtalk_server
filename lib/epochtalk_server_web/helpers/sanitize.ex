@@ -4,7 +4,7 @@ defmodule EpochtalkServerWeb.Helpers.Sanitize do
   """
 
   @doc """
-  Used to strip html from `Thread` or `Post` title
+  Used to sanitize html from `Thread` or `Post` title
 
   ## Example
       iex> alias EpochtalkServerWeb.Helpers.Sanitize
@@ -17,7 +17,7 @@ defmodule EpochtalkServerWeb.Helpers.Sanitize do
     do: Map.put(attrs, "title", HtmlSanitizeEx.strip_tags(title))
 
   @doc """
-  Used to strip html from `Message` subject
+  Used to sanitize html from `Message` subject
 
   ## Example
       iex> alias EpochtalkServerWeb.Helpers.Sanitize

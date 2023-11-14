@@ -9,6 +9,7 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
   alias EpochtalkServerWeb.Helpers.Validate
   alias EpochtalkServerWeb.Helpers.ACL
   alias EpochtalkServerWeb.Helpers.Sanitize
+  alias EpochtalkServerWeb.Helpers.Parse
   alias EpochtalkServer.Models.Thread
   alias EpochtalkServer.Models.User
   alias EpochtalkServer.Models.Board
@@ -69,6 +70,7 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
          attrs <- AutoModeration.moderate(user, attrs),
          attrs <- Mention.username_to_user_id(user, attrs),
          attrs <- Sanitize.html_from_title(attrs["title"], attrs),
+         attrs <- Parse.markdown_within_body(attrs["body"], attrs),
          attrs <- Sanitize.html_from_body(attrs["body"], attrs),
 
          # thread creation

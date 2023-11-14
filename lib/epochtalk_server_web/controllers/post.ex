@@ -9,6 +9,7 @@ defmodule EpochtalkServerWeb.Controllers.Post do
   alias EpochtalkServerWeb.Helpers.Validate
   alias EpochtalkServerWeb.Helpers.ACL
   alias EpochtalkServerWeb.Helpers.Sanitize
+  alias EpochtalkServerWeb.Helpers.Parse
   alias EpochtalkServer.Models.Post
   alias EpochtalkServer.Models.Poll
   alias EpochtalkServer.Models.Thread
@@ -47,9 +48,9 @@ defmodule EpochtalkServerWeb.Controllers.Post do
          post_max_length <-
            Application.get_env(:epochtalk_server, :frontend_config)["post_max_length"],
          thread_id <- Validate.cast(attrs, "thread_id", :integer, required: true),
-         title <-
+         _title <-
            Validate.cast(attrs, "title", :string, required: true, max: @max_post_title_length),
-         body <- Validate.cast(attrs, "body", :string, required: true, max: post_max_length),
+         _body <- Validate.cast(attrs, "body", :string, required: true, max: post_max_length),
          user_priority <- ACL.get_user_priority(conn),
          {:bypass_lock, true} <-
            {:bypass_lock, can_authed_user_bypass_thread_lock(user, thread_id)},
@@ -63,8 +64,9 @@ defmodule EpochtalkServerWeb.Controllers.Post do
            {:board_banned, BoardBan.is_banned_from_board(user, thread_id: thread_id)},
          attrs <- AutoModeration.moderate(user, attrs),
          attrs <- Mention.username_to_user_id(user, attrs),
-         attrs <- Sanitize.html_from_title(title, attrs),
-         attrs <- Sanitize.html_from_body(body, attrs),
+         attrs <- Sanitize.html_from_title(attrs["title"], attrs),
+         attrs <- Parse.markdown_within_body(attrs["body"], attrs),
+         attrs <- Sanitize.html_from_body(attrs["body"], attrs),
          # TODO(akinsey): Implement the following for completion
          # Plugins
          # 1) Track IP (done)

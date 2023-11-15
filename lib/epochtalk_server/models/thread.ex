@@ -703,7 +703,7 @@ defmodule EpochtalkServer.Models.Thread do
     post_attrs = %{
       thread_id: thread_id,
       user_id: user.id,
-      content: %{title: thread_attrs["title"], body: thread_attrs["body"]}
+      content: %{title: thread_attrs["title"], body: thread_attrs["body"],  body_html: thread_attrs["body_html"]}
     }
 
     case Post.create(post_attrs) do

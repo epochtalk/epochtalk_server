@@ -4,30 +4,44 @@ defmodule EpochtalkServerWeb.Helpers.Sanitize do
   """
 
   @doc """
-  Used to sanitize html from `Thread` or `Post` title
+  Used to sanitize html and entities from `Thread` or `Post` title
 
   ## Example
       iex> alias EpochtalkServerWeb.Helpers.Sanitize
-      iex> attrs = %{"title" => "<strong>Hello World</strong><br /><script></script><a href='google.com'></a>"}
-      iex> Sanitize.html_from_title(attrs["title"], attrs)
-      %{"title" => "Hello World"}
+      iex> attrs = %{"title" => "&nbsp;<strong>Hello World</strong><br /><script></script><a href='google.com'></a>"}
+      iex> Sanitize.html_and_entities_from_title(attrs["title"], attrs)
+      %{"title" => "&#38;nbsp;&lt;strong&gt;Hello World&lt;/strong&gt;&lt;br /&gt;&lt;script&gt;&lt;/script&gt;&lt;a href='google.com'&gt;&lt;/a&gt;"}
   """
-  @spec html_from_title(title :: String.t(), attrs :: map) :: map()
-  def html_from_title(title, attrs) when is_binary(title) and is_map(attrs),
-    do: Map.put(attrs, "title", HtmlSanitizeEx.strip_tags(title))
+  @spec html_and_entities_from_title(title :: String.t(), attrs :: map) :: map()
+  def html_and_entities_from_title(title, attrs) when is_binary(title) and is_map(attrs) do
+    sanitized_title =
+      title
+      |> String.replace(~r/(?:&)/, "&#38;")
+      |> String.replace(~r/(?:<)/, "&lt;")
+      |> String.replace(~r/(?:>)/, "&gt;")
+
+    Map.put(attrs, "title", sanitized_title)
+  end
 
   @doc """
   Used to sanitize html from `Message` subject
 
   ## Example
       iex> alias EpochtalkServerWeb.Helpers.Sanitize
-      iex> attrs = %{"subject" => "<strong>Hey this is</strong><br /> <script>a</script> <a href='google.com'>message</a>"}
-      iex> Sanitize.html_from_subject(attrs["subject"], attrs)
-      %{"subject" => "Hey this is a message"}
+      iex> attrs = %{"subject" => "&nbsp;<strong>Hello World</strong><br /><script></script><a href='google.com'></a>"}
+      iex> Sanitize.html_and_entities_from_subject(attrs["subject"], attrs)
+      %{"subject" => "&#38;nbsp;&lt;strong&gt;Hello World&lt;/strong&gt;&lt;br /&gt;&lt;script&gt;&lt;/script&gt;&lt;a href='google.com'&gt;&lt;/a&gt;"}
   """
-  @spec html_from_subject(subject :: String.t(), attrs :: map) :: map()
-  def html_from_subject(subject, attrs) when is_binary(subject) and is_map(attrs),
-    do: Map.put(attrs, "subject", HtmlSanitizeEx.strip_tags(subject))
+  @spec html_and_entities_from_subject(subject :: String.t(), attrs :: map) :: map()
+  def html_and_entities_from_subject(subject, attrs) when is_binary(subject) and is_map(attrs) do
+    sanitized_subjecet =
+      subject
+      |> String.replace(~r/(?:&)/, "&#38;")
+      |> String.replace(~r/(?:<)/, "&lt;")
+      |> String.replace(~r/(?:>)/, "&gt;")
+
+    Map.put(attrs, "subject", sanitized_subjecet)
+  end
 
   @doc """
   Used to sanitize all html except basic formatting html from `Thread` or `Post` body

@@ -176,7 +176,11 @@ defmodule EpochtalkServer.Models.Post do
       create(%{
         "thread_id" => post_attrs["thread_id"],
         "user_id" => user_id,
-        "content" => %{title: post_attrs["title"], body: post_attrs["body"], body_html: post_attrs["body_html"]},
+        "content" => %{
+          title: post_attrs["title"],
+          body: post_attrs["body"],
+          body_html: post_attrs["body_html"]
+        },
         "deleted" => post_attrs["deleted"],
         "locked" => post_attrs["locked"]
       })

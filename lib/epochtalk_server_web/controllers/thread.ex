@@ -70,9 +70,8 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
          attrs <- AutoModeration.moderate(user, attrs),
          attrs <- Mention.username_to_user_id(user, attrs),
          attrs <- Sanitize.html_and_entities_from_title(attrs["title"], attrs),
+         attrs <- Sanitize.html_and_entities_from_body(attrs["body"], attrs),
          attrs <- Parse.markdown_within_body(attrs["body"], attrs),
-         attrs <- Sanitize.html_from_body(attrs["body"], attrs),
-
          # thread creation
          {:ok, thread_data} <- Thread.create(attrs, user) do
       # post hooks

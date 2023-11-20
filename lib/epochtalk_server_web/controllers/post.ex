@@ -65,15 +65,15 @@ defmodule EpochtalkServerWeb.Controllers.Post do
          attrs <- AutoModeration.moderate(user, attrs),
          attrs <- Mention.username_to_user_id(user, attrs),
          attrs <- Sanitize.html_and_entities_from_title(attrs["title"], attrs),
+         attrs <- Sanitize.html_and_entities_from_body(attrs["body"], attrs),
          attrs <- Parse.markdown_within_body(attrs["body"], attrs),
-         attrs <- Sanitize.html_from_body(attrs["body"], attrs),
          # TODO(akinsey): Implement the following for completion
          # Plugins
          # 1) Track IP (done)
 
          # Pre Processing
 
-         # 1) clean post title (html_sanitize_ex) (done)
+         # 1) clean post title (done)
          # 2) parse/clean post body
          # 3) handle uploaded images
          # 4) handle filtering out newbie images

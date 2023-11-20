@@ -106,7 +106,7 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
 
       # Pre Processing
 
-      # 1) clean post (html_sanitize_ex)
+      # 1) clean post
       # 2) parse post
       # 3) handle uploaded images
       # 4) handle filtering out newbie images

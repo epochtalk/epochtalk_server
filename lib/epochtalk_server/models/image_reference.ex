@@ -18,7 +18,6 @@ defmodule EpochtalkServer.Models.ImageReference do
           type: String.t() | nil,
           checksum: String.t() | nil,
           expiration: NaiveDateTime.t() | nil,
-          confirmed: boolean | false,
           user: User.t() | term(),
           post: Post.t() | term(),
           message: Message.t() | term(),
@@ -32,7 +31,6 @@ defmodule EpochtalkServer.Models.ImageReference do
     field :type, :string
     field :checksum, :string
     field :expiration, :naive_datetime
-    field :confirmed, :boolean, default: false
     field :created_at, :naive_datetime
     many_to_many :user, User
     many_to_many :post, Post
@@ -58,7 +56,6 @@ defmodule EpochtalkServer.Models.ImageReference do
       :type,
       :checksum,
       :expiration,
-      :confirmed,
       :created_at,
       :user,
       :post,

@@ -12,7 +12,7 @@ defmodule EpochtalkServer.Models.ImageReference do
   """
   @type t :: %__MODULE__{
           id: non_neg_integer | nil,
-          uid: String.t() | nil,
+          uuid: String.t() | nil,
           url: String.t() | nil,
           length: non_neg_integer | nil,
           type: String.t() | nil,
@@ -26,7 +26,7 @@ defmodule EpochtalkServer.Models.ImageReference do
         }
   schema "image_references" do
     field :id, :integer
-    field :uid, :string
+    field :uuid, :string
     field :url, :string
     field :length, :integer
     field :type, :string
@@ -52,7 +52,7 @@ defmodule EpochtalkServer.Models.ImageReference do
     image_reference
     |> cast(attrs, [
       :id,
-      :uid,
+      :uuid,
       :url,
       :length,
       :type,

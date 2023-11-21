@@ -65,4 +65,33 @@ defmodule EpochtalkServer.Models.ImageReference do
     |> cast_assoc(:post)
     |> cast_assoc(:message)
   end
+
+  @doc """
+  Changeset for creating `ImageReference` model
+  """
+  @spec create_changeset(image_reference :: t(), attrs :: map() | nil) :: Ecto.Changeset.t()
+  def create_changeset(image_reference, attrs) do
+    now = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
+    uuid = Ecto.UUID.generate()
+
+    attrs =
+      attrs
+      |> Map.put(:created_at, now)
+      |> Map.put(:uuid, uuid)
+
+    naive_datetime
+    |> cast(attrs, [
+      :uuid,
+      :url,
+      :length,
+      :type,
+      :checksum,
+      :expiration,
+      :created_at,
+      :user
+    ])
+    |> unique_constraint(:id, name: :image_references_pkey)
+    |> unique_constraint(:checksum, name: :users_image_references_pkey)
+    |> cast_assoc(:user)
+  end
 end

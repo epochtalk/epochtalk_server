@@ -38,4 +38,34 @@ defmodule EpochtalkServer.Models.ImageReference do
     many_to_many :post, Post
     many_to_many :message, Message
   end
+
+  ## === Changesets Functions ===
+
+  @doc """
+  Generic changeset for `ImageReference` model
+  """
+  @spec changeset(
+          image_reference :: t(),
+          attrs :: map() | nil
+        ) :: Ecto.Changeset.t()
+  def changeset(image_reference, attrs) do
+    image_reference
+    |> cast(attrs, [
+      :id,
+      :uid,
+      :url,
+      :length,
+      :type,
+      :checksum,
+      :expiration,
+      :confirmed,
+      :created_at,
+      :user,
+      :post,
+      :message
+    ])
+    |> cast_assoc(:user)
+    |> cast_assoc(:post)
+    |> cast_assoc(:message)
+  end
 end

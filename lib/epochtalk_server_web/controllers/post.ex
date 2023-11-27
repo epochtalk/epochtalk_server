@@ -64,9 +64,9 @@ defmodule EpochtalkServerWeb.Controllers.Post do
            {:board_banned, BoardBan.is_banned_from_board(user, thread_id: thread_id)},
          attrs <- AutoModeration.moderate(user, attrs),
          attrs <- Mention.username_to_user_id(user, attrs),
-         attrs <- Sanitize.html_and_entities_from_title(attrs["title"], attrs),
-         attrs <- Sanitize.html_and_entities_from_body(attrs["body"], attrs),
-         attrs <- Parse.markdown_within_body(attrs["body"], attrs),
+         attrs <- Sanitize.html_and_entities_from_title(attrs),
+         attrs <- Sanitize.html_and_entities_from_body(attrs),
+         attrs <- Parse.markdown_within_body(attrs),
          # TODO(akinsey): Implement the following for completion
          # Plugins
          # 1) Track IP (done)

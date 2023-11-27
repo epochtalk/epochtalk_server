@@ -74,8 +74,8 @@ defmodule EpochtalkServerWeb.Controllers.Post do
          # Pre Processing
 
          # 1) clean post title (done)
-         # 2) parse/clean post body
-         # 3) handle uploaded images
+         # 2) parse/clean post body (wip)
+         # 3) handle uploaded images (wip)
          # 4) handle filtering out newbie images
 
          # Hooks

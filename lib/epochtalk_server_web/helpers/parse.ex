@@ -4,9 +4,9 @@ defmodule EpochtalkServerWeb.Helpers.Parse do
   """
 
   @doc """
-  Used to parse markdown within `Thread` or `Post` body
+  Used to parse markdown within `Thread` or `Post` body, assumes
   """
-  @spec markdown_within_body(body :: String.t(), attrs :: map) :: map()
-  def markdown_within_body(body, attrs) when is_binary(body) and is_map(attrs),
-    do: Map.put(attrs, "body_html", Earmark.as_html!(body))
+  @spec markdown_within_body(attrs :: map) :: map()
+  def markdown_within_body(attrs) when is_map(attrs),
+    do: Map.put(attrs, "body_html", Earmark.as_html!(attrs["body_html"] || attrs["body"]))
 end

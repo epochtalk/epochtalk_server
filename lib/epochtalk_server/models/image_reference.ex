@@ -18,7 +18,6 @@ defmodule EpochtalkServer.Models.ImageReference do
           type: String.t() | nil,
           checksum: String.t() | nil,
           expiration: NaiveDateTime.t() | nil,
-          user: User.t() | term(),
           post: Post.t() | term(),
           message: Message.t() | term(),
           created_at: NaiveDateTime.t() | nil
@@ -32,7 +31,6 @@ defmodule EpochtalkServer.Models.ImageReference do
     field :checksum, :string
     field :expiration, :naive_datetime
     field :created_at, :naive_datetime
-    many_to_many :user, User
     many_to_many :post, Post
     many_to_many :message, Message
   end
@@ -57,11 +55,9 @@ defmodule EpochtalkServer.Models.ImageReference do
       :checksum,
       :expiration,
       :created_at,
-      :user,
       :post,
       :message
     ])
-    |> cast_assoc(:user)
     |> cast_assoc(:post)
     |> cast_assoc(:message)
   end
@@ -88,10 +84,8 @@ defmodule EpochtalkServer.Models.ImageReference do
       :checksum,
       :expiration,
       :created_at,
-      :user
     ])
     |> unique_constraint(:id, name: :image_references_pkey)
-    |> unique_constraint(:checksum, name: :users_image_references_pkey)
-    |> cast_assoc(:user)
+    |> unique_constraint(:checksum)
   end
 end

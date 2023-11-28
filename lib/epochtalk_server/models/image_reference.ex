@@ -88,4 +88,15 @@ defmodule EpochtalkServer.Models.ImageReference do
     |> unique_constraint(:id, name: :image_references_pkey)
     |> unique_constraint(:checksum)
   end
+
+  ## === Database Functions ===
+
+  @doc """
+  Creates a new `ImageReference` in the database
+  """
+  @spec create(image_reference_attrs :: map()) :: {:ok, image_reference :: t()} | {:error, Ecto.Changeset.t()}
+  def create(image_reference) do
+    image_reference_changeset = create_changeset(%ImageReference{}, image_reference)
+    Repo.insert(image_reference_changeset)
+  end
 end

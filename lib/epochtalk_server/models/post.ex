@@ -8,6 +8,8 @@ defmodule EpochtalkServer.Models.Post do
   alias EpochtalkServer.Models.User
   alias EpochtalkServer.Models.Profile
 
+  @edit_window_ms 1000 * 60 * 10
+
   @moduledoc """
   `Post` model, for performing actions relating to forum posts
   """
@@ -54,29 +56,6 @@ defmodule EpochtalkServer.Models.Post do
   end
 
   ## === Changesets Functions ===
-
-  @doc """
-  Create generic changeset for `Post` model
-  """
-  @spec changeset(post :: t(), attrs :: map() | nil) :: Ecto.Changeset.t()
-  def changeset(post, attrs) do
-    post
-    |> cast(attrs, [
-      :id,
-      :thread_id,
-      :user_id,
-      :locked,
-      :deleted,
-      :position,
-      :content,
-      :metadata,
-      :imported_at,
-      :created_at,
-      :updated_at
-    ])
-    |> unique_constraint(:id, name: :posts_pkey)
-    |> foreign_key_constraint(:thread_id, name: :posts_thread_id_fkey)
-  end
 
   @doc """
   Create changeset for `Post` model
@@ -128,6 +107,63 @@ defmodule EpochtalkServer.Models.Post do
         else: errors_list
     end)
     |> unique_constraint(:id, name: :posts_pkey)
+    |> foreign_key_constraint(:thread_id, name: :posts_thread_id_fkey)
+  end
+
+  @doc """
+  Create update changeset for `Post` model
+  """
+  @spec update_changeset(post :: t(), attrs :: map() | nil) :: Ecto.Changeset.t()
+  def update_changeset(post, attrs) do
+    now = NaiveDateTime.utc_now()
+
+    diff_ms_between_now_and_created_at = abs(NaiveDateTime.diff(post.created_at, now) * 1000)
+
+    outside_edit_window = diff_ms_between_now_and_created_at > @edit_window_ms
+
+    now = NaiveDateTime.truncate(now, :second)
+
+    # set default values and timestamps
+    post =
+      post
+      |> Map.put(:created_at, now)
+
+    post =
+      if (post.metadata && Map.keys(post.metadata) != []) || outside_edit_window,
+        do: Map.put(post, :updated_at, now),
+        else: post
+
+    post
+    |> cast(attrs, [
+      :thread_id,
+      :content,
+      :metadata,
+      :updated_at
+    ])
+    |> validate_required([:thread_id, :content, :metadata])
+    |> validate_change(:content, fn _, content ->
+      string_not_blank = fn key ->
+        case String.trim(content[key] || "") do
+          "" -> [{key, "can't be blank"}]
+          _ -> []
+        end
+      end
+
+      is_string = fn key ->
+        case is_binary(content[key]) do
+          false -> [{key, "must be a string"}]
+          true -> []
+        end
+      end
+
+      # check that nested values at specified keys are strings
+      errors_list = is_string.(:title) ++ is_string.(:body)
+
+      # nested values are strings, check that values aren't blank, return errors
+      if errors_list == [],
+        do: string_not_blank.(:title) ++ string_not_blank.(:body),
+        else: errors_list
+    end)
     |> foreign_key_constraint(:thread_id, name: :posts_thread_id_fkey)
   end
 
@@ -184,6 +220,51 @@ defmodule EpochtalkServer.Models.Post do
         "deleted" => post_attrs["deleted"],
         "locked" => post_attrs["locked"]
       })
+
+  @doc """
+  Updates an existing `Post` in the database
+  """
+  @spec update(post_attrs :: map()) :: {:ok, post :: t()} | {:error, Ecto.Changeset.t()}
+  def update(post_attrs) do
+    Repo.transaction(fn ->
+      query =
+        from p in Post,
+          where: p.id == ^post_attrs["id"],
+          select: %Post{
+            content: p.content,
+            metadata: p.metadata,
+            user_id: p.user_id,
+            created_at: p.created_at
+          }
+
+      old_post = Repo.one(query)
+
+      post_cs = update_changeset(old_post, post_attrs)
+
+      # case Repo.insert(post_cs) do
+      #   # changeset valid, insert success, update metadata threads and return thread
+      #   {:ok, db_post} ->
+      #     # Increment user post count
+      #     Profile.increment_post_count(db_post.user_id)
+
+      #     # Set thread created_at and updated_at
+      #     Thread.set_timestamps(db_post.thread_id)
+
+      #     # Set post position
+      #     Post.set_position_using_thread(db_post.id, db_post.thread_id)
+
+      #     # Increment thread post ocunt
+      #     Thread.increment_post_count(db_post.thread_id)
+
+      #     # Requery post with position and thread slug info
+      #     Repo.one(from p in Post, where: p.id == ^db_post.id, preload: [:thread])
+
+      #   # changeset error
+      #   {:error, cs} ->
+      #     Repo.rollback(cs)
+      # end
+    end)
+  end
 
   @doc """
   Sets the `post_position` of a new `Post`, by querying the `post_count` of the

@@ -92,7 +92,7 @@ defmodule EpochtalkServer.Models.ImageReference do
   ## === Database Functions ===
 
   @doc """
-  Creates a new `ImageReference` in the database
+  Creates a new `ImageReference`
   """
   @spec create(image_reference_attrs :: map()) :: {:ok, image_reference :: t()} | {:error, Ecto.Changeset.t()}
   def create(image_reference) do

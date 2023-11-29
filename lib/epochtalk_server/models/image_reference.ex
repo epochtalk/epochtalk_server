@@ -18,8 +18,9 @@ defmodule EpochtalkServer.Models.ImageReference do
           type: String.t() | nil,
           checksum: String.t() | nil,
           expiration: NaiveDateTime.t() | nil,
-          post: Post.t() | term(),
-          message: Message.t() | term(),
+          posts: [Post.t()] | term(),
+          messages: [Message.t()] | term(),
+          profiles: [Profile.t()] | term(),
           created_at: NaiveDateTime.t() | nil
         }
   schema "image_references" do
@@ -30,9 +31,9 @@ defmodule EpochtalkServer.Models.ImageReference do
     field :checksum, :string
     field :expiration, :naive_datetime
     field :created_at, :naive_datetime
-    many_to_many :post, Post, join_through: PostImageReference
-    many_to_many :message, Message, join_through: MessageImageReference
-    many_to_many :profile, Profile, join_through: ProfileImageReference
+    many_to_many :posts, Post, join_through: PostImageReference
+    many_to_many :messages, Message, join_through: MessageImageReference
+    many_to_many :profiles, Profile, join_through: ProfileImageReference
   end
 
   ## === Changesets Functions ===
@@ -55,11 +56,13 @@ defmodule EpochtalkServer.Models.ImageReference do
       :checksum,
       :expiration,
       :created_at,
-      :post,
-      :message
+      :posts,
+      :messages,
+      :profiles
     ])
-    |> cast_assoc(:post)
-    |> cast_assoc(:message)
+    |> cast_assoc(:posts)
+    |> cast_assoc(:messages)
+    |> cast_assoc(:profiles)
   end
 
   @doc """

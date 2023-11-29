@@ -3,7 +3,7 @@ defmodule EpochtalkServer.Models.ImageReference do
   import Ecto.Changeset
   import Ecto.Query
   alias EpochtalkServer.Repo
-  alias EpochtalkServer.Models.User
+  alias EpochtalkServer.Models.Profile
   alias EpochtalkServer.Models.Post
   alias EpochtalkServer.Models.Message
 
@@ -30,8 +30,9 @@ defmodule EpochtalkServer.Models.ImageReference do
     field :checksum, :string
     field :expiration, :naive_datetime
     field :created_at, :naive_datetime
-    many_to_many :post, Post
-    many_to_many :message, Message
+    many_to_many :post, Post, join_through: PostImageReference
+    many_to_many :message, Message, join_through: MessageImageReference
+    many_to_many :profile, Profile, join_through: ProfileImageReference
   end
 
   ## === Changesets Functions ===

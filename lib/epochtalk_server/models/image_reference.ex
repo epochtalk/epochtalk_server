@@ -86,7 +86,7 @@ defmodule EpochtalkServer.Models.ImageReference do
       :type,
       :checksum,
       :expiration,
-      :created_at,
+      :created_at
     ])
     |> unique_constraint(:id, name: :image_references_pkey)
     |> unique_constraint(:checksum)

@@ -99,4 +99,12 @@ defmodule EpochtalkServer.Models.ImageReference do
     image_reference_changeset = create_changeset(%ImageReference{}, image_reference)
     Repo.insert(image_reference_changeset)
   end
+
+  @doc """
+  Finds an `ImageReference`
+  """
+  @spec find(image_reference_attrs :: map()) :: {:ok, image_reference :: t()} | {:error, Ecto.Changeset.t()}
+  def find(image_reference) do
+    Repo.all(image_reference_changeset)
+  end
 end

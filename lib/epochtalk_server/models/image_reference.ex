@@ -123,4 +123,18 @@ defmodule EpochtalkServer.Models.ImageReference do
         where: i.expiration < ^now and i.posts == [] and i.messages == [] and i.profiles == []
     Repo.all(query)
   end
+
+  @doc """
+  Finds an `ImageReference` with specified uuid
+  """
+  @spec with_uuid(uuid :: String.t()) ::
+          {:ok, t()} | {:error, :image_reference_does_not_exist}
+  def with_uuid(uuid) when is_string(uuid) do
+    query = from i in ImageReference, where: i.uuid == ^uuid
+    image_reference = Repo.one(query)
+
+    if image_reference,
+      do: {:ok, image_reference},
+      else: {:error, :image_reference_does_not_exist}
+  end
 end

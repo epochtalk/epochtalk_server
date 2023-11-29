@@ -110,4 +110,17 @@ defmodule EpochtalkServer.Models.ImageReference do
   def find(image_reference) do
     Repo.all(image_reference_changeset)
   end
+
+  @doc """
+  Finds expired `ImageReference`s
+  Images are expired if they are past their expiration date/time and have no referencing models
+  """
+  @spec find_expired() :: map()
+  def find_expired(image_reference) do
+    now = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
+    query =
+      from i in ImageReference,
+        where: i.expiration < ^now and i.posts == [] and i.messages == [] and i.profiles == []
+    Repo.all(query)
+  end
 end

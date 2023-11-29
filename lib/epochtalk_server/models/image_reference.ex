@@ -23,7 +23,6 @@ defmodule EpochtalkServer.Models.ImageReference do
           created_at: NaiveDateTime.t() | nil
         }
   schema "image_references" do
-    field :id, :integer
     field :uuid, :string
     field :url, :string
     field :length, :integer

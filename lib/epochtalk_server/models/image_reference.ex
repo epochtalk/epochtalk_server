@@ -143,7 +143,7 @@ defmodule EpochtalkServer.Models.ImageReference do
   """
   @spec with_uuid(uuid :: String.t()) ::
           {:ok, t()} | {:error, :image_reference_does_not_exist}
-  def with_uuid(uuid) when is_string(uuid) do
+  def with_uuid(uuid) when is_binary(uuid) do
     query = from i in ImageReference, where: i.uuid == ^uuid
     image_reference = Repo.one(query)
 

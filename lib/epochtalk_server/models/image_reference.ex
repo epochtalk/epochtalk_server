@@ -3,6 +3,7 @@ defmodule EpochtalkServer.Models.ImageReference do
   import Ecto.Changeset
   import Ecto.Query
   alias EpochtalkServer.Repo
+  alias EpochtalkServer.Models.ImageReference
   alias EpochtalkServer.Models.Profile
   alias EpochtalkServer.Models.Post
   alias EpochtalkServer.Models.Message

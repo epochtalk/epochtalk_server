@@ -135,7 +135,7 @@ defmodule EpochtalkServer.Models.ImageReference do
   @spec delete_expired() :: {non_neg_integer(), nil | [term()]}
   def delete_expired() do
     query_expired()
-    |> Repo.delete_all(query)
+    |> Repo.delete_all()
   end
 
   @doc """

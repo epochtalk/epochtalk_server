@@ -115,54 +115,70 @@ defmodule EpochtalkServer.Models.Post do
   """
   @spec update_changeset(post :: t(), attrs :: map(), authed_user :: map()) :: Ecto.Changeset.t()
   def update_changeset(post, attrs, authed_user) do
-    # merge new edited post attrs with existing post from db
-    post =
-      post
+    # format attrs for casting
+    attrs =
+      attrs
       |> Map.put(:content, %{
-        body: attrs["body"] || post.body,
-        body_html: attrs["body_html"] || post.body_html,
-        title: attrs["title"] || post.title
+        :body => attrs["body"],
+        :body_html => attrs["body_html"],
+        :title => attrs["title"]
       })
-      |> Map.put(:thread_id, attrs["thread_id"] || post.thread_id)
-      |> Map.put(:metadata, post.metadata || %{})
+      |> Map.put(:thread_id, post.thread_id)
+      |> Map.put(:metadata, post.metadata)
+      |> Map.put(:id, post.id)
 
-    # update metadata if edited by someone who is not post creator
-    metadata = if authed_user.id == post.user_id,
-      do: post.metadata |> Map.delete(:edited_by_id) |> Map.delete(:edited_by_username),
-      else: post.metadata |> Map.put(:edited_by_id, authed_user.id) |> Map.put(:edited_by_username, authed_user.username)
+    # update metadata if post is being edited by someone who is not the post author
+    metadata =
+      if authed_user.id == post.user_id,
+        do:
+          (attrs.metadata || %{}) |> Map.delete(:edited_by_id) |> Map.delete(:edited_by_username),
+        else:
+          (attrs.metadata || %{})
+          |> Map.put(:edited_by_id, authed_user.id)
+          |> Map.put(:edited_by_username, authed_user.username)
 
-    post = Map.put(post, :metadata, metadata)
-
-    now = NaiveDateTime.utc_now()
+    # if metadata has nothing in it, set to nil
+    attrs =
+      if metadata == %{},
+        do: Map.put(attrs, :metadata, nil),
+        else: Map.put(attrs, :metadata, metadata)
 
     # calculate if post is outside 10 minute edit window
-    diff_ms_between_now_and_created_at = abs(NaiveDateTime.diff(post.created_at, now) * 1000)
+    now = NaiveDateTime.utc_now()
 
-    outside_edit_window = diff_ms_between_now_and_created_at > @edit_window_ms
+    time_since_last_edit_ms =
+      abs(NaiveDateTime.diff(post.updated_at || post.created_at, now) * 1000)
 
-    now = NaiveDateTime.truncate(now, :second)
-
-    # set default values and timestamps
-    post =
-      post
-      |> Map.put(:created_at, now)
+    outside_edit_window = time_since_last_edit_ms > @edit_window_ms
 
     # update updated_at field if outside of 10 min grace period,
     # or if a moderator is editing a user's post
-    post =
-      if (post.metadata != nil && Map.keys(post.metadata) != []) || outside_edit_window,
-        do: Map.put(post, :updated_at, now),
-        else: post
+    now = NaiveDateTime.truncate(now, :second)
 
+    attrs =
+      if (attrs.metadata != nil && Map.keys(attrs.metadata) != []) || outside_edit_window,
+        do: Map.put(attrs, :updated_at, now),
+        else: attrs
+
+    # remove old keys after formatting attrs
+    attrs =
+      attrs
+      |> Map.delete("id")
+      |> Map.delete("body")
+      |> Map.delete("body_html")
+      |> Map.delete("title")
+
+    # cast attrs, create update changeset
     post
     |> cast(attrs, [
+      :id,
       :thread_id,
       :content,
       :metadata,
       :updated_at,
       :created_at
     ])
-    |> validate_required([:thread_id, :content, :metadata, :created_at, :updated_at])
+    |> validate_required([:id, :thread_id, :content, :created_at, :updated_at])
     |> validate_change(:content, fn _, content ->
       string_not_blank = fn key ->
         case String.trim(content[key] || "") do
@@ -246,46 +262,26 @@ defmodule EpochtalkServer.Models.Post do
   @doc """
   Updates an existing `Post` in the database
   """
-  @spec update(post_attrs :: map(), authed_user :: map()) :: {:ok, post :: t()} | {:error, Ecto.Changeset.t()}
+  @spec update(post_attrs :: map(), authed_user :: map()) ::
+          {:ok, post :: t()} | {:error, Ecto.Changeset.t()} | {:error, any()}
   def update(post_attrs, authed_user) do
     Repo.transaction(fn ->
       query =
         from p in Post,
           where: p.id == ^post_attrs["id"],
           select: %Post{
+            id: p.id,
+            thread_id: p.thread_id,
             content: p.content,
             metadata: p.metadata,
             user_id: p.user_id,
             created_at: p.created_at,
-            updated_at: p.updated_at,
+            updated_at: p.updated_at
           }
 
-      old_post = Repo.one(query)
-
-      _post_cs = update_changeset(old_post, post_attrs, authed_user)
-
-      # case Repo.insert(post_cs) do
-      #   # changeset valid, insert success, update metadata threads and return thread
-      #   {:ok, db_post} ->
-      #     # Increment user post count
-      #     Profile.increment_post_count(db_post.user_id)
-
-      #     # Set thread created_at and updated_at
-      #     Thread.set_timestamps(db_post.thread_id)
-
-      #     # Set post position
-      #     Post.set_position_using_thread(db_post.id, db_post.thread_id)
-
-      #     # Increment thread post ocunt
-      #     Thread.increment_post_count(db_post.thread_id)
-
-      #     # Requery post with position and thread slug info
-      #     Repo.one(from p in Post, where: p.id == ^db_post.id, preload: [:thread])
-
-      #   # changeset error
-      #   {:error, cs} ->
-      #     Repo.rollback(cs)
-      # end
+      Repo.one(query)
+      |> update_changeset(post_attrs, authed_user)
+      |> Repo.update!(returning: true)
     end)
   end
 

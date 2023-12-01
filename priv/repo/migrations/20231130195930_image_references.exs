@@ -46,6 +46,7 @@ defmodule EpochtalkServer.Repo.Migrations.ImageReferences do
     drop table(:posts, prefix: @schema_prefix)
     drop table(:messages, prefix: @schema_prefix)
     drop table(:profiles, prefix: @schema_prefix)
+    execute "DROP SCHEMA #{@schema_prefix}"
 
     # re-create image expirations table
     create table(:image_expirations, primary_key: false) do

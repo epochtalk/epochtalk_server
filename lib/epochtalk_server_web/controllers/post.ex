@@ -140,6 +140,65 @@ defmodule EpochtalkServerWeb.Controllers.Post do
   end
 
   @doc """
+  Used to update posts
+  """
+  def update(conn, attrs) do
+    # Authorizations Checks
+    with {:auth, user} <- {:auth, Guardian.Plug.current_resource(conn)},
+         :ok <- ACL.allow!(conn, "posts.update"),
+         # normally we use model changesets for validating POST requests parameters,
+         # this is an exception to save us from doing excessive processing between here
+         # and the creation of the post
+         post_max_length <-
+           Application.get_env(:epochtalk_server, :frontend_config)["post_max_length"],
+         _thread_id <- Validate.cast(attrs, "thread_id", :integer, required: true),
+         _title <-
+           Validate.cast(attrs, "title", :string, required: true, max: @max_post_title_length),
+         _body <- Validate.cast(attrs, "body", :string, required: true, max: post_max_length),
+
+         attrs <- AutoModeration.moderate(user, attrs),
+         attrs <- Mention.username_to_user_id(user, attrs),
+         attrs <- Sanitize.html_and_entities_from_title(attrs),
+         attrs <- Sanitize.html_and_entities_from_body(attrs),
+         attrs <- Parse.markdown_within_body(attrs),
+
+         {:ok, post_data} <- Post.update(attrs, user) do
+      # Create Mention notification
+      Mention.handle_user_mention_creation(user, attrs, post_data)
+
+      # Correct TSV due to mentions converting username to user id
+      Mention.correct_text_search_vector(attrs)
+
+      # render post json data
+      render(conn, :update, %{post_data: post_data})
+    else
+      {:error, %Ecto.Changeset{} = cs} ->
+        ErrorHelpers.render_json_error(conn, 400, cs)
+
+      {:auth, nil} ->
+        ErrorHelpers.render_json_error(conn, 400, "Not logged in, cannot create post")
+
+      {:bypass_lock, false} ->
+        ErrorHelpers.render_json_error(conn, 400, "Thread is locked")
+
+      {:is_active, false} ->
+        ErrorHelpers.render_json_error(conn, 400, "Account must be active to create posts")
+
+      {:can_read, {:ok, false}} ->
+        ErrorHelpers.render_json_error(conn, 403, "Unauthorized, you do not have permission")
+
+      {:can_write, {:ok, false}} ->
+        ErrorHelpers.render_json_error(conn, 403, "Unauthorized, you do not have permission")
+
+      {:board_banned, {:ok, true}} ->
+        ErrorHelpers.render_json_error(conn, 403, "Unauthorized, you are banned from this board")
+
+      _ ->
+        ErrorHelpers.render_json_error(conn, 400, "Error, cannot create post")
+    end
+  end
+
+  @doc """
   Used to retrieve `Posts` by `Thread`
 
   Test Cases:

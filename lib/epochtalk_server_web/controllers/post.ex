@@ -163,8 +163,8 @@ defmodule EpochtalkServerWeb.Controllers.Post do
          attrs <- Parse.markdown_within_body(attrs),
 
          {:ok, post_data} <- Post.update(attrs, user) do
-      # Create Mention notification
-      Mention.handle_user_mention_creation(user, attrs, post_data)
+      # Convert Mention user ids to usernames
+      Mention.user_id_to_username(post_data)
 
       # Correct TSV due to mentions converting username to user id
       Mention.correct_text_search_vector(attrs)

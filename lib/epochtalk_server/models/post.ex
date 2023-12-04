@@ -286,6 +286,7 @@ defmodule EpochtalkServer.Models.Post do
       Repo.one(query)
       |> update_changeset(post_attrs, authed_user)
       |> Repo.update!(returning: true)
+      |> Repo.preload(:thread)
     end)
   end
 

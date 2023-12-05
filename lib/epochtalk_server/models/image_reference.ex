@@ -79,7 +79,7 @@ defmodule EpochtalkServer.Models.ImageReference do
       |> Map.put(:created_at, now)
       |> Map.put(:uuid, uuid)
 
-    now
+    image_reference
     |> cast(attrs, [
       :uuid,
       :url,

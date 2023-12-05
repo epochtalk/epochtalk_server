@@ -155,13 +155,11 @@ defmodule EpochtalkServerWeb.Controllers.Post do
          _title <-
            Validate.cast(attrs, "title", :string, required: true, max: @max_post_title_length),
          _body <- Validate.cast(attrs, "body", :string, required: true, max: post_max_length),
-
          attrs <- AutoModeration.moderate(user, attrs),
          attrs <- Mention.username_to_user_id(user, attrs),
          attrs <- Sanitize.html_and_entities_from_title(attrs),
          attrs <- Sanitize.html_and_entities_from_body(attrs),
          attrs <- Parse.markdown_within_body(attrs),
-
          {:ok, post_data} <- Post.update(attrs, user) do
       # Convert Mention user ids to usernames
       Mention.user_id_to_username(post_data)
@@ -198,7 +196,6 @@ defmodule EpochtalkServerWeb.Controllers.Post do
       #   * username to user id
       #   * user_id to username
       #   * correct text search vector
-
     else
       {:error, %Ecto.Changeset{} = cs} ->
         ErrorHelpers.render_json_error(conn, 400, cs)

@@ -171,6 +171,34 @@ defmodule EpochtalkServerWeb.Controllers.Post do
 
       # render post json data
       render(conn, :update, %{post_data: post_data})
+
+      # TODO(akinsey): the following needs to be completed for this route to be finished
+
+      # Authorizations
+      # 1) Check base permissions (Done)
+      # 2) Check if user has mod priorty and is moderator
+      # 3) Check if user has admin bypass or is post owner, moderator or has priority to edit post
+      # 4) Check if user can bypass deleted post and still edit
+      # 5) Check if user can bypass locked thread and still edit
+      # 6) Check if user can bypass locked board and still edit
+      # 7) Check if user can bypass locked post and still edit
+      # 8) Can read board
+      # 9) Can write board
+      # 10) User is active
+
+      # Pre Processing
+      # 1) Clean posts (Done)
+      # 2) Parse post (Done)
+      # 3) Handle images
+      # 4) Handle newbie images
+
+      # Hooks
+      # 1) Auto moderation (Done)
+      # 2) Mentions (Done)
+      #   * username to user id
+      #   * user_id to username
+      #   * correct text search vector
+
     else
       {:error, %Ecto.Changeset{} = cs} ->
         ErrorHelpers.render_json_error(conn, 400, cs)

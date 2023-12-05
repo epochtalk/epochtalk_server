@@ -6,7 +6,7 @@ defmodule EpochtalkServer.Models.ImageReference do
   alias EpochtalkServer.Models.ImageReference
   alias EpochtalkServer.Models.Profile
   alias EpochtalkServer.Models.Post
-  alias EpochtalkServer.Models.Message
+  # alias EpochtalkServer.Models.Message
 
   @moduledoc """
   `ImageReference` model, for tracking images uploaded locally or to CDN
@@ -20,7 +20,7 @@ defmodule EpochtalkServer.Models.ImageReference do
           checksum: String.t() | nil,
           expiration: NaiveDateTime.t() | nil,
           posts: [Post.t()] | term(),
-          messages: [Message.t()] | term(),
+          # messages: [Message.t()] | term(),
           profiles: [Profile.t()] | term(),
           created_at: NaiveDateTime.t() | nil
         }
@@ -33,7 +33,7 @@ defmodule EpochtalkServer.Models.ImageReference do
     field :expiration, :naive_datetime
     field :created_at, :naive_datetime
     many_to_many :posts, Post, join_through: PostImageReference
-    many_to_many :messages, Message, join_through: MessageImageReference
+    # many_to_many :messages, Message, join_through: MessageImageReference
     many_to_many :profiles, Profile, join_through: ProfileImageReference
   end
 

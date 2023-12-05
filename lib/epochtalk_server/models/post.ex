@@ -116,61 +116,7 @@ defmodule EpochtalkServer.Models.Post do
   @spec update_changeset(post :: t(), attrs :: map(), authed_user :: map()) :: Ecto.Changeset.t()
   def update_changeset(post, attrs, authed_user) do
     # format attrs for casting
-    attrs =
-      attrs
-      |> Map.put(:content, %{
-        :body => attrs["body"],
-        :body_html => attrs["body_html"],
-        :title => attrs["title"]
-      })
-      |> Map.put(:thread_id, post.thread_id)
-      |> Map.put(:metadata, post.metadata)
-      |> Map.put(:id, post.id)
-
-    # update metadata if post is being edited by someone who is not the post author
-    metadata =
-      if authed_user.id == post.user_id,
-        do:
-          (attrs.metadata || %{}) |> Map.delete(:edited_by_id) |> Map.delete(:edited_by_username),
-        else:
-          (attrs.metadata || %{})
-          |> Map.put(:edited_by_id, authed_user.id)
-          |> Map.put(:edited_by_username, authed_user.username)
-
-    # if metadata has nothing in it, set to nil
-    attrs =
-      if metadata == %{},
-        do: Map.put(attrs, :metadata, nil),
-        else: Map.put(attrs, :metadata, metadata)
-
-    # calculate if post is outside 10 minute edit window
-    now = NaiveDateTime.utc_now()
-
-    time_since_last_edit_ms =
-      abs(NaiveDateTime.diff(post.updated_at || post.created_at, now) * 1000)
-
-    outside_edit_window = time_since_last_edit_ms > @edit_window_ms
-
-    # update updated_at field if outside of 10 min grace period,
-    # or if a moderator is editing a user's post
-    now = NaiveDateTime.truncate(now, :second)
-
-    attrs =
-      if (attrs.metadata != nil && Map.keys(attrs.metadata) != []) || outside_edit_window,
-        do: Map.put(attrs, :updated_at, now),
-        else: attrs
-
-    # remove old keys after formatting attrs
-    attrs =
-      attrs
-      |> Map.delete("id")
-      |> Map.delete("body")
-      |> Map.delete("body_html")
-      |> Map.delete("body_original")
-      |> Map.delete("mentioned_ids")
-      |> Map.delete("thread_id")
-      |> Map.delete("user_id")
-      |> Map.delete("title")
+    attrs = format_update_attrs(post, attrs, authed_user)
 
     # cast attrs, create update changeset
     post
@@ -486,5 +432,65 @@ defmodule EpochtalkServer.Models.Post do
         where: p.id == ^post_attrs["id"]
 
     Repo.update_all(query, [])
+  end
+
+  ## === Private Helper Fucntions ===
+
+  defp format_update_attrs(post, attrs, authed_user) do
+    # format attrs for casting
+    attrs =
+      attrs
+      |> Map.put(:content, %{
+        :body => attrs["body"],
+        :body_html => attrs["body_html"],
+        :title => attrs["title"]
+      })
+      |> Map.put(:thread_id, post.thread_id)
+      |> Map.put(:metadata, post.metadata)
+      |> Map.put(:id, post.id)
+
+    # update metadata if post is being edited by someone who is not the post author
+    metadata =
+      if authed_user.id == post.user_id,
+        do:
+          (attrs.metadata || %{}) |> Map.delete(:edited_by_id) |> Map.delete(:edited_by_username),
+        else:
+          (attrs.metadata || %{})
+          |> Map.put(:edited_by_id, authed_user.id)
+          |> Map.put(:edited_by_username, authed_user.username)
+
+    # if metadata has nothing in it, set to nil
+    attrs =
+      if metadata == %{},
+        do: Map.put(attrs, :metadata, nil),
+        else: Map.put(attrs, :metadata, metadata)
+
+    # calculate if post is outside 10 minute edit window
+    now = NaiveDateTime.utc_now()
+
+    time_since_last_edit_ms =
+      abs(NaiveDateTime.diff(post.updated_at || post.created_at, now) * 1000)
+
+    outside_edit_window = time_since_last_edit_ms > @edit_window_ms
+
+    # update updated_at field if outside of 10 min grace period,
+    # or if a moderator is editing a user's post
+    now = NaiveDateTime.truncate(now, :second)
+
+    attrs =
+      if (attrs.metadata != nil && Map.keys(attrs.metadata) != []) || outside_edit_window,
+        do: Map.put(attrs, :updated_at, now),
+        else: attrs
+
+    # remove old keys after formatting attrs
+    attrs
+      |> Map.delete("id")
+      |> Map.delete("body")
+      |> Map.delete("body_html")
+      |> Map.delete("body_original")
+      |> Map.delete("mentioned_ids")
+      |> Map.delete("thread_id")
+      |> Map.delete("user_id")
+      |> Map.delete("title")
   end
 end

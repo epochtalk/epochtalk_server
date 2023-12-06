@@ -62,6 +62,7 @@ defmodule EpochtalkServer.MixProject do
       {:postgrex, "~> 0.17.1"},
       {:redix, "~> 1.2.2"},
       {:remote_ip, "~> 1.1.0"},
+      {:sweet_xml, "~> 0.7"},
       {:swoosh, "~> 1.8"},
       {:telemetry_metrics, "~> 0.6"},
       {:telemetry_poller, "~> 1.0"}

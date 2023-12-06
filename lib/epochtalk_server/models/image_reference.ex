@@ -98,9 +98,9 @@ defmodule EpochtalkServer.Models.ImageReference do
   @doc """
   Creates a new `ImageReference`
   """
-  @spec create(image_reference_attrs :: map()) :: {:ok, image_reference :: t()} | {:error, Ecto.Changeset.t()}
-  def create(image_reference) do
-    image_reference_changeset = create_changeset(%ImageReference{}, image_reference)
+  @spec create(attrs :: map()) :: {:ok, image_reference :: t()} | {:error, Ecto.Changeset.t()}
+  def create(attrs) do
+    image_reference_changeset = create_changeset(%ImageReference{}, attrs)
     Repo.insert(image_reference_changeset)
   end
 

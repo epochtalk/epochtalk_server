@@ -151,10 +151,21 @@ defmodule EpochtalkServerWeb.Controllers.Post do
          # and the creation of the post
          post_max_length <-
            Application.get_env(:epochtalk_server, :frontend_config)["post_max_length"],
-         _thread_id <- Validate.cast(attrs, "thread_id", :integer, required: true),
+         thread_id <- Validate.cast(attrs, "thread_id", :integer, required: true),
          _title <-
            Validate.cast(attrs, "title", :string, required: true, max: @max_post_title_length),
          _body <- Validate.cast(attrs, "body", :string, required: true, max: post_max_length),
+         user_priority <- ACL.get_user_priority(conn),
+         {:bypass_lock, true} <-
+           {:bypass_lock, can_authed_user_bypass_thread_lock(user, thread_id)},
+         {:is_active, true} <-
+           {:is_active, User.is_active?(user.id)},
+         {:can_read, {:ok, true}} <-
+           {:can_read, Board.get_read_access_by_thread_id(thread_id, user_priority)},
+         {:can_write, {:ok, true}} <-
+           {:can_write, Board.get_write_access_by_thread_id(thread_id, user_priority)},
+         {:board_banned, {:ok, false}} <-
+           {:board_banned, BoardBan.is_banned_from_board(user, thread_id: thread_id)},
          attrs <- AutoModeration.moderate(user, attrs),
          attrs <- Mention.username_to_user_id(user, attrs),
          attrs <- Sanitize.html_and_entities_from_title(attrs),
@@ -177,12 +188,13 @@ defmodule EpochtalkServerWeb.Controllers.Post do
       # 2) Check if user has mod priorty and is moderator
       # 3) Check if user has admin bypass or is post owner, moderator or has priority to edit post
       # 4) Check if user can bypass deleted post and still edit
-      # 5) Check if user can bypass locked thread and still edit
+      # 5) Check if user can bypass locked thread and still edit (Done)
       # 6) Check if user can bypass locked board and still edit
       # 7) Check if user can bypass locked post and still edit
-      # 8) Can read board
-      # 9) Can write board
-      # 10) User is active
+      # 8) Can read board (Done)
+      # 9) Can write board (Done)
+      # 10) Check user is board banned (Done)
+      # 11) User is active (Done)
 
       # Pre Processing
       # 1) Clean posts (Done)

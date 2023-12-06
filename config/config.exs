@@ -97,6 +97,11 @@ config :epochtalk_server, EpochtalkServer.Mailer,
 #   private_key: {:pem_plain, File.read!("priv/keys/domain.private")}
 # ]
 
+# configure aws
+config :ex_aws,
+  access_key_id: [{:system, "AWS_ACCESS_KEY_ID"}, {:awscli, "default", 30}, :instance_role],
+  secret_access_key: [{:system, "AWS_SECRET_ACCESS_KEY"}, {:awscli, "default", 30}, :instance_role]
+
 # Swoosh API client is needed for adapters other than SMTP.
 config :swoosh, :api_client, false
 

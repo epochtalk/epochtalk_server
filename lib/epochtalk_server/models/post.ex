@@ -434,6 +434,19 @@ defmodule EpochtalkServer.Models.Post do
     Repo.update_all(query, [])
   end
 
+  @doc """
+  Returns boolean indicating if `Post` is locked or nil if it does not exist
+  """
+  @spec is_locked(id :: non_neg_integer) :: boolean | nil
+  def is_locked(id) when is_integer(id) do
+    query =
+      from p in Post,
+        where: p.id == ^id,
+        select: p.locked
+
+    Repo.one(query)
+  end
+
   ## === Private Helper Fucntions ===
 
   defp format_update_attrs(post, attrs, authed_user) do

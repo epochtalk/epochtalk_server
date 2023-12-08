@@ -110,8 +110,8 @@ defmodule EpochtalkServer.Models.ImageReference do
     image_reference_changeset = create_changeset(%ImageReference{}, attrs)
     case Repo.insert(image_reference_changeset) do
       {:ok, image_reference} ->
-        path = @path_prefix <> "/" <> image_reference.uuid <> "." <> image_reference.type
         # generate presigned post
+        path = @path_prefix <> image_reference.uuid <> "." <> image_reference.type
         opts = [
           expires_in: @expires_in_hours,
           content_length_range: [@content_length_minimum, @content_length_maximum],

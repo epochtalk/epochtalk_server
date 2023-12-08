@@ -110,7 +110,7 @@ defmodule EpochtalkServer.Models.ImageReference do
     image_reference_changeset = create_changeset(%ImageReference{}, attrs)
     case Repo.insert(image_reference_changeset) do
       {:ok, image_reference} ->
-        # generate presigned post
+        # set presigned post parameters
         path = @path_prefix <> image_reference.uuid <> "." <> image_reference.type
         opts = [
           expires_in: @expires_in_hours,
@@ -118,9 +118,12 @@ defmodule EpochtalkServer.Models.ImageReference do
           virtual_host: @virtual_host
         ]
 
-        :s3
-        |> ExAws.Config.new([])
-        |> ExAws.S3.presigned_post("epochtalk-dev", path, opts)
+        # generate presigned post
+        presigned_post_result =
+          :s3
+          |> ExAws.Config.new([])
+          |> ExAws.S3.presigned_post("epochtalk-dev", path, opts)
+        {:ok, image_reference, presigned_post_result}
       {:error, changeset} -> {:error, changeset}
     end
   end

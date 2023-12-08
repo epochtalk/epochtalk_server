@@ -24,6 +24,7 @@ defmodule EpochtalkServer.Models.ImageReference do
           profiles: [Profile.t()] | term(),
           created_at: NaiveDateTime.t() | nil
         }
+  @derive {Jason.Encoder, only: [:expiration, :created_at]}
   schema "image_references" do
     field :uuid, :string
     field :url, :string

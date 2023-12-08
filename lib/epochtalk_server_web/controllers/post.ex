@@ -53,7 +53,7 @@ defmodule EpochtalkServerWeb.Controllers.Post do
          _body <- Validate.cast(attrs, "body", :string, required: true, max: post_max_length),
          user_priority <- ACL.get_user_priority(conn),
          {:bypass_lock, true} <-
-           {:bypass_lock, can_authed_user_bypass_thread_lock(user, thread_id)},
+           {:bypass_lock, can_authed_user_bypass_thread_lock_on_post_create(user, thread_id)},
          {:is_active, true} <-
            {:is_active, User.is_active?(user.id)},
          {:can_read, {:ok, true}} <-
@@ -151,13 +151,16 @@ defmodule EpochtalkServerWeb.Controllers.Post do
          # and the creation of the post
          post_max_length <-
            Application.get_env(:epochtalk_server, :frontend_config)["post_max_length"],
+         id <- Validate.cast(attrs, "id", :integer, required: true),
          thread_id <- Validate.cast(attrs, "thread_id", :integer, required: true),
          _title <-
            Validate.cast(attrs, "title", :string, required: true, max: @max_post_title_length),
          _body <- Validate.cast(attrs, "body", :string, required: true, max: post_max_length),
          user_priority <- ACL.get_user_priority(conn),
-         {:bypass_lock, true} <-
-           {:bypass_lock, can_authed_user_bypass_thread_lock(user, thread_id)},
+         {:bypass_thread_lock, true} <-
+           {:bypass_thread_lock, can_authed_user_bypass_thread_lock_on_post_update(user, thread_id, id)},
+         {:bypass_post_lock, true} <-
+           {:bypass_post_lock, can_authed_user_bypass_post_lock_on_post_update(user, id, thread_id)},
          {:is_active, true} <-
            {:is_active, User.is_active?(user.id)},
          {:can_read, {:ok, true}} <-
@@ -215,8 +218,11 @@ defmodule EpochtalkServerWeb.Controllers.Post do
       {:auth, nil} ->
         ErrorHelpers.render_json_error(conn, 400, "Not logged in, cannot create post")
 
-      {:bypass_lock, false} ->
+      {:bypass_thread_lock, false} ->
         ErrorHelpers.render_json_error(conn, 400, "Thread is locked")
+
+      {:bypass_post_lock, false} ->
+        ErrorHelpers.render_json_error(conn, 400, "Post is locked")
 
       {:is_active, false} ->
         ErrorHelpers.render_json_error(conn, 400, "Account must be active to create posts")
@@ -355,11 +361,33 @@ defmodule EpochtalkServerWeb.Controllers.Post do
     end
   end
 
-  defp can_authed_user_bypass_thread_lock(user, thread_id) do
+  defp can_authed_user_bypass_thread_lock_on_post_create(user, thread_id) do
     has_bypass = ACL.has_permission(user, "posts.create.bypass.locked.admin")
     thread_not_locked = !Thread.is_locked(thread_id)
     is_mod = BoardModerator.user_is_moderator_with_thread_id(thread_id, user.id)
 
     has_bypass or thread_not_locked or is_mod
+  end
+
+  defp can_authed_user_bypass_thread_lock_on_post_update(user, thread_id, post_id) do
+    has_bypass = ACL.has_permission(user, "posts.update.bypass.locked.admin")
+    thread_not_locked = !Thread.is_locked(thread_id)
+    is_mod = BoardModerator.user_is_moderator_with_thread_id(thread_id, user.id)
+    has_priority = has_priorty(user, "posts.update.bypass.owner.priority", post_id)
+
+    has_bypass or thread_not_locked or is_mod or has_priority
+  end
+
+  defp can_authed_user_bypass_post_lock_on_post_update(user, post_id, thread_id) do
+    has_bypass = ACL.has_permission(user, "posts.update.bypass.locked.admin")
+    post_not_locked = !Post.is_locked(thread_id)
+    is_mod = BoardModerator.user_is_moderator_with_thread_id(thread_id, user.id)
+    has_priority = has_priorty(user, "posts.update.bypass.owner.priority", post_id)
+
+    has_bypass or post_not_locked or is_mod or has_priority
+  end
+
+  defp has_priorty(_user, _permission, _post_id, _self_mod \\ false) do
+    false
   end
 end

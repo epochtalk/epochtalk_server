@@ -497,13 +497,13 @@ defmodule EpochtalkServer.Models.Post do
 
     # remove old keys after formatting attrs
     attrs
-      |> Map.delete("id")
-      |> Map.delete("body")
-      |> Map.delete("body_html")
-      |> Map.delete("body_original")
-      |> Map.delete("mentioned_ids")
-      |> Map.delete("thread_id")
-      |> Map.delete("user_id")
-      |> Map.delete("title")
+    |> Map.delete("id")
+    |> Map.delete("body")
+    |> Map.delete("body_html")
+    |> Map.delete("body_original")
+    |> Map.delete("mentioned_ids")
+    |> Map.delete("thread_id")
+    |> Map.delete("user_id")
+    |> Map.delete("title")
   end
 end

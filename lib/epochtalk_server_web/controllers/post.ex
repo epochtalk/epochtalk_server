@@ -158,9 +158,11 @@ defmodule EpochtalkServerWeb.Controllers.Post do
          _body <- Validate.cast(attrs, "body", :string, required: true, max: post_max_length),
          user_priority <- ACL.get_user_priority(conn),
          {:bypass_thread_lock, true} <-
-           {:bypass_thread_lock, can_authed_user_bypass_thread_lock_on_post_update(user, thread_id, id)},
+           {:bypass_thread_lock,
+            can_authed_user_bypass_thread_lock_on_post_update(user, thread_id, id)},
          {:bypass_post_lock, true} <-
-           {:bypass_post_lock, can_authed_user_bypass_post_lock_on_post_update(user, id, thread_id)},
+           {:bypass_post_lock,
+            can_authed_user_bypass_post_lock_on_post_update(user, id, thread_id)},
          {:is_active, true} <-
            {:is_active, User.is_active?(user.id)},
          {:can_read, {:ok, true}} <-
@@ -387,7 +389,40 @@ defmodule EpochtalkServerWeb.Controllers.Post do
     has_bypass or post_not_locked or is_mod or has_priority
   end
 
-  defp has_priorty(_user, _permission, _post_id, _self_mod \\ false) do
-    false
+  defp has_priorty(user, permission, post_id, self_mod \\ false) do
+    # check permission, kick back if user doesnt have permission
+    _has_permission = ACL.allow!(user, permission)
+
+    # fetch post, preload post author roles
+    post = Post.find_by_id(post_id) |> Repo.preload(user: :roles)
+
+    is_post_owner = post.user_id == user.id
+
+    if is_post_owner do
+      true
+    else
+      post_author_is_mod = BoardModerator.user_is_moderator_with_post_id(post.id, post.user_id)
+
+      post_author_priority = ACL.get_user_priority(post.user)
+
+      # TODO(akinsey): check user roles for user role
+      post_author_is_user = false
+
+      authed_user_priority = ACL.get_user_priority(user)
+
+      # TODO(akinsey): check user roles for patroller role
+      authed_user_is_patroller = false
+
+      # determine if authed user has priority over post author
+      cond do
+        # authed user has higher or same priority, self mod is not enabled
+        authed_user_priority <= post_author_priority && !self_mod -> true
+        # authed user has higher or same priority, self mod is enabled, post author is not a mod
+        authed_user_priority <= post_author_priority && self_mod && !post_author_is_mod -> true
+        # Allows `patrollers` to have priority over `users` within self moderated threads
+        self_mod && post_author_is_user && authed_user_is_patroller -> true
+        true -> false
+      end
+    end
   end
 end

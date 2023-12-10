@@ -68,6 +68,7 @@ defmodule EpochtalkServer.Models.ImageReference do
       :messages,
       :profiles
     ])
+    |> validate_required([:type])
     |> cast_assoc(:posts)
     |> cast_assoc(:messages)
     |> cast_assoc(:profiles)

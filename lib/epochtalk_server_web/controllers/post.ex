@@ -391,7 +391,7 @@ defmodule EpochtalkServerWeb.Controllers.Post do
   end
 
   defp has_priorty(user, permission, post_id, self_mod \\ false) do
-    # check permission, kick back if user doesnt have permission
+    # check permission
     has_permission = ACL.has_permission(user, permission)
 
     # fetch post, preload post author roles
@@ -410,13 +410,17 @@ defmodule EpochtalkServerWeb.Controllers.Post do
 
         post_author_priority = ACL.get_user_priority(post.user)
 
-        # TODO(akinsey): check user roles for user role
-        post_author_is_user = false
+        # empty roles array means post author is a "user"
+        post_author_is_user = post.user.roles == []
 
         authed_user_priority = ACL.get_user_priority(user)
 
-        # TODO(akinsey): check user roles for patroller role
-        authed_user_is_patroller = false
+        # check authed user roles for patroller role
+        authed_user_is_patroller = Enum.reduce(user.roles, false, fn role, is_patroller ->
+          if is_patroller,
+            do: true,
+            else: role.lookup == "patroller"
+        end)
 
         # determine if authed user has priority over post author
         cond do

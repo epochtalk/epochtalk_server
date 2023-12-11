@@ -27,6 +27,7 @@ defmodule EpochtalkServerWeb.Controllers.Post do
   alias EpochtalkServer.Models.ThreadSubscription
   alias EpochtalkServer.Models.AutoModeration
   alias EpochtalkServer.Models.Mention
+  alias EpochtalkServer.Repo
 
   @max_post_title_length 255
 
@@ -391,38 +392,45 @@ defmodule EpochtalkServerWeb.Controllers.Post do
 
   defp has_priorty(user, permission, post_id, self_mod \\ false) do
     # check permission, kick back if user doesnt have permission
-    _has_permission = ACL.allow!(user, permission)
+    has_permission = ACL.has_permission(user, permission)
 
     # fetch post, preload post author roles
     post = Post.find_by_id(post_id) |> Repo.preload(user: :roles)
 
     is_post_owner = post.user_id == user.id
 
-    if is_post_owner do
-      true
-    else
-      post_author_is_mod = BoardModerator.user_is_moderator_with_post_id(post.id, post.user_id)
+    # if has permission and post owner allow, if has permission and not post owner do additional checks
+    cond do
+      # user is post owner and has permissions allow
+      has_permission && is_post_owner -> true
 
-      post_author_priority = ACL.get_user_priority(post.user)
+      # doesn't own post check users permissions
+      has_permission && !is_post_owner ->
+        post_author_is_mod = BoardModerator.user_is_moderator_with_post_id(post.id, post.user_id)
 
-      # TODO(akinsey): check user roles for user role
-      post_author_is_user = false
+        post_author_priority = ACL.get_user_priority(post.user)
 
-      authed_user_priority = ACL.get_user_priority(user)
+        # TODO(akinsey): check user roles for user role
+        post_author_is_user = false
 
-      # TODO(akinsey): check user roles for patroller role
-      authed_user_is_patroller = false
+        authed_user_priority = ACL.get_user_priority(user)
 
-      # determine if authed user has priority over post author
-      cond do
-        # authed user has higher or same priority, self mod is not enabled
-        authed_user_priority <= post_author_priority && !self_mod -> true
-        # authed user has higher or same priority, self mod is enabled, post author is not a mod
-        authed_user_priority <= post_author_priority && self_mod && !post_author_is_mod -> true
-        # Allows `patrollers` to have priority over `users` within self moderated threads
-        self_mod && post_author_is_user && authed_user_is_patroller -> true
-        true -> false
-      end
+        # TODO(akinsey): check user roles for patroller role
+        authed_user_is_patroller = false
+
+        # determine if authed user has priority over post author
+        cond do
+          # authed user has higher or same priority, self mod is not enabled
+          authed_user_priority <= post_author_priority && !self_mod -> true
+          # authed user has higher or same priority, self mod is enabled, post author is not a mod
+          authed_user_priority <= post_author_priority && self_mod && !post_author_is_mod -> true
+          # Allows `patrollers` to have priority over `users` within self moderated threads
+          self_mod && post_author_is_user && authed_user_is_patroller -> true
+          true -> false
+        end
+
+      # invalid permissions
+      true -> false
     end
   end
 end

@@ -117,13 +117,13 @@ defmodule EpochtalkServerWeb.Controllers.Post do
         ErrorHelpers.render_json_error(conn, 400, cs)
 
       {:auth, nil} ->
-        ErrorHelpers.render_json_error(conn, 400, "Not logged in, cannot create post")
+        ErrorHelpers.render_json_error(conn, 403, "Not logged in, cannot create post")
 
       {:bypass_lock, false} ->
-        ErrorHelpers.render_json_error(conn, 400, "Thread is locked")
+        ErrorHelpers.render_json_error(conn, 403, "Thread is locked")
 
       {:is_active, false} ->
-        ErrorHelpers.render_json_error(conn, 400, "Account must be active to create posts")
+        ErrorHelpers.render_json_error(conn, 403, "Account must be active to create posts")
 
       {:can_read, {:ok, false}} ->
         ErrorHelpers.render_json_error(conn, 403, "Unauthorized, you do not have permission")
@@ -218,16 +218,19 @@ defmodule EpochtalkServerWeb.Controllers.Post do
         ErrorHelpers.render_json_error(conn, 400, cs)
 
       {:auth, nil} ->
-        ErrorHelpers.render_json_error(conn, 400, "Not logged in, cannot create post")
+        ErrorHelpers.render_json_error(conn, 403, "Not logged in, cannot create post")
+
+      {:bypass_post_owner, false} ->
+        ErrorHelpers.render_json_error(conn, 403, "Unauthorized, you do not have permission to edit another user's post")
 
       {:bypass_thread_lock, false} ->
-        ErrorHelpers.render_json_error(conn, 400, "Thread is locked")
+        ErrorHelpers.render_json_error(conn, 403, "Thread is locked")
 
       {:bypass_post_lock, false} ->
-        ErrorHelpers.render_json_error(conn, 400, "Post is locked")
+        ErrorHelpers.render_json_error(conn, 403, "Post is locked")
 
       {:is_active, false} ->
-        ErrorHelpers.render_json_error(conn, 400, "Account must be active to create posts")
+        ErrorHelpers.render_json_error(conn, 403, "Account must be active to create posts")
 
       {:can_read, {:ok, false}} ->
         ErrorHelpers.render_json_error(conn, 403, "Unauthorized, you do not have permission")

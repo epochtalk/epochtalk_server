@@ -398,14 +398,17 @@ defmodule EpochtalkServer.Models.Post do
   @doc """
   Used to find a specific `Post` by it's `id`
   """
-  @spec find_by_id(id :: non_neg_integer) :: t()
-  def find_by_id(id) when is_integer(id) do
+  @spec find_by_id(id :: non_neg_integer, preload_user_roles :: boolean | nil) :: t()
+  def find_by_id(id, preload_user_roles \\ false) when is_integer(id) do
     query =
       from p in Post,
         where: p.id == ^id,
         preload: [:thread, user: :profile]
 
-    Repo.one(query)
+    results = Repo.one(query)
+    if preload_user_roles,
+      do: results |> Repo.preload(user: :roles),
+      else: results
   end
 
   @doc """

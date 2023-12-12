@@ -27,7 +27,6 @@ defmodule EpochtalkServerWeb.Controllers.Post do
   alias EpochtalkServer.Models.ThreadSubscription
   alias EpochtalkServer.Models.AutoModeration
   alias EpochtalkServer.Models.Mention
-  alias EpochtalkServer.Repo
 
   @max_post_title_length 255
 
@@ -394,8 +393,8 @@ defmodule EpochtalkServerWeb.Controllers.Post do
     # check permission
     has_permission = ACL.has_permission(user, permission)
 
-    # fetch post, preload post author roles
-    post = Post.find_by_id(post_id) |> Repo.preload(user: :roles)
+    # fetch post, with preloaded post author roles
+    post = Post.find_by_id(post_id, true)
 
     is_post_owner = post.user_id == user.id
 

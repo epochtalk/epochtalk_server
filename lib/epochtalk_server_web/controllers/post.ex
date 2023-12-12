@@ -157,12 +157,20 @@ defmodule EpochtalkServerWeb.Controllers.Post do
            Validate.cast(attrs, "title", :string, required: true, max: @max_post_title_length),
          _body <- Validate.cast(attrs, "body", :string, required: true, max: post_max_length),
          user_priority <- ACL.get_user_priority(conn),
+
+         # retreive post data for use with authorizations, preload user's roles
+         post <- Post.find_by_id(id, true),
+
+         # authorizations
+         {:bypass_post_owner, true} <-
+           {:bypass_post_owner,
+            can_authed_user_bypass_owner_on_post_update(user, post, id)},
          {:bypass_thread_lock, true} <-
            {:bypass_thread_lock,
-            can_authed_user_bypass_thread_lock_on_post_update(user, thread_id, id)},
+            can_authed_user_bypass_thread_lock_on_post_update(user, post, thread_id)},
          {:bypass_post_lock, true} <-
            {:bypass_post_lock,
-            can_authed_user_bypass_post_lock_on_post_update(user, id, thread_id)},
+            can_authed_user_bypass_post_lock_on_post_update(user, post, thread_id)},
          {:is_active, true} <-
            {:is_active, User.is_active?(user.id)},
          {:can_read, {:ok, true}} <-
@@ -190,16 +198,15 @@ defmodule EpochtalkServerWeb.Controllers.Post do
 
       # Authorizations
       # 1) Check base permissions (Done)
-      # 2) Check if user has mod priorty and is moderator
-      # 3) Check if user has admin bypass or is post owner, moderator or has priority to edit post
-      # 4) Check if user can bypass deleted post and still edit
-      # 5) Check if user can bypass locked thread and still edit (Done)
-      # 6) Check if user can bypass locked board and still edit
-      # 7) Check if user can bypass locked post and still edit
-      # 8) Can read board (Done)
-      # 9) Can write board (Done)
-      # 10) Check user is board banned (Done)
-      # 11) User is active (Done)
+      # 2) Check if user has admin bypass or is post owner, moderator or has priority to edit post (Done)
+      # 3) Check if user can bypass deleted post and still edit
+      # 4) Check if user can bypass locked thread and still edit (Done)
+      # 5) Check if user can bypass locked board and still edit
+      # 6) Check if user can bypass locked post and still edit (Done)
+      # 7) Can read board (Done)
+      # 8) Can write board (Done)
+      # 9) Check user is board banned (Done)
+      # 10) User is active (Done)
 
       # Pre Processing
       # 1) Clean posts (Done)
@@ -374,31 +381,43 @@ defmodule EpochtalkServerWeb.Controllers.Post do
     has_bypass or thread_not_locked or is_mod
   end
 
-  defp can_authed_user_bypass_thread_lock_on_post_update(user, thread_id, post_id) do
+  defp can_authed_user_bypass_owner_on_post_update(user, post, thread_id) do
+    has_admin_bypass = ACL.has_permission(user, "posts.update.bypass.owner.admin")
+    is_post_owner = post.user_id == user.id
+
+    is_board_mod = BoardModerator.user_is_moderator_with_thread_id(thread_id, user.id)
+    has_mod_permissions = has_priorty(user, "posts.update.bypass.owner.mod", post)
+
+    is_valid_mod = is_board_mod and has_mod_permissions
+
+    has_priority = has_priorty(user, "posts.update.bypass.owner.priority", post)
+
+    has_admin_bypass or is_post_owner or is_valid_mod or has_priority
+  end
+
+  defp can_authed_user_bypass_thread_lock_on_post_update(user, post, thread_id) do
     has_bypass = ACL.has_permission(user, "posts.update.bypass.locked.admin")
     thread_not_locked = !Thread.is_locked(thread_id)
     is_mod = BoardModerator.user_is_moderator_with_thread_id(thread_id, user.id)
-    has_priority = has_priorty(user, "posts.update.bypass.owner.priority", post_id)
+    has_priority = has_priorty(user, "posts.update.bypass.locked.priority", post)
 
     has_bypass or thread_not_locked or is_mod or has_priority
   end
 
-  defp can_authed_user_bypass_post_lock_on_post_update(user, post_id, thread_id) do
+  defp can_authed_user_bypass_post_lock_on_post_update(user, post, thread_id) do
     has_bypass = ACL.has_permission(user, "posts.update.bypass.locked.admin")
-    post_not_locked = !Post.is_locked(thread_id)
+    post_not_locked = !post.locked
     is_mod = BoardModerator.user_is_moderator_with_thread_id(thread_id, user.id)
-    has_priority = has_priorty(user, "posts.update.bypass.owner.priority", post_id)
+    has_priority = has_priorty(user, "posts.update.bypass.locked.priority", post)
 
     has_bypass or post_not_locked or is_mod or has_priority
   end
 
-  defp has_priorty(user, permission, post_id, self_mod \\ false) do
+  defp has_priorty(user, permission, post, self_mod \\ false) do
     # check permission
     has_permission = ACL.has_permission(user, permission)
 
-    # fetch post, with preloaded post author roles
-    post = Post.find_by_id(post_id, true)
-
+    # check if authed user is post owner
     is_post_owner = post.user_id == user.id
 
     # if has permission and post owner allow, if has permission and not post owner do additional checks

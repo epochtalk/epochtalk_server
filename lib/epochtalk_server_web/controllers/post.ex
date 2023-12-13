@@ -165,6 +165,9 @@ defmodule EpochtalkServerWeb.Controllers.Post do
          {:bypass_post_owner, true} <-
            {:bypass_post_owner,
             can_authed_user_bypass_owner_on_post_update(user, post, id)},
+         {:bypass_post_deleted, true} <-
+           {:bypass_post_deleted,
+            can_authed_user_bypass_post_deleted_on_post_update(user, post, thread_id)},
          {:bypass_thread_lock, true} <-
            {:bypass_thread_lock,
             can_authed_user_bypass_thread_lock_on_post_update(user, post, thread_id)},
@@ -235,6 +238,9 @@ defmodule EpochtalkServerWeb.Controllers.Post do
 
       {:bypass_post_lock, false} ->
         ErrorHelpers.render_json_error(conn, 403, "Post is locked")
+
+      {:bypass_post_deleted, false} ->
+        ErrorHelpers.render_json_error(conn, 400, "Post must be unhidden to be edited")
 
       {:is_active, false} ->
         ErrorHelpers.render_json_error(conn, 403, "Account must be active to create posts")
@@ -409,6 +415,15 @@ defmodule EpochtalkServerWeb.Controllers.Post do
     post_not_locked = !post.locked
     is_mod = BoardModerator.user_is_moderator_with_thread_id(thread_id, user.id)
     has_priority = has_priorty(user, "posts.update.bypass.locked.priority", post)
+
+    has_bypass or post_not_locked or is_mod or has_priority
+  end
+
+  defp can_authed_user_bypass_post_deleted_on_post_update(user, post, thread_id) do
+    has_bypass = ACL.has_permission(user, "posts.update.bypass.deleted.admin")
+    post_not_deleted = !post.deleted
+    is_mod = BoardModerator.user_is_moderator_with_thread_id(thread_id, user.id)
+    has_priority = has_priorty(user, "posts.update.bypass.deleted.priority", post)
 
     has_bypass or post_not_locked or is_mod or has_priority
   end

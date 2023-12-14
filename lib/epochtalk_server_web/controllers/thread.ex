@@ -9,6 +9,7 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
   alias EpochtalkServerWeb.Helpers.Validate
   alias EpochtalkServerWeb.Helpers.ACL
   alias EpochtalkServerWeb.Helpers.Sanitize
+  alias EpochtalkServerWeb.Helpers.Parse
   alias EpochtalkServer.Models.Thread
   alias EpochtalkServer.Models.User
   alias EpochtalkServer.Models.Board
@@ -68,9 +69,9 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
          # pre/parallel hooks
          attrs <- AutoModeration.moderate(user, attrs),
          attrs <- Mention.username_to_user_id(user, attrs),
-         attrs <- Sanitize.html_from_title(attrs["title"], attrs),
-         attrs <- Sanitize.html_from_body(attrs["body"], attrs),
-
+         attrs <- Sanitize.html_and_entities_from_title(attrs),
+         attrs <- Sanitize.html_and_entities_from_body(attrs),
+         attrs <- Parse.markdown_within_body(attrs),
          # thread creation
          {:ok, thread_data} <- Thread.create(attrs, user) do
       # post hooks
@@ -105,7 +106,7 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
 
       # Pre Processing
 
-      # 1) clean post (html_sanitize_ex)
+      # 1) clean post
       # 2) parse post
       # 3) handle uploaded images
       # 4) handle filtering out newbie images

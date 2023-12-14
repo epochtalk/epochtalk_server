@@ -120,7 +120,7 @@ defmodule EpochtalkServerWeb.Controllers.Post do
         ErrorHelpers.render_json_error(conn, 403, "Not logged in, cannot create post")
 
       {:bypass_lock, false} ->
-        ErrorHelpers.render_json_error(conn, 403, "Thread is locked")
+        ErrorHelpers.render_json_error(conn, 400, "Thread is locked")
 
       {:is_active, false} ->
         ErrorHelpers.render_json_error(conn, 403, "Account must be active to create posts")
@@ -161,19 +161,22 @@ defmodule EpochtalkServerWeb.Controllers.Post do
          # retreive post data for use with authorizations, preload user's roles
          post <- Post.find_by_id(id, true),
 
-         # authorizations
+         # Authorizations
          {:bypass_post_owner, true} <-
            {:bypass_post_owner,
             can_authed_user_bypass_owner_on_post_update(user, post, id)},
          {:bypass_post_deleted, true} <-
            {:bypass_post_deleted,
             can_authed_user_bypass_post_deleted_on_post_update(user, post, thread_id)},
-         {:bypass_thread_lock, true} <-
-           {:bypass_thread_lock,
-            can_authed_user_bypass_thread_lock_on_post_update(user, post, thread_id)},
          {:bypass_post_lock, true} <-
            {:bypass_post_lock,
             can_authed_user_bypass_post_lock_on_post_update(user, post, thread_id)},
+         {:bypass_thread_lock, true} <-
+           {:bypass_thread_lock,
+            can_authed_user_bypass_thread_lock_on_post_update(user, post, thread_id)},
+         {:bypass_board_lock, true} <-
+           {:bypass_board_lock,
+            can_authed_user_bypass_board_lock_on_post_update(user, post, thread_id)},
          {:is_active, true} <-
            {:is_active, User.is_active?(user.id)},
          {:can_read, {:ok, true}} <-
@@ -182,6 +185,8 @@ defmodule EpochtalkServerWeb.Controllers.Post do
            {:can_write, Board.get_write_access_by_thread_id(thread_id, user_priority)},
          {:board_banned, {:ok, false}} <-
            {:board_banned, BoardBan.is_banned_from_board(user, thread_id: thread_id)},
+
+         # Hooks
          attrs <- AutoModeration.moderate(user, attrs),
          attrs <- Mention.username_to_user_id(user, attrs),
          attrs <- Sanitize.html_and_entities_from_title(attrs),
@@ -202,9 +207,9 @@ defmodule EpochtalkServerWeb.Controllers.Post do
       # Authorizations
       # 1) Check base permissions (Done)
       # 2) Check if user has admin bypass or is post owner, moderator or has priority to edit post (Done)
-      # 3) Check if user can bypass deleted post and still edit
+      # 3) Check if user can bypass deleted post and still edit (Done)
       # 4) Check if user can bypass locked thread and still edit (Done)
-      # 5) Check if user can bypass locked board and still edit
+      # 5) Check if user can bypass locked board and still edit (Done)
       # 6) Check if user can bypass locked post and still edit (Done)
       # 7) Can read board (Done)
       # 8) Can write board (Done)
@@ -233,14 +238,17 @@ defmodule EpochtalkServerWeb.Controllers.Post do
       {:bypass_post_owner, false} ->
         ErrorHelpers.render_json_error(conn, 403, "Unauthorized, you do not have permission to edit another user's post")
 
-      {:bypass_thread_lock, false} ->
-        ErrorHelpers.render_json_error(conn, 403, "Thread is locked")
-
       {:bypass_post_lock, false} ->
-        ErrorHelpers.render_json_error(conn, 403, "Post is locked")
+        ErrorHelpers.render_json_error(conn, 400, "Post is locked")
 
       {:bypass_post_deleted, false} ->
         ErrorHelpers.render_json_error(conn, 400, "Post must be unhidden to be edited")
+
+      {:bypass_thread_lock, false} ->
+        ErrorHelpers.render_json_error(conn, 400, "Thread is locked")
+
+      {:bypass_board_lock, false} ->
+        ErrorHelpers.render_json_error(conn, 400, "Post editing is disabled for this board")
 
       {:is_active, false} ->
         ErrorHelpers.render_json_error(conn, 403, "Account must be active to create posts")

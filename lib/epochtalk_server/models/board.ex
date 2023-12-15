@@ -338,7 +338,10 @@ defmodule EpochtalkServer.Models.Board do
   Returns boolean indicating if `Board` has `Post` edit disabled, which is determined by
   the `post_edit_diabled` setting within the `meta` field of the `Board`
   """
-  @spec is_post_edit_disabled_by_thread_id(thread_id :: non_neg_integer, post_created_at :: NaiveDateTime) :: boolean
+  @spec is_post_edit_disabled_by_thread_id(
+          thread_id :: non_neg_integer,
+          post_created_at :: NaiveDateTime
+        ) :: boolean
   def is_post_edit_disabled_by_thread_id(thread_id, post_created_at) when is_integer(thread_id) do
     query =
       from b in Board,
@@ -350,15 +353,23 @@ defmodule EpochtalkServer.Models.Board do
     disable_post_edit = Repo.one(query)
 
     # check time elapsed if post edit is disabled
-    editing_disabled = if is_integer(disable_post_edit) and disable_post_edit > -1 do
-      current_time = NaiveDateTime.utc_now() |> DateTime.from_naive!("Etc/UTC") |> DateTime.to_unix(:millisecond)
-      post_created_at = post_created_at |> DateTime.from_naive!("Etc/UTC") |> DateTime.to_unix(:millisecond)
-      editable_for_mins = disable_post_edit * 60 * 1000
-      current_time - post_created_at >= editable_for_mins
-    else
-      # diable_post_edit not set
-      false
-    end
+    editing_disabled =
+      if is_integer(disable_post_edit) and disable_post_edit > -1 do
+        current_time =
+          NaiveDateTime.utc_now()
+          |> DateTime.from_naive!("Etc/UTC")
+          |> DateTime.to_unix(:millisecond)
+
+        post_created_at =
+          post_created_at |> DateTime.from_naive!("Etc/UTC") |> DateTime.to_unix(:millisecond)
+
+        editable_for_mins = disable_post_edit * 60 * 1000
+
+        current_time - post_created_at >= editable_for_mins
+      else
+        # diable_post_edit not set
+        false
+      end
 
     editing_disabled
   end

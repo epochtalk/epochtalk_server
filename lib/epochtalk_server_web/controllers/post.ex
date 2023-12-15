@@ -163,8 +163,7 @@ defmodule EpochtalkServerWeb.Controllers.Post do
 
          # Authorizations
          {:bypass_post_owner, true} <-
-           {:bypass_post_owner,
-            can_authed_user_bypass_owner_on_post_update(user, post, id)},
+           {:bypass_post_owner, can_authed_user_bypass_owner_on_post_update(user, post, id)},
          {:bypass_post_deleted, true} <-
            {:bypass_post_deleted,
             can_authed_user_bypass_post_deleted_on_post_update(user, post, thread_id)},
@@ -236,7 +235,11 @@ defmodule EpochtalkServerWeb.Controllers.Post do
         ErrorHelpers.render_json_error(conn, 403, "Not logged in, cannot create post")
 
       {:bypass_post_owner, false} ->
-        ErrorHelpers.render_json_error(conn, 403, "Unauthorized, you do not have permission to edit another user's post")
+        ErrorHelpers.render_json_error(
+          conn,
+          403,
+          "Unauthorized, you do not have permission to edit another user's post"
+        )
 
       {:bypass_post_lock, false} ->
         ErrorHelpers.render_json_error(conn, 400, "Post is locked")
@@ -390,7 +393,10 @@ defmodule EpochtalkServerWeb.Controllers.Post do
   defp can_authed_user_bypass_thread_lock_on_post_create(user, thread_id) do
     has_bypass = ACL.has_permission(user, "posts.create.bypass.locked.admin")
     thread_not_locked = !Thread.is_locked(thread_id)
-    is_mod = BoardModerator.user_is_moderator_with_thread_id(thread_id, user.id)
+
+    is_mod =
+      BoardModerator.user_is_moderator_with_thread_id(thread_id, user.id) and
+        ACL.has_permission(user, "posts.create.bypass.locked.mod")
 
     has_bypass or thread_not_locked or is_mod
   end
@@ -399,29 +405,24 @@ defmodule EpochtalkServerWeb.Controllers.Post do
     has_admin_bypass = ACL.has_permission(user, "posts.update.bypass.owner.admin")
     is_post_owner = post.user_id == user.id
 
-    is_board_mod = BoardModerator.user_is_moderator_with_thread_id(thread_id, user.id)
-    has_mod_permissions = has_priorty(user, "posts.update.bypass.owner.mod", post)
-
-    is_valid_mod = is_board_mod and has_mod_permissions
+    is_mod =
+      BoardModerator.user_is_moderator_with_thread_id(thread_id, user.id) and
+        ACL.has_permission(user, "posts.update.bypass.owner.mod") and
+        has_priorty(user, "posts.update.bypass.owner.mod", post)
 
     has_priority = has_priorty(user, "posts.update.bypass.owner.priority", post)
 
-    has_admin_bypass or is_post_owner or is_valid_mod or has_priority
-  end
-
-  defp can_authed_user_bypass_thread_lock_on_post_update(user, post, thread_id) do
-    has_bypass = ACL.has_permission(user, "posts.update.bypass.locked.admin")
-    thread_not_locked = !Thread.is_locked(thread_id)
-    is_mod = BoardModerator.user_is_moderator_with_thread_id(thread_id, user.id)
-    has_priority = has_priorty(user, "posts.update.bypass.locked.priority", post)
-
-    has_bypass or thread_not_locked or is_mod or has_priority
+    has_admin_bypass or is_post_owner or is_mod or has_priority
   end
 
   defp can_authed_user_bypass_post_lock_on_post_update(user, post, thread_id) do
     has_bypass = ACL.has_permission(user, "posts.update.bypass.locked.admin")
     post_not_locked = !post.locked
-    is_mod = BoardModerator.user_is_moderator_with_thread_id(thread_id, user.id)
+
+    is_mod =
+      BoardModerator.user_is_moderator_with_thread_id(thread_id, user.id) and
+        ACL.has_permission(user, "posts.update.bypass.locked.mod")
+
     has_priority = has_priorty(user, "posts.update.bypass.locked.priority", post)
 
     has_bypass or post_not_locked or is_mod or has_priority
@@ -430,10 +431,39 @@ defmodule EpochtalkServerWeb.Controllers.Post do
   defp can_authed_user_bypass_post_deleted_on_post_update(user, post, thread_id) do
     has_bypass = ACL.has_permission(user, "posts.update.bypass.deleted.admin")
     post_not_deleted = !post.deleted
-    is_mod = BoardModerator.user_is_moderator_with_thread_id(thread_id, user.id)
+
+    is_mod =
+      BoardModerator.user_is_moderator_with_thread_id(thread_id, user.id) and
+        ACL.has_permission(user, "posts.update.bypass.deleted.mod")
+
     has_priority = has_priorty(user, "posts.update.bypass.deleted.priority", post)
 
-    has_bypass or post_not_locked or is_mod or has_priority
+    has_bypass or post_not_deleted or is_mod or has_priority
+  end
+
+  defp can_authed_user_bypass_thread_lock_on_post_update(user, post, thread_id) do
+    has_bypass = ACL.has_permission(user, "posts.update.bypass.locked.admin")
+    thread_not_locked = !Thread.is_locked(thread_id)
+
+    is_mod =
+      BoardModerator.user_is_moderator_with_thread_id(thread_id, user.id) and
+        ACL.has_permission(user, "posts.update.bypass.locked.mod")
+
+    has_priority = has_priorty(user, "posts.update.bypass.locked.priority", post)
+
+    has_bypass or thread_not_locked or is_mod or has_priority
+  end
+
+  defp can_authed_user_bypass_board_lock_on_post_update(user, post, thread_id) do
+    has_bypass = ACL.has_permission(user, "posts.update.bypass.locked.admin")
+
+    board_post_edit_not_locked =
+      !Board.is_post_edit_disabled_by_thread_id(thread_id, post.created_at)
+
+    is_mod = BoardModerator.user_is_moderator_with_thread_id(thread_id, user.id)
+    has_priority = has_priorty(user, "posts.update.bypass.locked.priority", post)
+
+    has_bypass or board_post_edit_not_locked or is_mod or has_priority
   end
 
   defp has_priorty(user, permission, post, self_mod \\ false) do
@@ -446,7 +476,8 @@ defmodule EpochtalkServerWeb.Controllers.Post do
     # if has permission and post owner allow, if has permission and not post owner do additional checks
     cond do
       # user is post owner and has permissions allow
-      has_permission && is_post_owner -> true
+      has_permission && is_post_owner ->
+        true
 
       # doesn't own post check users permissions
       has_permission && !is_post_owner ->
@@ -460,11 +491,12 @@ defmodule EpochtalkServerWeb.Controllers.Post do
         authed_user_priority = ACL.get_user_priority(user)
 
         # check authed user roles for patroller role
-        authed_user_is_patroller = Enum.reduce(user.roles, false, fn role, is_patroller ->
-          if is_patroller,
-            do: true,
-            else: role.lookup == "patroller"
-        end)
+        authed_user_is_patroller =
+          Enum.reduce(user.roles, false, fn role, is_patroller ->
+            if is_patroller,
+              do: true,
+              else: role.lookup == "patroller"
+          end)
 
         # determine if authed user has priority over post author
         cond do
@@ -478,7 +510,8 @@ defmodule EpochtalkServerWeb.Controllers.Post do
         end
 
       # invalid permissions
-      true -> false
+      true ->
+        false
     end
   end
 end

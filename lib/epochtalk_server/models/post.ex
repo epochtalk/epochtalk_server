@@ -406,6 +406,7 @@ defmodule EpochtalkServer.Models.Post do
         preload: [:thread, user: :profile]
 
     results = Repo.one(query)
+
     if preload_user_roles,
       do: results |> Repo.preload(user: :roles),
       else: results

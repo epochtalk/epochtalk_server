@@ -151,4 +151,21 @@ defmodule EpochtalkServerWeb.Helpers.ACL do
 
   def get_user_priority(nil),
     do: Role.get_default_unauthenticated().priority
+
+  @doc """
+  Returns boolean indicating if supplied `User` has the role with the supplied
+  `lookup` path.
+  """
+  @spec has_role(
+          user :: User.t() | map(),
+          role_lookup :: String.t()
+        ) :: boolean
+  def has_role(%{roles: roles} = _user, role_lookup) do
+    if roles == [] and role_lookup == "user",
+      do: true,
+      else:
+        Enum.reduce(roles, false, fn role, has_role ->
+          has_role || role.lookup == role_lookup
+        end)
+  end
 end

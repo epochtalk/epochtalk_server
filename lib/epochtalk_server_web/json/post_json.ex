@@ -135,13 +135,13 @@ defmodule EpochtalkServerWeb.Controllers.PostJSON do
 
     # get information about how current post was hidden
     post_hidden_by_priority =
-      if metadata_map_exists,
-        do: post.metadata.hidden_by_priority,
+      if metadata_map_exists && post.metadata["hidden_by_priority"] != nil,
+        do: post.metadata["hidden_by_priority"],
         else: post.user.priority
 
     post_hidden_by_id =
-      if metadata_map_exists,
-        do: post.metadata.hidden_by_id,
+      if metadata_map_exists && post.metadata["hidden_by_id"] != nil,
+        do: post.metadata["hidden_by_id"],
         else: post.user.id
 
     # check if user has priority to view hidden post,

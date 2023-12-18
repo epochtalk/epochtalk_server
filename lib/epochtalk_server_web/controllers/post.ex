@@ -473,15 +473,15 @@ defmodule EpochtalkServerWeb.Controllers.Post do
     # check if authed user is post owner
     is_post_owner = post.user_id == user.id
 
+    # user is post owner and has permissions
+    valid_post_owner = has_permission and is_post_owner
+
+    # doesn't own post check users permissions
+    valid_post_owner_override =
+      has_permission and !is_post_owner and can_edit_others_posts(user, post, self_mod)
+
     # if has permission and post owner allow, if has permission and not post owner do additional checks
-    cond do
-      # user is post owner and has permissions allow
-      has_permission && is_post_owner -> true
-      # doesn't own post check users permissions
-      has_permission && !is_post_owner -> can_edit_others_posts(user, post, self_mod)
-      # invalid permissions
-      true -> false
-    end
+    valid_post_owner or valid_post_owner_override
   end
 
   defp can_edit_others_posts(user, post, self_mod) do
@@ -495,22 +495,22 @@ defmodule EpochtalkServerWeb.Controllers.Post do
     authed_user_priority = ACL.get_user_priority(user)
 
     # check authed user roles for patroller role
-    authed_user_is_patroller =
-      Enum.reduce(user.roles, false, fn role, is_patroller ->
-        if is_patroller,
-          do: true,
-          else: role.lookup == "patroller"
-      end)
+    authed_user_is_patroller = ACL.has_role(user, "patroller")
+
+    # authed user has higher or same priority as post author, self mod is not enabled
+    authed_user_has_priorty_no_self_mod =
+      authed_user_priority <= post_author_priority and !self_mod
+
+    # authed user has higher or same priority as post author, self mod is enabled, post author is not a mod
+    authed_user_has_priority_self_mod =
+      authed_user_priority <= post_author_priority and self_mod and !post_author_is_mod
+
+    # Allows `patrollers` to have priority over `users` within self moderated threads
+    authed_user_has_patroller_permissions =
+      self_mod and post_author_is_user and authed_user_is_patroller
 
     # determine if authed user has priority over post author
-    cond do
-      # authed user has higher or same priority, self mod is not enabled
-      authed_user_priority <= post_author_priority && !self_mod -> true
-      # authed user has higher or same priority, self mod is enabled, post author is not a mod
-      authed_user_priority <= post_author_priority && self_mod && !post_author_is_mod -> true
-      # Allows `patrollers` to have priority over `users` within self moderated threads
-      self_mod && post_author_is_user && authed_user_is_patroller -> true
-      true -> false
-    end
+    authed_user_has_priorty_no_self_mod or authed_user_has_priority_self_mod or
+      authed_user_has_patroller_permissions
   end
 end

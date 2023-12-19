@@ -340,7 +340,7 @@ defmodule EpochtalkServer.Models.Board do
   """
   @spec is_post_edit_disabled_by_thread_id(
           thread_id :: non_neg_integer,
-          post_created_at :: NaiveDateTime
+          post_created_at :: NaiveDateTime.t()
         ) :: boolean
   def is_post_edit_disabled_by_thread_id(thread_id, post_created_at) when is_integer(thread_id) do
     query =

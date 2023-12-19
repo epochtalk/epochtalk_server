@@ -18,3 +18,12 @@ config :epochtalk_server,
     emailer: %{ses_mode: System.get_env("EMAILER_SES_MODE") || false, options: %{from_address: System.get_env("EMAILER_FROM_ADDRESS") || "info@epochtalk.com"}},
     images: %{s3_mode: System.get_env("IMAGES_S3_MODE") || false, options: %{local_host: System.get_env("IMAGES_LOCAL_HOST") || "http://localhost:4000"}}
   }
+
+# configure redis for production
+config :guardian_redis, :redis,
+  host: System.get_env("REDIS_HOST") || "redis",
+  port: System.get_env("REDIS_PORT") || 6379,
+  pool_size: 10
+
+config :epochtalk_server, EpochtalkServerWeb.Endpoint,
+  url: [host: System.get_env("FRONTEND_URL")]

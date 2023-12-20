@@ -7,9 +7,6 @@ RUN mix local.rebar --force
 ADD . .
 RUN mix deps.get
 
-# enable configuration by environment
-COPY config/docker.secret.exs config/prod.secret.exs
-
 # compile for production
 ENV MIX_ENV=prod
 RUN mix compile

@@ -124,7 +124,7 @@ if config_env() == :prod do
       keywords: System.get_env("WEBSITE_KEYWORDS") || "open source, free forum, forum software, forum",
       logo: System.get_env("WEBSITE_LOGO") || nil,
       favicon: System.get_env("WEBSITE_FAVICON") || nil,
-      default_avatar: System.get_env("WEBSITE_DEFAULT_AVATAR")"/images/avatar.png",
+      default_avatar: System.get_env("WEBSITE_DEFAULT_AVATAR") || "/images/avatar.png",
       default_avatar_shape: System.get_env("WEBSITE_DEFAULT_AVATAR_SHAPE") || "circle"
     },
     portal: %{

@@ -80,11 +80,34 @@ if config_env() == :prod do
   #     config :swoosh, :api_client, Swoosh.ApiClient.Hackney
   #
   # See https://hexdocs.pm/swoosh/Swoosh.html#module-installation for details.
-  config :epochtalk_server, EpochtalkServer.Mailer,
-    relay: System.get_env("EMAILER_SMTP_RELAY") || "smtp.example.com",
-    username: System.get_env("EMAILER_SMTP_USERNAME") || "username",
-    password: System.get_env("EMAILER_SMTP_PASSWORD") || "password",
-    port: System.get_env("EMAILER_SMTP_PORT") || 465
+  if System.get_env("EMAILER_SES_MODE") do
+    emailer_ses_region =
+      System.get_env("EMAILER_SES_REGION") ||
+        raise """
+        environment variable EMAILER_SES_REGION is missing.
+        """
+    emailer_ses_aws_access_key =
+      System.get_env("EMAILER_SES_AWS_ACCESS_KEY") ||
+        raise """
+        environment variable EMAILER_SES_AWS_ACCESS_KEY missing.
+        """
+    emailer_ses_aws_secret_key =
+      System.get_env("EMAILER_SES_AWS_SECRET_KEY") ||
+        raise """
+        environment variable EMAILER_SES_AWS_SECRET_KEY missing.
+        """
+    config :epochtalk_server, EpochtalkServer.Mailer,
+      adapter: Swoosh.Adapters.AmazonSES,
+      region: emailer_ses_region,
+      access_key: emailer_ses_aws_access_key,
+      secret: emailer_ses_aws_secret_key
+  else
+    config :epochtalk_server, EpochtalkServer.Mailer,
+      relay: System.get_env("EMAILER_SMTP_RELAY") || "smtp.example.com",
+      username: System.get_env("EMAILER_SMTP_USERNAME") || "username",
+      password: System.get_env("EMAILER_SMTP_PASSWORD") || "password",
+      port: System.get_env("EMAILER_SMTP_PORT") || 465
+  end
 
   # Configure Guardian for Runtime
   config :epochtalk_server, EpochtalkServer.Auth.Guardian,

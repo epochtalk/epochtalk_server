@@ -357,6 +357,7 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
           else
             conn
           end
+
         _ ->
           conn
       end

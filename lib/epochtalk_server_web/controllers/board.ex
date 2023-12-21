@@ -112,22 +112,24 @@ defmodule EpochtalkServerWeb.Controllers.Board do
     conn =
       case conn.private.phoenix_action do
         :slug_to_id ->
-            case Integer.parse(conn.params["slug"]) do
-              {_, ""} ->
-                slug_as_id = Validate.cast(conn.params, "slug", :integer, required: true)
+          case Integer.parse(conn.params["slug"]) do
+            {_, ""} ->
+              slug_as_id = Validate.cast(conn.params, "slug", :integer, required: true)
 
-                if slug_as_id < System.get_env("BOARDS_SEQ") |> String.to_integer() do
-                  conn
-                  |> render(:slug_to_id, id: slug_as_id)
-                  |> halt()
-                end
-
-              _ ->
+              if slug_as_id < System.get_env("BOARDS_SEQ") |> String.to_integer() do
                 conn
-            end
+                |> render(:slug_to_id, id: slug_as_id)
+                |> halt()
+              end
+
+            _ ->
+              conn
+          end
+
         _ ->
           conn
       end
+
     conn
   end
 end

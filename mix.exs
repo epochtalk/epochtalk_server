@@ -50,6 +50,7 @@ defmodule EpochtalkServer.MixProject do
       {:iteraptor, git: "https://github.com/epochtalk/elixir-iteraptor.git", tag: "1.13.1"},
       {:jason, "~> 1.4.0"},
       {:mimic, "~> 1.7.4", only: :test},
+      {:myxql, "~> 0.6.3"},
       {:phoenix, "~> 1.7.2"},
       {:phoenix_ecto, "~> 4.4"},
       {:phoenix_html, "~> 3.0"},

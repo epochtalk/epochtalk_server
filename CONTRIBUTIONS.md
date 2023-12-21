@@ -13,7 +13,7 @@ conventions.  Please refer to these guidelines!
 * Write [code](https://en.wikipedia.org/wiki/Computer_programming)
   in [Elixir](https://elixir-lang.org/) to implement your feature
 
-  (Instructions for your computer to do things)
+* Use Logger instead of IO.puts/inspect
 
 * Commit code using [Angular Commit Message](https://gist.github.com/brianclements/841ea7bffdb01346392c)
   conventions.

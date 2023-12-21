@@ -8,12 +8,14 @@ defmodule EpochtalkServerWeb.Controllers.ModerationLog do
   alias EpochtalkServer.Models.ModerationLog
   alias EpochtalkServerWeb.ErrorHelpers
   alias EpochtalkServerWeb.Helpers.Validate
+  alias EpochtalkServerWeb.Helpers.ACL
 
   @doc """
   Used to page `ModerationLog` models for moderation log view`
   """
   def page(conn, attrs) do
     with {:auth, true} <- {:auth, Guardian.Plug.authenticated?(conn)},
+         :ok <- ACL.allow!(conn, "moderationLogs.page"),
          page <- Validate.cast(attrs, "page", :integer, min: 1),
          limit <- Validate.cast(attrs, "limit", :integer, min: 1),
          {:ok, moderation_logs, data} <- ModerationLog.page(attrs, page, per_page: limit) do

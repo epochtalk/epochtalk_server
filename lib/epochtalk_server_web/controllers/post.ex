@@ -8,6 +8,8 @@ defmodule EpochtalkServerWeb.Controllers.Post do
   alias EpochtalkServerWeb.ErrorHelpers
   alias EpochtalkServerWeb.Helpers.Validate
   alias EpochtalkServerWeb.Helpers.ACL
+  alias EpochtalkServerWeb.Helpers.Sanitize
+  alias EpochtalkServerWeb.Helpers.Parse
   alias EpochtalkServer.Models.Post
   alias EpochtalkServer.Models.Poll
   alias EpochtalkServer.Models.Thread
@@ -62,15 +64,18 @@ defmodule EpochtalkServerWeb.Controllers.Post do
            {:board_banned, BoardBan.is_banned_from_board(user, thread_id: thread_id)},
          attrs <- AutoModeration.moderate(user, attrs),
          attrs <- Mention.username_to_user_id(user, attrs),
+         attrs <- Sanitize.html_and_entities_from_title(attrs),
+         attrs <- Sanitize.html_and_entities_from_body(attrs),
+         attrs <- Parse.markdown_within_body(attrs),
          # TODO(akinsey): Implement the following for completion
          # Plugins
          # 1) Track IP (done)
 
          # Pre Processing
 
-         # 1) clean post (html_sanitize_ex)
-         # 2) parse post
-         # 3) handle uploaded images
+         # 1) clean post title (done)
+         # 2) parse/clean post body (wip)
+         # 3) handle uploaded images (wip)
          # 4) handle filtering out newbie images
 
          # Hooks

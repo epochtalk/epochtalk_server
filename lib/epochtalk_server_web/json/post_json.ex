@@ -265,8 +265,8 @@ defmodule EpochtalkServerWeb.Controllers.PostJSON do
 
   defp format_post_data_for_by_thread(post) do
     post
-    # TODO(akinsey): this is a temp hack to get posts to display
-    |> Map.put(:body_html, post.body)
+    # if body_html does not exist, default to post.body
+    |> Map.put(:body_html, post.body_html || post.body)
     |> Map.put(:user, %{
       id: post.user_id,
       name: post.name,

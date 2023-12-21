@@ -16,7 +16,8 @@ defmodule EpochtalkServerWeb.Controllers.Board do
   Used to retrieve categorized boards
   """
   def by_category(conn, attrs) do
-    with stripped <- Validate.cast(attrs, "stripped", :boolean, default: false),
+    with :ok <- ACL.allow!(conn, "boards.allCategories"),
+         stripped <- Validate.cast(attrs, "stripped", :boolean, default: false),
          user_priority <- ACL.get_user_priority(conn),
          board_mapping <- BoardMapping.all(stripped: stripped),
          board_moderators <- BoardModerator.all(),
@@ -36,8 +37,11 @@ defmodule EpochtalkServerWeb.Controllers.Board do
   Used to find a specific board
   """
   def find(conn, attrs) do
-    with id <- Validate.cast(attrs, "id", :integer, required: true),
+    with :ok <- ACL.allow!(conn, "boards.find"),
+         id <- Validate.cast(attrs, "id", :integer, required: true),
          user_priority <- ACL.get_user_priority(conn),
+         {:can_read, {:ok, true}} <-
+           {:can_read, Board.get_read_access_by_id(id, user_priority)},
          board_mapping <- BoardMapping.all(),
          board_moderators <- BoardModerator.all(),
          {:board, [_board]} <-
@@ -49,8 +53,22 @@ defmodule EpochtalkServerWeb.Controllers.Board do
         user_priority: user_priority
       })
     else
-      {:board, []} -> ErrorHelpers.render_json_error(conn, 400, "Error, board does not exist")
-      _ -> ErrorHelpers.render_json_error(conn, 400, "Error, cannot fetch boards")
+      # if user can't read board, return 404, user doesn't need to know hidden board exists
+      {:can_read, {:ok, false}} ->
+        ErrorHelpers.render_json_error(
+          conn,
+          404,
+          "Board not found"
+        )
+
+      {:can_read, {:error, :board_does_not_exist}} ->
+        ErrorHelpers.render_json_error(conn, 400, "Error, board does not exist")
+
+      {:board, []} ->
+        ErrorHelpers.render_json_error(conn, 400, "Error, board does not exist")
+
+      _ ->
+        ErrorHelpers.render_json_error(conn, 400, "Error, cannot fetch boards")
     end
   end
 
@@ -70,6 +88,7 @@ defmodule EpochtalkServerWeb.Controllers.Board do
   @doc """
   Used to convert `Board` slug to id
   """
+  # TODO(akinsey): allow validate cast to match a regex, for completeness validate slug format
   def slug_to_id(conn, attrs) do
     with slug <- Validate.cast(attrs, "slug", :string, required: true),
          {:ok, id} <- Board.slug_to_id(slug) do

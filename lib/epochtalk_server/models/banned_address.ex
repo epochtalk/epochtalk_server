@@ -6,6 +6,13 @@ defmodule EpochtalkServer.Models.BannedAddress do
   alias EpochtalkServer.Repo
   alias EpochtalkServer.Models.BannedAddress
 
+  @one_week_in_ms 1000 * 60 * 60 * 24 * 7
+  @inital_amount 0.8897
+  @rate_of_decay 0.9644
+  @ip32_weight 1
+  @ip24_weight 0.04
+  @ip16_weight 0.0016
+
   @moduledoc """
   `BannedAddress` model, for performing actions relating to banning by ip/hostname
   """
@@ -222,11 +229,13 @@ defmodule EpochtalkServer.Models.BannedAddress do
               0
           end
 
-        ip32_score = calculate_ip32_score(ip)
-        ip24_score = calculate_ip24_score(ip)
-        ip16_score = calculate_ip16_score(ip)
+        # calculate ip scores with weight constants
+        ip32_score = calculate_ip32_score(ip) * @ip32_weight
+        ip24_score = calculate_ip24_score(ip) * @ip24_weight
+        ip16_score = calculate_ip16_score(ip) * @ip16_weight
         # calculate malicious score using all scores
-        malicious_score = hostname_score + ip32_score + 0.04 + ip24_score + 0.0016 + ip16_score
+        malicious_score = hostname_score + ip32_score + ip24_score + ip16_score
+
         if malicious_score < 1, do: nil, else: malicious_score
 
       # invalid ip address, return nil for malicious score
@@ -310,11 +319,10 @@ defmodule EpochtalkServer.Models.BannedAddress do
   # in ms since the weight was last updated
   defp decay_for_time(time, weight) do
     weight = Decimal.to_float(weight)
-    one_week = 1000 * 60 * 60 * 24 * 7
-    weeks = time / one_week
-    a = 0.8897
-    r = 0.9644
-    a ** ((r ** weeks - 1) / (r - 1)) * weight ** (r ** weeks)
+    weeks = time / @one_week_in_ms
+
+    @inital_amount ** ((@rate_of_decay ** weeks - 1) / (@rate_of_decay - 1)) *
+      weight ** (@rate_of_decay ** weeks)
   end
 
   # returns the decayed score given a banned address

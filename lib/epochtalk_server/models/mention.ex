@@ -46,8 +46,8 @@ defmodule EpochtalkServer.Models.Mention do
   def create_changeset(mention, attrs) do
     now = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
 
-    attrs =
-      attrs
+    mention =
+      mention
       |> Map.put(:created_at, now)
 
     mention

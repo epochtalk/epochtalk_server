@@ -12,6 +12,8 @@ defmodule Test.Support.Factory do
   use Test.Support.Factories.Category
   use Test.Support.Factories.Board
   use Test.Support.Factories.Thread
+  use Test.Support.Factories.Mention
+  use Test.Support.Factories.Notification
   use Test.Support.Factories.BannedAddress
   use Test.Support.Factories.ModerationLog
 end

@@ -60,7 +60,7 @@ defmodule EpochtalkServer.Models.BoardModerator do
     do: Repo.all(from(b in BoardModerator, select: b.board_id, where: b.user_id == ^user_id))
 
   @doc """
-  Check if a specific `User` is moderater of a `Board` using a `Board` ID
+  Check if a specific `User` is moderator of a `Board` using a `Board` ID
   """
   @spec user_is_moderator(
           board_id :: non_neg_integer,
@@ -77,7 +77,7 @@ defmodule EpochtalkServer.Models.BoardModerator do
   end
 
   @doc """
-  Check if a specific `User` is moderater of a `Board` using a `Thread` ID
+  Check if a specific `User` is moderator of a `Board` using a `Thread` ID
   """
   @spec user_is_moderator_with_thread_id(thread_id :: non_neg_integer, user_id :: non_neg_integer) ::
           boolean
@@ -95,7 +95,7 @@ defmodule EpochtalkServer.Models.BoardModerator do
   end
 
   @doc """
-  Check if a specific `User` is moderater of a `Board` using a `Post` ID
+  Check if a specific `User` is moderator of a `Board` using a `Post` ID
   """
   @spec user_is_moderator_with_post_id(
           post_id :: non_neg_integer,

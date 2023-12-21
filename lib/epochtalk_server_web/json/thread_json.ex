@@ -1,5 +1,6 @@
 defmodule EpochtalkServerWeb.Controllers.ThreadJSON do
   alias EpochtalkServerWeb.Controllers.BoardJSON
+  alias EpochtalkServerWeb.Helpers.ProxyConversion
 
   @moduledoc """
   Renders and formats `Thread` data, in JSON format for frontend
@@ -87,6 +88,34 @@ defmodule EpochtalkServerWeb.Controllers.ThreadJSON do
 
     # return results and append board_banned only if user is banned
     if board_banned, do: Map.put(result, :board_banned, board_banned), else: result
+  end
+
+  def by_board_proxy(%{
+        threads: threads,
+        user: user,
+        page: page,
+        limit: limit
+      }) do
+    # format board data
+    board =
+      if is_map(threads) do
+        ProxyConversion.build_thread_and_board_mapping(threads)
+      else
+        ProxyConversion.build_thread_and_board_mapping(List.first(threads))
+      end
+
+    # format thread data
+    user_id = if is_nil(user), do: nil, else: user.id
+    normal = threads |> Enum.map(&format_thread_data(&1, user_id))
+    # sticky = threads.sticky |> Enum.map(&format_thread_data(&1, user_id))
+
+    # build by_board results
+    %{
+      normal: normal,
+      board: board.board,
+      page: page,
+      limit: limit
+    }
   end
 
   @doc """

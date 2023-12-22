@@ -27,7 +27,8 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
     case model_type do
       "threads.by_board" ->
         build_thread_model_by_board(id)
-
+      "posts.by_thread" ->
+        build_post_model_by_thread(id)
       _ ->
         build_model(model_type, [id])
     end
@@ -80,6 +81,7 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
       where: b.id_board in ^ids,
       select: %{
         id: b.id_board,
+        slug: b.id_board,
         cat_id: b.id_cat,
         name: b.name,
         description: b.description,
@@ -97,11 +99,7 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
           Enum.map(boards, fn board ->
             board =
               board
-              |> Map.put(:slug, String.downcase(String.replace(board.name, ~r/\s+/, "_")))
               |> Map.put(:children, [])
-
-            board = if board.cat_id, do: build_category_and_board_mapping(board)
-            board
           end)
 
         return_tuple(boards)
@@ -115,6 +113,7 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
       order_by: [desc: t.id_last_msg],
       select: %{
         id: t.id_topic,
+        slug: t.id_topic,
         board_id: t.id_board,
         sticky: t.isSticky,
         locked: t.locked,
@@ -141,7 +140,6 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
             thread =
               thread
               |> Map.put(:title, first_post.title)
-              |> Map.put(:slug, first_post.title)
               |> Map.put(:user_id, first_post.user_id)
               |> Map.put(:username, first_post.username)
               |> Map.put(:user_deleted, false)
@@ -169,10 +167,17 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
       where: t.id_topic in ^ids,
       select: %{
         id: t.id_topic,
+        slug: t.id_topic,
         board_id: t.id_board,
         sticky: t.isSticky,
         locked: t.locked,
-        metadata_views: t.numViews
+        view_count: t.numViews,
+        first_post_id: t.id_first_msg,
+        last_post_id: t.id_last_msg,
+        started_user_id: t.id_member_started,
+        updated_user_id: t.id_member_updated,
+        moderated: t.selfModerated,
+        post_count: t.numReplies
       }
     )
     |> SmfRepo.all()
@@ -182,13 +187,32 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
 
       threads ->
         threads =
-          Enum.map(threads, fn thread ->
-            thread = if thread.board_id, do: build_thread_and_board_mapping(thread)
-            thread
+          Enum.reduce(threads, [], fn thread, acc ->
+            first_post = get_post(thread.first_post_id)
+            last_post = get_post(thread.last_post_id)
+
+            thread =
+              thread
+              |> Map.put(:title, first_post.title)
+              |> Map.put(:user_id, first_post.user_id)
+              |> Map.put(:username, first_post.username)
+              |> Map.put(:user_deleted, false)
+              |> Map.put(:last_post_id, last_post.id)
+              |> Map.put(:last_post_created_at, last_post.created_at * 1000)
+              |> Map.put(:last_post_deleted, false)
+              |> Map.put(:last_post_user_id, last_post.user_id)
+              |> Map.put(:last_post_username, last_post.username)
+              |> Map.put(:last_post_user_deleted, false)
+              |> Map.put(:last_post_avatar, last_post.avatar)
+              |> Map.put(:last_viewed, nil)
+              |> Map.put(:created_at, first_post.created_at * 1000)
+
+            acc = [thread | acc]
+            acc
           end)
 
-        return_tuple(threads)
-    end
+        return_tuple(Enum.reverse(threads))
+      end
   end
 
   def build_post_model(ids) do
@@ -201,7 +225,9 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
         board_id: m.id_board,
         user_id: m.id_member,
         title: m.subject,
-        body: m.body
+        body: m.body,
+        updated_at: m.modifiedTime,
+        avatar: m.icon
       }
     )
     |> SmfRepo.all()
@@ -214,6 +240,48 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
           Enum.map(posts, fn post ->
             post = if post.thread_id, do: build_post_and_thread_mapping(post)
             post
+          end)
+
+        return_tuple(posts)
+    end
+  end
+
+  def build_post_model_by_thread(id) do
+    from(m in "smf_messages",
+      limit: 10,
+      where: m.id_topic == ^id,
+      order_by: [desc: m.posterTime],
+      select: %{
+        id: m.id_msg,
+        thread_id: m.id_topic,
+        board_id: m.id_board,
+        user_id: m.id_member,
+        title: m.subject,
+        body: m.body,
+        updated_at: m.modifiedTime,
+        avatar: m.icon,
+        username: m.posterName,
+        user_email: m.posterEmail,
+        poster_time: m.posterTime,
+        poster_name: m.posterName,
+        modified_time: m.modifiedTime
+      }
+    )
+    |> SmfRepo.all()
+    |> case do
+      [] ->
+        {:error, "Posts not found for thread_id: #{id}"}
+
+      posts ->
+        posts =
+          Enum.reduce(posts, [], fn post, acc ->
+            post =
+              post
+              |> Map.put(:created_at, post.poster_time * 1000)
+              |> Map.delete(:poster_time)
+
+            acc = [post | acc]
+            acc
           end)
 
         return_tuple(posts)

@@ -2,6 +2,7 @@ defmodule EpochtalkServerWeb.Controllers.PostJSON do
   alias EpochtalkServerWeb.Controllers.BoardJSON
   alias EpochtalkServerWeb.Controllers.ThreadJSON
   alias EpochtalkServerWeb.Helpers.ACL
+  alias EpochtalkServerWeb.Helpers.ProxyConversion
 
   @moduledoc """
   Renders and formats `Post` data, in JSON format for frontend
@@ -73,6 +74,41 @@ defmodule EpochtalkServerWeb.Controllers.PostJSON do
       start: start,
       limit: limit,
       desc: desc
+    }
+  end
+
+  def by_thread_proxy(%{
+        posts: posts,
+        page: page,
+        limit: limit
+      }) do
+
+    {:ok, thread} =
+      if is_map(posts) do
+        ProxyConversion.build_thread_model([posts.thread_id])
+      else
+        ProxyConversion.build_thread_model([List.first(posts).thread_id])
+      end
+
+    # format board data
+    {:ok, board} = ProxyConversion.build_board_model([thread.board_id])
+
+    board =
+      board
+      |> Map.put(:moderators, [])
+
+    # format post data
+    posts =
+      posts
+      |> Enum.map(&format_proxy_post_data_for_by_thread(&1))
+
+    # build by_thread results
+    %{
+      posts: posts,
+      thread: thread,
+      board: board,
+      page: page,
+      limit: limit
     }
   end
 
@@ -294,5 +330,29 @@ defmodule EpochtalkServerWeb.Controllers.PostJSON do
     |> Map.delete(:signature)
     |> Map.delete(:highlight_color)
     |> Map.delete(:role_name)
+  end
+
+  defp format_proxy_post_data_for_by_thread(post) do
+    post
+    # if body_html does not exist, default to post.body
+    |> Map.put(:body_html, post.body)
+    |> Map.put(:user, %{
+      id: post.user_id,
+      username: post.poster_name
+      # original_poster: post.original_poster,
+      # username: post.username,
+      # priority: if(is_nil(post.priority), do: post.default_priority, else: post.priority)
+      # deleted: post.user_deleted,
+      # signature: post.signature,
+      # post_count: post.post_count,
+      # highlight_color: post.highlight_color,
+      # role_name: post.role_name,
+      # stats: Map.get(post, :user_trust_stats),
+      # ignored: Map.get(post, :user_ignored),
+      # _ignored: Map.get(post, :user_ignored),
+      # activity: Map.get(post, :user_activity)
+    })
+    |> Map.delete(:user_id)
+    |> Map.delete(:poster_name)
   end
 end

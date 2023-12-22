@@ -25,7 +25,7 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
   alias EpochtalkServer.Models.Mention
   alias EpochtalkServerWeb.Helpers.ProxyConversion
 
-  plug :check_proxy when action in [:by_board]
+  plug :check_proxy when action in [:by_board, :slug_to_id, :viewed]
 
   @doc """
   Used to retrieve recent threads
@@ -357,7 +357,26 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
           else
             conn
           end
+        :slug_to_id ->
+          case Integer.parse(conn.params["slug"]) do
+            {_, ""} ->
+              slug_as_id = Validate.cast(conn.params, "slug", :integer, required: true)
 
+              if slug_as_id < System.get_env("THREADS_SEQ") |> String.to_integer() do
+                conn
+                |> render(:slug_to_id, id: slug_as_id)
+                |> halt()
+              else
+                conn
+              end
+
+            _ ->
+              conn
+          end
+        :viewed ->
+          conn
+          |> send_resp(200, [])
+          |> halt()
         _ ->
           conn
       end

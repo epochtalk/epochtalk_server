@@ -120,6 +120,8 @@ defmodule EpochtalkServerWeb.Controllers.Board do
                 conn
                 |> render(:slug_to_id, id: slug_as_id)
                 |> halt()
+              else
+                conn
               end
 
             _ ->

@@ -97,11 +97,11 @@ defmodule EpochtalkServerWeb.Controllers.ThreadJSON do
         limit: limit
       }) do
     # format board data
-    board =
+    {:ok, board} =
       if is_map(threads) do
-        ProxyConversion.build_thread_and_board_mapping(threads)
+        ProxyConversion.build_board_model([threads.board_id])
       else
-        ProxyConversion.build_thread_and_board_mapping(List.first(threads))
+        ProxyConversion.build_board_model([List.first(threads).board_id])
       end
 
     # format thread data
@@ -112,7 +112,7 @@ defmodule EpochtalkServerWeb.Controllers.ThreadJSON do
     # build by_board results
     %{
       normal: normal,
-      board: board.board,
+      board: board,
       page: page,
       limit: limit
     }

@@ -57,11 +57,13 @@ defmodule EpochtalkServer.Models.PollResponse do
   Create on `PollResponse` for specific poll. Used to vote for a `Poll`
   """
   @spec create(answer_ids :: [integer], user_id :: integer) :: t() | nil
-  def create(answer_ids, user_id) when is_list(answer_ids) and is_integer(user_id),
-    do: Enum.each(answer_ids, &PollResponse.create(&1, user_id))
+  def create([answer_id | _] = answer_ids, user_id)
+      when is_integer(answer_id) and is_integer(user_id),
+      do: Enum.each(answer_ids, &PollResponse.create(&1, user_id))
 
   def create(answer_id, user_id) do
-    poll_response_cs = create_changeset(%PollResponse{}, %{answer_id: answer_id, user_id: user_id})
+    poll_response_cs =
+      create_changeset(%PollResponse{}, %{answer_id: answer_id, user_id: user_id})
 
     Repo.insert(poll_response_cs)
   end

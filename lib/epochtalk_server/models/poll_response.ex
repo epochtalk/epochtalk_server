@@ -56,9 +56,9 @@ defmodule EpochtalkServer.Models.PollResponse do
   @doc """
   Create on `PollResponse` for specific poll. Used to vote for a `Poll`
   """
-  @spec create(answer_ids :: [integer], user_id :: integer) :: t() | nil
-  def create([answer_id | _] = answer_ids, user_id)
-      when is_integer(answer_id) and is_integer(user_id),
+  @spec create(attrs :: map, user_id :: integer) :: t() | nil
+  def create(%{answer_ids: answer_ids} = attrs, user_id)
+      when is_map(attrs) and is_integer(user_id),
       do: Enum.each(answer_ids, &PollResponse.create(&1, user_id))
 
   def create(answer_id, user_id) do

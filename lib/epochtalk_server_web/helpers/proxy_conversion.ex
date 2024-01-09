@@ -3,6 +3,7 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
   import Ecto.Query
   alias EpochtalkServer.SmfRepo
   alias EpochtalkServer.ProxySupervisor
+  alias EpochtalkServerWeb.Helpers.ProxyPagination
 
   def start_link(arg) do
     GenServer.start_link(__MODULE__, arg, name: __MODULE__)
@@ -13,49 +14,47 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
     {:ok, opts}
   end
 
-  def build_model(model_type, ids) when is_nil(model_type) or is_nil(ids) do
-    {:ok, %{}}
+  def build_model(model_type, ids, _, _) when is_nil(model_type) or is_nil(ids) do
+    {:ok, %{}, %{}}
   end
 
-  def build_model(_, ids) when length(ids) > 10 do
+  def build_model(_, ids, _, _) when length(ids) > 25 do
     {:error, "Limit too large, please try again"}
   end
 
-  def build_model(model_type, id) when is_integer(id) do
+  def build_model(model_type, id, page, per_page) when is_integer(id) do
     ProxySupervisor.start_link([])
 
     case model_type do
       "threads.by_board" ->
-        build_thread_model_by_board(id)
+        build_threads_by_board(id, page, per_page)
       "posts.by_thread" ->
-        build_post_model_by_thread(id)
+        build_posts_by_thread(id, page, per_page)
       _ ->
-        build_model(model_type, [id])
+        build_model(model_type, [id], nil, nil)
     end
   end
 
-  def build_model(model_type, ids) do
-    ProxySupervisor.start_link([])
-
+  def build_model(model_type, ids, _, _) do
     case model_type do
       "category" ->
-        build_category_model(ids)
+        build_categories(ids)
 
       "board" ->
-        build_board_model(ids)
+        build_boards(ids)
 
       "thread" ->
-        build_thread_model(ids)
+        build_threads(ids)
 
       "post" ->
-        build_post_model(ids)
+        build_posts(ids)
 
       _ ->
-        build_model(nil, nil)
+        build_model(nil, nil, nil, nil)
     end
   end
 
-  def build_category_model(ids) do
+  def build_categories(ids) do
     from(c in "smf_categories",
       limit: ^length(ids),
       where: c.id_cat in ^ids,
@@ -75,7 +74,7 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
     end
   end
 
-  def build_board_model(ids) do
+  def build_boards(ids) do
     from(b in "smf_boards",
       limit: ^length(ids),
       where: b.id_board in ^ids,
@@ -100,15 +99,17 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
             board =
               board
               |> Map.put(:children, [])
+            board
           end)
 
         return_tuple(boards)
     end
   end
 
-  def build_thread_model_by_board(id) do
+  def build_threads_by_board(id, page, per_page) do
+    count_query = from t in "smf_topics", where: t.id_board == ^id, select: %{count: count(t.id_topic)}
+
     from(t in "smf_topics",
-      limit: 10,
       where: t.id_board == ^id,
       order_by: [desc: t.id_last_msg],
       select: %{
@@ -126,12 +127,12 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
         post_count: t.numReplies
       }
     )
-    |> SmfRepo.all()
+    |> ProxyPagination.page_simple(count_query, page, per_page: per_page)
     |> case do
-      [] ->
+      {:ok, [], _} ->
         {:error, "Threads not found for board_id: #{id}"}
 
-      threads ->
+      {:ok, threads, data} ->
         threads =
           Enum.reduce(threads, [], fn thread, acc ->
             first_post = get_post(thread.first_post_id)
@@ -153,15 +154,14 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
               |> Map.put(:last_viewed, nil)
               |> Map.put(:created_at, first_post.created_at * 1000)
 
-            acc = [thread | acc]
-            acc
+            [thread | acc]
           end)
 
-        return_tuple(Enum.reverse(threads))
+        return_tuple(Enum.reverse(threads), data)
     end
   end
 
-  def build_thread_model(ids) do
+  def build_threads(ids) do
     from(t in "smf_topics",
       limit: ^length(ids),
       where: t.id_topic in ^ids,
@@ -207,15 +207,14 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
               |> Map.put(:last_viewed, nil)
               |> Map.put(:created_at, first_post.created_at * 1000)
 
-            acc = [thread | acc]
-            acc
+            [thread | acc]
           end)
 
         return_tuple(Enum.reverse(threads))
       end
   end
 
-  def build_post_model(ids) do
+  def build_posts(ids) do
     from(m in "smf_messages",
       limit: ^length(ids),
       where: m.id_msg in ^ids,
@@ -236,21 +235,28 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
         {:error, "Posts not found for ids: #{ids}"}
 
       posts ->
-        posts =
-          Enum.map(posts, fn post ->
-            post = if post.thread_id, do: build_post_and_thread_mapping(post)
-            post
+          posts =
+          Enum.reduce(posts, [], fn post, acc ->
+            post =
+              post
+              |> Map.put(:created_at, post.poster_time * 1000)
+              |> Map.delete(:poster_time)
+
+            [post | acc]
           end)
 
         return_tuple(posts)
     end
   end
 
-  def build_post_model_by_thread(id) do
+  def build_posts_by_thread(id, page, per_page) do
+    count_query = from m in "smf_messages", where: m.id_topic == ^id, select: %{count: count(m.id_topic)}
+
+
     from(m in "smf_messages",
-      limit: 10,
+      limit: 15,
       where: m.id_topic == ^id,
-      order_by: [desc: m.posterTime],
+      order_by: [asc: m.posterTime],
       select: %{
         id: m.id_msg,
         thread_id: m.id_topic,
@@ -267,12 +273,12 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
         modified_time: m.modifiedTime
       }
     )
-    |> SmfRepo.all()
+    |> ProxyPagination.page_simple(count_query, page, per_page: per_page)
     |> case do
-      [] ->
+      {:ok, [], _} ->
         {:error, "Posts not found for thread_id: #{id}"}
 
-      posts ->
+      {:ok, posts, data} ->
         posts =
           Enum.reduce(posts, [], fn post, acc ->
             post =
@@ -280,72 +286,10 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
               |> Map.put(:created_at, post.poster_time * 1000)
               |> Map.delete(:poster_time)
 
-            acc = [post | acc]
-            acc
+            [post | acc]
           end)
-
-        return_tuple(posts)
+        return_tuple(Enum.reverse(posts), data)
     end
-  end
-
-  defp build_category_and_board_mapping(board) do
-    {:ok, category} = build_category_model([board.cat_id])
-
-    board =
-      board
-      |> Map.put(:category, category)
-      |> Map.put(:board_mapping, build_board_mapping(category, board))
-      |> Map.delete(:cat_id)
-
-    board
-  end
-
-  def build_thread_and_board_mapping(thread) do
-    {:ok, board} = build_board_model([thread.board_id])
-
-    thread =
-      thread
-      |> Map.put(:board, board)
-      |> Map.delete(:board_id)
-
-    thread
-  end
-
-  defp build_post_and_thread_mapping(post) do
-    {:ok, thread} = build_thread_model([post.thread_id])
-
-    content = %{
-      "title" => post.title,
-      "body" => post.body
-    }
-
-    post =
-      post
-      |> Map.put(:thread, thread)
-      |> Map.delete(:thread_id)
-      |> Map.put(:content, content)
-      |> Map.delete(:title)
-      |> Map.delete(:body)
-
-    post
-  end
-
-  defp build_board_mapping(category, board) do
-    [
-      %{
-        id: category.id,
-        name: category.name,
-        type: "category",
-        view_order: category.view_order
-      },
-      %{
-        id: board.id,
-        name: board.name,
-        type: "board",
-        category_id: category.id,
-        view_order: category.view_order + 1
-      }
-    ]
   end
 
   defp return_tuple(object) do
@@ -353,6 +297,14 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
       {:ok, object}
     else
       {:ok, List.first(object)}
+    end
+  end
+
+  defp return_tuple(object, data) do
+    if length(object) > 1 do
+      {:ok, object, data}
+    else
+      {:ok, List.first(object), data}
     end
   end
 
@@ -377,7 +329,7 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
     |> SmfRepo.one()
     |> case do
       nil ->
-        {:error, "Posts not found for id: #{id}"}
+        {:error, "Post not found for id: #{id}"}
 
       post ->
         post

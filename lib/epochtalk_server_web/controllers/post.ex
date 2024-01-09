@@ -296,12 +296,13 @@ defmodule EpochtalkServerWeb.Controllers.Post do
          limit <- Validate.cast(attrs, "limit", :integer, default: 5),
          user <- Guardian.Plug.current_resource(conn),
          :ok <- ACL.allow!(conn, "posts.byThread"),
-         {:ok, posts} <- ProxyConversion.build_model("posts.by_thread", thread_id) do
+         {:ok, posts, data} <- ProxyConversion.build_model("posts.by_thread", thread_id, page, limit) do
       render(conn, :by_thread_proxy, %{
         posts: posts,
         user: user,
         page: page,
-        limit: limit
+        limit: limit,
+        pagination_data: data
       })
     else
       _ ->

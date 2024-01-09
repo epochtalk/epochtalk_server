@@ -28,8 +28,10 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
     case model_type do
       "threads.by_board" ->
         build_threads_by_board(id, page, per_page)
+
       "posts.by_thread" ->
         build_posts_by_thread(id, page, per_page)
+
       _ ->
         build_model(model_type, [id], nil, nil)
     end
@@ -99,6 +101,7 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
             board =
               board
               |> Map.put(:children, [])
+
             board
           end)
 
@@ -107,7 +110,8 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
   end
 
   def build_threads_by_board(id, page, per_page) do
-    count_query = from t in "smf_topics", where: t.id_board == ^id, select: %{count: count(t.id_topic)}
+    count_query =
+      from t in "smf_topics", where: t.id_board == ^id, select: %{count: count(t.id_topic)}
 
     from(t in "smf_topics",
       where: t.id_board == ^id,
@@ -211,7 +215,7 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
           end)
 
         return_tuple(Enum.reverse(threads))
-      end
+    end
   end
 
   def build_posts(ids) do
@@ -235,7 +239,7 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
         {:error, "Posts not found for ids: #{ids}"}
 
       posts ->
-          posts =
+        posts =
           Enum.reduce(posts, [], fn post, acc ->
             post =
               post
@@ -250,8 +254,8 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
   end
 
   def build_posts_by_thread(id, page, per_page) do
-    count_query = from m in "smf_messages", where: m.id_topic == ^id, select: %{count: count(m.id_topic)}
-
+    count_query =
+      from m in "smf_messages", where: m.id_topic == ^id, select: %{count: count(m.id_topic)}
 
     from(m in "smf_messages",
       limit: 15,
@@ -288,6 +292,7 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
 
             [post | acc]
           end)
+
         return_tuple(Enum.reverse(posts), data)
     end
   end

@@ -82,7 +82,6 @@ defmodule EpochtalkServerWeb.Controllers.PostJSON do
         page: page,
         limit: limit
       }) do
-
     {:ok, thread} =
       if is_map(posts) do
         ProxyConversion.build_model("thread", [posts.thread_id], page, limit)
@@ -92,7 +91,6 @@ defmodule EpochtalkServerWeb.Controllers.PostJSON do
 
     # format board data
     {:ok, board} = ProxyConversion.build_model("board", [thread.board_id], 1, 1)
-
 
     board =
       board

@@ -96,7 +96,6 @@ defmodule EpochtalkServerWeb.Controllers.ThreadJSON do
         page: page,
         limit: limit
       }) do
-
     # format board data
     {:ok, board} =
       if is_map(threads) do

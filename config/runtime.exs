@@ -112,6 +112,47 @@ if config_env() == :prod do
       port: System.get_env("EMAILER_SMTP_PORT") || 465
   end
 
+  # Configure SmfRepo for proxy
+  smf_repo_username =
+    System.get_env("SMF_REPO_USERNAME") ||
+      raise """
+      environment variable SMF_REPO_USERNAME is missing.
+      """
+
+  smf_repo_password =
+    System.get_env("SMF_REPO_PASSWORD") ||
+      raise """
+      environment variable SMF_REPO_PASSWORD is missing.
+      """
+
+  smf_repo_hostname =
+    System.get_env("SMF_REPO_HOSTNAME") ||
+      raise """
+      environment variable SMF_REPO_HOSTNAME is missing.
+      """
+
+  smf_repo_database =
+    System.get_env("SMF_REPO_DATABASE") ||
+      raise """
+      environment variable SMF_REPO_DATABASE is missing.
+      """
+
+  smf_repo_port =
+    System.get_env("SMF_REPO_PORT") ||
+      raise """
+      environment variable SMF_REPO_PORT is missing.
+      """
+
+  config :epochtalk_server, EpochtalkServer.SmfRepo,
+    username: smf_repo_username,
+    password: smf_repo_password,
+    hostname: smf_repo_hostname,
+    database: smf_repo_database,
+    port: smf_repo_port,
+    stacktrace: true,
+    show_sensitive_data_on_connection_error: true,
+    pool_size: 5
+
   # Configure Guardian for Runtime
   config :epochtalk_server, EpochtalkServer.Auth.Guardian,
     secret_key:

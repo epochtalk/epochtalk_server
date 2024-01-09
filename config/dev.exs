@@ -18,7 +18,7 @@ config :epochtalk_server, EpochtalkServer.SmfRepo,
   port: System.get_env("SMF_REPO_PORT"),
   stacktrace: true,
   show_sensitive_data_on_connection_error: true,
-  pool_size: 3
+  pool_size: 5
 
 # For development, we disable any cache and enable
 # debugging and code reloading.

@@ -23,6 +23,9 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
   alias EpochtalkServer.Models.UserActivity
   alias EpochtalkServer.Models.ThreadSubscription
   alias EpochtalkServer.Models.Mention
+  alias EpochtalkServerWeb.Helpers.ProxyConversion
+
+  plug :check_proxy when action in [:by_board, :slug_to_id, :viewed]
 
   @doc """
   Used to retrieve recent threads
@@ -341,4 +344,63 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
 
   defp update_user_thread_view_count(user, thread_id),
     do: UserThreadView.upsert(user.id, thread_id)
+
+  defp check_proxy(conn, _) do
+    conn =
+      case conn.private.phoenix_action do
+        :by_board ->
+          if Validate.cast(conn.params, "board_id", :integer, required: true) <
+               System.get_env("BOARDS_SEQ") |> String.to_integer() do
+            conn
+            |> proxy_by_board(conn.params)
+            |> halt()
+          else
+            conn
+          end
+        :slug_to_id ->
+          case Integer.parse(conn.params["slug"]) do
+            {_, ""} ->
+              slug_as_id = Validate.cast(conn.params, "slug", :integer, required: true)
+
+              if slug_as_id < System.get_env("THREADS_SEQ") |> String.to_integer() do
+                conn
+                |> render(:slug_to_id, id: slug_as_id)
+                |> halt()
+              else
+                conn
+              end
+
+            _ ->
+              conn
+          end
+        :viewed ->
+          conn
+          |> send_resp(200, [])
+          |> halt()
+        _ ->
+          conn
+      end
+
+    conn
+  end
+
+  defp proxy_by_board(conn, attrs) do
+    with board_id <- Validate.cast(attrs, "board_id", :integer, required: true),
+         page <- Validate.cast(attrs, "page", :integer, default: 1),
+         limit <- Validate.cast(attrs, "limit", :integer, default: 5),
+         user <- Guardian.Plug.current_resource(conn),
+         :ok <- ACL.allow!(conn, "threads.byBoard"),
+         {:ok, threads, data} <- ProxyConversion.build_model("threads.by_board", board_id, page, limit) do
+      render(conn, :by_board_proxy, %{
+        threads: threads,
+        user: user,
+        page: page,
+        limit: limit,
+        pagination_data: data
+      })
+    else
+      _ ->
+        ErrorHelpers.render_json_error(conn, 400, "Error, cannot get threads by board")
+    end
+  end
 end

@@ -10,6 +10,7 @@ defmodule EpochtalkServerWeb.Controllers.Post do
   alias EpochtalkServerWeb.Helpers.ACL
   alias EpochtalkServerWeb.Helpers.Sanitize
   alias EpochtalkServerWeb.Helpers.Parse
+  alias EpochtalkServerWeb.Helpers.ProxyConversion
   alias EpochtalkServer.Models.Post
   alias EpochtalkServer.Models.Poll
   alias EpochtalkServer.Models.Thread
@@ -29,6 +30,8 @@ defmodule EpochtalkServerWeb.Controllers.Post do
   alias EpochtalkServer.Models.Mention
 
   @max_post_title_length 255
+
+  plug :check_proxy when action in [:by_thread]
 
   @doc """
   Used to create posts
@@ -265,5 +268,45 @@ defmodule EpochtalkServerWeb.Controllers.Post do
     is_mod = BoardModerator.user_is_moderator_with_thread_id(thread_id, user.id)
 
     has_bypass or thread_not_locked or is_mod
+  end
+
+  defp check_proxy(conn, _) do
+    conn =
+      case conn.private.phoenix_action do
+        :by_thread ->
+          if Validate.cast(conn.params, "thread_id", :integer, required: true) <
+               System.get_env("THREADS_SEQ") |> String.to_integer() do
+            conn
+            |> proxy_by_thread(conn.params)
+            |> halt()
+          else
+            conn
+          end
+
+        _ ->
+          conn
+      end
+
+    conn
+  end
+
+  defp proxy_by_thread(conn, attrs) do
+    with thread_id <- Validate.cast(attrs, "thread_id", :integer, required: true),
+         page <- Validate.cast(attrs, "page", :integer, default: 1),
+         limit <- Validate.cast(attrs, "limit", :integer, default: 5),
+         user <- Guardian.Plug.current_resource(conn),
+         :ok <- ACL.allow!(conn, "posts.byThread"),
+         {:ok, posts, data} <- ProxyConversion.build_model("posts.by_thread", thread_id, page, limit) do
+      render(conn, :by_thread_proxy, %{
+        posts: posts,
+        user: user,
+        page: page,
+        limit: limit,
+        pagination_data: data
+      })
+    else
+      _ ->
+        ErrorHelpers.render_json_error(conn, 400, "Error, cannot get posts by thread")
+    end
   end
 end

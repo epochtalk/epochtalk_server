@@ -12,6 +12,8 @@ defmodule EpochtalkServerWeb.Controllers.Board do
   alias EpochtalkServerWeb.Helpers.Validate
   alias EpochtalkServerWeb.Helpers.ACL
 
+  plug :check_proxy when action in [:slug_to_id]
+
   @doc """
   Used to retrieve categorized boards
   """
@@ -104,5 +106,32 @@ defmodule EpochtalkServerWeb.Controllers.Board do
       _ ->
         ErrorHelpers.render_json_error(conn, 400, "Error, cannot convert board slug to id")
     end
+  end
+
+  defp check_proxy(conn, _) do
+    conn =
+      case conn.private.phoenix_action do
+        :slug_to_id ->
+          case Integer.parse(conn.params["slug"]) do
+            {_, ""} ->
+              slug_as_id = Validate.cast(conn.params, "slug", :integer, required: true)
+
+              if slug_as_id < System.get_env("BOARDS_SEQ") |> String.to_integer() do
+                conn
+                |> render(:slug_to_id, id: slug_as_id)
+                |> halt()
+              else
+                conn
+              end
+
+            _ ->
+              conn
+          end
+
+        _ ->
+          conn
+      end
+
+    conn
   end
 end

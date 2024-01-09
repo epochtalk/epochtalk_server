@@ -33,7 +33,10 @@ defmodule EpochtalkServerWeb.Helpers.ProxyPagination do
                total_pages: 1,
                total_records: 0}}
   """
-  @spec page_simple(query :: Ecto.Queryable.t(), count_query :: Ecto.Queryable.t(), page :: integer | String.t() | nil,
+  @spec page_simple(
+          query :: Ecto.Queryable.t(),
+          count_query :: Ecto.Queryable.t(),
+          page :: integer | String.t() | nil,
           per_page: integer | String.t() | nil
         ) :: {:ok, list :: [term()] | [], pagination_data :: map()}
   def page_simple(query, count_query, nil, per_page: nil),
@@ -47,10 +50,15 @@ defmodule EpochtalkServerWeb.Helpers.ProxyPagination do
 
   def page_simple(query, count_query, nil, per_page: per_page) when is_binary(per_page),
     do:
-      page_simple(query, count_query, 1, per_page: Validate.cast_str(per_page, :integer, key: "limit", min: 1))
+      page_simple(query, count_query, 1,
+        per_page: Validate.cast_str(per_page, :integer, key: "limit", min: 1)
+      )
 
   def page_simple(query, count_query, page, per_page: nil) when is_binary(page),
-    do: page_simple(query, count_query, Validate.cast_str(page, :integer, key: "page", min: 1), per_page: 15)
+    do:
+      page_simple(query, count_query, Validate.cast_str(page, :integer, key: "page", min: 1),
+        per_page: 15
+      )
 
   def page_simple(query, count_query, page, per_page: per_page)
       when is_binary(page) and is_binary(per_page),
@@ -67,9 +75,7 @@ defmodule EpochtalkServerWeb.Helpers.ProxyPagination do
         total_records(count_query)
       end)
 
-    IO.inspect(total_records)
     total_pages = total_pages(total_records, per_page)
-    IO.inspect(total_records)
 
     result = records(query, page, total_pages, per_page)
 
@@ -88,7 +94,6 @@ defmodule EpochtalkServerWeb.Helpers.ProxyPagination do
   defp records(_, page, total_pages, _) when page > total_pages, do: []
 
   defp records(query, page, _, per_page) do
-    IO.inspect(per_page * (page - 1))
     query
     |> limit(^per_page)
     |> offset(^(per_page * (page - 1)))

@@ -357,6 +357,7 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
           else
             conn
           end
+
         :slug_to_id ->
           case Integer.parse(conn.params["slug"]) do
             {_, ""} ->
@@ -373,10 +374,12 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
             _ ->
               conn
           end
+
         :viewed ->
           conn
           |> send_resp(200, [])
           |> halt()
+
         _ ->
           conn
       end
@@ -390,7 +393,8 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
          limit <- Validate.cast(attrs, "limit", :integer, default: 5),
          user <- Guardian.Plug.current_resource(conn),
          :ok <- ACL.allow!(conn, "threads.byBoard"),
-         {:ok, threads, data} <- ProxyConversion.build_model("threads.by_board", board_id, page, limit) do
+         {:ok, threads, data} <-
+           ProxyConversion.build_model("threads.by_board", board_id, page, limit) do
       render(conn, :by_board_proxy, %{
         threads: threads,
         user: user,

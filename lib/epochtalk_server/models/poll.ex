@@ -25,11 +25,14 @@ defmodule EpochtalkServer.Models.Poll do
   @derive {Jason.Encoder,
            only: [
              :thread_id,
+             :id,
              :question,
              :locked,
              :max_answers,
              :expiration,
              :change_vote,
+             :has_voted,
+             :answers,
              :display_mode
            ]}
   schema "polls" do
@@ -40,6 +43,8 @@ defmodule EpochtalkServer.Models.Poll do
     field :expiration, :naive_datetime
     field :change_vote, :boolean
     field :display_mode, Ecto.Enum, values: [:always, :voted, :expired]
+    field :has_voted, :boolean, virtual: true
+    field :answers, {:array, :map}, virtual: true
     has_many :poll_answers, PollAnswer
   end
 

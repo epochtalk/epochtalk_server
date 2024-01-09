@@ -44,6 +44,9 @@ defmodule EpochtalkServer.Models.PollResponse do
           attrs :: map() | nil
         ) :: Ecto.Changeset.t()
   def create_changeset(poll_response, attrs \\ %{}) do
+    # attempt to cast string answer id to integer
+    attrs = attrs |> Map.put(:answer_id, String.to_integer(attrs.answer_id))
+
     poll_response
     |> cast(attrs, [:answer_id, :user_id])
     |> validate_required([:answer_id, :user_id])
@@ -57,7 +60,7 @@ defmodule EpochtalkServer.Models.PollResponse do
   Create on `PollResponse` for specific poll. Used to vote for a `Poll`
   """
   @spec create(attrs :: map, user_id :: integer) :: t() | nil
-  def create(%{answer_ids: answer_ids} = attrs, user_id)
+  def create(%{"answer_ids" => answer_ids} = attrs, user_id)
       when is_map(attrs) and is_integer(user_id),
       do: Enum.each(answer_ids, &PollResponse.create(&1, user_id))
 

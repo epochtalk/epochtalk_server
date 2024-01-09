@@ -10,6 +10,16 @@ config :epochtalk_server, EpochtalkServer.Repo,
   show_sensitive_data_on_connection_error: true,
   pool_size: 10
 
+config :epochtalk_server, EpochtalkServer.SmfRepo,
+  username: System.get_env("SMF_REPO_USERNAME"),
+  password: System.get_env("SMF_REPO_PASSWORD"),
+  hostname: System.get_env("SMF_REPO_HOSTNAME"),
+  database: System.get_env("SMF_REPO_DATABASE"),
+  port: System.get_env("SMF_REPO_PORT"),
+  stacktrace: true,
+  show_sensitive_data_on_connection_error: true,
+  pool_size: 3
+
 # For development, we disable any cache and enable
 # debugging and code reloading.
 #

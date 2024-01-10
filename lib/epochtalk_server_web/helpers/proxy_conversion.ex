@@ -2,7 +2,6 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
   use GenServer
   import Ecto.Query
   alias EpochtalkServer.SmfRepo
-  alias EpochtalkServer.ProxySupervisor
   alias EpochtalkServerWeb.Helpers.ProxyPagination
 
   def start_link(arg) do
@@ -23,8 +22,6 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
   end
 
   def build_model(model_type, id, page, per_page) when is_integer(id) do
-    ProxySupervisor.start_link([])
-
     case model_type do
       "threads.by_board" ->
         build_threads_by_board(id, page, per_page)

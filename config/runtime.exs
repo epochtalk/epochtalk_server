@@ -150,7 +150,7 @@ if config_env() == :prod do
     database: smf_repo_database,
     port: smf_repo_port,
     stacktrace: true,
-    show_sensitive_data_on_connection_error: true,
+    show_sensitive_data_on_connection_error: false,
     pool_size: 5
 
   # Configure Guardian for Runtime

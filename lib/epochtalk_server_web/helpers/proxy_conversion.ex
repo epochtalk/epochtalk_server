@@ -1,17 +1,7 @@
 defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
-  use GenServer
   import Ecto.Query
   alias EpochtalkServer.SmfRepo
   alias EpochtalkServerWeb.Helpers.ProxyPagination
-
-  def start_link(arg) do
-    GenServer.start_link(__MODULE__, arg, name: __MODULE__)
-  end
-
-  @impl true
-  def init(opts) do
-    {:ok, opts}
-  end
 
   def build_model(model_type, ids, _, _) when is_nil(model_type) or is_nil(ids) do
     {:ok, %{}, %{}}

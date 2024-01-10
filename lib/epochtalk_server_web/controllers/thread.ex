@@ -23,6 +23,8 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
   alias EpochtalkServer.Models.UserActivity
   alias EpochtalkServer.Models.ThreadSubscription
   alias EpochtalkServer.Models.Mention
+  alias EpochtalkServer.Models.Poll
+  alias EpochtalkServer.Models.PollResponse
 
   @doc """
   Used to retrieve recent threads
@@ -214,6 +216,28 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
 
       _ ->
         ErrorHelpers.render_json_error(conn, 400, "Error, cannot get threads by board")
+    end
+  end
+
+  @doc """
+  Used to vote on `Thread` `Poll`
+  """
+  def vote(conn, attrs) do
+    with user <- Guardian.Plug.current_resource(conn),
+         thread_id <- Validate.cast(attrs, "thread_id", :integer, required: true),
+         :ok <- PollResponse.create(attrs, user.id),
+         poll <- Poll.by_thread(thread_id),
+         has_voted <- Poll.has_voted(thread_id, user.id) do
+      render(conn, :vote, %{
+        poll: poll,
+        has_voted: has_voted
+      })
+    else
+      {:error, data} ->
+        ErrorHelpers.render_json_error(conn, 400, data)
+
+      _ ->
+        ErrorHelpers.render_json_error(conn, 400, "Error, cannot cast vote")
     end
   end
 

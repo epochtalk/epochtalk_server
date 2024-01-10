@@ -151,9 +151,9 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
               |> Map.put(:last_post_user_id, last_post.user_id)
               |> Map.put(:last_post_username, last_post.username)
               |> Map.put(:last_post_user_deleted, false)
-              |> Map.put(:last_post_avatar, last_post.avatar)
               |> Map.put(:last_viewed, nil)
               |> Map.put(:created_at, first_post.created_at * 1000)
+              |> Map.put(:is_proxy, true)
 
             [thread | acc]
           end)
@@ -204,7 +204,6 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
               |> Map.put(:last_post_user_id, last_post.user_id)
               |> Map.put(:last_post_username, last_post.username)
               |> Map.put(:last_post_user_deleted, false)
-              |> Map.put(:last_post_avatar, last_post.avatar)
               |> Map.put(:last_viewed, nil)
               |> Map.put(:created_at, first_post.created_at * 1000)
 
@@ -226,8 +225,7 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
         user_id: m.id_member,
         title: m.subject,
         body: m.body,
-        updated_at: m.modifiedTime,
-        avatar: m.icon
+        updated_at: m.modifiedTime
       }
     )
     |> SmfRepo.all()
@@ -266,7 +264,6 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
         title: m.subject,
         body: m.body,
         updated_at: m.modifiedTime,
-        avatar: m.icon,
         username: m.posterName,
         user_email: m.posterEmail,
         poster_time: m.posterTime,
@@ -324,8 +321,7 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
         username: m.posterName,
         user_email: m.posterEmail,
         created_at: m.posterTime,
-        modified_time: m.modifiedTime,
-        avatar: m.icon
+        modified_time: m.modifiedTime
       }
     )
     |> SmfRepo.one()

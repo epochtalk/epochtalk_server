@@ -349,8 +349,9 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
     conn =
       case conn.private.phoenix_action do
         :by_board ->
-          if Validate.cast(conn.params, "board_id", :integer, required: true) <
-               System.get_env("BOARDS_SEQ") |> String.to_integer() do
+          %{boards_seq: boards_seq} = Application.get_env(:epochtalk_server, :proxy_config)
+          boards_seq = boards_seq |> String.to_integer()
+          if Validate.cast(conn.params, "board_id", :integer, required: true) < boards_seq do
             conn
             |> proxy_by_board(conn.params)
             |> halt()
@@ -363,7 +364,9 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
             {_, ""} ->
               slug_as_id = Validate.cast(conn.params, "slug", :integer, required: true)
 
-              if slug_as_id < System.get_env("THREADS_SEQ") |> String.to_integer() do
+              %{threads_seq: threads_seq} = Application.get_env(:epochtalk_server, :proxy_config)
+              threads_seq = threads_seq |> String.to_integer()
+              if slug_as_id < threads_seq do
                 conn
                 |> render(:slug_to_id, id: slug_as_id)
                 |> halt()

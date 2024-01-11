@@ -115,8 +115,9 @@ defmodule EpochtalkServerWeb.Controllers.Board do
           case Integer.parse(conn.params["slug"]) do
             {_, ""} ->
               slug_as_id = Validate.cast(conn.params, "slug", :integer, required: true)
-
-              if slug_as_id < System.get_env("BOARDS_SEQ") |> String.to_integer() do
+              %{boards_seq: boards_seq} = Application.get_env(:epochtalk_server, :proxy_config)
+              boards_seq = boards_seq |> String.to_integer()
+              if slug_as_id < boards_seq do
                 conn
                 |> render(:slug_to_id, id: slug_as_id)
                 |> halt()

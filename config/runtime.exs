@@ -138,7 +138,7 @@ if config_env() == :prod do
       """
 
   smf_repo_port =
-    System.get_env("SMF_REPO_PORT") ||
+    System.get_env("SMF_REPO_PORT") |> String.to_integer()  ||
       raise """
       environment variable SMF_REPO_PORT is missing.
       """

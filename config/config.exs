@@ -37,6 +37,13 @@ config :epochtalk_server,
     rate_limiting: %{}
   }
 
+# Configure proxy
+config :epochtalk_server,
+  proxy_config: %{
+    threads_seq: System.get_env("THREADS_SEQ") || "6000000",
+    boards_seq: System.get_env("BOARDS_SEQ") || "500"
+  }
+
 # Configure Guardian
 config :epochtalk_server, EpochtalkServer.Auth.Guardian,
   issuer: "EpochtalkServer",

@@ -151,7 +151,7 @@ if config_env() == :prod do
     port: smf_repo_port,
     stacktrace: true,
     show_sensitive_data_on_connection_error: false,
-    pool_size: 5
+    pool_size: 10
 
   # Configure Guardian for Runtime
   config :epochtalk_server, EpochtalkServer.Auth.Guardian,

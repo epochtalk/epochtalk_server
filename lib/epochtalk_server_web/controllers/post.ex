@@ -274,8 +274,10 @@ defmodule EpochtalkServerWeb.Controllers.Post do
     conn =
       case conn.private.phoenix_action do
         :by_thread ->
-          if Validate.cast(conn.params, "thread_id", :integer, required: true) <
-               System.get_env("THREADS_SEQ") |> String.to_integer() do
+          %{threads_seq: threads_seq} = Application.get_env(:epochtalk_server, :proxy_config)
+          threads_seq = threads_seq |> String.to_integer()
+
+          if Validate.cast(conn.params, "thread_id", :integer, required: true) < threads_seq do
             conn
             |> proxy_by_thread(conn.params)
             |> halt()

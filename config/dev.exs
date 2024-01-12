@@ -15,7 +15,7 @@ config :epochtalk_server, EpochtalkServer.SmfRepo,
   password: System.get_env("SMF_REPO_PASSWORD"),
   hostname: System.get_env("SMF_REPO_HOSTNAME"),
   database: System.get_env("SMF_REPO_DATABASE"),
-  port: System.get_env("SMF_REPO_PORT"),
+  port: System.get_env("SMF_REPO_PORT") |> String.to_integer(),
   stacktrace: true,
   show_sensitive_data_on_connection_error: true,
   pool_size: 5

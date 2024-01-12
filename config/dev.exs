@@ -16,9 +16,10 @@ config :epochtalk_server, EpochtalkServer.SmfRepo,
   hostname: System.get_env("SMF_REPO_HOSTNAME"),
   database: System.get_env("SMF_REPO_DATABASE"),
   port: System.get_env("SMF_REPO_PORT") |> String.to_integer(),
-  stacktrace: true,
-  show_sensitive_data_on_connection_error: true,
-  pool_size: 10
+  stacktrace: System.get_env("SMF_REPO_STACKTRACE") || true,
+  show_sensitive_data_on_connection_error:
+    System.get_env("SMF_REPO_SENSITIVE_DATA_ON_ERROR") || true,
+  pool_size: System.get_env("SMF_REPO_POOL_SIZE") |> String.to_integer() || 10
 
 # For development, we disable any cache and enable
 # debugging and code reloading.

@@ -351,6 +351,7 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
         :by_board ->
           %{boards_seq: boards_seq} = Application.get_env(:epochtalk_server, :proxy_config)
           boards_seq = boards_seq |> String.to_integer()
+
           if Validate.cast(conn.params, "board_id", :integer, required: true) < boards_seq do
             conn
             |> proxy_by_board(conn.params)
@@ -366,6 +367,7 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
 
               %{threads_seq: threads_seq} = Application.get_env(:epochtalk_server, :proxy_config)
               threads_seq = threads_seq |> String.to_integer()
+
               if slug_as_id < threads_seq do
                 conn
                 |> render(:slug_to_id, id: slug_as_id)

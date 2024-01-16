@@ -1,8 +1,11 @@
 defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
   import Ecto.Query
   alias EpochtalkServer.SmfRepo
-  alias EpochtalkServer.ProxySupervisor
   alias EpochtalkServerWeb.Helpers.ProxyPagination
+
+  @moduledoc """
+  Helper for pulling and formatting data from SmfRepo
+  """
 
   def build_model(model_type, ids, _, _) when is_nil(model_type) or is_nil(ids) do
     {:ok, %{}, %{}}
@@ -13,8 +16,6 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
   end
 
   def build_model(model_type, id, page, per_page) when is_integer(id) do
-    ProxySupervisor.start_link([])
-
     case model_type do
       "threads.by_board" ->
         build_threads_by_board(id, page, per_page)

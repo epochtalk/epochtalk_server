@@ -4,7 +4,6 @@ defmodule EpochtalkServerWeb.Helpers.ProxyPagination do
   """
   import Ecto.Query
   alias EpochtalkServer.SmfRepo
-  alias EpochtalkServer.ProxySupervisor
   alias EpochtalkServerWeb.Helpers.Validate
 
   @doc """
@@ -69,8 +68,6 @@ defmodule EpochtalkServerWeb.Helpers.ProxyPagination do
         )
 
   def page_simple(query, count_query, page, per_page: per_page) do
-    ProxySupervisor.start_link([])
-
     options = [prefix: "public"]
 
     total_records =

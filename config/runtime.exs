@@ -138,7 +138,7 @@ if config_env() == :prod do
       """
 
   smf_repo_port =
-    System.get_env("SMF_REPO_PORT") |> String.to_integer() ||
+    System.get_env("SMF_REPO_PORT") || "3306" |> String.to_integer() ||
       raise """
       environment variable SMF_REPO_PORT is missing.
       """
@@ -152,7 +152,7 @@ if config_env() == :prod do
     stacktrace: System.get_env("SMF_REPO_STACKTRACE") || true,
     show_sensitive_data_on_connection_error:
       System.get_env("SMF_REPO_SENSITIVE_DATA_ON_ERROR") || false,
-    pool_size: System.get_env("SMF_REPO_POOL_SIZE") |> String.to_integer() || 10
+    pool_size: System.get_env("SMF_REPO_POOL_SIZE") || "10" |> String.to_integer()
 
   # Configure Guardian for Runtime
   config :epochtalk_server, EpochtalkServer.Auth.Guardian,

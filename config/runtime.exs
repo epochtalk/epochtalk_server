@@ -166,11 +166,23 @@ if config_env() == :prod do
   # Configure Redis for Session Storage
   config :epochtalk_server, :redix, host: System.get_env("REDIS_HOST") || "127.0.0.1"
 
+  id_board_blacklist =
+    System.get_env("ID_BOARD_BLACKLIST") ||
+      raise """
+      environment variable ID_BOARD_BLACKLIST is missing.
+      """
+
+  id_board_blacklist =
+    id_board_blacklist
+    |> String.split()
+    |> Enum.map(&(String.to_integer(&1)))
+
   # Configure proxy
   config :epochtalk_server,
     proxy_config: %{
       threads_seq: System.get_env("THREADS_SEQ") || "6000000",
-      boards_seq: System.get_env("BOARDS_SEQ") || "500"
+      boards_seq: System.get_env("BOARDS_SEQ") || "500",
+      id_board_blacklist: id_board_blacklist
     }
 
   # Configure frontend

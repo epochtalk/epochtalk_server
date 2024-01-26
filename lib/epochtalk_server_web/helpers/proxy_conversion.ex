@@ -68,9 +68,10 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
   end
 
   def build_boards(ids) do
+    %{id_board_blacklist: id_board_blacklist} = Application.get_env(:epochtalk_server, :proxy_config)
     from(b in "smf_boards",
       limit: ^length(ids),
-      where: b.id_board in ^ids,
+      where: b.id_board in ^ids and b.id_board not in ^id_board_blacklist,
       select: %{
         id: b.id_board,
         slug: b.id_board,
@@ -101,11 +102,12 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
   end
 
   def build_threads_by_board(id, page, per_page) do
+    %{id_board_blacklist: id_board_blacklist} = Application.get_env(:epochtalk_server, :proxy_config)
     count_query =
-      from t in "smf_topics", where: t.id_board == ^id, select: %{count: count(t.id_topic)}
+      from t in "smf_topics", where: t.id_board == ^id and t.id_board not in ^id_board_blacklist, select: %{count: count(t.id_topic)}
 
     from(t in "smf_topics",
-      where: t.id_board == ^id,
+      where: t.id_board == ^id and t.id_board not in ^id_board_blacklist,
       order_by: [desc: t.id_last_msg],
       select: %{
         id: t.id_topic,
@@ -157,9 +159,10 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
   end
 
   def build_threads(ids) do
+    %{id_board_blacklist: id_board_blacklist} = Application.get_env(:epochtalk_server, :proxy_config)
     from(t in "smf_topics",
       limit: ^length(ids),
-      where: t.id_topic in ^ids,
+      where: t.id_topic in ^ids and t.id_board not in ^id_board_blacklist,
       select: %{
         id: t.id_topic,
         slug: t.id_topic,
@@ -209,9 +212,10 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
   end
 
   def build_posts(ids) do
+    %{id_board_blacklist: id_board_blacklist} = Application.get_env(:epochtalk_server, :proxy_config)
     from(m in "smf_messages",
       limit: ^length(ids),
-      where: m.id_msg in ^ids,
+      where: m.id_msg in ^ids and m.id_board not in ^id_board_blacklist,
       select: %{
         id: m.id_msg,
         thread_id: m.id_topic,
@@ -243,12 +247,13 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
   end
 
   def build_posts_by_thread(id, page, per_page) do
+    %{id_board_blacklist: id_board_blacklist} = Application.get_env(:epochtalk_server, :proxy_config)
     count_query =
-      from m in "smf_messages", where: m.id_topic == ^id, select: %{count: count(m.id_topic)}
+      from m in "smf_messages", where: m.id_topic == ^id and m.id_board not in ^id_board_blacklist, select: %{count: count(m.id_topic)}
 
     from(m in "smf_messages",
       limit: 15,
-      where: m.id_topic == ^id,
+      where: m.id_topic == ^id and m.id_board not in ^id_board_blacklist,
       order_by: [asc: m.posterTime],
       select: %{
         id: m.id_msg,
@@ -302,9 +307,10 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
   end
 
   defp get_post(id) do
+    %{id_board_blacklist: id_board_blacklist} = Application.get_env(:epochtalk_server, :proxy_config)
     from(m in "smf_messages",
       limit: 1,
-      where: m.id_msg == ^id,
+      where: m.id_msg == ^id and m.id_board not in ^id_board_blacklist,
       select: %{
         id: m.id_msg,
         thread_id: m.id_topic,

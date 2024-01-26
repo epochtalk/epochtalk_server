@@ -137,22 +137,16 @@ if config_env() == :prod do
       environment variable SMF_REPO_DATABASE is missing.
       """
 
-  smf_repo_port =
-    System.get_env("SMF_REPO_PORT") || "3306" |> String.to_integer() ||
-      raise """
-      environment variable SMF_REPO_PORT is missing.
-      """
-
   config :epochtalk_server, EpochtalkServer.SmfRepo,
     username: smf_repo_username,
     password: smf_repo_password,
     hostname: smf_repo_hostname,
     database: smf_repo_database,
-    port: smf_repo_port,
+    port: String.to_integer(System.get_env("SMF_REPO_PORT") || "3306"),
     stacktrace: System.get_env("SMF_REPO_STACKTRACE") || true,
     show_sensitive_data_on_connection_error:
       System.get_env("SMF_REPO_SENSITIVE_DATA_ON_ERROR") || false,
-    pool_size: System.get_env("SMF_REPO_POOL_SIZE") || "10" |> String.to_integer()
+    pool_size: String.to_integer(System.get_env("SMF_REPO_POOL_SIZE") || "10")
 
   # Configure Guardian for Runtime
   config :epochtalk_server, EpochtalkServer.Auth.Guardian,

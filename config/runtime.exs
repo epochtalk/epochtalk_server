@@ -80,11 +80,37 @@ if config_env() == :prod do
   #     config :swoosh, :api_client, Swoosh.ApiClient.Hackney
   #
   # See https://hexdocs.pm/swoosh/Swoosh.html#module-installation for details.
-  config :epochtalk_server, EpochtalkServer.Mailer,
-    relay: System.get_env("EMAILER_SMTP_RELAY") || "smtp.example.com",
-    username: System.get_env("EMAILER_SMTP_USERNAME") || "username",
-    password: System.get_env("EMAILER_SMTP_PASSWORD") || "password",
-    port: System.get_env("EMAILER_SMTP_PORT") || 465
+  if System.get_env("EMAILER_SES_MODE") do
+    emailer_ses_region =
+      System.get_env("EMAILER_SES_REGION") ||
+        raise """
+        environment variable EMAILER_SES_REGION is missing.
+        """
+
+    emailer_ses_aws_access_key =
+      System.get_env("EMAILER_SES_AWS_ACCESS_KEY") ||
+        raise """
+        environment variable EMAILER_SES_AWS_ACCESS_KEY missing.
+        """
+
+    emailer_ses_aws_secret_key =
+      System.get_env("EMAILER_SES_AWS_SECRET_KEY") ||
+        raise """
+        environment variable EMAILER_SES_AWS_SECRET_KEY missing.
+        """
+
+    config :epochtalk_server, EpochtalkServer.Mailer,
+      adapter: Swoosh.Adapters.AmazonSES,
+      region: emailer_ses_region,
+      access_key: emailer_ses_aws_access_key,
+      secret: emailer_ses_aws_secret_key
+  else
+    config :epochtalk_server, EpochtalkServer.Mailer,
+      relay: System.get_env("EMAILER_SMTP_RELAY") || "smtp.example.com",
+      username: System.get_env("EMAILER_SMTP_USERNAME") || "username",
+      password: System.get_env("EMAILER_SMTP_PASSWORD") || "password",
+      port: System.get_env("EMAILER_SMTP_PORT") || 465
+  end
 
   # Configure Guardian for Runtime
   config :epochtalk_server, EpochtalkServer.Auth.Guardian,
@@ -103,4 +129,48 @@ if config_env() == :prod do
 
   # Configure Redis for Session Storage
   config :epochtalk_server, :redix, host: System.get_env("REDIS_HOST") || "127.0.0.1"
+
+  # Configure frontend
+  config :epochtalk_server,
+    frontend_config: %{
+      frontend_url: System.get_env("FRONTEND_URL") || "http://localhost:8000",
+      backend_url: System.get_env("BACKEND_URL") || "http://localhost:4000",
+      newbie_enabled: System.get_env("NEWBIE_ENABLED") || false,
+      login_required: System.get_env("LOGIN_REQUIRED") || false,
+      invite_only: System.get_env("INVITE_ONLY") || false,
+      verify_registration: System.get_env("VERIFY_REGISTRATION") || true,
+      post_max_length: System.get_env("POST_MAX_LENGTH") || 10_000,
+      max_image_size: System.get_env("MAX_IMAGE_SIZE") || 10_485_760,
+      max_avatar_size: System.get_env("MAX_AVATAR_SIZE") || 102_400,
+      mobile_break_width: System.get_env("MOBILE_BREAK_WIDTH") || 767,
+      ga_key: System.get_env("GA_KEY") || "UA-XXXXX-Y",
+      revision: nil,
+      website: %{
+        title: System.get_env("WEBSITE_TITLE") || "Epochtalk Forums",
+        description: System.get_env("WEBSITE_DESCRIPTION") || "Open source forum software",
+        keywords:
+          System.get_env("WEBSITE_KEYWORDS") || "open source, free forum, forum software, forum",
+        logo: System.get_env("WEBSITE_LOGO") || nil,
+        favicon: System.get_env("WEBSITE_FAVICON") || nil,
+        default_avatar: System.get_env("WEBSITE_DEFAULT_AVATAR") || "/images/avatar.png",
+        default_avatar_shape: System.get_env("WEBSITE_DEFAULT_AVATAR_SHAPE") || "circle"
+      },
+      portal: %{
+        enabled: System.get_env("PORTAL_ENABLED") || false,
+        board_id: System.get_env("PORTAL_BOARD_ID") || nil
+      },
+      emailer: %{
+        ses_mode: System.get_env("EMAILER_SES_MODE") || false,
+        options: %{
+          from_address: System.get_env("EMAILER_OPTIONS_FROM_ADDRESS") || "info@epochtalk.com"
+        }
+      },
+      images: %{
+        s3_mode: System.get_env("IMAGES_S3_MODE") || false,
+        options: %{
+          local_host: System.get_env("IMAGES_OPTIONS_LOCAL_HOST") || "http://localhost:4000"
+        }
+      },
+      rate_limiting: %{}
+    }
 end

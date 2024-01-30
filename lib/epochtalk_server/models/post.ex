@@ -176,7 +176,11 @@ defmodule EpochtalkServer.Models.Post do
       create(%{
         "thread_id" => post_attrs["thread_id"],
         "user_id" => user_id,
-        "content" => %{title: post_attrs["title"], body: post_attrs["body"]},
+        "content" => %{
+          title: post_attrs["title"],
+          body: post_attrs["body"],
+          body_html: post_attrs["body_html"]
+        },
         "deleted" => post_attrs["deleted"],
         "locked" => post_attrs["locked"]
       })
@@ -248,7 +252,7 @@ defmodule EpochtalkServer.Models.Post do
         """
           SELECT
             p.thread_id, t.board_id, t.slug, b.right_to_left, p.user_id, p.content ->> \'title\' as title,
-            p.content ->> \'body\' as body, p.metadata, p.deleted, p.locked, p.created_at,
+            p.content ->> \'body\' as body, p.content ->> \'body_html\' as body_html, p.metadata, p.deleted, p.locked, p.created_at,
             p.updated_at, p.imported_at, CASE WHEN EXISTS (
               SELECT rp.id
               FROM administration.reports_posts rp
@@ -314,6 +318,7 @@ defmodule EpochtalkServer.Models.Post do
       user_id: p1.user_id,
       title: p1.title,
       body: p1.body,
+      body_html: p1.body_html,
       deleted: p1.deleted,
       locked: p1.locked,
       right_to_left: p1.right_to_left,

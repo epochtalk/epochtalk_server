@@ -264,7 +264,6 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
         body: m.body,
         updated_at: m.modifiedTime,
         username: m.posterName,
-        user_email: m.posterEmail,
         poster_time: m.posterTime,
         poster_name: m.posterName,
         modified_time: m.modifiedTime
@@ -319,7 +318,6 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
         title: m.subject,
         body: m.body,
         username: m.posterName,
-        user_email: m.posterEmail,
         created_at: m.posterTime,
         modified_time: m.modifiedTime
       }

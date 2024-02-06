@@ -149,6 +149,9 @@ if config_env() == :prod do
       expire_after_hours: System.get_env("S3_EXPIRE_AFTER_HOURS") || 1,
       min_size_mb: System.get_env("S3_MIN_SIZE_MB") || 1_048_576,
       max_size_mb: System.get_env("S3_MAX_SIZE_MB") || 10_485_760,
+      # virtual_host:
+      #   true -> https://<bucket>.s3.<region>.amazonaws.com
+      #   false -> https://s3.<region>.amazonaws.com/<bucket>
       virtual_host: System.get_env("S3_VIRTUAL_HOST") || true,
       bucket: s3_bucket,
       path: System.get_env("S3_PATH") || "images/"

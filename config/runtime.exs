@@ -112,6 +112,48 @@ if config_env() == :prod do
       port: System.get_env("EMAILER_SMTP_PORT") || 465
   end
 
+  # configure aws if images mode is "S3"
+  if System.get_env("IMAGES_MODE") == "S3" do
+    aws_access_key_id =
+      System.get_env("AWS_ACCESS_KEY_ID") ||
+        raise """
+        environment variable AWS_ACCESS_KEY_ID missing.
+        """
+
+    aws_secret_access_key =
+      System.get_env("AWS_SECRET_ACCESS_KEY") ||
+        raise """
+        environment variable AWS_SECRET_ACCESS_KEY missing.
+        """
+
+    aws_region =
+      System.get_env("AWS_REGION") ||
+        raise """
+        environment variable AWS_REGION missing.
+        """
+
+    # configure aws
+    config :ex_aws,
+      access_key_id: aws_access_key_id,
+      secret_access_key: aws_secret_access_key,
+      region: aws_region
+
+    s3_bucket =
+      System.get_env("S3_BUCKET") ||
+        raise """
+        environment variable S3_BUCKET missing.
+        """
+
+    # configure s3
+    config :epochtalk_server, EpochtalkServer.S3,
+      expire_after_hours: System.get_env("S3_EXPIRE_AFTER_HOURS") || 1,
+      min_size_mb: System.get_env("S3_MIN_SIZE_MB") || 1_048_576,
+      max_size_mb: System.get_env("S3_MAX_SIZE_MB") || 10_485_760,
+      virtual_host: System.get_env("S3_VIRTUAL_HOST") || true,
+      bucket: s3_bucket,
+      path: System.get_env("S3_PATH") || "images/"
+  end
+
   # Configure Guardian for Runtime
   config :epochtalk_server, EpochtalkServer.Auth.Guardian,
     secret_key:

@@ -7,12 +7,7 @@ defmodule EpochtalkServer.Models.ImageReference do
   alias EpochtalkServer.Models.Profile
   alias EpochtalkServer.Models.Post
   # alias EpochtalkServer.Models.Message
-  @expires_in_hours 1
-  @content_length_minimum 1048576 # 1 MiB
-  @content_length_maximum 10485760 # 10 MiB
-  # @virtual_host false # https://s3.<region>.amazonaws.com/<bucket>
-  @virtual_host true # https://<bucket>.s3.<region>.amazonaws.com
-  @path_prefix "images/"
+  alias EpochtalkServer.S3
 
   @moduledoc """
   `ImageReference` model, for tracking images uploaded locally or to CDN
@@ -112,18 +107,11 @@ defmodule EpochtalkServer.Models.ImageReference do
     case Repo.insert(image_reference_changeset) do
       {:ok, image_reference} ->
         # set presigned post parameters
-        path = @path_prefix <> image_reference.uuid <> "." <> image_reference.type
-        opts = [
-          expires_in: @expires_in_hours,
-          content_length_range: [@content_length_minimum, @content_length_maximum],
-          virtual_host: @virtual_host
-        ]
+        filename = image_reference.uuid <> "." <> image_reference.type
 
         # generate presigned post
         presigned_post_result =
-          :s3
-          |> ExAws.Config.new([])
-          |> ExAws.S3.presigned_post("epochtalk-dev", path, opts)
+          S3.generate_presigned_post(%{filename: filename})
         {:ok, image_reference, presigned_post_result}
       {:error, changeset} -> {:error, changeset}
     end

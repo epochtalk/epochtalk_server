@@ -6,7 +6,7 @@ defmodule EpochtalkServerWeb.Controllers.ImageReferenceJSON do
   @doc """
   Renders S3 presigned post response
   """
-  def s3_request_upload(%{create_result: create_result}) do
-    %{presigned_post: create_result}
+  def s3_request_upload(%{create_result: {:ok, image_reference, presigned_post}}) do
+    %{presigned_post: presigned_post}
   end
 end

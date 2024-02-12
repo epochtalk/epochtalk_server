@@ -197,6 +197,9 @@
         "allow": true
       }
     },
+    "images": {
+      "upload": true
+    },
     "invitations": {
       "all": {
         "allow": true
@@ -839,6 +842,9 @@
         "allow": true
       }
     },
+    "images": {
+      "upload": true
+    },
     "invitations": {
       "all": {
         "allow": true
@@ -1332,6 +1338,9 @@
         "allow": true
       }
     },
+    "images": {
+      "upload": true
+    },
     "invitations": {
       "invite": {
         "allow": true
@@ -1749,6 +1758,9 @@
         "allow": true
       }
     },
+    "images": {
+      "upload": true
+    },
     "invitations": {
       "invite": {
         "allow": true
@@ -2148,6 +2160,9 @@
         "allow": true
       }
     },
+    "images": {
+      "upload": true
+    },
     "invitations": {
       "invite": {
         "allow": true
@@ -2380,6 +2395,9 @@
       "messages": {
         "allow": true
       }
+    },
+    "images": {
+      "upload": true
     },
     "invitations": {
       "invite": {

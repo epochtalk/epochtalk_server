@@ -198,7 +198,9 @@
       }
     },
     "images": {
-      "upload": true
+      "upload": {
+        "request": true
+      }
     },
     "invitations": {
       "all": {
@@ -843,7 +845,9 @@
       }
     },
     "images": {
-      "upload": true
+      "upload": {
+        "request": true
+      }
     },
     "invitations": {
       "all": {
@@ -1339,7 +1343,9 @@
       }
     },
     "images": {
-      "upload": true
+      "upload": {
+        "request": true
+      }
     },
     "invitations": {
       "invite": {
@@ -1759,7 +1765,9 @@
       }
     },
     "images": {
-      "upload": true
+      "upload": {
+        "request": true
+      }
     },
     "invitations": {
       "invite": {
@@ -2161,7 +2169,9 @@
       }
     },
     "images": {
-      "upload": true
+      "upload": {
+        "request": true
+      }
     },
     "invitations": {
       "invite": {
@@ -2397,7 +2407,9 @@
       }
     },
     "images": {
-      "upload": true
+      "upload": {
+        "request": true
+      }
     },
     "invitations": {
       "invite": {

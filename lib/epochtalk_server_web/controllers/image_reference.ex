@@ -7,14 +7,14 @@ defmodule EpochtalkServerWeb.Controllers.ImageReference do
   alias EpochtalkServer.Models.ImageReference
   alias EpochtalkServerWeb.ErrorHelpers
   alias EpochtalkServerWeb.Helpers.Validate
-  # alias EpochtalkServerWeb.Helpers.ACL
+  alias EpochtalkServerWeb.Helpers.ACL
 
   @doc """
   Create new `ImageReference` and return presigned post
   """
   def s3_request_upload(conn, attrs) do
-    # with :ok <- ACL.allow!(conn, "images.requestUpload"),
-    with length <- Validate.cast(attrs, "length", :integer, required: true),
+    with :ok <- ACL.allow!(conn, "images.upload.request"),
+         length <- Validate.cast(attrs, "length", :integer, required: true),
          file_type <- Validate.cast(attrs, "file_type", :string, required: true),
          # checksum <- Validate.cast(attrs, "checksum", :string, required: true),
          create_result <- ImageReference.create(%{length: length, type: file_type}) do

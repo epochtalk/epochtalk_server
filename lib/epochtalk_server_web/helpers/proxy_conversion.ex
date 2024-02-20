@@ -135,7 +135,8 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
       last_post_user_id: l.id_member,
       last_post_username: l.posterName,
       last_post_user_deleted: false,
-      last_viewed: nil
+      last_viewed: nil,
+      is_proxy: true
     })
     |> ProxyPagination.page_simple(count_query, page, per_page: per_page)
   end

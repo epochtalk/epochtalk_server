@@ -162,53 +162,37 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
     %{id_board_blacklist: id_board_blacklist} = Application.get_env(:epochtalk_server, :proxy_config)
     from(t in "smf_topics",
       limit: ^length(ids),
-      where: t.id_topic in ^ids and t.id_board not in ^id_board_blacklist,
-      select: %{
-        id: t.id_topic,
-        slug: t.id_topic,
-        board_id: t.id_board,
-        sticky: t.isSticky,
-        locked: t.locked,
-        view_count: t.numViews,
-        first_post_id: t.id_first_msg,
-        last_post_id: t.id_last_msg,
-        started_user_id: t.id_member_started,
-        updated_user_id: t.id_member_updated,
-        moderated: t.selfModerated,
-        post_count: t.numReplies
-      }
+      where: t.id_topic in ^ids and t.id_board not in ^id_board_blacklist
     )
+    # get first and last message for thread
+    |> join(:left, [t], m in "smf_messages", on: t.id_first_msg == m.id_msg)
+    |> join(:left, [t], m in "smf_messages", on: t.id_last_msg == m.id_msg)
+    |> select([t, f, l], %{
+      id: t.id_topic,
+      slug: t.id_topic,
+      board_id: t.id_board,
+      sticky: t.isSticky,
+      locked: t.locked,
+      view_count: t.numViews,
+      first_post_id: t.id_first_msg,
+      last_post_id: t.id_last_msg,
+      started_user_id: t.id_member_started,
+      updated_user_id: t.id_member_updated,
+      moderated: t.selfModerated,
+      post_count: t.numReplies,
+      title: f.subject,
+      user_id: f.id_member,
+      username: f.posterName,
+      created_at: f.posterTime * 1000,
+      user_deleted: false,
+      last_post_created_at: l.posterTime * 1000,
+      last_post_deleted: false,
+      last_post_user_id: l.id_member,
+      last_post_username: l.posterName,
+      last_post_user_deleted: false,
+      last_viewed: nil
+    })
     |> SmfRepo.all()
-    |> case do
-      [] ->
-        {:error, "Threads not found for ids: #{ids}"}
-
-      threads ->
-        threads =
-          Enum.reduce(threads, [], fn thread, acc ->
-            first_post = get_post(thread.first_post_id)
-            last_post = get_post(thread.last_post_id)
-
-            thread =
-              thread
-              |> Map.put(:title, first_post.title)
-              |> Map.put(:user_id, first_post.user_id)
-              |> Map.put(:username, first_post.username)
-              |> Map.put(:user_deleted, false)
-              |> Map.put(:last_post_id, last_post.id)
-              |> Map.put(:last_post_created_at, last_post.created_at * 1000)
-              |> Map.put(:last_post_deleted, false)
-              |> Map.put(:last_post_user_id, last_post.user_id)
-              |> Map.put(:last_post_username, last_post.username)
-              |> Map.put(:last_post_user_deleted, false)
-              |> Map.put(:last_viewed, nil)
-              |> Map.put(:created_at, first_post.created_at * 1000)
-
-            [thread | acc]
-          end)
-
-        return_tuple(Enum.reverse(threads))
-    end
   end
 
   def build_posts(ids) do

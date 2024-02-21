@@ -28,6 +28,15 @@ if config_env() == :prod do
       For example: ecto://USER:PASS@HOST/DATABASE
       """
 
+  logger_level =
+    System.get_env("LOGGER_LEVEL")
+    |> case do
+      "DEBUG" -> :debug
+      _ -> :info
+    end
+
+  config :logger, level: logger_level
+
   maybe_ipv6 = if System.get_env("ECTO_IPV6") in ~w(true 1), do: [:inet6], else: []
 
   config :epochtalk_server, EpochtalkServer.Repo,

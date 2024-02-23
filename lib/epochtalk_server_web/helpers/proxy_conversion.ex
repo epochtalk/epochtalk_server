@@ -176,6 +176,7 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
       last_viewed: nil
     })
     |> SmfRepo.all()
+    |> return_tuple()
   end
 
   def build_posts(ids) do

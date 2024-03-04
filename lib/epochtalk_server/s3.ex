@@ -12,7 +12,8 @@ defmodule EpochtalkServer.S3 do
     opts = [
       expires_in: config[:expire_after_hours],
       content_length_range: [config[:min_size_bytes], config[:max_size_bytes]],
-      virtual_host: config[:virtual_host]
+      virtual_host: config[:virtual_host],
+      starts_with: ["$Content-Type", config[:content_type_starts_with]]
     ]
 
     ExAws.Config.new(:s3, [])

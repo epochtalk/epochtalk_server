@@ -147,8 +147,8 @@ if config_env() == :prod do
     # configure s3
     config :epochtalk_server, EpochtalkServer.S3,
       expire_after_hours: System.get_env("S3_EXPIRE_AFTER_HOURS") || 1,
-      min_size_mb: System.get_env("S3_MIN_SIZE_MB") || 1_048_576,
-      max_size_mb: System.get_env("S3_MAX_SIZE_MB") || 10_485_760,
+      min_size_bytes: System.get_env("S3_MIN_SIZE_BYTES") || 1_024, # 1 KB
+      max_size_bytes: System.get_env("S3_MAX_SIZE_BYTES") || 10_485_760, # 10 MB
       # virtual_host:
       #   true -> https://<bucket>.s3.<region>.amazonaws.com
       #   false -> https://s3.<region>.amazonaws.com/<bucket>

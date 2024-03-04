@@ -11,7 +11,7 @@ defmodule EpochtalkServer.S3 do
     config = Application.get_env(:epochtalk_server, __MODULE__)
     opts = [
       expires_in: config[:expire_after_hours],
-      content_length_range: [config[:min_size_mb], config[:max_size_mb]],
+      content_length_range: [config[:min_size_bytes], config[:max_size_bytes]],
       virtual_host: config[:virtual_host]
     ]
 

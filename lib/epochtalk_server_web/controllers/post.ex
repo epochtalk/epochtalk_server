@@ -61,7 +61,7 @@ defmodule EpochtalkServerWeb.Controllers.Post do
          {:can_write, {:ok, true}} <-
            {:can_write, Board.get_write_access_by_thread_id(thread_id, user_priority)},
          {:board_banned, {:ok, false}} <-
-           {:board_banned, BoardBan.is_banned_from_board(user, thread_id: thread_id)},
+           {:board_banned, BoardBan.banned_from_board?(user, thread_id: thread_id)},
          attrs <- AutoModeration.moderate(user, attrs),
          attrs <- Mention.username_to_user_id(user, attrs),
          attrs <- Sanitize.html_and_entities_from_title(attrs),
@@ -183,7 +183,7 @@ defmodule EpochtalkServerWeb.Controllers.Post do
          {:can_write, {:ok, true}} <-
            {:can_write, Board.get_write_access_by_thread_id(thread_id, user_priority)},
          {:board_banned, {:ok, false}} <-
-           {:board_banned, BoardBan.is_banned_from_board(user, thread_id: thread_id)},
+           {:board_banned, BoardBan.banned_from_board?(user, thread_id: thread_id)},
 
          # Hooks
          attrs <- AutoModeration.moderate(user, attrs),
@@ -306,7 +306,7 @@ defmodule EpochtalkServerWeb.Controllers.Post do
 
          # Data Queries
          {:ok, write_access} <- Board.get_write_access_by_thread_id(thread_id, user_priority),
-         {:ok, board_banned} <- BoardBan.is_banned_from_board(user, thread_id: thread_id),
+         {:ok, board_banned} <- BoardBan.banned_from_board?(user, thread_id: thread_id),
          board_mapping <- BoardMapping.all(),
          board_moderators <- BoardModerator.all(),
          poll <- Poll.by_thread(thread_id),
@@ -383,7 +383,7 @@ defmodule EpochtalkServerWeb.Controllers.Post do
         moderated_boards
 
       view_self_mod and moderated_boards == [] ->
-        Thread.is_self_moderated_by_user(thread_id, user_id)
+        Thread.self_moderated_by_user?(thread_id, user_id)
 
       true ->
         false

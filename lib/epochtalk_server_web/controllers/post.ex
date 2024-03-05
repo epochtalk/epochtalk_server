@@ -327,7 +327,7 @@ defmodule EpochtalkServerWeb.Controllers.Post do
          metric_rank_maps <- MetricRankMap.all_merged(),
          ranks <- Rank.all(),
          posts <- Mention.user_id_to_username(posts),
-         {:ok, watching_thread} <- WatchThread.is_watching(user, thread_id) do
+         {:ok, watching_thread} <- WatchThread.user_is_watching(user, thread_id) do
       render(conn, :by_thread, %{
         posts: posts,
         poll: poll,
@@ -392,7 +392,7 @@ defmodule EpochtalkServerWeb.Controllers.Post do
 
   defp can_authed_user_bypass_thread_lock_on_post_create(user, thread_id) do
     has_bypass = ACL.has_permission(user, "posts.create.bypass.locked.admin")
-    thread_not_locked = !Thread.is_locked(thread_id)
+    thread_not_locked = !Thread.locked?(thread_id)
 
     is_mod =
       BoardModerator.user_is_moderator_with_thread_id(thread_id, user.id) and
@@ -443,7 +443,7 @@ defmodule EpochtalkServerWeb.Controllers.Post do
 
   defp can_authed_user_bypass_thread_lock_on_post_update(user, post, thread_id) do
     has_bypass = ACL.has_permission(user, "posts.update.bypass.locked.admin")
-    thread_not_locked = !Thread.is_locked(thread_id)
+    thread_not_locked = !Thread.locked?(thread_id)
 
     is_mod =
       BoardModerator.user_is_moderator_with_thread_id(thread_id, user.id) and

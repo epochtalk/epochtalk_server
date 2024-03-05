@@ -150,7 +150,7 @@ defmodule EpochtalkServerWeb.Controllers.PostJSON do
     authed_user_hid_post = post_hidden_by_id == authed_user_id
 
     post_is_viewable =
-      is_post_viewable?(
+      post_viewable?(
         post,
         authed_user_id,
         authed_user_is_self_mod,
@@ -170,7 +170,7 @@ defmodule EpochtalkServerWeb.Controllers.PostJSON do
     post
   end
 
-  defp is_post_viewable?(
+  defp post_viewable?(
          post,
          authed_user_id,
          authed_user_is_self_mod,

@@ -86,11 +86,11 @@ defmodule EpochtalkServer.Models.WatchThread do
   @doc """
   Given a `User` model and `thread_id` returns if the `User` is watching the specified `Thread`
   """
-  @spec is_watching(user :: User.t(), thread_id :: non_neg_integer) ::
+  @spec user_is_watching(user :: User.t(), thread_id :: non_neg_integer) ::
           {:ok, watching :: boolean}
-  def is_watching(nil, _thread_id), do: {:ok, false}
+  def user_is_watching(nil, _thread_id), do: {:ok, false}
 
-  def is_watching(user, thread_id) do
+  def user_is_watching(user, thread_id) do
     query =
       from w in WatchThread,
         where: w.user_id == ^user.id and w.thread_id == ^thread_id

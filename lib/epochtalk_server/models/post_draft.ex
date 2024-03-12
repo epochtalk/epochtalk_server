@@ -41,4 +41,19 @@ defmodule EpochtalkServer.Models.PostDraft do
     Repo.one(query)
   end
 
+  @doc """
+  Used to upsert a `PostDraft` for a specific `User`
+  """
+  @spec upsert(user_id :: non_neg_integer, draft :: String.t()) ::
+          {:ok, t()} | {:error, Ecto.Changeset.t()}
+  def upsert(user_id, draft) when is_integer(user_id) and is_binary(draft) do
+    now = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
+
+    Repo.insert(
+      %PostDraft{user_id: user_id, draft: draft, updated_at: now},
+      on_conflict: [set: [draft: draft, updated_at: now]],
+      conflict_target: [:user_id]
+    )
+  end
+
 end

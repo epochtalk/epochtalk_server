@@ -1,7 +1,9 @@
 defmodule EpochtalkServer.Models.PostDraft do
   use Ecto.Schema
-  # alias EpochtalkServer.Repo
+  import Ecto.Query
+  alias EpochtalkServer.Repo
   alias EpochtalkServer.Models.User
+  alias EpochtalkServer.Models.PostDraft
 
   @moduledoc """
   `PostDraft` model, for performing actions relating to a `User`'s `Post` draft
@@ -26,4 +28,17 @@ defmodule EpochtalkServer.Models.PostDraft do
   end
 
   ## === Database Functions ===
+
+  @doc """
+  Returns `PostDraft` Data given a `User` id
+  """
+  @spec by_user_id(user_id :: integer) :: t() | nil
+  def by_user_id(user_id) do
+    query =
+      from p in PostDraft,
+        where: p.user_id == ^user_id
+
+    Repo.one(query)
+  end
+
 end

@@ -1,7 +1,6 @@
 defmodule EpochtalkServer.Models.PollAnswer do
   use Ecto.Schema
   import Ecto.Changeset
-  # import Ecto.Query
   alias EpochtalkServer.Repo
   alias EpochtalkServer.Models.PollAnswer
   alias EpochtalkServer.Models.Poll

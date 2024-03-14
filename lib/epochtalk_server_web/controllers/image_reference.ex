@@ -9,6 +9,9 @@ defmodule EpochtalkServerWeb.Controllers.ImageReference do
   alias EpochtalkServerWeb.Helpers.Validate
   alias EpochtalkServerWeb.Helpers.ACL
 
+  # TODO(boka): move to config
+  @max_images 10
+
   @doc """
   Create new `ImageReference` and return presigned post
   """
@@ -16,6 +19,8 @@ defmodule EpochtalkServerWeb.Controllers.ImageReference do
     with :ok <- ACL.allow!(conn, "images.upload.request"),
          # unwrap list from _json
          attrs_list <- attrs_list["_json"],
+         # ensure list does not exceed max size
+         true <- length(attrs_list) <= @max_images,
          casted_attrs_list <- Enum.map(attrs_list, &cast_upload_attrs/1),
          create_result <- ImageReference.create(casted_attrs_list) |> IO.inspect() do
       render(conn, :s3_request_upload, %{

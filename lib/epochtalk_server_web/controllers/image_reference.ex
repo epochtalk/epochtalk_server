@@ -22,7 +22,7 @@ defmodule EpochtalkServerWeb.Controllers.ImageReference do
          # ensure list does not exceed max size
          true <- length(attrs_list) <= @max_images,
          casted_attrs_list <- Enum.map(attrs_list, &cast_upload_attrs/1),
-         create_result <- ImageReference.create(casted_attrs_list) |> IO.inspect() do
+         create_result <- ImageReference.create(casted_attrs_list) do
       render(conn, :s3_request_upload, %{
         create_result: create_result
       })

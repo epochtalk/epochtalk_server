@@ -2,6 +2,7 @@ defmodule EpochtalkServer.Models.ImageReference do
   use Ecto.Schema
   import Ecto.Changeset
   import Ecto.Query
+  alias Ecto.Multi
   alias EpochtalkServer.Repo
   alias EpochtalkServer.Models.ImageReference
   alias EpochtalkServer.Models.Profile
@@ -102,6 +103,39 @@ defmodule EpochtalkServer.Models.ImageReference do
   Creates a new `ImageReference`
   """
   @spec create(attrs :: map()) :: {:ok, image_reference :: t(), ExAws.S3.presigned_post_result()} | {:error, Ecto.Changeset.t()}
+  def create(attrs_list) when is_list(attrs_list) do
+    # [changesets]
+    image_reference_changesets = attrs_list
+    |> Stream.map(fn attrs ->
+      create_changeset(%ImageReference{}, attrs)
+    end)
+    # map multi queries
+    |> Stream.map(fn image_reference_changeset ->
+      uuid = image_reference_changeset.changes.uuid
+      insert_key = "image_reference_#{uuid}"
+      presigned_post_key = "presigned_post_#{uuid}"
+      Multi.new()
+      |> Multi.insert(insert_key, image_reference_changeset)
+      |> Multi.run(presigned_post_key, fn _repo, insert_result ->
+        image_reference = insert_result[insert_key]
+        # set presigned post parameters
+        filename = image_reference.uuid <> "." <> image_reference.type
+
+        # generate presigned post
+        presigned_post_result = S3.generate_presigned_post(%{filename: filename})
+        {:ok, presigned_post_result}
+      end)
+    end)
+    # build multi combined transaction
+    |> Enum.reduce(Multi.new(), &Multi.append/2)
+    |> Repo.transaction()
+    |> case do
+      {:ok, results} ->
+        {:ok, results}
+      {:error, :image_references, value, others} ->
+        {:error, value, others}
+    end
+  end
   def create(attrs) do
     image_reference_changeset = create_changeset(%ImageReference{}, attrs)
     case Repo.insert(image_reference_changeset) do

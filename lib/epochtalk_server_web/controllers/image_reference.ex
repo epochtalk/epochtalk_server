@@ -34,7 +34,7 @@ defmodule EpochtalkServerWeb.Controllers.ImageReference do
     with length <- Validate.cast(attrs, "length", :integer, required: true),
          # checksum <- Validate.cast(attrs, "checksum", :string, required: true),
          file_type <- Validate.cast(attrs, "file_type", :string, required: true) do
-      %{length: length, file_type: file_type}
+      %{length: length, type: file_type}
     else
       _ -> %{error: "Invalid attrs"}
     end

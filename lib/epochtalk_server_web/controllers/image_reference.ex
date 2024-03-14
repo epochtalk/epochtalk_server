@@ -12,17 +12,26 @@ defmodule EpochtalkServerWeb.Controllers.ImageReference do
   @doc """
   Create new `ImageReference` and return presigned post
   """
-  def s3_request_upload(conn, attrs) do
+  def s3_request_upload(conn, attrs_list) do
     with :ok <- ACL.allow!(conn, "images.upload.request"),
-         length <- Validate.cast(attrs, "length", :integer, required: true),
-         file_type <- Validate.cast(attrs, "file_type", :string, required: true),
-         # checksum <- Validate.cast(attrs, "checksum", :string, required: true),
-         create_result <- ImageReference.create(%{length: length, type: file_type}) do
+         # unwrap list from _json
+         attrs_list <- attrs_list["_json"],
+         casted_attrs_list <- Enum.map(attrs_list, &cast_upload_attrs/1),
+         create_result <- ImageReference.create(casted_attrs_list) |> IO.inspect() do
       render(conn, :s3_request_upload, %{
         create_result: create_result
       })
     else
       _ -> ErrorHelpers.render_json_error(conn, 400, "Error, image request upload failed")
+    end
+  end
+  defp cast_upload_attrs(attrs) do
+    with length <- Validate.cast(attrs, "length", :integer, required: true),
+         # checksum <- Validate.cast(attrs, "checksum", :string, required: true),
+         file_type <- Validate.cast(attrs, "file_type", :string, required: true) do
+      %{length: length, file_type: file_type}
+    else
+      _ -> %{error: "Invalid attrs"}
     end
   end
 end

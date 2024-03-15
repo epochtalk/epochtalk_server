@@ -124,10 +124,40 @@ defmodule EpochtalkServer.Models.Poll do
     if poll_answers_len > 0, do: poll_cs, else: add_error(poll_cs, :answers, "can't be blank")
   end
 
+
+  @doc """
+  Update changeset for `Poll` model
+  """
+  @spec update_changeset(
+          poll :: t(),
+          attrs :: map() | nil
+        ) :: Ecto.Changeset.t()
+  def update_changeset(poll, attrs \\ %{}) do
+    poll_answers_len = length(poll.poll_answers || [])
+
+    poll_cs =
+      poll
+      |> cast(attrs, [
+        :max_answers,
+        :expiration,
+        :change_vote,
+        :display_mode
+      ])
+      |> validate_required([
+        :max_answers,
+        :change_vote,
+        :display_mode
+      ])
+      |> validate_naivedatetime(:expiration, after: :utc_now)
+      |> validate_number(:max_answers, greater_than: 0, less_than_or_equal_to: poll_answers_len)
+      |> validate_length(:question, min: 1, max: 255)
+      |> validate_display_mode()
+  end
+
   @doc """
   Creates a new `Poll` in the database
   """
-  @spec create(post_attrs :: map()) :: {:ok, post :: t()} | {:error, Ecto.Changeset.t()}
+  @spec create(poll_attrs :: map()) :: {:ok, poll :: t()} | {:error, Ecto.Changeset.t()}
   def create(poll_attrs) do
     Repo.transaction(fn ->
       post_cs = create_changeset(%Poll{}, poll_attrs)
@@ -146,6 +176,19 @@ defmodule EpochtalkServer.Models.Poll do
           Repo.rollback(cs)
       end
     end)
+  end
+
+  @doc """
+  Updates an existing `Poll` in the database
+  """
+  @spec update(poll_attrs :: map()) ::
+          {:ok, poll :: t()} | {:error, Ecto.Changeset.t()}
+  def update(attrs) do
+    Poll
+    |> Repo.get(attrs["id"])
+    |> Repo.preload([:poll_answers])
+    |> update_changeset(attrs)
+    |> Repo.update()
   end
 
   @doc """
@@ -179,6 +222,8 @@ defmodule EpochtalkServer.Models.Poll do
 
     Repo.one(query)
   end
+
+  # var q = 'UPDATE polls SET (max_answers, change_vote, expiration, display_mode) = ($1, $2, $3, $4) WHERE id = $5';
 
   # === Private Helper Functions ===
 

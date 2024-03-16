@@ -124,6 +124,18 @@ defmodule EpochtalkServerWeb.Controllers.ThreadJSON do
   end
 
   @doc """
+  Renders updated `Thread` `Poll`.
+  """
+  def update_poll(%{poll: poll}),
+    do: %{
+      id: poll.id,
+      max_answers: poll.max_answers,
+      change_vote: poll.change_vote,
+      expiration: poll.expiration,
+      display_mode: poll.display_mode
+    }
+
+  @doc """
   Renders `Thread` id for slug to id route.
   """
   def slug_to_id(%{id: id}), do: %{id: id}

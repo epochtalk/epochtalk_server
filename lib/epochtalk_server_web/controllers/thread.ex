@@ -242,6 +242,22 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
   end
 
   @doc """
+  Used to update `Thread` `Poll`
+  """
+  def update_poll(conn, attrs) do
+    with id <- Validate.cast(attrs, "id", :integer, required: true),
+         {:ok, poll} <- Poll.update(attrs) do
+      render(conn, :update_poll, poll: poll)
+    else
+      {:error, data} ->
+        ErrorHelpers.render_json_error(conn, 400, data)
+
+      _ ->
+        ErrorHelpers.render_json_error(conn, 400, "Error, cannot update thread poll")
+    end
+  end
+
+  @doc """
   Used to convert `Thread` slug to id
   """
   def slug_to_id(conn, attrs) do

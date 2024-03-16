@@ -124,7 +124,6 @@ defmodule EpochtalkServer.Models.Poll do
     if poll_answers_len > 0, do: poll_cs, else: add_error(poll_cs, :answers, "can't be blank")
   end
 
-
   @doc """
   Update changeset for `Poll` model
   """

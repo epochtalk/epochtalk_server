@@ -245,8 +245,7 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
   Used to update `Thread` `Poll`
   """
   def update_poll(conn, attrs) do
-    with id <- Validate.cast(attrs, "id", :integer, required: true),
-         {:ok, poll} <- Poll.update(attrs) do
+    with {:ok, poll} <- Poll.update(attrs) do
       render(conn, :update_poll, poll: poll)
     else
       {:error, data} ->

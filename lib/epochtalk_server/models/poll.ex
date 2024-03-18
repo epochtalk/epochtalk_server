@@ -134,23 +134,22 @@ defmodule EpochtalkServer.Models.Poll do
   def update_changeset(poll, attrs \\ %{}) do
     poll_answers_len = length(poll.poll_answers || [])
 
-    poll_cs =
-      poll
-      |> cast(attrs, [
-        :max_answers,
-        :expiration,
-        :change_vote,
-        :display_mode
-      ])
-      |> validate_required([
-        :max_answers,
-        :change_vote,
-        :display_mode
-      ])
-      |> validate_naivedatetime(:expiration, after: :utc_now)
-      |> validate_number(:max_answers, greater_than: 0, less_than_or_equal_to: poll_answers_len)
-      |> validate_length(:question, min: 1, max: 255)
-      |> validate_display_mode()
+    poll
+    |> cast(attrs, [
+      :max_answers,
+      :expiration,
+      :change_vote,
+      :display_mode
+    ])
+    |> validate_required([
+      :max_answers,
+      :change_vote,
+      :display_mode
+    ])
+    |> validate_naivedatetime(:expiration, after: :utc_now)
+    |> validate_number(:max_answers, greater_than: 0, less_than_or_equal_to: poll_answers_len)
+    |> validate_length(:question, min: 1, max: 255)
+    |> validate_display_mode()
   end
 
   @doc """

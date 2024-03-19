@@ -44,7 +44,7 @@ defmodule EpochtalkServerWeb.UserChannel do
   def handle_info(:track_user_online, socket), do: track_user_online(socket)
 
   @impl true
-  def handle_in("is_online", %{"user_id" => user_id}, socket), do: is_online(socket, user_id)
+  def handle_in("is_online", %{"user_id" => user_id}, socket), do: online?(socket, user_id)
 
   @doc """
   Handles joining of `user:public` channel. Message is broadcast on this channel when
@@ -103,9 +103,9 @@ defmodule EpochtalkServerWeb.UserChannel do
   `User` with `user_id` is connected using Presence. Returns `user_id`
   and `online`, a boolean indicating if the `User` is connected.
   """
-  @spec is_online(socket :: Phoenix.Socket.t(), user_id :: non_neg_integer) ::
+  @spec online?(socket :: Phoenix.Socket.t(), user_id :: non_neg_integer) ::
           {:reply, {:ok, %{id: non_neg_integer, online: boolean}}, socket :: Phoenix.Socket.t()}
-  def is_online(socket, user_id) do
+  def online?(socket, user_id) do
     online =
       case Presence.get_by_key("user:public", user_id) do
         # empty array is returned if user isn't in channel

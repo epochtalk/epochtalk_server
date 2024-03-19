@@ -99,7 +99,7 @@ defmodule EpochtalkServer.Session do
           | {:error, reason :: String.t() | Redix.Error.t() | Redix.ConnectionError.t()}
   def get_resource(user_id, session_id) do
     # check if session is active in redis
-    is_active_for_user_id?(session_id, user_id)
+    active_for_user_id?(session_id, user_id)
     |> case do
       {:error, error} ->
         {:error, "Error finding resource from claims #{inspect(error)}"}
@@ -179,7 +179,7 @@ defmodule EpochtalkServer.Session do
     end
   end
 
-  defp is_active_for_user_id?(session_id, user_id) do
+  defp active_for_user_id?(session_id, user_id) do
     session_key = generate_key(user_id, "sessions")
     # check ZSCORE for user_id:session_id pair
     # returns score if it is a member of the set

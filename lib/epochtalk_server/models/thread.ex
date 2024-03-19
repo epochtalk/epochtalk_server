@@ -170,8 +170,8 @@ defmodule EpochtalkServer.Models.Thread do
   @doc """
   Returns boolean indicating if `Thread` is locked or nil if it does not exist
   """
-  @spec is_locked(id :: non_neg_integer) :: boolean | nil
-  def is_locked(id) when is_integer(id) do
+  @spec locked?(id :: non_neg_integer) :: boolean | nil
+  def locked?(id) when is_integer(id) do
     query =
       from t in Thread,
         where: t.id == ^id,
@@ -335,9 +335,9 @@ defmodule EpochtalkServer.Models.Thread do
   @doc """
   Check if specific `Thread` is self moderated by a specific `User`
   """
-  @spec is_self_moderated_by_user(id :: non_neg_integer, user_id :: non_neg_integer) ::
+  @spec self_moderated_by_user?(id :: non_neg_integer, user_id :: non_neg_integer) ::
           boolean
-  def is_self_moderated_by_user(id, user_id) do
+  def self_moderated_by_user?(id, user_id) do
     query_first_thread_post =
       from p in Post,
         left_join: t in Thread,
@@ -355,12 +355,12 @@ defmodule EpochtalkServer.Models.Thread do
   @doc """
   Check if specific `Thread`, using a `post_id`, is self moderated by a specific `User`
   """
-  @spec is_self_moderated_by_user_with_post_id(
+  @spec self_moderated_by_user_with_post_id?(
           post_id :: non_neg_integer,
           user_id :: non_neg_integer
         ) ::
           boolean
-  def is_self_moderated_by_user_with_post_id(post_id, user_id) do
+  def self_moderated_by_user_with_post_id?(post_id, user_id) do
     query_first_thread_post =
       from p in Post,
         left_join: t in Thread,

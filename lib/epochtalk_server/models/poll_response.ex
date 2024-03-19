@@ -2,8 +2,8 @@ defmodule EpochtalkServer.Models.PollResponse do
   use Ecto.Schema
   import Ecto.Changeset
   # import Ecto.Query
-  # alias EpochtalkServer.Repo
-  # alias EpochtalkServer.Models.PollResponse
+  alias EpochtalkServer.Repo
+  alias EpochtalkServer.Models.PollResponse
   alias EpochtalkServer.Models.PollAnswer
   alias EpochtalkServer.Models.User
 
@@ -49,5 +49,22 @@ defmodule EpochtalkServer.Models.PollResponse do
     |> validate_required([:answer_id, :user_id])
     |> foreign_key_constraint(:answer_id, name: :poll_responses_answer_id_fkey)
     |> foreign_key_constraint(:user_id, name: :poll_responses_user_id_fkey)
+  end
+
+  ## === Database Functions ===
+
+  @doc """
+  Create on `PollResponse` for specific poll. Used to vote for a `Poll`
+  """
+  @spec create(attrs :: map, user_id :: integer) :: :ok
+  def create(%{"answer_ids" => answer_ids} = attrs, user_id)
+      when is_map(attrs) and is_integer(user_id),
+      do: Enum.each(answer_ids, &PollResponse.create(&1, user_id))
+
+  def create(answer_id, user_id) do
+    poll_response_cs =
+      create_changeset(%PollResponse{}, %{answer_id: answer_id, user_id: user_id})
+
+    Repo.insert(poll_response_cs)
   end
 end

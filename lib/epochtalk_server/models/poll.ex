@@ -6,6 +6,7 @@ defmodule EpochtalkServer.Models.Poll do
   alias EpochtalkServer.Repo
   alias EpochtalkServer.Models.Poll
   alias EpochtalkServer.Models.PollAnswer
+  alias EpochtalkServer.Models.PollResponse
   alias EpochtalkServer.Models.Thread
 
   @moduledoc """
@@ -24,11 +25,14 @@ defmodule EpochtalkServer.Models.Poll do
   @derive {Jason.Encoder,
            only: [
              :thread_id,
+             :id,
              :question,
              :locked,
              :max_answers,
              :expiration,
              :change_vote,
+             :has_voted,
+             :answers,
              :display_mode
            ]}
   schema "polls" do
@@ -39,6 +43,8 @@ defmodule EpochtalkServer.Models.Poll do
     field :expiration, :naive_datetime
     field :change_vote, :boolean
     field :display_mode, Ecto.Enum, values: [:always, :voted, :expired]
+    field :has_voted, :boolean, virtual: true
+    field :answers, {:array, :map}, virtual: true
     has_many :poll_answers, PollAnswer
   end
 
@@ -140,6 +146,25 @@ defmodule EpochtalkServer.Models.Poll do
           Repo.rollback(cs)
       end
     end)
+  end
+
+  @doc """
+  Returns boolean indicating if the specified `User` has voted on the specified `Thread`
+  """
+  @spec has_voted(thread_id :: integer, user_id :: integer) :: boolean
+  def has_voted(thread_id, user_id) do
+    query =
+      from p in Poll,
+        left_join: pr in PollResponse,
+        on: true,
+        left_join: pa in PollAnswer,
+        on: true,
+        where:
+          p.id == pa.poll_id and pr.answer_id == pa.id and p.thread_id == ^thread_id and
+            pr.user_id == ^user_id,
+        select: pr.user_id
+
+    Repo.exists?(query)
   end
 
   @doc """

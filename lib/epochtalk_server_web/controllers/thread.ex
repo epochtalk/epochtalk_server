@@ -23,6 +23,8 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
   alias EpochtalkServer.Models.UserActivity
   alias EpochtalkServer.Models.ThreadSubscription
   alias EpochtalkServer.Models.Mention
+  alias EpochtalkServer.Models.Poll
+  alias EpochtalkServer.Models.PollResponse
 
   @doc """
   Used to retrieve recent threads
@@ -57,7 +59,7 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
          {:can_write, {:ok, true}} <-
            {:can_write, Board.get_write_access_by_id(board_id, user_priority)},
          {:board_banned, {:ok, false}} <-
-           {:board_banned, BoardBan.is_banned_from_board(user, board_id: board_id)},
+           {:board_banned, BoardBan.banned_from_board?(user, board_id: board_id)},
          {:is_active, true} <-
            {:is_active, User.is_active?(user.id)},
          {:allows_self_mod, true} <-
@@ -176,8 +178,8 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
          {:can_read, {:ok, true}} <-
            {:can_read, Board.get_read_access_by_id(board_id, user_priority)},
          {:ok, write_access} <- Board.get_write_access_by_id(board_id, user_priority),
-         {:ok, board_banned} <- BoardBan.is_banned_from_board(user, board_id: board_id),
-         {:ok, watching_board} <- WatchBoard.is_watching(user, board_id),
+         {:ok, board_banned} <- BoardBan.banned_from_board?(user, board_id: board_id),
+         {:ok, watching_board} <- WatchBoard.user_is_watching(user, board_id),
          board_mapping <- BoardMapping.all(),
          board_moderators <- BoardModerator.all(),
          threads <-
@@ -214,6 +216,28 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
 
       _ ->
         ErrorHelpers.render_json_error(conn, 400, "Error, cannot get threads by board")
+    end
+  end
+
+  @doc """
+  Used to vote on `Thread` `Poll`
+  """
+  def vote(conn, attrs) do
+    with user <- Guardian.Plug.current_resource(conn),
+         thread_id <- Validate.cast(attrs, "thread_id", :integer, required: true),
+         :ok <- PollResponse.create(attrs, user.id),
+         poll <- Poll.by_thread(thread_id),
+         has_voted <- Poll.has_voted(thread_id, user.id) do
+      render(conn, :vote, %{
+        poll: poll,
+        has_voted: has_voted
+      })
+    else
+      {:error, data} ->
+        ErrorHelpers.render_json_error(conn, 400, data)
+
+      _ ->
+        ErrorHelpers.render_json_error(conn, 400, "Error, cannot cast vote")
     end
   end
 

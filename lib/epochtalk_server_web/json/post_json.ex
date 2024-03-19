@@ -17,6 +17,15 @@ defmodule EpochtalkServerWeb.Controllers.PostJSON do
   end
 
   @doc """
+  Renders `Post` data after updating existing `Post`
+  """
+  def update(%{
+        post_data: post_data
+      }) do
+    post_data
+  end
+
+  @doc """
   Renders all `Post` for a particular `Thread`.
   """
   def by_thread(%{
@@ -126,13 +135,13 @@ defmodule EpochtalkServerWeb.Controllers.PostJSON do
 
     # get information about how current post was hidden
     post_hidden_by_priority =
-      if metadata_map_exists,
-        do: post.metadata.hidden_by_priority,
+      if metadata_map_exists && post.metadata["hidden_by_priority"] != nil,
+        do: post.metadata["hidden_by_priority"],
         else: post.user.priority
 
     post_hidden_by_id =
-      if metadata_map_exists,
-        do: post.metadata.hidden_by_id,
+      if metadata_map_exists && post.metadata["hidden_by_id"] != nil,
+        do: post.metadata["hidden_by_id"],
         else: post.user.id
 
     # check if user has priority to view hidden post,
@@ -141,7 +150,7 @@ defmodule EpochtalkServerWeb.Controllers.PostJSON do
     authed_user_hid_post = post_hidden_by_id == authed_user_id
 
     post_is_viewable =
-      is_post_viewable?(
+      post_viewable?(
         post,
         authed_user_id,
         authed_user_is_self_mod,
@@ -161,7 +170,7 @@ defmodule EpochtalkServerWeb.Controllers.PostJSON do
     post
   end
 
-  defp is_post_viewable?(
+  defp post_viewable?(
          post,
          authed_user_id,
          authed_user_is_self_mod,

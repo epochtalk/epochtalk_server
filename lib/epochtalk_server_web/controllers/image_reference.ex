@@ -22,10 +22,8 @@ defmodule EpochtalkServerWeb.Controllers.ImageReference do
          # ensure list does not exceed max length
          :ok <- validate_max_length(attrs_list, @max_images),
          casted_attrs_list <- Enum.map(attrs_list, &cast_upload_attrs/1),
-         create_result <- ImageReference.create(casted_attrs_list) do
-      render(conn, :s3_request_upload, %{
-        create_result: create_result
-      })
+         {:ok, presigned_posts} <- ImageReference.create(casted_attrs_list) do
+      render(conn, :s3_request_upload, %{presigned_posts: presigned_posts})
     else
       {:max_length_error, message} -> ErrorHelpers.render_json_error(conn, 400, message)
       _ -> ErrorHelpers.render_json_error(conn, 400, "Error, image request upload failed")

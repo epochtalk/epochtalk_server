@@ -52,7 +52,7 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
     # authorization checks
     with :ok <- ACL.allow!(conn, "threads.create"),
          board_id <- Validate.cast(attrs, "board_id", :integer, required: true),
-         {:auth, user} <- {:auth, Guardian.Plug.current_resource(conn)},
+         {:auth, %{} = user} <- {:auth, Guardian.Plug.current_resource(conn)},
          user_priority <- ACL.get_user_priority(conn),
          {:can_read, {:ok, true}} <-
            {:can_read, Board.get_read_access_by_id(board_id, user_priority)},

@@ -40,7 +40,7 @@ defmodule EpochtalkServerWeb.Controllers.Post do
   # * Ensure mentions and notifications are created
   def create(conn, attrs) do
     # Authorizations Checks
-    with {:auth, user} <- {:auth, Guardian.Plug.current_resource(conn)},
+    with {:auth, %{} = user} <- {:auth, Guardian.Plug.current_resource(conn)},
          :ok <- ACL.allow!(conn, "posts.create"),
          # normally we use model changesets for validating POST requests parameters,
          # this is an exception to save us from doing excessive processing between here
@@ -144,7 +144,7 @@ defmodule EpochtalkServerWeb.Controllers.Post do
   """
   def update(conn, attrs) do
     # Authorizations Checks
-    with {:auth, user} <- {:auth, Guardian.Plug.current_resource(conn)},
+    with {:auth, %{} = user} <- {:auth, Guardian.Plug.current_resource(conn)},
          :ok <- ACL.allow!(conn, "posts.update"),
          # normally we use model changesets for validating POST requests parameters,
          # this is an exception to save us from doing excessive processing between here

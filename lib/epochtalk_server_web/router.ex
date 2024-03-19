@@ -64,6 +64,8 @@ defmodule EpochtalkServerWeb.Router do
     get "/register/username/:username", User, :username
     get "/register/email/:email", User, :email
     get "/posts", Post, :by_thread
+    get "/posts/draft", PostDraft, :by_user_id
+    put "/posts/draft", PostDraft, :upsert
     post "/posts", Post, :create
     post "/posts/:id", Post, :update
     post "/register", User, :register

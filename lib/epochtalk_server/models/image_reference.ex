@@ -106,14 +106,14 @@ defmodule EpochtalkServer.Models.ImageReference do
   def create(attrs_list) when is_list(attrs_list) do
     # [changesets]
     image_reference_changesets = attrs_list
-    |> Stream.map(fn attrs ->
-      create_changeset(%ImageReference{}, attrs)
+    |> Stream.with_index()
+    |> Stream.map(fn {attrs, index} ->
+      {create_changeset(%ImageReference{}, attrs), index}
     end)
-    # map multi queries
-    |> Stream.map(fn image_reference_changeset ->
+    |> Stream.map(fn {image_reference_changeset, index} ->
       uuid = image_reference_changeset.changes.uuid
       insert_key = "image_reference_#{uuid}"
-      presigned_post_key = "presigned_post_#{uuid}"
+      presigned_post_key = "#{index}"
       Multi.new()
       |> Multi.insert(insert_key, image_reference_changeset)
       |> Multi.run(presigned_post_key, fn _repo, insert_result ->
@@ -131,6 +131,11 @@ defmodule EpochtalkServer.Models.ImageReference do
     |> Repo.transaction()
     |> case do
       {:ok, results} ->
+        results =
+          results
+          # return only indexed items
+          |> Enum.filter(&key_is_integer?/1)
+          |> Map.new()
         {:ok, results}
       {:error, :image_references, value, others} ->
         {:error, value, others}
@@ -197,5 +202,14 @@ defmodule EpochtalkServer.Models.ImageReference do
     if image_reference,
       do: {:ok, image_reference},
       else: {:error, :image_reference_does_not_exist}
+  end
+
+  defp key_is_integer?({key, _}) do
+    key
+    |> Integer.parse()
+    |> case do
+      {_, ""} -> true
+      _ -> false
+    end
   end
 end

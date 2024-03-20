@@ -171,7 +171,7 @@ defmodule EpochtalkServer.Models.ImageReference do
   @spec find(image_reference_attrs :: map()) ::
           {:ok, image_reference :: t()} | {:error, Ecto.Changeset.t()}
   def find(image_reference) do
-    Repo.all(image_reference_changeset)
+    Repo.all(image_reference)
   end
 
   defp query_expired() do

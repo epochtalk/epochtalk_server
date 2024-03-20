@@ -225,14 +225,23 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
   def vote(conn, attrs) do
     with user <- Guardian.Plug.current_resource(conn),
          thread_id <- Validate.cast(attrs, "thread_id", :integer, required: true),
-         :ok <- PollResponse.create(attrs, user.id),
-         poll <- Poll.by_thread(thread_id),
+         %Poll{} = poll <- Poll.by_thread(thread_id),
+         answer_ids <- attrs["answer_ids"],
+         {:valid_answers_list, true} <- {:valid_answers_list, is_list(answer_ids)},
+         {:valid_answers_length, true} <- {:valid_answers_length, length(answer_ids) <= poll.max_answers},
+         {:ok, _} <- PollResponse.create(attrs, user.id),
          has_voted <- Poll.has_voted(thread_id, user.id) do
       render(conn, :vote, %{
         poll: poll,
         has_voted: has_voted
       })
     else
+      {:valid_answers_list, false} ->
+        ErrorHelpers.render_json_error(conn, 400, "Error, 'answer_ids' must be a list")
+
+      {:valid_answers_length, false} ->
+        ErrorHelpers.render_json_error(conn, 400, "Error, 'answer_ids' length too long, too many answers")
+
       {:error, data} ->
         ErrorHelpers.render_json_error(conn, 400, data)
 

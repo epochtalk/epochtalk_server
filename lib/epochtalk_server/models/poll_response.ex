@@ -59,12 +59,17 @@ defmodule EpochtalkServer.Models.PollResponse do
   @spec create(attrs :: map, user_id :: integer) :: :ok
   def create(%{"answer_ids" => answer_ids} = attrs, user_id)
       when is_map(attrs) and is_integer(user_id),
-      do: Enum.each(answer_ids, &PollResponse.create(&1, user_id))
+      do: Repo.transaction(fn ->
+       Enum.map(answer_ids, &PollResponse.create(&1, user_id))
+      end)
 
   def create(answer_id, user_id) do
     poll_response_cs =
       create_changeset(%PollResponse{}, %{answer_id: answer_id, user_id: user_id})
 
-    Repo.insert(poll_response_cs)
+    case Repo.insert(poll_response_cs) do
+      {:ok, poll_response} -> poll_response
+      {:error, cs} -> Repo.rollback(cs)
+    end
   end
 end

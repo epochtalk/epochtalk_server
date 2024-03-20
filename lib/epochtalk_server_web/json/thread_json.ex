@@ -107,7 +107,6 @@ defmodule EpochtalkServerWeb.Controllers.ThreadJSON do
         Enum.map(poll.answers, &Map.put(&1, :votes, Enum.count(&1.poll_responses)))
       )
 
-    # TODO(akinsey): figure out if we need to account for timezone here (i dont think so)
     # hide votes if poll is not expired and display mode is set to display votes when expired
     now = NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
 

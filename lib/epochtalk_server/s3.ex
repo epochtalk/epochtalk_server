@@ -9,6 +9,7 @@ defmodule EpochtalkServer.S3 do
   @spec generate_presigned_post(params :: map) :: ExAws.S3.presigned_post_result()
   def generate_presigned_post(%{filename: filename}) do
     config = Application.get_env(:epochtalk_server, __MODULE__)
+
     opts = [
       expires_in: config[:expire_after_hours],
       content_length_range: [config[:min_size_bytes], config[:max_size_bytes]],

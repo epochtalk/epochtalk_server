@@ -29,14 +29,17 @@ defmodule EpochtalkServerWeb.Controllers.ImageReference do
       _ -> ErrorHelpers.render_json_error(conn, 400, "Error, image request upload failed")
     end
   end
+
   defp validate_max_length(attrs_list, max_length) do
     attrs_length = length(attrs_list)
+
     if attrs_length <= max_length do
       :ok
     else
       {:max_length_error, "Requested images amount #{attrs_length} exceeds max of #{max_length}"}
     end
   end
+
   defp cast_upload_attrs(attrs) do
     with length <- Validate.cast(attrs, "length", :integer, required: true),
          # checksum <- Validate.cast(attrs, "checksum", :string, required: true),

@@ -26,20 +26,24 @@ defmodule EpochtalkServer.Repo.Migrations.ImageReferences do
       add :post_id, :bigint
       add :image_reference_id, :bigint
     end
+
     create unique_index(:posts, [:post_id, :image_reference_id], prefix: @schema_prefix)
 
     create table(:messages, prefix: @schema_prefix) do
       add :message_id, :bigint
       add :image_reference_id, :bigint
     end
+
     create unique_index(:messages, [:message_id, :image_reference_id], prefix: @schema_prefix)
 
     create table(:profiles, prefix: @schema_prefix) do
       add :profile_id, :bigint
       add :image_reference_id, :bigint
     end
+
     create unique_index(:profiles, [:profile_id, :image_reference_id], prefix: @schema_prefix)
   end
+
   def down do
     # drop image references table and join tables
     drop table(:image_references)

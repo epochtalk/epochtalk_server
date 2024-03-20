@@ -34,7 +34,7 @@ defmodule EpochtalkServerWeb.Controllers.ImageReference do
     if attrs_length <= max_length do
       :ok
     else
-      {:max_length_error, "Requested images amount #{attrs_length} exceededs max of #{max_length}"}
+      {:max_length_error, "Requested images amount #{attrs_length} exceeds max of #{max_length}"}
     end
   end
   defp cast_upload_attrs(attrs) do

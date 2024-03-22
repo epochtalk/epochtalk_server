@@ -222,6 +222,19 @@ defmodule EpochtalkServer.Models.Poll do
   end
 
   @doc """
+  Returns boolean indicating if the specified `Poll` is locked given a `Thread` id
+  """
+  @spec locked_by_thread_id(thread_id :: integer) :: boolean
+  def locked_by_thread_id(thread_id) do
+    query =
+      from p in Poll,
+        where: p.thread_id == ^thread_id,
+        select: p.locked
+
+    Repo.one(query)
+  end
+
+  @doc """
   Queries `Poll` Data by thread
   """
   @spec by_thread(thread_id :: integer) :: t() | nil

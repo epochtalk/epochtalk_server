@@ -209,6 +209,19 @@ defmodule EpochtalkServer.Models.Poll do
   end
 
   @doc """
+  Returns boolean indicating if the specified `Poll` exists given a `Thread` id
+  """
+  @spec exists_by_thread_id(thread_id :: integer) :: boolean
+  def exists_by_thread_id(thread_id) do
+    query =
+      from p in Poll,
+        where: p.thread_id == ^thread_id,
+        select: p.id
+
+    Repo.exists?(query)
+  end
+
+  @doc """
   Queries `Poll` Data by thread
   """
   @spec by_thread(thread_id :: integer) :: t() | nil

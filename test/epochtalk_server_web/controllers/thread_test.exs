@@ -21,6 +21,13 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     admin_threads = build_list(3, :thread, board: admin_board, user: admin_user)
     super_admin_threads = build_list(3, :thread, board: super_admin_board, user: super_admin_user)
 
+    thread_with_poll =
+      build(:thread,
+        board: board,
+        user: user,
+        poll: build(:poll_attributes)
+      )
+
     {
       :ok,
       board: board,
@@ -28,8 +35,96 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
       super_admin_board: super_admin_board,
       threads: threads,
       admin_threads: admin_threads,
-      super_admin_threads: super_admin_threads
+      super_admin_threads: super_admin_threads,
+      thread_with_poll: thread_with_poll
     }
+  end
+
+
+  describe "vote/2" do
+    test "when unauthenticated, returns Unauthorized error", %{conn: conn, thread_with_poll: thread_data} do
+      [one, _two] = thread_data.poll.poll_answers
+      thread_id = thread_data.post.thread.id
+      response =
+        conn
+        |> post(Routes.thread_path(conn, :vote, thread_id), %{"answer_ids" => [one.id]})
+        |> json_response(401)
+
+      assert response["error"] == "Unauthorized"
+      assert response["message"] == "No resource found"
+    end
+
+    @tag :authenticated
+    test "given an id for nonexistant thread, does not vote on poll", %{conn: conn, thread_with_poll: thread_data} do
+      [one, _two] = thread_data.poll.poll_answers
+      thread_id = -1
+      response =
+        conn
+        |> post(Routes.thread_path(conn, :vote, thread_id), %{"answer_ids" => [one.id]})
+        |> json_response(400)
+
+      assert response["error"] == "Bad Request"
+      assert response["message"] == "Error, cannot cast vote"
+    end
+
+    @tag :authenticated
+    test "given valid thread and answer ids, does vote on poll", %{conn: conn, thread_with_poll: thread_data} do
+      [one, _two] = thread_data.poll.poll_answers
+      thread_id = thread_data.post.thread.id
+      response =
+        conn
+        |> post(Routes.thread_path(conn, :vote, thread_id), %{"answer_ids" => [one.id]})
+        |> json_response(200)
+
+      assert response["id"] == thread_data.poll.id
+      assert length(response["answers"]) == length(thread_data.poll.poll_answers)
+      assert response["change_vote"] == thread_data.poll.change_vote
+      assert response["display_mode"] == Atom.to_string(thread_data.poll.display_mode)
+      assert response["expiration"] == thread_data.poll.expiration
+      assert response["has_voted"] == true
+      assert response["locked"] == false
+      assert response["max_answers"] == thread_data.poll.max_answers
+      assert response["question"] == thread_data.poll.question
+      assert response["thread_id"] == thread_data.poll.thread_id
+    end
+
+    @tag :authenticated
+    test "given valid thread id and invalid answer id, does not vote on poll", %{conn: conn, thread_with_poll: thread_data} do
+      answer_id = -1
+      thread_id = thread_data.post.thread.id
+      response =
+        conn
+        |> post(Routes.thread_path(conn, :vote, thread_id), %{"answer_ids" => [answer_id]})
+        |> json_response(400)
+
+      assert response["error"] == "Bad Request"
+      assert response["message"] == "Answer_id does not exist"
+    end
+
+    @tag :authenticated
+    test "given valid thread id and too many answer ids, does not vote on poll", %{conn: conn, thread_with_poll: thread_data} do
+      [one, two] = thread_data.poll.poll_answers
+      thread_id = thread_data.post.thread.id
+      response =
+        conn
+        |> post(Routes.thread_path(conn, :vote, thread_id), %{"answer_ids" => [one.id, two.id]})
+        |> json_response(400)
+
+      assert response["error"] == "Bad Request"
+      assert response["message"] == "Error, 'answer_ids' length too long, too many answers"
+    end
+
+    @tag :authenticated
+    test "given valid thread id and invalid answer ids, does not vote on poll", %{conn: conn, thread_with_poll: thread_data} do
+      thread_id = thread_data.post.thread.id
+      response =
+        conn
+        |> post(Routes.thread_path(conn, :vote, thread_id), %{})
+        |> json_response(400)
+
+      assert response["error"] == "Bad Request"
+      assert response["message"] == "Error, 'answer_ids' must be a list"
+    end
   end
 
   describe "by_board/2" do

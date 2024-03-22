@@ -3,6 +3,7 @@ defmodule Test.Support.Factories.Thread do
   Factory for `Thread`
   """
   alias EpochtalkServer.Models.Thread
+  alias EpochtalkServer.Repo
 
   defmacro __using__(_opts) do
     quote do
@@ -14,8 +15,7 @@ defmodule Test.Support.Factories.Thread do
           "sticky" => Map.get(attrs, :sticky) || false,
           "locked" => Map.get(attrs, :locked) || false,
           "moderated" => false,
-          "addPoll" => false,
-          "pollValid" => false,
+          "poll" => Map.get(attrs, :poll),
           "slug" => Map.get(attrs, :slug) || sequence(:thread_slug, &"thread-slug-#{&1}")
         }
       end
@@ -25,7 +25,11 @@ defmodule Test.Support.Factories.Thread do
 
         Thread.create(attributes, user)
         |> case do
-          {:ok, thread} -> thread |> Map.put(:attributes, attributes)
+          {:ok, thread} ->
+            thread = thread |> Map.put(:attributes, attributes)
+            if thread.poll == nil,
+              do: thread,
+              else: if thread.poll.poll_answers, do: Map.put(thread, :poll, thread.poll |> Repo.preload(:poll_answers)), else: thread
         end
       end
     end

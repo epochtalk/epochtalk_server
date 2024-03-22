@@ -40,11 +40,14 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     }
   end
 
-
   describe "vote/2" do
-    test "when unauthenticated, returns Unauthorized error", %{conn: conn, thread_with_poll: thread_data} do
+    test "when unauthenticated, returns Unauthorized error", %{
+      conn: conn,
+      thread_with_poll: thread_data
+    } do
       [one, _two] = thread_data.poll.poll_answers
       thread_id = thread_data.post.thread.id
+
       response =
         conn
         |> post(Routes.thread_path(conn, :vote, thread_id), %{"answer_ids" => [one.id]})
@@ -55,9 +58,13 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     end
 
     @tag :authenticated
-    test "given an id for nonexistant thread, does not vote on poll", %{conn: conn, thread_with_poll: thread_data} do
+    test "given an id for nonexistant thread, does not vote on poll", %{
+      conn: conn,
+      thread_with_poll: thread_data
+    } do
       [one, _two] = thread_data.poll.poll_answers
       thread_id = -1
+
       response =
         conn
         |> post(Routes.thread_path(conn, :vote, thread_id), %{"answer_ids" => [one.id]})
@@ -68,9 +75,13 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     end
 
     @tag :authenticated
-    test "given valid thread and answer ids, does vote on poll", %{conn: conn, thread_with_poll: thread_data} do
+    test "given valid thread and answer ids, does vote on poll", %{
+      conn: conn,
+      thread_with_poll: thread_data
+    } do
       [one, _two] = thread_data.poll.poll_answers
       thread_id = thread_data.post.thread.id
+
       response =
         conn
         |> post(Routes.thread_path(conn, :vote, thread_id), %{"answer_ids" => [one.id]})
@@ -89,9 +100,13 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     end
 
     @tag :authenticated
-    test "given valid thread id and invalid answer id, does not vote on poll", %{conn: conn, thread_with_poll: thread_data} do
+    test "given valid thread id and invalid answer id, does not vote on poll", %{
+      conn: conn,
+      thread_with_poll: thread_data
+    } do
       answer_id = -1
       thread_id = thread_data.post.thread.id
+
       response =
         conn
         |> post(Routes.thread_path(conn, :vote, thread_id), %{"answer_ids" => [answer_id]})
@@ -102,9 +117,13 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     end
 
     @tag :authenticated
-    test "given valid thread id and too many answer ids, does not vote on poll", %{conn: conn, thread_with_poll: thread_data} do
+    test "given valid thread id and too many answer ids, does not vote on poll", %{
+      conn: conn,
+      thread_with_poll: thread_data
+    } do
       [one, two] = thread_data.poll.poll_answers
       thread_id = thread_data.post.thread.id
+
       response =
         conn
         |> post(Routes.thread_path(conn, :vote, thread_id), %{"answer_ids" => [one.id, two.id]})
@@ -115,8 +134,12 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     end
 
     @tag :authenticated
-    test "given valid thread id and invalid answer ids, does not vote on poll", %{conn: conn, thread_with_poll: thread_data} do
+    test "given valid thread id and invalid answer ids, does not vote on poll", %{
+      conn: conn,
+      thread_with_poll: thread_data
+    } do
       thread_id = thread_data.post.thread.id
+
       response =
         conn
         |> post(Routes.thread_path(conn, :vote, thread_id), %{})

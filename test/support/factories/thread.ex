@@ -27,9 +27,14 @@ defmodule Test.Support.Factories.Thread do
         |> case do
           {:ok, thread} ->
             thread = thread |> Map.put(:attributes, attributes)
+
             if thread.poll == nil,
               do: thread,
-              else: if thread.poll.poll_answers, do: Map.put(thread, :poll, thread.poll |> Repo.preload(:poll_answers)), else: thread
+              else:
+                if(thread.poll.poll_answers,
+                  do: Map.put(thread, :poll, thread.poll |> Repo.preload(:poll_answers)),
+                  else: thread
+                )
         end
       end
     end

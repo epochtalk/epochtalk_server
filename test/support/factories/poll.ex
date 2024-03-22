@@ -8,8 +8,8 @@ defmodule Test.Support.Factories.Poll do
         %{
           "question" => Map.get(attrs, :question) || "Is this a thread with a poll?",
           "max_answers" => Map.get(attrs, :max_answers) || 1,
-          "answers" =>  Map.get(attrs, :answers) || ["Yes", "No"],
-          "change_vote" =>  Map.get(attrs, :change_vote) || false,
+          "answers" => Map.get(attrs, :answers) || ["Yes", "No"],
+          "change_vote" => Map.get(attrs, :change_vote) || false,
           "display_mode" => Map.get(attrs, :display_mode) || "always"
         }
       end

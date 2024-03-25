@@ -214,6 +214,9 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
       {:can_read, {:error, :board_does_not_exist}} ->
         ErrorHelpers.render_json_error(conn, 400, "Read error, board does not exist")
 
+      {:board_banned, {:ok, true}} ->
+        ErrorHelpers.render_json_error(conn, 403, "Unauthorized, you are banned from this board")
+
       _ ->
         ErrorHelpers.render_json_error(conn, 400, "Error, cannot get threads by board")
     end
@@ -225,10 +228,21 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
   def vote(conn, attrs) do
     with user <- Guardian.Plug.current_resource(conn),
          thread_id <- Validate.cast(attrs, "thread_id", :integer, required: true),
+         :ok <- ACL.allow!(conn, "threads.vote"),
          %Poll{} = poll <- Poll.by_thread(thread_id),
          answer_ids <- attrs["answer_ids"],
          {:valid_answers_list, true} <- {:valid_answers_list, is_list(answer_ids)},
-         {:valid_answers_length, true} <- {:valid_answers_length, length(answer_ids) <= poll.max_answers},
+         {:valid_answers_length, true} <-
+           {:valid_answers_length, length(answer_ids) <= poll.max_answers},
+         user_priority <- ACL.get_user_priority(conn),
+         {:can_read, {:ok, true}} <-
+           {:can_read, Board.get_read_access_by_thread_id(thread_id, user_priority)},
+         {:can_write, {:ok, true}} <-
+           {:can_write, Board.get_write_access_by_thread_id(thread_id, user_priority)},
+         {:is_active, true} <-
+           {:is_active, User.is_active?(user.id)},
+         {:board_banned, {:ok, false}} <-
+           {:board_banned, BoardBan.banned_from_board?(user, thread_id: thread_id)},
          {:ok, _} <- PollResponse.create(attrs, user.id),
          has_voted <- Poll.has_voted(thread_id, user.id) do
       render(conn, :vote, %{
@@ -240,7 +254,34 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
         ErrorHelpers.render_json_error(conn, 400, "Error, 'answer_ids' must be a list")
 
       {:valid_answers_length, false} ->
-        ErrorHelpers.render_json_error(conn, 400, "Error, 'answer_ids' length too long, too many answers")
+        ErrorHelpers.render_json_error(
+          conn,
+          400,
+          "Error, 'answer_ids' length too long, too many answers"
+        )
+
+      {:can_read, {:ok, false}} ->
+        ErrorHelpers.render_json_error(
+          conn,
+          403,
+          "Unauthorized, you do not have permission to read"
+        )
+
+      {:can_write, {:ok, false}} ->
+        ErrorHelpers.render_json_error(
+          conn,
+          403,
+          "Unauthorized, you do not have permission to write"
+        )
+
+      {:is_active, false} ->
+        ErrorHelpers.render_json_error(conn, 400, "Account must be active to vote")
+
+      {:board_banned, {:ok, true}} ->
+        ErrorHelpers.render_json_error(conn, 403, "Unauthorized, you are banned from this board")
+
+      {:error, :board_does_not_exist} ->
+        ErrorHelpers.render_json_error(conn, 400, "Error, board does not exist")
 
       {:error, data} ->
         ErrorHelpers.render_json_error(conn, 400, data)

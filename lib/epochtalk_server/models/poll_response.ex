@@ -56,12 +56,13 @@ defmodule EpochtalkServer.Models.PollResponse do
   @doc """
   Create on `PollResponse` for specific poll. Used to vote for a `Poll`
   """
-  @spec create(attrs :: map, user_id :: integer) :: :ok
+  @spec create(attrs :: map, user_id :: integer) :: {:ok, any()} | {:error, any()}
   def create(%{"answer_ids" => answer_ids} = attrs, user_id)
       when is_map(attrs) and is_integer(user_id),
-      do: Repo.transaction(fn ->
-       Enum.map(answer_ids, &PollResponse.create(&1, user_id))
-      end)
+      do:
+        Repo.transaction(fn ->
+          Enum.map(answer_ids, &PollResponse.create(&1, user_id))
+        end)
 
   def create(answer_id, user_id) do
     poll_response_cs =

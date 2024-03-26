@@ -235,6 +235,22 @@ defmodule EpochtalkServer.Models.Poll do
   end
 
   @doc """
+  Returns boolean indicating if the specified `Poll` is currently running given a `Thread` id
+  """
+  @spec running_by_thread_id(thread_id :: integer) :: boolean
+  def running_by_thread_id(thread_id) do
+    query =
+      from p in Poll,
+        where: p.thread_id == ^thread_id,
+        select: p.expiration
+
+    expiration = Repo.one(query)
+    if expiration == nil,
+      do: true,
+      else: NaiveDateTime.compare(expiration, NaiveDateTime.utc_now()) == :gt
+  end
+
+  @doc """
   Queries `Poll` Data by thread
   """
   @spec by_thread(thread_id :: integer) :: t() | nil

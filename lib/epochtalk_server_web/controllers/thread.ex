@@ -228,12 +228,11 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
   def vote(conn, attrs) do
     with user <- Guardian.Plug.current_resource(conn),
          thread_id <- Validate.cast(attrs, "thread_id", :integer, required: true),
-         :ok <- ACL.allow!(conn, "threads.vote"),
-         %Poll{} = poll <- Poll.by_thread(thread_id),
          answer_ids <- attrs["answer_ids"],
          {:valid_answers_list, true} <- {:valid_answers_list, is_list(answer_ids)},
-         {:valid_answers_length, true} <-
-           {:valid_answers_length, length(answer_ids) <= poll.max_answers},
+
+         # Authorizations
+         :ok <- ACL.allow!(conn, "threads.vote"),
          user_priority <- ACL.get_user_priority(conn),
          {:can_read, {:ok, true}} <-
            {:can_read, Board.get_read_access_by_thread_id(thread_id, user_priority)},
@@ -243,22 +242,24 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
            {:is_active, User.is_active?(user.id)},
          {:board_banned, {:ok, false}} <-
            {:board_banned, BoardBan.banned_from_board?(user, thread_id: thread_id)},
+         {:poll_exists, true} <- {:poll_exists, Poll.exists(thread_id)},
+         {:poll_running, true} <- {:poll_running, Poll.running(thread_id)},
+         {:poll_unlocked, true} <- {:poll_unlocked, Poll.unlocked(thread_id)},
+         {:poll_not_voted, true} <-
+           {:poll_not_voted, Poll.has_not_voted(thread_id, user.id)},
+         {:poll_valid_answers, true} <-
+           {:poll_valid_answers, length(answer_ids) <= Poll.max_answers(thread_id)},
+
+         # create poll response and query return data
          {:ok, _} <- PollResponse.create(attrs, user.id),
-         has_voted <- Poll.has_voted(thread_id, user.id) do
+         poll <- Poll.by_thread(thread_id) do
       render(conn, :vote, %{
         poll: poll,
-        has_voted: has_voted
+        has_voted: true
       })
     else
       {:valid_answers_list, false} ->
         ErrorHelpers.render_json_error(conn, 400, "Error, 'answer_ids' must be a list")
-
-      {:valid_answers_length, false} ->
-        ErrorHelpers.render_json_error(
-          conn,
-          400,
-          "Error, 'answer_ids' length too long, too many answers"
-        )
 
       {:can_read, {:ok, false}} ->
         ErrorHelpers.render_json_error(
@@ -272,6 +273,25 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
           conn,
           403,
           "Unauthorized, you do not have permission to write"
+        )
+
+      {:poll_exists, false} ->
+        ErrorHelpers.render_json_error(conn, 400, "Error, poll does not exist")
+
+      {:poll_running, false} ->
+        ErrorHelpers.render_json_error(conn, 400, "Error, poll is not currently running")
+
+      {:poll_unlocked, false} ->
+        ErrorHelpers.render_json_error(conn, 400, "Error, poll is locked")
+
+      {:poll_not_voted, false} ->
+        ErrorHelpers.render_json_error(conn, 400, "Error, you have already voted on this poll")
+
+      {:poll_valid_answers, false} ->
+        ErrorHelpers.render_json_error(
+          conn,
+          400,
+          "Error, 'answer_ids' length too long, too many answers"
         )
 
       {:is_active, false} ->

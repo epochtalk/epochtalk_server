@@ -209,10 +209,16 @@ defmodule EpochtalkServer.Models.Poll do
   end
 
   @doc """
+  Returns boolean indicating if the specified `User` has not voted on the specified `Thread`
+  """
+  @spec has_not_voted(thread_id :: integer, user_id :: integer) :: boolean
+  def has_not_voted(thread_id, user_id), do: !has_voted(thread_id, user_id)
+
+  @doc """
   Returns boolean indicating if the specified `Poll` exists given a `Thread` id
   """
-  @spec exists_by_thread_id(thread_id :: integer) :: boolean
-  def exists_by_thread_id(thread_id) do
+  @spec exists(thread_id :: integer) :: boolean
+  def exists(thread_id) do
     query =
       from p in Poll,
         where: p.thread_id == ^thread_id,
@@ -222,10 +228,23 @@ defmodule EpochtalkServer.Models.Poll do
   end
 
   @doc """
+  Returns integer indicating the max number of answers for the `Poll` given a `Thread` id
+  """
+  @spec max_answers(thread_id :: integer) :: non_neg_integer
+  def max_answers(thread_id) do
+    query =
+      from p in Poll,
+        where: p.thread_id == ^thread_id,
+        select: p.max_answers
+
+    Repo.one(query)
+  end
+
+  @doc """
   Returns boolean indicating if the specified `Poll` is locked given a `Thread` id
   """
-  @spec locked_by_thread_id(thread_id :: integer) :: boolean
-  def locked_by_thread_id(thread_id) do
+  @spec locked(thread_id :: integer) :: boolean
+  def locked(thread_id) do
     query =
       from p in Poll,
         where: p.thread_id == ^thread_id,
@@ -235,16 +254,23 @@ defmodule EpochtalkServer.Models.Poll do
   end
 
   @doc """
+  Returns boolean indicating if the specified `Poll` is unlocked given a `Thread` id
+  """
+  @spec unlocked(thread_id :: integer) :: boolean
+  def unlocked(thread_id), do: !locked(thread_id)
+
+  @doc """
   Returns boolean indicating if the specified `Poll` is currently running given a `Thread` id
   """
-  @spec running_by_thread_id(thread_id :: integer) :: boolean
-  def running_by_thread_id(thread_id) do
+  @spec running(thread_id :: integer) :: boolean
+  def running(thread_id) do
     query =
       from p in Poll,
         where: p.thread_id == ^thread_id,
         select: p.expiration
 
     expiration = Repo.one(query)
+
     if expiration == nil,
       do: true,
       else: NaiveDateTime.compare(expiration, NaiveDateTime.utc_now()) == :gt

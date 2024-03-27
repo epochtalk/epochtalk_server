@@ -1,6 +1,7 @@
 defmodule Test.EpochtalkServerWeb.Controllers.Thread do
   use Test.Support.ConnCase, async: true
   import Test.Support.Factory
+  alias EpochtalkServer.Models.Poll
 
   setup %{users: %{user: user, admin_user: admin_user, super_admin_user: super_admin_user}} do
     board = insert(:board)
@@ -28,6 +29,12 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
         poll: build(:poll_attributes)
       )
 
+    thread_no_poll =
+      build(:thread,
+        board: board,
+        user: user
+      )
+
     {
       :ok,
       board: board,
@@ -36,18 +43,16 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
       threads: threads,
       admin_threads: admin_threads,
       super_admin_threads: super_admin_threads,
-      thread_with_poll: thread_with_poll
+      thread_with_poll: thread_with_poll,
+      thread_no_poll: thread_no_poll
     }
   end
 
   describe "vote/2" do
     test "when unauthenticated, returns Unauthorized error", %{
       conn: conn,
-      thread_with_poll: thread_data
+      thread_with_poll: %{post: %{thread_id: thread_id}, poll: %{poll_answers: [one, _]}}
     } do
-      [one, _two] = thread_data.poll.poll_answers
-      thread_id = thread_data.post.thread.id
-
       response =
         conn
         |> post(Routes.thread_path(conn, :vote, thread_id), %{"answer_ids" => [one.id]})
@@ -60,14 +65,11 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     @tag :authenticated
     test "given an id for nonexistant thread, does not vote on poll", %{
       conn: conn,
-      thread_with_poll: thread_data
+      thread_with_poll: %{poll: %{poll_answers: [one, _]}}
     } do
-      [one, _two] = thread_data.poll.poll_answers
-      thread_id = -1
-
       response =
         conn
-        |> post(Routes.thread_path(conn, :vote, thread_id), %{"answer_ids" => [one.id]})
+        |> post(Routes.thread_path(conn, :vote, -1), %{"answer_ids" => [one.id]})
         |> json_response(400)
 
       assert response["error"] == "Bad Request"
@@ -77,39 +79,35 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     @tag :authenticated
     test "given valid thread and answer ids, does vote on poll", %{
       conn: conn,
-      thread_with_poll: thread_data
+      thread_with_poll: %{post: %{thread_id: thread_id}, poll: poll}
     } do
-      [one, _two] = thread_data.poll.poll_answers
-      thread_id = thread_data.post.thread.id
+      [one, _] = poll.poll_answers
 
       response =
         conn
         |> post(Routes.thread_path(conn, :vote, thread_id), %{"answer_ids" => [one.id]})
         |> json_response(200)
 
-      assert response["id"] == thread_data.poll.id
-      assert length(response["answers"]) == length(thread_data.poll.poll_answers)
-      assert response["change_vote"] == thread_data.poll.change_vote
-      assert response["display_mode"] == Atom.to_string(thread_data.poll.display_mode)
-      assert response["expiration"] == thread_data.poll.expiration
+      assert response["id"] == poll.id
+      assert length(response["answers"]) == length(poll.poll_answers)
+      assert response["change_vote"] == poll.change_vote
+      assert response["display_mode"] == Atom.to_string(poll.display_mode)
+      assert response["expiration"] == poll.expiration
       assert response["has_voted"] == true
       assert response["locked"] == false
-      assert response["max_answers"] == thread_data.poll.max_answers
-      assert response["question"] == thread_data.poll.question
-      assert response["thread_id"] == thread_data.poll.thread_id
+      assert response["max_answers"] == poll.max_answers
+      assert response["question"] == poll.question
+      assert response["thread_id"] == poll.thread_id
     end
 
     @tag :authenticated
     test "given valid thread id and invalid answer id, does not vote on poll", %{
       conn: conn,
-      thread_with_poll: thread_data
+      thread_with_poll: %{post: %{thread_id: thread_id}}
     } do
-      answer_id = -1
-      thread_id = thread_data.post.thread.id
-
       response =
         conn
-        |> post(Routes.thread_path(conn, :vote, thread_id), %{"answer_ids" => [answer_id]})
+        |> post(Routes.thread_path(conn, :vote, thread_id), %{"answer_ids" => [-1]})
         |> json_response(400)
 
       assert response["error"] == "Bad Request"
@@ -119,11 +117,8 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     @tag :authenticated
     test "given valid thread id and too many answer ids, does not vote on poll", %{
       conn: conn,
-      thread_with_poll: thread_data
+      thread_with_poll: %{post: %{thread_id: thread_id}, poll: %{poll_answers: [one, two]}}
     } do
-      [one, two] = thread_data.poll.poll_answers
-      thread_id = thread_data.post.thread.id
-
       response =
         conn
         |> post(Routes.thread_path(conn, :vote, thread_id), %{"answer_ids" => [one.id, two.id]})
@@ -134,12 +129,58 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     end
 
     @tag :authenticated
+    test "given valid thread id with no poll, does not vote on poll", %{
+      conn: conn,
+      thread_no_poll: %{post: %{thread_id: thread_id}}
+    } do
+      response =
+        conn
+        |> post(Routes.thread_path(conn, :vote, thread_id), %{"answer_ids" => [1, 2]})
+        |> json_response(400)
+
+      assert response["error"] == "Bad Request"
+      assert response["message"] == "Error, poll does not exist"
+    end
+
+    @tag :authenticated
+    test "given valid thread id with locked poll, does not vote on poll", %{
+      conn: conn,
+      thread_with_poll: %{post: %{thread_id: thread_id}, poll: %{poll_answers: [one, _]}}
+    } do
+      Poll.set_locked(thread_id, true)
+
+      response =
+        conn
+        |> post(Routes.thread_path(conn, :vote, thread_id), %{"answer_ids" => [one.id]})
+        |> json_response(400)
+
+      assert response["error"] == "Bad Request"
+      assert response["message"] == "Error, poll is locked"
+    end
+
+    @tag :authenticated
+    test "given valid thread id and voting twice, does not vote on poll twice", %{
+      conn: conn,
+      thread_with_poll: %{post: %{thread_id: thread_id}, poll: %{poll_answers: [one, _]}}
+    } do
+      conn
+      |> post(Routes.thread_path(conn, :vote, thread_id), %{"answer_ids" => [one.id]})
+      |> json_response(200)
+
+      response =
+        conn
+        |> post(Routes.thread_path(conn, :vote, thread_id), %{"answer_ids" => [one.id]})
+        |> json_response(400)
+
+      assert response["error"] == "Bad Request"
+      assert response["message"] == "Error, you have already voted on this poll"
+    end
+
+    @tag :authenticated
     test "given valid thread id and invalid answer ids, does not vote on poll", %{
       conn: conn,
-      thread_with_poll: thread_data
+      thread_with_poll: %{post: %{thread_id: thread_id}}
     } do
-      thread_id = thread_data.post.thread.id
-
       response =
         conn
         |> post(Routes.thread_path(conn, :vote, thread_id), %{})

@@ -241,6 +241,15 @@ defmodule EpochtalkServer.Models.Poll do
   end
 
   @doc """
+  Sets boolean indicating if the specified `Poll` is locked given a `Thread` id
+  """
+  @spec set_locked(thread_id :: integer, locked :: boolean) :: {non_neg_integer, nil | [term()]}
+  def set_locked(thread_id, locked) when is_integer(thread_id) and is_boolean(locked) do
+    query = from p in Poll, where: p.thread_id == ^thread_id
+    Repo.update_all(query, set: [locked: locked])
+  end
+
+  @doc """
   Returns boolean indicating if the specified `Poll` is locked given a `Thread` id
   """
   @spec locked(thread_id :: integer) :: boolean

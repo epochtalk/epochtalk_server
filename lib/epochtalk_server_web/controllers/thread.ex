@@ -327,6 +327,23 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
   end
 
   @doc """
+  Used to lock `Thread` `Poll`
+  """
+  def lock_poll(conn, attrs) do
+    with thread_id <- Validate.cast(attrs, "thread_id", :integer, required: true),
+         locked <- Validate.cast(attrs, "locked", :boolean, required: true),
+         {1, nil} <- Poll.set_locked(thread_id, locked) do
+      render(conn, :lock_poll, poll: %{thread_id: thread_id, locked: locked})
+    else
+      {:error, data} ->
+        ErrorHelpers.render_json_error(conn, 400, data)
+
+      _ ->
+        ErrorHelpers.render_json_error(conn, 400, "Error, cannot lock thread poll")
+    end
+  end
+
+  @doc """
   Used to convert `Thread` slug to id
   """
   def slug_to_id(conn, attrs) do

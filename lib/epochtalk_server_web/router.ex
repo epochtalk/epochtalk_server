@@ -47,6 +47,7 @@ defmodule EpochtalkServerWeb.Router do
     put "/admin/roles/update", Role, :update
     post "/threads", Thread, :create
     post "/threads/:thread_id/polls/vote", Thread, :vote
+    post "/threads/:thread_id/polls/lock", Thread, :lock_poll
     put "/threads/:thread_id/polls/:id", Thread, :update_poll
     get "/admin/modlog", ModerationLog, :page
     get "/boards/movelist", Board, :movelist

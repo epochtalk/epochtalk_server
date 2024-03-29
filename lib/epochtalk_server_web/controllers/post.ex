@@ -514,7 +514,8 @@ defmodule EpochtalkServerWeb.Controllers.Post do
   `User`, a `Permission` string, the `Post` attempting to be modified and a boolean
   indicating if self moderation should be taken into consideration.
   """
-  @spec has_priority(user :: map(), permission :: String.t(), post :: map(), self_mod :: boolean) :: boolean
+  @spec has_priority(user :: map(), permission :: String.t(), post :: map(), self_mod :: boolean) ::
+          boolean
   def has_priority(user, permission, post, self_mod) do
     # check permission
     has_permission = ACL.has_permission(user, permission)

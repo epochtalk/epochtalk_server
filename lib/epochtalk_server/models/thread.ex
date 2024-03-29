@@ -424,8 +424,8 @@ defmodule EpochtalkServer.Models.Thread do
           user: u
         }
 
-   first_post = Repo.one(query_first_thread_post_data)
-   Map.put(first_post, :user, Repo.preload(first_post.user, :roles))
+    first_post = Repo.one(query_first_thread_post_data)
+    Map.put(first_post, :user, Repo.preload(first_post.user, :roles))
   end
 
   @doc """
@@ -453,7 +453,6 @@ defmodule EpochtalkServer.Models.Thread do
           user_id: u.id,
           user: u
         }
-
 
     first_post = Repo.one(query_first_thread_post_data)
     Map.put(first_post, :user, Repo.preload(first_post.user, :roles))

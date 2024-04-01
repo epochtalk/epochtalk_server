@@ -168,4 +168,84 @@ defmodule EpochtalkServerWeb.Helpers.ACL do
           has_role || role.lookup == role_lookup
         end)
   end
+
+  def bypass_owner(user, post, permission, custom_condition) do
+    has_admin_bypass = ACL.has_permission(user, permission + ".bypass.owner.admin")
+
+    is_mod =
+      BoardModerator.user_is_moderator_with_thread_id(post.thread_id, user.id) and
+        ACL.has_permission(user, permission + ".bypass.owner.mod") and
+        ACL.has_priority_over_post_owner(user, permission + ".bypass.owner.mod", post)
+
+    has_priority =
+      ACL.has_priority_over_post_owner(user, permission + ".bypass.owner.priority", post)
+
+    has_admin_bypass or custom_condition or is_mod or has_priority
+  end
+
+  @doc """
+  Used to check route authorization when modifying a `Post` or related models. This function returns a
+  boolean indicating if the auth `User` has priority to modify the `Post` given an authed `User`, a
+  `Permission` string, and the `Post` attempting to be modified, this function will return a boolean
+  indicating if the auth `User` has priority to modify the `Post`
+  """
+  @spec has_priority_over_post_owner(user :: map(), permission :: String.t(), post :: map()) :: boolean
+  def has_priority_over_post_owner(user, permission, post),
+    do: has_priority(user, permission, post, false)
+
+  @doc """
+  Used to check route authorization when modifying a `Post` or related models. This function returns a
+  boolean indicating if the auth `User` has priority to modify the `Post` given an authed
+  `User`, a `Permission` string, the `Post` attempting to be modified and a boolean
+  indicating if self moderation should be taken into consideration.
+  """
+  @spec has_priority_over_post_owner(user :: map(), permission :: String.t(), post :: map(), self_mod :: boolean) ::
+          boolean
+  def has_priority_over_post_owner(user, permission, post, self_mod) do
+    # check permission
+    has_permission = ACL.has_permission(user, permission)
+
+    # check if authed user is post owner
+    is_post_owner = post.user_id == user.id
+
+    # user is post owner and has permissions
+    valid_post_owner = has_permission and is_post_owner
+
+    # doesn't own post check users permissions
+    valid_post_owner_override =
+      has_permission and !is_post_owner and can_edit_others_posts(user, post, self_mod)
+
+    # if has permission and post owner allow, if has permission and not post owner do additional checks
+    valid_post_owner or valid_post_owner_override
+  end
+
+  defp can_edit_others_posts(user, post, self_mod) do
+    post_author_is_mod = BoardModerator.user_is_moderator_with_post_id(post.id, post.user_id)
+
+    post_author_priority = ACL.get_user_priority(post.user)
+
+    # empty roles array means post author is a "user"
+    post_author_is_user = post.user.roles == []
+
+    authed_user_priority = ACL.get_user_priority(user)
+
+    # check authed user roles for patroller role
+    authed_user_is_patroller = ACL.has_role(user, "patroller")
+
+    # authed user has higher or same priority as post author, self mod is not enabled
+    authed_user_has_priority_no_self_mod =
+      authed_user_priority <= post_author_priority and !self_mod
+
+    # authed user has higher or same priority as post author, self mod is enabled, post author is not a mod
+    authed_user_has_priority_self_mod =
+      authed_user_priority <= post_author_priority and self_mod and !post_author_is_mod
+
+    # Allows `patrollers` to have priority over `users` within self moderated threads
+    authed_user_has_patroller_permissions =
+      self_mod and post_author_is_user and authed_user_is_patroller
+
+    # determine if authed user has priority over post author
+    authed_user_has_priority_no_self_mod or authed_user_has_priority_self_mod or
+      authed_user_has_patroller_permissions
+  end
 end

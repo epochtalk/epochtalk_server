@@ -10,7 +10,6 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
   alias EpochtalkServerWeb.Helpers.ACL
   alias EpochtalkServerWeb.Helpers.Sanitize
   alias EpochtalkServerWeb.Helpers.Parse
-  alias EpochtalkServerWeb.Controllers.Post, as: PostController
   alias EpochtalkServer.Models.Thread
   alias EpochtalkServer.Models.User
   alias EpochtalkServer.Models.Board
@@ -519,17 +518,14 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
   defp can_authed_user_bypass_owner_on_poll_update(user, thread_id) do
     post = Thread.get_first_post_data_by_id(thread_id)
 
-    has_admin_bypass = ACL.has_permission(user, "threads.editPoll.bypass.owner.admin")
-    is_post_owner = post.user_id == user.id
-
-    is_mod =
-      BoardModerator.user_is_moderator_with_thread_id(thread_id, user.id) and
-        ACL.has_permission(user, "threads.editPoll.bypass.owner.mod") and
-        PostController.has_priority(user, "threads.editPoll.bypass.owner.mod", post)
-
-    has_priority =
-      PostController.has_priority(user, "threads.editPoll.bypass.owner.priority", post)
-
-    has_admin_bypass or is_post_owner or is_mod or has_priority
+    ACL.bypass_post_owner(
+      user,
+      post,
+      "threads.editPoll",
+      "owner",
+      post.user_id == user.id,
+      true,
+      true
+    )
   end
 end

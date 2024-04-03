@@ -163,19 +163,15 @@ defmodule EpochtalkServerWeb.Controllers.Post do
 
          # Authorizations
          {:bypass_post_owner, true} <-
-           {:bypass_post_owner, can_authed_user_bypass_owner_on_post_update(user, post, id)},
+           {:bypass_post_owner, can_authed_user_bypass_owner_on_post_update(user, post)},
          {:bypass_post_deleted, true} <-
-           {:bypass_post_deleted,
-            can_authed_user_bypass_post_deleted_on_post_update(user, post, thread_id)},
+           {:bypass_post_deleted, can_authed_user_bypass_post_deleted_on_post_update(user, post)},
          {:bypass_post_lock, true} <-
-           {:bypass_post_lock,
-            can_authed_user_bypass_post_lock_on_post_update(user, post, thread_id)},
+           {:bypass_post_lock, can_authed_user_bypass_post_lock_on_post_update(user, post)},
          {:bypass_thread_lock, true} <-
-           {:bypass_thread_lock,
-            can_authed_user_bypass_thread_lock_on_post_update(user, post, thread_id)},
+           {:bypass_thread_lock, can_authed_user_bypass_thread_lock_on_post_update(user, post)},
          {:bypass_board_lock, true} <-
-           {:bypass_board_lock,
-            can_authed_user_bypass_board_lock_on_post_update(user, post, thread_id)},
+           {:bypass_board_lock, can_authed_user_bypass_board_lock_on_post_update(user, post)},
          {:is_active, true} <-
            {:is_active, User.is_active?(user.id)},
          {:can_read, {:ok, true}} <-
@@ -362,7 +358,7 @@ defmodule EpochtalkServerWeb.Controllers.Post do
     end
   end
 
-  ## === Private Helper Functions ===
+  ## === Private Authorization Helper Functions ===
 
   defp can_authed_user_view_deleted_posts(nil, _thread_id), do: false
 
@@ -390,147 +386,53 @@ defmodule EpochtalkServerWeb.Controllers.Post do
     end
   end
 
-  defp can_authed_user_bypass_thread_lock_on_post_create(user, thread_id) do
-    has_bypass = ACL.has_permission(user, "posts.create.bypass.locked.admin")
-    thread_not_locked = !Thread.locked?(thread_id)
+  defp can_authed_user_bypass_thread_lock_on_post_create(user, thread_id),
+    do:
+      ACL.bypass_post_owner(
+        user,
+        %{thread_id: thread_id},
+        "posts.create",
+        "locked",
+        !Thread.locked?(thread_id)
+      )
 
-    is_mod =
-      BoardModerator.user_is_moderator_with_thread_id(thread_id, user.id) and
-        ACL.has_permission(user, "posts.create.bypass.locked.mod")
+  defp can_authed_user_bypass_owner_on_post_update(user, post),
+    do:
+      ACL.bypass_post_owner(
+        user,
+        post,
+        "posts.update",
+        "owner",
+        post.user_id == user.id,
+        true,
+        true
+      )
 
-    has_bypass or thread_not_locked or is_mod
-  end
+  defp can_authed_user_bypass_post_lock_on_post_update(user, post),
+    do: ACL.bypass_post_owner(user, post, "posts.update", "locked", !post.locked, true)
 
-  defp can_authed_user_bypass_owner_on_post_update(user, post, thread_id) do
-    has_admin_bypass = ACL.has_permission(user, "posts.update.bypass.owner.admin")
-    is_post_owner = post.user_id == user.id
+  defp can_authed_user_bypass_post_deleted_on_post_update(user, post),
+    do: ACL.bypass_post_owner(user, post, "posts.update", "deleted", !post.deleted, true)
 
-    is_mod =
-      BoardModerator.user_is_moderator_with_thread_id(thread_id, user.id) and
-        ACL.has_permission(user, "posts.update.bypass.owner.mod") and
-        has_priority(user, "posts.update.bypass.owner.mod", post)
+  defp can_authed_user_bypass_thread_lock_on_post_update(user, post),
+    do:
+      ACL.bypass_post_owner(
+        user,
+        post,
+        "posts.update",
+        "locked",
+        !Thread.locked?(post.thread_id),
+        true
+      )
 
-    has_priority = has_priority(user, "posts.update.bypass.owner.priority", post)
-
-    has_admin_bypass or is_post_owner or is_mod or has_priority
-  end
-
-  defp can_authed_user_bypass_post_lock_on_post_update(user, post, thread_id) do
-    has_bypass = ACL.has_permission(user, "posts.update.bypass.locked.admin")
-    post_not_locked = !post.locked
-
-    is_mod =
-      BoardModerator.user_is_moderator_with_thread_id(thread_id, user.id) and
-        ACL.has_permission(user, "posts.update.bypass.locked.mod")
-
-    has_priority = has_priority(user, "posts.update.bypass.locked.priority", post)
-
-    has_bypass or post_not_locked or is_mod or has_priority
-  end
-
-  defp can_authed_user_bypass_post_deleted_on_post_update(user, post, thread_id) do
-    has_bypass = ACL.has_permission(user, "posts.update.bypass.deleted.admin")
-    post_not_deleted = !post.deleted
-
-    is_mod =
-      BoardModerator.user_is_moderator_with_thread_id(thread_id, user.id) and
-        ACL.has_permission(user, "posts.update.bypass.deleted.mod")
-
-    has_priority = has_priority(user, "posts.update.bypass.deleted.priority", post)
-
-    has_bypass or post_not_deleted or is_mod or has_priority
-  end
-
-  defp can_authed_user_bypass_thread_lock_on_post_update(user, post, thread_id) do
-    has_bypass = ACL.has_permission(user, "posts.update.bypass.locked.admin")
-    thread_not_locked = !Thread.locked?(thread_id)
-
-    is_mod =
-      BoardModerator.user_is_moderator_with_thread_id(thread_id, user.id) and
-        ACL.has_permission(user, "posts.update.bypass.locked.mod")
-
-    has_priority = has_priority(user, "posts.update.bypass.locked.priority", post)
-
-    has_bypass or thread_not_locked or is_mod or has_priority
-  end
-
-  defp can_authed_user_bypass_board_lock_on_post_update(user, post, thread_id) do
-    has_bypass = ACL.has_permission(user, "posts.update.bypass.locked.admin")
-
-    board_post_edit_not_locked =
-      !Board.is_post_edit_disabled_by_thread_id(thread_id, post.created_at)
-
-    is_mod = BoardModerator.user_is_moderator_with_thread_id(thread_id, user.id)
-    has_priority = has_priority(user, "posts.update.bypass.locked.priority", post)
-
-    has_bypass or board_post_edit_not_locked or is_mod or has_priority
-  end
-
-  defp can_edit_others_posts(user, post, self_mod) do
-    post_author_is_mod = BoardModerator.user_is_moderator_with_post_id(post.id, post.user_id)
-
-    post_author_priority = ACL.get_user_priority(post.user)
-
-    # empty roles array means post author is a "user"
-    post_author_is_user = post.user.roles == []
-
-    authed_user_priority = ACL.get_user_priority(user)
-
-    # check authed user roles for patroller role
-    authed_user_is_patroller = ACL.has_role(user, "patroller")
-
-    # authed user has higher or same priority as post author, self mod is not enabled
-    authed_user_has_priority_no_self_mod =
-      authed_user_priority <= post_author_priority and !self_mod
-
-    # authed user has higher or same priority as post author, self mod is enabled, post author is not a mod
-    authed_user_has_priority_self_mod =
-      authed_user_priority <= post_author_priority and self_mod and !post_author_is_mod
-
-    # Allows `patrollers` to have priority over `users` within self moderated threads
-    authed_user_has_patroller_permissions =
-      self_mod and post_author_is_user and authed_user_is_patroller
-
-    # determine if authed user has priority over post author
-    authed_user_has_priority_no_self_mod or authed_user_has_priority_self_mod or
-      authed_user_has_patroller_permissions
-  end
-
-  # === Public Authorization Helpers Functions ===
-
-  @doc """
-  Used to check route authorization when modifying a `Post` or related models. This function returns a
-  boolean indicating if the auth `User` has priority to modify the `Post` given an authed `User`, a
-  `Permission` string, and the `Post` attempting to be modified, this function will return a boolean
-  indicating if the auth `User` has priority to modify the `Post`
-  """
-  @spec has_priority(user :: map(), permission :: String.t(), post :: map()) :: boolean
-  def has_priority(user, permission, post),
-    do: has_priority(user, permission, post, false)
-
-  @doc """
-  Used to check route authorization when modifying a `Post` or related models. This function returns a
-  boolean indicating if the auth `User` has priority to modify the `Post` given an authed
-  `User`, a `Permission` string, the `Post` attempting to be modified and a boolean
-  indicating if self moderation should be taken into consideration.
-  """
-  @spec has_priority(user :: map(), permission :: String.t(), post :: map(), self_mod :: boolean) ::
-          boolean
-  def has_priority(user, permission, post, self_mod) do
-    # check permission
-    has_permission = ACL.has_permission(user, permission)
-
-    # check if authed user is post owner
-    is_post_owner = post.user_id == user.id
-
-    # user is post owner and has permissions
-    valid_post_owner = has_permission and is_post_owner
-
-    # doesn't own post check users permissions
-    valid_post_owner_override =
-      has_permission and !is_post_owner and can_edit_others_posts(user, post, self_mod)
-
-    # if has permission and post owner allow, if has permission and not post owner do additional checks
-    valid_post_owner or valid_post_owner_override
-  end
+  defp can_authed_user_bypass_board_lock_on_post_update(user, post),
+    do:
+      ACL.bypass_post_owner(
+        user,
+        post,
+        "posts.update",
+        "locked",
+        !Board.is_post_edit_disabled_by_thread_id(post.thread_id, post.created_at),
+        true
+      )
 end

@@ -375,11 +375,59 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
   Used to lock `Thread` `Poll`
   """
   def lock_poll(conn, attrs) do
-    with thread_id <- Validate.cast(attrs, "thread_id", :integer, required: true),
+    with user <- Guardian.Plug.current_resource(conn),
+         thread_id <- Validate.cast(attrs, "thread_id", :integer, required: true),
          locked <- Validate.cast(attrs, "locked", :boolean, required: true),
+         :ok <- ACL.allow!(conn, "threads.editPoll"),
+         user_priority <- ACL.get_user_priority(conn),
+         {:can_read, {:ok, true}} <-
+           {:can_read, Board.get_read_access_by_thread_id(thread_id, user_priority)},
+         {:can_write, {:ok, true}} <-
+           {:can_write, Board.get_write_access_by_thread_id(thread_id, user_priority)},
+         {:is_active, true} <-
+           {:is_active, User.is_active?(user.id)},
+         {:board_banned, {:ok, false}} <-
+           {:board_banned, BoardBan.banned_from_board?(user, thread_id: thread_id)},
+         {:poll_exists, true} <- {:poll_exists, Poll.exists(thread_id)},
+         {:bypass_post_owner, true} <-
+           {:bypass_post_owner, can_authed_user_bypass_owner_on_poll_lock(user, thread_id)},
          {1, nil} <- Poll.set_locked(thread_id, locked) do
       render(conn, :lock_poll, poll: %{thread_id: thread_id, locked: locked})
     else
+      {:can_read, {:ok, false}} ->
+        ErrorHelpers.render_json_error(
+          conn,
+          403,
+          "Unauthorized, you do not have permission to read"
+        )
+
+      {:can_write, {:ok, false}} ->
+        ErrorHelpers.render_json_error(
+          conn,
+          403,
+          "Unauthorized, you do not have permission to write"
+        )
+
+      {:bypass_post_owner, false} ->
+        ErrorHelpers.render_json_error(
+          conn,
+          403,
+          "Unauthorized, you do not have permission to modify the lock on another user's poll"
+        )
+
+      {:board_banned, {:ok, true}} ->
+        ErrorHelpers.render_json_error(conn, 403, "Unauthorized, you are banned from this board")
+
+      {:poll_exists, false} ->
+        ErrorHelpers.render_json_error(conn, 400, "Error, thread poll does not exist")
+
+      {:is_active, false} ->
+        ErrorHelpers.render_json_error(
+          conn,
+          400,
+          "Account must be active to modify lock on thread poll"
+        )
+
       {:error, data} ->
         ErrorHelpers.render_json_error(conn, 400, data)
 
@@ -516,6 +564,20 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
   # === Private Authorization Helpers Functions ===
 
   defp can_authed_user_bypass_owner_on_poll_update(user, thread_id) do
+    post = Thread.get_first_post_data_by_id(thread_id)
+
+    ACL.bypass_post_owner(
+      user,
+      post,
+      "threads.editPoll",
+      "owner",
+      post.user_id == user.id,
+      true,
+      true
+    )
+  end
+
+  defp can_authed_user_bypass_owner_on_poll_lock(user, thread_id) do
     post = Thread.get_first_post_data_by_id(thread_id)
 
     ACL.bypass_post_owner(

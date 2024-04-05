@@ -1,10 +1,11 @@
 defmodule EpochtalkServer.Models.PollResponse do
   use Ecto.Schema
   import Ecto.Changeset
-  # import Ecto.Query
+  import Ecto.Query
   alias EpochtalkServer.Repo
   alias EpochtalkServer.Models.PollResponse
   alias EpochtalkServer.Models.PollAnswer
+  alias EpochtalkServer.Models.Poll
   alias EpochtalkServer.Models.User
 
   @moduledoc """
@@ -54,7 +55,7 @@ defmodule EpochtalkServer.Models.PollResponse do
   ## === Database Functions ===
 
   @doc """
-  Create on `PollResponse` for specific poll. Used to vote for a `Poll`
+  Create on `PollResponse` for specific `Poll`. Used to vote for a `Poll`
   """
   @spec create(attrs :: map, user_id :: integer) :: {:ok, any()} | {:error, any()}
   def create(%{"answer_ids" => answer_ids} = attrs, user_id)
@@ -72,5 +73,25 @@ defmodule EpochtalkServer.Models.PollResponse do
       {:ok, poll_response} -> poll_response
       {:error, cs} -> Repo.rollback(cs)
     end
+  end
+
+  @doc """
+  Delete `PollResponse` for specific `Poll` and `User`. Used to remove vote from a `Poll`
+  """
+  @spec delete(thread_id :: non_neg_integer, user_id :: non_neg_integer) ::
+          {non_neg_integer(), nil | [t()]}
+  def delete(thread_id, user_id) do
+    poll_answer_ids =
+      from pa in PollAnswer,
+        join: p in Poll,
+        on: p.thread_id == ^thread_id and pa.poll_id == p.id,
+        select: pa.id
+
+    poll_responses_by_user =
+      from pr in PollResponse,
+        where: pr.answer_id in subquery(poll_answer_ids) and pr.user_id == ^user_id,
+        select: pr
+
+    Repo.delete_all(poll_responses_by_user)
   end
 end

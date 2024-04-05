@@ -103,8 +103,8 @@ defmodule EpochtalkServer.Models.ImageReference do
   Creates a new `ImageReference`
   """
   @spec create(attrs :: map()) ::
-          {:ok, image_reference :: t(), ExAws.S3.presigned_post_result()}
-          | {:error, Ecto.Changeset.t()}
+          {:ok, presigned_post_results :: map()}
+          | {:error, value :: t(), others :: t()}
   def create(attrs_list) when is_list(attrs_list) do
     # [changesets]
     image_reference_changesets =

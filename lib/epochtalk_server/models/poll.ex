@@ -269,6 +269,19 @@ defmodule EpochtalkServer.Models.Poll do
   def unlocked(thread_id), do: !locked(thread_id)
 
   @doc """
+  Returns boolean indicating if the specified `Poll` allows votes to be changed given a `Thread` id
+  """
+  @spec allow_change_vote(thread_id :: integer) :: boolean
+  def allow_change_vote(thread_id) do
+    query =
+      from p in Poll,
+        where: p.thread_id == ^thread_id,
+        select: p.change_vote
+
+    Repo.one(query)
+  end
+
+  @doc """
   Returns boolean indicating if the specified `Poll` is currently running given a `Thread` id
   """
   @spec running(thread_id :: integer) :: boolean

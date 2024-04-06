@@ -312,6 +312,88 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
   end
 
   @doc """
+  Used to delete vote on `Thread` `Poll`
+  """
+  def delete_vote(conn, attrs) do
+    with user <- Guardian.Plug.current_resource(conn),
+         thread_id <- Validate.cast(attrs, "thread_id", :integer, required: true),
+
+         # Authorizations
+         :ok <- ACL.allow!(conn, "threads.removeVote"),
+         user_priority <- ACL.get_user_priority(conn),
+         {:can_read, {:ok, true}} <-
+           {:can_read, Board.get_read_access_by_thread_id(thread_id, user_priority)},
+         {:can_write, {:ok, true}} <-
+           {:can_write, Board.get_write_access_by_thread_id(thread_id, user_priority)},
+         {:is_active, true} <-
+           {:is_active, User.is_active?(user.id)},
+         {:board_banned, {:ok, false}} <-
+           {:board_banned, BoardBan.banned_from_board?(user, thread_id: thread_id)},
+         {:poll_exists, true} <- {:poll_exists, Poll.exists(thread_id)},
+         {:poll_running, true} <- {:poll_running, Poll.running(thread_id)},
+         {:poll_unlocked, true} <- {:poll_unlocked, Poll.unlocked(thread_id)},
+         {:poll_change_vote, true} <-
+           {:poll_change_vote, Poll.allow_change_vote(thread_id)},
+
+         # delete poll response and query return data
+         {_count, _deleted} <- PollResponse.delete(thread_id, user.id),
+         poll <- Poll.by_thread(thread_id) do
+      render(conn, :delete_vote, %{
+        poll: poll,
+        has_voted: false
+      })
+    else
+      {:valid_answers_list, false} ->
+        ErrorHelpers.render_json_error(conn, 400, "Error, 'answer_ids' must be a list")
+
+      {:can_read, {:ok, false}} ->
+        ErrorHelpers.render_json_error(
+          conn,
+          403,
+          "Unauthorized, you do not have permission to read"
+        )
+
+      {:can_write, {:ok, false}} ->
+        ErrorHelpers.render_json_error(
+          conn,
+          403,
+          "Unauthorized, you do not have permission to write"
+        )
+
+      {:poll_exists, false} ->
+        ErrorHelpers.render_json_error(conn, 400, "Error, poll does not exist")
+
+      {:poll_running, false} ->
+        ErrorHelpers.render_json_error(conn, 400, "Error, poll is not currently running")
+
+      {:poll_unlocked, false} ->
+        ErrorHelpers.render_json_error(conn, 400, "Error, poll is locked")
+
+      {:poll_change_vote, false} ->
+        ErrorHelpers.render_json_error(
+          conn,
+          400,
+          "Error, you can't change your vote on this poll"
+        )
+
+      {:is_active, false} ->
+        ErrorHelpers.render_json_error(conn, 400, "Account must be active to vote")
+
+      {:board_banned, {:ok, true}} ->
+        ErrorHelpers.render_json_error(conn, 403, "Unauthorized, you are banned from this board")
+
+      {:error, :board_does_not_exist} ->
+        ErrorHelpers.render_json_error(conn, 400, "Error, board does not exist")
+
+      {:error, data} ->
+        ErrorHelpers.render_json_error(conn, 400, data)
+
+      err ->
+        ErrorHelpers.render_json_error(conn, 400, "Error, cannot cast vote")
+    end
+  end
+
+  @doc """
   Used to update `Thread` `Poll`
   """
   def update_poll(conn, attrs) do

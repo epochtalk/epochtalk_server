@@ -183,7 +183,7 @@ defmodule EpochtalkServer.Models.Poll do
           {:ok, poll :: t()} | {:error, Ecto.Changeset.t()}
   def update(attrs) do
     Poll
-    |> Repo.get(attrs["id"])
+    |> Repo.get_by(thread_id: attrs["thread_id"])
     |> Repo.preload([:poll_answers])
     |> update_changeset(attrs)
     |> Repo.update()

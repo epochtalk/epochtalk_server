@@ -388,7 +388,7 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
       {:error, data} ->
         ErrorHelpers.render_json_error(conn, 400, data)
 
-      err ->
+      _ ->
         ErrorHelpers.render_json_error(conn, 400, "Error, cannot cast vote")
     end
   end
@@ -571,12 +571,6 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
 
   ## === Private Helper Functions ===
 
-  defp handle_check_user_can_moderate(user, moderated) do
-    if moderated,
-      do: :ok == ACL.allow!(user, "threads.moderated"),
-      else: true
-  end
-
   defp maybe_update_thread_view_count(conn, thread_id) do
     viewer_id =
       case Plug.Conn.get_req_header(conn, "epoch-viewer") do
@@ -644,6 +638,12 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
     do: UserThreadView.upsert(user.id, thread_id)
 
   # === Private Authorization Helpers Functions ===
+
+  defp handle_check_user_can_moderate(user, moderated) do
+    if moderated,
+      do: :ok == ACL.allow!(user, "threads.moderated"),
+      else: true
+  end
 
   defp can_authed_user_bypass_owner_on_poll_update(user, thread_id) do
     post = Thread.get_first_post_data_by_id(thread_id)

@@ -49,7 +49,7 @@ defmodule EpochtalkServerWeb.Router do
     post "/threads/:thread_id/polls/vote", Thread, :vote
     delete "/threads/:thread_id/polls/vote", Thread, :delete_vote
     post "/threads/:thread_id/polls/lock", Thread, :lock_poll
-    put "/threads/:thread_id/polls/:id", Thread, :update_poll
+    put "/threads/:thread_id/polls", Thread, :update_poll
     get "/admin/modlog", ModerationLog, :page
     get "/boards/movelist", Board, :movelist
   end

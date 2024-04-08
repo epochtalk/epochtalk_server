@@ -11,22 +11,32 @@ defmodule EpochtalkServerWeb.Controllers.ImageReference do
 
   # TODO(boka): move to config
   @max_images_per_request 10
+  @one_day_in_ms 1000 * 60 * 60 * 24
+  @one_hour_in_ms 1000 * 60 * 60
+  @max_images_per_day 1000
+  @max_images_per_hour 100
 
   @doc """
   Create new `ImageReference` and return presigned post
   """
   def s3_request_upload(conn, attrs_list) do
     with :ok <- ACL.allow!(conn, "images.upload.request"),
+         user <- Guardian.Plug.current_resource(conn),
          # unwrap list from _json
          attrs_list <- attrs_list["_json"],
          attrs_length <- length(attrs_list),
          # ensure list does not exceed max length
          :ok <- validate_max_length(attrs_length, @max_images_per_request),
+         # ensure daily rate limit not exceeded
+         {:allow, daily_count} <- Hammer.check_rate_inc("s3_request_upload:user:#{user.id}", @one_day_in_ms, @max_images_per_day, attrs_length),
+         # ensure hourly rate limit not exceeded
+         {:allow, hourly_count} <- Hammer.check_rate_inc("s3_request_upload:user:#{user.id}", @one_hour_in_ms, @max_images_per_hour, attrs_length),
          casted_attrs_list <- Enum.map(attrs_list, &cast_upload_attrs/1),
          {:ok, presigned_posts} <- ImageReference.create(casted_attrs_list) do
       render(conn, :s3_request_upload, %{presigned_posts: presigned_posts})
     else
       {:max_length_error, message} -> ErrorHelpers.render_json_error(conn, 400, message)
+      {:deny, message} -> ErrorHelpers.render_json_error(conn, 400, message)
       _ -> ErrorHelpers.render_json_error(conn, 400, "Error, image request upload failed")
     end
   end

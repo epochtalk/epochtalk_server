@@ -10,7 +10,7 @@ defmodule EpochtalkServerWeb.Controllers.ImageReference do
   alias EpochtalkServerWeb.Helpers.ACL
 
   # TODO(boka): move to config
-  @max_images 10
+  @max_images_per_request 10
 
   @doc """
   Create new `ImageReference` and return presigned post
@@ -19,8 +19,9 @@ defmodule EpochtalkServerWeb.Controllers.ImageReference do
     with :ok <- ACL.allow!(conn, "images.upload.request"),
          # unwrap list from _json
          attrs_list <- attrs_list["_json"],
+         attrs_length <- length(attrs_list),
          # ensure list does not exceed max length
-         :ok <- validate_max_length(attrs_list, @max_images),
+         :ok <- validate_max_length(attrs_length, @max_images_per_request),
          casted_attrs_list <- Enum.map(attrs_list, &cast_upload_attrs/1),
          {:ok, presigned_posts} <- ImageReference.create(casted_attrs_list) do
       render(conn, :s3_request_upload, %{presigned_posts: presigned_posts})
@@ -30,9 +31,7 @@ defmodule EpochtalkServerWeb.Controllers.ImageReference do
     end
   end
 
-  defp validate_max_length(attrs_list, max_length) do
-    attrs_length = length(attrs_list)
-
+  defp validate_max_length(attrs_length, max_length) do
     if attrs_length <= max_length do
       :ok
     else

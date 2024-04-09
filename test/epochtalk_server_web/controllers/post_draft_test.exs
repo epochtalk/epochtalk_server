@@ -17,10 +17,10 @@ defmodule Test.EpochtalkServerWeb.Controllers.PostDraft do
       response =
         conn
         |> get(Routes.post_draft_path(conn, :by_user_id))
-        |> json_response(400)
+        |> json_response(401)
 
-      assert response["error"] == "Bad Request"
-      assert response["message"] == "Not logged in, cannot get post draft"
+      assert response["error"] == "Unauthorized"
+      assert response["message"] == "No resource found"
     end
 
     @tag :authenticated
@@ -55,10 +55,10 @@ defmodule Test.EpochtalkServerWeb.Controllers.PostDraft do
       response =
         conn
         |> put(Routes.post_draft_path(conn, :upsert), %{"draft" => "Hello World"})
-        |> json_response(400)
+        |> json_response(401)
 
-      assert response["error"] == "Bad Request"
-      assert response["message"] == "Not logged in, cannot upsert post draft"
+      assert response["error"] == "Unauthorized"
+      assert response["message"] == "No resource found"
     end
 
     @tag :authenticated

@@ -50,6 +50,11 @@ defmodule EpochtalkServerWeb.Router do
     delete "/threads/:thread_id/polls/vote", Thread, :delete_vote
     post "/threads/:thread_id/polls/lock", Thread, :lock_poll
     put "/threads/:thread_id/polls", Thread, :update_poll
+    get "/posts", Post, :by_thread
+    get "/posts/draft", PostDraft, :by_user_id
+    put "/posts/draft", PostDraft, :upsert
+    post "/posts", Post, :create
+    post "/posts/:id", Post, :update
     get "/admin/modlog", ModerationLog, :page
     get "/boards/movelist", Board, :movelist
   end
@@ -66,11 +71,6 @@ defmodule EpochtalkServerWeb.Router do
     get "/threads/recent", Thread, :recent
     get "/register/username/:username", User, :username
     get "/register/email/:email", User, :email
-    get "/posts", Post, :by_thread
-    get "/posts/draft", PostDraft, :by_user_id
-    put "/posts/draft", PostDraft, :upsert
-    post "/posts", Post, :create
-    post "/posts/:id", Post, :update
     post "/register", User, :register
     post "/login", User, :login
     post "/confirm", User, :confirm

@@ -48,6 +48,72 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     }
   end
 
+  describe "update_poll/2" do
+    test "when unauthenticated, returns Unauthorized error", %{
+      conn: conn,
+      thread_with_poll: %{post: %{thread_id: thread_id}}
+    } do
+      response =
+        conn
+        |> put(Routes.thread_path(conn, :update_poll, thread_id), %{
+          "max_answers" => 2,
+          "expiration" => nil,
+          "display_mode" => "always",
+          "change_vote" => false
+        })
+        |> json_response(401)
+
+      assert response["error"] == "Unauthorized"
+      assert response["message"] == "No resource found"
+    end
+
+    @tag :authenticated
+    test "given an id for nonexistant thread, does not lock poll", %{
+      conn: conn
+    } do
+      response =
+        conn
+        |> put(Routes.thread_path(conn, :update_poll, -1), %{
+          "max_answers" => 2,
+          "expiration" => nil,
+          "display_mode" => "always",
+          "change_vote" => false
+        })
+        |> json_response(400)
+
+      assert response["error"] == "Bad Request"
+      assert response["message"] == "Error, cannot edit thread poll"
+    end
+  end
+
+  describe "lock_poll/2" do
+    test "when unauthenticated, returns Unauthorized error", %{
+      conn: conn,
+      thread_with_poll: %{post: %{thread_id: thread_id}}
+    } do
+      response =
+        conn
+        |> post(Routes.thread_path(conn, :lock_poll, thread_id), %{"locked" => true})
+        |> json_response(401)
+
+      assert response["error"] == "Unauthorized"
+      assert response["message"] == "No resource found"
+    end
+
+    @tag :authenticated
+    test "given an id for nonexistant thread, does not lock poll", %{
+      conn: conn
+    } do
+      response =
+        conn
+        |> post(Routes.thread_path(conn, :lock_poll, -1), %{"locked" => true})
+        |> json_response(400)
+
+      assert response["error"] == "Bad Request"
+      assert response["message"] == "Error, cannot lock thread poll"
+    end
+  end
+
   describe "vote/2" do
     test "when unauthenticated, returns Unauthorized error", %{
       conn: conn,

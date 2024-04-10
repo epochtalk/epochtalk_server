@@ -394,6 +394,66 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
   end
 
   @doc """
+  Used to create `Thread` `Poll`
+  """
+  def create_poll(conn, attrs) do
+    with user <- Guardian.Plug.current_resource(conn),
+         thread_id <- Validate.cast(attrs, "thread_id", :integer, required: true),
+         :ok <- ACL.allow!(conn, "threads.createPoll"),
+         user_priority <- ACL.get_user_priority(conn),
+         {:can_read, {:ok, true}} <-
+           {:can_read, Board.get_read_access_by_thread_id(thread_id, user_priority)},
+         {:can_write, {:ok, true}} <-
+           {:can_write, Board.get_write_access_by_thread_id(thread_id, user_priority)},
+         {:is_active, true} <-
+           {:is_active, User.is_active?(user.id)},
+         {:board_banned, {:ok, false}} <-
+           {:board_banned, BoardBan.banned_from_board?(user, thread_id: thread_id)},
+         {:poll_exists, false} <- {:poll_exists, Poll.exists(thread_id)},
+         {:bypass_post_owner, true} <-
+           {:bypass_post_owner, can_authed_user_bypass_owner_on_poll_create(user, thread_id)},
+         {:ok, poll} <- Poll.create(attrs) do
+      render(conn, :create_poll, poll: poll)
+    else
+      {:can_read, {:ok, false}} ->
+        ErrorHelpers.render_json_error(
+          conn,
+          403,
+          "Unauthorized, you do not have permission to read"
+        )
+
+      {:can_write, {:ok, false}} ->
+        ErrorHelpers.render_json_error(
+          conn,
+          403,
+          "Unauthorized, you do not have permission to write"
+        )
+
+      {:bypass_post_owner, false} ->
+        ErrorHelpers.render_json_error(
+          conn,
+          403,
+          "Unauthorized, you do not have permission to create a poll for another user's thread"
+        )
+
+      {:board_banned, {:ok, true}} ->
+        ErrorHelpers.render_json_error(conn, 403, "Unauthorized, you are banned from this board")
+
+      {:poll_exists, true} ->
+        ErrorHelpers.render_json_error(conn, 400, "Error, thread poll already exists")
+
+      {:is_active, false} ->
+        ErrorHelpers.render_json_error(conn, 400, "Account must be active to create thread poll")
+
+      {:error, data} ->
+        ErrorHelpers.render_json_error(conn, 400, data)
+
+      _ ->
+        ErrorHelpers.render_json_error(conn, 400, "Error, cannot create thread poll")
+    end
+  end
+
+  @doc """
   Used to update `Thread` `Poll`
   """
   def update_poll(conn, attrs) do
@@ -643,6 +703,20 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
     if moderated,
       do: :ok == ACL.allow!(user, "threads.moderated"),
       else: true
+  end
+
+  defp can_authed_user_bypass_owner_on_poll_create(user, thread_id) do
+    post = Thread.get_first_post_data_by_id(thread_id)
+
+    ACL.bypass_post_owner(
+      user,
+      post,
+      "threads.createPoll",
+      "owner",
+      post.user_id == user.id,
+      true,
+      true
+    )
   end
 
   defp can_authed_user_bypass_owner_on_poll_update(user, thread_id) do

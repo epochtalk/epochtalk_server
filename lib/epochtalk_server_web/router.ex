@@ -50,6 +50,7 @@ defmodule EpochtalkServerWeb.Router do
     delete "/threads/:thread_id/polls/vote", Thread, :delete_vote
     post "/threads/:thread_id/polls/lock", Thread, :lock_poll
     put "/threads/:thread_id/polls", Thread, :update_poll
+    post "/threads/:thread_id/polls", Thread, :create_poll
     get "/posts", Post, :by_thread
     get "/posts/draft", PostDraft, :by_user_id
     put "/posts/draft", PostDraft, :upsert

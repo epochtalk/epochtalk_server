@@ -157,6 +157,18 @@ defmodule EpochtalkServerWeb.Controllers.ThreadJSON do
   end
 
   @doc """
+  Renders created `Thread` `Poll`.
+  """
+  def create_poll(%{poll: poll}),
+    do: %{
+      id: poll.id,
+      max_answers: poll.max_answers,
+      change_vote: poll.change_vote,
+      expiration: poll.expiration,
+      display_mode: poll.display_mode
+    }
+
+  @doc """
   Renders updated `Thread` `Poll`.
   """
   def update_poll(%{poll: poll}),

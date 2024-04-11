@@ -35,12 +35,17 @@ defmodule EpochtalkServerWeb.Controllers.ImageReference do
       Logger.debug("Daily count for user #{user.username}: #{daily_count}")
       render(conn, :s3_request_upload, %{presigned_posts: presigned_posts})
     else
-      {:max_length_error, message} -> ErrorHelpers.render_json_error(conn, 400, message)
+      {:max_length_error, message} ->
+        ErrorHelpers.render_json_error(conn, 400, message)
+
       {:s3_hourly, count} ->
         ErrorHelpers.render_json_error(conn, 400, "Hourly upload rate limit exceeded (#{count})")
+
       {:s3_daily, count} ->
         ErrorHelpers.render_json_error(conn, 400, "Daily rate limit exceeded (#{count})")
-      _ -> ErrorHelpers.render_json_error(conn, 400, "Error, image request upload failed")
+
+      _ ->
+        ErrorHelpers.render_json_error(conn, 400, "Error, image request upload failed")
     end
   end
 

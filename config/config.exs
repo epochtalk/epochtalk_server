@@ -60,19 +60,18 @@ config :epochtalk_server, :redix,
   name: :redix
 
 config :hammer,
-backend: {
-  Hammer.Backend.Redis,
-  [
-    expiry_ms: 60_000 * 60 * 2,
-    redix_config: [
-      host: "127.0.0.1",
-      port: 6379
-    ],
-    pool_size: 4,
-    pool_max_overflow: 2
-  ]
-}
-
+  backend: {
+    Hammer.Backend.Redis,
+    [
+      expiry_ms: 60_000 * 60 * 2,
+      redix_config: [
+        host: "127.0.0.1",
+        port: 6379
+      ],
+      pool_size: 4,
+      pool_max_overflow: 2
+    ]
+  }
 
 # Configures the endpoint
 config :epochtalk_server, EpochtalkServerWeb.Endpoint,

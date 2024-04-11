@@ -253,10 +253,7 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
          # create poll response and query return data
          {:ok, _} <- PollResponse.create(attrs, user.id),
          poll <- Poll.by_thread(thread_id) do
-      render(conn, :vote, %{
-        poll: poll,
-        has_voted: true
-      })
+      render(conn, :poll, %{poll: poll, has_voted: true})
     else
       {:valid_answers_list, false} ->
         ErrorHelpers.render_json_error(conn, 400, "Error, 'answer_ids' must be a list")
@@ -338,10 +335,7 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
          # delete poll response and query return data
          {_count, _deleted} <- PollResponse.delete(thread_id, user.id),
          poll <- Poll.by_thread(thread_id) do
-      render(conn, :delete_vote, %{
-        poll: poll,
-        has_voted: false
-      })
+      render(conn, :poll, %{poll: poll, has_voted: false})
     else
       {:valid_answers_list, false} ->
         ErrorHelpers.render_json_error(conn, 400, "Error, 'answer_ids' must be a list")
@@ -412,8 +406,9 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
          {:poll_exists, false} <- {:poll_exists, Poll.exists(thread_id)},
          {:bypass_post_owner, true} <-
            {:bypass_post_owner, can_authed_user_bypass_owner_on_poll_create(user, thread_id)},
-         {:ok, poll} <- Poll.create(attrs) do
-      render(conn, :create_poll, poll: poll)
+         {:ok, _} <- Poll.create(attrs),
+         poll <- Poll.by_thread(thread_id) do
+      render(conn, :poll, %{poll: poll, has_voted: false})
     else
       {:can_read, {:ok, false}} ->
         ErrorHelpers.render_json_error(

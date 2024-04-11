@@ -90,83 +90,9 @@ defmodule EpochtalkServerWeb.Controllers.ThreadJSON do
   end
 
   @doc """
-  Renders `Thread` `Poll` data for vote.
+  Renders `Thread` `Poll` data for vote, delete and create.
   """
-  def vote(%{
-        poll: poll,
-        has_voted: has_voted
-      }) do
-    # move poll_answers to answers field
-    poll = poll |> Map.put(:answers, poll.poll_answers)
-
-    # tally votes from poll_responses
-    poll =
-      poll
-      |> Map.put(
-        :answers,
-        Enum.map(poll.answers, &Map.put(&1, :votes, Enum.count(&1.poll_responses)))
-      )
-
-    # hide votes if poll is not expired and display mode is set to display votes when expired
-    now = NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
-
-    hide_votes =
-      poll.display_mode === :expired && NaiveDateTime.compare(poll.expiration, now) == :gt
-
-    poll =
-      if hide_votes,
-        do: poll |> Map.put(:answers, Enum.map(poll.answers, &Map.put(&1, :votes, 0))),
-        else: poll
-
-    # set boolean indicating if the authed user has voted
-    poll |> Map.put(:has_voted, has_voted)
-  end
-
-  @doc """
-  Renders `Thread` `Poll` data for delete vote.
-  """
-  def delete_vote(%{
-        poll: poll,
-        has_voted: has_voted
-      }) do
-    # move poll_answers to answers field
-    poll = poll |> Map.put(:answers, poll.poll_answers)
-
-    # tally votes from poll_responses
-    poll =
-      poll
-      |> Map.put(
-        :answers,
-        Enum.map(poll.answers, &Map.put(&1, :votes, Enum.count(&1.poll_responses)))
-      )
-
-    # hide votes if poll is not expired and display mode is set to display votes when expired
-    now = NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
-
-    hide_votes =
-      (poll.display_mode === :voted && !has_voted) ||
-        (poll.display_mode === :expired && NaiveDateTime.compare(poll.expiration, now) == :gt)
-
-    poll =
-      if hide_votes,
-        do: poll |> Map.put(:answers, Enum.map(poll.answers, &Map.put(&1, :votes, 0))),
-        else: poll
-
-    # set boolean indicating if the authed user has voted
-    poll |> Map.put(:has_voted, has_voted)
-  end
-
-  @doc """
-  Renders created `Thread` `Poll`.
-  """
-  def create_poll(%{poll: poll}),
-    do: %{
-      id: poll.id,
-      max_answers: poll.max_answers,
-      change_vote: poll.change_vote,
-      expiration: poll.expiration,
-      display_mode: poll.display_mode
-    }
+  def poll(%{poll: poll, has_voted: has_voted}), do: format_poll_data(poll, has_voted)
 
   @doc """
   Renders updated `Thread` `Poll`.
@@ -220,6 +146,34 @@ defmodule EpochtalkServerWeb.Controllers.ThreadJSON do
   end
 
   ## === Private Helper Functions ===
+
+  defp format_poll_data(poll, has_voted) do
+    # move poll_answers to answers field
+    poll = poll |> Map.put(:answers, poll.poll_answers)
+
+    # tally votes from poll_responses
+    poll =
+      poll
+      |> Map.put(
+        :answers,
+        Enum.map(poll.answers, &Map.put(&1, :votes, Enum.count(&1.poll_responses)))
+      )
+
+    # hide votes if poll is not expired and display mode is set to display votes when expired
+    now = NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
+
+    hide_votes =
+      (poll.display_mode === :voted && !has_voted) ||
+        (poll.display_mode === :expired && NaiveDateTime.compare(poll.expiration, now) == :gt)
+
+    poll =
+      if hide_votes,
+        do: poll |> Map.put(:answers, Enum.map(poll.answers, &Map.put(&1, :votes, 0))),
+        else: poll
+
+    # set boolean indicating if the authed user has voted
+    poll |> Map.put(:has_voted, has_voted)
+  end
 
   defp format_thread_data(thread, user_id) do
     thread

@@ -1,4 +1,8 @@
 defmodule EpochtalkServer.RateLimiter do
+  @moduledoc """
+  Handle rate limits for action type by user
+  """
+
   import Hammer,
     only: [
       check_rate_inc: 4,

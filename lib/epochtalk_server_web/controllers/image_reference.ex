@@ -42,7 +42,7 @@ defmodule EpochtalkServerWeb.Controllers.ImageReference do
         ErrorHelpers.render_json_error(conn, 400, "Hourly upload rate limit exceeded (#{count})")
 
       {:s3_daily, count} ->
-        ErrorHelpers.render_json_error(conn, 400, "Daily rate limit exceeded (#{count})")
+        ErrorHelpers.render_json_error(conn, 400, "Daily upload rate limit exceeded (#{count})")
 
       _ ->
         ErrorHelpers.render_json_error(conn, 400, "Error, image request upload failed")

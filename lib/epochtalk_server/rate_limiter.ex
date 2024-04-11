@@ -14,7 +14,7 @@ defmodule EpochtalkServer.RateLimiter do
   Returns type of action and error message on if action is denied
   """
   @spec check_rate_limited(type :: atom, user :: EpochtalkServer.Models.User.t()) :: {:allow, count :: non_neg_integer} | {type :: atom, count :: non_neg_integer} | {:error, message :: String.t()}
-  def check_rate_limited(type, user), :do check_rate_limited(type, user, @default_count)
+  def check_rate_limited(type, user), do: check_rate_limited(type, user, @default_count)
 
   @spec check_rate_limited(type :: atom, user :: EpochtalkServer.Models.User.t(), count :: non_neg_integer) :: {:allow, count :: non_neg_integer} | {type :: atom, count :: non_neg_integer} | {:error, message :: String.t()}
   def check_rate_limited(type, user, count) do

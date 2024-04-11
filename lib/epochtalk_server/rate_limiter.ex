@@ -8,7 +8,7 @@ defmodule EpochtalkServer.RateLimiter do
     case type do
       :s3_daily ->
         [key_fn, period, limit] = configs[:s3_daily]
-        key_fn(user)
+        key_fn.(user.id)
         |> check_rate_inc(period, limit, count)
         |> case do
           {:allow, count} -> {:allow, count}
@@ -16,7 +16,7 @@ defmodule EpochtalkServer.RateLimiter do
         end
       :s3_hourly ->
         [key_fn, period, limit] = configs[:s3_hourly]
-        key_fn(user)
+        key_fn.(user.id)
         |> check_rate_inc(period, limit, count)
         |> case do
           {:allow, count} -> {:allow, count}

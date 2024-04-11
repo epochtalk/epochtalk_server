@@ -102,8 +102,8 @@ defmodule EpochtalkServer.Models.ImageReference do
   @doc """
   Creates a new `ImageReference`
   """
-  @spec create(attrs :: map()) ::
-          {:ok, presigned_post_results :: map()}
+  @spec create(attrs :: list()) ::
+          {:ok, ExAws.S3.presigned_post_result()}
           | {:error, value :: t(), others :: t()}
   def create(attrs_list) when is_list(attrs_list) do
     attrs_list

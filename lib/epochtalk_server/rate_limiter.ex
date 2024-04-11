@@ -4,6 +4,8 @@ defmodule EpochtalkServer.RateLimiter do
     delete_buckets: 1
   ]
 
+  # default to a single action
+  @default_count 1
 
   @doc """
   Updates rate limit of specified type for specified user

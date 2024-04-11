@@ -1,4 +1,5 @@
 defmodule EpochtalkServerWeb.Controllers.ImageReference do
+  require Logger
   use EpochtalkServerWeb, :controller
 
   @moduledoc """
@@ -33,6 +34,8 @@ defmodule EpochtalkServerWeb.Controllers.ImageReference do
          {:allow, hourly_count} <- Hammer.check_rate_inc("s3_request_upload:user:#{user.id}", @one_hour_in_ms, @max_images_per_hour, attrs_length),
          casted_attrs_list <- Enum.map(attrs_list, &cast_upload_attrs/1),
          {:ok, presigned_posts} <- ImageReference.create(casted_attrs_list) do
+      Logger.debug("Hourly count for user #{user.username}: #{hourly_count}/#{@max_images_per_hour}")
+      Logger.debug("Daily count for user #{user.username}: #{daily_count}/#{@max_images_per_day}")
       render(conn, :s3_request_upload, %{presigned_posts: presigned_posts})
     else
       {:max_length_error, message} -> ErrorHelpers.render_json_error(conn, 400, message)

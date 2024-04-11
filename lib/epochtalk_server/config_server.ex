@@ -45,12 +45,12 @@ defmodule EpochtalkServer.ConfigServer do
     %{
       "Elixir.EpochtalkServer.RateLimiter": %{
         s3_daily: [
-          &("s3_request_upload:user:#{&1.id}"),
+          &("s3_request_upload:user:#{&1}"),
           @one_day_in_ms,
           @max_images_per_day
         ],
         s3_hourly: [
-          &("s3_request_upload:user:#{&1.id}"),
+          &("s3_request_upload:user:#{&1}"),
           @one_hour_in_ms,
           @max_images_per_hour
         ]

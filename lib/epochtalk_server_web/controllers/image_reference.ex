@@ -9,13 +9,10 @@ defmodule EpochtalkServerWeb.Controllers.ImageReference do
   alias EpochtalkServerWeb.ErrorHelpers
   alias EpochtalkServerWeb.Helpers.Validate
   alias EpochtalkServerWeb.Helpers.ACL
+  import EpochtalkServer.RateLimiter, only: [check_rate_limited: 3]
 
   # TODO(boka): move to config
   @max_images_per_request 10
-  @one_day_in_ms 1000 * 60 * 60 * 24
-  @one_hour_in_ms 1000 * 60 * 60
-  @max_images_per_day 1000
-  @max_images_per_hour 100
 
   @doc """
   Create new `ImageReference` and return presigned post
@@ -29,22 +26,20 @@ defmodule EpochtalkServerWeb.Controllers.ImageReference do
          # ensure list does not exceed max length
          :ok <- validate_max_length(attrs_length, @max_images_per_request),
          # ensure daily rate limit not exceeded
-         {:allow, daily_count} <- Hammer.check_rate_inc("s3_request_upload:user:#{user.id}", @one_day_in_ms, @max_images_per_day, attrs_length),
+         {:allow, daily_count} <- check_rate_limited(:s3_daily, user, attrs_length),
          # ensure hourly rate limit not exceeded
-         {:allow, hourly_count} <- Hammer.check_rate_inc("s3_request_upload:user:#{user.id}", @one_hour_in_ms, @max_images_per_hour, attrs_length),
+         {:allow, hourly_count} <- check_rate_limited(:s3_hourly, user, attrs_length),
          casted_attrs_list <- Enum.map(attrs_list, &cast_upload_attrs/1),
          {:ok, presigned_posts} <- ImageReference.create(casted_attrs_list) do
-      Logger.debug("Hourly count for user #{user.username}: #{hourly_count}/#{@max_images_per_hour}")
-      Logger.debug("Daily count for user #{user.username}: #{daily_count}/#{@max_images_per_day}")
+      Logger.debug("Hourly count for user #{user.username}: #{hourly_count}")
+      Logger.debug("Daily count for user #{user.username}: #{daily_count}")
       render(conn, :s3_request_upload, %{presigned_posts: presigned_posts})
     else
       {:max_length_error, message} -> ErrorHelpers.render_json_error(conn, 400, message)
-      {:deny, message} ->
-        if message == @max_images_per_hour do
-          ErrorHelpers.render_json_error(conn, 400, "Hourly upload rate limit exceeded (#{@max_images_per_hour})")
-        else
-          ErrorHelpers.render_json_error(conn, 400, "Daily rate limit exceeded (#{@max_images_per_day})")
-        end
+      {:s3_hourly, count} ->
+        ErrorHelpers.render_json_error(conn, 400, "Hourly upload rate limit exceeded (#{count})")
+      {:s3_daily, count} ->
+        ErrorHelpers.render_json_error(conn, 400, "Daily rate limit exceeded (#{count})")
       _ -> ErrorHelpers.render_json_error(conn, 400, "Error, image request upload failed")
     end
   end

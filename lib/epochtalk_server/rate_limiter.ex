@@ -22,6 +22,7 @@ defmodule EpochtalkServer.RateLimiter do
     |> get_configs()
     |> case do
       [period, limit] ->
+        # use Hammer to check rate limit
         build_key(type, user.id)
         |> check_rate_inc(period, limit, count)
         |> case do
@@ -37,13 +38,8 @@ defmodule EpochtalkServer.RateLimiter do
   """
   @spec reset_rate_limit(type :: atom, user :: EpochtalkServer.Models.User.t()) :: {:ok, num_reset :: non_neg_integer}
   def reset_rate_limit(type, user) do
-    # get configs
-    configs = EpochtalkServer.ConfigServer.by_module(__MODULE__)
-
-    [key_fn, _, _] = configs[type]
-    user.id
-    # build key with user id for rate limit check
-    |> key_fn.()
+    # use Hammer to reset rate limit
+    build_key(type, user.id)
     |> delete_buckets()
   end
 

@@ -1,4 +1,5 @@
 defmodule EpochtalkServerWeb.Controllers.ImageReference do
+  require Logger
   use EpochtalkServerWeb, :controller
 
   @moduledoc """
@@ -8,31 +9,47 @@ defmodule EpochtalkServerWeb.Controllers.ImageReference do
   alias EpochtalkServerWeb.ErrorHelpers
   alias EpochtalkServerWeb.Helpers.Validate
   alias EpochtalkServerWeb.Helpers.ACL
+  import EpochtalkServer.RateLimiter, only: [check_rate_limited: 3]
 
   # TODO(boka): move to config
-  @max_images 10
+  @max_images_per_request 10
 
   @doc """
   Create new `ImageReference` and return presigned post
   """
   def s3_request_upload(conn, attrs_list) do
     with :ok <- ACL.allow!(conn, "images.upload.request"),
+         user <- Guardian.Plug.current_resource(conn),
          # unwrap list from _json
          attrs_list <- attrs_list["_json"],
+         attrs_length <- length(attrs_list),
          # ensure list does not exceed max length
-         :ok <- validate_max_length(attrs_list, @max_images),
+         :ok <- validate_max_length(attrs_length, @max_images_per_request),
+         # ensure daily rate limit not exceeded
+         {:allow, daily_count} <- check_rate_limited(:s3_daily, user, attrs_length),
+         # ensure hourly rate limit not exceeded
+         {:allow, hourly_count} <- check_rate_limited(:s3_hourly, user, attrs_length),
          casted_attrs_list <- Enum.map(attrs_list, &cast_upload_attrs/1),
          {:ok, presigned_posts} <- ImageReference.create(casted_attrs_list) do
+      Logger.debug("Hourly count for user #{user.username}: #{hourly_count}")
+      Logger.debug("Daily count for user #{user.username}: #{daily_count}")
       render(conn, :s3_request_upload, %{presigned_posts: presigned_posts})
     else
-      {:max_length_error, message} -> ErrorHelpers.render_json_error(conn, 400, message)
-      _ -> ErrorHelpers.render_json_error(conn, 400, "Error, image request upload failed")
+      {:max_length_error, message} ->
+        ErrorHelpers.render_json_error(conn, 400, message)
+
+      {:s3_hourly, count} ->
+        ErrorHelpers.render_json_error(conn, 429, "Hourly upload rate limit exceeded (#{count})")
+
+      {:s3_daily, count} ->
+        ErrorHelpers.render_json_error(conn, 429, "Daily upload rate limit exceeded (#{count})")
+
+      _ ->
+        ErrorHelpers.render_json_error(conn, 400, "Error, image request upload failed")
     end
   end
 
-  defp validate_max_length(attrs_list, max_length) do
-    attrs_length = length(attrs_list)
-
+  defp validate_max_length(attrs_length, max_length) do
     if attrs_length <= max_length do
       :ok
     else

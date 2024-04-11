@@ -33,7 +33,7 @@ defmodule EpochtalkServer.ConfigServer do
   @doc """
   Returns config for specified module
   """
-  @spec by_module(module :: String.t()) :: map() | nil
+  @spec by_module(module :: atom) :: map() | nil
   def by_module(module) do
     GenServer.call(__MODULE__, {:get, module})
   end

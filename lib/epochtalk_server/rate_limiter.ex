@@ -8,8 +8,13 @@ defmodule EpochtalkServer.RateLimiter do
   @doc """
   Updates rate limit of specified type for specified user
   and checks if the action is within the limits
+
+  Returns type of action and error message on if action is denied
   """
-  @spec reset_rate_limit(type :: atom, user :: EpochtalkServer.Models.User.t(), count :: non_neg_integer) :: {:ok, num_reset :: non_neg_integer}
+  @spec check_rate_limited(type :: atom, user :: EpochtalkServer.Models.User.t()) :: {:allow, count :: non_neg_integer} | {type :: atom, count :: non_neg_integer} | {:error, message :: String.t()}
+  def check_rate_limited(type, user), :do check_rate_limited(type, user, @default_count)
+
+  @spec check_rate_limited(type :: atom, user :: EpochtalkServer.Models.User.t(), count :: non_neg_integer) :: {:allow, count :: non_neg_integer} | {type :: atom, count :: non_neg_integer} | {:error, message :: String.t()}
   def check_rate_limited(type, user, count) do
     type
     |> get_configs()

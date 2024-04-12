@@ -10,6 +10,7 @@ defmodule EpochtalkServer.Models.ImageReference do
   # alias EpochtalkServer.Models.Message
   alias EpochtalkServer.S3
 
+  @dialyzer {:no_return, create: 1}
   @moduledoc """
   `ImageReference` model, for tracking images uploaded locally or to CDN
   """

@@ -4,6 +4,8 @@ defmodule EpochtalkServer.S3 do
   """
   require Logger
 
+  @dialyzer {:no_return, generate_presigned_post: 1}
+
   @doc """
   """
   @spec generate_presigned_post(params :: map) :: ExAws.S3.presigned_post_result()

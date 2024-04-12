@@ -10,6 +10,7 @@ defmodule EpochtalkServer.Models.ImageReference do
   # alias EpochtalkServer.Models.Message
   alias EpochtalkServer.S3
 
+  @dialyzer {:no_return, create: 1}
   @moduledoc """
   `ImageReference` model, for tracking images uploaded locally or to CDN
   """
@@ -102,50 +103,48 @@ defmodule EpochtalkServer.Models.ImageReference do
   @doc """
   Creates a new `ImageReference`
   """
-  @spec create(attrs :: map()) ::
-          {:ok, image_reference :: t(), ExAws.S3.presigned_post_result()}
-          | {:error, Ecto.Changeset.t()}
+  @spec create(attrs :: list()) ::
+          {:ok, ExAws.S3.presigned_post_result()}
+          | {:error, value :: t(), others :: t()}
   def create(attrs_list) when is_list(attrs_list) do
-    # [changesets]
-    image_reference_changesets =
-      attrs_list
-      |> Stream.with_index()
-      |> Stream.map(fn {attrs, index} ->
-        {create_changeset(%ImageReference{}, attrs), index}
+    attrs_list
+    |> Stream.with_index()
+    |> Stream.map(fn {attrs, index} ->
+      {create_changeset(%ImageReference{}, attrs), index}
+    end)
+    |> Stream.map(fn {image_reference_changeset, index} ->
+      uuid = image_reference_changeset.changes.uuid
+      insert_key = "image_reference_#{uuid}"
+      presigned_post_key = "#{index}"
+
+      Multi.new()
+      |> Multi.insert(insert_key, image_reference_changeset)
+      |> Multi.run(presigned_post_key, fn _repo, insert_result ->
+        image_reference = insert_result[insert_key]
+        # set presigned post parameters
+        filename = image_reference.uuid <> "." <> image_reference.type
+
+        # generate presigned post
+        presigned_post_result = S3.generate_presigned_post(%{filename: filename})
+        {:ok, presigned_post_result}
       end)
-      |> Stream.map(fn {image_reference_changeset, index} ->
-        uuid = image_reference_changeset.changes.uuid
-        insert_key = "image_reference_#{uuid}"
-        presigned_post_key = "#{index}"
+    end)
+    # build multi combined transaction
+    |> Enum.reduce(Multi.new(), &Multi.append/2)
+    |> Repo.transaction()
+    |> case do
+      {:ok, results} ->
+        presigned_post_results =
+          results
+          # return only indexed items
+          |> Enum.filter(&key_is_integer?/1)
+          |> Map.new()
 
-        Multi.new()
-        |> Multi.insert(insert_key, image_reference_changeset)
-        |> Multi.run(presigned_post_key, fn _repo, insert_result ->
-          image_reference = insert_result[insert_key]
-          # set presigned post parameters
-          filename = image_reference.uuid <> "." <> image_reference.type
+        {:ok, presigned_post_results}
 
-          # generate presigned post
-          presigned_post_result = S3.generate_presigned_post(%{filename: filename})
-          {:ok, presigned_post_result}
-        end)
-      end)
-      # build multi combined transaction
-      |> Enum.reduce(Multi.new(), &Multi.append/2)
-      |> Repo.transaction()
-      |> case do
-        {:ok, results} ->
-          results =
-            results
-            # return only indexed items
-            |> Enum.filter(&key_is_integer?/1)
-            |> Map.new()
-
-          {:ok, results}
-
-        {:error, :image_references, value, others} ->
-          {:error, value, others}
-      end
+      {:error, :image_references, value, others} ->
+        {:error, value, others}
+    end
   end
 
   def create(attrs) do

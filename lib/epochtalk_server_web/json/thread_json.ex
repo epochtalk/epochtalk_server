@@ -90,29 +90,6 @@ defmodule EpochtalkServerWeb.Controllers.ThreadJSON do
   end
 
   @doc """
-  Renders `Thread` `Poll` data for vote, delete and create.
-  """
-  def poll(%{poll: poll, has_voted: has_voted}), do: format_poll_data(poll, has_voted)
-
-  @doc """
-  Renders updated `Thread` `Poll`.
-  """
-  def update_poll(%{poll: poll}),
-    do: %{
-      id: poll.id,
-      max_answers: poll.max_answers,
-      change_vote: poll.change_vote,
-      expiration: poll.expiration,
-      display_mode: poll.display_mode
-    }
-
-  @doc """
-  Renders locked `Thread` `Poll`.
-  """
-  def lock_poll(%{poll: %{thread_id: thread_id, locked: locked}}),
-    do: %{thread_id: thread_id, locked: locked}
-
-  @doc """
   Renders `Thread` id for slug to id route.
   """
   def slug_to_id(%{id: id}), do: %{id: id}
@@ -146,34 +123,6 @@ defmodule EpochtalkServerWeb.Controllers.ThreadJSON do
   end
 
   ## === Private Helper Functions ===
-
-  defp format_poll_data(poll, has_voted) do
-    # move poll_answers to answers field
-    poll = poll |> Map.put(:answers, poll.poll_answers)
-
-    # tally votes from poll_responses
-    poll =
-      poll
-      |> Map.put(
-        :answers,
-        Enum.map(poll.answers, &Map.put(&1, :votes, Enum.count(&1.poll_responses)))
-      )
-
-    # hide votes if poll is not expired and display mode is set to display votes when expired
-    now = NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
-
-    hide_votes =
-      (poll.display_mode === :voted && !has_voted) ||
-        (poll.display_mode === :expired && NaiveDateTime.compare(poll.expiration, now) == :gt)
-
-    poll =
-      if hide_votes,
-        do: poll |> Map.put(:answers, Enum.map(poll.answers, &Map.put(&1, :votes, 0))),
-        else: poll
-
-    # set boolean indicating if the authed user has voted
-    poll |> Map.put(:has_voted, has_voted)
-  end
 
   defp format_thread_data(thread, user_id) do
     thread

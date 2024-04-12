@@ -7,6 +7,8 @@ defmodule EpochtalkServer.S3 do
   @dialyzer {:no_return, generate_presigned_post: 1}
 
   @doc """
+  Generate a presigned post with specified params:
+    filename: name of the file
   """
   @spec generate_presigned_post(params :: map) :: ExAws.S3.presigned_post_result()
   def generate_presigned_post(%{filename: filename}) do

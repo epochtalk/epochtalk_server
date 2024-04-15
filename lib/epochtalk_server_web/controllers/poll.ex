@@ -63,16 +63,16 @@ defmodule EpochtalkServerWeb.Controllers.Poll do
         ErrorHelpers.render_json_error(conn, 403, "Unauthorized, you are banned from this board")
 
       {:poll_exists, true} ->
-        ErrorHelpers.render_json_error(conn, 400, "Error, thread poll already exists")
+        ErrorHelpers.render_json_error(conn, 400, "Error, poll already exists")
 
       {:is_active, false} ->
-        ErrorHelpers.render_json_error(conn, 400, "Account must be active to create thread poll")
+        ErrorHelpers.render_json_error(conn, 400, "Account must be active to create poll")
 
       {:error, data} ->
         ErrorHelpers.render_json_error(conn, 400, data)
 
       _ ->
-        ErrorHelpers.render_json_error(conn, 400, "Error, cannot create thread poll")
+        ErrorHelpers.render_json_error(conn, 400, "Error, cannot create poll")
     end
   end
 
@@ -123,16 +123,16 @@ defmodule EpochtalkServerWeb.Controllers.Poll do
         ErrorHelpers.render_json_error(conn, 403, "Unauthorized, you are banned from this board")
 
       {:poll_exists, false} ->
-        ErrorHelpers.render_json_error(conn, 400, "Error, thread poll does not exist")
+        ErrorHelpers.render_json_error(conn, 400, "Error, poll does not exist")
 
       {:is_active, false} ->
-        ErrorHelpers.render_json_error(conn, 400, "Account must be active to edit thread poll")
+        ErrorHelpers.render_json_error(conn, 400, "Account must be active to edit poll")
 
       {:error, data} ->
         ErrorHelpers.render_json_error(conn, 400, data)
 
       _ ->
-        ErrorHelpers.render_json_error(conn, 400, "Error, cannot edit thread poll")
+        ErrorHelpers.render_json_error(conn, 400, "Error, cannot edit poll")
     end
   end
 
@@ -184,20 +184,20 @@ defmodule EpochtalkServerWeb.Controllers.Poll do
         ErrorHelpers.render_json_error(conn, 403, "Unauthorized, you are banned from this board")
 
       {:poll_exists, false} ->
-        ErrorHelpers.render_json_error(conn, 400, "Error, thread poll does not exist")
+        ErrorHelpers.render_json_error(conn, 400, "Error, poll does not exist")
 
       {:is_active, false} ->
         ErrorHelpers.render_json_error(
           conn,
           400,
-          "Account must be active to modify lock on thread poll"
+          "Account must be active to modify lock on poll"
         )
 
       {:error, data} ->
         ErrorHelpers.render_json_error(conn, 400, data)
 
       _ ->
-        ErrorHelpers.render_json_error(conn, 400, "Error, cannot lock thread poll")
+        ErrorHelpers.render_json_error(conn, 400, "Error, cannot lock poll")
     end
   end
 

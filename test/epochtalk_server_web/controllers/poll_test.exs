@@ -48,6 +48,100 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
     }
   end
 
+  describe "create/2" do
+    test "when unauthenticated, returns Unauthorized error", %{
+      conn: conn,
+      thread_with_poll: %{post: %{thread_id: thread_id}}
+    } do
+      response =
+        conn
+        |> post(Routes.poll_path(conn, :create, thread_id), %{
+          "question" => "Is this a test?",
+          "answers" => ["Yes", "No"],
+          "max_answers" => 2,
+          "expiration" => nil,
+          "display_mode" => "always",
+          "change_vote" => false
+        })
+        |> json_response(401)
+
+      assert response["error"] == "Unauthorized"
+      assert response["message"] == "No resource found"
+    end
+
+    @tag :authenticated
+    test "given an id for nonexistant thread, does not create poll", %{
+      conn: conn
+    } do
+      response =
+        conn
+        |> post(Routes.poll_path(conn, :create, -1), %{
+          "question" => "Is this a test?",
+          "answers" => ["Yes", "No"],
+          "max_answers" => 2,
+          "expiration" => nil,
+          "display_mode" => "always",
+          "change_vote" => false
+        })
+        |> json_response(400)
+
+      assert response["error"] == "Bad Request"
+      assert response["message"] == "Error, cannot create poll"
+    end
+
+    @tag :authenticated
+    test "given an id for thread with existing poll, does not create poll", %{
+      conn: conn,
+      thread_with_poll: %{post: %{thread_id: thread_id}}
+    } do
+      response =
+        conn
+        |> post(Routes.poll_path(conn, :create, thread_id), %{
+          "question" => "Is this a test?",
+          "answers" => ["Yes", "No"],
+          "max_answers" => 2,
+          "expiration" => nil,
+          "display_mode" => "always",
+          "change_vote" => false
+        })
+        |> json_response(400)
+
+      assert response["error"] == "Bad Request"
+      assert response["message"] == "Error, poll already exists"
+    end
+
+    @tag :authenticated
+    test "given id for thread without an existing poll, does create a poll", %{
+      conn: conn,
+      thread_no_poll: %{post: %{thread_id: thread_id}}
+    } do
+      poll = %{
+        "question" => "Is this a test?",
+        "answers" => ["Yes", "No"],
+        "max_answers" => 2,
+        "expiration" => nil,
+        "display_mode" => "always",
+        "change_vote" => false
+      }
+
+      response =
+        conn
+        |> post(Routes.poll_path(conn, :create, thread_id), poll)
+        |> json_response(200)
+
+      assert response["id"] != nil
+      assert length(response["answers"]) == length(poll["answers"])
+      assert response["change_vote"] == poll["change_vote"]
+      assert response["display_mode"] == poll["display_mode"]
+      assert response["expiration"] == poll["expiration"]
+      assert response["has_voted"] == false
+      assert response["locked"] == false
+      assert response["max_answers"] == poll["max_answers"]
+      assert response["question"] == poll["question"]
+      assert response["thread_id"] == thread_id
+    end
+  end
+
   describe "update/2" do
     test "when unauthenticated, returns Unauthorized error", %{
       conn: conn,
@@ -68,7 +162,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
     end
 
     @tag :authenticated
-    test "given an id for nonexistant thread, does not lock poll", %{
+    test "given an id for nonexistant thread, does not update poll", %{
       conn: conn
     } do
       response =
@@ -82,7 +176,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
         |> json_response(400)
 
       assert response["error"] == "Bad Request"
-      assert response["message"] == "Error, cannot edit thread poll"
+      assert response["message"] == "Error, cannot edit poll"
     end
   end
 
@@ -101,7 +195,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
     end
 
     @tag :authenticated
-    test "given an id for nonexistant thread, does not lock poll", %{
+    test "given an id for nonexistant thread, does not delete votea from poll", %{
       conn: conn
     } do
       response =
@@ -110,7 +204,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
         |> json_response(400)
 
       assert response["error"] == "Bad Request"
-      assert response["message"] == "Error, cannot lock thread poll"
+      assert response["message"] == "Error, cannot lock poll"
     end
   end
 
@@ -138,7 +232,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
         |> json_response(400)
 
       assert response["error"] == "Bad Request"
-      assert response["message"] == "Error, cannot lock thread poll"
+      assert response["message"] == "Error, cannot lock poll"
     end
   end
 

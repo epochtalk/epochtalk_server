@@ -143,7 +143,7 @@ defmodule EpochtalkServerWeb.Controllers.Poll do
     with user <- Guardian.Plug.current_resource(conn),
          thread_id <- Validate.cast(attrs, "thread_id", :integer, required: true),
          locked <- Validate.cast(attrs, "locked", :boolean, required: true),
-         :ok <- ACL.allow!(conn, "threads.editPoll"),
+         :ok <- ACL.allow!(conn, "threads.lockPoll"),
          user_priority <- ACL.get_user_priority(conn),
          {:can_read, {:ok, true}} <-
            {:can_read, Board.get_read_access_by_thread_id(thread_id, user_priority)},

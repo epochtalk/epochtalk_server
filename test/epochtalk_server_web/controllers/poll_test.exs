@@ -43,6 +43,20 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
         user: admin_user
       )
 
+    admin_thread_with_poll =
+      build(:thread,
+        board: board,
+        user: admin_user,
+        poll: build(:poll_attributes)
+      )
+
+    super_admin_thread_with_poll =
+      build(:thread,
+        board: super_admin_board,
+        user: admin_user,
+        poll: build(:poll_attributes)
+      )
+
     {
       :ok,
       board: board,
@@ -53,7 +67,9 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
       super_admin_threads: super_admin_threads,
       thread_with_poll: thread_with_poll,
       thread_no_poll: thread_no_poll,
-      admin_thread_no_poll: admin_thread_no_poll
+      admin_thread_no_poll: admin_thread_no_poll,
+      admin_thread_with_poll: admin_thread_with_poll,
+      super_admin_thread_with_poll: super_admin_thread_with_poll
     }
   end
 
@@ -198,7 +214,9 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
         |> json_response(403)
 
       assert response["error"] == "Forbidden"
-      assert response["message"] == "Unauthorized, you do not have permission to create a poll for another user's thread"
+
+      assert response["message"] ==
+               "Unauthorized, you do not have permission to create a poll for another user's thread"
     end
 
     @tag :authenticated
@@ -251,16 +269,16 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
         |> post(Routes.poll_path(conn, :create, thread_id), poll)
         |> json_response(200)
 
-        assert response["id"] != nil
-        assert length(response["answers"]) == length(poll["answers"])
-        assert response["change_vote"] == poll["change_vote"]
-        assert response["display_mode"] == poll["display_mode"]
-        assert response["expiration"] == poll["expiration"]
-        assert response["has_voted"] == false
-        assert response["locked"] == false
-        assert response["max_answers"] == poll["max_answers"]
-        assert response["question"] == poll["question"]
-        assert response["thread_id"] == thread_id
+      assert response["id"] != nil
+      assert length(response["answers"]) == length(poll["answers"])
+      assert response["change_vote"] == poll["change_vote"]
+      assert response["display_mode"] == poll["display_mode"]
+      assert response["expiration"] == poll["expiration"]
+      assert response["has_voted"] == false
+      assert response["locked"] == false
+      assert response["max_answers"] == poll["max_answers"]
+      assert response["question"] == poll["question"]
+      assert response["thread_id"] == thread_id
     end
   end
 
@@ -299,6 +317,151 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
 
       assert response["error"] == "Bad Request"
       assert response["message"] == "Error, cannot edit poll"
+    end
+
+    @tag :authenticated
+    test "given thread without an existing poll, does not update poll", %{
+      conn: conn,
+      thread_no_poll: %{post: %{thread_id: thread_id}}
+    } do
+      response =
+        conn
+        |> put(Routes.poll_path(conn, :update, thread_id), %{
+          "max_answers" => 2,
+          "expiration" => nil,
+          "display_mode" => "always",
+          "change_vote" => false
+        })
+        |> json_response(400)
+
+      assert response["error"] == "Bad Request"
+      assert response["message"] == "Error, poll does not exist"
+    end
+
+    @tag :authenticated
+    test "given admin thread and insufficient priority, throws forbidden read error", %{
+      conn: conn,
+      admin_threads: [%{post: %{thread_id: thread_id}}, _, _]
+    } do
+      response =
+        conn
+        |> put(Routes.poll_path(conn, :update, thread_id), %{
+          "max_answers" => 2,
+          "expiration" => nil,
+          "display_mode" => "always",
+          "change_vote" => false
+        })
+        |> json_response(403)
+
+      assert response["error"] == "Forbidden"
+      assert response["message"] == "Unauthorized, you do not have permission to read"
+    end
+
+    @tag authenticated: :admin
+    test "given super admin thread and insufficient priority, throws forbidden write error", %{
+      conn: conn,
+      super_admin_threads: [%{post: %{thread_id: thread_id}}, _, _]
+    } do
+      response =
+        conn
+        |> put(Routes.poll_path(conn, :update, thread_id), %{
+          "max_answers" => 2,
+          "expiration" => nil,
+          "display_mode" => "always",
+          "change_vote" => false
+        })
+        |> json_response(403)
+
+      assert response["error"] == "Forbidden"
+      assert response["message"] == "Unauthorized, you do not have permission to write"
+    end
+
+    @tag authenticated: :banned
+    test "given banned authenticated user, throws InvalidPermission forbidden error", %{
+      conn: conn,
+      thread_with_poll: %{post: %{thread_id: thread_id}}
+    } do
+      assert_raise InvalidPermission,
+                   ~r/^Forbidden, invalid permissions to perform this action/,
+                   fn ->
+                     put(conn, Routes.poll_path(conn, :update, thread_id), %{
+                       "max_answers" => 2,
+                       "expiration" => nil,
+                       "display_mode" => "always",
+                       "change_vote" => false
+                     })
+                   end
+    end
+
+    @tag :authenticated
+    test "given admin thread and insufficient priority, throws forbidden write error", %{
+      conn: conn,
+      admin_thread_with_poll: %{post: %{thread_id: thread_id}}
+    } do
+      response =
+        conn
+        |> put(Routes.poll_path(conn, :update, thread_id), %{
+          "max_answers" => 2,
+          "expiration" => nil,
+          "display_mode" => "always",
+          "change_vote" => false
+        })
+        |> json_response(403)
+
+      assert response["error"] == "Forbidden"
+
+      assert response["message"] ==
+               "Unauthorized, you do not have permission to edit another user's poll"
+    end
+
+    @tag :authenticated
+    test "given thread with an existing poll, does update poll", %{
+      conn: conn,
+      thread_with_poll: %{post: %{thread_id: thread_id}}
+    } do
+      poll = %{
+        "max_answers" => 2,
+        "expiration" => nil,
+        "display_mode" => "always",
+        "change_vote" => false
+      }
+
+      response =
+        conn
+        |> put(Routes.poll_path(conn, :update, thread_id), poll)
+        |> json_response(200)
+
+      assert response["id"] != nil
+      assert response["change_vote"] == poll["change_vote"]
+      assert response["display_mode"] == poll["display_mode"]
+      assert response["expiration"] == poll["expiration"]
+      assert response["max_answers"] == poll["max_answers"]
+    end
+
+    @tag authenticated: :super_admin
+    test "given super admin thread and sufficient priority, does update a poll", %{
+      conn: conn,
+      super_admin_thread_with_poll: %{post: %{thread_id: thread_id}}
+    } do
+      poll = %{
+        "question" => "Is this a test?",
+        "answers" => ["Yes", "No"],
+        "max_answers" => 2,
+        "expiration" => nil,
+        "display_mode" => "always",
+        "change_vote" => false
+      }
+
+      response =
+        conn
+        |> put(Routes.poll_path(conn, :update, thread_id), poll)
+        |> json_response(200)
+
+      assert response["id"] != nil
+      assert response["change_vote"] == poll["change_vote"]
+      assert response["display_mode"] == poll["display_mode"]
+      assert response["expiration"] == poll["expiration"]
+      assert response["max_answers"] == poll["max_answers"]
     end
   end
 
@@ -356,6 +519,106 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
       assert response["error"] == "Bad Request"
       assert response["message"] == "Error, cannot lock poll"
     end
+
+    @tag :authenticated
+    test "given admin thread and insufficient priority, throws forbidden read error", %{
+      conn: conn,
+      admin_threads: [%{post: %{thread_id: thread_id}}, _, _]
+    } do
+      response =
+        conn
+        |> post(Routes.poll_path(conn, :lock, thread_id), %{"locked" => true})
+        |> json_response(403)
+
+      assert response["error"] == "Forbidden"
+      assert response["message"] == "Unauthorized, you do not have permission to read"
+    end
+
+    @tag authenticated: :admin
+    test "given super admin thread and insufficient priority, throws forbidden write error", %{
+      conn: conn,
+      super_admin_threads: [%{post: %{thread_id: thread_id}}, _, _]
+    } do
+      response =
+        conn
+        |> post(Routes.poll_path(conn, :lock, thread_id), %{"locked" => true})
+        |> json_response(403)
+
+      assert response["error"] == "Forbidden"
+      assert response["message"] == "Unauthorized, you do not have permission to write"
+    end
+
+    @tag authenticated: :banned
+    test "given banned authenticated user, throws InvalidPermission forbidden error", %{
+      conn: conn,
+      thread_with_poll: %{post: %{thread_id: thread_id}}
+    } do
+      assert_raise InvalidPermission,
+                   ~r/^Forbidden, invalid permissions to perform this action/,
+                   fn ->
+                     post(conn, Routes.poll_path(conn, :lock, thread_id), %{"locked" => true})
+                   end
+    end
+
+    @tag :authenticated
+    test "given admin owned thread and insufficient priority, throws forbidden write error", %{
+      conn: conn,
+      admin_thread_with_poll: %{post: %{thread_id: thread_id}}
+    } do
+      response =
+        conn
+        |> post(Routes.poll_path(conn, :lock, thread_id), %{"locked" => true})
+        |> json_response(403)
+
+      assert response["error"] == "Forbidden"
+
+      assert response["message"] ==
+               "Unauthorized, you do not have permission to modify the lock on another user's poll"
+    end
+
+    @tag authenticated: :newbie
+    test "given thread and user who does not own the poll, does not lock poll", %{
+      conn: conn,
+      thread_with_poll: %{post: %{thread_id: thread_id}}
+    } do
+      response =
+        conn
+        |> post(Routes.poll_path(conn, :lock, thread_id), %{"locked" => true})
+        |> json_response(403)
+
+      assert response["error"] == "Forbidden"
+
+      assert response["message"] ==
+               "Unauthorized, you do not have permission to modify the lock on another user's poll"
+    end
+
+    @tag :authenticated
+    test "given thread withd no poll and poll owner, does not lock poll", %{
+      conn: conn,
+      thread_no_poll: %{post: %{thread_id: thread_id}}
+    } do
+      response =
+        conn
+        |> post(Routes.poll_path(conn, :lock, thread_id), %{"locked" => true})
+        |> json_response(400)
+
+      assert response["error"] == "Bad Request"
+      assert response["message"] == "Error, poll does not exist"
+    end
+
+    @tag :authenticated
+    test "given thread with poll and poll owner, does lock poll", %{
+      conn: conn,
+      thread_with_poll: %{post: %{thread_id: thread_id}}
+    } do
+      response =
+        conn
+        |> post(Routes.poll_path(conn, :lock, thread_id), %{"locked" => true})
+        |> json_response(200)
+
+      assert response["locked"] == true
+      assert response["thread_id"] == thread_id
+    end
   end
 
   describe "vote/2" do
@@ -411,7 +674,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
     end
 
     @tag :authenticated
-    test "given valid thread id and invalid answer id, does not vote on poll", %{
+    test "given valid thread and invalid answer id, does not vote on poll", %{
       conn: conn,
       thread_with_poll: %{post: %{thread_id: thread_id}}
     } do
@@ -425,7 +688,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
     end
 
     @tag :authenticated
-    test "given valid thread id and too many answer ids, does not vote on poll", %{
+    test "given valid thread and too many answer ids, does not vote on poll", %{
       conn: conn,
       thread_with_poll: %{post: %{thread_id: thread_id}, poll: %{poll_answers: [one, two]}}
     } do
@@ -439,7 +702,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
     end
 
     @tag :authenticated
-    test "given valid thread id with no poll, does not vote on poll", %{
+    test "given valid thread with no poll, does not vote on poll", %{
       conn: conn,
       thread_no_poll: %{post: %{thread_id: thread_id}}
     } do
@@ -453,7 +716,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
     end
 
     @tag :authenticated
-    test "given valid thread id with locked poll, does not vote on poll", %{
+    test "given valid thread with locked poll, does not vote on poll", %{
       conn: conn,
       thread_with_poll: %{post: %{thread_id: thread_id}, poll: %{poll_answers: [one, _]}}
     } do
@@ -469,7 +732,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
     end
 
     @tag :authenticated
-    test "given valid thread id and voting twice, does not vote on poll twice", %{
+    test "given valid thread and voting twice, does not vote on poll twice", %{
       conn: conn,
       thread_with_poll: %{post: %{thread_id: thread_id}, poll: %{poll_answers: [one, _]}}
     } do
@@ -487,7 +750,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
     end
 
     @tag :authenticated
-    test "given valid thread id and invalid answer ids, does not vote on poll", %{
+    test "given valid thread and invalid answer ids, does not vote on poll", %{
       conn: conn,
       thread_with_poll: %{post: %{thread_id: thread_id}}
     } do

@@ -2,11 +2,13 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
   use Test.Support.ConnCase, async: true
   import Test.Support.Factory
   alias EpochtalkServer.Models.Poll
+  alias EpochtalkServerWeb.CustomErrors.InvalidPermission
 
   setup %{users: %{user: user, admin_user: admin_user, super_admin_user: super_admin_user}} do
     board = insert(:board)
     admin_board = insert(:board, viewable_by: 1)
-    super_admin_board = insert(:board, viewable_by: 0)
+    # readable by admins but only writeable by super admins
+    super_admin_board = insert(:board, viewable_by: 1, postable_by: 0)
     category = insert(:category)
 
     build(:board_mapping,
@@ -35,6 +37,12 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
         user: user
       )
 
+    admin_thread_no_poll =
+      build(:thread,
+        board: board,
+        user: admin_user
+      )
+
     {
       :ok,
       board: board,
@@ -44,7 +52,8 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
       admin_threads: admin_threads,
       super_admin_threads: super_admin_threads,
       thread_with_poll: thread_with_poll,
-      thread_no_poll: thread_no_poll
+      thread_no_poll: thread_no_poll,
+      admin_thread_no_poll: admin_thread_no_poll
     }
   end
 
@@ -70,7 +79,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
     end
 
     @tag :authenticated
-    test "given an id for nonexistant thread, does not create poll", %{
+    test "given nonexistant thread, does not create poll", %{
       conn: conn
     } do
       response =
@@ -90,7 +99,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
     end
 
     @tag :authenticated
-    test "given an id for thread with existing poll, does not create poll", %{
+    test "given thread with existing poll, does not create poll", %{
       conn: conn,
       thread_with_poll: %{post: %{thread_id: thread_id}}
     } do
@@ -111,7 +120,89 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
     end
 
     @tag :authenticated
-    test "given id for thread without an existing poll, does create a poll", %{
+    test "given admin thread and insufficient priority, throws forbidden read error", %{
+      conn: conn,
+      admin_threads: [%{post: %{thread_id: thread_id}}, _, _]
+    } do
+      response =
+        conn
+        |> post(Routes.poll_path(conn, :create, thread_id), %{
+          "question" => "Is this a test?",
+          "answers" => ["Yes", "No"],
+          "max_answers" => 2,
+          "expiration" => nil,
+          "display_mode" => "always",
+          "change_vote" => false
+        })
+        |> json_response(403)
+
+      assert response["error"] == "Forbidden"
+      assert response["message"] == "Unauthorized, you do not have permission to read"
+    end
+
+    @tag authenticated: :admin
+    test "given super admin thread and insufficient priority, throws forbidden write error", %{
+      conn: conn,
+      super_admin_threads: [%{post: %{thread_id: thread_id}}, _, _]
+    } do
+      response =
+        conn
+        |> post(Routes.poll_path(conn, :create, thread_id), %{
+          "question" => "Is this a test?",
+          "answers" => ["Yes", "No"],
+          "max_answers" => 2,
+          "expiration" => nil,
+          "display_mode" => "always",
+          "change_vote" => false
+        })
+        |> json_response(403)
+
+      assert response["error"] == "Forbidden"
+      assert response["message"] == "Unauthorized, you do not have permission to write"
+    end
+
+    @tag authenticated: :banned
+    test "given banned authenticated user, throws InvalidPermission forbidden error", %{
+      conn: conn,
+      thread_with_poll: %{post: %{thread_id: thread_id}}
+    } do
+      assert_raise InvalidPermission,
+                   ~r/^Forbidden, invalid permissions to perform this action/,
+                   fn ->
+                     post(conn, Routes.poll_path(conn, :create, thread_id), %{
+                       "question" => "Is this a test?",
+                       "answers" => ["Yes", "No"],
+                       "max_answers" => 2,
+                       "expiration" => nil,
+                       "display_mode" => "always",
+                       "change_vote" => false
+                     })
+                   end
+    end
+
+    @tag :authenticated
+    test "given admin thread and insufficient priority, throws forbidden write error", %{
+      conn: conn,
+      admin_thread_no_poll: %{post: %{thread_id: thread_id}}
+    } do
+      response =
+        conn
+        |> post(Routes.poll_path(conn, :create, thread_id), %{
+          "question" => "Is this a test?",
+          "answers" => ["Yes", "No"],
+          "max_answers" => 2,
+          "expiration" => nil,
+          "display_mode" => "always",
+          "change_vote" => false
+        })
+        |> json_response(403)
+
+      assert response["error"] == "Forbidden"
+      assert response["message"] == "Unauthorized, you do not have permission to create a poll for another user's thread"
+    end
+
+    @tag :authenticated
+    test "given thread without an existing poll, does create a poll", %{
       conn: conn,
       thread_no_poll: %{post: %{thread_id: thread_id}}
     } do
@@ -140,6 +231,37 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
       assert response["question"] == poll["question"]
       assert response["thread_id"] == thread_id
     end
+
+    @tag authenticated: :super_admin
+    test "given super admin thread and sufficient priority, does create a poll", %{
+      conn: conn,
+      super_admin_threads: [%{post: %{thread_id: thread_id}}, _, _]
+    } do
+      poll = %{
+        "question" => "Is this a test?",
+        "answers" => ["Yes", "No"],
+        "max_answers" => 2,
+        "expiration" => nil,
+        "display_mode" => "always",
+        "change_vote" => false
+      }
+
+      response =
+        conn
+        |> post(Routes.poll_path(conn, :create, thread_id), poll)
+        |> json_response(200)
+
+        assert response["id"] != nil
+        assert length(response["answers"]) == length(poll["answers"])
+        assert response["change_vote"] == poll["change_vote"]
+        assert response["display_mode"] == poll["display_mode"]
+        assert response["expiration"] == poll["expiration"]
+        assert response["has_voted"] == false
+        assert response["locked"] == false
+        assert response["max_answers"] == poll["max_answers"]
+        assert response["question"] == poll["question"]
+        assert response["thread_id"] == thread_id
+    end
   end
 
   describe "update/2" do
@@ -162,7 +284,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
     end
 
     @tag :authenticated
-    test "given an id for nonexistant thread, does not update poll", %{
+    test "given nonexistant thread, does not update poll", %{
       conn: conn
     } do
       response =
@@ -195,7 +317,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
     end
 
     @tag :authenticated
-    test "given an id for nonexistant thread, does not delete votea from poll", %{
+    test "given nonexistant thread, does not delete vote from poll", %{
       conn: conn
     } do
       response =
@@ -223,7 +345,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
     end
 
     @tag :authenticated
-    test "given an id for nonexistant thread, does not lock poll", %{
+    test "given nonexistant thread, does not lock poll", %{
       conn: conn
     } do
       response =
@@ -251,7 +373,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
     end
 
     @tag :authenticated
-    test "given an id for nonexistant thread, does not vote on poll", %{
+    test "given nonexistant thread, does not vote on poll", %{
       conn: conn,
       thread_with_poll: %{poll: %{poll_answers: [one, _]}}
     } do

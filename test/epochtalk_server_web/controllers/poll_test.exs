@@ -465,34 +465,6 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
     end
   end
 
-  describe "delete_vote/2" do
-    test "when unauthenticated, returns Unauthorized error", %{
-      conn: conn,
-      thread_with_poll: %{post: %{thread_id: thread_id}}
-    } do
-      response =
-        conn
-        |> post(Routes.poll_path(conn, :lock, thread_id), %{"locked" => true})
-        |> json_response(401)
-
-      assert response["error"] == "Unauthorized"
-      assert response["message"] == "No resource found"
-    end
-
-    @tag :authenticated
-    test "given nonexistant thread, does not delete vote from poll", %{
-      conn: conn
-    } do
-      response =
-        conn
-        |> post(Routes.poll_path(conn, :lock, -1), %{"locked" => true})
-        |> json_response(400)
-
-      assert response["error"] == "Bad Request"
-      assert response["message"] == "Error, cannot lock poll"
-    end
-  end
-
   describe "lock/2" do
     test "when unauthenticated, returns Unauthorized error", %{
       conn: conn,
@@ -761,6 +733,79 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
 
       assert response["error"] == "Bad Request"
       assert response["message"] == "Error, 'answer_ids' must be a list"
+    end
+
+    @tag :authenticated
+    test "given valid thread with expired poll, does not vote on poll", %{
+      conn: conn,
+      thread_with_poll: %{post: %{thread_id: thread_id}, poll: %{poll_answers: [one, _]}}
+    } do
+      Poll.update(%{"thread_id" => thread_id, "expiration" => NaiveDateTime.utc_now() |> NaiveDateTime.add(1)})
+
+      # wait one second for poll to expire
+      :timer.sleep(1000)
+
+      response =
+        conn
+        |> post(Routes.poll_path(conn, :vote, thread_id), %{"answer_ids" => [one.id]})
+        |> json_response(400)
+
+      assert response["error"] == "Bad Request"
+      assert response["message"] == "Error, poll is not currently running"
+    end
+
+    @tag :authenticated
+    test "given valid thread with expiring poll, does vote on poll", %{
+      conn: conn,
+      thread_with_poll: %{post: %{thread_id: thread_id}, poll: poll = %{poll_answers: [one, _]}}
+    } do
+      expiration = NaiveDateTime.utc_now() |> NaiveDateTime.add(10)
+      expiration_string =  NaiveDateTime.to_iso8601(expiration) |> String.split(".") |> List.first
+      Poll.update(%{"thread_id" => thread_id, "expiration" => expiration})
+
+      response =
+        conn
+        |> post(Routes.poll_path(conn, :vote, thread_id), %{"answer_ids" => [one.id]})
+        |> json_response(200)
+
+        assert response["id"] == poll.id
+        assert length(response["answers"]) == length(poll.poll_answers)
+        assert response["change_vote"] == poll.change_vote
+        assert response["display_mode"] == Atom.to_string(poll.display_mode)
+        assert response["expiration"] == expiration_string
+        assert response["has_voted"] == true
+        assert response["locked"] == false
+        assert response["max_answers"] == poll.max_answers
+        assert response["question"] == poll.question
+        assert response["thread_id"] == poll.thread_id
+    end
+  end
+
+  describe "delete_vote/2" do
+    test "when unauthenticated, returns Unauthorized error", %{
+      conn: conn,
+      thread_with_poll: %{post: %{thread_id: thread_id}}
+    } do
+      response =
+        conn
+        |> post(Routes.poll_path(conn, :lock, thread_id), %{"locked" => true})
+        |> json_response(401)
+
+      assert response["error"] == "Unauthorized"
+      assert response["message"] == "No resource found"
+    end
+
+    @tag :authenticated
+    test "given nonexistant thread, does not delete vote from poll", %{
+      conn: conn
+    } do
+      response =
+        conn
+        |> post(Routes.poll_path(conn, :lock, -1), %{"locked" => true})
+        |> json_response(400)
+
+      assert response["error"] == "Bad Request"
+      assert response["message"] == "Error, cannot lock poll"
     end
   end
 end

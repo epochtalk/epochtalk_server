@@ -44,6 +44,9 @@ defmodule EpochtalkServerWeb.Controllers.ImageReference do
       {:s3_daily, count} ->
         ErrorHelpers.render_json_error(conn, 429, "Daily upload rate limit exceeded (#{count})")
 
+      {:rate_limiter_error, message} ->
+        ErrorHelpers.render_json_error(conn, 500, "Rate limiter error #{message}")
+
       _ ->
         ErrorHelpers.render_json_error(conn, 400, "Error, image request upload failed")
     end

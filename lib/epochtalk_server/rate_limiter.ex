@@ -46,7 +46,7 @@ defmodule EpochtalkServer.RateLimiter do
         end
 
       {:error, message} ->
-        {:error, message}
+        {:rate_limiter_error, message}
     end
   end
 

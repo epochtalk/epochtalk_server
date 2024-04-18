@@ -622,27 +622,43 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
     end
 
     @tag :authenticated
-    test "given valid thread and answer ids, does vote on poll", %{
+    test "given admin thread and insufficient priority, throws forbidden read error", %{
       conn: conn,
-      thread_with_poll: %{post: %{thread_id: thread_id}, poll: poll}
+      admin_threads: [%{post: %{thread_id: thread_id}}, _, _]
     } do
-      [one, _] = poll.poll_answers
-
       response =
         conn
-        |> post(Routes.poll_path(conn, :vote, thread_id), %{"answer_ids" => [one.id]})
-        |> json_response(200)
+        |> post(Routes.poll_path(conn, :vote, thread_id), %{"answer_ids" => [1]})
+        |> json_response(403)
 
-      assert response["id"] == poll.id
-      assert length(response["answers"]) == length(poll.poll_answers)
-      assert response["change_vote"] == poll.change_vote
-      assert response["display_mode"] == Atom.to_string(poll.display_mode)
-      assert response["expiration"] == poll.expiration
-      assert response["has_voted"] == true
-      assert response["locked"] == false
-      assert response["max_answers"] == poll.max_answers
-      assert response["question"] == poll.question
-      assert response["thread_id"] == poll.thread_id
+      assert response["error"] == "Forbidden"
+      assert response["message"] == "Unauthorized, you do not have permission to read"
+    end
+
+    @tag authenticated: :admin
+    test "given super admin thread and insufficient priority, throws forbidden write error", %{
+      conn: conn,
+      super_admin_threads: [%{post: %{thread_id: thread_id}}, _, _]
+    } do
+      response =
+        conn
+        |> post(Routes.poll_path(conn, :vote, thread_id), %{"answer_ids" => [1]})
+        |> json_response(403)
+
+      assert response["error"] == "Forbidden"
+      assert response["message"] == "Unauthorized, you do not have permission to write"
+    end
+
+    @tag authenticated: :banned
+    test "given banned authenticated user, throws InvalidPermission forbidden error", %{
+      conn: conn,
+      thread_with_poll: %{post: %{thread_id: thread_id}}
+    } do
+      assert_raise InvalidPermission,
+                   ~r/^Forbidden, invalid permissions to perform this action/,
+                   fn ->
+                     post(conn, Routes.poll_path(conn, :vote, thread_id), %{"answer_ids" => [1]})
+                   end
     end
 
     @tag :authenticated
@@ -761,6 +777,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
     } do
       expiration = NaiveDateTime.utc_now() |> NaiveDateTime.add(10)
       expiration_string =  NaiveDateTime.to_iso8601(expiration) |> String.split(".") |> List.first
+
       Poll.update(%{"thread_id" => thread_id, "expiration" => expiration})
 
       response =
@@ -778,6 +795,30 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
         assert response["max_answers"] == poll.max_answers
         assert response["question"] == poll.question
         assert response["thread_id"] == poll.thread_id
+    end
+
+    @tag :authenticated
+    test "given valid thread and answer ids, does vote on poll", %{
+      conn: conn,
+      thread_with_poll: %{post: %{thread_id: thread_id}, poll: poll}
+    } do
+      [one, _] = poll.poll_answers
+
+      response =
+        conn
+        |> post(Routes.poll_path(conn, :vote, thread_id), %{"answer_ids" => [one.id]})
+        |> json_response(200)
+
+      assert response["id"] == poll.id
+      assert length(response["answers"]) == length(poll.poll_answers)
+      assert response["change_vote"] == poll.change_vote
+      assert response["display_mode"] == Atom.to_string(poll.display_mode)
+      assert response["expiration"] == poll.expiration
+      assert response["has_voted"] == true
+      assert response["locked"] == false
+      assert response["max_answers"] == poll.max_answers
+      assert response["question"] == poll.question
+      assert response["thread_id"] == poll.thread_id
     end
   end
 

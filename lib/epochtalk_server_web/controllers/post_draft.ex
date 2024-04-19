@@ -19,7 +19,7 @@ defmodule EpochtalkServerWeb.Controllers.PostDraft do
       render(conn, :upsert, %{draft_data: draft_data, user_id: user.id})
     else
       {:auth, nil} ->
-        ErrorHelpers.render_json_error(conn, 400, "Not logged in, cannot upsert post draft")
+        ErrorHelpers.render_json_error(conn, 403, "Not logged in, cannot upsert post draft")
 
       {:error, data} ->
         ErrorHelpers.render_json_error(conn, 400, data)
@@ -35,7 +35,7 @@ defmodule EpochtalkServerWeb.Controllers.PostDraft do
       render(conn, :by_user_id, %{draft_data: draft_data, user_id: user.id})
     else
       {:auth, nil} ->
-        ErrorHelpers.render_json_error(conn, 400, "Not logged in, cannot get post draft")
+        ErrorHelpers.render_json_error(conn, 403, "Not logged in, cannot get post draft")
     end
   end
 end

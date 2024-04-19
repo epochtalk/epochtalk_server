@@ -75,7 +75,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.PostDraft do
     end
 
     @tag authenticated: :admin
-    test "when authenticated with an existing post draft, overrides existing and reutnrs new post draft",
+    test "when authenticated with an existing post draft, overrides existing and returns new post draft",
          %{conn: conn, users: %{admin_user: admin_user}, draft_data: draft_data} do
       response =
         conn

@@ -23,5 +23,17 @@ defmodule Test.EpochtalkServerWeb.Controllers.ImageReference do
           post(conn, Routes.image_reference_path(conn, :s3_request_upload), %{images: []})
         end
     end
+
+    @tag authenticated: :admin
+    test "given empty list, succeeds", %{
+      conn: conn
+    } do
+      response =
+        conn
+        |> post(Routes.image_reference_path(conn, :s3_request_upload), %{images: []})
+        |> json_response(200)
+      assert Map.keys(response) == ["presigned_posts"]
+      assert Map.keys(response["presigned_posts"]) |> length() == 0
+    end
   end
 end

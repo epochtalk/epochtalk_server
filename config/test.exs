@@ -13,6 +13,14 @@ config :epochtalk_server, EpochtalkServer.Repo,
   pool: Ecto.Adapters.SQL.Sandbox,
   pool_size: 10
 
+config :epochtalk_server, EpochtalkServer.S3,
+  expire_after_hours: System.get_env("S3_EXPIRE_AFTER_HOURS") || 1,
+  min_size_bytes: System.get_env("S3_MIN_SIZE_BYTES") || 1_024,
+  max_size_bytes: System.get_env("S3_MAX_SIZE_BYTES") || 10_485_760,
+  virtual_host: System.get_env("S3_VIRTUAL_HOST") || true,
+  bucket: System.get_env("S3_BUCKET") || "epochtalk_server_test",
+  path: System.get_env("S3_PATH") || "images/"
+
 # We don't run a server during test. If one is required,
 # you can enable the server option below.
 config :epochtalk_server, EpochtalkServerWeb.Endpoint,

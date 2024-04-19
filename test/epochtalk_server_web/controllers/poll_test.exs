@@ -20,60 +20,39 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
       ]
     )
 
-    threads = build_list(3, :thread, board: board, user: user)
-    admin_threads = build_list(3, :thread, board: admin_board, user: admin_user)
-    super_admin_threads = build_list(3, :thread, board: super_admin_board, user: super_admin_user)
+    admin_board_thread =
+      build(:thread, board: admin_board, user: admin_user, poll: build(:poll_attributes))
 
-    thread_with_poll =
-      build(:thread,
-        board: board,
-        user: user,
-        poll: build(:poll_attributes)
-      )
-
-
-    thread_with_change_vote_poll =
-      build(:thread,
-        board: board,
-        user: user,
-        poll: build(:poll_attributes, change_vote: true)
-      )
-
-
-    thread_no_poll =
-      build(:thread,
-        board: board,
-        user: user
-      )
-
-    admin_thread_no_poll =
-      build(:thread,
-        board: board,
-        user: admin_user
-      )
-
-    admin_thread_with_poll =
-      build(:thread,
-        board: board,
-        user: admin_user,
-        poll: build(:poll_attributes)
-      )
-
-    super_admin_thread_with_poll =
+    super_admin_board_thread =
       build(:thread,
         board: super_admin_board,
-        user: admin_user,
+        user: super_admin_user,
         poll: build(:poll_attributes)
       )
+
+    super_admin_board_thread_no_poll =
+      build(:thread, board: super_admin_board, user: super_admin_user)
+
+    thread_with_poll = build(:thread, board: board, user: user, poll: build(:poll_attributes))
+
+    thread_with_change_vote_poll =
+      build(:thread, board: board, user: user, poll: build(:poll_attributes, change_vote: true))
+
+    thread_no_poll = build(:thread, board: board, user: user)
+
+    admin_thread_no_poll = build(:thread, board: board, user: admin_user)
+
+    admin_thread_with_poll =
+      build(:thread, board: board, user: admin_user, poll: build(:poll_attributes))
+
+    super_admin_thread_with_poll =
+      build(:thread, board: super_admin_board, user: admin_user, poll: build(:poll_attributes))
 
     {
       :ok,
-      board: board,
-      admin_board: admin_board,
-      super_admin_board: super_admin_board,
-      threads: threads,
-      admin_threads: admin_threads,
-      super_admin_threads: super_admin_threads,
+      admin_board_thread: admin_board_thread,
+      super_admin_board_thread: super_admin_board_thread,
+      super_admin_board_thread_no_poll: super_admin_board_thread_no_poll,
       thread_with_poll: thread_with_poll,
       thread_with_change_vote_poll: thread_with_change_vote_poll,
       thread_no_poll: thread_no_poll,
@@ -148,7 +127,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
     @tag :authenticated
     test "given admin thread and insufficient priority, throws forbidden read error", %{
       conn: conn,
-      admin_threads: [%{post: %{thread_id: thread_id}}, _, _]
+      admin_board_thread: %{post: %{thread_id: thread_id}}
     } do
       response =
         conn
@@ -169,7 +148,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
     @tag authenticated: :admin
     test "given super admin thread and insufficient priority, throws forbidden write error", %{
       conn: conn,
-      super_admin_threads: [%{post: %{thread_id: thread_id}}, _, _]
+      super_admin_board_thread: %{post: %{thread_id: thread_id}}
     } do
       response =
         conn
@@ -263,7 +242,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
     @tag authenticated: :super_admin
     test "given super admin thread and sufficient priority, does create a poll", %{
       conn: conn,
-      super_admin_threads: [%{post: %{thread_id: thread_id}}, _, _]
+      super_admin_board_thread_no_poll: %{post: %{thread_id: thread_id}}
     } do
       poll = %{
         "question" => "Is this a test?",
@@ -351,7 +330,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
     @tag :authenticated
     test "given admin thread and insufficient priority, throws forbidden read error", %{
       conn: conn,
-      admin_threads: [%{post: %{thread_id: thread_id}}, _, _]
+      admin_board_thread: %{post: %{thread_id: thread_id}}
     } do
       response =
         conn
@@ -370,7 +349,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
     @tag authenticated: :admin
     test "given super admin thread and insufficient priority, throws forbidden write error", %{
       conn: conn,
-      super_admin_threads: [%{post: %{thread_id: thread_id}}, _, _]
+      super_admin_board_thread: %{post: %{thread_id: thread_id}}
     } do
       response =
         conn
@@ -505,7 +484,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
     @tag :authenticated
     test "given admin thread and insufficient priority, throws forbidden read error", %{
       conn: conn,
-      admin_threads: [%{post: %{thread_id: thread_id}}, _, _]
+      admin_board_thread: %{post: %{thread_id: thread_id}}
     } do
       response =
         conn
@@ -519,7 +498,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
     @tag authenticated: :admin
     test "given super admin thread and insufficient priority, throws forbidden write error", %{
       conn: conn,
-      super_admin_threads: [%{post: %{thread_id: thread_id}}, _, _]
+      super_admin_board_thread: %{post: %{thread_id: thread_id}}
     } do
       response =
         conn
@@ -634,7 +613,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
     @tag :authenticated
     test "given admin thread and insufficient priority, throws forbidden read error", %{
       conn: conn,
-      admin_threads: [%{post: %{thread_id: thread_id}}, _, _]
+      admin_board_thread: %{post: %{thread_id: thread_id}}
     } do
       response =
         conn
@@ -648,7 +627,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
     @tag authenticated: :admin
     test "given super admin thread and insufficient priority, throws forbidden write error", %{
       conn: conn,
-      super_admin_threads: [%{post: %{thread_id: thread_id}}, _, _]
+      super_admin_board_thread: %{post: %{thread_id: thread_id}}
     } do
       response =
         conn
@@ -766,7 +745,10 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
       conn: conn,
       thread_with_poll: %{post: %{thread_id: thread_id}, poll: %{poll_answers: [one, _]}}
     } do
-      Poll.update(%{"thread_id" => thread_id, "expiration" => NaiveDateTime.utc_now() |> NaiveDateTime.add(1)})
+      Poll.update(%{
+        "thread_id" => thread_id,
+        "expiration" => NaiveDateTime.utc_now() |> NaiveDateTime.add(1)
+      })
 
       # wait one second for poll to expire
       :timer.sleep(1000)
@@ -786,7 +768,9 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
       thread_with_poll: %{post: %{thread_id: thread_id}, poll: poll = %{poll_answers: [one, _]}}
     } do
       expiration = NaiveDateTime.utc_now() |> NaiveDateTime.add(10)
-      expiration_string =  NaiveDateTime.to_iso8601(expiration) |> String.split(".") |> List.first
+
+      expiration_string =
+        NaiveDateTime.to_iso8601(expiration) |> String.split(".") |> List.first()
 
       Poll.update(%{"thread_id" => thread_id, "expiration" => expiration})
 
@@ -795,16 +779,16 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
         |> post(Routes.poll_path(conn, :vote, thread_id), %{"answer_ids" => [one.id]})
         |> json_response(200)
 
-        assert response["id"] == poll.id
-        assert length(response["answers"]) == length(poll.poll_answers)
-        assert response["change_vote"] == poll.change_vote
-        assert response["display_mode"] == Atom.to_string(poll.display_mode)
-        assert response["expiration"] == expiration_string
-        assert response["has_voted"] == true
-        assert response["locked"] == false
-        assert response["max_answers"] == poll.max_answers
-        assert response["question"] == poll.question
-        assert response["thread_id"] == poll.thread_id
+      assert response["id"] == poll.id
+      assert length(response["answers"]) == length(poll.poll_answers)
+      assert response["change_vote"] == poll.change_vote
+      assert response["display_mode"] == Atom.to_string(poll.display_mode)
+      assert response["expiration"] == expiration_string
+      assert response["has_voted"] == true
+      assert response["locked"] == false
+      assert response["max_answers"] == poll.max_answers
+      assert response["question"] == poll.question
+      assert response["thread_id"] == poll.thread_id
     end
 
     @tag :authenticated
@@ -860,6 +844,76 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
     end
 
     @tag :authenticated
+    test "given admin thread and insufficient priority, throws forbidden read error", %{
+      conn: conn,
+      admin_board_thread: %{post: %{thread_id: thread_id}}
+    } do
+      response =
+        conn
+        |> delete(Routes.poll_path(conn, :delete_vote, thread_id))
+        |> json_response(403)
+
+      assert response["error"] == "Forbidden"
+      assert response["message"] == "Unauthorized, you do not have permission to read"
+    end
+
+    @tag authenticated: :admin
+    test "given super admin thread and insufficient priority, throws forbidden write error", %{
+      conn: conn,
+      super_admin_board_thread: %{post: %{thread_id: thread_id}}
+    } do
+      response =
+        conn
+        |> delete(Routes.poll_path(conn, :delete_vote, thread_id))
+        |> json_response(403)
+
+      assert response["error"] == "Forbidden"
+      assert response["message"] == "Unauthorized, you do not have permission to write"
+    end
+
+    @tag authenticated: :banned
+    test "given banned authenticated user, throws InvalidPermission forbidden error", %{
+      conn: conn,
+      thread_with_poll: %{post: %{thread_id: thread_id}}
+    } do
+      assert_raise InvalidPermission,
+                   ~r/^Forbidden, invalid permissions to perform this action/,
+                   fn ->
+                     delete(conn, Routes.poll_path(conn, :delete_vote, thread_id))
+                   end
+    end
+
+    @tag :authenticated
+    test "given valid thread with no poll, does note delete vote", %{
+      conn: conn,
+      thread_no_poll: %{post: %{thread_id: thread_id}}
+    } do
+      response =
+        conn
+        |> delete(Routes.poll_path(conn, :delete_vote, thread_id))
+        |> json_response(400)
+
+      assert response["error"] == "Bad Request"
+      assert response["message"] == "Error, poll does not exist"
+    end
+
+    @tag :authenticated
+    test "given valid thread with locked poll, does not delete vote", %{
+      conn: conn,
+      thread_with_poll: %{post: %{thread_id: thread_id}}
+    } do
+      Poll.set_locked(thread_id, true)
+
+      response =
+        conn
+        |> delete(Routes.poll_path(conn, :delete_vote, thread_id))
+        |> json_response(400)
+
+      assert response["error"] == "Bad Request"
+      assert response["message"] == "Error, poll is locked"
+    end
+
+    @tag :authenticated
     test "given valid thread and poll that doesn't allow changing votes, does not delete vote", %{
       conn: conn,
       thread_with_poll: %{post: %{thread_id: thread_id}}
@@ -871,6 +925,57 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
 
       assert response["error"] == "Bad Request"
       assert response["message"] == "Error, you can't change your vote on this poll"
+    end
+
+    @tag :authenticated
+    test "given valid thread with expired poll, does not delete vote", %{
+      conn: conn,
+      thread_with_change_vote_poll: %{post: %{thread_id: thread_id}}
+    } do
+      Poll.update(%{
+        "thread_id" => thread_id,
+        "expiration" => NaiveDateTime.utc_now() |> NaiveDateTime.add(1)
+      })
+
+      # wait one second for poll to expire
+      :timer.sleep(1000)
+
+      response =
+        conn
+        |> delete(Routes.poll_path(conn, :vote, thread_id))
+        |> json_response(400)
+
+      assert response["error"] == "Bad Request"
+      assert response["message"] == "Error, poll is not currently running"
+    end
+
+    @tag :authenticated
+    test "given valid thread with expiring poll that allows changing votes, does delete vote", %{
+      conn: conn,
+      thread_with_change_vote_poll: %{post: %{thread_id: thread_id}, poll: poll}
+    } do
+      expiration = NaiveDateTime.utc_now() |> NaiveDateTime.add(10)
+
+      expiration_string =
+        NaiveDateTime.to_iso8601(expiration) |> String.split(".") |> List.first()
+
+      Poll.update(%{"thread_id" => thread_id, "expiration" => expiration})
+
+      response =
+        conn
+        |> delete(Routes.poll_path(conn, :delete_vote, thread_id))
+        |> json_response(200)
+
+      assert response["id"] == poll.id
+      assert length(response["answers"]) == length(poll.poll_answers)
+      assert response["change_vote"] == poll.change_vote
+      assert response["display_mode"] == Atom.to_string(poll.display_mode)
+      assert response["expiration"] == expiration_string
+      assert response["has_voted"] == false
+      assert response["locked"] == false
+      assert response["max_answers"] == poll.max_answers
+      assert response["question"] == poll.question
+      assert response["thread_id"] == poll.thread_id
     end
 
     @tag :authenticated

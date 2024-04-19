@@ -31,6 +31,15 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
         poll: build(:poll_attributes)
       )
 
+
+    thread_with_change_vote_poll =
+      build(:thread,
+        board: board,
+        user: user,
+        poll: build(:poll_attributes, change_vote: true)
+      )
+
+
     thread_no_poll =
       build(:thread,
         board: board,
@@ -66,6 +75,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
       admin_threads: admin_threads,
       super_admin_threads: super_admin_threads,
       thread_with_poll: thread_with_poll,
+      thread_with_change_vote_poll: thread_with_change_vote_poll,
       thread_no_poll: thread_no_poll,
       admin_thread_no_poll: admin_thread_no_poll,
       admin_thread_with_poll: admin_thread_with_poll,
@@ -847,6 +857,42 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
 
       assert response["error"] == "Bad Request"
       assert response["message"] == "Error, cannot lock poll"
+    end
+
+    @tag :authenticated
+    test "given valid thread and poll that doesn't allow changing votes, does not delete vote", %{
+      conn: conn,
+      thread_with_poll: %{post: %{thread_id: thread_id}}
+    } do
+      response =
+        conn
+        |> delete(Routes.poll_path(conn, :delete_vote, thread_id))
+        |> json_response(400)
+
+      assert response["error"] == "Bad Request"
+      assert response["message"] == "Error, you can't change your vote on this poll"
+    end
+
+    @tag :authenticated
+    test "given valid thread and poll that allows changing votes, does delete vote", %{
+      conn: conn,
+      thread_with_change_vote_poll: %{post: %{thread_id: thread_id}, poll: poll}
+    } do
+      response =
+        conn
+        |> delete(Routes.poll_path(conn, :delete_vote, thread_id))
+        |> json_response(200)
+
+      assert response["id"] == poll.id
+      assert length(response["answers"]) == length(poll.poll_answers)
+      assert response["change_vote"] == poll.change_vote
+      assert response["display_mode"] == Atom.to_string(poll.display_mode)
+      assert response["expiration"] == poll.expiration
+      assert response["has_voted"] == false
+      assert response["locked"] == false
+      assert response["max_answers"] == poll.max_answers
+      assert response["question"] == poll.question
+      assert response["thread_id"] == poll.thread_id
     end
   end
 end

@@ -1,11 +1,6 @@
 defmodule Test.EpochtalkServerWeb.Controllers.ImageReference do
   use Test.Support.ConnCase, async: true
-  import Test.Support.Factory
   alias EpochtalkServerWeb.CustomErrors.InvalidPermission
-
-  setup %{conn: conn} do
-    :ok
-  end
 
   describe "s3_request_upload/2" do
     test "when unauthenticated, raises InvalidPermission error", %{

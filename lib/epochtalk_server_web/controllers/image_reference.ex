@@ -17,11 +17,9 @@ defmodule EpochtalkServerWeb.Controllers.ImageReference do
   @doc """
   Create new `ImageReference` and return presigned post
   """
-  def s3_request_upload(conn, attrs_list) do
+  def s3_request_upload(conn, %{"images" => attrs_list}) do
     with :ok <- ACL.allow!(conn, "images.upload.request"),
          user <- Guardian.Plug.current_resource(conn),
-         # unwrap list from _json
-         attrs_list <- attrs_list["_json"],
          attrs_length <- length(attrs_list),
          # ensure list does not exceed max length
          :ok <- validate_max_length(attrs_length, @max_images_per_request),

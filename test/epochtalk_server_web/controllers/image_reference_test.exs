@@ -20,7 +20,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ImageReference do
       assert_raise InvalidPermission,
         ~r/^Forbidden, invalid permissions to perform this action/,
         fn ->
-          post(conn, Routes.image_reference_path(conn, :s3_request_upload))
+          post(conn, Routes.image_reference_path(conn, :s3_request_upload), %{images: []})
         end
     end
   end

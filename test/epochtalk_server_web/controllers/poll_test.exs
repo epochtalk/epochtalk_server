@@ -1,5 +1,7 @@
 defmodule Test.EpochtalkServerWeb.Controllers.Poll do
-  use Test.Support.ConnCase, async: true
+  use Test.Support.ConnCase, async: false
+  # this test is running non-async, it causes deadlocks when run in async
+
   import Test.Support.Factory
   alias EpochtalkServer.Models.Poll
   alias EpochtalkServerWeb.CustomErrors.InvalidPermission

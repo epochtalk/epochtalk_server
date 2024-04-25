@@ -14,6 +14,7 @@ defmodule Test.Support.Factory do
   use Test.Support.Factories.Thread
   use Test.Support.Factories.Mention
   use Test.Support.Factories.Notification
+  use Test.Support.Factories.Poll
   use Test.Support.Factories.PostDraft
   use Test.Support.Factories.BannedAddress
   use Test.Support.Factories.ModerationLog

@@ -125,9 +125,37 @@ defmodule EpochtalkServer.Models.Poll do
   end
 
   @doc """
+  Update changeset for `Poll` model
+  """
+  @spec update_changeset(
+          poll :: t(),
+          attrs :: map() | nil
+        ) :: Ecto.Changeset.t()
+  def update_changeset(poll, attrs \\ %{}) do
+    poll_answers_len = length(poll.poll_answers || [])
+
+    poll
+    |> cast(attrs, [
+      :max_answers,
+      :expiration,
+      :change_vote,
+      :display_mode
+    ])
+    |> validate_required([
+      :max_answers,
+      :change_vote,
+      :display_mode
+    ])
+    |> validate_naivedatetime(:expiration, after: :utc_now)
+    |> validate_number(:max_answers, greater_than: 0, less_than_or_equal_to: poll_answers_len)
+    |> validate_length(:question, min: 1, max: 255)
+    |> validate_display_mode()
+  end
+
+  @doc """
   Creates a new `Poll` in the database
   """
-  @spec create(post_attrs :: map()) :: {:ok, post :: t()} | {:error, Ecto.Changeset.t()}
+  @spec create(poll_attrs :: map()) :: {:ok, poll :: t()} | {:error, Ecto.Changeset.t()}
   def create(poll_attrs) do
     Repo.transaction(fn ->
       post_cs = create_changeset(%Poll{}, poll_attrs)
@@ -146,6 +174,19 @@ defmodule EpochtalkServer.Models.Poll do
           Repo.rollback(cs)
       end
     end)
+  end
+
+  @doc """
+  Updates an existing `Poll` in the database
+  """
+  @spec update(poll_attrs :: map()) ::
+          {:ok, poll :: t()} | {:error, Ecto.Changeset.t()}
+  def update(attrs) do
+    Poll
+    |> Repo.get_by(thread_id: attrs["thread_id"])
+    |> Repo.preload([:poll_answers])
+    |> update_changeset(attrs)
+    |> Repo.update()
   end
 
   @doc """
@@ -168,6 +209,96 @@ defmodule EpochtalkServer.Models.Poll do
   end
 
   @doc """
+  Returns boolean indicating if the specified `User` has not voted on the specified `Thread`
+  """
+  @spec has_not_voted(thread_id :: integer, user_id :: integer) :: boolean
+  def has_not_voted(thread_id, user_id), do: !has_voted(thread_id, user_id)
+
+  @doc """
+  Returns boolean indicating if the specified `Poll` exists given a `Thread` id
+  """
+  @spec exists(thread_id :: integer) :: boolean
+  def exists(thread_id) do
+    query =
+      from p in Poll,
+        where: p.thread_id == ^thread_id,
+        select: p.id
+
+    Repo.exists?(query)
+  end
+
+  @doc """
+  Returns integer indicating the max number of answers for the `Poll` given a `Thread` id
+  """
+  @spec max_answers(thread_id :: integer) :: non_neg_integer
+  def max_answers(thread_id) do
+    query =
+      from p in Poll,
+        where: p.thread_id == ^thread_id,
+        select: p.max_answers
+
+    Repo.one(query)
+  end
+
+  @doc """
+  Sets boolean indicating if the specified `Poll` is locked given a `Thread` id
+  """
+  @spec set_locked(thread_id :: integer, locked :: boolean) :: {non_neg_integer, nil | [term()]}
+  def set_locked(thread_id, locked) when is_integer(thread_id) and is_boolean(locked) do
+    query = from p in Poll, where: p.thread_id == ^thread_id
+    Repo.update_all(query, set: [locked: locked])
+  end
+
+  @doc """
+  Returns boolean indicating if the specified `Poll` is locked given a `Thread` id
+  """
+  @spec locked(thread_id :: integer) :: boolean
+  def locked(thread_id) do
+    query =
+      from p in Poll,
+        where: p.thread_id == ^thread_id,
+        select: p.locked
+
+    Repo.one(query)
+  end
+
+  @doc """
+  Returns boolean indicating if the specified `Poll` is unlocked given a `Thread` id
+  """
+  @spec unlocked(thread_id :: integer) :: boolean
+  def unlocked(thread_id), do: !locked(thread_id)
+
+  @doc """
+  Returns boolean indicating if the specified `Poll` allows votes to be changed given a `Thread` id
+  """
+  @spec allow_change_vote(thread_id :: integer) :: boolean
+  def allow_change_vote(thread_id) do
+    query =
+      from p in Poll,
+        where: p.thread_id == ^thread_id,
+        select: p.change_vote
+
+    Repo.one(query)
+  end
+
+  @doc """
+  Returns boolean indicating if the specified `Poll` is currently running given a `Thread` id
+  """
+  @spec running(thread_id :: integer) :: boolean
+  def running(thread_id) do
+    query =
+      from p in Poll,
+        where: p.thread_id == ^thread_id,
+        select: p.expiration
+
+    expiration = Repo.one(query)
+
+    if expiration == nil,
+      do: true,
+      else: NaiveDateTime.compare(expiration, NaiveDateTime.utc_now()) == :gt
+  end
+
+  @doc """
   Queries `Poll` Data by thread
   """
   @spec by_thread(thread_id :: integer) :: t() | nil
@@ -179,6 +310,8 @@ defmodule EpochtalkServer.Models.Poll do
 
     Repo.one(query)
   end
+
+  # var q = 'UPDATE polls SET (max_answers, change_vote, expiration, display_mode) = ($1, $2, $3, $4) WHERE id = $5';
 
   # === Private Helper Functions ===
 

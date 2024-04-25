@@ -419,10 +419,13 @@ defmodule EpochtalkServer.Models.Thread do
           body: p.content["body"],
           thread_id: p.thread_id,
           thread_slug: t.slug,
-          username: u.username
+          username: u.username,
+          user_id: u.id,
+          user: u
         }
 
-    Repo.one(query_first_thread_post_data)
+    first_post = Repo.one(query_first_thread_post_data)
+    Map.put(first_post, :user, Repo.preload(first_post.user, :roles))
   end
 
   @doc """
@@ -446,10 +449,13 @@ defmodule EpochtalkServer.Models.Thread do
           body: p.content["body"],
           thread_id: p.thread_id,
           thread_slug: t.slug,
-          username: u.username
+          username: u.username,
+          user_id: u.id,
+          user: u
         }
 
-    Repo.one(query_first_thread_post_data)
+    first_post = Repo.one(query_first_thread_post_data)
+    Map.put(first_post, :user, Repo.preload(first_post.user, :roles))
   end
 
   ## === Private Helper Functions ===

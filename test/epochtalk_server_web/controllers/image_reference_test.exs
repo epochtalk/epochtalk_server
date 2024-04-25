@@ -1,6 +1,12 @@
 defmodule Test.EpochtalkServerWeb.Controllers.ImageReference do
-  use Test.Support.ConnCase, async: true
+  @moduledoc """
+  This test sets async: false because it tests the RateLimiter,
+  which is succeptible to interference from other tests
+  """
+  use Test.Support.ConnCase, async: false
   alias EpochtalkServerWeb.CustomErrors.InvalidPermission
+  alias EpochtalkServer.RateLimiter
+  import Test.Support.Factory
 
   describe "s3_request_upload/2" do
     test "when unauthenticated, raises InvalidPermission error", %{
@@ -164,6 +170,40 @@ defmodule Test.EpochtalkServerWeb.Controllers.ImageReference do
         |> json_response(400)
       assert response["error"] == "Bad Request"
       assert response["message"] == "Requested images amount 11 exceeds max of 10"
+    end
+  end
+
+  describe "s3_request_upload/2, rate limiting" do
+    @tag :authenticated
+    test "performs up to 100 requests in an hour", %{
+      conn: conn,
+      users: %{
+        user: user
+      }
+    } do
+      # reset daily/hourly limits for user
+      RateLimiter.reset_rate_limit(:s3_daily, user)
+      RateLimiter.reset_rate_limit(:s3_hourly, user)
+      # build ten image reference attrs
+      image_reference_attrs = %{
+        images: build_list(10, :image_reference_attributes, length: 1000, file_type: "jpeg")
+      }
+      # call :s3_request_upload ten times with ten images each
+      Enum.each(1..10, fn _ ->
+        response =
+          conn
+          |> post(Routes.image_reference_path(conn, :s3_request_upload), image_reference_attrs)
+          |> json_response(200)
+        assert Map.keys(response) == ["presigned_posts"]
+        assert Map.keys(response["presigned_posts"]) |> length() == 10
+      end)
+      # call :s3_request_upload once more
+      response =
+        conn
+        |> post(Routes.image_reference_path(conn, :s3_request_upload), image_reference_attrs)
+        |> json_response(429)
+      assert response["error"] == "Too Many Requests"
+      assert response["message"] == "Hourly upload rate limit exceeded (100)"
     end
   end
 end

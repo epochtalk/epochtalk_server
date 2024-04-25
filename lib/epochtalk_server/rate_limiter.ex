@@ -36,7 +36,7 @@ defmodule EpochtalkServer.RateLimiter do
     type
     |> get_configs()
     |> case do
-      [period, limit] ->
+      {period, limit} ->
         # use Hammer to check rate limit
         build_key(type, user.id)
         |> check_rate_inc(period, limit, count)

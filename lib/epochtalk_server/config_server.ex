@@ -44,14 +44,14 @@ defmodule EpochtalkServer.ConfigServer do
   defp load() do
     %{
       "Elixir.EpochtalkServer.RateLimiter": %{
-        s3_daily: [
+        s3_daily: {
           @one_day_in_ms,
           @max_images_per_day
-        ],
-        s3_hourly: [
+        },
+        s3_hourly: {
           @one_hour_in_ms,
           @max_images_per_hour
-        ]
+        }
       }
     }
   end

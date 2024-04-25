@@ -110,6 +110,7 @@ jobs:
       postgres:
         image: postgres:14.2
         env:
+          AWS_REGION: ${{ secrets.AWS_REGION }}
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: epochtalk_server_test

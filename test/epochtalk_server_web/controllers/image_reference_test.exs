@@ -16,6 +16,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ImageReference do
         conn
         |> post(Routes.image_reference_path(conn, :s3_request_upload))
         |> json_response(401)
+
       assert response["error"] == "Unauthorized"
     end
 
@@ -24,10 +25,12 @@ defmodule Test.EpochtalkServerWeb.Controllers.ImageReference do
       conn: conn
     } do
       assert_raise InvalidPermission,
-        ~r/^Forbidden, invalid permissions to perform this action/,
-        fn ->
-          post(conn, Routes.image_reference_path(conn, :s3_request_upload), %{images: []})
-        end
+                   ~r/^Forbidden, invalid permissions to perform this action/,
+                   fn ->
+                     post(conn, Routes.image_reference_path(conn, :s3_request_upload), %{
+                       images: []
+                     })
+                   end
     end
 
     @tag authenticated: :admin
@@ -38,6 +41,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ImageReference do
         conn
         |> post(Routes.image_reference_path(conn, :s3_request_upload), %{images: []})
         |> json_response(200)
+
       assert Map.keys(response) == ["presigned_posts"]
       assert Map.keys(response["presigned_posts"]) |> length() == 0
     end
@@ -52,10 +56,12 @@ defmodule Test.EpochtalkServerWeb.Controllers.ImageReference do
           "file_type" => "jpeg"
         }
       ]
+
       response =
         conn
         |> post(Routes.image_reference_path(conn, :s3_request_upload), %{images: images})
         |> json_response(200)
+
       assert Map.keys(response) == ["presigned_posts"]
       assert Map.keys(response["presigned_posts"]) |> length() == 1
     end
@@ -106,10 +112,12 @@ defmodule Test.EpochtalkServerWeb.Controllers.ImageReference do
           "file_type" => "jpeg"
         }
       ]
+
       response =
         conn
         |> post(Routes.image_reference_path(conn, :s3_request_upload), %{images: images})
         |> json_response(200)
+
       assert Map.keys(response) == ["presigned_posts"]
       assert Map.keys(response["presigned_posts"]) |> length() == 10
     end
@@ -164,10 +172,12 @@ defmodule Test.EpochtalkServerWeb.Controllers.ImageReference do
           "file_type" => "jpeg"
         }
       ]
+
       response =
         conn
         |> post(Routes.image_reference_path(conn, :s3_request_upload), %{images: images})
         |> json_response(400)
+
       assert response["error"] == "Bad Request"
       assert response["message"] == "Requested images amount 11 exceeds max of 10"
     end
@@ -188,20 +198,24 @@ defmodule Test.EpochtalkServerWeb.Controllers.ImageReference do
       image_reference_attrs = %{
         images: build_list(10, :image_reference_attributes, length: 1000, file_type: "jpeg")
       }
+
       # call :s3_request_upload ten times with ten images each
       Enum.each(1..10, fn _ ->
         response =
           conn
           |> post(Routes.image_reference_path(conn, :s3_request_upload), image_reference_attrs)
           |> json_response(200)
+
         assert Map.keys(response) == ["presigned_posts"]
         assert Map.keys(response["presigned_posts"]) |> length() == 10
       end)
+
       # call :s3_request_upload once more
       response =
         conn
         |> post(Routes.image_reference_path(conn, :s3_request_upload), image_reference_attrs)
         |> json_response(429)
+
       assert response["error"] == "Too Many Requests"
       assert response["message"] == "Hourly upload rate limit exceeded (100)"
     end
@@ -220,6 +234,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ImageReference do
       image_reference_attrs = %{
         images: build_list(10, :image_reference_attributes, length: 1000, file_type: "jpeg")
       }
+
       # call :s3_request_upload one hundred times with ten images each
       # resetting hourly rate limits each ten times
       Enum.each(1..10, fn _ ->
@@ -228,17 +243,21 @@ defmodule Test.EpochtalkServerWeb.Controllers.ImageReference do
             conn
             |> post(Routes.image_reference_path(conn, :s3_request_upload), image_reference_attrs)
             |> json_response(200)
+
           assert Map.keys(response) == ["presigned_posts"]
           assert Map.keys(response["presigned_posts"]) |> length() == 10
         end)
+
         # reset hourly limits for user
         RateLimiter.reset_rate_limit(:s3_hourly, user)
       end)
+
       # call :s3_request_upload once more
       response =
         conn
         |> post(Routes.image_reference_path(conn, :s3_request_upload), image_reference_attrs)
         |> json_response(429)
+
       assert response["error"] == "Too Many Requests"
       assert response["message"] == "Daily upload rate limit exceeded (1000)"
     end

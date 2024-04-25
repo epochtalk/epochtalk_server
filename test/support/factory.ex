@@ -16,4 +16,5 @@ defmodule Test.Support.Factory do
   use Test.Support.Factories.Notification
   use Test.Support.Factories.BannedAddress
   use Test.Support.Factories.ModerationLog
+  use Test.Support.Factories.ImageReference
 end

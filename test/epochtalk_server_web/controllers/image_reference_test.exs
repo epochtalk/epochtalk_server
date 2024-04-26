@@ -50,12 +50,8 @@ defmodule Test.EpochtalkServerWeb.Controllers.ImageReference do
     test "given list with one image, succeeds", %{
       conn: conn
     } do
-      images = [
-        %{
-          "length" => 100,
-          "file_type" => "jpeg"
-        }
-      ]
+      attrs = [{100, "jpeg"}]
+      images = build(:image_reference_attributes, attrs)
 
       response =
         conn
@@ -70,48 +66,19 @@ defmodule Test.EpochtalkServerWeb.Controllers.ImageReference do
     test "given list with ten images, succeeds", %{
       conn: conn
     } do
-      images = [
-        %{
-          "length" => 100,
-          "file_type" => "jpeg"
-        },
-        %{
-          "length" => 200,
-          "file_type" => "png"
-        },
-        %{
-          "length" => 300,
-          "file_type" => "gif"
-        },
-        %{
-          "length" => 400,
-          "file_type" => "tiff"
-        },
-        %{
-          "length" => 500,
-          "file_type" => "vnd.microsoft.icon"
-        },
-        %{
-          "length" => 600,
-          "file_type" => "x-icon"
-        },
-        %{
-          "length" => 700,
-          "file_type" => "vnd.djvu"
-        },
-        %{
-          "length" => 800,
-          "file_type" => "svg+xml"
-        },
-        %{
-          "length" => 900,
-          "file_type" => "jpeg"
-        },
-        %{
-          "length" => 1000,
-          "file_type" => "jpeg"
-        }
+      attrs = [
+        {100, "jpeg"},
+        {200, "png"},
+        {300,"gif"},
+        {400, "tiff"},
+        {500, "vnd.microsoft.icon"},
+        {600, "x-icon"},
+        {700, "vnd.djvu"},
+        {800, "svg+xml"},
+        {900, "jpeg"},
+        {1000, "jpeg"}
       ]
+      images = build(:image_reference_attributes, attrs)
 
       response =
         conn
@@ -126,52 +93,20 @@ defmodule Test.EpochtalkServerWeb.Controllers.ImageReference do
     test "given list with eleven images, fails with bad request", %{
       conn: conn
     } do
-      images = [
-        %{
-          "length" => 100,
-          "file_type" => "jpeg"
-        },
-        %{
-          "length" => 200,
-          "file_type" => "png"
-        },
-        %{
-          "length" => 300,
-          "file_type" => "gif"
-        },
-        %{
-          "length" => 400,
-          "file_type" => "tiff"
-        },
-        %{
-          "length" => 500,
-          "file_type" => "vnd.microsoft.icon"
-        },
-        %{
-          "length" => 600,
-          "file_type" => "x-icon"
-        },
-        %{
-          "length" => 700,
-          "file_type" => "vnd.djvu"
-        },
-        %{
-          "length" => 800,
-          "file_type" => "svg+xml"
-        },
-        %{
-          "length" => 900,
-          "file_type" => "jpeg"
-        },
-        %{
-          "length" => 1000,
-          "file_type" => "jpeg"
-        },
-        %{
-          "length" => 1100,
-          "file_type" => "jpeg"
-        }
+      attrs = [
+        {100, "jpeg"},
+        {200, "png"},
+        {300,"gif"},
+        {400, "tiff"},
+        {500, "vnd.microsoft.icon"},
+        {600, "x-icon"},
+        {700, "vnd.djvu"},
+        {800, "svg+xml"},
+        {900, "jpeg"},
+        {1000, "jpeg"},
+        {1100, "jpeg"}
       ]
+      images = build(:image_reference_attributes, attrs)
 
       response =
         conn

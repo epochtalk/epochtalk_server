@@ -56,6 +56,7 @@ defmodule EpochtalkServerWeb.Router do
     put "/posts/draft", PostDraft, :upsert
     post "/posts", Post, :create
     post "/posts/:id", Post, :update
+    post "/preview", Post, :preview
     get "/admin/modlog", ModerationLog, :page
     get "/boards/movelist", Board, :movelist
   end

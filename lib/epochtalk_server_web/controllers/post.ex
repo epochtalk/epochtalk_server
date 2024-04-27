@@ -358,6 +358,22 @@ defmodule EpochtalkServerWeb.Controllers.Post do
     end
   end
 
+  @doc """
+  Get `Post` preview by running content through parser
+  """
+  def preview(conn, attrs) do
+    with post_max_length <-
+           Application.get_env(:epochtalk_server, :frontend_config)["post_max_length"],
+         body <-
+           Validate.cast(attrs, "body", :string, required: true, max: post_max_length),
+         parsed_body <- Parse.markdown(body) do
+      render(conn, :preview, %{parsed_body: parsed_body})
+    else
+      _ ->
+        ErrorHelpers.render_json_error(conn, 400, "Error, cannot generate preview")
+    end
+  end
+
   ## === Private Authorization Helper Functions ===
 
   defp can_authed_user_view_deleted_posts(nil, _thread_id), do: false

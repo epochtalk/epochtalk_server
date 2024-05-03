@@ -51,7 +51,6 @@ defmodule EpochtalkServerWeb.Router do
     post "/threads/:thread_id/polls/lock", Poll, :lock
     put "/threads/:thread_id/polls", Poll, :update
     post "/threads/:thread_id/polls", Poll, :create
-    get "/posts", Post, :by_thread
     get "/posts/draft", PostDraft, :by_user_id
     put "/posts/draft", PostDraft, :upsert
     post "/posts", Post, :create
@@ -67,6 +66,7 @@ defmodule EpochtalkServerWeb.Router do
     get "/boards/:id", Board, :find
     get "/boards/:slug/id", Board, :slug_to_id
     get "/breadcrumbs", Breadcrumb, :breadcrumbs
+    get "/posts", Post, :by_thread
     get "/threads", Thread, :by_board
     get "/threads/:slug/id", Thread, :slug_to_id
     post "/threads/:id/viewed", Thread, :viewed

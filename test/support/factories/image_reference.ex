@@ -11,6 +11,7 @@ defmodule Test.Support.Factories.ImageReference do
           "file_type" => file_type
         }
       end
+
       def image_reference_attributes_factory(attrs) do
         attrs
         |> Enum.reduce([], fn {length, file_type}, acc ->

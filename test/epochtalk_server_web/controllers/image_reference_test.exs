@@ -69,7 +69,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ImageReference do
       attrs = [
         {100, "jpeg"},
         {200, "png"},
-        {300,"gif"},
+        {300, "gif"},
         {400, "tiff"},
         {500, "vnd.microsoft.icon"},
         {600, "x-icon"},
@@ -78,6 +78,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ImageReference do
         {900, "jpeg"},
         {1000, "jpeg"}
       ]
+
       images = build(:image_reference_attributes, attrs)
 
       response =
@@ -96,7 +97,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ImageReference do
       attrs = [
         {100, "jpeg"},
         {200, "png"},
-        {300,"gif"},
+        {300, "gif"},
         {400, "tiff"},
         {500, "vnd.microsoft.icon"},
         {600, "x-icon"},
@@ -106,6 +107,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ImageReference do
         {1000, "jpeg"},
         {1100, "jpeg"}
       ]
+
       images = build(:image_reference_attributes, attrs)
 
       response =

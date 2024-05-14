@@ -363,9 +363,9 @@ defmodule EpochtalkServerWeb.Controllers.Post do
   """
   def preview(conn, attrs) do
     with post_max_length <-
-           Application.get_env(:epochtalk_server, :frontend_config)["post_max_length"],
+           Map.get(Application.get_env(:epochtalk_server, :frontend_config), :post_max_length),
          body <-
-           Validate.cast(attrs, "body", :string, required: true, max: post_max_length),
+           Validate.cast(attrs, "body", :string, required: true, max: post_max_length, min: 1),
          parsed_body <- Parse.markdown(body) do
       render(conn, :preview, %{parsed_body: parsed_body})
     else

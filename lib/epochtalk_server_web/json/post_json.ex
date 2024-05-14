@@ -26,6 +26,20 @@ defmodule EpochtalkServerWeb.Controllers.PostJSON do
   end
 
   @doc """
+  Renders `Post` data for preview purposes
+
+    ## Example
+    iex> parsed_body = %{parsed_body: "<p><strong>Hello World</strong><p>"}
+    iex> EpochtalkServerWeb.Controllers.PostJSON.preview(parsed_body)
+    parsed_body
+  """
+  def preview(%{
+        parsed_body: parsed_body
+      }) do
+    %{parsed_body: parsed_body}
+  end
+
+  @doc """
   Renders all `Post` for a particular `Thread`.
   """
   def by_thread(%{

@@ -385,6 +385,10 @@ defmodule EpochtalkServerWeb.Controllers.Post do
          body <-
            Validate.cast(attrs, "body", :string, required: true, max: post_max_length * 2, min: 1),
          parsed_body <- body do
+
+    %Porcelain.Result{out: output, status: status} = Porcelain.shell("pwd")
+    IO.inspect status
+    IO.inspect output
       render(conn, :parse_legacy, %{parsed_body: parsed_body})
     else
       _ ->

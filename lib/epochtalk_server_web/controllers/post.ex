@@ -363,7 +363,8 @@ defmodule EpochtalkServerWeb.Controllers.Post do
   """
   def preview(conn, attrs) do
     with post_max_length <-
-           Map.get(Application.get_env(:epochtalk_server, :frontend_config), :post_max_length),
+           Map.get(Application.get_env(:epochtalk_server, :frontend_config), :post_max_length) ||
+             Application.get_env(:epochtalk_server, :frontend_config)["post_max_length"],
          body <-
            Validate.cast(attrs, "body", :string, required: true, max: post_max_length, min: 1),
          parsed_body <- Parse.markdown(body) do
@@ -371,6 +372,23 @@ defmodule EpochtalkServerWeb.Controllers.Post do
     else
       _ ->
         ErrorHelpers.render_json_error(conn, 400, "Error, cannot generate preview")
+    end
+  end
+
+  @doc """
+  Parse legacy `Post` containing bbcode using Porcelain
+  """
+  def parse_legacy(conn, attrs) do
+    with post_max_length <-
+           Map.get(Application.get_env(:epochtalk_server, :frontend_config), :post_max_length) ||
+             Application.get_env(:epochtalk_server, :frontend_config)["post_max_length"],
+         body <-
+           Validate.cast(attrs, "body", :string, required: true, max: post_max_length * 2, min: 1),
+         parsed_body <- body do
+      render(conn, :parse_legacy, %{parsed_body: parsed_body})
+    else
+      _ ->
+        ErrorHelpers.render_json_error(conn, 400, "Error, cannot parse")
     end
   end
 

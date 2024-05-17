@@ -56,6 +56,7 @@ defmodule EpochtalkServerWeb.Router do
     post "/posts", Post, :create
     post "/posts/:id", Post, :update
     post "/preview", Post, :preview
+    post "/bbcode", Post, :parse_legacy
     get "/admin/modlog", ModerationLog, :page
     get "/boards/movelist", Board, :movelist
   end

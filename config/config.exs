@@ -37,6 +37,9 @@ config :epochtalk_server,
     rate_limiting: %{}
   }
 
+# Configure Porcelain
+config :porcelain, driver: Porcelain.Driver.Basic
+
 # Configure Guardian
 config :epochtalk_server, EpochtalkServer.Auth.Guardian,
   issuer: "EpochtalkServer",

@@ -59,6 +59,20 @@ config :epochtalk_server, :redix,
   host: "127.0.0.1",
   name: :redix
 
+config :hammer,
+  backend: {
+    Hammer.Backend.Redis,
+    [
+      expiry_ms: 60_000 * 60 * 2,
+      redix_config: [
+        host: "127.0.0.1",
+        port: 6379
+      ],
+      pool_size: 4,
+      pool_max_overflow: 2
+    ]
+  }
+
 # Configures the endpoint
 config :epochtalk_server, EpochtalkServerWeb.Endpoint,
   url: [host: "localhost"],
@@ -96,6 +110,16 @@ config :epochtalk_server, EpochtalkServer.Mailer,
 #   s: "default", d: "domain.com",
 #   private_key: {:pem_plain, File.read!("priv/keys/domain.private")}
 # ]
+
+# configure aws
+config :ex_aws,
+  access_key_id: [{:system, "AWS_ACCESS_KEY_ID"}, {:awscli, "default", 30}, :instance_role],
+  secret_access_key: [
+    {:system, "AWS_SECRET_ACCESS_KEY"},
+    {:awscli, "default", 30},
+    :instance_role
+  ],
+  region: {:system, "AWS_REGION"}
 
 # Swoosh API client is needed for adapters other than SMTP.
 config :swoosh, :api_client, false

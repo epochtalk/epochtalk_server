@@ -70,8 +70,7 @@ config :hammer,
       redix_config: [
         host: redis_config[:redis_host],
         port: redis_config[:redis_port],
-        database: redis_config[:redis_database],
-        name: :redix
+        database: redis_config[:redis_database]
       ],
       pool_size: 4,
       pool_max_overflow: 2

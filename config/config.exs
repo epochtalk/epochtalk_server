@@ -47,18 +47,6 @@ config :guardian, Guardian.DB, repo: GuardianRedis.Repo
 # schema_name: "guardian_tokens" # default
 # token_types: ["refresh_token"] # store all token types if not set
 
-# Configure GuardianRedis (for auth)
-# (implementation of Guardian.DB storage in redis)
-config :guardian_redis, :redis,
-  host: "127.0.0.1",
-  port: 6379,
-  pool_size: 10
-
-# Configures redix (for sessions storage)
-config :epochtalk_server, :redix,
-  host: "127.0.0.1",
-  name: :redix
-
 config :hammer,
   backend: {
     Hammer.Backend.Redis,

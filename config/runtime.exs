@@ -20,6 +20,47 @@ if System.get_env("PHX_SERVER") do
   config :epochtalk_server, EpochtalkServerWeb.Endpoint, server: true
 end
 
+
+## Redis configurations
+redis_config = case config_env() do
+  :prod ->
+    %{
+      redis_host: System.get_env("REDIS_HOST", "127.0.0.1"),
+      redis_port: System.get_env("REDIS_PORT", "6379") |> String.to_integer(),
+      redis_pool_size: System.get_env("REDIS_POOL_SIZE", "10") |> String.to_integer(),
+      redis_database: System.get_env("REDIS_DATABASE", "0") |> String.to_integer()
+    }
+  :dev ->
+    %{
+      redis_host: "127.0.0.1",
+      redis_port: 6379,
+      redis_pool_size: 10,
+      redis_database: 0
+    }
+  :test ->
+    %{
+      redis_host: "127.0.0.1",
+      redis_port: 6379,
+      redis_pool_size: 10,
+      # tests use separate redis database (doesn't interfere with dev)
+      redis_database: 1
+    }
+end
+
+# Configure Guardian Redis
+config :guardian_redis, :redis,
+  host: redis_config[:redis_host],
+  port: redis_config[:redis_port],
+  pool_size: redis_config[:redis_pool_size],
+  database: redis_config[:redis_database]
+
+# Configure Redis for Session Storage
+config :epochtalk_server, :redix,
+  host: redis_config[:redis_host],
+  port: redis_config[:redis_port],
+  database: redis_config[:redis_database],
+  name: :redix
+
 if config_env() == :prod do
   database_url =
     System.get_env("DATABASE_URL") ||
@@ -168,15 +209,6 @@ if config_env() == :prod do
         environment variable GUARDIAN_SECRET_KEY is missing.
         You can generate one by calling: mix guardian.gen.secret
         """)
-
-  # Configure Guardian Redis
-  config :guardian_redis, :redis,
-    host: System.get_env("REDIS_HOST") || "127.0.0.1",
-    port: String.to_integer(System.get_env("REDIS_PORT") || "6379"),
-    pool_size: String.to_integer(System.get_env("REDIS_POOL_SIZE") || "10")
-
-  # Configure Redis for Session Storage
-  config :epochtalk_server, :redix, host: System.get_env("REDIS_HOST") || "127.0.0.1"
 
   # Configure frontend
   config :epochtalk_server,

@@ -61,6 +61,23 @@ config :epochtalk_server, :redix,
   database: redis_config[:redis_database],
   name: :redix
 
+# Configure hammer for rate limiting
+config :hammer,
+  backend: {
+    Hammer.Backend.Redis,
+    [
+      expiry_ms: 60_000 * 60 * 2,
+      redix_config: [
+        host: redis_config[:redis_host],
+        port: redis_config[:redis_port],
+        database: redis_config[:redis_database],
+        name: :redix
+      ],
+      pool_size: 4,
+      pool_max_overflow: 2
+    ]
+  }
+
 if config_env() == :prod do
   database_url =
     System.get_env("DATABASE_URL") ||

@@ -14,7 +14,12 @@ board_slug = "general-discussion"
 board = %{
   name: board_name,
   description: board_description,
-  slug: board_slug
+  slug: board_slug,
+  meta: %{
+    "disable_post_edit" => nil,
+    "disable_self_mod" => false,
+    "disable_signature" => false
+  }
 }
 
 Repo.transaction(fn ->

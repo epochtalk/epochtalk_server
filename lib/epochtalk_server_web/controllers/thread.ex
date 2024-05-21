@@ -50,14 +50,14 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
     # authorization checks
     with :ok <- ACL.allow!(conn, "threads.create"),
          board_id <- Validate.cast(attrs, "board_id", :integer, required: true),
-         {:auth, user} <- {:auth, Guardian.Plug.current_resource(conn)},
+         {:auth, %{} = user} <- {:auth, Guardian.Plug.current_resource(conn)},
          user_priority <- ACL.get_user_priority(conn),
          {:can_read, {:ok, true}} <-
            {:can_read, Board.get_read_access_by_id(board_id, user_priority)},
          {:can_write, {:ok, true}} <-
            {:can_write, Board.get_write_access_by_id(board_id, user_priority)},
          {:board_banned, {:ok, false}} <-
-           {:board_banned, BoardBan.is_banned_from_board(user, board_id: board_id)},
+           {:board_banned, BoardBan.banned_from_board?(user, board_id: board_id)},
          {:is_active, true} <-
            {:is_active, User.is_active?(user.id)},
          {:allows_self_mod, true} <-
@@ -176,8 +176,8 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
          {:can_read, {:ok, true}} <-
            {:can_read, Board.get_read_access_by_id(board_id, user_priority)},
          {:ok, write_access} <- Board.get_write_access_by_id(board_id, user_priority),
-         {:ok, board_banned} <- BoardBan.is_banned_from_board(user, board_id: board_id),
-         {:ok, watching_board} <- WatchBoard.is_watching(user, board_id),
+         {:ok, board_banned} <- BoardBan.banned_from_board?(user, board_id: board_id),
+         {:ok, watching_board} <- WatchBoard.user_is_watching(user, board_id),
          board_mapping <- BoardMapping.all(),
          board_moderators <- BoardModerator.all(),
          threads <-
@@ -211,6 +211,9 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
 
       {:can_read, {:error, :board_does_not_exist}} ->
         ErrorHelpers.render_json_error(conn, 400, "Read error, board does not exist")
+
+      {:board_banned, {:ok, true}} ->
+        ErrorHelpers.render_json_error(conn, 403, "Unauthorized, you are banned from this board")
 
       _ ->
         ErrorHelpers.render_json_error(conn, 400, "Error, cannot get threads by board")
@@ -269,12 +272,6 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
   end
 
   ## === Private Helper Functions ===
-
-  defp handle_check_user_can_moderate(user, moderated) do
-    if moderated,
-      do: :ok == ACL.allow!(user, "threads.moderated"),
-      else: true
-  end
 
   defp maybe_update_thread_view_count(conn, thread_id) do
     viewer_id =
@@ -341,4 +338,12 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
 
   defp update_user_thread_view_count(user, thread_id),
     do: UserThreadView.upsert(user.id, thread_id)
+
+  # === Private Authorization Helpers Functions ===
+
+  defp handle_check_user_can_moderate(user, moderated) do
+    if moderated,
+      do: :ok == ACL.allow!(user, "threads.moderated"),
+      else: true
+  end
 end

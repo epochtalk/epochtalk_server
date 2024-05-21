@@ -1,7 +1,6 @@
 defmodule EpochtalkServer.Models.PollAnswer do
   use Ecto.Schema
   import Ecto.Changeset
-  # import Ecto.Query
   alias EpochtalkServer.Repo
   alias EpochtalkServer.Models.PollAnswer
   alias EpochtalkServer.Models.Poll
@@ -15,10 +14,11 @@ defmodule EpochtalkServer.Models.PollAnswer do
           poll_id: non_neg_integer | nil,
           answer: String.t() | nil
         }
-  @derive {Jason.Encoder, only: [:poll_id, :answer]}
+  @derive {Jason.Encoder, only: [:id, :answer, :votes]}
   schema "poll_answers" do
     belongs_to :poll, Poll
     field :answer, :string
+    field :votes, :integer, virtual: true, default: 0
     has_many :poll_responses, PollResponse, foreign_key: :answer_id
   end
 

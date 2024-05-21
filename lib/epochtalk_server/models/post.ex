@@ -8,6 +8,8 @@ defmodule EpochtalkServer.Models.Post do
   alias EpochtalkServer.Models.User
   alias EpochtalkServer.Models.Profile
 
+  @edit_window_ms 1000 * 60 * 10
+
   @moduledoc """
   `Post` model, for performing actions relating to forum posts
   """
@@ -54,29 +56,6 @@ defmodule EpochtalkServer.Models.Post do
   end
 
   ## === Changesets Functions ===
-
-  @doc """
-  Create generic changeset for `Post` model
-  """
-  @spec changeset(post :: t(), attrs :: map() | nil) :: Ecto.Changeset.t()
-  def changeset(post, attrs) do
-    post
-    |> cast(attrs, [
-      :id,
-      :thread_id,
-      :user_id,
-      :locked,
-      :deleted,
-      :position,
-      :content,
-      :metadata,
-      :imported_at,
-      :created_at,
-      :updated_at
-    ])
-    |> unique_constraint(:id, name: :posts_pkey)
-    |> foreign_key_constraint(:thread_id, name: :posts_thread_id_fkey)
-  end
 
   @doc """
   Create changeset for `Post` model
@@ -128,6 +107,51 @@ defmodule EpochtalkServer.Models.Post do
         else: errors_list
     end)
     |> unique_constraint(:id, name: :posts_pkey)
+    |> foreign_key_constraint(:thread_id, name: :posts_thread_id_fkey)
+  end
+
+  @doc """
+  Create update changeset for `Post` model
+  """
+  @spec update_changeset(post :: t(), attrs :: map(), authed_user :: map()) :: Ecto.Changeset.t()
+  def update_changeset(post, attrs, authed_user) do
+    # format attrs for casting
+    attrs = format_update_attrs(post, attrs, authed_user)
+
+    # cast attrs, create update changeset
+    post
+    |> cast(attrs, [
+      :id,
+      :thread_id,
+      :content,
+      :metadata,
+      :updated_at,
+      :created_at
+    ])
+    |> validate_required([:id, :thread_id, :content, :created_at, :updated_at])
+    |> validate_change(:content, fn _, content ->
+      string_not_blank = fn key ->
+        case String.trim(content[key] || "") do
+          "" -> [{key, "can't be blank"}]
+          _ -> []
+        end
+      end
+
+      is_string = fn key ->
+        case is_binary(content[key]) do
+          false -> [{key, "must be a string"}]
+          true -> []
+        end
+      end
+
+      # check that nested values at specified keys are strings
+      errors_list = is_string.(:title) ++ is_string.(:body)
+
+      # nested values are strings, check that values aren't blank, return errors
+      if errors_list == [],
+        do: string_not_blank.(:title) ++ string_not_blank.(:body),
+        else: errors_list
+    end)
     |> foreign_key_constraint(:thread_id, name: :posts_thread_id_fkey)
   end
 
@@ -184,6 +208,33 @@ defmodule EpochtalkServer.Models.Post do
         "deleted" => post_attrs["deleted"],
         "locked" => post_attrs["locked"]
       })
+
+  @doc """
+  Updates an existing `Post` in the database
+  """
+  @spec update(post_attrs :: map(), authed_user :: map()) ::
+          {:ok, post :: t()} | {:error, Ecto.Changeset.t()} | {:error, any()}
+  def update(post_attrs, authed_user) do
+    Repo.transaction(fn ->
+      query =
+        from p in Post,
+          where: p.id == ^post_attrs["id"],
+          select: %Post{
+            id: p.id,
+            thread_id: p.thread_id,
+            content: p.content,
+            metadata: p.metadata,
+            user_id: p.user_id,
+            created_at: p.created_at,
+            updated_at: p.updated_at
+          }
+
+      Repo.one(query)
+      |> update_changeset(post_attrs, authed_user)
+      |> Repo.update!(returning: true)
+      |> Repo.preload(:thread)
+    end)
+  end
 
   @doc """
   Sets the `post_position` of a new `Post`, by querying the `post_count` of the
@@ -347,14 +398,18 @@ defmodule EpochtalkServer.Models.Post do
   @doc """
   Used to find a specific `Post` by it's `id`
   """
-  @spec find_by_id(id :: non_neg_integer) :: t()
-  def find_by_id(id) when is_integer(id) do
+  @spec find_by_id(id :: non_neg_integer, preload_user_roles :: boolean | nil) :: t()
+  def find_by_id(id, preload_user_roles \\ false) when is_integer(id) do
     query =
       from p in Post,
         where: p.id == ^id,
         preload: [:thread, user: :profile]
 
-    Repo.one(query)
+    results = Repo.one(query)
+
+    if preload_user_roles,
+      do: results |> Repo.preload(user: :roles),
+      else: results
   end
 
   @doc """
@@ -381,5 +436,65 @@ defmodule EpochtalkServer.Models.Post do
         where: p.id == ^post_attrs["id"]
 
     Repo.update_all(query, [])
+  end
+
+  ## === Private Helper Fucntions ===
+
+  defp format_update_attrs(post, attrs, authed_user) do
+    # format attrs for casting
+    attrs =
+      attrs
+      |> Map.put(:content, %{
+        :body => attrs["body"],
+        :body_html => attrs["body_html"],
+        :title => attrs["title"]
+      })
+      |> Map.put(:thread_id, post.thread_id)
+      |> Map.put(:metadata, post.metadata)
+      |> Map.put(:id, post.id)
+
+    # update metadata if post is being edited by someone who is not the post author
+    metadata =
+      if authed_user.id == post.user_id,
+        do:
+          (attrs.metadata || %{}) |> Map.delete(:edited_by_id) |> Map.delete(:edited_by_username),
+        else:
+          (attrs.metadata || %{})
+          |> Map.put(:edited_by_id, authed_user.id)
+          |> Map.put(:edited_by_username, authed_user.username)
+
+    # if metadata has nothing in it, set to nil
+    attrs =
+      if metadata == %{},
+        do: Map.put(attrs, :metadata, nil),
+        else: Map.put(attrs, :metadata, metadata)
+
+    # calculate if post is outside 10 minute edit window
+    now = NaiveDateTime.utc_now()
+
+    time_since_last_edit_ms =
+      abs(NaiveDateTime.diff(post.updated_at || post.created_at, now) * 1000)
+
+    outside_edit_window = time_since_last_edit_ms > @edit_window_ms
+
+    # update updated_at field if outside of 10 min grace period,
+    # or if a moderator is editing a user's post
+    now = NaiveDateTime.truncate(now, :second)
+
+    attrs =
+      if (attrs.metadata != nil && Map.keys(attrs.metadata) != []) || outside_edit_window,
+        do: Map.put(attrs, :updated_at, now),
+        else: attrs
+
+    # remove old keys after formatting attrs
+    attrs
+    |> Map.delete("id")
+    |> Map.delete("body")
+    |> Map.delete("body_html")
+    |> Map.delete("body_original")
+    |> Map.delete("mentioned_ids")
+    |> Map.delete("thread_id")
+    |> Map.delete("user_id")
+    |> Map.delete("title")
   end
 end

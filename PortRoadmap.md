@@ -80,7 +80,7 @@
 | bct-trust                | posts.byThread.post            | userTrust                | :white_check_mark: |
 | bct-trust                | posts.byThread.post            | showTrust                | :white_check_mark: |
 | ept-auto-moderation      | posts.create.pre               | moderate                 | :white_check_mark: |
-| ept-auto-moderation      | posts.update.pre               | moderate                 | :x: |
+| ept-auto-moderation      | posts.update.pre               | moderate                 | :white_check_mark: |
 | ept-auto-moderation      | threads.create.pre             | moderate                 | :white_check_mark: |
 | ept-ignore-users         | users.find.post                | userIgnored              | :x: |
 | ept-ignore-users         | posts.patroller.post           | isIgnored                | :x: |
@@ -93,14 +93,14 @@
 | ept-mentions             | posts.search.post              | userIdToUsername         | :x: |
 | ept-mentions             | mentions.page.post             | userIdToUsername         | :x: |
 | ept-mentions             | portal.view.post               | userIdToUsername         | :x: |
-| ept-mentions             | posts.update.post              | userIdToUsername         | :x: |
-| ept-mentions             | posts.update.post              | correctTextSearchVector  | :x: |
+| ept-mentions             | posts.update.post              | userIdToUsername         | :white_check_mark: |
+| ept-mentions             | posts.update.post              | correctTextSearchVector  | :white_check_mark: |
 | ept-mentions             | posts.create.pre               | usernameToUserId         | :white_check_mark: |
-| ept-mentions             | posts.update.pre               | usernameToUserId         | :x: |
+| ept-mentions             | posts.update.pre               | usernameToUserId         | :white_check_mark: |
 | ept-mentions             | threads.create.pre             | usernameToUserId         | :white_check_mark: |
 | ept-mentions             | posts.create.post              | createMention            | :white_check_mark: |
 | ept-mentions             | posts.create.post              | correctTextSearchVector  | :white_check_mark: |
-| ept-mentions             | posts.update.post              | removeMentionIds         | :x: |
+| ept-mentions             | posts.update.post              | removeMentionIds         | **N/A** |
 | ept-mentions             | threads.create.post            | createMention            | :white_check_mark: |
 | ept-mentions             | threads.create.post            | correctTextSearchVector  | :white_check_mark: |
 | ept-mentions             | users.find.post                | userIgnoredMentions      | :x: |

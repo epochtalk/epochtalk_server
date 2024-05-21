@@ -16,7 +16,7 @@ defmodule EpochtalkServerWeb.Controllers.Role do
   Returns id of `Role` on success
   """
   def update(conn, attrs) do
-    with {:auth, _user} <- {:auth, Guardian.Plug.current_resource(conn)},
+    with {:auth, %{} = _user} <- {:auth, Guardian.Plug.current_resource(conn)},
          :ok <- ACL.allow!(conn, "roles.update"),
          {:ok, _role_permission_data} <- RolePermission.modify_by_role(attrs),
          {:ok, _role_data} <- Role.update(attrs) do
@@ -34,7 +34,7 @@ defmodule EpochtalkServerWeb.Controllers.Role do
   Get all `Role`s
   """
   def all(conn, _) do
-    with {:auth, _user} <- {:auth, Guardian.Plug.current_resource(conn)},
+    with {:auth, %{} = _user} <- {:auth, Guardian.Plug.current_resource(conn)},
          roles <- Role.all() do
       render(conn, :all, roles: roles)
     else

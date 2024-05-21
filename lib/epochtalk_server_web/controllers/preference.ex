@@ -12,7 +12,7 @@ defmodule EpochtalkServerWeb.Controllers.Preference do
   Used to retrieve preferences of a specific `User`
   """
   def preferences(conn, _attrs) do
-    with {:auth, user} <- {:auth, Guardian.Plug.current_resource(conn)},
+    with {:auth, %{} = user} <- {:auth, Guardian.Plug.current_resource(conn)},
          do: render(conn, :preferences, preferences: Preference.by_user_id(user.id)),
          else:
            ({:auth, nil} ->

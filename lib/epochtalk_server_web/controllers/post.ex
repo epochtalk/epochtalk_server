@@ -386,10 +386,11 @@ defmodule EpochtalkServerWeb.Controllers.Post do
            Validate.cast(attrs, "body", :string, required: true, max: post_max_length * 2, min: 1),
          parsed_body <- body do
 
-    %Porcelain.Result{out: output, status: status} = Porcelain.shell("php bbcode.php")
+    %Porcelain.Result{out: output, status: status} = Porcelain.shell("php -r \"require 'parsing.php'; ECHO parse_bbc('Hello [br] [color=red]Hello[/color]', false);\"")
     IO.inspect status
     IO.inspect output
-      render(conn, :parse_legacy, %{parsed_body: parsed_body})
+    IO.inspect parsed_body
+      render(conn, :parse_legacy, %{parsed_body: output})
     else
       _ ->
         ErrorHelpers.render_json_error(conn, 400, "Error, cannot parse")

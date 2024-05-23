@@ -1,18 +1,5 @@
 import Config
 
-# Configure your database
-#
-# The MIX_TEST_PARTITION environment variable can be used
-# to provide built-in test partitioning in CI environment.
-# Run `mix help test` for more information.
-config :epochtalk_server, EpochtalkServer.Repo,
-  username: "postgres",
-  password: "postgres",
-  hostname: "localhost",
-  database: "epochtalk_server_test#{System.get_env("MIX_TEST_PARTITION")}",
-  pool: Ecto.Adapters.SQL.Sandbox,
-  pool_size: 10
-
 config :epochtalk_server, EpochtalkServer.S3,
   expire_after_hours: System.get_env("S3_EXPIRE_AFTER_HOURS") || 1,
   min_size_bytes: System.get_env("S3_MIN_SIZE_BYTES") || 1_024,

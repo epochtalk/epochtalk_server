@@ -77,22 +77,52 @@ config :hammer,
     ]
   }
 
+
+## Database configurations
+# dev
+database_config = case config_env() do
+  :dev ->
+    [
+      username: "postgres",
+      password: "postgres",
+      hostname: "localhost",
+      database: "epochtalk_server_dev",
+      stacktrace: true,
+      show_sensitive_data_on_connection_error: true,
+      pool_size: 10
+    ]
+  :test ->
+    # The MIX_TEST_PARTITION environment variable can be used
+    # to provide built-in test partitioning in CI environment.
+    # Run `mix help test` for more information.
+    [
+      username: "postgres",
+      password: "postgres",
+      hostname: "localhost",
+      database: "epochtalk_server_test#{System.get_env("MIX_TEST_PARTITION")}",
+      pool: Ecto.Adapters.SQL.Sandbox,
+      pool_size: 10
+    ]
+  :prod ->
+    database_url =
+      System.get_env("DATABASE_URL") ||
+        raise """
+        environment variable DATABASE_URL is missing.
+        For example: ecto://USER:PASS@HOST/DATABASE
+        """
+
+    maybe_ipv6 = if System.get_env("ECTO_IPV6") in ~w(true 1), do: [:inet6], else: []
+
+    [
+      url: database_url,
+      pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
+      socket_options: maybe_ipv6
+    ]
+end
+
+config :epochtalk_server, EpochtalkServer.Repo, database_config
+
 if config_env() == :prod do
-  database_url =
-    System.get_env("DATABASE_URL") ||
-      raise """
-      environment variable DATABASE_URL is missing.
-      For example: ecto://USER:PASS@HOST/DATABASE
-      """
-
-  maybe_ipv6 = if System.get_env("ECTO_IPV6") in ~w(true 1), do: [:inet6], else: []
-
-  config :epochtalk_server, EpochtalkServer.Repo,
-    # ssl: true,
-    url: database_url,
-    pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
-    socket_options: maybe_ipv6
-
   # The secret key base is used to sign/encrypt cookies and other secrets.
   # A default value is used in config/dev.exs and config/test.exs but you
   # want to use a different value for prod and you most likely don't want

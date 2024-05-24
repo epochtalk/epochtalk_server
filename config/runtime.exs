@@ -264,14 +264,14 @@ if config_env() == :prod do
         description: System.get_env("WEBSITE_DESCRIPTION", "Open source forum software"),
         keywords:
           System.get_env("WEBSITE_KEYWORDS", "open source, free forum, forum software, forum"),
-        logo: System.get_env("WEBSITE_LOGO", nil),
-        favicon: System.get_env("WEBSITE_FAVICON", nil),
+        logo: System.get_env("WEBSITE_LOGO"),
+        favicon: System.get_env("WEBSITE_FAVICON"),
         default_avatar: System.get_env("WEBSITE_DEFAULT_AVATAR", "/images/avatar.png"),
         default_avatar_shape: System.get_env("WEBSITE_DEFAULT_AVATAR_SHAPE", "circle")
       },
       portal: %{
         enabled: System.get_env("PORTAL_ENABLED", "FALSE") == "TRUE",
-        board_id: System.get_env("PORTAL_BOARD_ID", nil)
+        board_id: System.get_env("PORTAL_BOARD_ID")
       },
       emailer: %{
         ses_mode: System.get_env("EMAILER_SES_MODE", "FALSE") == "TRUE",

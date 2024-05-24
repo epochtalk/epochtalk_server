@@ -31,6 +31,9 @@ end
 get_env_or_raise = fn(env_var) ->
   get_env_or_raise_with_message.(env_var, "")
 end
+get_env_cast_integer_with_default = fn(env_var, default) ->
+  System.get_env(env_var, default) |> String.to_integer()
+end
 
 
 ## Redis configurations
@@ -38,9 +41,9 @@ redis_config = case config_env() do
   :prod ->
     %{
       redis_host: System.get_env("REDIS_HOST", "127.0.0.1"),
-      redis_port: System.get_env("REDIS_PORT", "6379") |> String.to_integer(),
-      redis_pool_size: System.get_env("REDIS_POOL_SIZE", "10") |> String.to_integer(),
-      redis_database: System.get_env("REDIS_DATABASE", "0") |> String.to_integer()
+      redis_port: get_env_cast_integer_with_default.("REDIS_PORT", "6379"),
+      redis_pool_size: get_env_cast_integer_with_default.("REDIS_POOL_SIZE", "10"),
+      redis_database: get_env_cast_integer_with_default.("REDIS_DATABASE", "0")
     }
   :dev ->
     %{
@@ -122,7 +125,7 @@ database_config = case config_env() do
 
     [
       url: database_url,
-      pool_size: System.get_env("POOL_SIZE", "10") |> String.to_integer(),
+      pool_size: get_env_cast_integer_with_default.("POOL_SIZE", "10"),
       socket_options: maybe_ipv6
     ]
 end
@@ -161,11 +164,11 @@ if System.get_env("IMAGES_MODE") == "S3" do
   end
   # configure s3
   config :epochtalk_server, EpochtalkServer.S3,
-    expire_after_hours: System.get_env("S3_EXPIRE_AFTER_HOURS", "1") |> String.to_integer(),
+    expire_after_hours: get_env_cast_integer_with_default.("S3_EXPIRE_AFTER_HOURS", "1"),
     # 1 KB
-    min_size_bytes: System.get_env("S3_MIN_SIZE_BYTES", "1024") |> String.to_integer(),
+    min_size_bytes: get_env_cast_integer_with_default.("S3_MIN_SIZE_BYTES", "1024"),
     # 10 MB
-    max_size_bytes: System.get_env("S3_MAX_SIZE_BYTES", "10485760") |> String.to_integer(),
+    max_size_bytes: get_env_cast_integer_with_default.("S3_MAX_SIZE_BYTES", "10485760"),
     content_type_starts_with: System.get_env("S3_CONTENT_TYPE_STARTS_WITH", "image/"),
     # virtual_host:
     #   true -> https://<bucket>.s3.<region>.amazonaws.com
@@ -187,7 +190,7 @@ if config_env() == :prod do
   )
 
   host = get_env_or_raise("PHX_HOST")
-  port = System.get_env("PORT", "4000") |> String.to_integer()
+  port = get_env_cast_integer_with_default.("PORT", "4000")
 
   config :epochtalk_server, EpochtalkServerWeb.Endpoint,
     url: [host: host, port: 443, scheme: "https"],
@@ -233,7 +236,7 @@ if config_env() == :prod do
       relay: System.get_env("EMAILER_SMTP_RELAY", "smtp.example.com"),
       username: System.get_env("EMAILER_SMTP_USERNAME", "username"),
       password: System.get_env("EMAILER_SMTP_PASSWORD", "password"),
-      port: System.get_env("EMAILER_SMTP_PORT", "465") |> String.to_integer()
+      port: get_env_cast_integer_with_default.("EMAILER_SMTP_PORT", "465")
   end
 
 
@@ -253,10 +256,10 @@ if config_env() == :prod do
       login_required: System.get_env("LOGIN_REQUIRED", "FALSE") == "TRUE",
       invite_only: System.get_env("INVITE_ONLY", "FALSE") == "TRUE",
       verify_registration: System.get_env("VERIFY_REGISTRATION", "TRUE") == "TRUE",
-      post_max_length: System.get_env("POST_MAX_LENGTH", "10000") |> String.to_integer(),
-      max_image_size: System.get_env("MAX_IMAGE_SIZE", "10485760") |> String.to_integer(),
-      max_avatar_size: System.get_env("MAX_AVATAR_SIZE", "102400") |> String.to_integer(),
-      mobile_break_width: System.get_env("MOBILE_BREAK_WIDTH", "767") |> String.to_integer(),
+      post_max_length: get_env_cast_integer_with_default.("POST_MAX_LENGTH", "10000"),
+      max_image_size: get_env_cast_integer_with_default.("MAX_IMAGE_SIZE", "10485760"),
+      max_avatar_size: get_env_cast_integer_with_default.("MAX_AVATAR_SIZE", "102400"),
+      mobile_break_width: get_env_cast_integer_with_default.("MOBILE_BREAK_WIDTH", "767"),
       ga_key: System.get_env("GA_KEY", "UA-XXXXX-Y"),
       revision: nil,
       website: %{

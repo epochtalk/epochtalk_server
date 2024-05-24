@@ -157,18 +157,18 @@ if System.get_env("IMAGES_MODE") == "S3" do
 
   # configure s3
   config :epochtalk_server, EpochtalkServer.S3,
-    expire_after_hours: System.get_env("S3_EXPIRE_AFTER_HOURS") || 1,
+    expire_after_hours: System.get_env("S3_EXPIRE_AFTER_HOURS", "1") |> String.to_integer(),
     # 1 KB
-    min_size_bytes: System.get_env("S3_MIN_SIZE_BYTES") || 1_024,
+    min_size_bytes: System.get_env("S3_MIN_SIZE_BYTES", "1_024") |> String.to_integer(),
     # 10 MB
-    max_size_bytes: System.get_env("S3_MAX_SIZE_BYTES") || 10_485_760,
-    content_type_starts_with: System.get_env("S3_CONTENT_TYPE_STARTS_WITH") || "image/",
+    max_size_bytes: System.get_env("S3_MAX_SIZE_BYTES", "10_485_760") |> String.to_integer(),
+    content_type_starts_with: System.get_env("S3_CONTENT_TYPE_STARTS_WITH", "image/"),
     # virtual_host:
     #   true -> https://<bucket>.s3.<region>.amazonaws.com
     #   false -> https://s3.<region>.amazonaws.com/<bucket>
     virtual_host: System.get_env("S3_VIRTUAL_HOST") || true,
     bucket: s3_bucket,
-    path: System.get_env("S3_PATH") || "images/"
+    path: System.get_env("S3_PATH", "images/")
 end
 
 if config_env() == :prod do

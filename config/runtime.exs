@@ -184,12 +184,12 @@ if config_env() == :prod do
   # want to use a different value for prod and you most likely don't want
   # to check this value into version control, so we use an environment
   # variable instead.
-  secret_key_base = get_env_or_raise_with_message(
+  secret_key_base = get_env_or_raise_with_message.(
     "SECRET_KEY_BASE",
     "You can generate one by calling: mix phx.gen.secret"
   )
 
-  host = get_env_or_raise("PHX_HOST")
+  host = get_env_or_raise.("PHX_HOST")
   port = get_env_cast_integer_with_default.("PORT", "4000")
 
   config :epochtalk_server, EpochtalkServerWeb.Endpoint,

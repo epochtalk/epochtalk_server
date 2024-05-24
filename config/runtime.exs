@@ -129,6 +129,28 @@ end
 
 config :epochtalk_server, EpochtalkServer.Repo, database_config
 
+## AWS Configurations
+aws_config = case config_env() do
+  :dev ->
+    [
+      access_key_id: [{:system, "AWS_ACCESS_KEY_ID"}, {:awscli, "default", 30}, :instance_role],
+      secret_access_key: [
+        {:system, "AWS_SECRET_ACCESS_KEY"},
+        {:awscli, "default", 30},
+        :instance_role
+      ],
+      region: {:system, "AWS_REGION"}
+    ]
+  _ ->
+    [
+      access_key_id: get_env_or_raise.("AWS_ACCESS_KEY_ID"),
+      secret_access_key: get_env_or_raise.("AWS_SECRET_ACCESS_KEY"),
+      region: get_env_or_raise.("AWS_REGION")
+    ]
+end
+config :ex_aws, aws_config
+
+
 if config_env() == :prod do
   # The secret key base is used to sign/encrypt cookies and other secrets.
   # A default value is used in config/dev.exs and config/test.exs but you
@@ -208,30 +230,6 @@ if config_env() == :prod do
 
   # configure aws if images mode is "S3"
   if System.get_env("IMAGES_MODE") == "S3" do
-    aws_access_key_id =
-      System.get_env("AWS_ACCESS_KEY_ID") ||
-        raise """
-        environment variable AWS_ACCESS_KEY_ID missing.
-        """
-
-    aws_secret_access_key =
-      System.get_env("AWS_SECRET_ACCESS_KEY") ||
-        raise """
-        environment variable AWS_SECRET_ACCESS_KEY missing.
-        """
-
-    aws_region =
-      System.get_env("AWS_REGION") ||
-        raise """
-        environment variable AWS_REGION missing.
-        """
-
-    # configure aws
-    config :ex_aws,
-      access_key_id: aws_access_key_id,
-      secret_access_key: aws_secret_access_key,
-      region: aws_region
-
     s3_bucket =
       System.get_env("S3_BUCKET") ||
         raise """

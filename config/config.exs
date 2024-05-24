@@ -7,17 +7,10 @@
 # General application configuration
 import Config
 
+# Set ecto repos
 config :epochtalk_server, ecto_repos: [EpochtalkServer.Repo]
-
-# Configure Guardian
-config :epochtalk_server, EpochtalkServer.Auth.Guardian,
-  issuer: "EpochtalkServer",
-  secret_key: "Secret key. You can use `mix guardian.gen.secret` to get one"
-
-# Configure Guardian.DB
+# Set Guardian.DB to GuardianRedis
 config :guardian, Guardian.DB, repo: GuardianRedis.Repo
-# schema_name: "guardian_tokens" # default
-# token_types: ["refresh_token"] # store all token types if not set
 
 # Configures the endpoint
 config :epochtalk_server, EpochtalkServerWeb.Endpoint,

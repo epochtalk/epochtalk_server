@@ -79,6 +79,23 @@ config :epochtalk_server,
     rate_limiting: %{}
   }
 
+## Guardian configurations
+guardian_config = case config_env() do
+  :prod ->
+    [
+      secret_key: get_env_or_raise_with_message.(
+        "GUARDIAN_SECRET_KEY",
+        "You can generate one by calling: mix guardian.gen.secret"
+      )
+    ]
+  _ ->
+    [
+      issuer: "EpochtalkServer",
+      secret_key: "Secret key. You can use `mix guardian.gen.secret` to get one"
+    ]
+end
+config :epochtalk_server, EpochtalkServer.Auth.Guardian, guardian_config
+
 ## Redis configurations
 redis_config = case config_env() do
   :prod ->
@@ -281,12 +298,4 @@ if config_env() == :prod do
       password: System.get_env("EMAILER_SMTP_PASSWORD", "password"),
       port: get_env_cast_integer_with_default.("EMAILER_SMTP_PORT", "465")
   end
-
-
-  # Configure Guardian for Runtime
-  config :epochtalk_server, EpochtalkServer.Auth.Guardian,
-    secret_key: get_env_or_raise_with_message.(
-      "GUARDIAN_SECRET_KEY",
-      "You can generate one by calling: mix guardian.gen.secret"
-    )
 end

@@ -20,12 +20,16 @@ if System.get_env("PHX_SERVER") do
   config :epochtalk_server, EpochtalkServerWeb.Endpoint, server: true
 end
 
-## Env access helper function
-get_env_or_raise = fn(env_var) ->
+## Env access helper functions
+get_env_or_raise_with_message = fn(env_var, message) ->
   System.get_env(env_var) ||
     raise """
     environment variable #{env_var} missing.
+    #{message}
     """
+end
+get_env_or_raise = fn(env_var) ->
+  get_env_or_raise_with_message.(env_var, "")
 end
 
 
@@ -112,12 +116,7 @@ database_config = case config_env() do
       pool_size: 10
     ]
   :prod ->
-    database_url =
-      System.get_env("DATABASE_URL") ||
-        raise """
-        environment variable DATABASE_URL is missing.
-        For example: ecto://USER:PASS@HOST/DATABASE
-        """
+    database_url = get_env_or_raise_with_message.("DATABASE_URL", "For example: ecto://USER:PASS@HOST/DATABASE")
 
     maybe_ipv6 = if System.get_env("ECTO_IPV6") in ~w(true 1), do: [:inet6], else: []
 

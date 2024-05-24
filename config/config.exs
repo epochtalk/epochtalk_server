@@ -29,29 +29,6 @@ config :epochtalk_server, EpochtalkServerWeb.Endpoint,
   pubsub_server: EpochtalkServer.PubSub,
   live_view: [signing_salt: "2Ay27BWv"]
 
-# Configures the mailer
-#
-# By default "SMTP" adapter is being used.
-#
-# For production configurations are fetched from system environment variables.
-# Overrides for production are in `config/runtime.exs`.
-config :epochtalk_server, EpochtalkServer.Mailer,
-  adapter: Swoosh.Adapters.SMTP,
-  relay: "smtp.example.com",
-  username: "username",
-  password: "password",
-  ssl: true,
-  tls: :if_available,
-  auth: :always,
-  port: 465,
-  retries: 2,
-  no_mx_lookups: false
-
-# dkim: [
-#   s: "default", d: "domain.com",
-#   private_key: {:pem_plain, File.read!("priv/keys/domain.private")}
-# ]
-
 # Swoosh API client is needed for adapters other than SMTP.
 config :swoosh, :api_client, false
 

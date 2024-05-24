@@ -153,8 +153,12 @@ config :ex_aws, aws_config
 ## S3 configurations
 # configure s3 if images mode is "S3"
 if System.get_env("IMAGES_MODE") == "S3" do
-  s3_bucket = get_env_or_raise.("S3_BUCKET")
-
+  bucket = case config_env() do
+    :test ->
+      System.get_env("S3_BUCKET", "epochtalk_server_test")
+    _ ->
+      get_env_or_raise.("S3_BUCKET")
+  end
   # configure s3
   config :epochtalk_server, EpochtalkServer.S3,
     expire_after_hours: System.get_env("S3_EXPIRE_AFTER_HOURS", "1") |> String.to_integer(),
@@ -167,7 +171,7 @@ if System.get_env("IMAGES_MODE") == "S3" do
     #   true -> https://<bucket>.s3.<region>.amazonaws.com
     #   false -> https://s3.<region>.amazonaws.com/<bucket>
     virtual_host: System.get_env("S3_VIRTUAL_HOST", "TRUE") == "TRUE",
-    bucket: s3_bucket,
+    bucket: bucket,
     path: System.get_env("S3_PATH", "images/")
 end
 

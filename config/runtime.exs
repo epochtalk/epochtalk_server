@@ -265,9 +265,9 @@ if config_env() == :prod do
   #
   # See https://hexdocs.pm/swoosh/Swoosh.html#module-installation for details.
   if System.get_env("EMAILER_SES_MODE") do
-    emailer_ses_region = get_env_or_raise("EMAILER_SES_REGION")
-    emailer_ses_aws_access_key = get_env_or_raise("EMAILER_SES_AWS_ACCESS_KEY")
-    emailer_ses_aws_secret_key = get_env_or_raise("EMAILER_SES_AWS_SECRET_KEY")
+    emailer_ses_region = get_env_or_raise.("EMAILER_SES_REGION")
+    emailer_ses_aws_access_key = get_env_or_raise.("EMAILER_SES_AWS_ACCESS_KEY")
+    emailer_ses_aws_secret_key = get_env_or_raise.("EMAILER_SES_AWS_SECRET_KEY")
 
     config :epochtalk_server, EpochtalkServer.Mailer,
       adapter: Swoosh.Adapters.AmazonSES,
@@ -285,7 +285,7 @@ if config_env() == :prod do
 
   # Configure Guardian for Runtime
   config :epochtalk_server, EpochtalkServer.Auth.Guardian,
-    secret_key: get_env_or_raise_with_message(
+    secret_key: get_env_or_raise_with_message.(
       "GUARDIAN_SECRET_KEY",
       "You can generate one by calling: mix guardian.gen.secret"
     )

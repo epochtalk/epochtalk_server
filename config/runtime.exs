@@ -163,9 +163,9 @@ if System.get_env("IMAGES_MODE") == "S3" do
   config :epochtalk_server, EpochtalkServer.S3,
     expire_after_hours: System.get_env("S3_EXPIRE_AFTER_HOURS", "1") |> String.to_integer(),
     # 1 KB
-    min_size_bytes: System.get_env("S3_MIN_SIZE_BYTES", "1_024") |> String.to_integer(),
+    min_size_bytes: System.get_env("S3_MIN_SIZE_BYTES", "1024") |> String.to_integer(),
     # 10 MB
-    max_size_bytes: System.get_env("S3_MAX_SIZE_BYTES", "10_485_760") |> String.to_integer(),
+    max_size_bytes: System.get_env("S3_MAX_SIZE_BYTES", "10485760") |> String.to_integer(),
     content_type_starts_with: System.get_env("S3_CONTENT_TYPE_STARTS_WITH", "image/"),
     # virtual_host:
     #   true -> https://<bucket>.s3.<region>.amazonaws.com

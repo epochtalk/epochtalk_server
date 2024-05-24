@@ -16,7 +16,10 @@ config :epochtalk_server, EpochtalkServerWeb.Endpoint,
   secret_key_base: "9ORa6oGSN+xlXNedSn0gIKVc/6//naQqSiZsRJ8vNbcvHpPOTPMLgcn134WIH3Pd",
   watchers: []
 
-# Configure Local Mailer by default for dev mode (this can be overridden in dev.secret.exs)
+# For Development `config/dev.exs` loads the "Local" adapter which allows preview
+# of sent emails at the url `/dev/mailbox`. To test SMTP in Development mode,
+# mailer configurations for adapter, credentials and other options can be
+# overriden in `config/dev.secret.exs`
 config :epochtalk_server, EpochtalkServer.Mailer, adapter: Swoosh.Adapters.Local
 
 # Do not include metadata nor timestamps in development logs

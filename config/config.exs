@@ -33,11 +33,6 @@ config :epochtalk_server, EpochtalkServerWeb.Endpoint,
 #
 # By default "SMTP" adapter is being used.
 #
-# For Development `config/dev.exs` loads the "Local" adapter which allows preview
-# of sent emails at the url `/dev/mailbox`. To test SMTP in Development mode,
-# mailer configurations for adapter, credentials and other options can be
-# overriden in `config/dev.secret.exs`
-#
 # For production configurations are fetched from system environment variables.
 # Overrides for production are in `config/runtime.exs`.
 config :epochtalk_server, EpochtalkServer.Mailer,

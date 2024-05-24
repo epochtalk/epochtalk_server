@@ -166,7 +166,7 @@ if System.get_env("IMAGES_MODE") == "S3" do
     # virtual_host:
     #   true -> https://<bucket>.s3.<region>.amazonaws.com
     #   false -> https://s3.<region>.amazonaws.com/<bucket>
-    virtual_host: System.get_env("S3_VIRTUAL_HOST") || true,
+    virtual_host: System.get_env("S3_VIRTUAL_HOST", "TRUE") == "TRUE",
     bucket: s3_bucket,
     path: System.get_env("S3_PATH", "images/")
 end

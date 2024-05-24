@@ -150,6 +150,26 @@ aws_config = case config_env() do
 end
 config :ex_aws, aws_config
 
+## S3 configurations
+# configure s3 if images mode is "S3"
+if System.get_env("IMAGES_MODE") == "S3" do
+  s3_bucket = get_env_or_raise.("S3_BUCKET")
+
+  # configure s3
+  config :epochtalk_server, EpochtalkServer.S3,
+    expire_after_hours: System.get_env("S3_EXPIRE_AFTER_HOURS") || 1,
+    # 1 KB
+    min_size_bytes: System.get_env("S3_MIN_SIZE_BYTES") || 1_024,
+    # 10 MB
+    max_size_bytes: System.get_env("S3_MAX_SIZE_BYTES") || 10_485_760,
+    content_type_starts_with: System.get_env("S3_CONTENT_TYPE_STARTS_WITH") || "image/",
+    # virtual_host:
+    #   true -> https://<bucket>.s3.<region>.amazonaws.com
+    #   false -> https://s3.<region>.amazonaws.com/<bucket>
+    virtual_host: System.get_env("S3_VIRTUAL_HOST") || true,
+    bucket: s3_bucket,
+    path: System.get_env("S3_PATH") || "images/"
+end
 
 if config_env() == :prod do
   # The secret key base is used to sign/encrypt cookies and other secrets.
@@ -228,29 +248,6 @@ if config_env() == :prod do
       port: System.get_env("EMAILER_SMTP_PORT") || 465
   end
 
-  # configure aws if images mode is "S3"
-  if System.get_env("IMAGES_MODE") == "S3" do
-    s3_bucket =
-      System.get_env("S3_BUCKET") ||
-        raise """
-        environment variable S3_BUCKET missing.
-        """
-
-    # configure s3
-    config :epochtalk_server, EpochtalkServer.S3,
-      expire_after_hours: System.get_env("S3_EXPIRE_AFTER_HOURS") || 1,
-      # 1 KB
-      min_size_bytes: System.get_env("S3_MIN_SIZE_BYTES") || 1_024,
-      # 10 MB
-      max_size_bytes: System.get_env("S3_MAX_SIZE_BYTES") || 10_485_760,
-      content_type_starts_with: System.get_env("S3_CONTENT_TYPE_STARTS_WITH") || "image/",
-      # virtual_host:
-      #   true -> https://<bucket>.s3.<region>.amazonaws.com
-      #   false -> https://s3.<region>.amazonaws.com/<bucket>
-      virtual_host: System.get_env("S3_VIRTUAL_HOST") || true,
-      bucket: s3_bucket,
-      path: System.get_env("S3_PATH") || "images/"
-  end
 
   # Configure Guardian for Runtime
   config :epochtalk_server, EpochtalkServer.Auth.Guardian,

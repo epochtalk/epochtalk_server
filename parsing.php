@@ -7,6 +7,14 @@ function parse_bbc($message, $smileys = true, $cache_id = '', $local_disable = a
 {
 	global $txt, $scripturl, $context, $modSettings, $user_info;
 	static $bbc_codes = array(), $itemcodes = array(), $no_autolink_tags = array();
+	$context['browser']['is_gecko'] = false;
+	$context['browser']['is_ie5'] = false;
+	$context['browser']['is_ie5'] = false;
+	$context['browser']['is_ie4'] = false;
+	$context['browser']['is_mac_ie'] = false;
+	$context['browser']['is_konqueror'] = false;
+	$context['browser']['is_opera'] = false;
+	$context['browser']['is_ie'] = false;
 	$disabled = array();
 	
 	//theymos - die if it's taking way too long
@@ -21,19 +29,20 @@ function parse_bbc($message, $smileys = true, $cache_id = '', $local_disable = a
 		$smileys = (bool) $smileys;
 
 	ECHO "a";
-	if (empty($modSettings['enableBBC']) && $message !== false)
-	{
-		if ($smileys === true)
-			parsesmileys($message);
-	ECHO "b";
+	// if (empty($modSettings['enableBBC']) && $message !== false)
+	// {
+	// 	if ($smileys === true)
+	// 		parsesmileys($message);
+	// ECHO "b";
 
-		return $message;
-	}
+	// 	return $message;
+	// }
 	ECHO "c";
 
 	// Just in case it wasn't determined yet whether UTF-8 is enabled.
 	if (!isset($context['utf8']))
-		$context['utf8'] = (empty($modSettings['global_character_set']) ? $txt['lang_character_set'] : $modSettings['global_character_set']) === 'UTF-8';
+		// $context['utf8'] = (empty(ç['global_character_set']) ? $txt['lang_character_set'] : $modSettings['global_character_set']) === 'UTF-8';
+		$context['utf8'] = true;
 
 	//theymos - disable links and images on pages where we don't want to send a referer to random people
 	$disabledsecurity='';
@@ -204,7 +213,7 @@ function parse_bbc($message, $smileys = true, $cache_id = '', $local_disable = a
 			array(
 				'tag' => 'code',
 				'type' => 'unparsed_content',
-				'content' => '<div class="codeheader">' . $txt['smf238'] . ':</div><div class="code">' . ($context['browser']['is_gecko'] ? '<pre style="margin-top: 0; display: inline;">$1</pre>' : '$1') . '</div>',
+				'content' => '<div class="codeheader">' . '$txt[\'smf238\']' . ':</div><div class="code">' . ($context['browser']['is_gecko'] ? '<pre style="margin-top: 0; display: inline;">$1</pre>' : '$1') . '</div>',
 				// !!! Maybe this can be simplified?
 				'validate' => isset($disabled['code']) ? null : function(&$tag, &$data, $disabled) {
 					global $context;
@@ -242,7 +251,7 @@ function parse_bbc($message, $smileys = true, $cache_id = '', $local_disable = a
 			array(
 				'tag' => 'code',
 				'type' => 'unparsed_equals_content',
-				'content' => '<div class="codeheader">' . $txt['smf238'] . ': ($2)</div><div class="code">' . ($context['browser']['is_gecko'] ? '<pre style="margin-top: 0; display: inline;">$1</pre>' : '$1') . '</div>',
+				'content' => '<div class="codeheader">' . '$txt[\'smf238\']' . ': ($2)</div><div class="code">' . ($context['browser']['is_gecko'] ? '<pre style="margin-top: 0; display: inline;">$1</pre>' : '$1') . '</div>',
 				// !!! Maybe this can be simplified?
 				'validate' => isset($disabled['code']) ? null : function(&$tag, &$data, $disabled) {
 					global $context;
@@ -522,7 +531,7 @@ function parse_bbc($message, $smileys = true, $cache_id = '', $local_disable = a
 			),
 			array(
 				'tag' => 'quote',
-				'before' => '<div class="quoteheader">' . $txt['smf240'] . '</div><div class="quote">',
+				'before' => '<div class="quoteheader">' . '$txt[\'smf240\']' . '</div><div class="quote">',
 				'after' => '</div>',
 				'block_level' => true,
 			),
@@ -531,14 +540,14 @@ function parse_bbc($message, $smileys = true, $cache_id = '', $local_disable = a
 				'parameters' => array(
 					'author' => array('match' => '(.{1,192}?)', 'quoted' => true, 'validate' => 'parse_bbc'),
 				),
-				'before' => '<div class="quoteheader">' . $txt['smf239'] . ': {author}</div><div class="quote">',
+				'before' => '<div class="quoteheader">' . '$txt[\'smf239\']' . ': {author}</div><div class="quote">',
 				'after' => '</div>',
 				'block_level' => true,
 			),
 			array(
 				'tag' => 'quote',
 				'type' => 'parsed_equals',
-				'before' => '<div class="quoteheader">' . $txt['smf239'] . ': $1</div><div class="quote">',
+				'before' => '<div class="quoteheader">' . '$txt[\'smf239\']' . ': $1</div><div class="quote">',
 				'after' => '</div>',
 				'quoted' => 'optional',
 				'block_level' => true,
@@ -550,7 +559,7 @@ function parse_bbc($message, $smileys = true, $cache_id = '', $local_disable = a
 					'link' => array('match' => '(?:board=\d+;)?((?:topic|threadid)=[\dmsg#\./]{1,40}(?:;start=[\dmsg#\./]{1,40})?|action=profile;u=\d+)'),
 					'date' => array('match' => '(\d+)', 'validate' => 'timeformat'),
 				),
-				'before' => '<div class="quoteheader"><a href="' . $scripturl . '?{link}">' . $txt['smf239'] . ': {author} ' . $txt[176] . ' {date}</a></div><div class="quote">',
+				'before' => '<div class="quoteheader"><a href="' . $scripturl . '?{link}">' . '$txt[\'smf239\']' . ': {author} ' . '$txt[\'176\']' . ' {date}</a></div><div class="quote">',
 				'after' => '</div>',
 				'block_level' => true,
 			),
@@ -559,7 +568,7 @@ function parse_bbc($message, $smileys = true, $cache_id = '', $local_disable = a
 				'parameters' => array(
 					'author' => array('match' => '(.{1,192}?)', 'validate' => 'parse_bbc'),
 				),
-				'before' => '<div class="quoteheader">' . $txt['smf239'] . ': {author}</div><div class="quote">',
+				'before' => '<div class="quoteheader">' . '$txt[\'smf239\']' . ': {author}</div><div class="quote">',
 				'after' => '</div>',
 				'block_level' => true,
 			),
@@ -819,6 +828,7 @@ function parse_bbc($message, $smileys = true, $cache_id = '', $local_disable = a
 	$message = strtr($message, array("\n" => '<br />'));
 
 	// The non-breaking-space looks a bit different each time.
+	$context['server']['complex_preg_chars'] = true;
 	$non_breaking_space = $context['utf8'] ? ($context['server']['complex_preg_chars'] ? '\x{C2A0}' : chr(0xC2) . chr(0xA0)) : '\xA0';
 
 	$pos = -1;

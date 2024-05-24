@@ -181,15 +181,13 @@ if config_env() == :prod do
   # want to use a different value for prod and you most likely don't want
   # to check this value into version control, so we use an environment
   # variable instead.
-  secret_key_base =
-    System.get_env("SECRET_KEY_BASE") ||
-      raise """
-      environment variable SECRET_KEY_BASE is missing.
-      You can generate one by calling: mix phx.gen.secret
-      """
+  secret_key_base = get_env_or_raise_with_message(
+    "SECRET_KEY_BASE",
+    "You can generate one by calling: mix phx.gen.secret"
+  )
 
-  host = System.get_env("PHX_HOST") || "example.com"
-  port = String.to_integer(System.get_env("PORT") || "4000")
+  host = get_env_or_raise("PHX_HOST")
+  port = System.get_env("PORT", "4000") |> String.to_integer()
 
   config :epochtalk_server, EpochtalkServerWeb.Endpoint,
     url: [host: host, port: 443, scheme: "https"],
@@ -221,23 +219,9 @@ if config_env() == :prod do
   #
   # See https://hexdocs.pm/swoosh/Swoosh.html#module-installation for details.
   if System.get_env("EMAILER_SES_MODE") do
-    emailer_ses_region =
-      System.get_env("EMAILER_SES_REGION") ||
-        raise """
-        environment variable EMAILER_SES_REGION is missing.
-        """
-
-    emailer_ses_aws_access_key =
-      System.get_env("EMAILER_SES_AWS_ACCESS_KEY") ||
-        raise """
-        environment variable EMAILER_SES_AWS_ACCESS_KEY missing.
-        """
-
-    emailer_ses_aws_secret_key =
-      System.get_env("EMAILER_SES_AWS_SECRET_KEY") ||
-        raise """
-        environment variable EMAILER_SES_AWS_SECRET_KEY missing.
-        """
+    emailer_ses_region = get_env_or_raise("EMAILER_SES_REGION")
+    emailer_ses_aws_access_key = get_env_or_raise("EMAILER_SES_AWS_ACCESS_KEY")
+    emailer_ses_aws_secret_key = get_env_or_raise("EMAILER_SES_AWS_SECRET_KEY")
 
     config :epochtalk_server, EpochtalkServer.Mailer,
       adapter: Swoosh.Adapters.AmazonSES,
@@ -246,10 +230,10 @@ if config_env() == :prod do
       secret: emailer_ses_aws_secret_key
   else
     config :epochtalk_server, EpochtalkServer.Mailer,
-      relay: System.get_env("EMAILER_SMTP_RELAY") || "smtp.example.com",
-      username: System.get_env("EMAILER_SMTP_USERNAME") || "username",
-      password: System.get_env("EMAILER_SMTP_PASSWORD") || "password",
-      port: System.get_env("EMAILER_SMTP_PORT") || 465
+      relay: System.get_env("EMAILER_SMTP_RELAY", "smtp.example.com"),
+      username: System.get_env("EMAILER_SMTP_USERNAME", "username"),
+      password: System.get_env("EMAILER_SMTP_PASSWORD", "password"),
+      port: System.get_env("EMAILER_SMTP_PORT", "465") |> String.to_integer()
   end
 
 

@@ -239,12 +239,10 @@ if config_env() == :prod do
 
   # Configure Guardian for Runtime
   config :epochtalk_server, EpochtalkServer.Auth.Guardian,
-    secret_key:
-      System.get_env("GUARDIAN_SECRET_KEY") ||
-        raise("""
-        environment variable GUARDIAN_SECRET_KEY is missing.
-        You can generate one by calling: mix guardian.gen.secret
-        """)
+    secret_key: get_env_or_raise_with_message(
+      "GUARDIAN_SECRET_KEY",
+      "You can generate one by calling: mix guardian.gen.secret"
+    )
 
   # Configure frontend
   config :epochtalk_server,

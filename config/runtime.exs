@@ -20,6 +20,14 @@ if System.get_env("PHX_SERVER") do
   config :epochtalk_server, EpochtalkServerWeb.Endpoint, server: true
 end
 
+## Env access helper function
+get_env_or_raise = fn(env_var) ->
+  System.get_env(env_var) ||
+    raise """
+    environment variable #{env_var} missing.
+    """
+end
+
 
 ## Redis configurations
 redis_config = case config_env() do

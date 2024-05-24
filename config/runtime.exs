@@ -35,6 +35,49 @@ get_env_cast_integer_with_default = fn(env_var, default) ->
   System.get_env(env_var, default) |> String.to_integer()
 end
 
+## Frontend configurations
+config :epochtalk_server,
+  frontend_config: %{
+    frontend_url: System.get_env("FRONTEND_URL", "http://localhost:8000"),
+    backend_url: System.get_env("BACKEND_URL", "http://localhost:4000"),
+    newbie_enabled: System.get_env("NEWBIE_ENABLED", "FALSE") == "TRUE",
+    login_required: System.get_env("LOGIN_REQUIRED", "FALSE") == "TRUE",
+    invite_only: System.get_env("INVITE_ONLY", "FALSE") == "TRUE",
+    verify_registration: System.get_env("VERIFY_REGISTRATION", "TRUE") == "TRUE",
+    post_max_length: get_env_cast_integer_with_default.("POST_MAX_LENGTH", "10000"),
+    max_image_size: get_env_cast_integer_with_default.("MAX_IMAGE_SIZE", "10485760"),
+    max_avatar_size: get_env_cast_integer_with_default.("MAX_AVATAR_SIZE", "102400"),
+    mobile_break_width: get_env_cast_integer_with_default.("MOBILE_BREAK_WIDTH", "767"),
+    ga_key: System.get_env("GA_KEY", "UA-XXXXX-Y"),
+    revision: nil,
+    website: %{
+      title: System.get_env("WEBSITE_TITLE", "Epochtalk Forums"),
+      description: System.get_env("WEBSITE_DESCRIPTION", "Open source forum software"),
+      keywords:
+        System.get_env("WEBSITE_KEYWORDS", "open source, free forum, forum software, forum"),
+      logo: System.get_env("WEBSITE_LOGO"),
+      favicon: System.get_env("WEBSITE_FAVICON"),
+      default_avatar: System.get_env("WEBSITE_DEFAULT_AVATAR", "/images/avatar.png"),
+      default_avatar_shape: System.get_env("WEBSITE_DEFAULT_AVATAR_SHAPE", "circle")
+    },
+    portal: %{
+      enabled: System.get_env("PORTAL_ENABLED", "FALSE") == "TRUE",
+      board_id: System.get_env("PORTAL_BOARD_ID")
+    },
+    emailer: %{
+      ses_mode: System.get_env("EMAILER_SES_MODE", "FALSE") == "TRUE",
+      options: %{
+        from_address: System.get_env("EMAILER_OPTIONS_FROM_ADDRESS", "info@epochtalk.com")
+      }
+    },
+    images: %{
+      s3_mode: System.get_env("IMAGES_S3_MODE", "FALSE"),
+      options: %{
+        local_host: System.get_env("IMAGES_OPTIONS_LOCAL_HOST", "http://localhost:4000")
+      }
+    },
+    rate_limiting: %{}
+  }
 
 ## Redis configurations
 redis_config = case config_env() do
@@ -246,48 +289,4 @@ if config_env() == :prod do
       "GUARDIAN_SECRET_KEY",
       "You can generate one by calling: mix guardian.gen.secret"
     )
-
-  # Configure frontend
-  config :epochtalk_server,
-    frontend_config: %{
-      frontend_url: System.get_env("FRONTEND_URL", "http://localhost:8000"),
-      backend_url: System.get_env("BACKEND_URL", "http://localhost:4000"),
-      newbie_enabled: System.get_env("NEWBIE_ENABLED", "FALSE") == "TRUE",
-      login_required: System.get_env("LOGIN_REQUIRED", "FALSE") == "TRUE",
-      invite_only: System.get_env("INVITE_ONLY", "FALSE") == "TRUE",
-      verify_registration: System.get_env("VERIFY_REGISTRATION", "TRUE") == "TRUE",
-      post_max_length: get_env_cast_integer_with_default.("POST_MAX_LENGTH", "10000"),
-      max_image_size: get_env_cast_integer_with_default.("MAX_IMAGE_SIZE", "10485760"),
-      max_avatar_size: get_env_cast_integer_with_default.("MAX_AVATAR_SIZE", "102400"),
-      mobile_break_width: get_env_cast_integer_with_default.("MOBILE_BREAK_WIDTH", "767"),
-      ga_key: System.get_env("GA_KEY", "UA-XXXXX-Y"),
-      revision: nil,
-      website: %{
-        title: System.get_env("WEBSITE_TITLE", "Epochtalk Forums"),
-        description: System.get_env("WEBSITE_DESCRIPTION", "Open source forum software"),
-        keywords:
-          System.get_env("WEBSITE_KEYWORDS", "open source, free forum, forum software, forum"),
-        logo: System.get_env("WEBSITE_LOGO"),
-        favicon: System.get_env("WEBSITE_FAVICON"),
-        default_avatar: System.get_env("WEBSITE_DEFAULT_AVATAR", "/images/avatar.png"),
-        default_avatar_shape: System.get_env("WEBSITE_DEFAULT_AVATAR_SHAPE", "circle")
-      },
-      portal: %{
-        enabled: System.get_env("PORTAL_ENABLED", "FALSE") == "TRUE",
-        board_id: System.get_env("PORTAL_BOARD_ID")
-      },
-      emailer: %{
-        ses_mode: System.get_env("EMAILER_SES_MODE", "FALSE") == "TRUE",
-        options: %{
-          from_address: System.get_env("EMAILER_OPTIONS_FROM_ADDRESS", "info@epochtalk.com")
-        }
-      },
-      images: %{
-        s3_mode: System.get_env("IMAGES_S3_MODE", "FALSE"),
-        options: %{
-          local_host: System.get_env("IMAGES_OPTIONS_LOCAL_HOST", "http://localhost:4000")
-        }
-      },
-      rate_limiting: %{}
-    }
 end

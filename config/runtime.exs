@@ -21,17 +21,19 @@ if System.get_env("PHX_SERVER") do
 end
 
 ## Env access helper functions
-get_env_or_raise_with_message = fn(env_var, message) ->
+get_env_or_raise_with_message = fn env_var, message ->
   System.get_env(env_var) ||
     raise """
     environment variable #{env_var} missing.
     #{message}
     """
 end
-get_env_or_raise = fn(env_var) ->
+
+get_env_or_raise = fn env_var ->
   get_env_or_raise_with_message.(env_var, "")
 end
-get_env_cast_integer_with_default = fn(env_var, default) ->
+
+get_env_cast_integer_with_default = fn env_var, default ->
   System.get_env(env_var, default) |> String.to_integer()
 end
 
@@ -80,47 +82,54 @@ config :epochtalk_server,
   }
 
 ## Guardian configurations
-guardian_config = case config_env() do
-  :prod ->
-    [
-      secret_key: get_env_or_raise_with_message.(
-        "GUARDIAN_SECRET_KEY",
-        "You can generate one by calling: mix guardian.gen.secret"
-      )
-    ]
-  _ ->
-    [
-      issuer: "EpochtalkServer",
-      secret_key: "Secret key. You can use `mix guardian.gen.secret` to get one"
-    ]
-end
+guardian_config =
+  case config_env() do
+    :prod ->
+      [
+        secret_key:
+          get_env_or_raise_with_message.(
+            "GUARDIAN_SECRET_KEY",
+            "You can generate one by calling: mix guardian.gen.secret"
+          )
+      ]
+
+    _ ->
+      [
+        issuer: "EpochtalkServer",
+        secret_key: "Secret key. You can use `mix guardian.gen.secret` to get one"
+      ]
+  end
+
 config :epochtalk_server, EpochtalkServer.Auth.Guardian, guardian_config
 
 ## Redis configurations
-redis_config = case config_env() do
-  :prod ->
-    %{
-      redis_host: System.get_env("REDIS_HOST", "127.0.0.1"),
-      redis_port: get_env_cast_integer_with_default.("REDIS_PORT", "6379"),
-      redis_pool_size: get_env_cast_integer_with_default.("REDIS_POOL_SIZE", "10"),
-      redis_database: get_env_cast_integer_with_default.("REDIS_DATABASE", "0")
-    }
-  :dev ->
-    %{
-      redis_host: "127.0.0.1",
-      redis_port: 6379,
-      redis_pool_size: 10,
-      redis_database: 0
-    }
-  :test ->
-    %{
-      redis_host: "127.0.0.1",
-      redis_port: 6379,
-      redis_pool_size: 10,
-      # tests use separate redis database (doesn't interfere with dev)
-      redis_database: 1
-    }
-end
+redis_config =
+  case config_env() do
+    :prod ->
+      %{
+        redis_host: System.get_env("REDIS_HOST", "127.0.0.1"),
+        redis_port: get_env_cast_integer_with_default.("REDIS_PORT", "6379"),
+        redis_pool_size: get_env_cast_integer_with_default.("REDIS_POOL_SIZE", "10"),
+        redis_database: get_env_cast_integer_with_default.("REDIS_DATABASE", "0")
+      }
+
+    :dev ->
+      %{
+        redis_host: "127.0.0.1",
+        redis_port: 6379,
+        redis_pool_size: 10,
+        redis_database: 0
+      }
+
+    :test ->
+      %{
+        redis_host: "127.0.0.1",
+        redis_port: 6379,
+        redis_pool_size: 10,
+        # tests use separate redis database (doesn't interfere with dev)
+        redis_database: 1
+      }
+  end
 
 # Configure Guardian Redis
 config :guardian_redis, :redis,
@@ -152,76 +161,88 @@ config :hammer,
     ]
   }
 
-
 ## Database configurations
 # dev
-database_config = case config_env() do
-  :dev ->
-    [
-      username: "postgres",
-      password: "postgres",
-      hostname: "localhost",
-      database: "epochtalk_server_dev",
-      stacktrace: true,
-      show_sensitive_data_on_connection_error: true,
-      pool_size: 10
-    ]
-  :test ->
-    # The MIX_TEST_PARTITION environment variable can be used
-    # to provide built-in test partitioning in CI environment.
-    # Run `mix help test` for more information.
-    [
-      username: "postgres",
-      password: "postgres",
-      hostname: "localhost",
-      database: "epochtalk_server_test#{System.get_env("MIX_TEST_PARTITION")}",
-      pool: Ecto.Adapters.SQL.Sandbox,
-      pool_size: 10
-    ]
-  :prod ->
-    database_url = get_env_or_raise_with_message.("DATABASE_URL", "For example: ecto://USER:PASS@HOST/DATABASE")
+database_config =
+  case config_env() do
+    :dev ->
+      [
+        username: "postgres",
+        password: "postgres",
+        hostname: "localhost",
+        database: "epochtalk_server_dev",
+        stacktrace: true,
+        show_sensitive_data_on_connection_error: true,
+        pool_size: 10
+      ]
 
-    maybe_ipv6 = if System.get_env("ECTO_IPV6") in ~w(true 1), do: [:inet6], else: []
+    :test ->
+      # The MIX_TEST_PARTITION environment variable can be used
+      # to provide built-in test partitioning in CI environment.
+      # Run `mix help test` for more information.
+      [
+        username: "postgres",
+        password: "postgres",
+        hostname: "localhost",
+        database: "epochtalk_server_test#{System.get_env("MIX_TEST_PARTITION")}",
+        pool: Ecto.Adapters.SQL.Sandbox,
+        pool_size: 10
+      ]
 
-    [
-      url: database_url,
-      pool_size: get_env_cast_integer_with_default.("POOL_SIZE", "10"),
-      socket_options: maybe_ipv6
-    ]
-end
+    :prod ->
+      database_url =
+        get_env_or_raise_with_message.(
+          "DATABASE_URL",
+          "For example: ecto://USER:PASS@HOST/DATABASE"
+        )
+
+      maybe_ipv6 = if System.get_env("ECTO_IPV6") in ~w(true 1), do: [:inet6], else: []
+
+      [
+        url: database_url,
+        pool_size: get_env_cast_integer_with_default.("POOL_SIZE", "10"),
+        socket_options: maybe_ipv6
+      ]
+  end
 
 config :epochtalk_server, EpochtalkServer.Repo, database_config
 
 ## AWS Configurations
-aws_config = case config_env() do
-  :dev ->
-    [
-      access_key_id: [{:system, "AWS_ACCESS_KEY_ID"}, {:awscli, "default", 30}, :instance_role],
-      secret_access_key: [
-        {:system, "AWS_SECRET_ACCESS_KEY"},
-        {:awscli, "default", 30},
-        :instance_role
-      ],
-      region: {:system, "AWS_REGION"}
-    ]
-  _ ->
-    [
-      access_key_id: get_env_or_raise.("AWS_ACCESS_KEY_ID"),
-      secret_access_key: get_env_or_raise.("AWS_SECRET_ACCESS_KEY"),
-      region: get_env_or_raise.("AWS_REGION")
-    ]
-end
+aws_config =
+  case config_env() do
+    :dev ->
+      [
+        access_key_id: [{:system, "AWS_ACCESS_KEY_ID"}, {:awscli, "default", 30}, :instance_role],
+        secret_access_key: [
+          {:system, "AWS_SECRET_ACCESS_KEY"},
+          {:awscli, "default", 30},
+          :instance_role
+        ],
+        region: {:system, "AWS_REGION"}
+      ]
+
+    _ ->
+      [
+        access_key_id: get_env_or_raise.("AWS_ACCESS_KEY_ID"),
+        secret_access_key: get_env_or_raise.("AWS_SECRET_ACCESS_KEY"),
+        region: get_env_or_raise.("AWS_REGION")
+      ]
+  end
+
 config :ex_aws, aws_config
 
 ## S3 configurations
 # configure s3 if images mode is "S3"
 if System.get_env("IMAGES_MODE") == "S3" do
-  bucket = case config_env() do
-    :test ->
-      System.get_env("S3_BUCKET", "epochtalk_server_test")
-    _ ->
-      get_env_or_raise.("S3_BUCKET")
-  end
+  bucket =
+    case config_env() do
+      :test ->
+        System.get_env("S3_BUCKET", "epochtalk_server_test")
+
+      _ ->
+        get_env_or_raise.("S3_BUCKET")
+    end
+
   # configure s3
   config :epochtalk_server, EpochtalkServer.S3,
     expire_after_hours: get_env_cast_integer_with_default.("S3_EXPIRE_AFTER_HOURS", "1"),
@@ -244,10 +265,11 @@ if config_env() == :prod do
   # want to use a different value for prod and you most likely don't want
   # to check this value into version control, so we use an environment
   # variable instead.
-  secret_key_base = get_env_or_raise_with_message.(
-    "SECRET_KEY_BASE",
-    "You can generate one by calling: mix phx.gen.secret"
-  )
+  secret_key_base =
+    get_env_or_raise_with_message.(
+      "SECRET_KEY_BASE",
+      "You can generate one by calling: mix phx.gen.secret"
+    )
 
   host = get_env_or_raise.("PHX_HOST")
   port = get_env_cast_integer_with_default.("PORT", "4000")

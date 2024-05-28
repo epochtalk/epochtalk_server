@@ -384,10 +384,11 @@ defmodule EpochtalkServerWeb.Controllers.Post do
              Application.get_env(:epochtalk_server, :frontend_config)["post_max_length"],
          body <-
            Validate.cast(attrs, "body", :string, required: true, max: post_max_length * 2, min: 1) do
-
+          body = String.replace(body, "'", "\'")
     %Porcelain.Result{out: output, status: status} = Porcelain.shell("php -r \"require 'parsing.php'; ECHO parse_bbc('" <> body <> "', false);\"")
-    IO.inspect status
-    IO.inspect output
+      IO.inspect "'#{body}'"
+      IO.inspect output
+      IO.inspect status
       render(conn, :parse_legacy, %{parsed_body: output})
     else
       _ ->

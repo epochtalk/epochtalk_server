@@ -36,6 +36,9 @@ defmodule EpochtalkServer.RateLimiter do
     type
     |> get_configs()
     |> case do
+      {:error, message} ->
+        {:rate_limiter_error, message}
+
       {period, limit} ->
         # use Hammer to check rate limit
         build_key(type, user.id)
@@ -44,9 +47,6 @@ defmodule EpochtalkServer.RateLimiter do
           {:allow, count} -> {:allow, count}
           {:deny, count} -> {type, count}
         end
-
-      {:error, message} ->
-        {:rate_limiter_error, message}
     end
   end
 

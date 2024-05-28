@@ -20,6 +20,9 @@ if System.get_env("PHX_SERVER") do
   config :epochtalk_server, EpochtalkServerWeb.Endpoint, server: true
 end
 
+# Configure Rate limiter
+EpochtalkServer.RateLimiter.init()
+
 ## Env access helper functions
 get_env_or_raise_with_message = fn env_var, message ->
   System.get_env(env_var) ||

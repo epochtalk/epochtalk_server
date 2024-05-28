@@ -59,6 +59,7 @@ defmodule EpochtalkServerWeb.Router do
     post "/bbcode", Post, :parse_legacy
     get "/admin/modlog", ModerationLog, :page
     get "/boards/movelist", Board, :movelist
+    post "/images/s3/upload", ImageReference, :s3_request_upload
   end
 
   scope "/api", EpochtalkServerWeb.Controllers do

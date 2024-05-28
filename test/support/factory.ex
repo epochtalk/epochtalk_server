@@ -18,4 +18,5 @@ defmodule Test.Support.Factory do
   use Test.Support.Factories.PostDraft
   use Test.Support.Factories.BannedAddress
   use Test.Support.Factories.ModerationLog
+  use Test.Support.Factories.ImageReference
 end

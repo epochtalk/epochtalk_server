@@ -28,7 +28,7 @@ function parse_bbc($message, $smileys = true, $cache_id = '', $local_disable = a
 	elseif ($smileys !== null && ($smileys == '1' || $smileys == '0'))
 		$smileys = (bool) $smileys;
 
-	ECHO "a";
+	// ECHO "a";
 	// if (empty($modSettings['enableBBC']) && $message !== false)
 	// {
 	// 	if ($smileys === true)
@@ -37,7 +37,7 @@ function parse_bbc($message, $smileys = true, $cache_id = '', $local_disable = a
 
 	// 	return $message;
 	// }
-	ECHO "c";
+	// ECHO "c";
 
 	// Just in case it wasn't determined yet whether UTF-8 is enabled.
 	if (!isset($context['utf8']))
@@ -1555,7 +1555,7 @@ function parse_bbc($message, $smileys = true, $cache_id = '', $local_disable = a
 	if (isset($cache_key, $cache_t) && array_sum(explode(' ', microtime())) - array_sum(explode(' ', $cache_t)) > 0.05)
 		cache_put_data($cache_key, $message, 600);
 
-	ECHO "d";
+	// ECHO "d";
 
 	return $message;
 }

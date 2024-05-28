@@ -383,13 +383,11 @@ defmodule EpochtalkServerWeb.Controllers.Post do
            Map.get(Application.get_env(:epochtalk_server, :frontend_config), :post_max_length) ||
              Application.get_env(:epochtalk_server, :frontend_config)["post_max_length"],
          body <-
-           Validate.cast(attrs, "body", :string, required: true, max: post_max_length * 2, min: 1),
-         parsed_body <- body do
+           Validate.cast(attrs, "body", :string, required: true, max: post_max_length * 2, min: 1) do
 
-    %Porcelain.Result{out: output, status: status} = Porcelain.shell("php -r \"require 'parsing.php'; ECHO parse_bbc('Hello [br] [color=red]Hello[/color]', false);\"")
+    %Porcelain.Result{out: output, status: status} = Porcelain.shell("php -r \"require 'parsing.php'; ECHO parse_bbc('" <> body <> "', false);\"")
     IO.inspect status
     IO.inspect output
-    IO.inspect parsed_body
       render(conn, :parse_legacy, %{parsed_body: output})
     else
       _ ->

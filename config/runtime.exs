@@ -37,6 +37,12 @@ get_env_cast_integer_with_default = fn env_var, default ->
   System.get_env(env_var, default) |> String.to_integer()
 end
 
+## Conditionally load env configurations from dotenv
+case config_env() do
+  :dev ->
+    DotenvParser.load_file(".env")
+end
+
 ## Configure Rate limiter
 EpochtalkServer.RateLimiter.init()
 

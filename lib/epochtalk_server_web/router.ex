@@ -56,7 +56,6 @@ defmodule EpochtalkServerWeb.Router do
     post "/posts", Post, :create
     post "/posts/:id", Post, :update
     post "/preview", Post, :preview
-    post "/bbcode", Post, :parse_legacy
     get "/admin/modlog", ModerationLog, :page
     get "/boards/movelist", Board, :movelist
     post "/images/s3/upload", ImageReference, :s3_request_upload
@@ -78,6 +77,7 @@ defmodule EpochtalkServerWeb.Router do
     post "/register", User, :register
     post "/login", User, :login
     post "/confirm", User, :confirm
+    post "/bbcode", Post, :parse_legacy
     delete "/logout", User, :logout
   end
 

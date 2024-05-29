@@ -20,9 +20,6 @@ if System.get_env("PHX_SERVER") do
   config :epochtalk_server, EpochtalkServerWeb.Endpoint, server: true
 end
 
-# Configure Rate limiter
-EpochtalkServer.RateLimiter.init()
-
 ## Env access helper functions
 get_env_or_raise_with_message = fn env_var, message ->
   System.get_env(env_var) ||
@@ -39,6 +36,9 @@ end
 get_env_cast_integer_with_default = fn env_var, default ->
   System.get_env(env_var, default) |> String.to_integer()
 end
+
+## Configure Rate limiter
+EpochtalkServer.RateLimiter.init()
 
 ## Frontend configurations
 config :epochtalk_server, :frontend_config,

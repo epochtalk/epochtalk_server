@@ -22,6 +22,7 @@ alias EpochtalkServer.Models.{
   Notification,
   Permission,
   Post,
+  PostDraft,
   Poll,
   PollAnswer,
   PollResponse,

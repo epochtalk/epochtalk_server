@@ -14,7 +14,7 @@ defmodule EpochtalkServerWeb.Controllers.Notification do
   Used to retrieve `Notification` counts for a specific `User`
   """
   def counts(conn, attrs) do
-    with {:auth, user} <- {:auth, Guardian.Plug.current_resource(conn)},
+    with {:auth, %{} = user} <- {:auth, Guardian.Plug.current_resource(conn)},
          :ok <- ACL.allow!(conn, "notifications.counts"),
          max <- Validate.cast(attrs, "max", :integer, min: 1) do
       render(conn, :counts, data: Notification.counts_by_user_id(user.id, max: max || 99))
@@ -39,7 +39,7 @@ defmodule EpochtalkServerWeb.Controllers.Notification do
   Used to dismiss `Notification` counts for a specific `User`
   """
   def dismiss(conn, %{"id" => id}) do
-    with {:auth, user} <- {:auth, Guardian.Plug.current_resource(conn)},
+    with {:auth, %{} = user} <- {:auth, Guardian.Plug.current_resource(conn)},
          :ok <- ACL.allow!(conn, "notifications.dismiss"),
          {_count, nil} <- Notification.dismiss(id) do
       EpochtalkServerWeb.Endpoint.broadcast("user:#{user.id}", "refreshMentions", %{})
@@ -62,7 +62,7 @@ defmodule EpochtalkServerWeb.Controllers.Notification do
   end
 
   def dismiss(conn, %{"type" => type}) do
-    with {:auth, user} <- {:auth, Guardian.Plug.current_resource(conn)},
+    with {:auth, %{} = user} <- {:auth, Guardian.Plug.current_resource(conn)},
          :ok <- ACL.allow!(conn, "notifications.dismiss"),
          {_count, nil} <- Notification.dismiss_type_by_user_id(user.id, type) do
       EpochtalkServerWeb.Endpoint.broadcast("user:#{user.id}", "refreshMentions", %{})

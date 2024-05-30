@@ -197,6 +197,11 @@
         "allow": true
       }
     },
+    "images": {
+      "upload": {
+        "request": true
+      }
+    },
     "invitations": {
       "all": {
         "allow": true
@@ -839,6 +844,11 @@
         "allow": true
       }
     },
+    "images": {
+      "upload": {
+        "request": true
+      }
+    },
     "invitations": {
       "all": {
         "allow": true
@@ -1332,6 +1342,11 @@
         "allow": true
       }
     },
+    "images": {
+      "upload": {
+        "request": true
+      }
+    },
     "invitations": {
       "invite": {
         "allow": true
@@ -1749,6 +1764,11 @@
         "allow": true
       }
     },
+    "images": {
+      "upload": {
+        "request": true
+      }
+    },
     "invitations": {
       "invite": {
         "allow": true
@@ -2148,6 +2168,11 @@
         "allow": true
       }
     },
+    "images": {
+      "upload": {
+        "request": true
+      }
+    },
     "invitations": {
       "invite": {
         "allow": true
@@ -2379,6 +2404,11 @@
       },
       "messages": {
         "allow": true
+      }
+    },
+    "images": {
+      "upload": {
+        "request": true
       }
     },
     "invitations": {

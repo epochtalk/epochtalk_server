@@ -21,6 +21,8 @@ defmodule EpochtalkServer.Application do
       EpochtalkServer.Repo,
       # Start the Smf repository
       EpochtalkServer.SmfRepo,
+      # Start Config Server
+      EpochtalkServer.ConfigServer,
       # Start Role Cache
       EpochtalkServer.Cache.Role,
       # Warm frontend_config variable (referenced by api controllers)

@@ -62,6 +62,7 @@ defmodule EpochtalkServer.MixProject do
       {:phoenix_ecto, "~> 4.4"},
       {:phoenix_html, "~> 3.0"},
       {:plug_cowboy, "~> 2.5"},
+      {:porcelain, "~> 2.0"},
       {:poison, "~> 3.0"},
       {:postgrex, "~> 0.17.1"},
       {:redix, "~> 1.2.2"},

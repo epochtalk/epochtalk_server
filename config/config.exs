@@ -44,6 +44,9 @@ config :epochtalk_server,
     boards_seq: System.get_env("BOARDS_SEQ") || "500"
   }
 
+# Configure Porcelain
+config :porcelain, driver: Porcelain.Driver.Basic
+
 # Configure Guardian
 config :epochtalk_server, EpochtalkServer.Auth.Guardian,
   issuer: "EpochtalkServer",

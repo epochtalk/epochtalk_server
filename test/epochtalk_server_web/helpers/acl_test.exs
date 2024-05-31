@@ -25,7 +25,7 @@ defmodule Test.EpochtalkServerWeb.Helpers.ACL do
                    end
     end
 
-    test "defaults to 'private' role if 'frontend_config.login_required' is true", %{conn: conn} do
+    test "defaults to 'private' role if 'frontend_config[:login_required]' is true", %{conn: conn} do
       frontend_config =
         Application.get_env(:epochtalk_server, :frontend_config)
         |> Keyword.put(:login_required, true)
@@ -132,7 +132,7 @@ defmodule Test.EpochtalkServerWeb.Helpers.ACL do
                    end
     end
 
-    test "defaults to 'private' role if 'frontend_config.login_required' is true", %{conn: conn} do
+    test "defaults to 'private' role if 'frontend_config[:login_required]' is true", %{conn: conn} do
       frontend_config =
         Application.get_env(:epochtalk_server, :frontend_config)
         |> Keyword.put(:login_required, true)
@@ -203,7 +203,7 @@ defmodule Test.EpochtalkServerWeb.Helpers.ACL do
              ) == false
     end
 
-    test "defaults to 'private' role if 'frontend_config.login_required' is true", %{conn: conn} do
+    test "defaults to 'private' role if 'frontend_config[:login_required]' is true", %{conn: conn} do
       frontend_config =
         Application.get_env(:epochtalk_server, :frontend_config)
         |> Keyword.put(:login_required, true)

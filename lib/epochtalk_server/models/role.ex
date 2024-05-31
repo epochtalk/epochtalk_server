@@ -126,7 +126,7 @@ defmodule EpochtalkServer.Models.Role do
   def get_newbie_role_id(), do: RoleCache.by_lookup("newbie").id
 
   @doc """
-  Returns default `Role`, for base installation this is the `user` role, if `:epochtalk_server[:frontend_config]["newbie_enabled"]`
+  Returns default `Role`, for base installation this is the `user` role, if `:epochtalk_server[:frontend_config][:newbie_enabled"]`
   configuration is set to true, then `newbie` is the default role.
   """
   @spec get_default() :: t() | nil
@@ -137,7 +137,7 @@ defmodule EpochtalkServer.Models.Role do
   end
 
   @doc """
-  Returns default `Role`, for base installation this is the `user` role, if `:epochtalk_server[:frontend_config]["newbie_enabled"]`
+  Returns default `Role`, for base installation this is the `user` role, if `:epochtalk_server[:frontend_config][:newbie_enabled"]`
   configuration is set to true, then `newbie` is the default role.
   """
   @spec get_default_unauthenticated() :: t() | nil

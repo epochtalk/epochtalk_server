@@ -135,7 +135,7 @@ defmodule EpochtalkServerWeb.Helpers.ACL do
   Helper which returns the active User's priority.
 
   Will return priority of role with highest permissions if the user is authenticated, otherwise anonymous priority
-  is returned if `frontend_config.login_required` is false otherwise private role priority is returned. If
+  is returned if `frontend_config[:login_required]` is false otherwise private role priority is returned. If
   user is banned the Banned role priority is returned.
   """
   # TODO(akinsey): review chain of authenticated user's roles. See if banned and user roles are being defaulted

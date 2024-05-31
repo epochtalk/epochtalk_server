@@ -109,7 +109,7 @@ defmodule EpochtalkServerWeb.Controllers.User do
   end
 
   @doc """
-  Confirms a newly registered `User`. Used when `:epochtalk_server[:frontend_config]["verify_registration"]`
+  Confirms a newly registered `User`. Used when `:epochtalk_server[:frontend_config][:verify_registration]`
   configuration is set to `true`
   """
   def confirm(conn, %{"username" => username, "token" => token}) do

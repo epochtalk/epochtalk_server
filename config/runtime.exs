@@ -44,6 +44,8 @@ case config_env() do
 end
 
 ## Configure Rate limiter
+# Rate limiter is re-configurable during app runtime;
+# here we call its init function
 EpochtalkServer.RateLimiter.init()
 
 ## Frontend configurations
@@ -169,7 +171,6 @@ config :hammer,
   }
 
 ## Database configurations
-# dev
 database_config =
   case config_env() do
     :dev ->

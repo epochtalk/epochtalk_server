@@ -28,7 +28,7 @@ defmodule Test.EpochtalkServerWeb.Helpers.ACL do
     test "defaults to 'private' role if 'frontend_config.login_required' is true", %{conn: conn} do
       frontend_config =
         Application.get_env(:epochtalk_server, :frontend_config)
-        |> Map.put(:login_required, true)
+        |> Keyword.put(:login_required, true)
 
       Application.put_env(:epochtalk_server, :frontend_config, frontend_config)
 
@@ -46,7 +46,7 @@ defmodule Test.EpochtalkServerWeb.Helpers.ACL do
 
       frontend_config =
         Application.get_env(:epochtalk_server, :frontend_config)
-        |> Map.put(:login_required, false)
+        |> Keyword.put(:login_required, false)
 
       Application.put_env(:epochtalk_server, :frontend_config, frontend_config)
     end
@@ -135,7 +135,7 @@ defmodule Test.EpochtalkServerWeb.Helpers.ACL do
     test "defaults to 'private' role if 'frontend_config.login_required' is true", %{conn: conn} do
       frontend_config =
         Application.get_env(:epochtalk_server, :frontend_config)
-        |> Map.put(:login_required, true)
+        |> Keyword.put(:login_required, true)
 
       Application.put_env(:epochtalk_server, :frontend_config, frontend_config)
 
@@ -153,7 +153,7 @@ defmodule Test.EpochtalkServerWeb.Helpers.ACL do
 
       frontend_config =
         Application.get_env(:epochtalk_server, :frontend_config)
-        |> Map.put(:login_required, false)
+        |> Keyword.put(:login_required, false)
 
       Application.put_env(:epochtalk_server, :frontend_config, frontend_config)
     end
@@ -206,7 +206,7 @@ defmodule Test.EpochtalkServerWeb.Helpers.ACL do
     test "defaults to 'private' role if 'frontend_config.login_required' is true", %{conn: conn} do
       frontend_config =
         Application.get_env(:epochtalk_server, :frontend_config)
-        |> Map.put(:login_required, true)
+        |> Keyword.put(:login_required, true)
 
       Application.put_env(:epochtalk_server, :frontend_config, frontend_config)
 
@@ -215,7 +215,7 @@ defmodule Test.EpochtalkServerWeb.Helpers.ACL do
 
       frontend_config =
         Application.get_env(:epochtalk_server, :frontend_config)
-        |> Map.put(:login_required, false)
+        |> Keyword.put(:login_required, false)
 
       Application.put_env(:epochtalk_server, :frontend_config, frontend_config)
     end

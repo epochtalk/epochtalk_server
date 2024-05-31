@@ -15,7 +15,6 @@ defmodule EpochtalkServer.RateLimiter do
       delete_buckets: 1
     ]
 
-
   def init() do
     config :epochtalk_server, __MODULE__,
       s3_daily: {

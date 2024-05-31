@@ -168,6 +168,15 @@ defmodule EpochtalkServer.Models.Thread do
   end
 
   @doc """
+  Sets boolean indicating if the specified `Thread` is locked given a `Thread` id
+  """
+  @spec set_locked(id :: integer, locked :: boolean) :: {non_neg_integer, nil | [term()]}
+  def set_locked(id, locked) when is_integer(id) and is_boolean(locked) do
+    query = from t in Thread, where: t.id == ^id
+    Repo.update_all(query, set: [locked: locked])
+  end
+
+  @doc """
   Returns boolean indicating if `Thread` is locked or nil if it does not exist
   """
   @spec locked?(id :: non_neg_integer) :: boolean | nil

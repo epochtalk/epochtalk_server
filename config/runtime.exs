@@ -39,8 +39,8 @@ end
 
 ## Conditionally load env configurations from dotenv
 case config_env() do
-  :dev ->
-    DotenvParser.load_file(".env")
+  :prod -> nil
+  _ -> DotenvParser.load_file(".env")
 end
 
 ## Configure Rate limiter

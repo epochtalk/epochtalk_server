@@ -90,6 +90,19 @@ defmodule EpochtalkServerWeb.Controllers.ThreadJSON do
   end
 
   @doc """
+  Renders locked `Poll`.
+
+    iex> thread = %{
+    iex>   thread_id: 2,
+    iex>   locked: false
+    iex> }
+    iex> EpochtalkServerWeb.Controllers.ThreadJSON.lock(%{thread: thread})
+    poll
+  """
+  def lock(%{thread: %{thread_id: thread_id, locked: locked}}),
+    do: %{thread_id: thread_id, locked: locked}
+
+  @doc """
   Renders `Thread` id for slug to id route.
   """
   def slug_to_id(%{id: id}), do: %{id: id}

@@ -37,6 +37,14 @@ get_env_cast_integer_with_default = fn env_var, default ->
   System.get_env(env_var, default) |> String.to_integer()
 end
 
+get_env_cast_bool_with_default = fn env_var, default ->
+  System.get_env(env_var, default) == "TRUE"
+end
+
+get_env_cast_bool = fn env_var ->
+  get_env_cast_bool_with_default.(env_var, "FALSE")
+end
+
 ## Conditionally load env configurations from dotenv
 case config_env() do
   :prod ->
@@ -48,7 +56,7 @@ case config_env() do
     #
     # set CI to "TRUE" when testing in CI
     # variables in CI should be set directly through the environment
-    unless System.get_env("CI") == "TRUE" do
+    unless get_env_cast_bool.("CI") do
       DotenvParser.load_file("example.env")
     end
 
@@ -65,10 +73,10 @@ EpochtalkServer.RateLimiter.init()
 config :epochtalk_server, :frontend_config,
   frontend_url: System.get_env("FRONTEND_URL", "http://localhost:8000"),
   backend_url: System.get_env("BACKEND_URL", "http://localhost:4000"),
-  newbie_enabled: System.get_env("NEWBIE_ENABLED", "FALSE") == "TRUE",
-  login_required: System.get_env("LOGIN_REQUIRED", "FALSE") == "TRUE",
-  invite_only: System.get_env("INVITE_ONLY", "FALSE") == "TRUE",
-  verify_registration: System.get_env("VERIFY_REGISTRATION", "FALSE") == "TRUE",
+  newbie_enabled: get_env_cast_bool_with_default.("NEWBIE_ENABLED", "FALSE"),
+  login_required: get_env_cast_bool_with_default.("LOGIN_REQUIRED", "FALSE"),
+  invite_only: get_env_cast_bool_with_default.("INVITE_ONLY", "FALSE"),
+  verify_registration: get_env_cast_bool_with_default.("VERIFY_REGISTRATION", "FALSE"),
   post_max_length: get_env_cast_integer_with_default.("POST_MAX_LENGTH", "10000"),
   max_image_size: get_env_cast_integer_with_default.("MAX_IMAGE_SIZE", "10485760"),
   max_avatar_size: get_env_cast_integer_with_default.("MAX_AVATAR_SIZE", "102400"),
@@ -86,11 +94,11 @@ config :epochtalk_server, :frontend_config,
     default_avatar_shape: System.get_env("WEBSITE_DEFAULT_AVATAR_SHAPE", "circle")
   },
   portal: %{
-    enabled: System.get_env("PORTAL_ENABLED", "FALSE") == "TRUE",
+    enabled: get_env_cast_bool_with_default.("PORTAL_ENABLED", "FALSE"),
     board_id: System.get_env("PORTAL_BOARD_ID")
   },
   emailer: %{
-    ses_mode: System.get_env("EMAILER_SES_MODE", "FALSE") == "TRUE",
+    ses_mode: get_env_cast_bool_with_default.("EMAILER_SES_MODE", "FALSE"),
     options: %{
       from_address: System.get_env("EMAILER_OPTIONS_FROM_ADDRESS", "info@epochtalk.com")
     }
@@ -276,7 +284,7 @@ if System.get_env("IMAGES_MODE") == "S3" do
     # virtual_host:
     #   true -> https://<bucket>.s3.<region>.amazonaws.com
     #   false -> https://s3.<region>.amazonaws.com/<bucket>
-    virtual_host: System.get_env("S3_VIRTUAL_HOST", "TRUE") == "TRUE",
+    virtual_host: get_env_cast_bool_with_default.("S3_VIRTUAL_HOST", "TRUE"),
     bucket: bucket,
     path: System.get_env("S3_PATH", "images/")
 end

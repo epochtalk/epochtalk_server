@@ -1,11 +1,12 @@
 defmodule Test.EpochtalkServerWeb.Controllers.Thread do
   use Test.Support.ConnCase, async: true
   import Test.Support.Factory
+  alias EpochtalkServerWeb.CustomErrors.InvalidPermission
 
   setup %{users: %{user: user, admin_user: admin_user, super_admin_user: super_admin_user}} do
     board = insert(:board)
     admin_board = insert(:board, viewable_by: 1)
-    super_admin_board = insert(:board, viewable_by: 0)
+    super_admin_board = insert(:board, viewable_by: 1, postable_by: 0)
     category = insert(:category)
 
     build(:board_mapping,
@@ -23,6 +24,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
 
     thread = build(:thread, board: board, user: user)
     admin_thread = build(:thread, board: admin_board, user: admin_user)
+    admin_created_thread = build(:thread, board: board, user: admin_user)
     super_admin_thread = build(:thread, board: super_admin_board, user: super_admin_user)
 
     {
@@ -35,6 +37,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
       super_admin_threads: super_admin_threads,
       thread: thread,
       admin_thread: admin_thread,
+      admin_created_thread: admin_created_thread,
       super_admin_thread: super_admin_thread
     }
   end

@@ -155,32 +155,32 @@ defmodule Test.Support.DataCase do
     {
       :ok,
       [
-         users: %{
-           super_admin_user: super_admin_user,
-           admin_user: admin_user,
-           global_mod_user: global_mod_user,
-           mod_user: mod_user,
-           user: user,
-           patroller_user: patroller_user,
-           newbie_user: newbie_user,
-           banned_user: banned_user,
-           anonymous_user: anonymous_user,
-           private_user: private_user,
-           no_login_user: no_login_user
-         },
-         user_attrs: %{
-           super_admin_user: @test_super_admin_user_attrs,
-           admin_user: @test_admin_user_attrs,
-           global_mod_user: @test_global_mod_user_attrs,
-           mod_user: @test_mod_user_attrs,
-           user: @test_user_attrs,
-           patroller_user: @test_patroller_user_attrs,
-           newbie_user: @test_newbie_user_attrs,
-           banned_user: @test_banned_user_attrs,
-           anonymous_user: @test_anonymous_user_attrs,
-           private_user: @test_private_user_attrs,
-           no_login_user: @test_no_login_user_attrs
-         }
+        users: %{
+          super_admin_user: super_admin_user,
+          admin_user: admin_user,
+          global_mod_user: global_mod_user,
+          mod_user: mod_user,
+          user: user,
+          patroller_user: patroller_user,
+          newbie_user: newbie_user,
+          banned_user: banned_user,
+          anonymous_user: anonymous_user,
+          private_user: private_user,
+          no_login_user: no_login_user
+        },
+        user_attrs: %{
+          super_admin_user: @test_super_admin_user_attrs,
+          admin_user: @test_admin_user_attrs,
+          global_mod_user: @test_global_mod_user_attrs,
+          mod_user: @test_mod_user_attrs,
+          user: @test_user_attrs,
+          patroller_user: @test_patroller_user_attrs,
+          newbie_user: @test_newbie_user_attrs,
+          banned_user: @test_banned_user_attrs,
+          anonymous_user: @test_anonymous_user_attrs,
+          private_user: @test_private_user_attrs,
+          no_login_user: @test_no_login_user_attrs
+        }
       ]
     }
   end

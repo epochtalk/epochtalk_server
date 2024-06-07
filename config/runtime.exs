@@ -39,7 +39,9 @@ end
 
 ## Conditionally load env configurations from dotenv
 case config_env() do
-  :prod -> nil
+  :prod ->
+    nil
+
   :test ->
     # if testing anywhere other than in CI, load example.env
     # this helps ensure tests always work when running locally in dev
@@ -49,7 +51,9 @@ case config_env() do
     unless System.get_env("CI") == "TRUE" do
       DotenvParser.load_file("example.env")
     end
-  _ -> DotenvParser.load_file(".env")
+
+  _ ->
+    DotenvParser.load_file(".env")
 end
 
 ## Configure Rate limiter

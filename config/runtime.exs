@@ -168,7 +168,8 @@ config :hammer,
   backend: {
     Hammer.Backend.Redis,
     [
-      expiry_ms: 60_000 * 60 * 2,
+      # two hours
+      expiry_ms: 1_000 * 60 * 60 * 2,
       redix_config: [
         host: redis_config[:redis_host],
         port: redis_config[:redis_port],

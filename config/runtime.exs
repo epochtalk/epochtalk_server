@@ -351,6 +351,8 @@ config :epochtalk_server,
        EpochtalkServerWeb.Endpoint,
        Keyword.merge(base_endpoint_config, endpoint_config)
 
+## Configure mailer in prod
+#  (Other envs are hardcoded into their respective config/ files)
 if config_env() == :prod do
   # ## Configuring the mailer
   #

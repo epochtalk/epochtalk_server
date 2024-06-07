@@ -10,6 +10,7 @@ defmodule EpochtalkServer.Models.Thread do
   alias EpochtalkServer.Models.Board
   alias EpochtalkServer.Models.Poll
   alias EpochtalkServer.Models.Post
+  alias EpochtalkServer.Models.Role
 
   @moduledoc """
   `Thread` model, for performing actions relating to forum threads
@@ -434,7 +435,14 @@ defmodule EpochtalkServer.Models.Thread do
         }
 
     first_post = Repo.one(query_first_thread_post_data)
-    Map.put(first_post, :user, Repo.preload(first_post.user, :roles))
+
+    # any time we preload a users roles, we need to handle empty and banned roles
+    preloaded_user =
+      Repo.preload(first_post.user, :roles)
+      |> Role.handle_empty_user_roles()
+      |> Role.handle_banned_user_role()
+
+    Map.put(first_post, :user, preloaded_user)
   end
 
   @doc """

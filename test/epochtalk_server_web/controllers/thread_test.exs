@@ -233,5 +233,72 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
       assert response["message"] == "Unauthorized, you do not have permission to read"
     end
 
+    @tag authenticated: :admin
+    test "given super admin thread and insufficient priority, throws forbidden write error", %{
+      conn: conn,
+      super_admin_thread: %{post: %{thread_id: thread_id}}
+    } do
+      response =
+        conn
+        |> post(Routes.thread_path(conn, :lock, thread_id), %{"locked" => true})
+        |> json_response(403)
+
+      assert response["error"] == "Forbidden"
+      assert response["message"] == "Unauthorized, you do not have permission to write"
+    end
+
+    @tag authenticated: :banned
+    test "given banned authenticated user, throws InvalidPermission forbidden error", %{
+      conn: conn,
+      thread: %{post: %{thread_id: thread_id}}
+    } do
+      assert_raise InvalidPermission,
+                   ~r/^Forbidden, invalid permissions to perform this action/,
+                   fn ->
+                     post(conn, Routes.thread_path(conn, :lock, thread_id), %{"locked" => true})
+                   end
+    end
+
+    @tag authenticated: :global_mod
+    test "given admin created thread and insufficient priority, throws forbidden error", %{
+      conn: conn,
+      admin_created_thread: %{post: %{thread_id: thread_id}}
+    } do
+      response =
+        conn
+        |> post(Routes.thread_path(conn, :lock, thread_id), %{"locked" => true})
+        |> json_response(403)
+
+      assert response["error"] == "Forbidden"
+
+      assert response["message"] ==
+               "Unauthorized, you do not have permission to modify the lock on another user's thread"
+    end
+
+    @tag :authenticated
+    test "given thread and user who does not own the thread, does not lock thread", %{
+      conn: conn,
+      thread: %{post: %{thread_id: thread_id}}
+    } do
+      assert_raise InvalidPermission,
+                   ~r/^Forbidden, invalid permissions to perform this action/,
+                   fn ->
+                     post(conn, Routes.thread_path(conn, :lock, thread_id), %{"locked" => true})
+                   end
+    end
+
+    @tag authenticated: :global_mod
+    test "given thread that authenticated user moderates, does lock poll", %{
+      conn: conn,
+      thread: %{post: %{thread_id: thread_id}}
+    } do
+      response =
+        conn
+        |> post(Routes.thread_path(conn, :lock, thread_id), %{"locked" => true})
+        |> json_response(200)
+
+      assert response["locked"] == true
+      assert response["thread_id"] == thread_id
+    end
   end
 end

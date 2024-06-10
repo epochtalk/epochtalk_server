@@ -38,6 +38,7 @@ defmodule EpochtalkServer.MixProject do
       {:corsica, "~> 1.3.0"},
       {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.2", only: [:dev], runtime: false},
+      {:dotenv_parser, "~> 2.0"},
       {:earmark, "~> 1.4"},
       {:ecto_sql, "~> 3.6"},
       {:ex_aws, "~> 2.5"},

@@ -1,11 +1,12 @@
 defmodule Test.EpochtalkServerWeb.Controllers.Thread do
   use Test.Support.ConnCase, async: true
   import Test.Support.Factory
+  alias EpochtalkServerWeb.CustomErrors.InvalidPermission
 
   setup %{users: %{user: user, admin_user: admin_user, super_admin_user: super_admin_user}} do
     board = insert(:board)
     admin_board = insert(:board, viewable_by: 1)
-    super_admin_board = insert(:board, viewable_by: 0)
+    super_admin_board = insert(:board, viewable_by: 1, postable_by: 0)
     category = insert(:category)
 
     build(:board_mapping,
@@ -21,6 +22,11 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     admin_threads = build_list(3, :thread, board: admin_board, user: admin_user)
     super_admin_threads = build_list(3, :thread, board: super_admin_board, user: super_admin_user)
 
+    thread = build(:thread, board: board, user: user)
+    admin_thread = build(:thread, board: admin_board, user: admin_user)
+    admin_created_thread = build(:thread, board: board, user: admin_user)
+    super_admin_thread = build(:thread, board: super_admin_board, user: super_admin_user)
+
     {
       :ok,
       board: board,
@@ -28,7 +34,11 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
       super_admin_board: super_admin_board,
       threads: threads,
       admin_threads: admin_threads,
-      super_admin_threads: super_admin_threads
+      super_admin_threads: super_admin_threads,
+      thread: thread,
+      admin_thread: admin_thread,
+      admin_created_thread: admin_created_thread,
+      super_admin_thread: super_admin_thread
     }
   end
 
@@ -179,6 +189,116 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
 
       assert Map.has_key?(response, "normal") == true
       assert Map.has_key?(response, "sticky") == true
+    end
+  end
+
+  describe "lock/2" do
+    test "when unauthenticated, returns Unauthorized error", %{
+      conn: conn,
+      thread: %{post: %{thread_id: thread_id}}
+    } do
+      response =
+        conn
+        |> post(Routes.thread_path(conn, :lock, thread_id), %{"locked" => true})
+        |> json_response(401)
+
+      assert response["error"] == "Unauthorized"
+      assert response["message"] == "No resource found"
+    end
+
+    @tag authenticated: :admin
+    test "given nonexistant thread, does not lock thread", %{
+      conn: conn
+    } do
+      response =
+        conn
+        |> post(Routes.thread_path(conn, :lock, -1), %{"locked" => true})
+        |> json_response(400)
+
+      assert response["error"] == "Bad Request"
+      assert response["message"] == "Error, cannot lock thread"
+    end
+
+    @tag authenticated: :mod
+    test "given admin thread and insufficient priority, throws forbidden read error", %{
+      conn: conn,
+      admin_thread: %{post: %{thread_id: thread_id}}
+    } do
+      response =
+        conn
+        |> post(Routes.thread_path(conn, :lock, thread_id), %{"locked" => true})
+        |> json_response(403)
+
+      assert response["error"] == "Forbidden"
+      assert response["message"] == "Unauthorized, you do not have permission to read"
+    end
+
+    @tag authenticated: :admin
+    test "given super admin thread and insufficient priority, throws forbidden write error", %{
+      conn: conn,
+      super_admin_thread: %{post: %{thread_id: thread_id}}
+    } do
+      response =
+        conn
+        |> post(Routes.thread_path(conn, :lock, thread_id), %{"locked" => true})
+        |> json_response(403)
+
+      assert response["error"] == "Forbidden"
+      assert response["message"] == "Unauthorized, you do not have permission to write"
+    end
+
+    @tag authenticated: :banned
+    test "given banned authenticated user, throws InvalidPermission forbidden error", %{
+      conn: conn,
+      thread: %{post: %{thread_id: thread_id}}
+    } do
+      assert_raise InvalidPermission,
+                   ~r/^Forbidden, invalid permissions to perform this action/,
+                   fn ->
+                     post(conn, Routes.thread_path(conn, :lock, thread_id), %{"locked" => true})
+                   end
+    end
+
+    @tag authenticated: :global_mod
+    test "given admin created thread and insufficient priority, throws forbidden error", %{
+      conn: conn,
+      admin_created_thread: %{post: %{thread_id: thread_id}}
+    } do
+      response =
+        conn
+        |> post(Routes.thread_path(conn, :lock, thread_id), %{"locked" => true})
+        |> json_response(403)
+
+      assert response["error"] == "Forbidden"
+
+      assert response["message"] ==
+               "Unauthorized, you do not have permission to modify the lock on another user's thread"
+    end
+
+    @tag :authenticated
+    test "given thread and user who does not own the thread, does not lock thread", %{
+      conn: conn,
+      thread: %{post: %{thread_id: thread_id}}
+    } do
+      assert_raise InvalidPermission,
+                   ~r/^Forbidden, invalid permissions to perform this action/,
+                   fn ->
+                     post(conn, Routes.thread_path(conn, :lock, thread_id), %{"locked" => true})
+                   end
+    end
+
+    @tag authenticated: :global_mod
+    test "given thread that authenticated user moderates, does lock poll", %{
+      conn: conn,
+      thread: %{post: %{thread_id: thread_id}}
+    } do
+      response =
+        conn
+        |> post(Routes.thread_path(conn, :lock, thread_id), %{"locked" => true})
+        |> json_response(200)
+
+      assert response["locked"] == true
+      assert response["thread_id"] == thread_id
     end
   end
 end

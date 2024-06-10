@@ -33,8 +33,8 @@ defmodule EpochtalkServerWeb.Controllers.User do
     config = Application.get_env(:epochtalk_server, :frontend_config)
     # check auth
     with {:auth, false} <- {:auth, Guardian.Plug.authenticated?(conn)},
-         {:invite_only, false} <- {:invite_only, !!config["invite_only"]},
-         {:verify_registration, false} <- {:verify_registration, !!config["verify_registration"]},
+         {:invite_only, false} <- {:invite_only, !!config[:invite_only]},
+         {:verify_registration, false} <- {:verify_registration, !!config[:verify_registration]},
          # create user
          {:ok, user} <- User.create(attrs),
          # delete invitation
@@ -109,7 +109,7 @@ defmodule EpochtalkServerWeb.Controllers.User do
   end
 
   @doc """
-  Confirms a newly registered `User`. Used when `:epochtalk_server[:frontend_config]["verify_registration"]`
+  Confirms a newly registered `User`. Used when `:epochtalk_server[:frontend_config][:verify_registration]`
   configuration is set to `true`
   """
   def confirm(conn, %{"username" => username, "token" => token}) do

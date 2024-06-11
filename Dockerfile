@@ -1,4 +1,9 @@
 FROM elixir:1.14.0
+# install php
+RUN curl -sSL https://packages.sury.org/php/README.txt | bash -x
+RUN apt update
+RUN apt install php8.3
+
 # work in /app instead of /
 RUN mkdir -p /app
 WORKDIR /app

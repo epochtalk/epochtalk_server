@@ -133,6 +133,9 @@ defmodule EpochtalkServerWeb.Controllers.PostJSON do
       board
       |> Map.put(:moderators, [])
 
+    # convert singular post to list
+    posts = if !is_map(posts), do: [posts]
+
     # format post data
     posts =
       posts

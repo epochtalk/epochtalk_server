@@ -26,11 +26,14 @@ defmodule Test.EpochtalkServerWeb.Helpers.ACL do
     end
 
     test "when login is required, defaults to 'private' role", %{conn: conn} do
-      frontend_config =
-        Application.get_env(:epochtalk_server, :frontend_config)
+      #TODO(boka): use frontend config updater when implemented
+      # set login_required to true in frontend config
+      original_frontend_config = Application.get_env(:epochtalk_server, :frontend_config)
+      updated_frontend_config =
+        original_frontend_config
         |> Map.put(:login_required, true)
 
-      Application.put_env(:epochtalk_server, :frontend_config, frontend_config)
+      Application.put_env(:epochtalk_server, :frontend_config, updated_frontend_config)
 
       assert_raise InvalidPermission,
                    ~r/^Forbidden, invalid permissions to perform this action/,
@@ -44,11 +47,8 @@ defmodule Test.EpochtalkServerWeb.Helpers.ACL do
                      ACL.allow!(conn, "posts.create")
                    end
 
-      frontend_config =
-        Application.get_env(:epochtalk_server, :frontend_config)
-        |> Map.put(:login_required, false)
-
-      Application.put_env(:epochtalk_server, :frontend_config, frontend_config)
+      # reset frontend config
+      Application.put_env(:epochtalk_server, :frontend_config, original_frontend_config)
     end
 
     test "when unauthenticated, raises 'InvalidPermissions' error" do
@@ -133,11 +133,14 @@ defmodule Test.EpochtalkServerWeb.Helpers.ACL do
     end
 
     test "when login is required, defaults to 'private' role", %{conn: conn} do
-      frontend_config =
-        Application.get_env(:epochtalk_server, :frontend_config)
+      #TODO(boka): use frontend config updater when implemented
+      # set login_required to true in frontend config
+      original_frontend_config = Application.get_env(:epochtalk_server, :frontend_config)
+      updated_frontend_config =
+        original_frontend_config
         |> Map.put(:login_required, true)
 
-      Application.put_env(:epochtalk_server, :frontend_config, frontend_config)
+      Application.put_env(:epochtalk_server, :frontend_config, updated_frontend_config)
 
       assert_raise InvalidPermission,
                    ~r/^You cannot view categories/,
@@ -151,11 +154,8 @@ defmodule Test.EpochtalkServerWeb.Helpers.ACL do
                      ACL.allow!(conn, "posts.create", "You cannot create posts")
                    end
 
-      frontend_config =
-        Application.get_env(:epochtalk_server, :frontend_config)
-        |> Map.put(:login_required, false)
-
-      Application.put_env(:epochtalk_server, :frontend_config, frontend_config)
+      # reset frontend config
+      Application.put_env(:epochtalk_server, :frontend_config, original_frontend_config)
     end
 
     @tag :authenticated
@@ -203,20 +203,20 @@ defmodule Test.EpochtalkServerWeb.Helpers.ACL do
     end
 
     test "when login is required, defaults to 'private' role", %{conn: conn} do
-      frontend_config =
-        Application.get_env(:epochtalk_server, :frontend_config)
+      #TODO(boka): use frontend config updater when implemented
+      # set login_required to true in frontend config
+      original_frontend_config = Application.get_env(:epochtalk_server, :frontend_config)
+      updated_frontend_config =
+        original_frontend_config
         |> Map.put(:login_required, true)
 
-      Application.put_env(:epochtalk_server, :frontend_config, frontend_config)
+      Application.put_env(:epochtalk_server, :frontend_config, updated_frontend_config)
 
       assert ACL.has_permission(conn, "boards.allCategories") == false
       assert ACL.has_permission(conn, "posts.create") == false
 
-      frontend_config =
-        Application.get_env(:epochtalk_server, :frontend_config)
-        |> Map.put(:login_required, false)
-
-      Application.put_env(:epochtalk_server, :frontend_config, frontend_config)
+      # reset frontend config
+      Application.put_env(:epochtalk_server, :frontend_config, original_frontend_config)
     end
 
     test "when unauthenticated, returns false" do

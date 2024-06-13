@@ -9,7 +9,9 @@ defmodule Test.EpochtalkServerWeb.Helpers.ACL do
 
   describe "allow!/2" do
     @tag :authenticated
-    test "when authenticated with valid 'User' role permissions, returns :ok", %{authed_user: authed_user} do
+    test "when authenticated with valid 'User' role permissions, returns :ok", %{
+      authed_user: authed_user
+    } do
       assert ACL.allow!(authed_user, "boards.allCategories") == :ok
       assert ACL.allow!(authed_user, "posts.create") == :ok
       assert ACL.allow!(authed_user, "threads.create") == :ok
@@ -30,9 +32,10 @@ defmodule Test.EpochtalkServerWeb.Helpers.ACL do
     end
 
     test "when login is required, defaults to 'private' role", %{conn: conn} do
-      #TODO(boka): use frontend config updater when implemented
+      # TODO(boka): use frontend config updater when implemented
       # set login_required to true in frontend config
       original_frontend_config = Application.get_env(:epochtalk_server, :frontend_config)
+
       updated_frontend_config =
         original_frontend_config
         |> Map.put(:login_required, true)
@@ -70,9 +73,10 @@ defmodule Test.EpochtalkServerWeb.Helpers.ACL do
     end
 
     @tag :authenticated
-    test "when authenticated with invalid 'User' role permissions, raises 'InvalidPermissions' error", %{
-      authed_user: authed_user
-    } do
+    test "when authenticated with invalid 'User' role permissions, raises 'InvalidPermissions' error",
+         %{
+           authed_user: authed_user
+         } do
       assert_raise InvalidPermission,
                    ~r/^Forbidden, invalid permissions to perform this action/,
                    fn ->
@@ -95,7 +99,9 @@ defmodule Test.EpochtalkServerWeb.Helpers.ACL do
 
   describe "allow!/3" do
     @tag :authenticated
-    test "when authenticated with valid 'User' role permissions, returns :ok", %{authed_user: authed_user} do
+    test "when authenticated with valid 'User' role permissions, returns :ok", %{
+      authed_user: authed_user
+    } do
       assert ACL.allow!(authed_user, "boards.allCategories", "You cannot query all categories") ==
                :ok
 
@@ -137,9 +143,10 @@ defmodule Test.EpochtalkServerWeb.Helpers.ACL do
     end
 
     test "when login is required, defaults to 'private' role", %{conn: conn} do
-      #TODO(boka): use frontend config updater when implemented
+      # TODO(boka): use frontend config updater when implemented
       # set login_required to true in frontend config
       original_frontend_config = Application.get_env(:epochtalk_server, :frontend_config)
+
       updated_frontend_config =
         original_frontend_config
         |> Map.put(:login_required, true)
@@ -163,7 +170,8 @@ defmodule Test.EpochtalkServerWeb.Helpers.ACL do
     end
 
     @tag :authenticated
-    test "when authenticated with invalid 'User' role permissions, raises 'InvalidPermissions' error with custom message", %{authed_user: authed_user} do
+    test "when authenticated with invalid 'User' role permissions, raises 'InvalidPermissions' error with custom message",
+         %{authed_user: authed_user} do
       assert_raise InvalidPermission, ~r/^You cannot update roles/, fn ->
         ACL.allow!(authed_user, "roles.update", "You cannot update roles")
       end
@@ -180,7 +188,9 @@ defmodule Test.EpochtalkServerWeb.Helpers.ACL do
 
   describe "has_permission/2" do
     @tag :authenticated
-    test "when authenticated with valid 'User' role permissions, returns true", %{authed_user: authed_user} do
+    test "when authenticated with valid 'User' role permissions, returns true", %{
+      authed_user: authed_user
+    } do
       assert ACL.has_permission(authed_user, "boards.allCategories") == true
       assert ACL.has_permission(authed_user, "posts.create") == true
       assert ACL.has_permission(authed_user, "threads.create") == true
@@ -207,9 +217,10 @@ defmodule Test.EpochtalkServerWeb.Helpers.ACL do
     end
 
     test "when login is required, defaults to 'private' role", %{conn: conn} do
-      #TODO(boka): use frontend config updater when implemented
+      # TODO(boka): use frontend config updater when implemented
       # set login_required to true in frontend config
       original_frontend_config = Application.get_env(:epochtalk_server, :frontend_config)
+
       updated_frontend_config =
         original_frontend_config
         |> Map.put(:login_required, true)

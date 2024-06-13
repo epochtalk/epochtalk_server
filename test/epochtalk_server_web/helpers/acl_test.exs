@@ -1,5 +1,9 @@
 defmodule Test.EpochtalkServerWeb.Helpers.ACL do
-  use Test.Support.ConnCase, async: true
+  @moduledoc """
+  This test sets async: false because it changes Application env,
+  which can cause config issues in other tests
+  """
+  use Test.Support.ConnCase, async: false
   alias EpochtalkServerWeb.Helpers.ACL
   alias EpochtalkServerWeb.CustomErrors.InvalidPermission
 

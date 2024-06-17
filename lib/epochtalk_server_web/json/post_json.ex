@@ -372,9 +372,15 @@ defmodule EpochtalkServerWeb.Controllers.PostJSON do
   end
 
   defp format_proxy_post_data_for_by_thread(post) do
+    body = String.replace(post.body || post.body_html, "'", "\'")
+
+    %Porcelain.Result{out: parsed_body, status: status} = Porcelain.shell("php -r \"require 'parsing.php'; ECHO parse_bbc('" <> body <> "');\"")
+    IO.inspect "'#{body}'"
+    IO.inspect parsed_body
+    IO.inspect status
+
     post
-    # if body_html does not exist, default to post.body
-    |> Map.put(:body_html, post.body)
+    |> Map.put(:body_html, parsed_body)
     |> Map.put(:user, %{
       id: post.user_id,
       username: post.poster_name

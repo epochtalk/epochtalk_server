@@ -169,6 +169,15 @@ defmodule EpochtalkServer.Models.Thread do
   end
 
   @doc """
+  Sets boolean indicating if the specified `Thread` is sticky given a `Thread` id
+  """
+  @spec set_sticky(id :: integer, sticky :: boolean) :: {non_neg_integer, nil | [term()]}
+  def set_sticky(id, sticky) when is_integer(id) and is_boolean(sticky) do
+    query = from t in Thread, where: t.id == ^id
+    Repo.update_all(query, set: [sticky: sticky])
+  end
+
+  @doc """
   Sets boolean indicating if the specified `Thread` is locked given a `Thread` id
   """
   @spec set_locked(id :: integer, locked :: boolean) :: {non_neg_integer, nil | [term()]}

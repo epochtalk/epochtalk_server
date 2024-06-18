@@ -89,15 +89,30 @@ defmodule EpochtalkServerWeb.Controllers.ThreadJSON do
     if board_banned, do: Map.put(result, :board_banned, board_banned), else: result
   end
 
+
   @doc """
-  Renders locked `Poll`.
+  Renders sticky `Thread`.
+
+    iex> thread = %{
+    iex>   thread_id: 2,
+    iex>   sticky: true
+    iex> }
+    iex> EpochtalkServerWeb.Controllers.ThreadJSON.sticky(%{thread: thread})
+    thread
+  """
+  def sticky(%{thread: %{thread_id: thread_id, sticky: sticky}}),
+    do: %{thread_id: thread_id, sticky: sticky}
+
+
+  @doc """
+  Renders locked `Thread`.
 
     iex> thread = %{
     iex>   thread_id: 2,
     iex>   locked: false
     iex> }
     iex> EpochtalkServerWeb.Controllers.ThreadJSON.lock(%{thread: thread})
-    poll
+    thread
   """
   def lock(%{thread: %{thread_id: thread_id, locked: locked}}),
     do: %{thread_id: thread_id, locked: locked}

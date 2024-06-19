@@ -47,6 +47,7 @@ defmodule EpochtalkServerWeb.Router do
     put "/admin/roles/update", Role, :update
     post "/threads", Thread, :create
     post "/threads/:thread_id/lock", Thread, :lock
+    post "/threads/:thread_id/sticky", Thread, :sticky
     post "/threads/:thread_id/polls/vote", Poll, :vote
     delete "/threads/:thread_id/polls/vote", Poll, :delete_vote
     post "/threads/:thread_id/polls/lock", Poll, :lock

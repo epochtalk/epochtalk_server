@@ -282,6 +282,67 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
   end
 
   @doc """
+  Used to sticky `Thread`
+  """
+  def sticky(conn, attrs) do
+    with user <- Guardian.Plug.current_resource(conn),
+         thread_id <- Validate.cast(attrs, "thread_id", :integer, required: true),
+         sticky <- Validate.cast(attrs, "sticky", :boolean, required: true),
+         :ok <- ACL.allow!(conn, "threads.sticky"),
+         user_priority <- ACL.get_user_priority(conn),
+         {:can_read, {:ok, true}} <-
+           {:can_read, Board.get_read_access_by_thread_id(thread_id, user_priority)},
+         {:can_write, {:ok, true}} <-
+           {:can_write, Board.get_write_access_by_thread_id(thread_id, user_priority)},
+         {:is_active, true} <-
+           {:is_active, User.is_active?(user.id)},
+         {:board_banned, {:ok, false}} <-
+           {:board_banned, BoardBan.banned_from_board?(user, thread_id: thread_id)},
+         {:bypass_thread_owner, true} <-
+           {:bypass_thread_owner, can_authed_user_bypass_owner_on_thread_lock(user, thread_id)},
+         {1, nil} <- Thread.set_sticky(thread_id, sticky) do
+      render(conn, :sticky, thread: %{thread_id: thread_id, sticky: sticky})
+    else
+      {:can_read, {:ok, false}} ->
+        ErrorHelpers.render_json_error(
+          conn,
+          403,
+          "Unauthorized, you do not have permission to read"
+        )
+
+      {:can_write, {:ok, false}} ->
+        ErrorHelpers.render_json_error(
+          conn,
+          403,
+          "Unauthorized, you do not have permission to write"
+        )
+
+      {:bypass_thread_owner, false} ->
+        ErrorHelpers.render_json_error(
+          conn,
+          403,
+          "Unauthorized, you do not have permission to modify another user's thread"
+        )
+
+      {:board_banned, {:ok, true}} ->
+        ErrorHelpers.render_json_error(conn, 403, "Unauthorized, you are banned from this board")
+
+      {:is_active, false} ->
+        ErrorHelpers.render_json_error(
+          conn,
+          400,
+          "Account must be active to modify sticky on thread"
+        )
+
+      {:error, data} ->
+        ErrorHelpers.render_json_error(conn, 400, data)
+
+      _ ->
+        ErrorHelpers.render_json_error(conn, 400, "Error, cannot sticky thread")
+    end
+  end
+
+  @doc """
   Used to convert `Thread` slug to id
   """
   def slug_to_id(conn, attrs) do

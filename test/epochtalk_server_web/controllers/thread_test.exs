@@ -302,7 +302,6 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     end
   end
 
-
   describe "sticky/2" do
     test "when unauthenticated, returns Unauthorized error", %{
       conn: conn,

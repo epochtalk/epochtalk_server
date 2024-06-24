@@ -169,6 +169,46 @@ defmodule EpochtalkServer.Models.Thread do
   end
 
   @doc """
+  Fully purges a `Thread` from the database
+
+  This sets off a trigger that updates the metadata.boards' thread_count and
+  post_count accordingly. It also updates the metadata.boards' last post
+  information.
+  """
+  @spec purge(thread_id :: non_neg_integer, user_id :: non_neg_integer) ::
+          {:ok, thread :: t()} | {:error, Ecto.Changeset.t()}
+  def purge(thread_id, user_id) do
+    case Repo.transaction(fn ->
+          # Update user profile post count
+
+          # Get all posters user id's from thread and decrement post count
+          # decrement each posters post count by how many post they have in the
+          # current thread
+
+          # Get title and user_id of first post in thread
+
+          # remove thread
+          query =
+            from t in Thread,
+              where: t.thread_id == ^thread_id
+
+          Repo.delete_all(query)
+
+          # append board_id and poster_ids
+
+          %{post: db_post, poll: db_poll}
+         end) do
+      # transaction success return purged thread data
+      {:ok, thread_data} ->
+        {:ok, thread_data}
+
+      # some other error
+      {:error, cs} ->
+        {:error, cs}
+    end
+  end
+
+  @doc """
   Sets boolean indicating if the specified `Thread` is sticky given a `Thread` id
   """
   @spec set_sticky(id :: integer, sticky :: boolean) :: {non_neg_integer, nil | [term()]}

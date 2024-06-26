@@ -77,7 +77,6 @@ defmodule EpochtalkServerWeb.Router do
     post "/register", User, :register
     post "/login", User, :login
     post "/confirm", User, :confirm
-    post "/bbcode", Post, :parse_legacy
     delete "/logout", User, :logout
   end
 

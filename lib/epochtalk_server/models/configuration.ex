@@ -101,6 +101,7 @@ defmodule EpochtalkServer.Models.Configuration do
         # configuration found in database
         configuration ->
           debug("Loading Frontend Configurations from Database")
+
           configuration.config
           |> atomize_keys(deep: true)
       end

@@ -45,6 +45,7 @@ defmodule EpochtalkServer.MixProject do
       {:ex_aws_s3, "~> 2.5"},
       {:ex_doc, "~> 0.29.4"},
       {:ex_machina, "~> 2.7.0", only: :test},
+      {:ex_utils, "~> 0.1.7"},
       {:finch, "~> 0.13"},
       {:gen_smtp, "~> 1.2"},
       {:guardian, "~> 2.2"},

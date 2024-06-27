@@ -1,12 +1,16 @@
 defmodule EpochtalkServer.Models.Configuration do
   use Ecto.Schema
   import Logger, only: [debug: 1]
+  import ExUtils.Map, only: [atomize_keys: 2]
   import Ecto.Changeset
   alias EpochtalkServer.Repo
   alias EpochtalkServer.Models.Configuration
 
   @moduledoc """
   `Configuration` model, for performing actions relating to frontend `Configuration`
+
+  WARNING: ensure all keys are atoms when storing via Application.put_env
+  use `atomize_keys/2` when necessary
   """
 
   @type t :: %__MODULE__{
@@ -97,7 +101,9 @@ defmodule EpochtalkServer.Models.Configuration do
         # configuration found in database
         configuration ->
           debug("Loading Frontend Configurations from Database")
+
           configuration.config
+          |> atomize_keys(deep: true)
       end
 
     Application.put_env(:epochtalk_server, :frontend_config, frontend_config)
@@ -133,7 +139,7 @@ defmodule EpochtalkServer.Models.Configuration do
 
     frontend_config =
       Application.get_env(:epochtalk_server, :frontend_config)
-      |> Map.put("revision", revision)
+      |> Map.put(:revision, revision)
 
     Application.put_env(:epochtalk_server, :frontend_config, frontend_config)
   end

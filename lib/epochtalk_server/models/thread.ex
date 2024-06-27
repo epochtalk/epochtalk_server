@@ -212,18 +212,18 @@ defmodule EpochtalkServer.Models.Thread do
           unique_poster_ids = Enum.uniq(poster_ids)
 
           # query thread before purging
-          purged_thread = Repo.one(query_first_thread_post_data)
+          purged_thread = Repo.one!(query_first_thread_post_data)
             |> Map.put(:poster_ids, unique_poster_ids)
 
           # remove thread
           delete_query =
             from t in Thread,
-              where: t.thread_id == ^thread_id
+              where: t.id == ^thread_id
 
           Repo.delete_all(delete_query)
 
-          # append board_id and poster_ids
-          %{thread: purged_thread}
+          # return data for purged thread
+          purged_thread
          end) do
       # transaction success return purged thread data
       {:ok, thread_data} ->

@@ -10,6 +10,7 @@ defmodule EpochtalkServer.Models.Thread do
   alias EpochtalkServer.Models.Board
   alias EpochtalkServer.Models.Poll
   alias EpochtalkServer.Models.Post
+  alias EpochtalkServer.Models.Profile
   alias EpochtalkServer.Models.Role
 
   @moduledoc """
@@ -175,28 +176,54 @@ defmodule EpochtalkServer.Models.Thread do
   post_count accordingly. It also updates the metadata.boards' last post
   information.
   """
-  @spec purge(thread_id :: non_neg_integer, user_id :: non_neg_integer) ::
+  @spec purge(thread_id :: non_neg_integer) ::
           {:ok, thread :: t()} | {:error, Ecto.Changeset.t()}
-  def purge(thread_id, user_id) do
+  def purge(thread_id) do
     case Repo.transaction(fn ->
-          # Update user profile post count
 
-          # Get all posters user id's from thread and decrement post count
-          # decrement each posters post count by how many post they have in the
+          # Get all poster's user id's from thread and decrement post count
+          # decrement each poster's post count by how many post they have in the
           # current thread
+          poster_ids_query =
+            from p in Post,
+              where: p.thread_id == ^thread_id,
+              select: p.user_id
+
+          poster_ids = Repo.all(poster_ids_query)
+
+          # Update user profile post count for each post
+          Enum.map(poster_ids, &Profile.decrement_post_count(&1))
 
           # Get title and user_id of first post in thread
+          query_first_thread_post_data =
+            from p in Post,
+              left_join: t in Thread,
+              on: t.id == p.thread_id,
+              where: p.thread_id == ^thread_id,
+              order_by: [p.created_at],
+              limit: 1,
+              select: %{
+                title: p.content["title"],
+                user_id: p.user_id,
+                board_id: t.board_id,
+              }
+
+          # get unique poster ids to send emails
+          unique_poster_ids = Enum.uniq(poster_ids)
+
+          # query thread before purging
+          purged_thread = Repo.one(query_first_thread_post_data)
+            |> Map.put(:poster_ids, unique_poster_ids)
 
           # remove thread
-          query =
+          delete_query =
             from t in Thread,
               where: t.thread_id == ^thread_id
 
-          Repo.delete_all(query)
+          Repo.delete_all(delete_query)
 
           # append board_id and poster_ids
-
-          %{post: db_post, poll: db_poll}
+          %{thread: purged_thread}
          end) do
       # transaction success return purged thread data
       {:ok, thread_data} ->

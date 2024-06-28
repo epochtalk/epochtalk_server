@@ -299,7 +299,7 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
          {:board_banned, {:ok, false}} <-
            {:board_banned, BoardBan.banned_from_board?(user, thread_id: thread_id)},
          {:bypass_thread_owner, true} <-
-           {:bypass_thread_owner, can_authed_user_bypass_owner_on_thread_lock(user, thread_id)},
+           {:bypass_thread_owner, can_authed_user_bypass_owner_on_thread_sticky(user, thread_id)},
          {1, nil} <- Thread.set_sticky(thread_id, sticky) do
       render(conn, :sticky, thread: %{thread_id: thread_id, sticky: sticky})
     else
@@ -467,6 +467,20 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
     if moderated,
       do: :ok == ACL.allow!(user, "threads.moderated"),
       else: true
+  end
+
+  defp can_authed_user_bypass_owner_on_thread_sticky(user, thread_id) do
+    post = Thread.get_first_post_data_by_id(thread_id)
+
+    ACL.bypass_post_owner(
+      user,
+      post,
+      "threads.sticky",
+      "owner",
+      false,
+      true,
+      true
+    )
   end
 
   defp can_authed_user_bypass_owner_on_thread_lock(user, thread_id) do

@@ -116,6 +116,19 @@ defmodule EpochtalkServerWeb.Controllers.ThreadJSON do
     do: %{thread_id: thread_id, locked: locked}
 
   @doc """
+  Renders purge `Thread`.
+
+    iex> thread = %{
+    iex>   thread_id: 2,
+    iex>   locked: false
+    iex> }
+    iex> EpochtalkServerWeb.Controllers.ThreadJSON.purge(%{thread: thread})
+    thread
+  """
+  def purge(%{thread: thread}),
+    do: thread
+
+  @doc """
   Renders `Thread` id for slug to id route.
   """
   def slug_to_id(%{id: id}), do: %{id: id}

@@ -197,6 +197,20 @@ defmodule EpochtalkServer.Models.User do
   end
 
   @doc """
+  Gets a `User` email from the database by `id` list
+  """
+  @spec email_by_id_list(id :: [integer]) ::
+          [user_data :: map()] | {:error, :user_not_found}
+  def email_by_id_list([h | _] = id_list) when is_list(id_list) and is_integer(h) do
+    query =
+      from u in User,
+        where: u.id in ^id_list,
+        select: %{email: u.email, user_id: u.id, username: u.username}
+
+    Repo.all(query)
+  end
+
+  @doc """
   Gets a `User` username from the database by `id`
   """
   @spec username_by_id(id :: integer) :: username :: String.t() | nil

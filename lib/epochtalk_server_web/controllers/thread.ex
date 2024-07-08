@@ -5,6 +5,7 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
   Controller For `Thread` related API requests
   """
   alias EpochtalkServer.Auth.Guardian
+  alias EpochtalkServer.Mailer
   alias EpochtalkServerWeb.ErrorHelpers
   alias EpochtalkServerWeb.Helpers.Validate
   alias EpochtalkServerWeb.Helpers.ACL
@@ -361,6 +362,21 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
          {:bypass_thread_owner, true} <-
            {:bypass_thread_owner, can_authed_user_bypass_owner_on_thread_purge(user, thread_id)},
          {:ok, thread} <- Thread.purge(thread_id) do
+
+      poster_data = User.email_by_id_list(thread.poster_ids)
+
+      # Email thread owner and subscribers
+      Enum.each(poster_data, fn %{user_id: user_id, email: email, username: username} ->
+        action = if user_id == user.id, do: "created", else: "participated in"
+        Mailer.send_thread_purge(%{
+          email: email,
+          title: thread.title,
+          username: username,
+          action: action,
+          mod_username: user.username
+        })
+      end)
+
       render(conn, :purge, thread: thread)
     else
       {:can_read, {:ok, false}} ->

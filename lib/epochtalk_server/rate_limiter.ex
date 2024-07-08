@@ -4,9 +4,7 @@ defmodule EpochtalkServer.RateLimiter do
   """
   import Config
 
-  @one_day_in_ms 1000 * 60 * 60 * 24
   @one_hour_in_ms 1000 * 60 * 60
-  @max_images_per_day 1000
   @max_images_per_hour 100
 
   import Hammer,
@@ -17,10 +15,6 @@ defmodule EpochtalkServer.RateLimiter do
 
   def init() do
     config :epochtalk_server, __MODULE__,
-      s3_daily: {
-        @one_day_in_ms,
-        @max_images_per_day
-      },
       s3_hourly: {
         @one_hour_in_ms,
         @max_images_per_hour

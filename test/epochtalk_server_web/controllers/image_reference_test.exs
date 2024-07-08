@@ -128,8 +128,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ImageReference do
         user: user
       }
     } do
-      # reset daily/hourly limits for user
-      RateLimiter.reset_rate_limit(:s3_daily, user)
+      # reset hourly limits for user
       RateLimiter.reset_rate_limit(:s3_hourly, user)
       # build ten image reference attrs
       image_reference_attrs = %{
@@ -155,48 +154,6 @@ defmodule Test.EpochtalkServerWeb.Controllers.ImageReference do
 
       assert response["error"] == "Too Many Requests"
       assert response["message"] == "Hourly upload rate limit exceeded (100)"
-    end
-
-    @tag :authenticated
-    test "performs up to 1000 requests in a day", %{
-      conn: conn,
-      users: %{
-        user: user
-      }
-    } do
-      # reset daily/hourly limits for user
-      RateLimiter.reset_rate_limit(:s3_daily, user)
-      RateLimiter.reset_rate_limit(:s3_hourly, user)
-      # build ten image reference attrs
-      image_reference_attrs = %{
-        images: build_list(10, :image_reference_attributes, length: 1000, file_type: "jpeg")
-      }
-
-      # call :s3_request_upload one hundred times with ten images each
-      # resetting hourly rate limits each ten times
-      Enum.each(1..10, fn _ ->
-        Enum.each(1..10, fn _ ->
-          response =
-            conn
-            |> post(Routes.image_reference_path(conn, :s3_request_upload), image_reference_attrs)
-            |> json_response(200)
-
-          assert Map.keys(response) == ["presigned_posts"]
-          assert Map.keys(response["presigned_posts"]) |> length() == 10
-        end)
-
-        # reset hourly limits for user
-        RateLimiter.reset_rate_limit(:s3_hourly, user)
-      end)
-
-      # call :s3_request_upload once more
-      response =
-        conn
-        |> post(Routes.image_reference_path(conn, :s3_request_upload), image_reference_attrs)
-        |> json_response(429)
-
-      assert response["error"] == "Too Many Requests"
-      assert response["message"] == "Daily upload rate limit exceeded (1000)"
     end
   end
 end

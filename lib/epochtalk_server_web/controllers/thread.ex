@@ -367,7 +367,7 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
 
       # Email thread owner and subscribers
       Enum.each(poster_data, fn %{user_id: user_id, email: email, username: username} ->
-        action = if user_id == user.id, do: "created", else: "participated in"
+        action = if thread.user_id == user_id, do: "created", else: "participated in"
         Mailer.send_thread_purge(%{
           email: email,
           title: thread.title,

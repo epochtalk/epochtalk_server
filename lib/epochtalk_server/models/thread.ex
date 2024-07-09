@@ -198,13 +198,15 @@ defmodule EpochtalkServer.Models.Thread do
              from p in Post,
                left_join: t in Thread,
                on: t.id == p.thread_id,
+               left_join: b in Board,
+               on: b.id == t.board_id,
                where: p.thread_id == ^thread_id,
                order_by: [p.created_at],
                limit: 1,
                select: %{
                  title: p.content["title"],
                  user_id: p.user_id,
-                 board_id: t.board_id
+                 board_name: b.name
                }
 
            # get unique poster ids to send emails

@@ -24,7 +24,7 @@ defmodule EpochtalkServerWeb.Controllers.ImageReference do
          # ensure list does not exceed max length
          :ok <- validate_max_length(attrs_length, @max_images_per_request),
          # ensure hourly rate limit not exceeded
-         {:allow, hourly_count} <- check_rate_limited(:s3_hourly, user, attrs_length),
+         {:allow, hourly_count} <- check_rate_limited(:s3_hourly, user.id, attrs_length),
          casted_attrs_list <- Enum.map(attrs_list, &cast_upload_attrs/1),
          {:ok, presigned_posts} <- ImageReference.create(casted_attrs_list) do
       Logger.debug("Hourly count for user #{user.username}: #{hourly_count}")

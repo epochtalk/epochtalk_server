@@ -30,21 +30,21 @@ defmodule EpochtalkServer.RateLimiter do
 
   Returns type of action and error message on if action is denied
   """
-  @spec check_rate_limited(type :: atom, user :: EpochtalkServer.Models.User.t()) ::
+  @spec check_rate_limited(type :: atom, user_id :: String.t()) ::
           {:allow, count :: non_neg_integer}
           | {type :: atom, count :: non_neg_integer}
           | {:error, message :: String.t()}
-  def check_rate_limited(type, user), do: check_rate_limited(type, user, @default_count)
+  def check_rate_limited(type, user_id), do: check_rate_limited(type, user_id, @default_count)
 
   @spec check_rate_limited(
           type :: atom,
-          user :: EpochtalkServer.Models.User.t(),
+          user_id :: String.t(),
           count :: non_neg_integer
         ) ::
           {:allow, count :: non_neg_integer}
           | {type :: atom, count :: non_neg_integer}
           | {:error, message :: String.t()}
-  def check_rate_limited(type, user, count) do
+  def check_rate_limited(type, user_id, count) do
     type
     |> get_configs()
     |> case do
@@ -53,7 +53,7 @@ defmodule EpochtalkServer.RateLimiter do
 
       {period, limit} ->
         # use Hammer to check rate limit
-        build_key(type, user.id)
+        build_key(type, user_id)
         |> check_rate_inc(period, limit, count)
         |> case do
           {:allow, count} -> {:allow, count}
@@ -65,11 +65,11 @@ defmodule EpochtalkServer.RateLimiter do
   @doc """
   Resets rate limit of specified type for specified user
   """
-  @spec reset_rate_limit(type :: atom, user :: EpochtalkServer.Models.User.t()) ::
+  @spec reset_rate_limit(type :: atom, user_id :: String.t()) ::
           {:ok, num_reset :: non_neg_integer}
-  def reset_rate_limit(type, user) do
+  def reset_rate_limit(type, user_id) do
     # use Hammer to reset rate limit
-    build_key(type, user.id)
+    build_key(type, user_id)
     |> delete_buckets()
   end
 

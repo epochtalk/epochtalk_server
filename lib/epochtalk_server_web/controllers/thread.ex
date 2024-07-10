@@ -19,6 +19,7 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
   alias EpochtalkServer.Models.BoardModerator
   alias EpochtalkServer.Models.UserThreadView
   alias EpochtalkServer.Models.MetadataThread
+  alias EpochtalkServer.Models.ModerationLog
   alias EpochtalkServer.Models.WatchBoard
   alias EpochtalkServer.Models.AutoModeration
   alias EpochtalkServer.Models.UserActivity
@@ -362,12 +363,12 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
          {:bypass_thread_owner, true} <-
            {:bypass_thread_owner, can_authed_user_bypass_owner_on_thread_purge(user, thread_id)},
          {:ok, thread} <- Thread.purge(thread_id) do
-
       poster_data = User.email_by_id_list(thread.poster_ids)
 
       # Email thread owner and subscribers
       Enum.each(poster_data, fn %{user_id: user_id, email: email, username: username} ->
         action = if thread.user_id == user_id, do: "created", else: "participated in"
+
         Mailer.send_thread_purge(%{
           email: email,
           title: thread.title,
@@ -376,6 +377,24 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
           mod_username: user.username
         })
       end)
+
+      # parse moderator's ip, remove ipv6 prefix if present
+      mod_ip_str =
+        conn.remote_ip
+        |> :inet_parse.ntoa()
+        |> to_string
+        |> String.replace("::ffff:", "")
+
+      {:ok, _moderation_log} =
+        ModerationLog.create(%{
+          mod: %{username: user.username, id: user.id, ip: mod_ip_str},
+          action: %{
+            api_url: "/api/threads/#{thread_id}",
+            api_method: "delete",
+            type: "threads.purge",
+            obj: thread
+          }
+        })
 
       render(conn, :purge, thread: thread)
     else

@@ -18,6 +18,8 @@ defmodule EpochtalkServerWeb.Router do
     plug Guardian.Plug.LoadResource, allow_blank: true
     # Track IP address of users making POST, PUT or PATCH requests
     plug EpochtalkServerWeb.Plugs.TrackIp
+    # Rate limit for GET, PUT, POST, PATCH, or DELETE requests
+    plug EpochtalkServerWeb.Plugs.RateLimit
     # Track user last active
     plug EpochtalkServerWeb.Plugs.UserLastActive
   end

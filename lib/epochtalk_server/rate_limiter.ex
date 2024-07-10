@@ -6,6 +6,12 @@ defmodule EpochtalkServer.RateLimiter do
 
   @one_hour_in_ms 1000 * 60 * 60
   @max_images_per_hour 100
+  @one_second_in_ms 1000
+  @max_get_per_second 10
+  @max_post_per_second 2
+  @max_put_per_second 2
+  @max_patch_per_second 2
+  @max_delete_per_second 2
 
   import Hammer,
     only: [
@@ -15,6 +21,26 @@ defmodule EpochtalkServer.RateLimiter do
 
   def init() do
     config :epochtalk_server, __MODULE__,
+      get: {
+        @one_second_in_ms,
+        @max_get_per_second
+      },
+      post: {
+        @one_second_in_ms,
+        @max_post_per_second
+      },
+      put: {
+        @one_second_in_ms,
+        @max_put_per_second
+      },
+      patch: {
+        @one_second_in_ms,
+        @max_patch_per_second
+      },
+      delete: {
+        @one_second_in_ms,
+        @max_delete_per_second
+      },
       s3_hourly: {
         @one_hour_in_ms,
         @max_images_per_hour

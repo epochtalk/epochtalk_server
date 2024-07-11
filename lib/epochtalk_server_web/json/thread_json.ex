@@ -119,8 +119,7 @@ defmodule EpochtalkServerWeb.Controllers.ThreadJSON do
   Renders purge `Thread`.
 
     iex> thread = %{
-    iex>   thread_id: 2,
-    iex>   locked: false
+    iex>   thread_id: 2
     iex> }
     iex> EpochtalkServerWeb.Controllers.ThreadJSON.purge(%{thread: thread})
     thread

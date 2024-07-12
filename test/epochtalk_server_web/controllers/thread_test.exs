@@ -29,6 +29,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
 
     {
       :ok,
+      user: user,
       board: board,
       admin_board: admin_board,
       super_admin_board: super_admin_board,
@@ -409,6 +410,119 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
 
       assert response["sticky"] == true
       assert response["thread_id"] == thread_id
+    end
+  end
+
+  describe "purge/2" do
+    test "when unauthenticated, returns Unauthorized error", %{
+      conn: conn,
+      thread: %{post: %{thread_id: thread_id}}
+    } do
+      response =
+        conn
+        |> delete(Routes.thread_path(conn, :purge, thread_id), %{})
+        |> json_response(401)
+
+      assert response["error"] == "Unauthorized"
+      assert response["message"] == "No resource found"
+    end
+
+    @tag authenticated: :admin
+    test "given nonexistant thread, does not purge thread", %{
+      conn: conn
+    } do
+      response =
+        conn
+        |> delete(Routes.thread_path(conn, :purge, -1), %{})
+        |> json_response(400)
+
+      assert response["error"] == "Bad Request"
+      assert response["message"] == "Error, cannot purge thread"
+    end
+
+    @tag authenticated: :mod
+    test "given admin thread and insufficient priority, throws forbidden read error", %{
+      conn: conn,
+      admin_thread: %{post: %{thread_id: thread_id}}
+    } do
+      response =
+        conn
+        |> delete(Routes.thread_path(conn, :purge, thread_id), %{})
+        |> json_response(403)
+
+      assert response["error"] == "Forbidden"
+      assert response["message"] == "Unauthorized, you do not have permission to read"
+    end
+
+    @tag authenticated: :admin
+    test "given super admin thread and insufficient priority, throws forbidden write error", %{
+      conn: conn,
+      super_admin_thread: %{post: %{thread_id: thread_id}}
+    } do
+      response =
+        conn
+        |> delete(Routes.thread_path(conn, :purge, thread_id), %{})
+        |> json_response(403)
+
+      assert response["error"] == "Forbidden"
+      assert response["message"] == "Unauthorized, you do not have permission to write"
+    end
+
+    @tag authenticated: :banned
+    test "given banned authenticated user, throws InvalidPermission forbidden error", %{
+      conn: conn,
+      thread: %{post: %{thread_id: thread_id}}
+    } do
+      assert_raise InvalidPermission,
+                   ~r/^Forbidden, invalid permissions to perform this action/,
+                   fn ->
+                     delete(conn, Routes.thread_path(conn, :purge, thread_id), %{})
+                   end
+    end
+
+    @tag authenticated: :global_mod
+    test "given admin created thread and insufficient priority, throws forbidden error", %{
+      conn: conn,
+      admin_created_thread: %{post: %{thread_id: thread_id}}
+    } do
+      response =
+        conn
+        |> delete(Routes.thread_path(conn, :purge, thread_id), %{})
+        |> json_response(403)
+
+      assert response["error"] == "Forbidden"
+
+      assert response["message"] ==
+               "Unauthorized, you do not have permission to modify another user's thread"
+    end
+
+    @tag :authenticated
+    test "given thread and user who does not own the thread, does not purge thread", %{
+      conn: conn,
+      thread: %{post: %{thread_id: thread_id}}
+    } do
+      assert_raise InvalidPermission,
+                   ~r/^Forbidden, invalid permissions to perform this action/,
+                   fn ->
+                     delete(conn, Routes.thread_path(conn, :purge, thread_id), %{})
+                   end
+    end
+
+    @tag authenticated: :global_mod
+    test "given thread that authenticated user moderates, does purge thread", %{
+      conn: conn,
+      thread: %{post: %{thread_id: thread_id}},
+      user: %{id: user_id}
+    } do
+      response =
+        conn
+        |> delete(Routes.thread_path(conn, :purge, thread_id), %{})
+        |> json_response(200)
+
+      assert String.slice(response["board_name"], 0..4) == "Board"
+      assert String.slice(response["title"], 0..11) == "Thread title"
+      assert response["poster_ids"] == [user_id]
+      assert response["user_id"] == user_id
     end
   end
 end

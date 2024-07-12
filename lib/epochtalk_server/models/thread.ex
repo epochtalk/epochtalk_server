@@ -26,7 +26,10 @@ defmodule EpochtalkServer.Models.Thread do
           post_count: non_neg_integer | nil,
           created_at: NaiveDateTime.t() | nil,
           imported_at: NaiveDateTime.t() | nil,
-          updated_at: NaiveDateTime.t() | nil
+          updated_at: NaiveDateTime.t() | nil,
+          poster_ids: [non_neg_integer] | nil,
+          user_id: non_neg_integer | nil,
+          title: String.t() | nil
         }
   @derive {Jason.Encoder,
            only: [
@@ -52,6 +55,9 @@ defmodule EpochtalkServer.Models.Thread do
     field :imported_at, :naive_datetime
     field :updated_at, :naive_datetime
     has_many :posts, Post
+    field :poster_ids, {:array, :integer}, virtual: true
+    field :user_id, :integer, virtual: true
+    field :title, :string, virtual: true
     # field :smf_topic, :map, virtual: true
   end
 

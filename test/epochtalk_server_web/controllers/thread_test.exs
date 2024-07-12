@@ -2,6 +2,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
   use Test.Support.ConnCase, async: true
   import Test.Support.Factory
   alias EpochtalkServerWeb.CustomErrors.InvalidPermission
+  alias EpochtalkServer.Models.User
 
   setup %{users: %{user: user, admin_user: admin_user, super_admin_user: super_admin_user}} do
     board = insert(:board)
@@ -523,6 +524,25 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
       assert String.slice(response["title"], 0..11) == "Thread title"
       assert response["poster_ids"] == [user_id]
       assert response["user_id"] == user_id
+    end
+
+    @tag authenticated: :global_mod
+    test "after purging thread, does decreases thread posters' post count", %{
+      conn: conn,
+      threads: [%{post: %{thread_id: thread_id}} | _],
+      user: %{id: user_id}
+    } do
+      {:ok, user} = User.by_id(user_id)
+      old_post_count = user.profile.post_count
+
+      conn
+      |> delete(Routes.thread_path(conn, :purge, thread_id), %{})
+      |> json_response(200)
+
+      {:ok, updated_user} = User.by_id(user_id)
+      new_post_count = updated_user.profile.post_count
+
+      assert new_post_count == old_post_count - 1
     end
   end
 end

@@ -164,7 +164,7 @@ if config_env() == :prod do
       # virtual_host:
       #   true -> https://<bucket>.s3.<region>.amazonaws.com
       #   false -> https://s3.<region>.amazonaws.com/<bucket>
-      virtual_host: System.get_env("S3_VIRTUAL_HOST") || true,
+      virtual_host: System.get_env("S3_VIRTUAL_HOST") == "TRUE" || true,
       bucket: s3_bucket,
       path: System.get_env("S3_PATH") || "images/"
   end
@@ -200,9 +200,9 @@ if config_env() == :prod do
     hostname: smf_repo_hostname,
     database: smf_repo_database,
     port: String.to_integer(System.get_env("SMF_REPO_PORT") || "3306"),
-    stacktrace: System.get_env("SMF_REPO_STACKTRACE") || true,
+    stacktrace: System.get_env("SMF_REPO_STACKTRACE") == "TRUE" || true,
     show_sensitive_data_on_connection_error:
-      System.get_env("SMF_REPO_SENSITIVE_DATA_ON_ERROR") || false,
+      System.get_env("SMF_REPO_SENSITIVE_DATA_ON_ERROR") == "TRUE" || false,
     pool_size: String.to_integer(System.get_env("SMF_REPO_POOL_SIZE") || "10")
 
   # Configure Guardian for Runtime
@@ -247,10 +247,10 @@ if config_env() == :prod do
     frontend_config: %{
       frontend_url: System.get_env("FRONTEND_URL") || "http://localhost:8000",
       backend_url: System.get_env("BACKEND_URL") || "http://localhost:4000",
-      newbie_enabled: System.get_env("NEWBIE_ENABLED") || false,
-      login_required: System.get_env("LOGIN_REQUIRED") || false,
-      invite_only: System.get_env("INVITE_ONLY") || false,
-      verify_registration: System.get_env("VERIFY_REGISTRATION") || true,
+      newbie_enabled: System.get_env("NEWBIE_ENABLED") == "TRUE" || false,
+      login_required: System.get_env("LOGIN_REQUIRED") == "TRUE" || false,
+      invite_only: System.get_env("INVITE_ONLY") == "TRUE" || false,
+      verify_registration: System.get_env("VERIFY_REGISTRATION") == "TRUE" || true,
       post_max_length: System.get_env("POST_MAX_LENGTH") || 10_000,
       max_image_size: System.get_env("MAX_IMAGE_SIZE") || 10_485_760,
       max_avatar_size: System.get_env("MAX_AVATAR_SIZE") || 102_400,
@@ -268,17 +268,17 @@ if config_env() == :prod do
         default_avatar_shape: System.get_env("WEBSITE_DEFAULT_AVATAR_SHAPE") || "circle"
       },
       portal: %{
-        enabled: System.get_env("PORTAL_ENABLED") || false,
+        enabled: System.get_env("PORTAL_ENABLED") == "TRUE" || false,
         board_id: System.get_env("PORTAL_BOARD_ID") || nil
       },
       emailer: %{
-        ses_mode: System.get_env("EMAILER_SES_MODE") || false,
+        ses_mode: System.get_env("EMAILER_SES_MODE") == "TRUE" || false,
         options: %{
           from_address: System.get_env("EMAILER_OPTIONS_FROM_ADDRESS") || "info@epochtalk.com"
         }
       },
       images: %{
-        s3_mode: System.get_env("IMAGES_S3_MODE") || false,
+        s3_mode: System.get_env("IMAGES_S3_MODE") == "TRUE" || false,
         options: %{
           local_host: System.get_env("IMAGES_OPTIONS_LOCAL_HOST") || "http://localhost:4000"
         }

@@ -43,5 +43,28 @@ defmodule Test.EpochtalkServerWeb.Plugs.RateLimit do
         end
       end)
     end
+    test "when requesting POST, allows up to max requests per second", %{conn: conn} do
+      # load rate limits
+      {_, max_post_per_second} =
+        Application.get_env(:epochtalk_server, EpochtalkServer.RateLimiter)
+        |> Keyword.get(:post)
+      1..max_post_per_second+5
+      |> Enum.map(fn n ->
+        # test request rate limit
+        if n > max_post_per_second do
+          assert_raise RateLimitExceeded,
+                      "POST rate limit exceeded (#{max_post_per_second})",
+                      fn ->
+                        conn
+                        |> post(Routes.user_path(conn, :login, %{}))
+                      end
+        else
+          response =
+            conn
+            |> post(Routes.user_path(conn, :login, %{username: "logintest", password: "1"}))
+            |> json_response(400)
+        end
+      end)
+    end
   end
 end

@@ -45,14 +45,10 @@ defmodule EpochtalkServerWeb.Plugs.RateLimit do
       # bypass rate limits
       :bypass -> conn
       {:get, count} -> raise RateLimitExceeded, message: "GET rate limit exceeded (#{count})"
-      {:post, count} ->
-        ErrorHelpers.render_json_error(conn, 429, "POST rate limit exceeded (#{count})")
-      {:put, count} ->
-        ErrorHelpers.render_json_error(conn, 429, "PUT rate limit exceeded (#{count})")
-      {:patch, count} ->
-        ErrorHelpers.render_json_error(conn, 429, "PATCH rate limit exceeded (#{count})")
-      {:delete, count} ->
-        ErrorHelpers.render_json_error(conn, 429, "DELETE rate limit exceeded (#{count})")
+      {:post, count} -> raise RateLimitExceeded, message: "POST rate limit exceeded (#{count})"
+      {:put, count} -> raise RateLimitExceeded, message: "PUT rate limit exceeded (#{count})"
+      {:patch, count} -> raise RateLimitExceeded, message: "PATCH rate limit exceeded (#{count})"
+      {:delete, count} -> raise RateLimitExceeded, message: "DELETE rate limit exceeded (#{count})"
       {:rate_limiter_error, message} ->
         ErrorHelpers.render_json_error(conn, 500, "Rate limiter error #{message}")
       {:method_error, message} ->

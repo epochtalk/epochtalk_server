@@ -102,4 +102,21 @@ defmodule EpochtalkServerWeb.CustomErrors do
     """
     defexception plug_status: 400, message: "Payload too large"
   end
+
+  defmodule RateLimitExceeded do
+    @moduledoc """
+    Exception raised when api request rate limit is exceeded
+    """
+    @default_message "Rate limit exceeded"
+    defexception plug_status: 429, message: @default_message
+
+    @impl true
+    def exception(value) do
+      case value do
+        [message: nil] -> %RateLimitExceeded{}
+        [message: message] -> %RateLimitExceeded{message: message}
+        _ -> %RateLimitExceeded{}
+      end
+    end
+  end
 end

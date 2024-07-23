@@ -6,6 +6,9 @@ defmodule EpochtalkServerWeb.Plugs.RateLimit do
   use Plug.Builder
   alias EpochtalkServer.Auth.Guardian
   alias EpochtalkServerWeb.ErrorHelpers
+  alias EpochtalkServerWeb.CustomErrors.{
+    RateLimitExceeded
+  }
   import EpochtalkServer.RateLimiter, only: [check_rate_limited: 2]
 
   @methods ~w(GET POST PUT PATCH DELETE)
@@ -41,8 +44,7 @@ defmodule EpochtalkServerWeb.Plugs.RateLimit do
     else
       # bypass rate limits
       :bypass -> conn
-      {:get, count} ->
-        ErrorHelpers.render_json_error(conn, 429, "GET rate limit exceeded (#{count})")
+      {:get, count} -> raise RateLimitExceeded, message: "GET rate limit exceeded (#{count})"
       {:post, count} ->
         ErrorHelpers.render_json_error(conn, 429, "POST rate limit exceeded (#{count})")
       {:put, count} ->

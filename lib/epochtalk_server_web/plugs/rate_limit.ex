@@ -8,7 +8,6 @@ defmodule EpochtalkServerWeb.Plugs.RateLimit do
   alias EpochtalkServerWeb.ErrorHelpers
   import EpochtalkServer.RateLimiter, only: [check_rate_limited: 2]
 
-  @env Mix.env()
   @methods ~w(GET POST PUT PATCH DELETE)
   @method_to_atom_map %{
     "GET" => :get,
@@ -31,8 +30,8 @@ defmodule EpochtalkServerWeb.Plugs.RateLimit do
   Stores `User` IP when `User` is performing actions that modify data in the database
   """
   def rate_limit_request(conn, _opts) do
-    with IO.puts("\n\n\nRATE LIMIT REQUEST"),
-         %{method: method} <- conn |> IO.inspect(),
+    with :ok <- check_env(conn),
+         %{method: method} <- conn,
          {:ok, method} <- atomize_method(method),
          conn_id <- get_conn_id(conn),
          # ensure rate limit not exceeded
@@ -40,6 +39,8 @@ defmodule EpochtalkServerWeb.Plugs.RateLimit do
       Logger.debug("#{method} count for conn #{conn_id}: #{allow_count}")
       conn
     else
+      # bypass rate limits
+      :bypass -> conn
       {:get, count} ->
         ErrorHelpers.render_json_error(conn, 429, "GET rate limit exceeded (#{count})")
       {:post, count} ->
@@ -61,8 +62,15 @@ defmodule EpochtalkServerWeb.Plugs.RateLimit do
     end
   end
 
+  defp check_env(conn) do
+    if Mix.env() == :test && !Map.get(conn, :enforce_rate_limit) do
+      :bypass
+    else
+      :ok
+    end
+  end
   defp atomize_method(method) do
-    if method in @methods and @env != :test do
+    if method in @methods do
       case Map.get(@method_to_atom_map, method) do
         nil -> {:atomize_method_error, method}
         atom -> {:ok, atom}

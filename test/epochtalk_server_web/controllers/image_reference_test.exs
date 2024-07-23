@@ -129,7 +129,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ImageReference do
       }
     } do
       # reset hourly limits for user
-      RateLimiter.reset_rate_limit(:s3_hourly, user)
+      RateLimiter.reset_rate_limit(:s3_hourly, user.id)
       # build ten image reference attrs
       image_reference_attrs = %{
         images: build_list(10, :image_reference_attributes, length: 1000, file_type: "jpeg")

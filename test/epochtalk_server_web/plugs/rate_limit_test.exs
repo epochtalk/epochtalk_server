@@ -6,10 +6,9 @@ defmodule Test.EpochtalkServerWeb.Plugs.RateLimit do
   use Test.Support.ConnCase, async: false
   alias EpochtalkServerWeb.CustomErrors.RateLimitExceeded
 
+  @one_second_in_ms 1000
+
   setup %{conn: conn} do
-    one_second_in_ms = 1000
-    # reset 1 second rate limit timer
-    :timer.sleep(one_second_in_ms)
     # enforce rate limit during these tests
     conn = conn
     |> Map.put(:enforce_rate_limit, true)
@@ -17,6 +16,9 @@ defmodule Test.EpochtalkServerWeb.Plugs.RateLimit do
   end
 
   describe "rate_limit_request/2" do
+    # synchronously delay 1 second to reset rate limit timers
+    :timer.sleep(@one_second_in_ms)
+
     test "when requesting GET, allows up to max requests per second", %{conn: conn} do
       # load rate limits
       {_, max_get_per_second} =

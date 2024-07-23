@@ -10,7 +10,7 @@ defmodule Test.EpochtalkServerWeb.Plugs.RateLimit do
     # reset 1 second rate limit timer
     :timer.sleep(one_second_in_ms)
     # enforce rate limit during these tests
-    conn
+    conn = conn
     |> Map.put(:enforce_rate_limit, true)
     {:ok, conn: conn}
   end

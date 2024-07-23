@@ -17,17 +17,14 @@ defmodule Test.EpochtalkServerWeb.Plugs.RateLimit do
   end
 
   describe "rate_limit_request/2" do
-    test "when requesting, allows up to max requests per second", %{conn: conn} do
+    test "when requesting GET, allows up to max requests per second", %{conn: conn} do
       # load rate limits
-      rl_configs = Application.get_env(:epochtalk_server, EpochtalkServer.RateLimiter)
-      {_, max_get_per_second} = rl_configs |> Keyword.get(:get)
-      # {_, max_post_per_second} = rl_configs |> Keyword.get(:post)
-      # {_, max_put_per_second} = rl_configs |> Keyword.get(:put)
-      # {_, max_patch_per_second} = rl_configs |> Keyword.get(:patch)
-      # {_, max_delete_per_second} = rl_configs |> Keyword.get(:delete)
-      1..15
+      {_, max_get_per_second} =
+        Application.get_env(:epochtalk_server, EpochtalkServer.RateLimiter)
+        |> Keyword.get(:get)
+      1..max_get_per_second+5
       |> Enum.map(fn n ->
-        # test GET request rate limit
+        # test request rate limit
         if n > max_get_per_second do
           assert_raise RateLimitExceeded,
                       "GET rate limit exceeded (#{max_get_per_second})",

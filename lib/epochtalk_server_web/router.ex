@@ -36,6 +36,8 @@ defmodule EpochtalkServerWeb.Router do
     plug EpochtalkServerWeb.Plugs.TrackIp
     # Track user last active
     plug EpochtalkServerWeb.Plugs.UserLastActive
+    # Rate limit for GET, PUT, POST, PATCH, or DELETE requests
+    plug EpochtalkServerWeb.Plugs.RateLimit
   end
 
   scope "/api", EpochtalkServerWeb.Controllers do

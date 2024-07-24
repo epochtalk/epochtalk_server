@@ -69,6 +69,8 @@ defmodule Test.EpochtalkServerWeb.Plugs.RateLimit do
             conn
             |> post(Routes.user_path(conn, :login, %{username: "logintest", password: "1"}))
             |> json_response(400)
+          assert response["error"] == "Bad Request"
+          assert response["message"] == "Invalid credentials"
         end
       end)
     end
@@ -95,6 +97,8 @@ defmodule Test.EpochtalkServerWeb.Plugs.RateLimit do
             conn
             |> put(Routes.poll_path(conn, :update, -1), %{})
             |> json_response(400)
+          assert response["error"] == "Bad Request"
+          assert response["message"] == "Error, cannot edit poll"
         end
       end)
     end
@@ -120,6 +124,8 @@ defmodule Test.EpochtalkServerWeb.Plugs.RateLimit do
             conn
             |> delete(Routes.user_path(conn, :logout))
             |> json_response(400)
+          assert response["error"] == "Bad Request"
+          assert response["message"] == "Not logged in"
         end
       end)
     end

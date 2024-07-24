@@ -10,8 +10,10 @@ defmodule Test.EpochtalkServerWeb.Plugs.RateLimit do
 
   setup %{conn: conn} do
     # enforce rate limit during these tests
-    conn = conn
-    |> Map.put(:enforce_rate_limit, true)
+    conn =
+      conn
+      |> Map.put(:enforce_rate_limit, true)
+
     {:ok, conn: conn}
   end
 
@@ -24,40 +26,44 @@ defmodule Test.EpochtalkServerWeb.Plugs.RateLimit do
       {_, max_get_per_second} =
         Application.get_env(:epochtalk_server, EpochtalkServer.RateLimiter)
         |> Keyword.get(:get)
-      1..max_get_per_second+5
+
+      1..(max_get_per_second + 5)
       |> Enum.map(fn n ->
         # test request rate limit
         if n > max_get_per_second do
           assert_raise RateLimitExceeded,
-                      "GET rate limit exceeded (#{max_get_per_second})",
-                      fn ->
-                        conn
-                        |> get(Routes.board_path(conn, :by_category))
-                      end
+                       "GET rate limit exceeded (#{max_get_per_second})",
+                       fn ->
+                         conn
+                         |> get(Routes.board_path(conn, :by_category))
+                       end
         else
           response =
             conn
             |> get(Routes.board_path(conn, :by_category))
             |> json_response(200)
+
           assert response |> Map.get("boards") == []
         end
       end)
     end
+
     test "when requesting POST, allows up to max requests per second", %{conn: conn} do
       # load rate limits
       {_, max_post_per_second} =
         Application.get_env(:epochtalk_server, EpochtalkServer.RateLimiter)
         |> Keyword.get(:post)
-      1..max_post_per_second+5
+
+      1..(max_post_per_second + 5)
       |> Enum.map(fn n ->
         # test request rate limit
         if n > max_post_per_second do
           assert_raise RateLimitExceeded,
-                      "POST rate limit exceeded (#{max_post_per_second})",
-                      fn ->
-                        conn
-                        |> post(Routes.user_path(conn, :login, %{}))
-                      end
+                       "POST rate limit exceeded (#{max_post_per_second})",
+                       fn ->
+                         conn
+                         |> post(Routes.user_path(conn, :login, %{}))
+                       end
         else
           response =
             conn
@@ -66,22 +72,24 @@ defmodule Test.EpochtalkServerWeb.Plugs.RateLimit do
         end
       end)
     end
+
     @tag :authenticated
     test "when requesting PUT, allows up to max requests per second", %{conn: conn} do
       # load rate limits
       {_, max_put_per_second} =
         Application.get_env(:epochtalk_server, EpochtalkServer.RateLimiter)
         |> Keyword.get(:put)
-      1..max_put_per_second+5
+
+      1..(max_put_per_second + 5)
       |> Enum.map(fn n ->
         # test request rate limit
         if n > max_put_per_second do
           assert_raise RateLimitExceeded,
-                      "PUT rate limit exceeded (#{max_put_per_second})",
-                      fn ->
-                        conn
-                        |> put(Routes.poll_path(conn, :update, -1), %{})
-                      end
+                       "PUT rate limit exceeded (#{max_put_per_second})",
+                       fn ->
+                         conn
+                         |> put(Routes.poll_path(conn, :update, -1), %{})
+                       end
         else
           response =
             conn
@@ -90,21 +98,23 @@ defmodule Test.EpochtalkServerWeb.Plugs.RateLimit do
         end
       end)
     end
+
     test "when requesting DELETE, allows up to max requests per second", %{conn: conn} do
       # load rate limits
       {_, max_delete_per_second} =
         Application.get_env(:epochtalk_server, EpochtalkServer.RateLimiter)
         |> Keyword.get(:delete)
-      1..max_delete_per_second+5
+
+      1..(max_delete_per_second + 5)
       |> Enum.map(fn n ->
         # test request rate limit
         if n > max_delete_per_second do
           assert_raise RateLimitExceeded,
-                      "DELETE rate limit exceeded (#{max_delete_per_second})",
-                      fn ->
-                        conn
-                        |> delete(Routes.user_path(conn, :logout))
-                      end
+                       "DELETE rate limit exceeded (#{max_delete_per_second})",
+                       fn ->
+                         conn
+                         |> delete(Routes.user_path(conn, :logout))
+                       end
         else
           response =
             conn

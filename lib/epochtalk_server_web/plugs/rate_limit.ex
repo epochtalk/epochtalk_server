@@ -1,14 +1,17 @@
 defmodule EpochtalkServerWeb.Plugs.RateLimit do
   require Logger
+
   @moduledoc """
   Handles rate limiting for GET, PUT, POST, or PATCH operations
   """
   use Plug.Builder
   alias EpochtalkServer.Auth.Guardian
   alias EpochtalkServerWeb.ErrorHelpers
+
   alias EpochtalkServerWeb.CustomErrors.{
     RateLimitExceeded
   }
+
   import EpochtalkServer.RateLimiter, only: [check_rate_limited: 2]
 
   @methods ~w(GET POST PUT PATCH DELETE)
@@ -43,18 +46,33 @@ defmodule EpochtalkServerWeb.Plugs.RateLimit do
       conn
     else
       # bypass rate limits
-      :bypass -> conn
-      {:get, count} -> raise RateLimitExceeded, message: "GET rate limit exceeded (#{count})"
-      {:post, count} -> raise RateLimitExceeded, message: "POST rate limit exceeded (#{count})"
-      {:put, count} -> raise RateLimitExceeded, message: "PUT rate limit exceeded (#{count})"
-      {:patch, count} -> raise RateLimitExceeded, message: "PATCH rate limit exceeded (#{count})"
-      {:delete, count} -> raise RateLimitExceeded, message: "DELETE rate limit exceeded (#{count})"
+      :bypass ->
+        conn
+
+      {:get, count} ->
+        raise RateLimitExceeded, message: "GET rate limit exceeded (#{count})"
+
+      {:post, count} ->
+        raise RateLimitExceeded, message: "POST rate limit exceeded (#{count})"
+
+      {:put, count} ->
+        raise RateLimitExceeded, message: "PUT rate limit exceeded (#{count})"
+
+      {:patch, count} ->
+        raise RateLimitExceeded, message: "PATCH rate limit exceeded (#{count})"
+
+      {:delete, count} ->
+        raise RateLimitExceeded, message: "DELETE rate limit exceeded (#{count})"
+
       {:rate_limiter_error, message} ->
         ErrorHelpers.render_json_error(conn, 500, "Rate limiter error #{message}")
+
       {:method_error, message} ->
         ErrorHelpers.render_json_error(conn, 400, "Operation not supported (#{message})")
+
       {:atomize_method_error, message} ->
         ErrorHelpers.render_json_error(conn, 400, "Operation not convertible (#{message})")
+
       {:methodize_atom_error, message} ->
         ErrorHelpers.render_json_error(conn, 400, "Operation not unconvertible (#{message})")
     end
@@ -67,6 +85,7 @@ defmodule EpochtalkServerWeb.Plugs.RateLimit do
       :ok
     end
   end
+
   defp atomize_method(method) do
     if method in @methods do
       case Map.get(@method_to_atom_map, method) do

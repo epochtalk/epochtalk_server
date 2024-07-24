@@ -66,5 +66,28 @@ defmodule Test.EpochtalkServerWeb.Plugs.RateLimit do
         end
       end)
     end
+    test "when requesting DELETE, allows up to max requests per second", %{conn: conn} do
+      # load rate limits
+      {_, max_delete_per_second} =
+        Application.get_env(:epochtalk_server, EpochtalkServer.RateLimiter)
+        |> Keyword.get(:delete)
+      1..max_delete_per_second+5
+      |> Enum.map(fn n ->
+        # test request rate limit
+        if n > max_delete_per_second do
+          assert_raise RateLimitExceeded,
+                      "DELETE rate limit exceeded (#{max_delete_per_second})",
+                      fn ->
+                        conn
+                        |> delete(Routes.user_path(conn, :logout))
+                      end
+        else
+          response =
+            conn
+            |> delete(Routes.user_path(conn, :logout))
+            |> json_response(400)
+        end
+      end)
+    end
   end
 end

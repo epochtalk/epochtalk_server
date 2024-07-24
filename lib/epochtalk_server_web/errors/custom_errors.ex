@@ -37,6 +37,25 @@ defmodule EpochtalkServerWeb.CustomErrors do
     end
   end
 
+  # Rate Limiter error handling
+  # credo:disable-for-next-line
+  defmodule RateLimitExceeded do
+    @moduledoc """
+    Exception raised when api request rate limit is exceeded
+    """
+    @default_message "Rate limit exceeded"
+    defexception plug_status: 429, message: @default_message
+
+    @impl true
+    def exception(value) do
+      case value do
+        [message: nil] -> %RateLimitExceeded{}
+        [message: message] -> %RateLimitExceeded{message: message}
+        _ -> %RateLimitExceeded{}
+      end
+    end
+  end
+
   # API Payload Handling
   defmodule InvalidPayload do
     @moduledoc """
@@ -101,22 +120,5 @@ defmodule EpochtalkServerWeb.CustomErrors do
     Exception raised when api request payload is too large
     """
     defexception plug_status: 400, message: "Payload too large"
-  end
-
-  defmodule RateLimitExceeded do
-    @moduledoc """
-    Exception raised when api request rate limit is exceeded
-    """
-    @default_message "Rate limit exceeded"
-    defexception plug_status: 429, message: @default_message
-
-    @impl true
-    def exception(value) do
-      case value do
-        [message: nil] -> %RateLimitExceeded{}
-        [message: message] -> %RateLimitExceeded{message: message}
-        _ -> %RateLimitExceeded{}
-      end
-    end
   end
 end

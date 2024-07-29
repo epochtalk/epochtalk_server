@@ -20,6 +20,7 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
   alias EpochtalkServer.Models.UserThreadView
   alias EpochtalkServer.Models.MetadataThread
   alias EpochtalkServer.Models.ModerationLog
+  alias EpochtalkServer.Models.WatchThread
   alias EpochtalkServer.Models.WatchBoard
   alias EpochtalkServer.Models.AutoModeration
   alias EpochtalkServer.Models.UserActivity
@@ -219,6 +220,43 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
 
       _ ->
         ErrorHelpers.render_json_error(conn, 400, "Error, cannot get threads by board")
+    end
+  end
+
+  @doc """
+  Used to watch `Thread`
+  """
+  def watch(conn, attrs) do
+    with user <- Guardian.Plug.current_resource(conn),
+         thread_id <- Validate.cast(attrs, "thread_id", :integer, required: true),
+         :ok <- ACL.allow!(conn, "watchlist.watchThread"),
+         user_priority <- ACL.get_user_priority(conn),
+         {:can_read, {:ok, true}} <-
+           {:can_read, Board.get_read_access_by_thread_id(thread_id, user_priority)},
+         {:is_active, true} <-
+           {:is_active, User.is_active?(user.id)},
+         {:ok, watch_thread} <- WatchThread.create(user, thread_id) do
+      render(conn, :watch, thread: watch_thread)
+    else
+      {:can_read, {:ok, false}} ->
+        ErrorHelpers.render_json_error(
+          conn,
+          403,
+          "Unauthorized, you do not have permission to read"
+        )
+
+      {:is_active, false} ->
+        ErrorHelpers.render_json_error(
+          conn,
+          400,
+          "Account must be active to watch thread"
+        )
+
+      {:error, data} ->
+        ErrorHelpers.render_json_error(conn, 400, data)
+
+      _ ->
+        ErrorHelpers.render_json_error(conn, 400, "Error, cannot watch thread")
     end
   end
 

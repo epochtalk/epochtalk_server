@@ -54,6 +54,7 @@ defmodule EpochtalkServerWeb.Router do
     post "/threads/:thread_id/polls/lock", Poll, :lock
     put "/threads/:thread_id/polls", Poll, :update
     post "/threads/:thread_id/polls", Poll, :create
+    post "/watchlist/threads/:thread_id", Thread, :watch
     get "/posts/draft", PostDraft, :by_user_id
     put "/posts/draft", PostDraft, :upsert
     post "/posts", Post, :create

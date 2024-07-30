@@ -75,7 +75,7 @@ defmodule EpochtalkServer.Models.WatchThread do
   """
   @spec delete(user :: User.t(), thread_id :: non_neg_integer) ::
           {non_neg_integer(), nil | [term()]}
-  def delete(%User{} = user, thread_id) do
+  def delete(%{} = user, thread_id) do
     query =
       from w in WatchThread,
         where: w.user_id == ^user.id and w.thread_id == ^thread_id

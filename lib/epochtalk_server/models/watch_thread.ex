@@ -54,7 +54,7 @@ defmodule EpochtalkServer.Models.WatchThread do
 
     case Repo.insert(watch_thread_cs) do
       {:ok, db_watch_thread} ->
-        db_watch_thread
+        {:ok, db_watch_thread}
 
       {:error,
        %Ecto.Changeset{

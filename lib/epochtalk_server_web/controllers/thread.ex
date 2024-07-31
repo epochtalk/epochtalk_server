@@ -261,6 +261,43 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
   end
 
   @doc """
+  Used to unwatch `Thread`
+  """
+  def unwatch(conn, attrs) do
+    with user <- Guardian.Plug.current_resource(conn),
+         thread_id <- Validate.cast(attrs, "thread_id", :integer, required: true),
+         :ok <- ACL.allow!(conn, "watchlist.unwatchThread"),
+         user_priority <- ACL.get_user_priority(conn),
+         {:can_read, {:ok, true}} <-
+           {:can_read, Board.get_read_access_by_thread_id(thread_id, user_priority)},
+         {:is_active, true} <-
+           {:is_active, User.is_active?(user.id)},
+         {1, nil} <- WatchThread.delete(user, thread_id) do
+      render(conn, :watch, thread: %{thread_id: thread_id, user_id: user.id})
+    else
+      {:can_read, {:ok, false}} ->
+        ErrorHelpers.render_json_error(
+          conn,
+          403,
+          "Unauthorized, you do not have permission to read"
+        )
+
+      {:is_active, false} ->
+        ErrorHelpers.render_json_error(
+          conn,
+          400,
+          "Account must be active to unwatch thread"
+        )
+
+      {:error, data} ->
+        ErrorHelpers.render_json_error(conn, 400, data)
+
+      _ ->
+        ErrorHelpers.render_json_error(conn, 400, "Error, cannot unwatch thread")
+    end
+  end
+
+  @doc """
   Used to lock `Thread`
   """
   def lock(conn, attrs) do

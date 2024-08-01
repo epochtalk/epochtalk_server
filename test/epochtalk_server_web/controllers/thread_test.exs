@@ -303,6 +303,24 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
       assert response["locked"] == true
       assert response["thread_id"] == thread_id
     end
+
+    @tag authenticated: :global_mod
+    test "given thread that authenticated user moderates, does unlock poll", %{
+      conn: conn,
+      thread: %{post: %{thread_id: thread_id}}
+    } do
+      conn
+      |> post(Routes.thread_path(conn, :lock, thread_id), %{"locked" => true})
+      |> json_response(200)
+
+      response =
+        conn
+        |> post(Routes.thread_path(conn, :lock, thread_id), %{"locked" => false})
+        |> json_response(200)
+
+      assert response["locked"] == false
+      assert response["thread_id"] == thread_id
+    end
   end
 
   describe "sticky/2" do

@@ -4,7 +4,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
   alias EpochtalkServerWeb.CustomErrors.InvalidPermission
   alias EpochtalkServer.Models.User
 
-  setup %{users: %{user: user, admin_user: admin_user, super_admin_user: super_admin_user}} do
+  setup %{users: %{user: user, admin_user: admin_user, super_admin_user: super_admin_user, global_mod_user: global_mod_user}} do
     board = insert(:board)
     admin_board = insert(:board, viewable_by: 1)
     super_admin_board = insert(:board, viewable_by: 1, postable_by: 0)
@@ -31,6 +31,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     {
       :ok,
       user: user,
+      global_mod_user: global_mod_user,
       board: board,
       admin_board: admin_board,
       super_admin_board: super_admin_board,

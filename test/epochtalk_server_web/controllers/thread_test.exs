@@ -419,7 +419,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     end
 
     @tag authenticated: :global_mod
-    test "given thread that authenticated user moderates, does sticky poll", %{
+    test "given thread that authenticated user moderates, does sticky thread", %{
       conn: conn,
       thread: %{post: %{thread_id: thread_id}}
     } do

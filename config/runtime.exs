@@ -70,8 +70,7 @@ end
 EpochtalkServer.RateLimiter.init()
 
 ## Frontend configurations
-config :epochtalk_server, :frontend_config,
-%{
+config :epochtalk_server, :frontend_config, %{
   frontend_url: System.get_env("FRONTEND_URL", "http://localhost:8000"),
   backend_url: System.get_env("BACKEND_URL", "http://localhost:4000"),
   newbie_enabled: get_env_cast_bool_with_default.("NEWBIE_ENABLED", "FALSE"),

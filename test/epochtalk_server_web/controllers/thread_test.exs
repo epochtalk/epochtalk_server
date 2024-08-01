@@ -431,6 +431,24 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
       assert response["sticky"] == true
       assert response["thread_id"] == thread_id
     end
+
+    @tag authenticated: :global_mod
+    test "given thread that authenticated user moderates, does unsticky thread", %{
+      conn: conn,
+      thread: %{post: %{thread_id: thread_id}}
+    } do
+      conn
+      |> post(Routes.thread_path(conn, :sticky, thread_id), %{"sticky" => true})
+      |> json_response(200)
+
+      response =
+        conn
+        |> post(Routes.thread_path(conn, :sticky, thread_id), %{"sticky" => false})
+        |> json_response(200)
+
+      assert response["sticky"] == false
+      assert response["thread_id"] == thread_id
+    end
   end
 
   describe "purge/2" do

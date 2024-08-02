@@ -74,6 +74,15 @@ defmodule EpochtalkServer.Models.Configuration do
   ## === External Helper Functions ===
 
   @doc """
+  Deletes `Configuration` from database
+  """
+  @spec delete() :: {non_neg_integer(), nil | [term()]}
+  def delete() do
+    Configuration
+    |> Repo.delete_all()
+  end
+
+  @doc """
   Warms `:epochtalk_server[:frontend_config]` config variable using `Configuration` stored in database,
   if present. If there is no `Configuration` in the database, the default value is taken
   from `:epochtalk_server[:frontend_config]` and inserted into the database as the default
@@ -86,25 +95,18 @@ defmodule EpochtalkServer.Models.Configuration do
         # no configurations in database
         nil ->
           debug("Frontend Configurations not found, setting defaults in Database")
-          frontend_config = Application.get_env(:epochtalk_server, :frontend_config)
-
-          case Configuration.set_default(frontend_config) do
-            {:ok, configuration} ->
-              configuration.config
-
-            {:error, _} ->
-              raise(
-                "There was an issue with :epochtalk_server[:frontend_configs], please check config/config.exs"
-              )
-          end
+          # load configurations from application env
+          load_from_env()
 
         # configuration found in database
         configuration ->
           debug("Loading Frontend Configurations from Database")
 
           configuration.config
-          |> atomize_keys(deep: true)
       end
+      # result comes from database return (string keys)
+      # convert to atom keys
+      |> atomize_keys(deep: true)
 
     Application.put_env(:epochtalk_server, :frontend_config, frontend_config)
     set_git_revision()
@@ -122,6 +124,27 @@ defmodule EpochtalkServer.Models.Configuration do
   end
 
   ## === Private Helper Functions ===
+
+  @doc """
+  Load default values from `:epochtalk_server[:frontend_config]` and inserted
+  into the database as the default `Configuration`.
+  Returns map with string keys
+  """
+  @spec load_from_env() :: configuration :: map()
+  defp load_from_env() do
+    frontend_config =
+      Application.get_env(:epochtalk_server, :frontend_config)
+
+    case Configuration.set_default(frontend_config) do
+      {:ok, configuration} ->
+        configuration.config
+
+      {:error, _} ->
+        raise(
+          "There was an issue with :epochtalk_server[:frontend_configs], please check config/runtime.exs"
+        )
+    end
+  end
 
   defp set_git_revision() do
     # tag

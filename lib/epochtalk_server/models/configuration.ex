@@ -132,8 +132,7 @@ defmodule EpochtalkServer.Models.Configuration do
   """
   @spec load_from_env() :: configuration :: map()
   defp load_from_env() do
-    frontend_config =
-      Application.get_env(:epochtalk_server, :frontend_config)
+    frontend_config = Application.get_env(:epochtalk_server, :frontend_config)
 
     case Configuration.set_default(frontend_config) do
       {:ok, configuration} ->

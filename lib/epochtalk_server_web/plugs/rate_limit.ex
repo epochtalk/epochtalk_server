@@ -67,9 +67,6 @@ defmodule EpochtalkServerWeb.Plugs.RateLimit do
       {:rate_limiter_error, message} ->
         ErrorHelpers.render_json_error(conn, 500, "Rate limiter error #{message}")
 
-      {:method_error, message} ->
-        ErrorHelpers.render_json_error(conn, 400, "Operation not supported (#{message})")
-
       {:atomize_method_error, message} ->
         ErrorHelpers.render_json_error(conn, 400, "Operation not convertible (#{message})")
 
@@ -93,7 +90,8 @@ defmodule EpochtalkServerWeb.Plugs.RateLimit do
         atom -> {:ok, atom}
       end
     else
-      {:method_error, method}
+      # bypass rate limiter if http request method is not supported
+      :bypass
     end
   end
 

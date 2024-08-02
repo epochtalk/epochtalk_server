@@ -51,27 +51,27 @@ defmodule EpochtalkServer.RateLimiter do
   @default_count 1
 
   @doc """
-  Updates rate limit of specified type for specified user
+  Updates rate limit of specified action_type for specified user
   and checks if the action is within the limits
 
-  Returns type of action and error message on if action is denied
+  Returns action_type and error message on if action is denied
   """
-  @spec check_rate_limited(type :: atom, user_id :: String.t()) ::
+  @spec check_rate_limited(action_type :: atom, user_id :: String.t()) ::
           {:allow, count :: non_neg_integer}
-          | {type :: atom, count :: non_neg_integer}
+          | {action_type :: atom, count :: non_neg_integer}
           | {:error, message :: String.t()}
-  def check_rate_limited(type, user_id), do: check_rate_limited(type, user_id, @default_count)
+  def check_rate_limited(action_type, user_id), do: check_rate_limited(action_type, user_id, @default_count)
 
   @spec check_rate_limited(
-          type :: atom,
+          action_type :: atom,
           user_id :: String.t(),
           count :: non_neg_integer
         ) ::
           {:allow, count :: non_neg_integer}
-          | {type :: atom, count :: non_neg_integer}
+          | {action_type :: atom, count :: non_neg_integer}
           | {:error, message :: String.t()}
-  def check_rate_limited(type, user_id, count) do
-    type
+  def check_rate_limited(action_type, user_id, count) do
+    action_type
     |> get_configs()
     |> case do
       {:error, message} ->
@@ -79,39 +79,39 @@ defmodule EpochtalkServer.RateLimiter do
 
       {period, limit} ->
         # use Hammer to check rate limit
-        build_key(type, user_id)
+        build_key(action_type, user_id)
         |> check_rate_inc(period, limit, count)
         |> case do
           {:allow, count} -> {:allow, count}
-          {:deny, count} -> {type, count}
+          {:deny, count} -> {action_type, count}
         end
     end
   end
 
   @doc """
-  Resets rate limit of specified type for specified user
+  Resets rate limit of specified action_type for specified user
   """
-  @spec reset_rate_limit(type :: atom, user_id :: String.t()) ::
+  @spec reset_rate_limit(action_type :: atom, user_id :: String.t()) ::
           {:ok, num_reset :: non_neg_integer}
-  def reset_rate_limit(type, user_id) do
+  def reset_rate_limit(action_type, user_id) do
     # use Hammer to reset rate limit
-    build_key(type, user_id)
+    build_key(action_type, user_id)
     |> delete_buckets()
   end
 
-  # get configs and handle case when config type is missing
-  defp get_configs(type) do
+  # get configs and handle case when config action_type is missing
+  defp get_configs(action_type) do
     Application.get_env(:epochtalk_server, __MODULE__)
-    |> Keyword.get(type)
+    |> Keyword.get(action_type)
     |> case do
       # return error if config not found in map
-      nil -> {:error, "Could not get rate limit configs for type #{type}"}
+      nil -> {:error, "Could not get rate limit configs for action_type #{action_type}"}
       result -> result
     end
   end
 
   # build key with id for rate limit check
-  defp build_key(type, id) do
-    "#{to_string(type)}:user:#{id}"
+  defp build_key(action_type, id) do
+    "#{to_string(action_type)}:user:#{id}"
   end
 end

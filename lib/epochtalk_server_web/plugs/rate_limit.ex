@@ -64,9 +64,6 @@ defmodule EpochtalkServerWeb.Plugs.RateLimit do
       {:delete, count} ->
         raise RateLimitExceeded, message: "DELETE rate limit exceeded (#{count})"
 
-      {:atomize_method_error, message} ->
-        ErrorHelpers.render_json_error(conn, 400, "Operation not convertible (#{message})")
-
       {:methodize_atom_error, message} ->
         ErrorHelpers.render_json_error(conn, 400, "Operation not unconvertible (#{message})")
     end
@@ -82,10 +79,7 @@ defmodule EpochtalkServerWeb.Plugs.RateLimit do
 
   defp atomize_method(method) do
     if method in @methods do
-      case Map.get(@method_to_atom_map, method) do
-        nil -> {:atomize_method_error, method}
-        atom -> {:ok, atom}
-      end
+      {:ok, @method_to_atom_map[method]}
     else
       # bypass rate limiter if http request method is not supported
       :bypass

@@ -64,9 +64,6 @@ defmodule EpochtalkServerWeb.Plugs.RateLimit do
       {:delete, count} ->
         raise RateLimitExceeded, message: "DELETE rate limit exceeded (#{count})"
 
-      {:rate_limiter_error, message} ->
-        ErrorHelpers.render_json_error(conn, 500, "Rate limiter error #{message}")
-
       {:atomize_method_error, message} ->
         ErrorHelpers.render_json_error(conn, 400, "Operation not convertible (#{message})")
 

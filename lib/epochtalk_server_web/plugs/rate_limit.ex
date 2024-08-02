@@ -60,7 +60,7 @@ defmodule EpochtalkServerWeb.Plugs.RateLimit do
   end
 
   defp check_env(conn) do
-    if Mix.env() == :test && !Map.get(conn, :enforce_rate_limit) do
+    if unquote(Mix.env() == :test) && !Map.get(conn, :enforce_rate_limit) do
       :bypass
     else
       :ok

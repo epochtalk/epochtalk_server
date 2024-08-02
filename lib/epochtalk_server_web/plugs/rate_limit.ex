@@ -14,7 +14,6 @@ defmodule EpochtalkServerWeb.Plugs.RateLimit do
 
   import EpochtalkServer.RateLimiter, only: [check_rate_limited: 2]
 
-  @methods ~w(GET POST PUT PATCH DELETE)
   @method_to_atom_map %{
     "GET" => :get,
     "POST" => :post,
@@ -22,13 +21,7 @@ defmodule EpochtalkServerWeb.Plugs.RateLimit do
     "PATCH" => :patch,
     "DELETE" => :delete
   }
-  @atom_to_method_map %{
-    get: "GET",
-    post: "POST",
-    put: "PUT",
-    patch: "PATCH",
-    delete: "DELETE"
-  }
+  @methods @method_to_atom_map |> Map.keys()
 
   plug(:rate_limit_request)
 

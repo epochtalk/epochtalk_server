@@ -54,7 +54,7 @@ defmodule EpochtalkServer.RateLimiter do
   Updates rate limit of specified action_type for specified user
   and checks if the action is within the limits
 
-  Returns action_type and error message on if action is denied
+  Returns action_type and error message if action is denied
   """
   @spec check_rate_limited(action_type :: atom, user_id :: String.t()) ::
           {:allow, count :: non_neg_integer}

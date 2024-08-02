@@ -132,6 +132,27 @@ defmodule EpochtalkServer.Models.Configuration do
 
   ## === Private Helper Functions ===
 
+  @doc """
+  Load default values from `:epochtalk_server[:frontend_config]` and inserted
+  into the database as the default `Configuration`.
+  Returns map with string keys
+  """
+  @spec load_from_env() :: configuration :: map()
+  defp load_from_env() do
+    frontend_config =
+      Application.get_env(:epochtalk_server, :frontend_config)
+
+    case Configuration.set_default(frontend_config) do
+      {:ok, configuration} ->
+        configuration.config
+
+      {:error, _} ->
+        raise(
+          "There was an issue with :epochtalk_server[:frontend_configs], please check config/runtime.exs"
+        )
+    end
+  end
+
   defp set_git_revision() do
     # tag
     {tag, _} = System.cmd("git", ["tag", "--points-at", "HEAD", "v[0-9]*"])

@@ -95,17 +95,8 @@ defmodule EpochtalkServer.Models.Configuration do
         # no configurations in database
         nil ->
           debug("Frontend Configurations not found, setting defaults in Database")
-          frontend_config = Application.get_env(:epochtalk_server, :frontend_config)
-
-          case Configuration.set_default(frontend_config) do
-            {:ok, configuration} ->
-              configuration.config
-
-            {:error, _} ->
-              raise(
-                "There was an issue with :epochtalk_server[:frontend_configs], please check config/config.exs"
-              )
-          end
+          # load configurations from application env
+          load_from_env()
 
         # configuration found in database
         configuration ->

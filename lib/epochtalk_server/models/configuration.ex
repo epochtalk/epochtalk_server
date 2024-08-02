@@ -103,8 +103,10 @@ defmodule EpochtalkServer.Models.Configuration do
           debug("Loading Frontend Configurations from Database")
 
           configuration.config
-          |> atomize_keys(deep: true)
       end
+      # result comes from database return (string keys)
+      # convert to atom keys
+      |> atomize_keys(deep: true)
 
     Application.put_env(:epochtalk_server, :frontend_config, frontend_config)
     set_git_revision()

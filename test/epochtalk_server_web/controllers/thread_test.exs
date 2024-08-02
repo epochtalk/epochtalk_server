@@ -582,4 +582,77 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
       assert new_post_count == old_post_count - 1
     end
   end
+
+  describe "watch/2" do
+    test "when unauthenticated, returns Unauthorized error", %{
+      conn: conn,
+      thread: %{post: %{thread_id: thread_id}}
+    } do
+      response =
+        conn
+        |> post(Routes.thread_path(conn, :watch, thread_id), %{})
+        |> json_response(401)
+
+      assert response["error"] == "Unauthorized"
+      assert response["message"] == "No resource found"
+    end
+
+    @tag authenticated: :admin
+    test "given nonexistant thread, does not watch thread", %{
+      conn: conn
+    } do
+      response =
+        conn
+        |> post(Routes.thread_path(conn, :watch, -1), %{})
+        |> json_response(400)
+
+      assert response["error"] == "Bad Request"
+      assert response["message"] == "Error, cannot watch thread"
+    end
+
+    @tag authenticated: :mod
+    test "given admin thread and insufficient priority, throws forbidden read error", %{
+      conn: conn,
+      admin_thread: %{post: %{thread_id: thread_id}}
+    } do
+      response =
+        conn
+        |> post(Routes.thread_path(conn, :watch, thread_id), %{})
+        |> json_response(403)
+
+      assert response["error"] == "Forbidden"
+      assert response["message"] == "Unauthorized, you do not have permission to read"
+    end
+
+    @tag authenticated: :global_mod
+    test "given admin created thread and insufficient priority, throws forbidden error", %{
+      conn: conn,
+      super_admin_thread: %{post: %{thread_id: thread_id}}
+    } do
+      response =
+        conn
+        |> post(Routes.thread_path(conn, :watch, thread_id), %{})
+        |> json_response(403)
+
+      assert response["error"] == "Forbidden"
+
+      assert response["message"] ==
+               "Unauthorized, you do not have permission to read"
+    end
+
+    @tag authenticated: :global_mod
+    test "given a valid thread, does watch", %{
+      conn: conn,
+      thread: %{post: %{thread_id: thread_id}},
+      global_mod_user: %{id: user_id}
+    } do
+      response =
+        conn
+        |> post(Routes.thread_path(conn, :watch, thread_id), %{})
+        |> json_response(200)
+
+      assert response["thread_id"] == thread_id
+      assert response["user_id"] == user_id
+    end
+  end
 end

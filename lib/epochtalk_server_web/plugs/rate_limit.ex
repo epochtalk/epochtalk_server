@@ -38,7 +38,8 @@ defmodule EpochtalkServerWeb.Plugs.RateLimit do
       conn
     else
       # bypass rate limits
-      :bypass ->
+      # use tuple form with _ to pass dialyzer
+      {:bypass, _} ->
         conn
 
       {:get, count} ->
@@ -60,7 +61,7 @@ defmodule EpochtalkServerWeb.Plugs.RateLimit do
 
   defp check_env(conn) do
     if unquote(Mix.env() == :test) && !Map.get(conn, :enforce_rate_limit) do
-      :bypass
+      {:bypass, nil}
     else
       :ok
     end
@@ -71,7 +72,7 @@ defmodule EpochtalkServerWeb.Plugs.RateLimit do
       {:ok, @method_to_atom_map[method]}
     else
       # bypass rate limiter if http request method is not supported
-      :bypass
+      {:bypass, nil}
     end
   end
 

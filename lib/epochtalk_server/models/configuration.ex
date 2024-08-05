@@ -125,12 +125,9 @@ defmodule EpochtalkServer.Models.Configuration do
 
   ## === Private Helper Functions ===
 
-  @doc """
-  Load default values from `:epochtalk_server[:frontend_config]` and inserted
-  into the database as the default `Configuration`.
-  Returns map with string keys
-  """
-  @spec load_from_env() :: configuration :: map()
+  # Load default values from `:epochtalk_server[:frontend_config]` and inserted
+  # into the database as the default `Configuration`.
+  # Returns map with string keys
   defp load_from_env() do
     frontend_config = Application.get_env(:epochtalk_server, :frontend_config)
 

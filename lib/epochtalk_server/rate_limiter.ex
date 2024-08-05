@@ -60,7 +60,8 @@ defmodule EpochtalkServer.RateLimiter do
           {:allow, count :: non_neg_integer}
           | {action_type :: atom, count :: non_neg_integer}
           | {:error, message :: String.t()}
-  def check_rate_limited(action_type, user_id), do: check_rate_limited(action_type, user_id, @default_count)
+  def check_rate_limited(action_type, user_id),
+    do: check_rate_limited(action_type, user_id, @default_count)
 
   @spec check_rate_limited(
           action_type :: atom,
@@ -74,7 +75,8 @@ defmodule EpochtalkServer.RateLimiter do
     action_type
     |> get_configs()
     |> case do
-      {:error, message} -> raise message
+      {:error, message} ->
+        raise message
 
       {period, limit} ->
         # use Hammer to check rate limit

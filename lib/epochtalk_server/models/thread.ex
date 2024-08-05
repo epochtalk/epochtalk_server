@@ -244,6 +244,37 @@ defmodule EpochtalkServer.Models.Thread do
   end
 
   @doc """
+  Moves `Thread` to the specified `Board` given a `thread_id` and `board_id`
+  """
+  @spec move(thread_id :: non_neg_integer, board_id :: non_neg_integer) ::
+          {:ok, thread :: t()} | {:error, Ecto.Changeset.t()}
+  def move(thread_id, board_id) do
+    case Repo.transaction(fn ->
+      thread_lock_query =
+       from t in Thread,
+         join: mt in MetadataThread,
+         on: mt.thread_id == t.id,
+         where: t.id == ^thread_id,
+         select: {t, mt},
+         lock: "FOR UPDATE"
+
+      {thread, _thread_meta} = Repo.one(thread_lock_query)
+
+      else
+        {:error, :invalid_board_id}
+      end
+    end) do
+      # transaction success return purged thread data
+      {:ok, thread_data} ->
+        {:ok, thread_data}
+
+      # some other error
+      {:error, cs} ->
+        {:error, cs}
+    end
+  end
+
+  @doc """
   Sets boolean indicating if the specified `Thread` is sticky given a `Thread` id
   """
   @spec set_sticky(id :: integer, sticky :: boolean) :: {non_neg_integer, nil | [term()]}

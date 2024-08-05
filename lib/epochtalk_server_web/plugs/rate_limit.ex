@@ -6,7 +6,6 @@ defmodule EpochtalkServerWeb.Plugs.RateLimit do
   """
   use Plug.Builder
   alias EpochtalkServer.Auth.Guardian
-  alias EpochtalkServerWeb.ErrorHelpers
 
   alias EpochtalkServerWeb.CustomErrors.{
     RateLimitExceeded

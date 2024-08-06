@@ -260,6 +260,17 @@ defmodule EpochtalkServer.Models.Thread do
 
       {thread, _thread_meta} = Repo.one(thread_lock_query)
 
+      if thread.board_id != board_id do
+        old_board_lock_query =
+         from b in Board,
+           join: mb in MetadataBoard,
+           on: mb.board_id == b.id,
+           where: b.id == ^thread.board_id,
+           select: {b, mb},
+           lock: "FOR UPDATE"
+
+        {old_board, _old_board_meta} = Repo.one(old_board_lock_query)
+
       else
         {:error, :invalid_board_id}
       end

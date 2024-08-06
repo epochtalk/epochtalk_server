@@ -1,8 +1,12 @@
 defmodule EpochtalkServer.Models.MetadataBoard do
   use Ecto.Schema
   import Ecto.Changeset
+  import Ecto.Query
   alias EpochtalkServer.Repo
   alias EpochtalkServer.Models.Board
+  alias EpochtalkServer.Models.Post
+  alias EpochtalkServer.Models.Thread
+  alias EpochtalkServer.Models.User
   alias EpochtalkServer.Models.MetadataBoard
 
   @moduledoc """
@@ -85,4 +89,44 @@ defmodule EpochtalkServer.Models.MetadataBoard do
   @spec insert(metadata_board :: t()) ::
           {:ok, metadata_board :: t()} | {:error, Ecto.Changeset.t()}
   def insert(%MetadataBoard{} = metadata_board), do: Repo.insert(metadata_board)
+
+  @doc """
+  Queries then updates `MetadataBoard` info for the specified Board`
+  """
+  @spec update_last_post_info(board_id :: non_neg_integer) ::
+          {:ok, metadata_board :: t()} | {:error, Ecto.Changeset.t()}
+  def update_last_post_info(board_id) do
+    # query most recent post in thread and it's authoring user's data
+    last_post_subquery =
+      from t in Thread,
+        left_join: p in Post,
+        on: t.id == p.thread_id,
+        left_join: u in User,
+        on: u.id == p.user_id,
+        where: t.board_id == ^board_id,
+        order_by: [desc: p.created_at],
+        limit: 1,
+        select: %{thread_id: p.thread_id, created_at: p.created_at, username: u.username, position: p.position}
+
+    # query most recent thread in board, join last post subquery
+    last_post_query =
+      from t in Thread,
+        left_join: p in Post,
+        on: p.thread_id == t.id,
+        left_join: lp in subquery(last_post_subquery),
+        on: p.thread_id == lp.thread_id,
+        where: t.board_id == ^board_id,
+        order_by: [desc: t.created_at],
+        limit: 1,
+        select: %{
+          board_id: t.board_id,
+          thread_id: t.id,
+          title: p.content["title"],
+          username: lp.username,
+          created_at: lp.created_at,
+          position: lp.position
+        }
+
+    Repo.one(last_post_query)
+  end
 end

@@ -10,6 +10,8 @@ defmodule EpochtalkServer.Models.Thread do
   alias EpochtalkServer.Models.Board
   alias EpochtalkServer.Models.Poll
   alias EpochtalkServer.Models.Post
+  alias EpochtalkServer.Models.Profile
+  alias EpochtalkServer.Models.Role
 
   @moduledoc """
   `Thread` model, for performing actions relating to forum threads
@@ -24,7 +26,10 @@ defmodule EpochtalkServer.Models.Thread do
           post_count: non_neg_integer | nil,
           created_at: NaiveDateTime.t() | nil,
           imported_at: NaiveDateTime.t() | nil,
-          updated_at: NaiveDateTime.t() | nil
+          updated_at: NaiveDateTime.t() | nil,
+          poster_ids: [non_neg_integer] | nil,
+          user_id: non_neg_integer | nil,
+          title: String.t() | nil
         }
   @derive {Jason.Encoder,
            only: [
@@ -50,6 +55,9 @@ defmodule EpochtalkServer.Models.Thread do
     field :imported_at, :naive_datetime
     field :updated_at, :naive_datetime
     has_many :posts, Post
+    field :poster_ids, {:array, :integer}, virtual: true
+    field :user_id, :integer, virtual: true
+    field :title, :string, virtual: true
     # field :smf_topic, :map, virtual: true
   end
 
@@ -165,6 +173,92 @@ defmodule EpochtalkServer.Models.Thread do
       {:error, cs} ->
         {:error, cs}
     end
+  end
+
+  @doc """
+  Fully purges a `Thread` from the database
+
+  This sets off a trigger that updates the metadata.boards' thread_count and
+  post_count accordingly. It also updates the metadata.boards' last post
+  information.
+  """
+  @spec purge(thread_id :: non_neg_integer) ::
+          {:ok, thread :: t()} | {:error, Ecto.Changeset.t()}
+  def purge(thread_id) do
+    case Repo.transaction(fn ->
+           # Get all poster's user id's from thread and decrement post count
+           # decrement each poster's post count by how many post they have in the
+           # current thread
+           poster_ids_query =
+             from p in Post,
+               where: p.thread_id == ^thread_id,
+               select: p.user_id
+
+           poster_ids = Repo.all(poster_ids_query)
+
+           # Update user profile post count for each post
+           Enum.each(poster_ids, &Profile.decrement_post_count(&1))
+
+           # Get title and user_id of first post in thread
+           query_first_thread_post_data =
+             from p in Post,
+               left_join: t in Thread,
+               on: t.id == p.thread_id,
+               left_join: b in Board,
+               on: b.id == t.board_id,
+               where: p.thread_id == ^thread_id,
+               order_by: [p.created_at],
+               limit: 1,
+               select: %{
+                 title: p.content["title"],
+                 user_id: p.user_id,
+                 board_name: b.name
+               }
+
+           # get unique poster ids to send emails
+           unique_poster_ids = Enum.uniq(poster_ids)
+
+           # query thread before purging
+           purged_thread =
+             Repo.one!(query_first_thread_post_data)
+             |> Map.put(:poster_ids, unique_poster_ids)
+
+           # remove thread
+           delete_query =
+             from t in Thread,
+               where: t.id == ^thread_id
+
+           Repo.delete_all(delete_query)
+
+           # return data for purged thread
+           purged_thread
+         end) do
+      # transaction success return purged thread data
+      {:ok, thread_data} ->
+        {:ok, thread_data}
+
+      # some other error
+      {:error, cs} ->
+        {:error, cs}
+    end
+  end
+
+  @doc """
+  Sets boolean indicating if the specified `Thread` is sticky given a `Thread` id
+  """
+  @spec set_sticky(id :: integer, sticky :: boolean) :: {non_neg_integer, nil | [term()]}
+  def set_sticky(id, sticky) when is_integer(id) and is_boolean(sticky) do
+    query = from t in Thread, where: t.id == ^id
+    Repo.update_all(query, set: [sticky: sticky])
+  end
+
+  @doc """
+  Sets boolean indicating if the specified `Thread` is locked given a `Thread` id
+  """
+  @spec set_locked(id :: integer, locked :: boolean) :: {non_neg_integer, nil | [term()]}
+  def set_locked(id, locked) when is_integer(id) and is_boolean(locked) do
+    query = from t in Thread, where: t.id == ^id
+    Repo.update_all(query, set: [locked: locked])
   end
 
   @doc """
@@ -425,7 +519,14 @@ defmodule EpochtalkServer.Models.Thread do
         }
 
     first_post = Repo.one(query_first_thread_post_data)
-    Map.put(first_post, :user, Repo.preload(first_post.user, :roles))
+
+    # any time we preload a users roles, we need to handle empty and banned roles
+    preloaded_user =
+      Repo.preload(first_post.user, :roles)
+      |> Role.handle_empty_user_roles()
+      |> Role.handle_banned_user_role()
+
+    Map.put(first_post, :user, preloaded_user)
   end
 
   @doc """

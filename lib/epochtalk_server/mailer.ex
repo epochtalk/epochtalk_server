@@ -80,6 +80,44 @@ defmodule EpochtalkServer.Mailer do
   end
 
   @doc """
+  Sends thread purge email
+  """
+  @spec send_thread_purge(email_data :: map) :: {:ok, term} | {:error, term}
+  def send_thread_purge(%{
+        email: email,
+        title: thread_title,
+        username: username,
+        action: action,
+        mod_username: mod_username
+      }) do
+    config = Application.get_env(:epochtalk_server, :frontend_config)
+    frontend_url = config[:frontend_url]
+    website_title = config[:website][:title]
+    from_address = config[:emailer][:options][:from_address]
+
+    content =
+      generate_from_base_template(
+        """
+        <h3>"#{thread_title}" a thread that you #{action}, has been deleted</h3>
+        User "#{mod_username}" has deleted the thread named "#{thread_title}". If you wish to know why this thread was removed please contact a member of the forum moderation team.<br /><br />
+        <a href="#{frontend_url}">Visit Forum</a><br /><br />
+        <small>Raw site URL: #{frontend_url}</small>
+        """,
+        config
+      )
+
+    new()
+    |> to({username, email})
+    |> from({website_title, from_address})
+    |> subject(
+      "[#{website_title}] \"#{thread_title}\" a thread that you #{action}, has been deleted"
+    )
+    |> html_body(content)
+    |> deliver()
+    |> handle_delivered_email()
+  end
+
+  @doc """
   Sends mention notification email
   """
   @spec send_mention_notification(email_data :: map) :: {:ok, term} | {:error, term}

@@ -584,7 +584,7 @@ defmodule EpochtalkServerWeb.Helpers.ModerationLogHelper do
   def get_display_data(action_type) when action_type == "threads.purge" do
     %{
       get_display_text: fn data ->
-        "purged thread '#{data.title}' created by user '#{data.author.username}' from board '#{data.old_board_name}'"
+        "purged thread '#{data.title}' created by user '#{data.author.username}' from board '#{data.board_name}'"
       end,
       get_display_url: fn _ -> nil end,
       data_query: fn data ->

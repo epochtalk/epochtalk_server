@@ -26,7 +26,13 @@ defmodule EpochtalkServerWeb.Plugs.TrackIp do
   defp maybe_save_user_ip_to_database(conn) do
     register_before_send(conn, fn conn ->
       user = Guardian.Plug.current_resource(conn)
-      user_ip = conn.remote_ip |> :inet_parse.ntoa() |> to_string
+
+      user_ip =
+        conn.remote_ip
+        |> :inet_parse.ntoa()
+        |> to_string
+        |> String.replace("::ffff:", "")
+
       UserIp.maybe_track(user, user_ip)
       conn
     end)

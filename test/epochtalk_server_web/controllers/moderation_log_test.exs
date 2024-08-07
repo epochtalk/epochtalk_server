@@ -1072,7 +1072,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
           obj: %{
             title: thread_title,
             user_id: user.id,
-            old_board_name: board.name
+            board_name: board.name
           }
         })
 

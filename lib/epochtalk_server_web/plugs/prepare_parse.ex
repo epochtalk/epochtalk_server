@@ -34,9 +34,15 @@ defmodule EpochtalkServerWeb.Plugs.PrepareParse do
   end
 
   defp try_decode(conn, body) do
-    case Jason.decode(body) do
-      {:ok, _result} -> update_in(conn.assigns[:raw_body], &[body | &1 || []])
-      {:error, _reason} -> raise MalformedPayload
+    %{method: method} = conn
+
+    if method in @methods and @env != :test do
+      case Jason.decode(body) do
+        {:ok, _result} -> update_in(conn.assigns[:raw_body], &[body | &1 || []])
+        {:error, _reason} -> raise MalformedPayload
+      end
+    else
+      conn
     end
   end
 end

@@ -38,7 +38,7 @@ defmodule Test.EpochtalkServerWeb.Helpers.ACL do
 
       updated_frontend_config =
         original_frontend_config
-        |> Keyword.put(:login_required, true)
+        |> Map.put(:login_required, true)
 
       Application.put_env(:epochtalk_server, :frontend_config, updated_frontend_config)
 
@@ -149,7 +149,7 @@ defmodule Test.EpochtalkServerWeb.Helpers.ACL do
 
       updated_frontend_config =
         original_frontend_config
-        |> Keyword.put(:login_required, true)
+        |> Map.put(:login_required, true)
 
       Application.put_env(:epochtalk_server, :frontend_config, updated_frontend_config)
 
@@ -223,7 +223,7 @@ defmodule Test.EpochtalkServerWeb.Helpers.ACL do
 
       updated_frontend_config =
         original_frontend_config
-        |> Keyword.put(:login_required, true)
+        |> Map.put(:login_required, true)
 
       Application.put_env(:epochtalk_server, :frontend_config, updated_frontend_config)
 

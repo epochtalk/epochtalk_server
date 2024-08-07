@@ -4,7 +4,14 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
   alias EpochtalkServerWeb.CustomErrors.InvalidPermission
   alias EpochtalkServer.Models.User
 
-  setup %{users: %{user: user, admin_user: admin_user, super_admin_user: super_admin_user}} do
+  setup %{
+    users: %{
+      user: user,
+      admin_user: admin_user,
+      super_admin_user: super_admin_user,
+      global_mod_user: global_mod_user
+    }
+  } do
     board = insert(:board)
     admin_board = insert(:board, viewable_by: 1)
     super_admin_board = insert(:board, viewable_by: 1, postable_by: 0)
@@ -31,6 +38,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     {
       :ok,
       user: user,
+      global_mod_user: global_mod_user,
       board: board,
       admin_board: admin_board,
       super_admin_board: super_admin_board,
@@ -302,6 +310,24 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
       assert response["locked"] == true
       assert response["thread_id"] == thread_id
     end
+
+    @tag authenticated: :global_mod
+    test "given thread that authenticated user moderates, does unlock poll", %{
+      conn: conn,
+      thread: %{post: %{thread_id: thread_id}}
+    } do
+      conn
+      |> post(Routes.thread_path(conn, :lock, thread_id), %{"locked" => true})
+      |> json_response(200)
+
+      response =
+        conn
+        |> post(Routes.thread_path(conn, :lock, thread_id), %{"locked" => false})
+        |> json_response(200)
+
+      assert response["locked"] == false
+      assert response["thread_id"] == thread_id
+    end
   end
 
   describe "sticky/2" do
@@ -400,7 +426,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     end
 
     @tag authenticated: :global_mod
-    test "given thread that authenticated user moderates, does sticky poll", %{
+    test "given thread that authenticated user moderates, does sticky thread", %{
       conn: conn,
       thread: %{post: %{thread_id: thread_id}}
     } do
@@ -410,6 +436,24 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
         |> json_response(200)
 
       assert response["sticky"] == true
+      assert response["thread_id"] == thread_id
+    end
+
+    @tag authenticated: :global_mod
+    test "given thread that authenticated user moderates, does unsticky thread", %{
+      conn: conn,
+      thread: %{post: %{thread_id: thread_id}}
+    } do
+      conn
+      |> post(Routes.thread_path(conn, :sticky, thread_id), %{"sticky" => true})
+      |> json_response(200)
+
+      response =
+        conn
+        |> post(Routes.thread_path(conn, :sticky, thread_id), %{"sticky" => false})
+        |> json_response(200)
+
+      assert response["sticky"] == false
       assert response["thread_id"] == thread_id
     end
   end
@@ -543,6 +587,170 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
       new_post_count = updated_user.profile.post_count
 
       assert new_post_count == old_post_count - 1
+    end
+  end
+
+  describe "watch/2" do
+    test "when unauthenticated, returns Unauthorized error", %{
+      conn: conn,
+      thread: %{post: %{thread_id: thread_id}}
+    } do
+      response =
+        conn
+        |> post(Routes.thread_path(conn, :watch, thread_id), %{})
+        |> json_response(401)
+
+      assert response["error"] == "Unauthorized"
+      assert response["message"] == "No resource found"
+    end
+
+    @tag authenticated: :admin
+    test "given nonexistant thread, does not watch thread", %{
+      conn: conn
+    } do
+      response =
+        conn
+        |> post(Routes.thread_path(conn, :watch, -1), %{})
+        |> json_response(400)
+
+      assert response["error"] == "Bad Request"
+      assert response["message"] == "Error, cannot watch thread"
+    end
+
+    @tag authenticated: :mod
+    test "given admin thread and insufficient priority, throws forbidden read error", %{
+      conn: conn,
+      admin_thread: %{post: %{thread_id: thread_id}}
+    } do
+      response =
+        conn
+        |> post(Routes.thread_path(conn, :watch, thread_id), %{})
+        |> json_response(403)
+
+      assert response["error"] == "Forbidden"
+      assert response["message"] == "Unauthorized, you do not have permission to read"
+    end
+
+    @tag authenticated: :global_mod
+    test "given admin created thread and insufficient priority, throws forbidden error", %{
+      conn: conn,
+      super_admin_thread: %{post: %{thread_id: thread_id}}
+    } do
+      response =
+        conn
+        |> post(Routes.thread_path(conn, :watch, thread_id), %{})
+        |> json_response(403)
+
+      assert response["error"] == "Forbidden"
+
+      assert response["message"] ==
+               "Unauthorized, you do not have permission to read"
+    end
+
+    @tag authenticated: :global_mod
+    test "given a valid thread, does watch", %{
+      conn: conn,
+      thread: %{post: %{thread_id: thread_id}},
+      global_mod_user: %{id: user_id}
+    } do
+      response =
+        conn
+        |> post(Routes.thread_path(conn, :watch, thread_id), %{})
+        |> json_response(200)
+
+      assert response["thread_id"] == thread_id
+      assert response["user_id"] == user_id
+    end
+  end
+
+  describe "unwatch/2" do
+    test "when unauthenticated, returns Unauthorized error", %{
+      conn: conn,
+      thread: %{post: %{thread_id: thread_id}}
+    } do
+      response =
+        conn
+        |> delete(Routes.thread_path(conn, :unwatch, thread_id), %{})
+        |> json_response(401)
+
+      assert response["error"] == "Unauthorized"
+      assert response["message"] == "No resource found"
+    end
+
+    @tag authenticated: :admin
+    test "given nonexistant thread, does not unwatch thread", %{
+      conn: conn
+    } do
+      response =
+        conn
+        |> delete(Routes.thread_path(conn, :unwatch, -1), %{})
+        |> json_response(400)
+
+      assert response["error"] == "Bad Request"
+      assert response["message"] == "Error, cannot unwatch thread"
+    end
+
+    @tag authenticated: :mod
+    test "given admin thread and insufficient priority, throws forbidden read error", %{
+      conn: conn,
+      admin_thread: %{post: %{thread_id: thread_id}}
+    } do
+      response =
+        conn
+        |> delete(Routes.thread_path(conn, :unwatch, thread_id), %{})
+        |> json_response(403)
+
+      assert response["error"] == "Forbidden"
+      assert response["message"] == "Unauthorized, you do not have permission to read"
+    end
+
+    @tag authenticated: :global_mod
+    test "given admin created thread and insufficient priority, throws forbidden error", %{
+      conn: conn,
+      super_admin_thread: %{post: %{thread_id: thread_id}}
+    } do
+      response =
+        conn
+        |> delete(Routes.thread_path(conn, :unwatch, thread_id), %{})
+        |> json_response(403)
+
+      assert response["error"] == "Forbidden"
+
+      assert response["message"] ==
+               "Unauthorized, you do not have permission to read"
+    end
+
+    @tag authenticated: :global_mod
+    test "given a valid thread that is not watched, does not unwatch thread", %{
+      conn: conn,
+      thread: %{post: %{thread_id: thread_id}}
+    } do
+      response =
+        conn
+        |> delete(Routes.thread_path(conn, :unwatch, thread_id), %{})
+        |> json_response(400)
+
+      assert response["error"] == "Bad Request"
+      assert response["message"] == "Error, cannot unwatch thread"
+    end
+
+    @tag authenticated: :global_mod
+    test "given a valid thread, does unwatch", %{
+      conn: conn,
+      thread: %{post: %{thread_id: thread_id}},
+      global_mod_user: %{id: user_id}
+    } do
+      conn
+      |> post(Routes.thread_path(conn, :watch, thread_id), %{})
+      |> json_response(200)
+
+      response =
+        conn
+        |> delete(Routes.thread_path(conn, :unwatch, thread_id), %{})
+        |> json_response(200)
+
+      assert response["thread_id"] == thread_id
+      assert response["user_id"] == user_id
     end
   end
 end

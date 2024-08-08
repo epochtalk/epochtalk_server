@@ -93,9 +93,8 @@ defmodule EpochtalkServer.Models.MetadataBoard do
   @doc """
   Queries then updates `MetadataBoard` info for the specified Board`
   """
-  @spec update_last_post_info(board_id :: non_neg_integer) ::
-          {non_neg_integer(), nil | [term()]}
-  def update_last_post_info(board_id) do
+  @spec update_last_post_info(metadata_board :: t(), board_id :: non_neg_integer) :: t()
+  def update_last_post_info(metadata_board, board_id) do
     # query most recent post in thread and it's authoring user's data
     last_post_subquery =
       from t in Thread,
@@ -105,7 +104,6 @@ defmodule EpochtalkServer.Models.MetadataBoard do
         on: u.id == p.user_id,
         where: t.board_id == ^board_id,
         order_by: [desc: p.created_at],
-        limit: 1,
         select: %{
           thread_id: p.thread_id,
           created_at: p.created_at,
@@ -133,29 +131,25 @@ defmodule EpochtalkServer.Models.MetadataBoard do
         }
 
     # update board metadata using queried data
-    update_query =
-      from mb in MetadataBoard,
-        where: mb.board_id == ^board_id
-
-    params =
+    updated_metadata_board  =
       if lp = Repo.one(last_post_query) do
-        [
+        change(metadata_board,
           last_post_username: lp.username,
           last_post_created_at: lp.created_at,
           last_thread_id: lp.thread_id,
           last_thread_title: lp.title,
           last_post_position: lp.position
-        ]
+        )
       else
-        [
+        change(metadata_board,
           last_post_username: nil,
           last_post_created_at: nil,
           last_thread_id: nil,
           last_thread_title: nil,
           last_post_position: nil
-        ]
+        )
       end
 
-    Repo.update_all(update_query, set: params)
+    Repo.update!(updated_metadata_board)
   end
 end

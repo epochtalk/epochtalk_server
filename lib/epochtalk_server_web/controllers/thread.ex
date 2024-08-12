@@ -519,7 +519,7 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
   def move(conn, attrs) do
     with user <- Guardian.Plug.current_resource(conn),
          thread_id <- Validate.cast(attrs, "thread_id", :integer, required: true),
-         board_id <- Validate.cast(attrs, "board_id", :integer, required: true),
+         new_board_id <- Validate.cast(attrs, "new_board_id", :integer, required: true),
          :ok <- ACL.allow!(conn, "threads.move"),
          user_priority <- ACL.get_user_priority(conn),
          {:can_read, {:ok, true}} <-
@@ -532,7 +532,7 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
            {:board_banned, BoardBan.banned_from_board?(user, thread_id: thread_id)},
          {:bypass_thread_owner, true} <-
            {:bypass_thread_owner, can_authed_user_bypass_owner_on_thread_move(user, thread_id)},
-         {:ok, old_board_data} <- Thread.move(thread_id, board_id) do
+         {:ok, old_board_data} <- Thread.move(thread_id, new_board_id) do
       render(conn, :move, old_board_data: old_board_data)
     else
       {:can_read, {:ok, false}} ->

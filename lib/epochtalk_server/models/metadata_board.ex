@@ -131,7 +131,7 @@ defmodule EpochtalkServer.Models.MetadataBoard do
         }
 
     # update board metadata using queried data
-    updated_metadata_board  =
+    updated_metadata_board =
       if lp = Repo.one(last_post_query) do
         change(metadata_board,
           last_post_username: lp.username,

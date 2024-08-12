@@ -512,7 +512,6 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
     end
   end
 
-
   @doc """
   Used to move a `Thread`
   """

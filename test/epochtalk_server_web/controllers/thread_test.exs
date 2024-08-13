@@ -223,7 +223,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     end
 
     @tag authenticated: :mod
-    test "given admin thread and insufficient priority, throws forbidden read error", %{
+    test "when authenticated with insufficient priority, given admin thread, throws forbidden read error", %{
       conn: conn,
       admin_thread: %{post: %{thread_id: thread_id}}
     } do
@@ -237,7 +237,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     end
 
     @tag authenticated: :admin
-    test "given super admin thread and insufficient priority, throws forbidden write error", %{
+    test "when authenticated with insufficient priority, given super admin thread, throws forbidden write error", %{
       conn: conn,
       super_admin_thread: %{post: %{thread_id: thread_id}}
     } do
@@ -251,7 +251,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     end
 
     @tag authenticated: :banned
-    test "given banned authenticated user, throws InvalidPermission forbidden error", %{
+    test "when authenticated with banned user, throws InvalidPermission forbidden error", %{
       conn: conn,
       thread: %{post: %{thread_id: thread_id}}
     } do
@@ -263,7 +263,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     end
 
     @tag authenticated: :global_mod
-    test "given admin created thread and insufficient priority, throws forbidden error", %{
+    test "when authenticated with insufficient priority, given admin created, throws forbidden error", %{
       conn: conn,
       admin_created_thread: %{post: %{thread_id: thread_id}}
     } do
@@ -351,7 +351,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     end
 
     @tag authenticated: :mod
-    test "given admin thread and insufficient priority, throws forbidden read error", %{
+    test "when authenticated with insufficient priority, given admin thread, throws forbidden read error", %{
       conn: conn,
       admin_thread: %{post: %{thread_id: thread_id}}
     } do
@@ -365,7 +365,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     end
 
     @tag authenticated: :admin
-    test "given super admin thread and insufficient priority, throws forbidden write error", %{
+    test "when authenticated with insufficient priority, given super admin thread, throws forbidden write error", %{
       conn: conn,
       super_admin_thread: %{post: %{thread_id: thread_id}}
     } do
@@ -379,7 +379,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     end
 
     @tag authenticated: :banned
-    test "given banned authenticated user, throws InvalidPermission forbidden error", %{
+    test "when authenticated with banned user, throws InvalidPermission forbidden error", %{
       conn: conn,
       thread: %{post: %{thread_id: thread_id}}
     } do
@@ -391,7 +391,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     end
 
     @tag authenticated: :global_mod
-    test "given admin created thread and insufficient priority, throws forbidden error", %{
+    test "when authenticated with insufficient priority, given admin created, throws forbidden error", %{
       conn: conn,
       admin_created_thread: %{post: %{thread_id: thread_id}}
     } do
@@ -419,7 +419,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     end
 
     @tag authenticated: :global_mod
-    test "given thread that authenticated user moderates, does sticky thread", %{
+    test "given thread that authenticated user moderates, stickies thread", %{
       conn: conn,
       thread: %{post: %{thread_id: thread_id}}
     } do
@@ -433,7 +433,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     end
 
     @tag authenticated: :global_mod
-    test "given thread that authenticated user moderates, does unsticky thread", %{
+    test "given thread that authenticated user moderates, unstickies thread", %{
       conn: conn,
       thread: %{post: %{thread_id: thread_id}}
     } do
@@ -479,7 +479,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     end
 
     @tag authenticated: :mod
-    test "given admin thread and insufficient priority, throws forbidden read error", %{
+    test "when authenticated with insufficient priority, given admin thread, throws forbidden read error", %{
       conn: conn,
       admin_thread: %{post: %{thread_id: thread_id}}
     } do
@@ -493,7 +493,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     end
 
     @tag authenticated: :admin
-    test "given super admin thread and insufficient priority, throws forbidden write error", %{
+    test "when authenticated with insufficient priority, given super admin thread, throws forbidden write error", %{
       conn: conn,
       super_admin_thread: %{post: %{thread_id: thread_id}}
     } do
@@ -507,7 +507,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     end
 
     @tag authenticated: :banned
-    test "given banned authenticated user, throws InvalidPermission forbidden error", %{
+    test "when authenticated with banned user, throws InvalidPermission forbidden error", %{
       conn: conn,
       thread: %{post: %{thread_id: thread_id}}
     } do
@@ -519,7 +519,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     end
 
     @tag authenticated: :global_mod
-    test "given admin created thread and insufficient priority, throws forbidden error", %{
+    test "when authenticated with insufficient priority, given admin created thread, throws forbidden error", %{
       conn: conn,
       admin_created_thread: %{post: %{thread_id: thread_id}}
     } do
@@ -547,7 +547,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     end
 
     @tag authenticated: :global_mod
-    test "given thread that authenticated user moderates, does purge thread", %{
+    test "given thread that authenticated user moderates, purges thread", %{
       conn: conn,
       thread: %{post: %{thread_id: thread_id}},
       users: %{user: %{id: user_id}}
@@ -557,14 +557,14 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
         |> delete(Routes.thread_path(conn, :purge, thread_id), %{})
         |> json_response(200)
 
-      assert String.slice(response["board_name"], 0..4) == "Board"
-      assert String.slice(response["title"], 0..11) == "Thread title"
+      assert String.starts_with?(response["board_name"], "Board")
+      assert String.starts_with?(response["title"], "Thread title")
       assert response["poster_ids"] == [user_id]
       assert response["user_id"] == user_id
     end
 
     @tag authenticated: :global_mod
-    test "after purging thread, does decreases thread posters' post count", %{
+    test "after purging thread, decreases thread posters' post count", %{
       conn: conn,
       thread: %{post: %{thread_id: thread_id}},
       users: %{user: %{id: user_id}}
@@ -611,7 +611,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     end
 
     @tag authenticated: :mod
-    test "given admin thread and insufficient priority, throws forbidden read error", %{
+    test "when authenticated with insufficient priority, given admin thread, throws forbidden read error", %{
       conn: conn,
       admin_thread: %{post: %{thread_id: thread_id}}
     } do
@@ -625,7 +625,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     end
 
     @tag authenticated: :global_mod
-    test "given admin created thread and insufficient priority, throws forbidden error", %{
+    test "when authenticated with insufficient priority, given admin created thread, throws forbidden error", %{
       conn: conn,
       super_admin_thread: %{post: %{thread_id: thread_id}}
     } do
@@ -641,7 +641,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     end
 
     @tag authenticated: :global_mod
-    test "given a valid thread, does watch", %{
+    test "given a valid thread, watches", %{
       conn: conn,
       thread: %{post: %{thread_id: thread_id}},
       users: %{global_mod_user: %{id: user_id}}
@@ -684,7 +684,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     end
 
     @tag authenticated: :mod
-    test "given admin thread and insufficient priority, throws forbidden read error", %{
+    test "when authenticated with insufficient priority, given admin thread, throws forbidden read error", %{
       conn: conn,
       admin_thread: %{post: %{thread_id: thread_id}}
     } do
@@ -698,7 +698,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     end
 
     @tag authenticated: :global_mod
-    test "given admin created thread and insufficient priority, throws forbidden error", %{
+    test "when authenticated with insufficient priority, given admin created, throws forbidden error", %{
       conn: conn,
       super_admin_thread: %{post: %{thread_id: thread_id}}
     } do
@@ -728,7 +728,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     end
 
     @tag authenticated: :global_mod
-    test "given a valid thread, does unwatch", %{
+    test "given a valid thread, unwatches", %{
       conn: conn,
       thread: %{post: %{thread_id: thread_id}},
       users: %{global_mod_user: %{id: user_id}}

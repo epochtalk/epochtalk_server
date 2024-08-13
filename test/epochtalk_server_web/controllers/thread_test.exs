@@ -298,7 +298,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     end
 
     @tag authenticated: :global_mod
-    test "given thread that authenticated user moderates, does lock poll", %{
+    test "given thread that authenticated user moderates, locks thread", %{
       conn: conn,
       thread: %{post: %{thread_id: thread_id}}
     } do
@@ -312,7 +312,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     end
 
     @tag authenticated: :global_mod
-    test "given thread that authenticated user moderates, does unlock poll", %{
+    test "given thread that authenticated user moderates, unlocks thread", %{
       conn: conn,
       thread: %{post: %{thread_id: thread_id}}
     } do

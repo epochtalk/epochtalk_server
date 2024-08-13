@@ -8,8 +8,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     users: %{
       user: user,
       admin_user: admin_user,
-      super_admin_user: super_admin_user,
-      global_mod_user: global_mod_user
+      super_admin_user: super_admin_user
     }
   } do
     board = insert(:board)
@@ -26,9 +25,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
       ]
     )
 
-    threads = build_list(3, :thread, board: board, user: user)
-    admin_threads = build_list(3, :thread, board: admin_board, user: admin_user)
-    super_admin_threads = build_list(3, :thread, board: super_admin_board, user: super_admin_user)
+    factory_threads = build_list(3, :thread, board: board, user: user)
 
     thread = build(:thread, board: board, user: user)
     admin_thread = build(:thread, board: admin_board, user: admin_user)
@@ -37,14 +34,10 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
 
     {
       :ok,
-      user: user,
-      global_mod_user: global_mod_user,
       board: board,
       admin_board: admin_board,
       super_admin_board: super_admin_board,
-      threads: threads,
-      admin_threads: admin_threads,
-      super_admin_threads: super_admin_threads,
+      factory_threads: factory_threads,
       thread: thread,
       admin_thread: admin_thread,
       admin_created_thread: admin_created_thread,
@@ -66,7 +59,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     test "given an id for existing board, gets threads", %{
       conn: conn,
       board: board,
-      threads: factory_threads
+      factory_threads: factory_threads
     } do
       response =
         conn
@@ -298,7 +291,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     end
 
     @tag authenticated: :global_mod
-    test "given thread that authenticated user moderates, does lock poll", %{
+    test "given thread that authenticated user moderates, locks thread", %{
       conn: conn,
       thread: %{post: %{thread_id: thread_id}}
     } do
@@ -312,7 +305,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     end
 
     @tag authenticated: :global_mod
-    test "given thread that authenticated user moderates, does unlock poll", %{
+    test "given thread that authenticated user moderates, unlocks thread", %{
       conn: conn,
       thread: %{post: %{thread_id: thread_id}}
     } do
@@ -557,7 +550,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     test "given thread that authenticated user moderates, does purge thread", %{
       conn: conn,
       thread: %{post: %{thread_id: thread_id}},
-      user: %{id: user_id}
+      users: %{user: %{id: user_id}}
     } do
       response =
         conn
@@ -573,8 +566,8 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     @tag authenticated: :global_mod
     test "after purging thread, does decreases thread posters' post count", %{
       conn: conn,
-      threads: [%{post: %{thread_id: thread_id}} | _],
-      user: %{id: user_id}
+      thread: %{post: %{thread_id: thread_id}},
+      users: %{user: %{id: user_id}}
     } do
       {:ok, user} = User.by_id(user_id)
       old_post_count = user.profile.post_count
@@ -651,7 +644,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     test "given a valid thread, does watch", %{
       conn: conn,
       thread: %{post: %{thread_id: thread_id}},
-      global_mod_user: %{id: user_id}
+      users: %{global_mod_user: %{id: user_id}}
     } do
       response =
         conn
@@ -738,7 +731,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     test "given a valid thread, does unwatch", %{
       conn: conn,
       thread: %{post: %{thread_id: thread_id}},
-      global_mod_user: %{id: user_id}
+      users: %{global_mod_user: %{id: user_id}}
     } do
       conn
       |> post(Routes.thread_path(conn, :watch, thread_id), %{})

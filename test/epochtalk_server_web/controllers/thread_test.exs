@@ -26,9 +26,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
       ]
     )
 
-    threads = build_list(3, :thread, board: board, user: user)
-    admin_threads = build_list(3, :thread, board: admin_board, user: admin_user)
-    super_admin_threads = build_list(3, :thread, board: super_admin_board, user: super_admin_user)
+    factory_threads = build_list(3, :thread, board: board, user: user)
 
     thread = build(:thread, board: board, user: user)
     admin_thread = build(:thread, board: admin_board, user: admin_user)
@@ -42,9 +40,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
       board: board,
       admin_board: admin_board,
       super_admin_board: super_admin_board,
-      threads: threads,
-      admin_threads: admin_threads,
-      super_admin_threads: super_admin_threads,
+      factory_threads: factory_threads,
       thread: thread,
       admin_thread: admin_thread,
       admin_created_thread: admin_created_thread,
@@ -66,7 +62,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     test "given an id for existing board, gets threads", %{
       conn: conn,
       board: board,
-      threads: factory_threads
+      factory_threads: factory_threads
     } do
       response =
         conn
@@ -573,7 +569,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     @tag authenticated: :global_mod
     test "after purging thread, does decreases thread posters' post count", %{
       conn: conn,
-      threads: [%{post: %{thread_id: thread_id}} | _],
+      thread: %{post: %{thread_id: thread_id}},
       user: %{id: user_id}
     } do
       {:ok, user} = User.by_id(user_id)

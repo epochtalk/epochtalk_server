@@ -8,8 +8,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     users: %{
       user: user,
       admin_user: admin_user,
-      super_admin_user: super_admin_user,
-      global_mod_user: global_mod_user
+      super_admin_user: super_admin_user
     }
   } do
     board = insert(:board)
@@ -35,8 +34,6 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
 
     {
       :ok,
-      user: user,
-      global_mod_user: global_mod_user,
       board: board,
       admin_board: admin_board,
       super_admin_board: super_admin_board,
@@ -553,7 +550,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     test "given thread that authenticated user moderates, does purge thread", %{
       conn: conn,
       thread: %{post: %{thread_id: thread_id}},
-      user: %{id: user_id}
+      users: %{user: %{id: user_id}}
     } do
       response =
         conn
@@ -570,7 +567,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     test "after purging thread, does decreases thread posters' post count", %{
       conn: conn,
       thread: %{post: %{thread_id: thread_id}},
-      user: %{id: user_id}
+      users: %{user: %{id: user_id}}
     } do
       {:ok, user} = User.by_id(user_id)
       old_post_count = user.profile.post_count
@@ -647,7 +644,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     test "given a valid thread, does watch", %{
       conn: conn,
       thread: %{post: %{thread_id: thread_id}},
-      global_mod_user: %{id: user_id}
+      users: %{global_mod_user: %{id: user_id}}
     } do
       response =
         conn
@@ -734,7 +731,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     test "given a valid thread, does unwatch", %{
       conn: conn,
       thread: %{post: %{thread_id: thread_id}},
-      global_mod_user: %{id: user_id}
+      users: %{global_mod_user: %{id: user_id}}
     } do
       conn
       |> post(Routes.thread_path(conn, :watch, thread_id), %{})

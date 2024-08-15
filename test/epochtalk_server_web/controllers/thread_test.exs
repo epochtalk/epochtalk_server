@@ -12,6 +12,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     }
   } do
     board = insert(:board)
+    test_move_board = insert(:board)
     admin_board = insert(:board, viewable_by: 1)
     super_admin_board = insert(:board, viewable_by: 1, postable_by: 0)
     category = insert(:category)
@@ -21,7 +22,8 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
         [category: category, view_order: 0],
         [board: board, category: category, view_order: 1],
         [board: admin_board, category: category, view_order: 2],
-        [board: super_admin_board, category: category, view_order: 3]
+        [board: super_admin_board, category: category, view_order: 3],
+        [board: test_move_board, category: category, view_order: 4]
       ]
     )
 
@@ -35,6 +37,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     {
       :ok,
       board: board,
+      test_move_board: test_move_board,
       admin_board: admin_board,
       super_admin_board: super_admin_board,
       factory_threads: factory_threads,

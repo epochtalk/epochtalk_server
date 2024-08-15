@@ -197,6 +197,20 @@ defmodule EpochtalkServer.Models.User do
   end
 
   @doc """
+  Gets a `User` email from the database by `id` list
+  """
+  @spec email_by_id_list(id :: [integer]) ::
+          [user_data :: map()] | {:error, :user_not_found}
+  def email_by_id_list([h | _] = id_list) when is_list(id_list) and is_integer(h) do
+    query =
+      from u in User,
+        where: u.id in ^id_list,
+        select: %{email: u.email, user_id: u.id, username: u.username}
+
+    Repo.all(query)
+  end
+
+  @doc """
   Gets a `User` username from the database by `id`
   """
   @spec username_by_id(id :: integer) :: username :: String.t() | nil
@@ -327,7 +341,7 @@ defmodule EpochtalkServer.Models.User do
           {:ok, user :: t()} | {:error, :ban_error}
   def handle_malicious_user(%User{} = user, ip) do
     # convert ip tuple into string
-    ip_str = ip |> :inet_parse.ntoa() |> to_string
+    ip_str = ip |> :inet_parse.ntoa() |> to_string |> String.replace("::ffff:", "")
     # calculate user's malicious score from ip, nil if less than 1
     malicious_score = BannedAddress.calculate_malicious_score_from_ip(ip_str)
     # set user's malicious score

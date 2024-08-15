@@ -63,6 +63,15 @@ defmodule EpochtalkServer.Models.Profile do
   end
 
   @doc """
+  Decrements the `post_count` field given a `User` id
+  """
+  @spec decrement_post_count(user_id :: non_neg_integer) :: {non_neg_integer(), nil}
+  def decrement_post_count(user_id) do
+    query = from p in Profile, where: p.user_id == ^user_id
+    Repo.update_all(query, inc: [post_count: -1])
+  end
+
+  @doc """
   Creates `Profile` record for a specific `User`
   """
   @spec create(user_id :: non_neg_integer, attrs :: map | nil) ::

@@ -10,6 +10,7 @@ defmodule Test.Support.Factories.BoardMapping do
   ])
   """
   alias EpochtalkServer.Models.BoardMapping
+  alias EpochtalkServer.Models.MetadataBoard
 
   defmacro __using__(_opts) do
     quote do
@@ -19,6 +20,8 @@ defmodule Test.Support.Factories.BoardMapping do
             view_order: view_order,
             category: category
           }) do
+        # create metadata row for board
+        MetadataBoard.insert(%MetadataBoard{board_id: board.id})
         %{
           id: board.id,
           name: board.name,
@@ -30,6 +33,8 @@ defmodule Test.Support.Factories.BoardMapping do
 
       # generate attributes for board under parent board
       def board_mapping_attributes_factory(%{board: board, view_order: view_order, parent: parent}) do
+        # create metadata row for board
+        MetadataBoard.insert(%MetadataBoard{board_id: board.id})
         %{
           id: board.id,
           name: board.name,

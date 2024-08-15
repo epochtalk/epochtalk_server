@@ -28,9 +28,9 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     factory_threads = build_list(3, :thread, board: board, user: user)
 
     thread = build(:thread, board: board, user: user)
-    admin_thread = build(:thread, board: admin_board, user: admin_user)
-    admin_created_thread = build(:thread, board: board, user: admin_user)
-    super_admin_thread = build(:thread, board: super_admin_board, user: super_admin_user)
+    admin_priority_thread = build(:thread, board: board, user: admin_user)
+    admin_board_thread = build(:thread, board: admin_board, user: admin_user)
+    super_admin_board_thread = build(:thread, board: super_admin_board, user: super_admin_user)
 
     {
       :ok,
@@ -39,9 +39,9 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
       super_admin_board: super_admin_board,
       factory_threads: factory_threads,
       thread: thread,
-      admin_thread: admin_thread,
-      admin_created_thread: admin_created_thread,
-      super_admin_thread: super_admin_thread
+      admin_board_thread: admin_board_thread,
+      admin_priority_thread: admin_priority_thread,
+      super_admin_board_thread: super_admin_board_thread
     }
   end
 
@@ -223,9 +223,9 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     end
 
     @tag authenticated: :mod
-    test "when authenticated with insufficient priority, given admin thread, throws forbidden read error", %{
+    test "when authenticated with insufficient permissions, throws forbidden read error", %{
       conn: conn,
-      admin_thread: %{post: %{thread_id: thread_id}}
+      admin_board_thread: %{post: %{thread_id: thread_id}}
     } do
       response =
         conn
@@ -237,9 +237,9 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     end
 
     @tag authenticated: :admin
-    test "when authenticated with insufficient priority, given super admin thread, throws forbidden write error", %{
+    test "when authenticated with insufficient permissions, throws forbidden write error", %{
       conn: conn,
-      super_admin_thread: %{post: %{thread_id: thread_id}}
+      super_admin_board_thread: %{post: %{thread_id: thread_id}}
     } do
       response =
         conn
@@ -263,9 +263,9 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     end
 
     @tag authenticated: :global_mod
-    test "when authenticated with insufficient priority, given admin created, throws forbidden error", %{
+    test "when authenticated with insufficient priority, throws forbidden error", %{
       conn: conn,
-      admin_created_thread: %{post: %{thread_id: thread_id}}
+      admin_priority_thread: %{post: %{thread_id: thread_id}}
     } do
       response =
         conn
@@ -351,9 +351,9 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     end
 
     @tag authenticated: :mod
-    test "when authenticated with insufficient priority, given admin thread, throws forbidden read error", %{
+    test "when authenticated with insufficient permissions, throws forbidden read error", %{
       conn: conn,
-      admin_thread: %{post: %{thread_id: thread_id}}
+      admin_board_thread: %{post: %{thread_id: thread_id}}
     } do
       response =
         conn
@@ -365,9 +365,9 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     end
 
     @tag authenticated: :admin
-    test "when authenticated with insufficient priority, given super admin thread, throws forbidden write error", %{
+    test "when authenticated with insufficient permissions, throws forbidden write error", %{
       conn: conn,
-      super_admin_thread: %{post: %{thread_id: thread_id}}
+      super_admin_board_thread: %{post: %{thread_id: thread_id}}
     } do
       response =
         conn
@@ -391,9 +391,9 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     end
 
     @tag authenticated: :global_mod
-    test "when authenticated with insufficient priority, given admin created, throws forbidden error", %{
+    test "when authenticated with insufficient priority, throws forbidden error", %{
       conn: conn,
-      admin_created_thread: %{post: %{thread_id: thread_id}}
+      admin_priority_thread: %{post: %{thread_id: thread_id}}
     } do
       response =
         conn
@@ -479,9 +479,9 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     end
 
     @tag authenticated: :mod
-    test "when authenticated with insufficient priority, given admin thread, throws forbidden read error", %{
+    test "when authenticated with insufficient permissions, throws forbidden read error", %{
       conn: conn,
-      admin_thread: %{post: %{thread_id: thread_id}}
+      admin_board_thread: %{post: %{thread_id: thread_id}}
     } do
       response =
         conn
@@ -493,9 +493,9 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     end
 
     @tag authenticated: :admin
-    test "when authenticated with insufficient priority, given super admin thread, throws forbidden write error", %{
+    test "when authenticated with insufficient permissions, throws forbidden write error", %{
       conn: conn,
-      super_admin_thread: %{post: %{thread_id: thread_id}}
+      super_admin_board_thread: %{post: %{thread_id: thread_id}}
     } do
       response =
         conn
@@ -519,9 +519,9 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     end
 
     @tag authenticated: :global_mod
-    test "when authenticated with insufficient priority, given admin created thread, throws forbidden error", %{
+    test "when authenticated with insufficient priority, throws forbidden error", %{
       conn: conn,
-      admin_created_thread: %{post: %{thread_id: thread_id}}
+      admin_priority_thread: %{post: %{thread_id: thread_id}}
     } do
       response =
         conn
@@ -611,9 +611,9 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     end
 
     @tag authenticated: :mod
-    test "when authenticated with insufficient priority, given admin thread, throws forbidden read error", %{
+    test "when authenticated with insufficient permissions, throws forbidden read error", %{
       conn: conn,
-      admin_thread: %{post: %{thread_id: thread_id}}
+      admin_board_thread: %{post: %{thread_id: thread_id}}
     } do
       response =
         conn
@@ -625,9 +625,9 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     end
 
     @tag authenticated: :global_mod
-    test "when authenticated with insufficient priority, given admin created thread, throws forbidden error", %{
+    test "when authenticated with insufficient permissions, throws forbidden error", %{
       conn: conn,
-      super_admin_thread: %{post: %{thread_id: thread_id}}
+      super_admin_board_thread: %{post: %{thread_id: thread_id}}
     } do
       response =
         conn
@@ -684,9 +684,9 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     end
 
     @tag authenticated: :mod
-    test "when authenticated with insufficient priority, given admin thread, throws forbidden read error", %{
+    test "when authenticated with insufficient permissions, throws forbidden read error", %{
       conn: conn,
-      admin_thread: %{post: %{thread_id: thread_id}}
+      admin_board_thread: %{post: %{thread_id: thread_id}}
     } do
       response =
         conn
@@ -698,9 +698,9 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     end
 
     @tag authenticated: :global_mod
-    test "when authenticated with insufficient priority, given admin created, throws forbidden error", %{
+    test "when authenticated with insufficient permissions, throws forbidden error", %{
       conn: conn,
-      super_admin_thread: %{post: %{thread_id: thread_id}}
+      super_admin_board_thread: %{post: %{thread_id: thread_id}}
     } do
       response =
         conn

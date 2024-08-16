@@ -341,7 +341,7 @@ defmodule EpochtalkServer.Models.User do
           {:ok, user :: t()} | {:error, :ban_error}
   def handle_malicious_user(%User{} = user, ip) do
     # convert ip tuple into string
-    ip_str = ip |> :inet_parse.ntoa() |> to_string |> String.replace("::ffff:", "")
+    ip_str = ip |> :inet.ntoa() |> to_string |> String.replace("::ffff:", "")
     # calculate user's malicious score from ip, nil if less than 1
     malicious_score = BannedAddress.calculate_malicious_score_from_ip(ip_str)
     # set user's malicious score

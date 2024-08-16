@@ -29,7 +29,7 @@ defmodule EpochtalkServerWeb.Plugs.TrackIp do
 
       user_ip =
         conn.remote_ip
-        |> :inet_parse.ntoa()
+        |> :inet.ntoa()
         |> to_string
         |> String.replace("::ffff:", "")
 

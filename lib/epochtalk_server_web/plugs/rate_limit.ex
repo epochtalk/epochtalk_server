@@ -78,7 +78,7 @@ defmodule EpochtalkServerWeb.Plugs.RateLimit do
 
   defp get_conn_id(conn) do
     case Guardian.Plug.current_resource(conn) do
-      nil -> conn.remote_ip |> :inet_parse.ntoa() |> to_string
+      nil -> conn.remote_ip |> :inet.ntoa() |> to_string
       %{id: id} -> id
     end
   end

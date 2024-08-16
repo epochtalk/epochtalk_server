@@ -456,7 +456,7 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
       # parse moderator's ip, remove ipv6 prefix if present
       mod_ip_str =
         conn.remote_ip
-        |> :inet_parse.ntoa()
+        |> :inet.ntoa()
         |> to_string
         |> String.replace("::ffff:", "")
 
@@ -611,7 +611,7 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
     # convert ip tuple into string
     viewer_ip =
       conn.remote_ip
-      |> :inet_parse.ntoa()
+      |> :inet.ntoa()
       |> to_string
       |> String.replace("::ffff:", "")
 

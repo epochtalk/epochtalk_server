@@ -50,11 +50,16 @@ defmodule EpochtalkServerWeb.Router do
     get "/admin/roles/all", Role, :all
     put "/admin/roles/update", Role, :update
     post "/threads", Thread, :create
+    post "/threads/:thread_id/lock", Thread, :lock
+    post "/threads/:thread_id/sticky", Thread, :sticky
+    delete "/threads/:thread_id", Thread, :purge
     post "/threads/:thread_id/polls/vote", Poll, :vote
     delete "/threads/:thread_id/polls/vote", Poll, :delete_vote
     post "/threads/:thread_id/polls/lock", Poll, :lock
     put "/threads/:thread_id/polls", Poll, :update
     post "/threads/:thread_id/polls", Poll, :create
+    post "/watchlist/threads/:thread_id", Thread, :watch
+    delete "/watchlist/threads/:thread_id", Thread, :unwatch
     get "/posts/draft", PostDraft, :by_user_id
     put "/posts/draft", PostDraft, :upsert
     post "/posts", Post, :create

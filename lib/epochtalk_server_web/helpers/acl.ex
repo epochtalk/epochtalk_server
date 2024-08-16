@@ -89,7 +89,7 @@ defmodule EpochtalkServerWeb.Helpers.ACL do
       when is_binary(permission_path) do
     # check if login is required to view forum
     config = Application.get_env(:epochtalk_server, :frontend_config)
-    login_required = config[:login_required] || config["login_required"]
+    login_required = config[:login_required]
     # default to user's roles > anonymous > private
     user_roles =
       if user == nil,
@@ -135,7 +135,7 @@ defmodule EpochtalkServerWeb.Helpers.ACL do
   Helper which returns the active User's priority.
 
   Will return priority of role with highest permissions if the user is authenticated, otherwise anonymous priority
-  is returned if `frontend_config.login_required` is false otherwise private role priority is returned. If
+  is returned if `frontend_config[:login_required]` is false otherwise private role priority is returned. If
   user is banned the Banned role priority is returned.
   """
   # TODO(akinsey): review chain of authenticated user's roles. See if banned and user roles are being defaulted

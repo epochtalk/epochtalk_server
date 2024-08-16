@@ -5,6 +5,7 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
   Controller For `Thread` related API requests
   """
   alias EpochtalkServer.Auth.Guardian
+  alias EpochtalkServer.Mailer
   alias EpochtalkServerWeb.ErrorHelpers
   alias EpochtalkServerWeb.Helpers.Validate
   alias EpochtalkServerWeb.Helpers.ACL
@@ -18,6 +19,8 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
   alias EpochtalkServer.Models.BoardModerator
   alias EpochtalkServer.Models.UserThreadView
   alias EpochtalkServer.Models.MetadataThread
+  alias EpochtalkServer.Models.ModerationLog
+  alias EpochtalkServer.Models.WatchThread
   alias EpochtalkServer.Models.WatchBoard
   alias EpochtalkServer.Models.AutoModeration
   alias EpochtalkServer.Models.UserActivity
@@ -224,6 +227,295 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
   end
 
   @doc """
+  Used to watch `Thread`
+  """
+  def watch(conn, attrs) do
+    with user <- Guardian.Plug.current_resource(conn),
+         thread_id <- Validate.cast(attrs, "thread_id", :integer, required: true),
+         :ok <- ACL.allow!(conn, "watchlist.watchThread"),
+         user_priority <- ACL.get_user_priority(conn),
+         {:can_read, {:ok, true}} <-
+           {:can_read, Board.get_read_access_by_thread_id(thread_id, user_priority)},
+         {:is_active, true} <-
+           {:is_active, User.is_active?(user.id)},
+         {:ok, watch_thread} <- WatchThread.create(user, thread_id) do
+      render(conn, :watch, thread: watch_thread)
+    else
+      {:can_read, {:ok, false}} ->
+        ErrorHelpers.render_json_error(
+          conn,
+          403,
+          "Unauthorized, you do not have permission to read"
+        )
+
+      {:is_active, false} ->
+        ErrorHelpers.render_json_error(
+          conn,
+          400,
+          "Account must be active to watch thread"
+        )
+
+      {:error, data} ->
+        ErrorHelpers.render_json_error(conn, 400, data)
+
+      _ ->
+        ErrorHelpers.render_json_error(conn, 400, "Error, cannot watch thread")
+    end
+  end
+
+  @doc """
+  Used to unwatch `Thread`
+  """
+  def unwatch(conn, attrs) do
+    with user <- Guardian.Plug.current_resource(conn),
+         thread_id <- Validate.cast(attrs, "thread_id", :integer, required: true),
+         :ok <- ACL.allow!(conn, "watchlist.unwatchThread"),
+         user_priority <- ACL.get_user_priority(conn),
+         {:can_read, {:ok, true}} <-
+           {:can_read, Board.get_read_access_by_thread_id(thread_id, user_priority)},
+         {:is_active, true} <-
+           {:is_active, User.is_active?(user.id)},
+         {1, nil} <- WatchThread.delete(user, thread_id) do
+      render(conn, :watch, thread: %{thread_id: thread_id, user_id: user.id})
+    else
+      {:can_read, {:ok, false}} ->
+        ErrorHelpers.render_json_error(
+          conn,
+          403,
+          "Unauthorized, you do not have permission to read"
+        )
+
+      {:is_active, false} ->
+        ErrorHelpers.render_json_error(
+          conn,
+          400,
+          "Account must be active to unwatch thread"
+        )
+
+      {:error, data} ->
+        ErrorHelpers.render_json_error(conn, 400, data)
+
+      _ ->
+        ErrorHelpers.render_json_error(conn, 400, "Error, cannot unwatch thread")
+    end
+  end
+
+  @doc """
+  Used to lock `Thread`
+  """
+  def lock(conn, attrs) do
+    with user <- Guardian.Plug.current_resource(conn),
+         thread_id <- Validate.cast(attrs, "thread_id", :integer, required: true),
+         locked <- Validate.cast(attrs, "locked", :boolean, required: true),
+         :ok <- ACL.allow!(conn, "threads.lock"),
+         user_priority <- ACL.get_user_priority(conn),
+         {:can_read, {:ok, true}} <-
+           {:can_read, Board.get_read_access_by_thread_id(thread_id, user_priority)},
+         {:can_write, {:ok, true}} <-
+           {:can_write, Board.get_write_access_by_thread_id(thread_id, user_priority)},
+         {:is_active, true} <-
+           {:is_active, User.is_active?(user.id)},
+         {:board_banned, {:ok, false}} <-
+           {:board_banned, BoardBan.banned_from_board?(user, thread_id: thread_id)},
+         {:bypass_thread_owner, true} <-
+           {:bypass_thread_owner, can_authed_user_bypass_owner_on_thread_lock(user, thread_id)},
+         {1, nil} <- Thread.set_locked(thread_id, locked) do
+      render(conn, :lock, thread: %{thread_id: thread_id, locked: locked})
+    else
+      {:can_read, {:ok, false}} ->
+        ErrorHelpers.render_json_error(
+          conn,
+          403,
+          "Unauthorized, you do not have permission to read"
+        )
+
+      {:can_write, {:ok, false}} ->
+        ErrorHelpers.render_json_error(
+          conn,
+          403,
+          "Unauthorized, you do not have permission to write"
+        )
+
+      {:bypass_thread_owner, false} ->
+        ErrorHelpers.render_json_error(
+          conn,
+          403,
+          "Unauthorized, you do not have permission to modify the lock on another user's thread"
+        )
+
+      {:board_banned, {:ok, true}} ->
+        ErrorHelpers.render_json_error(conn, 403, "Unauthorized, you are banned from this board")
+
+      {:is_active, false} ->
+        ErrorHelpers.render_json_error(
+          conn,
+          400,
+          "Account must be active to modify lock on thread"
+        )
+
+      {:error, data} ->
+        ErrorHelpers.render_json_error(conn, 400, data)
+
+      _ ->
+        ErrorHelpers.render_json_error(conn, 400, "Error, cannot lock thread")
+    end
+  end
+
+  @doc """
+  Used to sticky `Thread`
+  """
+  def sticky(conn, attrs) do
+    with user <- Guardian.Plug.current_resource(conn),
+         thread_id <- Validate.cast(attrs, "thread_id", :integer, required: true),
+         sticky <- Validate.cast(attrs, "sticky", :boolean, required: true),
+         :ok <- ACL.allow!(conn, "threads.sticky"),
+         user_priority <- ACL.get_user_priority(conn),
+         {:can_read, {:ok, true}} <-
+           {:can_read, Board.get_read_access_by_thread_id(thread_id, user_priority)},
+         {:can_write, {:ok, true}} <-
+           {:can_write, Board.get_write_access_by_thread_id(thread_id, user_priority)},
+         {:is_active, true} <-
+           {:is_active, User.is_active?(user.id)},
+         {:board_banned, {:ok, false}} <-
+           {:board_banned, BoardBan.banned_from_board?(user, thread_id: thread_id)},
+         {:bypass_thread_owner, true} <-
+           {:bypass_thread_owner, can_authed_user_bypass_owner_on_thread_sticky(user, thread_id)},
+         {1, nil} <- Thread.set_sticky(thread_id, sticky) do
+      render(conn, :sticky, thread: %{thread_id: thread_id, sticky: sticky})
+    else
+      {:can_read, {:ok, false}} ->
+        ErrorHelpers.render_json_error(
+          conn,
+          403,
+          "Unauthorized, you do not have permission to read"
+        )
+
+      {:can_write, {:ok, false}} ->
+        ErrorHelpers.render_json_error(
+          conn,
+          403,
+          "Unauthorized, you do not have permission to write"
+        )
+
+      {:bypass_thread_owner, false} ->
+        ErrorHelpers.render_json_error(
+          conn,
+          403,
+          "Unauthorized, you do not have permission to modify another user's thread"
+        )
+
+      {:board_banned, {:ok, true}} ->
+        ErrorHelpers.render_json_error(conn, 403, "Unauthorized, you are banned from this board")
+
+      {:is_active, false} ->
+        ErrorHelpers.render_json_error(
+          conn,
+          400,
+          "Account must be active to modify sticky on thread"
+        )
+
+      {:error, data} ->
+        ErrorHelpers.render_json_error(conn, 400, data)
+
+      _ ->
+        ErrorHelpers.render_json_error(conn, 400, "Error, cannot sticky thread")
+    end
+  end
+
+  @doc """
+  Used to purge `Thread`
+  """
+  def purge(conn, attrs) do
+    with user <- Guardian.Plug.current_resource(conn),
+         thread_id <- Validate.cast(attrs, "thread_id", :integer, required: true),
+         :ok <- ACL.allow!(conn, "threads.purge"),
+         user_priority <- ACL.get_user_priority(conn),
+         {:can_read, {:ok, true}} <-
+           {:can_read, Board.get_read_access_by_thread_id(thread_id, user_priority)},
+         {:can_write, {:ok, true}} <-
+           {:can_write, Board.get_write_access_by_thread_id(thread_id, user_priority)},
+         {:is_active, true} <-
+           {:is_active, User.is_active?(user.id)},
+         {:board_banned, {:ok, false}} <-
+           {:board_banned, BoardBan.banned_from_board?(user, thread_id: thread_id)},
+         {:bypass_thread_owner, true} <-
+           {:bypass_thread_owner, can_authed_user_bypass_owner_on_thread_purge(user, thread_id)},
+         {:ok, thread} <- Thread.purge(thread_id) do
+      poster_data = User.email_by_id_list(thread.poster_ids)
+
+      # Email thread owner and subscribers
+      Enum.each(poster_data, fn %{user_id: user_id, email: email, username: username} ->
+        action = if thread.user_id == user_id, do: "created", else: "participated in"
+
+        Mailer.send_thread_purge(%{
+          email: email,
+          title: thread.title,
+          username: username,
+          action: action,
+          mod_username: user.username
+        })
+      end)
+
+      # parse moderator's ip, remove ipv6 prefix if present
+      mod_ip_str =
+        conn.remote_ip
+        |> :inet_parse.ntoa()
+        |> to_string
+        |> String.replace("::ffff:", "")
+
+      {:ok, _moderation_log} =
+        ModerationLog.create(%{
+          mod: %{username: user.username, id: user.id, ip: mod_ip_str},
+          action: %{
+            api_url: "/api/threads/#{thread_id}",
+            api_method: "delete",
+            type: "threads.purge",
+            obj: thread
+          }
+        })
+
+      render(conn, :purge, thread: thread)
+    else
+      {:can_read, {:ok, false}} ->
+        ErrorHelpers.render_json_error(
+          conn,
+          403,
+          "Unauthorized, you do not have permission to read"
+        )
+
+      {:can_write, {:ok, false}} ->
+        ErrorHelpers.render_json_error(
+          conn,
+          403,
+          "Unauthorized, you do not have permission to write"
+        )
+
+      {:bypass_thread_owner, false} ->
+        ErrorHelpers.render_json_error(
+          conn,
+          403,
+          "Unauthorized, you do not have permission to modify another user's thread"
+        )
+
+      {:board_banned, {:ok, true}} ->
+        ErrorHelpers.render_json_error(conn, 403, "Unauthorized, you are banned from this board")
+
+      {:is_active, false} ->
+        ErrorHelpers.render_json_error(
+          conn,
+          400,
+          "Account must be active to modify purge on thread"
+        )
+
+      {:error, data} ->
+        ErrorHelpers.render_json_error(conn, 400, data)
+
+      _ ->
+        ErrorHelpers.render_json_error(conn, 400, "Error, cannot purge thread")
+    end
+  end
+
+  @doc """
   Used to convert `Thread` slug to id
   """
   def slug_to_id(conn, attrs) do
@@ -320,7 +612,12 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
 
   defp check_view_ip(conn, thread_id) do
     # convert ip tuple into string
-    viewer_ip = conn.remote_ip |> :inet_parse.ntoa() |> to_string
+    viewer_ip =
+      conn.remote_ip
+      |> :inet_parse.ntoa()
+      |> to_string
+      |> String.replace("::ffff:", "")
+
     viewer_ip_key = viewer_ip <> Integer.to_string(thread_id)
     handle_cooloff(viewer_ip_key, viewer_ip, thread_id, true)
   end
@@ -416,5 +713,47 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
     if moderated,
       do: :ok == ACL.allow!(user, "threads.moderated"),
       else: true
+  end
+
+  defp can_authed_user_bypass_owner_on_thread_purge(user, thread_id) do
+    post = Thread.get_first_post_data_by_id(thread_id)
+
+    ACL.bypass_post_owner(
+      user,
+      post,
+      "threads.purge",
+      "owner",
+      false,
+      true,
+      true
+    )
+  end
+
+  defp can_authed_user_bypass_owner_on_thread_sticky(user, thread_id) do
+    post = Thread.get_first_post_data_by_id(thread_id)
+
+    ACL.bypass_post_owner(
+      user,
+      post,
+      "threads.sticky",
+      "owner",
+      false,
+      true,
+      true
+    )
+  end
+
+  defp can_authed_user_bypass_owner_on_thread_lock(user, thread_id) do
+    post = Thread.get_first_post_data_by_id(thread_id)
+
+    ACL.bypass_post_owner(
+      user,
+      post,
+      "threads.lock",
+      "owner",
+      post.user_id == user.id,
+      true,
+      true
+    )
   end
 end

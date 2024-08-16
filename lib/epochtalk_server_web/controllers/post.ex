@@ -49,7 +49,7 @@ defmodule EpochtalkServerWeb.Controllers.Post do
          # this is an exception to save us from doing excessive processing between here
          # and the creation of the post
          post_max_length <-
-           Application.get_env(:epochtalk_server, :frontend_config)["post_max_length"],
+           Application.get_env(:epochtalk_server, :frontend_config)[:post_max_length],
          thread_id <- Validate.cast(attrs, "thread_id", :integer, required: true),
          _title <-
            Validate.cast(attrs, "title", :string, required: true, max: @max_post_title_length),
@@ -153,7 +153,7 @@ defmodule EpochtalkServerWeb.Controllers.Post do
          # this is an exception to save us from doing excessive processing between here
          # and the creation of the post
          post_max_length <-
-           Application.get_env(:epochtalk_server, :frontend_config)["post_max_length"],
+           Application.get_env(:epochtalk_server, :frontend_config)[:post_max_length],
          id <- Validate.cast(attrs, "id", :integer, required: true),
          thread_id <- Validate.cast(attrs, "thread_id", :integer, required: true),
          _title <-
@@ -366,8 +366,7 @@ defmodule EpochtalkServerWeb.Controllers.Post do
   """
   def preview(conn, attrs) do
     with post_max_length <-
-           Map.get(Application.get_env(:epochtalk_server, :frontend_config), :post_max_length) ||
-             Application.get_env(:epochtalk_server, :frontend_config)["post_max_length"],
+           Application.get_env(:epochtalk_server, :frontend_config)[:post_max_length],
          body <-
            Validate.cast(attrs, "body", :string, required: true, max: post_max_length, min: 1),
          parsed_body <- Parse.markdown(body) do

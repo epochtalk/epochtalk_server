@@ -14,9 +14,9 @@ defmodule EpochtalkServer.Mailer do
   @spec send_confirm_account(recipient :: User.t()) :: {:ok, term} | {:error, term}
   def send_confirm_account(%User{email: email, username: username, confirmation_token: token}) do
     config = Application.get_env(:epochtalk_server, :frontend_config)
-    frontend_url = config["frontend_url"]
-    website_title = config["website"]["title"]
-    from_address = config["emailer"]["options"]["from_address"]
+    frontend_url = config[:frontend_url]
+    website_title = config[:website][:title]
+    from_address = config[:emailer][:options][:from_address]
     confirm_url = "#{frontend_url}/confirm/#{String.downcase(username)}/#{token}"
 
     content =
@@ -52,9 +52,9 @@ defmodule EpochtalkServer.Mailer do
         username: username
       }) do
     config = Application.get_env(:epochtalk_server, :frontend_config)
-    frontend_url = config["frontend_url"]
-    website_title = config["website"]["title"]
-    from_address = config["emailer"]["options"]["from_address"]
+    frontend_url = config[:frontend_url]
+    website_title = config[:website][:title]
+    from_address = config[:emailer][:options][:from_address]
 
     thread_url =
       "#{frontend_url}/threads/#{thread_slug}?start=#{last_post_position}##{last_post_id}"
@@ -80,6 +80,44 @@ defmodule EpochtalkServer.Mailer do
   end
 
   @doc """
+  Sends thread purge email
+  """
+  @spec send_thread_purge(email_data :: map) :: {:ok, term} | {:error, term}
+  def send_thread_purge(%{
+        email: email,
+        title: thread_title,
+        username: username,
+        action: action,
+        mod_username: mod_username
+      }) do
+    config = Application.get_env(:epochtalk_server, :frontend_config)
+    frontend_url = config[:frontend_url]
+    website_title = config[:website][:title]
+    from_address = config[:emailer][:options][:from_address]
+
+    content =
+      generate_from_base_template(
+        """
+        <h3>"#{thread_title}" a thread that you #{action}, has been deleted</h3>
+        User "#{mod_username}" has deleted the thread named "#{thread_title}". If you wish to know why this thread was removed please contact a member of the forum moderation team.<br /><br />
+        <a href="#{frontend_url}">Visit Forum</a><br /><br />
+        <small>Raw site URL: #{frontend_url}</small>
+        """,
+        config
+      )
+
+    new()
+    |> to({username, email})
+    |> from({website_title, from_address})
+    |> subject(
+      "[#{website_title}] \"#{thread_title}\" a thread that you #{action}, has been deleted"
+    )
+    |> html_body(content)
+    |> deliver()
+    |> handle_delivered_email()
+  end
+
+  @doc """
   Sends mention notification email
   """
   @spec send_mention_notification(email_data :: map) :: {:ok, term} | {:error, term}
@@ -92,9 +130,9 @@ defmodule EpochtalkServer.Mailer do
         thread_title: thread_title
       }) do
     config = Application.get_env(:epochtalk_server, :frontend_config)
-    frontend_url = config["frontend_url"]
-    website_title = config["website"]["title"]
-    from_address = config["emailer"]["options"]["from_address"]
+    frontend_url = config[:frontend_url]
+    website_title = config[:website][:title]
+    from_address = config[:emailer][:options][:from_address]
 
     thread_url = "#{frontend_url}/threads/#{thread_slug}?start=#{post_position}##{post_id}"
 
@@ -144,7 +182,7 @@ defmodule EpochtalkServer.Mailer do
       color_primary: "rgb(255, 100, 0)"
     }
 
-    website_title = config["website"]["title"]
+    website_title = config[:website][:title]
 
     """
     <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">

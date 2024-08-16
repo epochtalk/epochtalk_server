@@ -117,6 +117,7 @@ guardian_config =
   case config_env() do
     :prod ->
       [
+        issuer: "EpochtalkServer",
         secret_key:
           get_env_or_raise_with_message.(
             "GUARDIAN_SECRET_KEY",

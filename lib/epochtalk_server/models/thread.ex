@@ -258,7 +258,6 @@ defmodule EpochtalkServer.Models.Thread do
                select: t,
                lock: "FOR UPDATE"
 
-           # locked thread, reference this when updating
            thread = Repo.one(thread_lock_query)
 
            # prevent moving board to same board or non existent board
@@ -291,7 +290,7 @@ defmodule EpochtalkServer.Models.Thread do
              old_board
              |> change(
                thread_count: old_board.thread_count - 1,
-               post_count: old_board.post_count - 1
+               post_count: old_board.post_count - thread.post_count
              )
              |> Repo.update!()
 
@@ -299,7 +298,7 @@ defmodule EpochtalkServer.Models.Thread do
              new_board
              |> change(
                thread_count: new_board.thread_count + 1,
-               post_count: new_board.post_count + 1
+               post_count: new_board.post_count + thread.post_count
              )
              |> Repo.update!()
 

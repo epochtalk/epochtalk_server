@@ -80,7 +80,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Board do
       assert response_boards |> Enum.count() == 2
 
       # check parent board
-      assert response_parent_board["id"] == parent_board.id
+      assert response_parent_board["board_id"] == parent_board.id
       assert response_parent_board["name"] == parent_board.name
       assert response_parent_board["category_id"] == category.id
       assert response_parent_board["parent_id"] == nil

@@ -32,7 +32,9 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
 
     num_thread_replies = 3
     thread_post_count = num_thread_replies + 1
-    thread = build(:thread, board: board, user: user, num_replies: num_thread_replies)
+    thread = build(:thread, board: board, user: user)
+    _thread_posts = build_list(num_thread_replies, :post, user: user, thread: thread.post.thread)
+
     admin_priority_thread = build(:thread, board: board, user: admin_user)
     admin_board_thread = build(:thread, board: admin_board, user: admin_user)
     super_admin_board_thread = build(:thread, board: super_admin_board, user: super_admin_user)
@@ -787,11 +789,12 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     end
 
     @tag authenticated: :mod
-    test "when authenticated with insufficient priority, given admin thread, throws forbidden read error", %{
-      conn: conn,
-      admin_board_thread: %{post: %{thread_id: thread_id}},
-      test_move_board: %{id: board_id}
-    } do
+    test "when authenticated with insufficient priority, given admin thread, throws forbidden read error",
+         %{
+           conn: conn,
+           admin_board_thread: %{post: %{thread_id: thread_id}},
+           test_move_board: %{id: board_id}
+         } do
       response =
         conn
         |> post(Routes.thread_path(conn, :move, thread_id), %{new_board_id: board_id})
@@ -802,11 +805,12 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     end
 
     @tag authenticated: :admin
-    test "when authenticated with insufficient priority, given super admin thread, throws forbidden write error", %{
-      conn: conn,
-      super_admin_board_thread: %{post: %{thread_id: thread_id}},
-      test_move_board: %{id: board_id}
-    } do
+    test "when authenticated with insufficient priority, given super admin thread, throws forbidden write error",
+         %{
+           conn: conn,
+           super_admin_board_thread: %{post: %{thread_id: thread_id}},
+           test_move_board: %{id: board_id}
+         } do
       response =
         conn
         |> post(Routes.thread_path(conn, :move, thread_id), %{new_board_id: board_id})
@@ -825,16 +829,19 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
       assert_raise InvalidPermission,
                    ~r/^Forbidden, invalid permissions to perform this action/,
                    fn ->
-                     post(conn, Routes.thread_path(conn, :move, thread_id), %{new_board_id: board_id})
+                     post(conn, Routes.thread_path(conn, :move, thread_id), %{
+                       new_board_id: board_id
+                     })
                    end
     end
 
     @tag authenticated: :mod
-    test "when authenticated with insufficient priority, given admin created thread, throws forbidden error", %{
-      conn: conn,
-      admin_priority_thread: %{post: %{thread_id: thread_id}},
-      test_move_board: %{id: board_id}
-    } do
+    test "when authenticated with insufficient priority, given admin created thread, throws forbidden error",
+         %{
+           conn: conn,
+           admin_priority_thread: %{post: %{thread_id: thread_id}},
+           test_move_board: %{id: board_id}
+         } do
       response =
         conn
         |> post(Routes.thread_path(conn, :move, thread_id), %{new_board_id: board_id})
@@ -855,7 +862,9 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
       assert_raise InvalidPermission,
                    ~r/^Forbidden, invalid permissions to perform this action/,
                    fn ->
-                     post(conn, Routes.thread_path(conn, :move, thread_id), %{new_board_id: board_id})
+                     post(conn, Routes.thread_path(conn, :move, thread_id), %{
+                       new_board_id: board_id
+                     })
                    end
     end
 

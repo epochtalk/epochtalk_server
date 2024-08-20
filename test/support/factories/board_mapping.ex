@@ -22,6 +22,7 @@ defmodule Test.Support.Factories.BoardMapping do
           }) do
         # create metadata row for board
         MetadataBoard.insert(%MetadataBoard{board_id: board.id})
+
         %{
           id: board.id,
           name: board.name,
@@ -35,6 +36,7 @@ defmodule Test.Support.Factories.BoardMapping do
       def board_mapping_attributes_factory(%{board: board, view_order: view_order, parent: parent}) do
         # create metadata row for board
         MetadataBoard.insert(%MetadataBoard{board_id: board.id})
+
         %{
           id: board.id,
           name: board.name,

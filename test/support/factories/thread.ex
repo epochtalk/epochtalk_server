@@ -3,7 +3,6 @@ defmodule Test.Support.Factories.Thread do
   Factory for `Thread`
   """
   alias EpochtalkServer.Models.Thread
-  alias EpochtalkServer.Models.Post
   alias EpochtalkServer.Repo
 
   defmacro __using__(_opts) do
@@ -21,7 +20,7 @@ defmodule Test.Support.Factories.Thread do
         }
       end
 
-      def thread_factory(%{user: user} = attrs) do
+      def thread_factory(%{board: board, user: user} = attrs) do
         attributes = build(:thread_attributes, attrs)
 
         Thread.create(attributes, user)
@@ -31,23 +30,15 @@ defmodule Test.Support.Factories.Thread do
             thread_title = thread.post.thread.title
             thread = thread |> Map.put(:attributes, attributes)
 
-            thread = if thread.poll == nil,
+            if thread.poll == nil,
               do: thread,
               else:
                 if(thread.poll.poll_answers,
                   do: Map.put(thread, :poll, thread.poll |> Repo.preload(:poll_answers)),
                   else: thread
                 )
-
-            if attrs[:num_replies],
-              do: Enum.each(1..attrs[:num_replies], fn _index ->
-                Post.create(%{user_id: user.id, thread_id: thread_id, content: %{title: "RE: #{thread_title}", body: "Thread reply"}})
-              end)
-
-            thread
         end
       end
-
     end
   end
 end

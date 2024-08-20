@@ -158,7 +158,7 @@ defmodule EpochtalkServerWeb.Controllers.BoardJSON do
         board =
           board
           |> Map.merge(to_map_remove_nil(board.board))
-          |> Map.merge(to_map_remove_nil(board.stats))
+          |> Map.merge(Map.delete(to_map_remove_nil(board.stats), :id))
           |> Map.merge(board.thread)
 
         # delete unneeded properties

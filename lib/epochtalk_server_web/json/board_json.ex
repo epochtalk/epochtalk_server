@@ -92,7 +92,7 @@ defmodule EpochtalkServerWeb.Controllers.BoardJSON do
       board
       |> Map.merge(to_map_remove_nil(board.board))
       |> Map.merge(
-        to_map_remove_nil(board.stats)
+        remove_nil(board.stats)
         |> Map.delete(:id)
       )
       |> Map.merge(board.thread)
@@ -158,7 +158,7 @@ defmodule EpochtalkServerWeb.Controllers.BoardJSON do
         board =
           board
           |> Map.merge(to_map_remove_nil(board.board))
-          |> Map.merge(Map.delete(to_map_remove_nil(board.stats), :id))
+          |> Map.merge(remove_nil(board.stats))
           |> Map.merge(board.thread)
 
         # delete unneeded properties
@@ -209,6 +209,13 @@ defmodule EpochtalkServerWeb.Controllers.BoardJSON do
   defp to_map_remove_nil(struct) do
     struct
     |> Map.from_struct()
+    |> remove_nil()
+  end
+
+  defp remove_nil(nil), do: %{}
+
+  defp remove_nil(map) do
+    map
     |> Enum.reject(fn {_, v} -> is_nil(v) end)
     |> Map.new()
   end

@@ -1,5 +1,5 @@
 defmodule Test.EpochtalkServerWeb.Controllers.Notification do
-  use Test.Support.ConnCase, async: false
+  use Test.Support.ConnCase, async: true
   import Test.Support.Factory
 
   @mentions_count 99
@@ -19,8 +19,8 @@ defmodule Test.EpochtalkServerWeb.Controllers.Notification do
 
     mentions =
       build_list(@mentions_count, :mention, %{
-        thread_id: thread_data.post.id,
-        post_id: thread_data.post.thread_id,
+        thread_id: thread_data.post.thread_id,
+        post_id: thread_data.post.id,
         mentioner_id: user.id,
         mentionee_id: admin_user.id
       })
@@ -67,8 +67,8 @@ defmodule Test.EpochtalkServerWeb.Controllers.Notification do
     test "when authenticated as notification receiver and notifications exceed default max, returns max+",
          %{conn: conn, users: %{user: user, admin_user: admin_user}, thread_data: thread_data} do
       build(:mention, %{
-        thread_id: thread_data.post.id,
-        post_id: thread_data.post.thread_id,
+        thread_id: thread_data.post.thread_id,
+        post_id: thread_data.post.id,
         mentioner_id: user.id,
         mentionee_id: admin_user.id
       })

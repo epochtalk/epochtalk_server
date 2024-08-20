@@ -107,7 +107,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Board do
       assert response_parent_board_children == []
 
       # check child board
-      assert response_child_board["id"] == child_board.id
+      assert response_child_board["board_id"] == child_board.id
       assert response_child_board["name"] == child_board.name
       assert response_child_board["category_id"] == nil
       assert response_child_board["parent_id"] == parent_board.id

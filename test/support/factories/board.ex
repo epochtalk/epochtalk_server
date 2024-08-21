@@ -6,6 +6,7 @@ defmodule Test.Support.Factories.Board do
 
   defmacro __using__(_opts) do
     quote do
+      # credo:disable-for-next-line
       def board_attributes_factory(attrs) do
         %{
           name: Map.get(attrs, :name) || sequence(:board_name, &"Board #{&1}"),

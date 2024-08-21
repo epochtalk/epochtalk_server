@@ -518,7 +518,7 @@ defmodule Test.EpochtalkServer.Session do
       assert Map.get(resource_user, :moderating) == nil
 
       # create board and add user as moderator
-      board = insert(:board)
+      board = build(:board)
       BoardModerator.add_moderators_by_username(board.id, [authed_user.username])
 
       # check session user updates with moderating

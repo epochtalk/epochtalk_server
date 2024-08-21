@@ -5,8 +5,8 @@ defmodule Test.EpochtalkServerWeb.Controllers.Notification do
   @mentions_count 99
 
   setup %{users: %{user: user, admin_user: admin_user}} do
-    board = insert(:board)
-    category = insert(:category)
+    board = build(:board)
+    category = build(:category)
 
     build(:board_mapping,
       attributes: [

@@ -4,8 +4,8 @@ defmodule Test.EpochtalkServer.Models.Mention do
   alias EpochtalkServer.Models.Mention
 
   setup %{users: %{user: user}} do
-    category = insert(:category)
-    board = insert(:board)
+    category = build(:category)
+    board = build(:board)
 
     build(:board_mapping,
       attributes: [

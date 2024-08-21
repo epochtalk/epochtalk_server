@@ -12,11 +12,11 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
       super_admin_user: super_admin_user
     }
   } do
-    board = insert(:board)
-    test_move_board = insert(:board)
-    admin_board = insert(:board, viewable_by: 1)
-    super_admin_board = insert(:board, viewable_by: 1, postable_by: 0)
-    category = insert(:category)
+    board = build(:board)
+    test_move_board = build(:board)
+    admin_board = build(:board, viewable_by: 1)
+    super_admin_board = build(:board, viewable_by: 1, postable_by: 0)
+    category = build(:category)
 
     build(:board_mapping,
       attributes: [
@@ -33,7 +33,9 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     num_thread_replies = 3
     thread_post_count = num_thread_replies + 1
     thread = build(:thread, board: board, user: user)
-    _thread_posts = build_list(num_thread_replies, :post, user: user, thread: thread.post.thread)
+
+    # create posts in thread created above, this is to get a speciic number of thread replies
+    build_list(num_thread_replies, :post, user: user, thread: thread.post.thread)
 
     admin_priority_thread = build(:thread, board: board, user: admin_user)
     admin_board_thread = build(:thread, board: admin_board, user: admin_user)
@@ -854,7 +856,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     end
 
     @tag :authenticated
-    test "given thread and user who does not moderate the thread, does not move thread", %{
+    test "when authenticated, with insufficient permissions, does not move thread", %{
       conn: conn,
       thread: %{post: %{thread_id: thread_id}},
       test_move_board: %{id: board_id}
@@ -869,7 +871,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     end
 
     @tag authenticated: :global_mod
-    test "given thread that authenticated user moderates, moves thread", %{
+    test "when authenticated, with valid permissions, moves thread", %{
       conn: conn,
       thread: %{post: %{thread_id: thread_id}},
       board: %{id: old_board_id, name: old_board_name},

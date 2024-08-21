@@ -206,7 +206,7 @@ defmodule EpochtalkServerWeb.Controllers.BoardJSON do
 
   defp to_map_remove_nil(nil), do: %{}
 
-  defp to_map_remove_nil(struct) do
+  defp to_map_remove_nil(struct) when is_struct(struct) do
     struct
     |> Map.from_struct()
     |> remove_nil()
@@ -214,7 +214,7 @@ defmodule EpochtalkServerWeb.Controllers.BoardJSON do
 
   defp remove_nil(nil), do: %{}
 
-  defp remove_nil(map) do
+  defp remove_nil(map) when is_map(map) do
     map
     |> Enum.reject(fn {_, v} -> is_nil(v) end)
     |> Map.new()

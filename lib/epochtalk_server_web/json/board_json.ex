@@ -90,7 +90,7 @@ defmodule EpochtalkServerWeb.Controllers.BoardJSON do
     # flatten needed boards data
     board =
       board
-      |> Map.merge(to_map_remove_nil(board.board))
+      |> Map.merge(remove_nil(board.board))
       |> Map.merge(
         remove_nil(board.stats)
         |> Map.delete(:id)
@@ -157,7 +157,7 @@ defmodule EpochtalkServerWeb.Controllers.BoardJSON do
         # flatten needed boards data
         board =
           board
-          |> Map.merge(to_map_remove_nil(board.board))
+          |> Map.merge(remove_nil(board.board))
           |> Map.merge(remove_nil(board.stats))
           |> Map.merge(board.thread)
 
@@ -204,15 +204,13 @@ defmodule EpochtalkServerWeb.Controllers.BoardJSON do
     parent
   end
 
-  defp to_map_remove_nil(nil), do: %{}
+  defp remove_nil(nil), do: %{}
 
-  defp to_map_remove_nil(struct) when is_struct(struct) do
+  defp remove_nil(struct) when is_struct(struct) do
     struct
     |> Map.from_struct()
     |> remove_nil()
   end
-
-  defp remove_nil(nil), do: %{}
 
   defp remove_nil(map) when is_map(map) do
     map

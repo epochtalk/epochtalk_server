@@ -124,8 +124,8 @@ defmodule EpochtalkServer.Models.Board do
   Creates a new `Board` in the database
   """
   @spec create(board_attrs :: map()) :: {:ok, board :: t()} | {:error, Ecto.Changeset.t()}
-  def create(board) do
-    board_cs = create_changeset(%Board{}, board)
+  def create(board_attrs) do
+    board_cs = create_changeset(%Board{}, board_attrs)
 
     case Repo.insert(board_cs) do
       {:ok, db_board} ->

@@ -20,12 +20,14 @@ defmodule Test.Support.Factories.Thread do
         }
       end
 
-      def thread_factory(%{user: user} = attrs) do
+      def thread_factory(%{board: board, user: user} = attrs) do
         attributes = build(:thread_attributes, attrs)
 
         Thread.create(attributes, user)
         |> case do
           {:ok, thread} ->
+            thread_id = thread.post.thread.id
+            thread_title = thread.post.thread.title
             thread = thread |> Map.put(:attributes, attributes)
 
             if thread.poll == nil,

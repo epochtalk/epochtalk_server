@@ -3,6 +3,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
   import Test.Support.Factory
   alias EpochtalkServerWeb.CustomErrors.InvalidPermission
   alias EpochtalkServer.Models.User
+  alias EpochtalkServer.Models.Board
 
   setup %{
     users: %{
@@ -11,23 +12,31 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
       super_admin_user: super_admin_user
     }
   } do
-    board = insert(:board)
-    admin_board = insert(:board, viewable_by: 1)
-    super_admin_board = insert(:board, viewable_by: 1, postable_by: 0)
-    category = insert(:category)
+    board = build(:board)
+    test_move_board = build(:board)
+    admin_board = build(:board, viewable_by: 1)
+    super_admin_board = build(:board, viewable_by: 1, postable_by: 0)
+    category = build(:category)
 
     build(:board_mapping,
       attributes: [
         [category: category, view_order: 0],
         [board: board, category: category, view_order: 1],
         [board: admin_board, category: category, view_order: 2],
-        [board: super_admin_board, category: category, view_order: 3]
+        [board: super_admin_board, category: category, view_order: 3],
+        [board: test_move_board, category: category, view_order: 4]
       ]
     )
 
     factory_threads = build_list(3, :thread, board: board, user: user)
 
+    num_thread_replies = 3
+    thread_post_count = num_thread_replies + 1
     thread = build(:thread, board: board, user: user)
+
+    # create posts in thread created above, this is to get a speciic number of thread replies
+    build_list(num_thread_replies, :post, user: user, thread: thread.post.thread)
+
     admin_priority_thread = build(:thread, board: board, user: admin_user)
     admin_board_thread = build(:thread, board: admin_board, user: admin_user)
     super_admin_board_thread = build(:thread, board: super_admin_board, user: super_admin_user)
@@ -35,9 +44,11 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     {
       :ok,
       board: board,
+      test_move_board: test_move_board,
       admin_board: admin_board,
       super_admin_board: super_admin_board,
       factory_threads: factory_threads,
+      thread_post_count: thread_post_count,
       thread: thread,
       admin_board_thread: admin_board_thread,
       admin_priority_thread: admin_priority_thread,
@@ -567,7 +578,8 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     test "after purging thread, decreases thread posters' post count", %{
       conn: conn,
       thread: %{post: %{thread_id: thread_id}},
-      users: %{user: %{id: user_id}}
+      users: %{user: %{id: user_id}},
+      thread_post_count: thread_post_count
     } do
       {:ok, user} = User.by_id(user_id)
       old_post_count = user.profile.post_count
@@ -579,7 +591,9 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
       {:ok, updated_user} = User.by_id(user_id)
       new_post_count = updated_user.profile.post_count
 
-      assert new_post_count == old_post_count - 1
+      # we use thread_post_count because all replies to thread are by the
+      # same user
+      assert new_post_count == old_post_count - thread_post_count
     end
   end
 
@@ -744,6 +758,181 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
 
       assert response["thread_id"] == thread_id
       assert response["user_id"] == user_id
+    end
+  end
+
+  describe "move/2" do
+    test "when unauthenticated, returns Unauthorized error", %{
+      conn: conn,
+      thread: %{post: %{thread_id: thread_id}},
+      test_move_board: %{id: board_id}
+    } do
+      response =
+        conn
+        |> post(Routes.thread_path(conn, :move, thread_id), %{new_board_id: board_id})
+        |> json_response(401)
+
+      assert response["error"] == "Unauthorized"
+      assert response["message"] == "No resource found"
+    end
+
+    @tag authenticated: :admin
+    test "given nonexistant thread, does not move thread", %{
+      conn: conn,
+      test_move_board: %{id: board_id}
+    } do
+      response =
+        conn
+        |> post(Routes.thread_path(conn, :move, -1), %{new_board_id: board_id})
+        |> json_response(400)
+
+      assert response["error"] == "Bad Request"
+      assert response["message"] == "Error, cannot move thread"
+    end
+
+    @tag authenticated: :mod
+    test "when authenticated with insufficient priority, given admin thread, throws forbidden read error",
+         %{
+           conn: conn,
+           admin_board_thread: %{post: %{thread_id: thread_id}},
+           test_move_board: %{id: board_id}
+         } do
+      response =
+        conn
+        |> post(Routes.thread_path(conn, :move, thread_id), %{new_board_id: board_id})
+        |> json_response(403)
+
+      assert response["error"] == "Forbidden"
+      assert response["message"] == "Unauthorized, you do not have permission to read"
+    end
+
+    @tag authenticated: :admin
+    test "when authenticated with insufficient priority, given super admin thread, throws forbidden write error",
+         %{
+           conn: conn,
+           super_admin_board_thread: %{post: %{thread_id: thread_id}},
+           test_move_board: %{id: board_id}
+         } do
+      response =
+        conn
+        |> post(Routes.thread_path(conn, :move, thread_id), %{new_board_id: board_id})
+        |> json_response(403)
+
+      assert response["error"] == "Forbidden"
+      assert response["message"] == "Unauthorized, you do not have permission to write"
+    end
+
+    @tag authenticated: :banned
+    test "when authenticated with banned user, throws InvalidPermission forbidden error", %{
+      conn: conn,
+      thread: %{post: %{thread_id: thread_id}},
+      test_move_board: %{id: board_id}
+    } do
+      assert_raise InvalidPermission,
+                   ~r/^Forbidden, invalid permissions to perform this action/,
+                   fn ->
+                     post(conn, Routes.thread_path(conn, :move, thread_id), %{
+                       new_board_id: board_id
+                     })
+                   end
+    end
+
+    @tag authenticated: :mod
+    test "when authenticated with insufficient priority, given admin created thread, throws forbidden error",
+         %{
+           conn: conn,
+           admin_priority_thread: %{post: %{thread_id: thread_id}},
+           test_move_board: %{id: board_id}
+         } do
+      response =
+        conn
+        |> post(Routes.thread_path(conn, :move, thread_id), %{new_board_id: board_id})
+        |> json_response(403)
+
+      assert response["error"] == "Forbidden"
+
+      assert response["message"] ==
+               "Unauthorized, you do not have permission to move another user's thread"
+    end
+
+    @tag :authenticated
+    test "when authenticated, with insufficient permissions, does not move thread", %{
+      conn: conn,
+      thread: %{post: %{thread_id: thread_id}},
+      test_move_board: %{id: board_id}
+    } do
+      assert_raise InvalidPermission,
+                   ~r/^Forbidden, invalid permissions to perform this action/,
+                   fn ->
+                     post(conn, Routes.thread_path(conn, :move, thread_id), %{
+                       new_board_id: board_id
+                     })
+                   end
+    end
+
+    @tag authenticated: :global_mod
+    test "when authenticated, with valid permissions, moves thread", %{
+      conn: conn,
+      thread: %{post: %{thread_id: thread_id}},
+      board: %{id: old_board_id, name: old_board_name},
+      test_move_board: %{id: new_board_id}
+    } do
+      response =
+        conn
+        |> post(Routes.thread_path(conn, :move, thread_id), %{new_board_id: new_board_id})
+        |> json_response(200)
+
+      assert response["old_board_id"] == old_board_id
+      assert response["old_board_name"] == old_board_name
+    end
+
+    @tag authenticated: :global_mod
+    test "after moving thread, decreases old board's post count and thread count", %{
+      conn: conn,
+      thread: %{post: %{thread_id: thread_id}},
+      board: %{id: old_board_id},
+      test_move_board: %{id: new_board_id},
+      thread_post_count: thread_post_count
+    } do
+      {:ok, old_board} = Board.find_by_id(old_board_id)
+      old_post_count = old_board.post_count
+      old_thread_count = old_board.thread_count
+
+      conn
+      |> post(Routes.thread_path(conn, :move, thread_id), %{new_board_id: new_board_id})
+      |> json_response(200)
+
+      {:ok, old_board} = Board.find_by_id(old_board_id)
+      new_post_count = old_board.post_count
+      new_thread_count = old_board.thread_count
+
+      # assuming one post in thread
+      assert new_post_count == old_post_count - thread_post_count
+      assert new_thread_count == old_thread_count - 1
+    end
+
+    @tag authenticated: :global_mod
+    test "after moving thread, increases new board's post count and thread count", %{
+      conn: conn,
+      thread: %{post: %{thread_id: thread_id}},
+      test_move_board: %{id: new_board_id},
+      thread_post_count: thread_post_count
+    } do
+      {:ok, new_board} = Board.find_by_id(new_board_id)
+      old_post_count = new_board.post_count
+      old_thread_count = new_board.thread_count
+
+      conn
+      |> post(Routes.thread_path(conn, :move, thread_id), %{new_board_id: new_board_id})
+      |> json_response(200)
+
+      {:ok, new_board} = Board.find_by_id(new_board_id)
+      new_post_count = new_board.post_count
+      new_thread_count = new_board.thread_count
+
+      # assuming one post in thread
+      assert new_post_count == old_post_count + thread_post_count
+      assert new_thread_count == old_thread_count + 1
     end
   end
 end

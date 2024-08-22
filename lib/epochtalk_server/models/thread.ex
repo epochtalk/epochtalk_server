@@ -7,6 +7,7 @@ defmodule EpochtalkServer.Models.Thread do
   alias EpochtalkServer.Models.User
   alias EpochtalkServer.Models.Thread
   alias EpochtalkServer.Models.MetadataThread
+  alias EpochtalkServer.Models.MetadataBoard
   alias EpochtalkServer.Models.Board
   alias EpochtalkServer.Models.Poll
   alias EpochtalkServer.Models.Post
@@ -232,6 +233,89 @@ defmodule EpochtalkServer.Models.Thread do
 
            # return data for purged thread
            purged_thread
+         end) do
+      # transaction success return purged thread data
+      {:ok, thread_data} ->
+        {:ok, thread_data}
+
+      # some other error
+      {:error, cs} ->
+        {:error, cs}
+    end
+  end
+
+  @doc """
+  Moves `Thread` to the specified `Board` given a `thread_id` and `board_id`
+  """
+  @spec move(thread_id :: non_neg_integer, board_id :: non_neg_integer) ::
+          {:ok, thread :: t()} | {:error, Ecto.Changeset.t()}
+  def move(thread_id, board_id) do
+    case Repo.transaction(fn ->
+           # query and lock thread for update,
+           thread_lock_query =
+             from t in Thread,
+               where: t.id == ^thread_id,
+               select: t,
+               lock: "FOR UPDATE"
+
+           thread = Repo.one(thread_lock_query)
+
+           # prevent moving board to same board or non existent board
+           if thread.board_id != board_id && Repo.get_by(Board, id: board_id) != nil do
+             # query old board and lock for update
+             old_board_lock_query =
+               from b in Board,
+                 join: mb in MetadataBoard,
+                 on: mb.board_id == b.id,
+                 where: b.id == ^thread.board_id,
+                 select: {b, mb},
+                 lock: "FOR UPDATE"
+
+             # locked old_board, reference this when updating
+             {old_board, old_board_meta} = Repo.one(old_board_lock_query)
+
+             # query new board and lock for update
+             new_board_lock_query =
+               from b in Board,
+                 join: mb in MetadataBoard,
+                 on: mb.board_id == b.id,
+                 where: b.id == ^board_id,
+                 select: {b, mb},
+                 lock: "FOR UPDATE"
+
+             # locked new_board, reference this when updating
+             {new_board, new_board_meta} = Repo.one(new_board_lock_query)
+
+             # update old_board, thread and post count
+             old_board
+             |> change(
+               thread_count: old_board.thread_count - 1,
+               post_count: old_board.post_count - thread.post_count
+             )
+             |> Repo.update!()
+
+             # update new_board, thread and post count
+             new_board
+             |> change(
+               thread_count: new_board.thread_count + 1,
+               post_count: new_board.post_count + thread.post_count
+             )
+             |> Repo.update!()
+
+             # update thread's original board_id with new_board's id
+             thread
+             |> change(board_id: new_board.id)
+             |> Repo.update!()
+
+             # update last post metadata info of both the old board and new board
+             MetadataBoard.update_last_post_info(old_board_meta, old_board.id)
+             MetadataBoard.update_last_post_info(new_board_meta, new_board.id)
+
+             # return old board data for reference
+             %{old_board_name: old_board.name, old_board_id: old_board.id}
+           else
+             Repo.rollback(:invalid_board_id)
+           end
          end) do
       # transaction success return purged thread data
       {:ok, thread_data} ->

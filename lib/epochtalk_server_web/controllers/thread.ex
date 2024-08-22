@@ -513,6 +513,67 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
   end
 
   @doc """
+  Used to move a `Thread`
+  """
+  def move(conn, attrs) do
+    with user <- Guardian.Plug.current_resource(conn),
+         thread_id <- Validate.cast(attrs, "thread_id", :integer, required: true),
+         new_board_id <- Validate.cast(attrs, "new_board_id", :integer, required: true),
+         :ok <- ACL.allow!(conn, "threads.move"),
+         user_priority <- ACL.get_user_priority(conn),
+         {:can_read, {:ok, true}} <-
+           {:can_read, Board.get_read_access_by_thread_id(thread_id, user_priority)},
+         {:can_write, {:ok, true}} <-
+           {:can_write, Board.get_write_access_by_thread_id(thread_id, user_priority)},
+         {:is_active, true} <-
+           {:is_active, User.is_active?(user.id)},
+         {:board_banned, {:ok, false}} <-
+           {:board_banned, BoardBan.banned_from_board?(user, thread_id: thread_id)},
+         {:bypass_thread_owner, true} <-
+           {:bypass_thread_owner, can_authed_user_bypass_owner_on_thread_move(user, thread_id)},
+         {:ok, old_board_data} <- Thread.move(thread_id, new_board_id) do
+      render(conn, :move, old_board_data: old_board_data)
+    else
+      {:can_read, {:ok, false}} ->
+        ErrorHelpers.render_json_error(
+          conn,
+          403,
+          "Unauthorized, you do not have permission to read"
+        )
+
+      {:can_write, {:ok, false}} ->
+        ErrorHelpers.render_json_error(
+          conn,
+          403,
+          "Unauthorized, you do not have permission to write"
+        )
+
+      {:bypass_thread_owner, false} ->
+        ErrorHelpers.render_json_error(
+          conn,
+          403,
+          "Unauthorized, you do not have permission to move another user's thread"
+        )
+
+      {:board_banned, {:ok, true}} ->
+        ErrorHelpers.render_json_error(conn, 403, "Unauthorized, you are banned from this board")
+
+      {:is_active, false} ->
+        ErrorHelpers.render_json_error(
+          conn,
+          400,
+          "Account must be active to move thread"
+        )
+
+      {:error, data} ->
+        ErrorHelpers.render_json_error(conn, 400, data)
+
+      _ ->
+        ErrorHelpers.render_json_error(conn, 400, "Error, cannot move thread")
+    end
+  end
+
+  @doc """
   Used to convert `Thread` slug to id
   """
   def slug_to_id(conn, attrs) do
@@ -681,6 +742,20 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
       "threads.lock",
       "owner",
       post.user_id == user.id,
+      true,
+      true
+    )
+  end
+
+  defp can_authed_user_bypass_owner_on_thread_move(user, thread_id) do
+    post = Thread.get_first_post_data_by_id(thread_id)
+
+    ACL.bypass_post_owner(
+      user,
+      post,
+      "threads.move",
+      "owner",
+      false,
       true,
       true
     )

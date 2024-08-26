@@ -69,7 +69,7 @@ defmodule EpochtalkServer.Models.Category do
       |> Map.put(:updated_at, now)
 
     category
-    |> cast(attrs, [:name, :viewable_by, :created_at, :updated_at])
+    |> cast(attrs, [:name, :view_order, :viewable_by, :postable_by, :created_at, :updated_at])
   end
 
   @doc """
@@ -79,7 +79,7 @@ defmodule EpochtalkServer.Models.Category do
           Ecto.Changeset.t()
   def update_for_board_mapping_changeset(category, attrs) do
     category
-    |> cast(attrs, [:id, :name, :view_order, :viewable_by])
+    |> cast(attrs, [:id, :name, :view_order, :viewable_by, :postable_by])
     |> unique_constraint(:id, name: :categories_pkey)
   end
 

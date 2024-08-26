@@ -170,6 +170,19 @@ defmodule EpochtalkServerWeb.Controllers.ThreadJSON do
     do: thread
 
   @doc """
+  Renders move `Thread`.
+
+    iex> old_board_data = %{
+    iex>   old_board_id: 2,
+    iex>   old_board_name: "General Discussion"
+    iex> }
+    iex> EpochtalkServerWeb.Controllers.ThreadJSON.move(%{old_board_data: old_board_data})
+    old_board_data
+  """
+  def move(%{old_board_data: old_board_data}),
+    do: old_board_data
+
+  @doc """
   Renders `Thread` id for slug to id route.
   """
   def slug_to_id(%{id: id}), do: %{id: id}

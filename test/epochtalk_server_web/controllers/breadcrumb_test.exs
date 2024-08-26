@@ -3,10 +3,10 @@ defmodule Test.EpochtalkServerWeb.Controllers.Breadcrumb do
   import Test.Support.Factory
 
   setup %{users: %{user: user}} do
-    category = insert(:category)
-    parent_board = insert(:board)
-    child_board = insert(:board)
-    board_no_parent = insert(:board)
+    category = build(:category)
+    parent_board = build(:board)
+    child_board = build(:board)
+    board_no_parent = build(:board)
 
     build(:board_mapping,
       attributes: [

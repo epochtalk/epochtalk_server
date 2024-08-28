@@ -104,12 +104,49 @@ defmodule EpochtalkServer.Models.MetadataBoard do
         on: u.id == p.user_id,
         where: t.board_id == ^board_id,
         order_by: [desc: p.created_at],
+        limit: 1,
         select: %{
           thread_id: p.thread_id,
           created_at: p.created_at,
           username: u.username,
           position: p.position
         }
+
+    #     SELECT
+    #       t.board_id,
+    #       t.id as thread_id,
+    #       (SELECT p.content->>'title' as title FROM posts p WHERE p.thread_id = t.id ORDER BY created_at ASC LIMIT 1),
+    #       (SELECT u.username FROM users u WHERE u.id = lp.user_id),
+    #       lp.created_at,
+    #       lp.position
+    #       FROM threads t
+    #       JOIN
+    #         (SELECT p2.thread_id, p2.created_at, p2.user_id, p2.position
+    #           FROM posts p2
+    #           WHERE p2.thread_id = (SELECT id from threads WHERE board_id = $1 limit 1)
+    #           ORDER BY p2.created_at DESC LIMIT 1) lp
+    #       ON lp.thread_id = (SELECT id from threads WHERE board_id = $1 limit 1)
+    #       WHERE t.board_id = $1 ORDER BY t.created_at DESC LIMIT 1;
+  # var q = `
+  #   SELECT
+  #     t.board_id,
+  #     t.id as thread_id,
+  #     (SELECT p.content->>'title' as title FROM posts p WHERE p.thread_id = t.id ORDER BY created_at ASC LIMIT 1), (SELECT u.username FROM users u WHERE u.id = lp.user_id),
+  #     lp.created_at,
+  #     lp.position
+  #       FROM threads t JOIN
+  #         (
+  #           SELECT p2.thread_id, p2.created_at, p2.user_id, p2.position
+  #           FROM posts p2 WHERE p2.thread_id = (SELECT id from threads WHERE board_id = $1 limit 1) ORDER BY p2.created_at DESC LIMIT 1) lp ON lp.thread_id = (SELECT id from threads WHERE board_id = $1 limit 1) WHERE t.board_id = $1 ORDER BY t.created_at DESC LIMIT 1;`;
+
+  #   last_post_thread_title_subquery =
+  #     from p2 in Post,
+  #       order_by: [asc: p2.created_at],
+  #       limit: 1,
+  #       select: %{
+  #         title: p2.content["title"],
+  #         thread_id: p2.thread_id
+  #       }
 
     # query most recent thread in board, join last post subquery
     last_post_query =
@@ -124,7 +161,7 @@ defmodule EpochtalkServer.Models.MetadataBoard do
         select: %{
           board_id: t.board_id,
           thread_id: t.id,
-          title: p.content["title"],
+          title: fragment("SELECT p.content->>'title' as title FROM posts p WHERE p.thread_id = ? ORDER BY created_at ASC LIMIT 1", t.id),
           username: lp.username,
           created_at: lp.created_at,
           position: lp.position

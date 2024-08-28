@@ -96,7 +96,7 @@ defmodule EpochtalkServer.Models.MetadataBoard do
   @spec update_last_post_info(metadata_board :: t(), board_id :: non_neg_integer) :: t()
   def update_last_post_info(metadata_board, board_id) do
     # query most recent post in thread and it's authoring user's data
-    last_post_subquery =
+    last_post_query =
       from t in Thread,
         left_join: p in Post,
         on: t.id == p.thread_id,
@@ -112,80 +112,37 @@ defmodule EpochtalkServer.Models.MetadataBoard do
           position: p.position
         }
 
-    #     SELECT
-    #       t.board_id,
-    #       t.id as thread_id,
-    #       (SELECT p.content->>'title' as title FROM posts p WHERE p.thread_id = t.id ORDER BY created_at ASC LIMIT 1),
-    #       (SELECT u.username FROM users u WHERE u.id = lp.user_id),
-    #       lp.created_at,
-    #       lp.position
-    #       FROM threads t
-    #       JOIN
-    #         (SELECT p2.thread_id, p2.created_at, p2.user_id, p2.position
-    #           FROM posts p2
-    #           WHERE p2.thread_id = (SELECT id from threads WHERE board_id = $1 limit 1)
-    #           ORDER BY p2.created_at DESC LIMIT 1) lp
-    #       ON lp.thread_id = (SELECT id from threads WHERE board_id = $1 limit 1)
-    #       WHERE t.board_id = $1 ORDER BY t.created_at DESC LIMIT 1;
-  # var q = `
-  #   SELECT
-  #     t.board_id,
-  #     t.id as thread_id,
-  #     (SELECT p.content->>'title' as title FROM posts p WHERE p.thread_id = t.id ORDER BY created_at ASC LIMIT 1), (SELECT u.username FROM users u WHERE u.id = lp.user_id),
-  #     lp.created_at,
-  #     lp.position
-  #       FROM threads t JOIN
-  #         (
-  #           SELECT p2.thread_id, p2.created_at, p2.user_id, p2.position
-  #           FROM posts p2 WHERE p2.thread_id = (SELECT id from threads WHERE board_id = $1 limit 1) ORDER BY p2.created_at DESC LIMIT 1) lp ON lp.thread_id = (SELECT id from threads WHERE board_id = $1 limit 1) WHERE t.board_id = $1 ORDER BY t.created_at DESC LIMIT 1;`;
-
-  #   last_post_thread_title_subquery =
-  #     from p2 in Post,
-  #       order_by: [asc: p2.created_at],
-  #       limit: 1,
-  #       select: %{
-  #         title: p2.content["title"],
-  #         thread_id: p2.thread_id
-  #       }
-
-    # query most recent thread in board, join last post subquery
-    last_post_query =
-      from t in Thread,
-        left_join: p in Post,
-        on: p.thread_id == t.id,
-        left_join: lp in subquery(last_post_subquery),
-        on: p.thread_id == lp.thread_id,
-        where: t.board_id == ^board_id,
-        order_by: [desc: t.created_at],
-        limit: 1,
-        select: %{
-          board_id: t.board_id,
-          thread_id: t.id,
-          title: fragment("SELECT p.content->>'title' as title FROM posts p WHERE p.thread_id = ? ORDER BY created_at ASC LIMIT 1", t.id),
-          username: lp.username,
-          created_at: lp.created_at,
-          position: lp.position
-        }
-
-    # update board metadata using queried data
-    updated_metadata_board =
+    # query most recent thread in board title
+    last_post_info =
       if lp = Repo.one(last_post_query) do
-        change(metadata_board,
+        last_thread_title_query =
+          from p in Post,
+            where: p.thread_id == ^lp.thread_id,
+            order_by: [asc: p.created_at],
+            limit: 1,
+            select: p.content["title"]
+
+        last_thread_title = Repo.one(last_thread_title_query)
+
+        %{
           last_post_username: lp.username,
           last_post_created_at: lp.created_at,
           last_thread_id: lp.thread_id,
-          last_thread_title: lp.title,
+          last_thread_title: last_thread_title,
           last_post_position: lp.position
-        )
+        }
       else
-        change(metadata_board,
+        %{
           last_post_username: nil,
           last_post_created_at: nil,
           last_thread_id: nil,
           last_thread_title: nil,
           last_post_position: nil
-        )
+        }
       end
+
+    # update board metadata using queried data
+    updated_metadata_board = change(metadata_board, last_post_info)
 
     Repo.update!(updated_metadata_board)
   end

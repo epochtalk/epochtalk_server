@@ -39,7 +39,10 @@ defmodule Test.EpochtalkServerWeb.Controllers.Breadcrumb do
       response =
         conn
         |> get(
-          Routes.breadcrumb_path(conn, :breadcrumbs, %{"id" => category.id, "type" => "category"})
+          ~p"/api/breadcrumbs?#{%{
+            "id" => category.id,
+            "type" => "category"
+          }}"
         )
         |> json_response(200)
 
@@ -59,10 +62,10 @@ defmodule Test.EpochtalkServerWeb.Controllers.Breadcrumb do
       response =
         conn
         |> get(
-          Routes.breadcrumb_path(conn, :breadcrumbs, %{
+          ~p"/api/breadcrumbs?#{%{
             "id" => parent_board.slug,
             "type" => "parent"
-          })
+          }}"
         )
         |> json_response(200)
 
@@ -87,10 +90,10 @@ defmodule Test.EpochtalkServerWeb.Controllers.Breadcrumb do
       response =
         conn
         |> get(
-          Routes.breadcrumb_path(conn, :breadcrumbs, %{
+          ~p"/api/breadcrumbs?#{%{
             "id" => child_board.slug,
             "type" => "board"
-          })
+          }}"
         )
         |> json_response(200)
 
@@ -126,10 +129,10 @@ defmodule Test.EpochtalkServerWeb.Controllers.Breadcrumb do
       response =
         conn
         |> get(
-          Routes.breadcrumb_path(conn, :breadcrumbs, %{
+          ~p"/api/breadcrumbs?#{%{
             "id" => thread.attributes["slug"],
             "type" => "thread"
-          })
+          }}"
         )
         |> json_response(200)
 
@@ -165,10 +168,10 @@ defmodule Test.EpochtalkServerWeb.Controllers.Breadcrumb do
       response =
         conn
         |> get(
-          Routes.breadcrumb_path(conn, :breadcrumbs, %{
+          ~p"/api/breadcrumbs?#{%{
             "id" => board_no_parent.slug,
             "type" => "board"
-          })
+          }}"
         )
         |> json_response(200)
 
@@ -198,10 +201,10 @@ defmodule Test.EpochtalkServerWeb.Controllers.Breadcrumb do
       response =
         conn
         |> get(
-          Routes.breadcrumb_path(conn, :breadcrumbs, %{
+          ~p"/api/breadcrumbs?#{%{
             "id" => thread_no_parent.attributes["slug"],
             "type" => "thread"
-          })
+          }}"
         )
         |> json_response(200)
 
@@ -231,7 +234,12 @@ defmodule Test.EpochtalkServerWeb.Controllers.Breadcrumb do
          %{conn: conn} do
       response =
         conn
-        |> get(Routes.breadcrumb_path(conn, :breadcrumbs, %{"id" => 99, "type" => "category"}))
+        |> get(
+          ~p"/api/breadcrumbs?#{%{
+            "id" => 99,
+            "type" => "category"
+          }}"
+        )
         |> json_response(200)
 
       assert Enum.empty?(response["breadcrumbs"]) == true
@@ -242,7 +250,10 @@ defmodule Test.EpochtalkServerWeb.Controllers.Breadcrumb do
       response =
         conn
         |> get(
-          Routes.breadcrumb_path(conn, :breadcrumbs, %{"id" => "error_board", "type" => "board"})
+          ~p"/api/breadcrumbs?#{%{
+            "id" => "error_board",
+            "type" => "board"
+          }}"
         )
         |> json_response(200)
 
@@ -254,7 +265,10 @@ defmodule Test.EpochtalkServerWeb.Controllers.Breadcrumb do
       response =
         conn
         |> get(
-          Routes.breadcrumb_path(conn, :breadcrumbs, %{"id" => "test_thread", "type" => "thread"})
+          ~p"/api/breadcrumbs?#{%{
+            "id" => "test_thread",
+            "type" => "thread"
+          }}"
         )
         |> json_response(200)
 

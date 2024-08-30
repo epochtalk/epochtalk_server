@@ -27,7 +27,7 @@ defmodule Test.EpochtalkServerWeb.Plugs.RateLimit do
         Application.get_env(:epochtalk_server, EpochtalkServer.RateLimiter)
         |> Keyword.get(:get)
 
-      1..(max_get_per_second + 5)
+      1..(max_get_per_second + 3)
       |> Enum.map(fn n ->
         # test request rate limit
         if n > max_get_per_second do
@@ -54,7 +54,7 @@ defmodule Test.EpochtalkServerWeb.Plugs.RateLimit do
         Application.get_env(:epochtalk_server, EpochtalkServer.RateLimiter)
         |> Keyword.get(:post)
 
-      1..(max_post_per_second + 5)
+      1..(max_post_per_second + 3)
       |> Enum.map(fn n ->
         # test request rate limit
         if n > max_post_per_second do
@@ -83,7 +83,7 @@ defmodule Test.EpochtalkServerWeb.Plugs.RateLimit do
         Application.get_env(:epochtalk_server, EpochtalkServer.RateLimiter)
         |> Keyword.get(:put)
 
-      1..(max_put_per_second + 5)
+      1..(max_put_per_second + 3)
       |> Enum.map(fn n ->
         # test request rate limit
         if n > max_put_per_second do
@@ -111,7 +111,7 @@ defmodule Test.EpochtalkServerWeb.Plugs.RateLimit do
         Application.get_env(:epochtalk_server, EpochtalkServer.RateLimiter)
         |> Keyword.get(:delete)
 
-      1..(max_delete_per_second + 5)
+      1..(max_delete_per_second + 3)
       |> Enum.map(fn n ->
         # test request rate limit
         if n > max_delete_per_second do

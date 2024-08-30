@@ -23,7 +23,10 @@ defmodule Test.Support.Factories.Thread do
       def thread_factory(%{board: board, user: user} = attrs) do
         attributes = build(:thread_attributes, attrs)
 
-        Thread.create(attributes, user)
+        timestamp =
+          sequence(:post_timestamp, &NaiveDateTime.add(~N[1970-01-01 00:00:00], &1 * 60 * 60))
+
+        Thread.create(attributes, user, timestamp)
         |> case do
           {:ok, thread} ->
             thread_id = thread.post.thread.id

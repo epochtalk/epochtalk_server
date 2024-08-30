@@ -20,7 +20,10 @@ defmodule Test.Support.Factories.Post do
       def post_factory(%{user: user, thread: thread} = attrs) do
         attributes = build(:post_attributes, attrs)
 
-        Post.create(attributes)
+        timestamp =
+          sequence(:post_timestamp, &NaiveDateTime.add(~N[1970-01-01 00:00:00], &1 * 60 * 60))
+
+        Post.create_for_test(attributes, timestamp)
       end
     end
   end

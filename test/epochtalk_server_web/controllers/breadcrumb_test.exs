@@ -38,12 +38,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Breadcrumb do
     } do
       response =
         conn
-        |> get(
-          ~p"/api/breadcrumbs?#{%{
-            "id" => category.id,
-            "type" => "category"
-          }}"
-        )
+        |> get(~p"/api/breadcrumbs?#{%{"id" => category.id, "type" => "category"}}")
         |> json_response(200)
 
       assert Enum.count(response["breadcrumbs"]) == 1
@@ -61,12 +56,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Breadcrumb do
          %{conn: conn, category: category, parent_board: parent_board} do
       response =
         conn
-        |> get(
-          ~p"/api/breadcrumbs?#{%{
-            "id" => parent_board.slug,
-            "type" => "parent"
-          }}"
-        )
+        |> get(~p"/api/breadcrumbs?#{%{"id" => parent_board.slug, "type" => "parent"}}")
         |> json_response(200)
 
       assert Enum.count(response["breadcrumbs"]) == 2
@@ -89,12 +79,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Breadcrumb do
          %{conn: conn, category: category, parent_board: parent_board, child_board: child_board} do
       response =
         conn
-        |> get(
-          ~p"/api/breadcrumbs?#{%{
-            "id" => child_board.slug,
-            "type" => "board"
-          }}"
-        )
+        |> get(~p"/api/breadcrumbs?#{%{"id" => child_board.slug, "type" => "board"}}")
         |> json_response(200)
 
       assert Enum.count(response["breadcrumbs"]) == 3
@@ -128,12 +113,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Breadcrumb do
          } do
       response =
         conn
-        |> get(
-          ~p"/api/breadcrumbs?#{%{
-            "id" => thread.attributes["slug"],
-            "type" => "thread"
-          }}"
-        )
+        |> get(~p"/api/breadcrumbs?#{%{"id" => thread.attributes["slug"], "type" => "thread"}}")
         |> json_response(200)
 
       assert Enum.count(response["breadcrumbs"]) == 4
@@ -167,12 +147,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Breadcrumb do
          %{conn: conn, category: category, board_no_parent: board_no_parent} do
       response =
         conn
-        |> get(
-          ~p"/api/breadcrumbs?#{%{
-            "id" => board_no_parent.slug,
-            "type" => "board"
-          }}"
-        )
+        |> get(~p"/api/breadcrumbs?#{%{"id" => board_no_parent.slug, "type" => "board"}}")
         |> json_response(200)
 
       assert Enum.count(response["breadcrumbs"]) == 2
@@ -201,10 +176,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Breadcrumb do
       response =
         conn
         |> get(
-          ~p"/api/breadcrumbs?#{%{
-            "id" => thread_no_parent.attributes["slug"],
-            "type" => "thread"
-          }}"
+          ~p"/api/breadcrumbs?#{%{"id" => thread_no_parent.attributes["slug"], "type" => "thread"}}"
         )
         |> json_response(200)
 
@@ -234,12 +206,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Breadcrumb do
          %{conn: conn} do
       response =
         conn
-        |> get(
-          ~p"/api/breadcrumbs?#{%{
-            "id" => 99,
-            "type" => "category"
-          }}"
-        )
+        |> get(~p"/api/breadcrumbs?#{%{"id" => 99, "type" => "category"}}")
         |> json_response(200)
 
       assert Enum.empty?(response["breadcrumbs"]) == true
@@ -249,12 +216,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Breadcrumb do
          %{conn: conn} do
       response =
         conn
-        |> get(
-          ~p"/api/breadcrumbs?#{%{
-            "id" => "error_board",
-            "type" => "board"
-          }}"
-        )
+        |> get(~p"/api/breadcrumbs?#{%{"id" => "error_board", "type" => "board"}}")
         |> json_response(200)
 
       assert Enum.empty?(response["breadcrumbs"]) == true
@@ -264,12 +226,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Breadcrumb do
          %{conn: conn} do
       response =
         conn
-        |> get(
-          ~p"/api/breadcrumbs?#{%{
-            "id" => "test_thread",
-            "type" => "thread"
-          }}"
-        )
+        |> get(~p"/api/breadcrumbs?#{%{"id" => "test_thread", "type" => "thread"}}")
         |> json_response(200)
 
       assert Enum.empty?(response["breadcrumbs"]) == true

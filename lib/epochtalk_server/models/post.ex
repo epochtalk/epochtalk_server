@@ -60,9 +60,13 @@ defmodule EpochtalkServer.Models.Post do
   @doc """
   Create changeset for `Post` model
   """
-  @spec create_changeset(post :: t(), attrs :: map() | nil) :: Ecto.Changeset.t()
-  def create_changeset(post, attrs) do
-    now = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
+  @spec create_changeset(
+          post :: t(),
+          attrs :: map() | nil,
+          now_override :: NaiveDateTime.t() | nil
+        ) :: Ecto.Changeset.t()
+  def create_changeset(post, attrs, now_override \\ nil) do
+    now = now_override || NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
 
     # set default values and timestamps
     post =
@@ -164,6 +168,40 @@ defmodule EpochtalkServer.Models.Post do
   def create(post_attrs) do
     Repo.transaction(fn ->
       post_cs = create_changeset(%Post{}, post_attrs)
+
+      case Repo.insert(post_cs) do
+        # changeset valid, insert success, update metadata threads and return thread
+        {:ok, db_post} ->
+          # Increment user post count
+          Profile.increment_post_count(db_post.user_id)
+
+          # Set thread created_at and updated_at
+          Thread.set_timestamps(db_post.thread_id)
+
+          # Set post position
+          Post.set_position_using_thread(db_post.id, db_post.thread_id)
+
+          # Increment thread post ocunt
+          Thread.increment_post_count(db_post.thread_id)
+
+          # Requery post with position and thread slug info
+          Repo.one(from p in Post, where: p.id == ^db_post.id, preload: [:thread])
+
+        # changeset error
+        {:error, cs} ->
+          Repo.rollback(cs)
+      end
+    end)
+  end
+
+  @doc """
+  Creates a new `Post` in the database, used during testing. Allows modification of created_at
+  """
+  @spec create_for_test(post_attrs :: map(), timestamp :: NaiveDateTime.t()) ::
+          {:ok, post :: t()} | {:error, Ecto.Changeset.t()}
+  def create_for_test(post_attrs, timestamp) do
+    Repo.transaction(fn ->
+      post_cs = create_changeset(%Post{}, post_attrs, timestamp)
 
       case Repo.insert(post_cs) do
         # changeset valid, insert success, update metadata threads and return thread

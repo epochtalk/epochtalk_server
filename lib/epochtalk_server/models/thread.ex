@@ -90,9 +90,13 @@ defmodule EpochtalkServer.Models.Thread do
   @doc """
   Create changeset for creation of `Thread` model
   """
-  @spec create_changeset(thread :: t(), attrs :: map() | nil) :: Ecto.Changeset.t()
-  def create_changeset(thread, attrs) do
-    now = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
+  @spec create_changeset(
+          thread :: t(),
+          attrs :: map() | nil,
+          now_override :: NaiveDateTime.t() | nil
+        ) :: Ecto.Changeset.t()
+  def create_changeset(thread, attrs, now_override \\ nil) do
+    now = now_override || NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
 
     # set default values and timestamps
     thread =
@@ -125,9 +129,9 @@ defmodule EpochtalkServer.Models.Thread do
   @doc """
   Creates a new `Thread` in the database
   """
-  @spec create(thread_attrs :: map(), user :: map()) ::
+  @spec create(thread_attrs :: map(), user :: map(), timestamp :: NaiveDateTime.t() | nil) ::
           {:ok, thread :: t()} | {:error, Ecto.Changeset.t()}
-  def create(thread_attrs, user) do
+  def create(thread_attrs, user, timestamp \\ nil) do
     thread_cs = create_changeset(%Thread{}, thread_attrs)
 
     case Repo.transaction(fn ->
@@ -143,7 +147,7 @@ defmodule EpochtalkServer.Models.Thread do
            # create poll, if necessary
            db_poll = handle_create_poll(db_thread.id, thread_attrs["poll"], user)
            # create post
-           db_post = handle_create_post(db_thread.id, thread_attrs, user)
+           db_post = handle_create_post(db_thread.id, thread_attrs, user, timestamp)
            # return post (preloaded thread) and poll data
            %{post: db_post, poll: db_poll}
          end) do
@@ -890,7 +894,7 @@ defmodule EpochtalkServer.Models.Thread do
     end
   end
 
-  defp handle_create_post(thread_id, thread_attrs, user) do
+  defp handle_create_post(thread_id, thread_attrs, user, timestamp) do
     post_attrs = %{
       thread_id: thread_id,
       user_id: user.id,
@@ -901,7 +905,12 @@ defmodule EpochtalkServer.Models.Thread do
       }
     }
 
-    case Post.create(post_attrs) do
+    if is_nil(timestamp) do
+      Post.create(post_attrs)
+    else
+      Post.create_for_test(post_attrs, timestamp)
+    end
+    |> case do
       {:ok, post} -> post
       {:error, cs} -> Repo.rollback(cs)
     end

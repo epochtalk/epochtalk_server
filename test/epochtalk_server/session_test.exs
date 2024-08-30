@@ -263,10 +263,10 @@ defmodule Test.EpochtalkServer.Session do
 
       post(
         conn,
-        Routes.user_path(conn, :login, %{
-          username: user_attrs.username,
-          password: user_attrs.password
-        })
+        ~p"/api/login?#{%{
+            username: user_attrs.username,
+            password: user_attrs.password
+        }}"
       )
 
       baninfo_ttl = Redix.command!(:redix, ["TTL", "user:#{user.id}:baninfo"])
@@ -294,11 +294,11 @@ defmodule Test.EpochtalkServer.Session do
 
       post(
         conn,
-        Routes.user_path(conn, :login, %{
+        ~p"/api/login?#{%{
           username: user_attrs.username,
           password: user_attrs.password,
           rememberMe: true
-        })
+        }}"
       )
 
       baninfo_ttl = Redix.command!(:redix, ["TTL", "user:#{user.id}:baninfo"])

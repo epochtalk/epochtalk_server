@@ -218,7 +218,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.User do
     } do
       response =
         conn
-        |> post(Routes.user_path(conn, :login, user_attrs))
+        |> post(~p"/api/login?#{user_attrs}")
         |> json_response(200)
 
       assert response["id"] == user.id
@@ -231,7 +231,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.User do
     } do
       response =
         conn
-        |> post(Routes.user_path(conn, :login, authed_user_attrs))
+        |> post(~p"/api/login?#{authed_user_attrs}")
         |> json_response(400)
 
       assert response["error"] == "Bad Request"
@@ -250,7 +250,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.User do
 
       response =
         conn
-        |> post(Routes.user_path(conn, :login, user_attrs))
+        |> post(~p"/api/login?#{user_attrs}")
         |> json_response(400)
 
       assert response["error"] == "Bad Request"
@@ -269,7 +269,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.User do
 
       response =
         conn
-        |> post(Routes.user_path(conn, :login, user_attrs))
+        |> post(~p"/api/login?#{user_attrs}")
         |> json_response(403)
 
       assert response["error"] == "Forbidden"
@@ -281,7 +281,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.User do
 
       response =
         conn
-        |> post(Routes.user_path(conn, :login, invalid_username_login_attrs))
+        |> post(~p"/api/login?#{invalid_username_login_attrs}")
         |> json_response(400)
 
       assert response["error"] == "Bad Request"
@@ -293,7 +293,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.User do
 
       response =
         conn
-        |> post(Routes.user_path(conn, :login, invalid_password_login_attrs))
+        |> post(~p"/api/login?#{invalid_password_login_attrs}")
         |> json_response(400)
 
       assert response["error"] == "Bad Request"
@@ -306,7 +306,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.User do
     test "when logged in, logs user out", %{conn: conn} do
       response =
         conn
-        |> delete(Routes.user_path(conn, :logout))
+        |> delete(~p"/api/logout")
         |> json_response(200)
 
       assert response["success"] == true
@@ -315,7 +315,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.User do
     test "when not logged in, errors", %{conn: conn} do
       response =
         conn
-        |> delete(Routes.user_path(conn, :logout))
+        |> delete(~p"/api/logout")
         |> json_response(400)
 
       assert response["error"] == "Bad Request"
@@ -331,7 +331,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.User do
     } do
       response =
         conn
-        |> get(Routes.user_path(conn, :authenticate))
+        |> get(~p"/api/authenticate")
         |> json_response(200)
 
       {:ok, user} = User.by_username(authed_user_attrs.username)
@@ -345,7 +345,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.User do
     test "when user is not authenticated, errors", %{conn: conn} do
       response =
         conn
-        |> get(Routes.user_path(conn, :authenticate))
+        |> get(~p"/api/authenticate")
         |> json_response(401)
 
       assert response["error"] == "Unauthorized"

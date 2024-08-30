@@ -134,8 +134,6 @@ defmodule Test.Support.ConnCase do
       import Phoenix.ConnTest
       import Test.Support.ConnCase
 
-      alias EpochtalkServerWeb.Router.Helpers, as: Routes
-
       use EpochtalkServerWeb, :verified_routes
 
       # The default endpoint for testing

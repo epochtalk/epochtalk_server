@@ -37,7 +37,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Board do
       assert_raise InvalidPermission,
                    ~r/^Forbidden, invalid permissions to perform this action/,
                    fn ->
-                     get(conn, Routes.board_path(conn, :by_category))
+                     get(conn, ~p"/api/boards")
                    end
     end
 
@@ -49,7 +49,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Board do
     } do
       response =
         conn
-        |> get(Routes.board_path(conn, :by_category))
+        |> get(~p"/api/boards")
         |> json_response(200)
         |> case do
           %{"boards" => boards} -> boards
@@ -134,7 +134,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Board do
     test "given a nonexistant id, does not find a board", %{conn: conn} do
       response =
         conn
-        |> get(Routes.board_path(conn, :find, 0))
+        |> get(~p"/api/boards/#{0}")
         |> json_response(400)
 
       assert response["error"] == "Bad Request"
@@ -147,7 +147,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Board do
     } do
       response =
         conn
-        |> get(Routes.board_path(conn, :find, admin_board.id))
+        |> get(~p"/api/boards/#{admin_board.id}")
         |> json_response(404)
 
       assert response["error"] == "Not Found"
@@ -160,7 +160,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Board do
     } do
       response =
         conn
-        |> get(Routes.board_path(conn, :find, board.id))
+        |> get(~p"/api/boards/#{board.id}")
         |> json_response(200)
 
       assert response["name"] == board.name
@@ -181,7 +181,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Board do
     } do
       response =
         conn
-        |> get(Routes.board_path(conn, :find, admin_board.id))
+        |> get(~p"/api/boards/#{admin_board.id}")
         |> json_response(404)
 
       assert response["error"] == "Not Found"
@@ -195,7 +195,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Board do
     } do
       response =
         conn
-        |> get(Routes.board_path(conn, :find, board.id))
+        |> get(~p"/api/boards/#{board.id}")
         |> json_response(200)
 
       assert response["name"] == board.name
@@ -208,7 +208,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Board do
     } do
       response =
         conn
-        |> get(Routes.board_path(conn, :find, admin_board.id))
+        |> get(~p"/api/boards/#{admin_board.id}")
         |> json_response(200)
 
       assert response["name"] == admin_board.name
@@ -221,7 +221,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Board do
     } do
       response =
         conn
-        |> get(Routes.board_path(conn, :find, super_admin_board.id))
+        |> get(~p"/api/boards/#{super_admin_board.id}")
         |> json_response(404)
 
       assert response["error"] == "Not Found"
@@ -235,7 +235,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Board do
     } do
       response =
         conn
-        |> get(Routes.board_path(conn, :find, super_admin_board.id))
+        |> get(~p"/api/boards/#{super_admin_board.id}")
         |> json_response(200)
 
       assert response["name"] == super_admin_board.name
@@ -246,7 +246,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Board do
     test "given a nonexistant slug, does not deslugify board id", %{conn: conn} do
       response =
         conn
-        |> get(Routes.board_path(conn, :slug_to_id, "bad-slug"))
+        |> get(~p"/api/boards/#{"bad-slug"}/id")
         |> json_response(400)
 
       assert response["error"] == "Bad Request"
@@ -256,7 +256,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Board do
     test "given an existing slug, deslugifies board id", %{conn: conn, parent_board: board} do
       response =
         conn
-        |> get(Routes.board_path(conn, :slug_to_id, board.slug))
+        |> get(~p"/api/boards/#{board.slug}/id")
         |> json_response(200)
 
       assert response["id"] == board.id
@@ -267,7 +267,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Board do
     test "when unauthenticated, returns Unauthorized error", %{conn: conn} do
       response_boards =
         conn
-        |> get(Routes.board_path(conn, :movelist))
+        |> get(~p"/api/boards/movelist")
         |> json_response(401)
 
       assert response_boards["error"] == "Unauthorized"
@@ -281,7 +281,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Board do
       assert_raise InvalidPermission,
                    ~r/^Forbidden, invalid permissions to perform this action/,
                    fn ->
-                     get(conn, Routes.board_path(conn, :movelist))
+                     get(conn, ~p"/api/boards/movelist")
                    end
     end
 
@@ -293,7 +293,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Board do
     } do
       response_boards =
         conn
-        |> get(Routes.board_path(conn, :movelist))
+        |> get(~p"/api/boards/movelist")
         |> json_response(200)
 
       [response_parent_board | response_boards] = response_boards
@@ -318,7 +318,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Board do
     } do
       response_boards =
         conn
-        |> get(Routes.board_path(conn, :movelist))
+        |> get(~p"/api/boards/movelist")
         |> json_response(200)
 
       [response_parent_board | response_boards] = response_boards

@@ -16,7 +16,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.PostDraft do
     test "when unauthenticated, returns Unauthorized error", %{conn: conn} do
       response =
         conn
-        |> get(Routes.post_draft_path(conn, :by_user_id))
+        |> get(~p"/api/posts/draft")
         |> json_response(401)
 
       assert response["error"] == "Unauthorized"
@@ -28,7 +28,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.PostDraft do
          %{conn: conn, users: %{user: user}} do
       response =
         conn
-        |> get(Routes.post_draft_path(conn, :by_user_id))
+        |> get(~p"/api/posts/draft")
         |> json_response(200)
 
       assert response["user_id"] == user.id
@@ -41,7 +41,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.PostDraft do
          %{conn: conn, users: %{admin_user: admin_user}, draft_data: draft_data} do
       response =
         conn
-        |> get(Routes.post_draft_path(conn, :by_user_id))
+        |> get(~p"/api/posts/draft")
         |> json_response(200)
 
       assert response["user_id"] == admin_user.id
@@ -54,7 +54,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.PostDraft do
     test "when unauthenticated, returns Unauthorized error", %{conn: conn} do
       response =
         conn
-        |> put(Routes.post_draft_path(conn, :upsert), %{"draft" => "Hello World"})
+        |> put(~p"/api/posts/draft", %{"draft" => "Hello World"})
         |> json_response(401)
 
       assert response["error"] == "Unauthorized"
@@ -66,7 +66,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.PostDraft do
          %{conn: conn, users: %{user: user}} do
       response =
         conn
-        |> put(Routes.post_draft_path(conn, :upsert), %{"draft" => "Hello World"})
+        |> put(~p"/api/posts/draft", %{"draft" => "Hello World"})
         |> json_response(200)
 
       assert response["user_id"] == user.id
@@ -79,7 +79,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.PostDraft do
          %{conn: conn, users: %{admin_user: admin_user}, draft_data: draft_data} do
       response =
         conn
-        |> put(Routes.post_draft_path(conn, :upsert), %{"draft" => "Hello World"})
+        |> put(~p"/api/posts/draft", %{"draft" => "Hello World"})
         |> json_response(200)
 
       assert response["user_id"] == admin_user.id

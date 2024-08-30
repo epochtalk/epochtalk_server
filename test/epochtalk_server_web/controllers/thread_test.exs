@@ -49,7 +49,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     test "given an id for nonexistant board, does not get threads", %{conn: conn} do
       response =
         conn
-        |> get(Routes.thread_path(conn, :by_board), %{board_id: -1})
+        |> get(~p"/api/threads", %{board_id: -1})
         |> json_response(400)
 
       assert response["error"] == "Bad Request"
@@ -63,7 +63,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     } do
       response =
         conn
-        |> get(Routes.thread_path(conn, :by_board), %{board_id: board.id})
+        |> get(~p"/api/threads", %{board_id: board.id})
         |> json_response(200)
 
       assert Map.has_key?(response, "normal") == true
@@ -115,12 +115,12 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     } do
       admin_board_response =
         conn
-        |> get(Routes.thread_path(conn, :by_board), %{board_id: admin_board.id})
+        |> get(~p"/api/threads", %{board_id: admin_board.id})
         |> json_response(403)
 
       super_admin_board_response =
         conn
-        |> get(Routes.thread_path(conn, :by_board), %{board_id: super_admin_board.id})
+        |> get(~p"/api/threads", %{board_id: super_admin_board.id})
         |> json_response(403)
 
       assert admin_board_response["error"] == "Forbidden"
@@ -137,12 +137,12 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     } do
       admin_board_response =
         conn
-        |> get(Routes.thread_path(conn, :by_board), %{board_id: admin_board.id})
+        |> get(~p"/api/threads", %{board_id: admin_board.id})
         |> json_response(403)
 
       super_admin_board_response =
         conn
-        |> get(Routes.thread_path(conn, :by_board), %{board_id: super_admin_board.id})
+        |> get(~p"/api/threads", %{board_id: super_admin_board.id})
         |> json_response(403)
 
       assert admin_board_response["error"] == "Forbidden"
@@ -158,7 +158,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     } do
       response =
         conn
-        |> get(Routes.thread_path(conn, :by_board), %{board_id: admin_board.id})
+        |> get(~p"/api/threads", %{board_id: admin_board.id})
         |> json_response(200)
 
       assert Map.has_key?(response, "normal") == true
@@ -173,7 +173,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
          } do
       response =
         conn
-        |> get(Routes.thread_path(conn, :by_board), %{board_id: admin_board.id})
+        |> get(~p"/api/threads", %{board_id: admin_board.id})
         |> json_response(200)
 
       assert Map.has_key?(response, "normal") == true
@@ -187,7 +187,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     } do
       response =
         conn
-        |> get(Routes.thread_path(conn, :by_board), %{board_id: super_admin_board.id})
+        |> get(~p"/api/threads", %{board_id: super_admin_board.id})
         |> json_response(200)
 
       assert Map.has_key?(response, "normal") == true
@@ -202,7 +202,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     } do
       response =
         conn
-        |> post(Routes.thread_path(conn, :lock, thread_id), %{"locked" => true})
+        |> post(~p"/api/threads/#{thread_id}/lock", %{"locked" => true})
         |> json_response(401)
 
       assert response["error"] == "Unauthorized"
@@ -215,7 +215,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     } do
       response =
         conn
-        |> post(Routes.thread_path(conn, :lock, -1), %{"locked" => true})
+        |> post(~p"/api/threads/#{-1}/lock", %{"locked" => true})
         |> json_response(400)
 
       assert response["error"] == "Bad Request"
@@ -229,7 +229,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     } do
       response =
         conn
-        |> post(Routes.thread_path(conn, :lock, thread_id), %{"locked" => true})
+        |> post(~p"/api/threads/#{thread_id}/lock", %{"locked" => true})
         |> json_response(403)
 
       assert response["error"] == "Forbidden"
@@ -243,7 +243,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     } do
       response =
         conn
-        |> post(Routes.thread_path(conn, :lock, thread_id), %{"locked" => true})
+        |> post(~p"/api/threads/#{thread_id}/lock", %{"locked" => true})
         |> json_response(403)
 
       assert response["error"] == "Forbidden"
@@ -258,7 +258,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
       assert_raise InvalidPermission,
                    ~r/^Forbidden, invalid permissions to perform this action/,
                    fn ->
-                     post(conn, Routes.thread_path(conn, :lock, thread_id), %{"locked" => true})
+                     post(conn, ~p"/api/threads/#{thread_id}/lock", %{"locked" => true})
                    end
     end
 
@@ -269,7 +269,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     } do
       response =
         conn
-        |> post(Routes.thread_path(conn, :lock, thread_id), %{"locked" => true})
+        |> post(~p"/api/threads/#{thread_id}/lock", %{"locked" => true})
         |> json_response(403)
 
       assert response["error"] == "Forbidden"
@@ -286,7 +286,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
       assert_raise InvalidPermission,
                    ~r/^Forbidden, invalid permissions to perform this action/,
                    fn ->
-                     post(conn, Routes.thread_path(conn, :lock, thread_id), %{"locked" => true})
+                     post(conn, ~p"/api/threads/#{thread_id}/lock", %{"locked" => true})
                    end
     end
 
@@ -297,7 +297,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     } do
       response =
         conn
-        |> post(Routes.thread_path(conn, :lock, thread_id), %{"locked" => true})
+        |> post(~p"/api/threads/#{thread_id}/lock", %{"locked" => true})
         |> json_response(200)
 
       assert response["locked"] == true
@@ -310,12 +310,12 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
       thread: %{post: %{thread_id: thread_id}}
     } do
       conn
-      |> post(Routes.thread_path(conn, :lock, thread_id), %{"locked" => true})
+      |> post(~p"/api/threads/#{thread_id}/lock", %{"locked" => true})
       |> json_response(200)
 
       response =
         conn
-        |> post(Routes.thread_path(conn, :lock, thread_id), %{"locked" => false})
+        |> post(~p"/api/threads/#{thread_id}/lock", %{"locked" => false})
         |> json_response(200)
 
       assert response["locked"] == false
@@ -330,7 +330,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     } do
       response =
         conn
-        |> post(Routes.thread_path(conn, :sticky, thread_id), %{"sticky" => true})
+        |> post(~p"/api/threads/#{thread_id}/sticky", %{"sticky" => true})
         |> json_response(401)
 
       assert response["error"] == "Unauthorized"
@@ -343,7 +343,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     } do
       response =
         conn
-        |> post(Routes.thread_path(conn, :sticky, -1), %{"sticky" => true})
+        |> post(~p"/api/threads/#{-1}/sticky", %{"sticky" => true})
         |> json_response(400)
 
       assert response["error"] == "Bad Request"
@@ -357,7 +357,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     } do
       response =
         conn
-        |> post(Routes.thread_path(conn, :sticky, thread_id), %{"sticky" => true})
+        |> post(~p"/api/threads/#{thread_id}/sticky", %{"sticky" => true})
         |> json_response(403)
 
       assert response["error"] == "Forbidden"
@@ -371,7 +371,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     } do
       response =
         conn
-        |> post(Routes.thread_path(conn, :sticky, thread_id), %{"sticky" => true})
+        |> post(~p"/api/threads/#{thread_id}/sticky", %{"sticky" => true})
         |> json_response(403)
 
       assert response["error"] == "Forbidden"
@@ -386,7 +386,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
       assert_raise InvalidPermission,
                    ~r/^Forbidden, invalid permissions to perform this action/,
                    fn ->
-                     post(conn, Routes.thread_path(conn, :sticky, thread_id), %{"sticky" => true})
+                     post(conn, ~p"/api/threads/#{thread_id}/sticky", %{"sticky" => true})
                    end
     end
 
@@ -397,7 +397,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     } do
       response =
         conn
-        |> post(Routes.thread_path(conn, :sticky, thread_id), %{"sticky" => true})
+        |> post(~p"/api/threads/#{thread_id}/sticky", %{"sticky" => true})
         |> json_response(403)
 
       assert response["error"] == "Forbidden"
@@ -414,7 +414,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
       assert_raise InvalidPermission,
                    ~r/^Forbidden, invalid permissions to perform this action/,
                    fn ->
-                     post(conn, Routes.thread_path(conn, :sticky, thread_id), %{"sticky" => true})
+                     post(conn, ~p"/api/threads/#{thread_id}/sticky", %{"sticky" => true})
                    end
     end
 
@@ -425,7 +425,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     } do
       response =
         conn
-        |> post(Routes.thread_path(conn, :sticky, thread_id), %{"sticky" => true})
+        |> post(~p"/api/threads/#{thread_id}/sticky", %{"sticky" => true})
         |> json_response(200)
 
       assert response["sticky"] == true
@@ -438,12 +438,12 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
       thread: %{post: %{thread_id: thread_id}}
     } do
       conn
-      |> post(Routes.thread_path(conn, :sticky, thread_id), %{"sticky" => true})
+      |> post(~p"/api/threads/#{thread_id}/sticky", %{"sticky" => true})
       |> json_response(200)
 
       response =
         conn
-        |> post(Routes.thread_path(conn, :sticky, thread_id), %{"sticky" => false})
+        |> post(~p"/api/threads/#{thread_id}/sticky", %{"sticky" => false})
         |> json_response(200)
 
       assert response["sticky"] == false
@@ -458,7 +458,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     } do
       response =
         conn
-        |> delete(Routes.thread_path(conn, :purge, thread_id), %{})
+        |> delete(~p"/api/threads/#{thread_id}", %{})
         |> json_response(401)
 
       assert response["error"] == "Unauthorized"
@@ -471,7 +471,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     } do
       response =
         conn
-        |> delete(Routes.thread_path(conn, :purge, -1), %{})
+        |> delete(~p"/api/threads/#{-1}", %{})
         |> json_response(400)
 
       assert response["error"] == "Bad Request"
@@ -485,7 +485,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     } do
       response =
         conn
-        |> delete(Routes.thread_path(conn, :purge, thread_id), %{})
+        |> delete(~p"/api/threads/#{thread_id}", %{})
         |> json_response(403)
 
       assert response["error"] == "Forbidden"
@@ -499,7 +499,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     } do
       response =
         conn
-        |> delete(Routes.thread_path(conn, :purge, thread_id), %{})
+        |> delete(~p"/api/threads/#{thread_id}", %{})
         |> json_response(403)
 
       assert response["error"] == "Forbidden"
@@ -514,7 +514,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
       assert_raise InvalidPermission,
                    ~r/^Forbidden, invalid permissions to perform this action/,
                    fn ->
-                     delete(conn, Routes.thread_path(conn, :purge, thread_id), %{})
+                     delete(conn, ~p"/api/threads/#{thread_id}", %{})
                    end
     end
 
@@ -525,7 +525,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     } do
       response =
         conn
-        |> delete(Routes.thread_path(conn, :purge, thread_id), %{})
+        |> delete(~p"/api/threads/#{thread_id}", %{})
         |> json_response(403)
 
       assert response["error"] == "Forbidden"
@@ -542,7 +542,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
       assert_raise InvalidPermission,
                    ~r/^Forbidden, invalid permissions to perform this action/,
                    fn ->
-                     delete(conn, Routes.thread_path(conn, :purge, thread_id), %{})
+                     delete(conn, ~p"/api/threads/#{thread_id}", %{})
                    end
     end
 
@@ -554,7 +554,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     } do
       response =
         conn
-        |> delete(Routes.thread_path(conn, :purge, thread_id), %{})
+        |> delete(~p"/api/threads/#{thread_id}", %{})
         |> json_response(200)
 
       assert String.starts_with?(response["board_name"], "Board")
@@ -573,7 +573,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
       old_post_count = user.profile.post_count
 
       conn
-      |> delete(Routes.thread_path(conn, :purge, thread_id), %{})
+      |> delete(~p"/api/threads/#{thread_id}", %{})
       |> json_response(200)
 
       {:ok, updated_user} = User.by_id(user_id)
@@ -590,7 +590,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     } do
       response =
         conn
-        |> post(Routes.thread_path(conn, :watch, thread_id), %{})
+        |> post(~p"/api/watchlist/threads/#{thread_id}", %{})
         |> json_response(401)
 
       assert response["error"] == "Unauthorized"
@@ -603,7 +603,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     } do
       response =
         conn
-        |> post(Routes.thread_path(conn, :watch, -1), %{})
+        |> post(~p"/api/watchlist/threads/#{-1}", %{})
         |> json_response(400)
 
       assert response["error"] == "Bad Request"
@@ -617,7 +617,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     } do
       response =
         conn
-        |> post(Routes.thread_path(conn, :watch, thread_id), %{})
+        |> post(~p"/api/watchlist/threads/#{thread_id}", %{})
         |> json_response(403)
 
       assert response["error"] == "Forbidden"
@@ -631,7 +631,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     } do
       response =
         conn
-        |> post(Routes.thread_path(conn, :watch, thread_id), %{})
+        |> post(~p"/api/watchlist/threads/#{thread_id}", %{})
         |> json_response(403)
 
       assert response["error"] == "Forbidden"
@@ -648,7 +648,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     } do
       response =
         conn
-        |> post(Routes.thread_path(conn, :watch, thread_id), %{})
+        |> post(~p"/api/watchlist/threads/#{thread_id}", %{})
         |> json_response(200)
 
       assert response["thread_id"] == thread_id
@@ -663,7 +663,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     } do
       response =
         conn
-        |> delete(Routes.thread_path(conn, :unwatch, thread_id), %{})
+        |> delete(~p"/api/watchlist/threads/#{thread_id}", %{})
         |> json_response(401)
 
       assert response["error"] == "Unauthorized"
@@ -676,7 +676,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     } do
       response =
         conn
-        |> delete(Routes.thread_path(conn, :unwatch, -1), %{})
+        |> delete(~p"/api/watchlist/threads/#{-1}", %{})
         |> json_response(400)
 
       assert response["error"] == "Bad Request"
@@ -690,7 +690,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     } do
       response =
         conn
-        |> delete(Routes.thread_path(conn, :unwatch, thread_id), %{})
+        |> delete(~p"/api/watchlist/threads/#{thread_id}", %{})
         |> json_response(403)
 
       assert response["error"] == "Forbidden"
@@ -704,7 +704,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     } do
       response =
         conn
-        |> delete(Routes.thread_path(conn, :unwatch, thread_id), %{})
+        |> delete(~p"/api/watchlist/threads/#{thread_id}", %{})
         |> json_response(403)
 
       assert response["error"] == "Forbidden"
@@ -720,7 +720,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     } do
       response =
         conn
-        |> delete(Routes.thread_path(conn, :unwatch, thread_id), %{})
+        |> delete(~p"/api/watchlist/threads/#{thread_id}", %{})
         |> json_response(400)
 
       assert response["error"] == "Bad Request"
@@ -734,12 +734,12 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
       users: %{global_mod_user: %{id: user_id}}
     } do
       conn
-      |> post(Routes.thread_path(conn, :watch, thread_id), %{})
+      |> post(~p"/api/watchlist/threads/#{thread_id}", %{})
       |> json_response(200)
 
       response =
         conn
-        |> delete(Routes.thread_path(conn, :unwatch, thread_id), %{})
+        |> delete(~p"/api/watchlist/threads/#{thread_id}", %{})
         |> json_response(200)
 
       assert response["thread_id"] == thread_id

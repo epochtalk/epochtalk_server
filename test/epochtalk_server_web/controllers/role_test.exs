@@ -14,7 +14,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Role do
     @tag :authenticated
     test "when authenticated, gets all roles", %{conn: conn} do
       RoleCache.reload()
-      conn = get(conn, Routes.role_path(conn, :all))
+      conn = get(conn, ~p"/api/admin/roles/all")
       roles = json_response(conn, 200)
 
       newbie_permissions = %{
@@ -131,7 +131,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Role do
     test "when not authenticated, does not get roles", %{conn: conn} do
       response =
         conn
-        |> get(Routes.role_path(conn, :all))
+        |> get(~p"/api/admin/roles/all")
         |> json_response(401)
 
       assert response["error"] == "Unauthorized"
@@ -157,7 +157,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Role do
 
       response =
         conn
-        |> put(Routes.role_path(conn, :update), new_newbie_permissions_attrs)
+        |> put(~p"/api/admin/roles/update", new_newbie_permissions_attrs)
         |> json_response(401)
 
       assert response["error"] == "Unauthorized"
@@ -183,7 +183,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Role do
       assert_raise InvalidPermission,
                    ~r/^Forbidden, invalid permissions to perform this action/,
                    fn ->
-                     put(conn, Routes.role_path(conn, :update), new_newbie_permissions_attrs)
+                     put(conn, ~p"/api/admin/roles/update", new_newbie_permissions_attrs)
                    end
     end
 
@@ -202,14 +202,14 @@ defmodule Test.EpochtalkServerWeb.Controllers.Role do
 
       update_response =
         conn
-        |> put(Routes.role_path(conn, :update), new_newbie_permissions_attrs)
+        |> put(~p"/api/admin/roles/update", new_newbie_permissions_attrs)
         |> json_response(200)
 
       assert update_response == new_newbie_permissions_attrs.id
 
       modified_newbie =
         conn
-        |> get(Routes.role_path(conn, :all))
+        |> get(~p"/api/admin/roles/all")
         |> json_response(200)
         |> Enum.at(6)
 
@@ -223,14 +223,14 @@ defmodule Test.EpochtalkServerWeb.Controllers.Role do
 
       blank_hc_response =
         conn
-        |> put(Routes.role_path(conn, :update), blank_hc_attrs)
+        |> put(~p"/api/admin/roles/update", blank_hc_attrs)
         |> json_response(200)
 
       assert blank_hc_response == blank_hc_attrs.id
 
       blank_hc_newbie =
         conn
-        |> get(Routes.role_path(conn, :all))
+        |> get(~p"/api/admin/roles/all")
         |> json_response(200)
         |> Enum.at(6)
 
@@ -244,20 +244,20 @@ defmodule Test.EpochtalkServerWeb.Controllers.Role do
 
       original_newbie =
         conn
-        |> get(Routes.role_path(conn, :all))
+        |> get(~p"/api/admin/roles/all")
         |> json_response(200)
         |> Enum.at(6)
 
       update_response =
         conn
-        |> put(Routes.role_path(conn, :update), new_newbie_permissions_attrs)
+        |> put(~p"/api/admin/roles/update", new_newbie_permissions_attrs)
         |> json_response(200)
 
       assert update_response == new_newbie_permissions_attrs.id
 
       modified_newbie =
         conn
-        |> get(Routes.role_path(conn, :all))
+        |> get(~p"/api/admin/roles/all")
         |> json_response(200)
         |> Enum.at(6)
 
@@ -272,7 +272,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Role do
     test "when fields are not properly formatted, errors", %{conn: conn} do
       original_newbie =
         conn
-        |> get(Routes.role_path(conn, :all))
+        |> get(~p"/api/admin/roles/all")
         |> json_response(200)
         |> Enum.at(6)
 
@@ -289,52 +289,52 @@ defmodule Test.EpochtalkServerWeb.Controllers.Role do
 
       short_name_response =
         conn
-        |> put(Routes.role_path(conn, :update), short_name_attrs)
+        |> put(~p"/api/admin/roles/update", short_name_attrs)
         |> json_response(400)
 
       long_name_response =
         conn
-        |> put(Routes.role_path(conn, :update), long_name_attrs)
+        |> put(~p"/api/admin/roles/update", long_name_attrs)
         |> json_response(400)
 
       short_lu_response =
         conn
-        |> put(Routes.role_path(conn, :update), short_lu_attrs)
+        |> put(~p"/api/admin/roles/update", short_lu_attrs)
         |> json_response(400)
 
       long_lu_response =
         conn
-        |> put(Routes.role_path(conn, :update), long_lu_attrs)
+        |> put(~p"/api/admin/roles/update", long_lu_attrs)
         |> json_response(400)
 
       uniq_lu_response =
         conn
-        |> put(Routes.role_path(conn, :update), uniq_lu_attrs)
+        |> put(~p"/api/admin/roles/update", uniq_lu_attrs)
         |> json_response(400)
 
       short_desc_response =
         conn
-        |> put(Routes.role_path(conn, :update), short_desc_attrs)
+        |> put(~p"/api/admin/roles/update", short_desc_attrs)
         |> json_response(400)
 
       long_desc_response =
         conn
-        |> put(Routes.role_path(conn, :update), long_desc_attrs)
+        |> put(~p"/api/admin/roles/update", long_desc_attrs)
         |> json_response(400)
 
       low_prio_response =
         conn
-        |> put(Routes.role_path(conn, :update), low_prio_attrs)
+        |> put(~p"/api/admin/roles/update", low_prio_attrs)
         |> json_response(400)
 
       high_prio_response =
         conn
-        |> put(Routes.role_path(conn, :update), high_prio_attrs)
+        |> put(~p"/api/admin/roles/update", high_prio_attrs)
         |> json_response(400)
 
       bad_hc_response =
         conn
-        |> put(Routes.role_path(conn, :update), bad_hc_attrs)
+        |> put(~p"/api/admin/roles/update", bad_hc_attrs)
         |> json_response(400)
 
       assert short_name_response["message"] == "Name can't be blank"
@@ -350,7 +350,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Role do
 
       modified_newbie =
         conn
-        |> get(Routes.role_path(conn, :all))
+        |> get(~p"/api/admin/roles/all")
         |> json_response(200)
         |> Enum.at(6)
 
@@ -367,7 +367,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Role do
 
       newbie =
         conn
-        |> get(Routes.role_path(conn, :all))
+        |> get(~p"/api/admin/roles/all")
         |> json_response(200)
         |> Enum.at(6)
 
@@ -389,14 +389,14 @@ defmodule Test.EpochtalkServerWeb.Controllers.Role do
 
       update_response =
         conn
-        |> put(Routes.role_path(conn, :update), new_newbie_permissions_attrs)
+        |> put(~p"/api/admin/roles/update", new_newbie_permissions_attrs)
         |> json_response(200)
 
       assert update_response == new_newbie_permissions_attrs.id
 
       modified_newbie =
         conn
-        |> get(Routes.role_path(conn, :all))
+        |> get(~p"/api/admin/roles/all")
         |> json_response(200)
         |> Enum.at(6)
 
@@ -418,14 +418,14 @@ defmodule Test.EpochtalkServerWeb.Controllers.Role do
 
       new_update_response =
         conn
-        |> put(Routes.role_path(conn, :update), new_newbie_permissions_attrs)
+        |> put(~p"/api/admin/roles/update", new_newbie_permissions_attrs)
         |> json_response(200)
 
       assert new_update_response == new_newbie_permissions_attrs.id
 
       modified_newbie =
         conn
-        |> get(Routes.role_path(conn, :all))
+        |> get(~p"/api/admin/roles/all")
         |> json_response(200)
         |> Enum.at(6)
 
@@ -437,7 +437,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Role do
       RoleCache.reload()
 
       initial_newbie_priority_restrictions =
-        get(conn, Routes.role_path(conn, :all))
+        get(conn, ~p"/api/admin/roles/all")
         |> json_response(200)
         |> Enum.at(6)
         |> Map.get("priority_restrictions")
@@ -451,14 +451,14 @@ defmodule Test.EpochtalkServerWeb.Controllers.Role do
 
       update_response =
         conn
-        |> put(Routes.role_path(conn, :update), new_newbie_permissions_attrs)
+        |> put(~p"/api/admin/roles/update", new_newbie_permissions_attrs)
         |> json_response(200)
 
       assert update_response == new_newbie_permissions_attrs.id
 
       modified_newbie =
         conn
-        |> get(Routes.role_path(conn, :all))
+        |> get(~p"/api/admin/roles/all")
         |> json_response(200)
         |> Enum.at(6)
 
@@ -494,14 +494,14 @@ defmodule Test.EpochtalkServerWeb.Controllers.Role do
 
       update_response =
         conn
-        |> put(Routes.role_path(conn, :update), new_newbie_permissions_attrs)
+        |> put(~p"/api/admin/roles/update", new_newbie_permissions_attrs)
         |> json_response(200)
 
       assert update_response == new_newbie_permissions_attrs.id
 
       modified_newbie =
         conn
-        |> get(Routes.role_path(conn, :all))
+        |> get(~p"/api/admin/roles/all")
         |> json_response(200)
         |> Enum.at(6)
 
@@ -514,7 +514,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Role do
 
       initial_newbie_permissions =
         conn
-        |> get(Routes.role_path(conn, :all))
+        |> get(~p"/api/admin/roles/all")
         |> json_response(200)
         |> Enum.at(6)
         |> Map.get("permissions")
@@ -528,14 +528,14 @@ defmodule Test.EpochtalkServerWeb.Controllers.Role do
 
       update_response =
         conn
-        |> put(Routes.role_path(conn, :update), new_newbie_permissions_attrs)
+        |> put(~p"/api/admin/roles/update", new_newbie_permissions_attrs)
         |> json_response(200)
 
       assert update_response == new_newbie_permissions_attrs.id
 
       modified_newbie =
         conn
-        |> get(Routes.role_path(conn, :all))
+        |> get(~p"/api/admin/roles/all")
         |> json_response(200)
         |> Enum.at(6)
 

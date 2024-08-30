@@ -71,7 +71,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
     } do
       response =
         conn
-        |> post(Routes.poll_path(conn, :create, thread_id), %{
+        |> post(~p"/api/threads/#{thread_id}/polls", %{
           "question" => "Is this a test?",
           "answers" => ["Yes", "No"],
           "max_answers" => 2,
@@ -91,7 +91,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
     } do
       response =
         conn
-        |> post(Routes.poll_path(conn, :create, -1), %{
+        |> post(~p"/api/threads/#{-1}/polls", %{
           "question" => "Is this a test?",
           "answers" => ["Yes", "No"],
           "max_answers" => 2,
@@ -112,7 +112,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
     } do
       response =
         conn
-        |> post(Routes.poll_path(conn, :create, thread_id), %{
+        |> post(~p"/api/threads/#{thread_id}/polls", %{
           "question" => "Is this a test?",
           "answers" => ["Yes", "No"],
           "max_answers" => 2,
@@ -133,7 +133,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
     } do
       response =
         conn
-        |> post(Routes.poll_path(conn, :create, thread_id), %{
+        |> post(~p"/api/threads/#{thread_id}/polls", %{
           "question" => "Is this a test?",
           "answers" => ["Yes", "No"],
           "max_answers" => 2,
@@ -154,7 +154,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
     } do
       response =
         conn
-        |> post(Routes.poll_path(conn, :create, thread_id), %{
+        |> post(~p"/api/threads/#{thread_id}/polls", %{
           "question" => "Is this a test?",
           "answers" => ["Yes", "No"],
           "max_answers" => 2,
@@ -176,7 +176,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
       assert_raise InvalidPermission,
                    ~r/^Forbidden, invalid permissions to perform this action/,
                    fn ->
-                     post(conn, Routes.poll_path(conn, :create, thread_id), %{
+                     post(conn, ~p"/api/threads/#{thread_id}/polls", %{
                        "question" => "Is this a test?",
                        "answers" => ["Yes", "No"],
                        "max_answers" => 2,
@@ -194,7 +194,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
     } do
       response =
         conn
-        |> post(Routes.poll_path(conn, :create, thread_id), %{
+        |> post(~p"/api/threads/#{thread_id}/polls", %{
           "question" => "Is this a test?",
           "answers" => ["Yes", "No"],
           "max_answers" => 2,
@@ -226,7 +226,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
 
       response =
         conn
-        |> post(Routes.poll_path(conn, :create, thread_id), poll)
+        |> post(~p"/api/threads/#{thread_id}/polls", poll)
         |> json_response(200)
 
       assert response["id"] != nil
@@ -257,7 +257,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
 
       response =
         conn
-        |> post(Routes.poll_path(conn, :create, thread_id), poll)
+        |> post(~p"/api/threads/#{thread_id}/polls", poll)
         |> json_response(200)
 
       assert response["id"] != nil
@@ -280,7 +280,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
     } do
       response =
         conn
-        |> put(Routes.poll_path(conn, :update, thread_id), %{
+        |> put(~p"/api/threads/#{thread_id}/polls", %{
           "max_answers" => 2,
           "expiration" => nil,
           "display_mode" => "always",
@@ -298,7 +298,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
     } do
       response =
         conn
-        |> put(Routes.poll_path(conn, :update, -1), %{
+        |> put(~p"/api/threads/#{-1}/polls", %{
           "max_answers" => 2,
           "expiration" => nil,
           "display_mode" => "always",
@@ -317,7 +317,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
     } do
       response =
         conn
-        |> put(Routes.poll_path(conn, :update, thread_id), %{
+        |> put(~p"/api/threads/#{thread_id}/polls", %{
           "max_answers" => 2,
           "expiration" => nil,
           "display_mode" => "always",
@@ -336,7 +336,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
     } do
       response =
         conn
-        |> put(Routes.poll_path(conn, :update, thread_id), %{
+        |> put(~p"/api/threads/#{thread_id}/polls", %{
           "max_answers" => 2,
           "expiration" => nil,
           "display_mode" => "always",
@@ -355,7 +355,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
     } do
       response =
         conn
-        |> put(Routes.poll_path(conn, :update, thread_id), %{
+        |> put(~p"/api/threads/#{thread_id}/polls", %{
           "max_answers" => 2,
           "expiration" => nil,
           "display_mode" => "always",
@@ -375,7 +375,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
       assert_raise InvalidPermission,
                    ~r/^Forbidden, invalid permissions to perform this action/,
                    fn ->
-                     put(conn, Routes.poll_path(conn, :update, thread_id), %{
+                     put(conn, ~p"/api/threads/#{thread_id}/polls", %{
                        "max_answers" => 2,
                        "expiration" => nil,
                        "display_mode" => "always",
@@ -391,7 +391,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
     } do
       response =
         conn
-        |> put(Routes.poll_path(conn, :update, thread_id), %{
+        |> put(~p"/api/threads/#{thread_id}/polls", %{
           "max_answers" => 2,
           "expiration" => nil,
           "display_mode" => "always",
@@ -419,7 +419,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
 
       response =
         conn
-        |> put(Routes.poll_path(conn, :update, thread_id), poll)
+        |> put(~p"/api/threads/#{thread_id}/polls", poll)
         |> json_response(200)
 
       assert response["id"] != nil
@@ -445,7 +445,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
 
       response =
         conn
-        |> put(Routes.poll_path(conn, :update, thread_id), poll)
+        |> put(~p"/api/threads/#{thread_id}/polls", poll)
         |> json_response(200)
 
       assert response["id"] != nil
@@ -463,7 +463,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
     } do
       response =
         conn
-        |> post(Routes.poll_path(conn, :lock, thread_id), %{"locked" => true})
+        |> post(~p"/api/threads/#{thread_id}/polls/lock", %{"locked" => true})
         |> json_response(401)
 
       assert response["error"] == "Unauthorized"
@@ -476,7 +476,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
     } do
       response =
         conn
-        |> post(Routes.poll_path(conn, :lock, -1), %{"locked" => true})
+        |> post(~p"/api/threads/#{-1}/polls/lock", %{"locked" => true})
         |> json_response(400)
 
       assert response["error"] == "Bad Request"
@@ -490,7 +490,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
     } do
       response =
         conn
-        |> post(Routes.poll_path(conn, :lock, thread_id), %{"locked" => true})
+        |> post(~p"/api/threads/#{thread_id}/polls/lock", %{"locked" => true})
         |> json_response(403)
 
       assert response["error"] == "Forbidden"
@@ -504,7 +504,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
     } do
       response =
         conn
-        |> post(Routes.poll_path(conn, :lock, thread_id), %{"locked" => true})
+        |> post(~p"/api/threads/#{thread_id}/polls/lock", %{"locked" => true})
         |> json_response(403)
 
       assert response["error"] == "Forbidden"
@@ -519,7 +519,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
       assert_raise InvalidPermission,
                    ~r/^Forbidden, invalid permissions to perform this action/,
                    fn ->
-                     post(conn, Routes.poll_path(conn, :lock, thread_id), %{"locked" => true})
+                     post(conn, ~p"/api/threads/#{thread_id}/polls/lock", %{"locked" => true})
                    end
     end
 
@@ -530,7 +530,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
     } do
       response =
         conn
-        |> post(Routes.poll_path(conn, :lock, thread_id), %{"locked" => true})
+        |> post(~p"/api/threads/#{thread_id}/polls/lock", %{"locked" => true})
         |> json_response(403)
 
       assert response["error"] == "Forbidden"
@@ -546,7 +546,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
     } do
       response =
         conn
-        |> post(Routes.poll_path(conn, :lock, thread_id), %{"locked" => true})
+        |> post(~p"/api/threads/#{thread_id}/polls/lock", %{"locked" => true})
         |> json_response(403)
 
       assert response["error"] == "Forbidden"
@@ -562,7 +562,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
     } do
       response =
         conn
-        |> post(Routes.poll_path(conn, :lock, thread_id), %{"locked" => true})
+        |> post(~p"/api/threads/#{thread_id}/polls/lock", %{"locked" => true})
         |> json_response(400)
 
       assert response["error"] == "Bad Request"
@@ -576,7 +576,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
     } do
       response =
         conn
-        |> post(Routes.poll_path(conn, :lock, thread_id), %{"locked" => true})
+        |> post(~p"/api/threads/#{thread_id}/polls/lock", %{"locked" => true})
         |> json_response(200)
 
       assert response["locked"] == true
@@ -591,7 +591,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
     } do
       response =
         conn
-        |> post(Routes.poll_path(conn, :vote, thread_id), %{"answer_ids" => [one.id]})
+        |> post(~p"/api/threads/#{thread_id}/polls/vote", %{"answer_ids" => [one.id]})
         |> json_response(401)
 
       assert response["error"] == "Unauthorized"
@@ -605,7 +605,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
     } do
       response =
         conn
-        |> post(Routes.poll_path(conn, :vote, -1), %{"answer_ids" => [one.id]})
+        |> post(~p"/api/threads/#{-1}/polls/vote", %{"answer_ids" => [one.id]})
         |> json_response(400)
 
       assert response["error"] == "Bad Request"
@@ -619,7 +619,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
     } do
       response =
         conn
-        |> post(Routes.poll_path(conn, :vote, thread_id), %{"answer_ids" => [1]})
+        |> post(~p"/api/threads/#{thread_id}/polls/vote", %{"answer_ids" => [1]})
         |> json_response(403)
 
       assert response["error"] == "Forbidden"
@@ -633,7 +633,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
     } do
       response =
         conn
-        |> post(Routes.poll_path(conn, :vote, thread_id), %{"answer_ids" => [1]})
+        |> post(~p"/api/threads/#{thread_id}/polls/vote", %{"answer_ids" => [1]})
         |> json_response(403)
 
       assert response["error"] == "Forbidden"
@@ -648,7 +648,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
       assert_raise InvalidPermission,
                    ~r/^Forbidden, invalid permissions to perform this action/,
                    fn ->
-                     post(conn, Routes.poll_path(conn, :vote, thread_id), %{"answer_ids" => [1]})
+                     post(conn, ~p"/api/threads/#{thread_id}/polls/vote", %{"answer_ids" => [1]})
                    end
     end
 
@@ -659,7 +659,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
     } do
       response =
         conn
-        |> post(Routes.poll_path(conn, :vote, thread_id), %{"answer_ids" => [-1]})
+        |> post(~p"/api/threads/#{thread_id}/polls/vote", %{"answer_ids" => [-1]})
         |> json_response(400)
 
       assert response["error"] == "Bad Request"
@@ -673,7 +673,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
     } do
       response =
         conn
-        |> post(Routes.poll_path(conn, :vote, thread_id), %{"answer_ids" => [one.id, two.id]})
+        |> post(~p"/api/threads/#{thread_id}/polls/vote", %{"answer_ids" => [one.id, two.id]})
         |> json_response(400)
 
       assert response["error"] == "Bad Request"
@@ -687,7 +687,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
     } do
       response =
         conn
-        |> post(Routes.poll_path(conn, :vote, thread_id), %{"answer_ids" => [1, 2]})
+        |> post(~p"/api/threads/#{thread_id}/polls/vote", %{"answer_ids" => [1, 2]})
         |> json_response(400)
 
       assert response["error"] == "Bad Request"
@@ -703,7 +703,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
 
       response =
         conn
-        |> post(Routes.poll_path(conn, :vote, thread_id), %{"answer_ids" => [one.id]})
+        |> post(~p"/api/threads/#{thread_id}/polls/vote", %{"answer_ids" => [one.id]})
         |> json_response(400)
 
       assert response["error"] == "Bad Request"
@@ -716,12 +716,12 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
       thread_with_poll: %{post: %{thread_id: thread_id}, poll: %{poll_answers: [one, _]}}
     } do
       conn
-      |> post(Routes.poll_path(conn, :vote, thread_id), %{"answer_ids" => [one.id]})
+      |> post(~p"/api/threads/#{thread_id}/polls/vote", %{"answer_ids" => [one.id]})
       |> json_response(200)
 
       response =
         conn
-        |> post(Routes.poll_path(conn, :vote, thread_id), %{"answer_ids" => [one.id]})
+        |> post(~p"/api/threads/#{thread_id}/polls/vote", %{"answer_ids" => [one.id]})
         |> json_response(400)
 
       assert response["error"] == "Bad Request"
@@ -735,7 +735,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
     } do
       response =
         conn
-        |> post(Routes.poll_path(conn, :vote, thread_id), %{})
+        |> post(~p"/api/threads/#{thread_id}/polls/vote", %{})
         |> json_response(400)
 
       assert response["error"] == "Bad Request"
@@ -757,7 +757,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
 
       response =
         conn
-        |> post(Routes.poll_path(conn, :vote, thread_id), %{"answer_ids" => [one.id]})
+        |> post(~p"/api/threads/#{thread_id}/polls/vote", %{"answer_ids" => [one.id]})
         |> json_response(400)
 
       assert response["error"] == "Bad Request"
@@ -778,7 +778,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
 
       response =
         conn
-        |> post(Routes.poll_path(conn, :vote, thread_id), %{"answer_ids" => [one.id]})
+        |> post(~p"/api/threads/#{thread_id}/polls/vote", %{"answer_ids" => [one.id]})
         |> json_response(200)
 
       assert response["id"] == poll.id
@@ -802,7 +802,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
 
       response =
         conn
-        |> post(Routes.poll_path(conn, :vote, thread_id), %{"answer_ids" => [one.id]})
+        |> post(~p"/api/threads/#{thread_id}/polls/vote", %{"answer_ids" => [one.id]})
         |> json_response(200)
 
       assert response["id"] == poll.id
@@ -825,7 +825,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
     } do
       response =
         conn
-        |> post(Routes.poll_path(conn, :lock, thread_id), %{"locked" => true})
+        |> post(~p"/api/threads/#{thread_id}/polls/lock", %{"locked" => true})
         |> json_response(401)
 
       assert response["error"] == "Unauthorized"
@@ -838,7 +838,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
     } do
       response =
         conn
-        |> post(Routes.poll_path(conn, :lock, -1), %{"locked" => true})
+        |> post(~p"/api/threads/#{-1}/polls/lock", %{"locked" => true})
         |> json_response(400)
 
       assert response["error"] == "Bad Request"
@@ -852,7 +852,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
     } do
       response =
         conn
-        |> delete(Routes.poll_path(conn, :delete_vote, thread_id))
+        |> delete(~p"/api/threads/#{thread_id}/polls/vote")
         |> json_response(403)
 
       assert response["error"] == "Forbidden"
@@ -866,7 +866,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
     } do
       response =
         conn
-        |> delete(Routes.poll_path(conn, :delete_vote, thread_id))
+        |> delete(~p"/api/threads/#{thread_id}/polls/vote")
         |> json_response(403)
 
       assert response["error"] == "Forbidden"
@@ -881,7 +881,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
       assert_raise InvalidPermission,
                    ~r/^Forbidden, invalid permissions to perform this action/,
                    fn ->
-                     delete(conn, Routes.poll_path(conn, :delete_vote, thread_id))
+                     delete(conn, ~p"/api/threads/#{thread_id}/polls/vote")
                    end
     end
 
@@ -892,7 +892,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
     } do
       response =
         conn
-        |> delete(Routes.poll_path(conn, :delete_vote, thread_id))
+        |> delete(~p"/api/threads/#{thread_id}/polls/vote")
         |> json_response(400)
 
       assert response["error"] == "Bad Request"
@@ -908,7 +908,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
 
       response =
         conn
-        |> delete(Routes.poll_path(conn, :delete_vote, thread_id))
+        |> delete(~p"/api/threads/#{thread_id}/polls/vote")
         |> json_response(400)
 
       assert response["error"] == "Bad Request"
@@ -922,7 +922,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
     } do
       response =
         conn
-        |> delete(Routes.poll_path(conn, :delete_vote, thread_id))
+        |> delete(~p"/api/threads/#{thread_id}/polls/vote")
         |> json_response(400)
 
       assert response["error"] == "Bad Request"
@@ -944,7 +944,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
 
       response =
         conn
-        |> delete(Routes.poll_path(conn, :vote, thread_id))
+        |> delete(~p"/api/threads/#{thread_id}/polls/vote")
         |> json_response(400)
 
       assert response["error"] == "Bad Request"
@@ -965,7 +965,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
 
       response =
         conn
-        |> delete(Routes.poll_path(conn, :delete_vote, thread_id))
+        |> delete(~p"/api/threads/#{thread_id}/polls/vote")
         |> json_response(200)
 
       assert response["id"] == poll.id
@@ -987,7 +987,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
     } do
       response =
         conn
-        |> delete(Routes.poll_path(conn, :delete_vote, thread_id))
+        |> delete(~p"/api/threads/#{thread_id}/polls/vote")
         |> json_response(200)
 
       assert response["id"] == poll.id

@@ -35,12 +35,12 @@ defmodule Test.EpochtalkServerWeb.Plugs.RateLimit do
                        "GET rate limit exceeded (#{max_get_per_second})",
                        fn ->
                          conn
-                         |> get(Routes.board_path(conn, :by_category))
+                         |> get(~p"/api/boards")
                        end
         else
           response =
             conn
-            |> get(Routes.board_path(conn, :by_category))
+            |> get(~p"/api/boards")
             |> json_response(200)
 
           assert response |> Map.get("boards") == []
@@ -62,12 +62,12 @@ defmodule Test.EpochtalkServerWeb.Plugs.RateLimit do
                        "POST rate limit exceeded (#{max_post_per_second})",
                        fn ->
                          conn
-                         |> post(Routes.user_path(conn, :login, %{}))
+                         |> post(~p"/api/login")
                        end
         else
           response =
             conn
-            |> post(Routes.user_path(conn, :login, %{username: "logintest", password: "1"}))
+            |> post(~p"/api/login?#{%{username: "logintest", password: "1"}}")
             |> json_response(400)
 
           assert response["error"] == "Bad Request"
@@ -91,12 +91,12 @@ defmodule Test.EpochtalkServerWeb.Plugs.RateLimit do
                        "PUT rate limit exceeded (#{max_put_per_second})",
                        fn ->
                          conn
-                         |> put(Routes.poll_path(conn, :update, -1), %{})
+                         |> put(~p"/api/threads/#{-1}/polls", %{})
                        end
         else
           response =
             conn
-            |> put(Routes.poll_path(conn, :update, -1), %{})
+            |> put(~p"/api/threads/#{-1}/polls", %{})
             |> json_response(400)
 
           assert response["error"] == "Bad Request"
@@ -119,12 +119,12 @@ defmodule Test.EpochtalkServerWeb.Plugs.RateLimit do
                        "DELETE rate limit exceeded (#{max_delete_per_second})",
                        fn ->
                          conn
-                         |> delete(Routes.user_path(conn, :logout))
+                         |> delete(~p"/api/logout")
                        end
         else
           response =
             conn
-            |> delete(Routes.user_path(conn, :logout))
+            |> delete(~p"/api/logout")
             |> json_response(400)
 
           assert response["error"] == "Bad Request"

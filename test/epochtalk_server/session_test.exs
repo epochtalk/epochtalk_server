@@ -58,7 +58,7 @@ defmodule Test.EpochtalkServer.Session do
       #   this is done rather than calling Session.delete
       #   because guardian does not load the resource
       #   when calling Session.delete directly
-      unauthed_conn = delete(conn, Routes.user_path(conn, :logout))
+      unauthed_conn = delete(conn, ~p"/api/logout")
       assert Guardian.Plug.authenticated?(unauthed_conn) == false
       unauthed_resource = Session.get_resource(authed_user.id, session_id)
 
@@ -119,7 +119,7 @@ defmodule Test.EpochtalkServer.Session do
 
       authenticate_persisted_response =
         authed_conn_to_persist
-        |> get(Routes.user_path(authed_conn_to_persist, :authenticate))
+        |> get(~p"/api/authenticate")
         |> json_response(200)
 
       assert authenticate_persisted_response["id"] == user.id
@@ -130,7 +130,7 @@ defmodule Test.EpochtalkServer.Session do
 
       new_authenticate_response =
         new_authed_conn
-        |> get(Routes.user_path(new_authed_conn, :authenticate))
+        |> get(~p"/api/authenticate")
         |> json_response(200)
 
       assert new_authenticate_response["id"] == user.id
@@ -142,7 +142,7 @@ defmodule Test.EpochtalkServer.Session do
 
       authenticate_deleted_response =
         authed_conn_to_delete
-        |> get(Routes.user_path(authed_conn_to_delete, :authenticate))
+        |> get(~p"/api/authenticate")
         |> json_response(401)
 
       assert authenticate_deleted_response["error"] == "Unauthorized"

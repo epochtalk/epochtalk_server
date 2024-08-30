@@ -14,7 +14,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ImageReference do
     } do
       response =
         conn
-        |> post(Routes.image_reference_path(conn, :s3_request_upload))
+        |> post(~p"/api/images/s3/upload")
         |> json_response(401)
 
       assert response["error"] == "Unauthorized"
@@ -27,7 +27,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ImageReference do
       assert_raise InvalidPermission,
                    ~r/^Forbidden, invalid permissions to perform this action/,
                    fn ->
-                     post(conn, Routes.image_reference_path(conn, :s3_request_upload), %{
+                     post(conn, ~p"/api/images/s3/upload", %{
                        images: []
                      })
                    end
@@ -39,7 +39,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ImageReference do
     } do
       response =
         conn
-        |> post(Routes.image_reference_path(conn, :s3_request_upload), %{images: []})
+        |> post(~p"/api/images/s3/upload", %{images: []})
         |> json_response(200)
 
       assert Map.keys(response) == ["presigned_posts"]
@@ -55,7 +55,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ImageReference do
 
       response =
         conn
-        |> post(Routes.image_reference_path(conn, :s3_request_upload), %{images: images})
+        |> post(~p"/api/images/s3/upload", %{images: images})
         |> json_response(200)
 
       assert Map.keys(response) == ["presigned_posts"]
@@ -83,7 +83,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ImageReference do
 
       response =
         conn
-        |> post(Routes.image_reference_path(conn, :s3_request_upload), %{images: images})
+        |> post(~p"/api/images/s3/upload", %{images: images})
         |> json_response(200)
 
       assert Map.keys(response) == ["presigned_posts"]
@@ -112,7 +112,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ImageReference do
 
       response =
         conn
-        |> post(Routes.image_reference_path(conn, :s3_request_upload), %{images: images})
+        |> post(~p"/api/images/s3/upload", %{images: images})
         |> json_response(400)
 
       assert response["error"] == "Bad Request"
@@ -139,7 +139,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ImageReference do
       Enum.each(1..10, fn _ ->
         response =
           conn
-          |> post(Routes.image_reference_path(conn, :s3_request_upload), image_reference_attrs)
+          |> post(~p"/api/images/s3/upload", image_reference_attrs)
           |> json_response(200)
 
         assert Map.keys(response) == ["presigned_posts"]
@@ -149,7 +149,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ImageReference do
       # call :s3_request_upload once more
       response =
         conn
-        |> post(Routes.image_reference_path(conn, :s3_request_upload), image_reference_attrs)
+        |> post(~p"/api/images/s3/upload", image_reference_attrs)
         |> json_response(429)
 
       assert response["error"] == "Too Many Requests"

@@ -32,7 +32,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Notification do
     test "when unauthenticated, returns Unauthorized error", %{conn: conn} do
       response =
         conn
-        |> get(Routes.notification_path(conn, :counts))
+        |> get(~p"/api/notifications/counts")
         |> json_response(401)
 
       assert response["error"] == "Unauthorized"
@@ -44,7 +44,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Notification do
          %{conn: conn} do
       response =
         conn
-        |> get(Routes.notification_path(conn, :counts))
+        |> get(~p"/api/notifications/counts")
         |> json_response(200)
 
       assert response["mention"] == 0
@@ -56,7 +56,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Notification do
          %{conn: conn} do
       response =
         conn
-        |> get(Routes.notification_path(conn, :counts))
+        |> get(~p"/api/notifications/counts")
         |> json_response(200)
 
       assert response["mention"] == @mentions_count
@@ -75,7 +75,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Notification do
 
       response =
         conn
-        |> get(Routes.notification_path(conn, :counts))
+        |> get(~p"/api/notifications/counts")
         |> json_response(200)
 
       assert response["mention"] == "#{@mentions_count}+"
@@ -89,7 +89,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Notification do
 
       response =
         conn
-        |> get(Routes.notification_path(conn, :counts), %{max: max_count})
+        |> get(~p"/api/notifications/counts", %{max: max_count})
         |> json_response(200)
 
       assert response["mention"] == "#{max_count}+"
@@ -101,7 +101,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Notification do
     test "when unauthenticated, returns Unauthorized error", %{conn: conn} do
       response =
         conn
-        |> get(Routes.notification_path(conn, :counts))
+        |> get(~p"/api/notifications/counts")
         |> json_response(401)
 
       assert response["error"] == "Unauthorized"
@@ -113,14 +113,14 @@ defmodule Test.EpochtalkServerWeb.Controllers.Notification do
          %{conn: conn} do
       dismiss_response =
         conn
-        |> post(Routes.notification_path(conn, :dismiss), %{"type" => "mention"})
+        |> post(~p"/api/notifications/dismiss", %{"type" => "mention"})
         |> json_response(200)
 
       assert dismiss_response == %{"success" => true}
 
       response =
         conn
-        |> get(Routes.notification_path(conn, :counts), %{})
+        |> get(~p"/api/notifications/counts", %{})
         |> json_response(200)
 
       assert response["mention"] == 0
@@ -132,14 +132,14 @@ defmodule Test.EpochtalkServerWeb.Controllers.Notification do
          %{conn: conn} do
       dismiss_response =
         conn
-        |> post(Routes.notification_path(conn, :dismiss), %{"type" => "message"})
+        |> post(~p"/api/notifications/dismiss", %{"type" => "message"})
         |> json_response(200)
 
       assert dismiss_response == %{"success" => true}
 
       response =
         conn
-        |> get(Routes.notification_path(conn, :counts), %{})
+        |> get(~p"/api/notifications/counts", %{})
         |> json_response(200)
 
       assert response["mention"] == @mentions_count
@@ -152,14 +152,14 @@ defmodule Test.EpochtalkServerWeb.Controllers.Notification do
       Enum.reduce(mentions, @mentions_count, fn mention, count ->
         dismiss_response =
           conn
-          |> post(Routes.notification_path(conn, :dismiss), %{"id" => mention.id})
+          |> post(~p"/api/notifications/dismiss", %{"id" => mention.id})
           |> json_response(200)
 
         assert dismiss_response == %{"success" => true}
 
         response =
           conn
-          |> get(Routes.notification_path(conn, :counts), %{})
+          |> get(~p"/api/notifications/counts", %{})
           |> json_response(200)
 
         assert response["mention"] == count - 1

@@ -11,16 +11,18 @@ defmodule Test.EpochtalkServerWeb.Controllers.User do
     test "when username is taken, found is true", %{conn: conn, users: %{user: user}} do
       response =
         conn
-        |> get(Routes.user_path(conn, :username, user.username))
+        |> get(~p"/api/register/username/#{user.username}")
         |> json_response(200)
 
       assert response["found"] == true
     end
 
     test "when username is not taken, found is false", %{conn: conn} do
+      false_username = "false_username"
+
       response =
         conn
-        |> get(Routes.user_path(conn, :username, "false_username"))
+        |> get(~p"/api/register/username/#{false_username}")
         |> json_response(200)
 
       assert response["found"] == false
@@ -31,7 +33,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.User do
     test "when email is taken, found is true", %{conn: conn, users: %{user: user}} do
       response =
         conn
-        |> get(Routes.user_path(conn, :email, user.email))
+        |> get(~p"/api/register/email/#{user.email}")
         |> json_response(200)
 
       assert response["found"] == true
@@ -42,7 +44,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.User do
 
       response =
         conn
-        |> get(Routes.user_path(conn, :email, invalid_email))
+        |> get(~p"/api/register/email/#{invalid_email}")
         |> json_response(200)
 
       assert response["found"] == false
@@ -89,7 +91,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.User do
 
       response =
         conn
-        |> post(Routes.user_path(conn, :register, register_attrs))
+        |> post(~p"/api/register?#{register_attrs}")
         |> json_response(200)
 
       {:ok, registered_user} = User.by_username(register_attrs.username)
@@ -104,7 +106,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.User do
     } do
       response =
         conn
-        |> post(Routes.user_path(conn, :register, existing_user_attrs))
+        |> post(~p"/api/register?#{existing_user_attrs}")
         |> json_response(400)
 
       assert response["error"] == "Bad Request"
@@ -118,7 +120,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.User do
     } do
       response =
         conn
-        |> post(Routes.user_path(conn, :register, authed_user_attrs))
+        |> post(~p"/api/register?#{authed_user_attrs}")
         |> json_response(400)
 
       assert response["error"] == "Bad Request"
@@ -134,7 +136,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.User do
 
       response =
         conn
-        |> post(Routes.user_path(conn, :register, blank_username_attrs))
+        |> post(~p"/api/register?#{blank_username_attrs}")
         |> json_response(400)
 
       assert response["error"] == "Bad Request"
@@ -150,7 +152,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.User do
 
       response =
         conn
-        |> post(Routes.user_path(conn, :register, blank_password_attrs))
+        |> post(~p"/api/register?#{blank_password_attrs}")
         |> json_response(400)
 
       assert response["error"] == "Bad Request"
@@ -169,14 +171,14 @@ defmodule Test.EpochtalkServerWeb.Controllers.User do
       # refresh user data
       {:ok, confirmed_user} = User.by_username(user.username)
 
+      params = %{
+        username: confirmed_user.username,
+        token: confirmed_user.confirmation_token
+      }
+
       response =
         conn
-        |> post(
-          Routes.user_path(conn, :confirm, %{
-            username: confirmed_user.username,
-            token: confirmed_user.confirmation_token
-          })
-        )
+        |> post(~p"/api/confirm?#{params}")
         |> json_response(200)
 
       assert response["id"] == confirmed_user.id
@@ -187,7 +189,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.User do
 
       response =
         conn
-        |> post(Routes.user_path(conn, :confirm, invalid_username_confirm))
+        |> post(~p"/api/confirm?#{invalid_username_confirm}")
         |> json_response(400)
 
       assert response["error"] == "Bad Request"
@@ -200,7 +202,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.User do
 
       response =
         conn
-        |> post(Routes.user_path(conn, :confirm, invalid_token_confirm))
+        |> post(~p"/api/confirm?#{invalid_token_confirm}")
         |> json_response(400)
 
       assert response["error"] == "Bad Request"

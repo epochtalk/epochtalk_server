@@ -61,7 +61,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
 
   defp page_response_list(conn, query) do
     conn
-    |> get(Routes.moderation_log_path(conn, :page, query))
+    |> get(~p"/api/admin/modlog?#{query}")
     |> json_response(200)
     |> Map.get("moderation_logs")
   end

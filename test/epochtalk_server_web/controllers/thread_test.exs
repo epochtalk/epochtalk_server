@@ -41,14 +41,16 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     move_board_thread = build(:thread, board: move_board, user: user)
 
     # create posts in thread created above, this is to get a specific number of thread replies
-    [_, {:ok, move_board_last_post}] = build_list(2, :post, user: mod_user, thread: move_board_thread.post.thread)
+    [_, {:ok, move_board_last_post}] =
+      build_list(2, :post, user: mod_user, thread: move_board_thread.post.thread)
 
     num_thread_replies = 3
     thread_post_count = num_thread_replies + 1
     thread = build(:thread, board: board, user: user)
 
     # create posts in thread created above, this is to get a specific number of thread replies
-    [_, _, {:ok, board_last_post}] = build_list(num_thread_replies, :post, user: user, thread: thread.post.thread)
+    [_, _, {:ok, board_last_post}] =
+      build_list(num_thread_replies, :post, user: user, thread: thread.post.thread)
 
     # NOTE: building additional posts or threads within "thread" or "move_board_thread"
     # will break move thread tests which tests last post info
@@ -955,7 +957,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
       move_board: %{id: new_board_id},
       board_last_post: old_board_last_post,
       admin_priority_thread: old_board_second_to_last_thread,
-      move_board_last_post: new_board_last_post,
+      move_board_last_post: new_board_last_post
     } do
       all_boards = BoardMapping.all()
       [old_board_before_move] = Enum.filter(all_boards, fn bm -> bm.board_id == old_board_id end)
@@ -983,6 +985,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
       assert new_board_before_move.stats.last_thread_id == new_board_last_thread.id
 
       thread_id = old_board_before_move.stats.last_thread_id
+
       conn
       |> post(Routes.thread_path(conn, :move, thread_id), %{new_board_id: new_board_id})
       |> json_response(200)
@@ -1007,7 +1010,10 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
       assert old_board_after_move.stats.last_thread_id == old_board_new_last_post.thread_id
       assert old_board_after_move.stats.last_post_created_at == old_board_new_last_post.created_at
       assert old_board_after_move.stats.last_post_position == old_board_new_last_post.position
-      assert old_board_after_move.stats.last_post_username == old_board_new_last_post.user.username
+
+      assert old_board_after_move.stats.last_post_username ==
+               old_board_new_last_post.user.username
+
       assert old_board_after_move.stats.last_thread_title == old_board_new_last_thread.title
       assert old_board_after_move.stats.last_thread_id == old_board_new_last_thread.id
 

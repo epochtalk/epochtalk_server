@@ -65,6 +65,7 @@ defmodule EpochtalkServer.Models.Post do
           attrs :: map() | nil,
           now_override :: NaiveDateTime.t() | nil
         ) :: Ecto.Changeset.t()
+  # credo:disable-for-next-line
   def create_changeset(post, attrs, now_override \\ nil) do
     now = now_override || NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
 

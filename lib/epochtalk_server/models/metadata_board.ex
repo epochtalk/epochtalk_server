@@ -112,7 +112,7 @@ defmodule EpochtalkServer.Models.MetadataBoard do
           position: p.position
         }
 
-    # query most recent thread in board title
+    # query most recent thread's, in board, title
     last_post_info =
       if lp = Repo.one(last_post_query) do
         last_thread_title_query =

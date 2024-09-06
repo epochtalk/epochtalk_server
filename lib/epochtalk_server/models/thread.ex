@@ -444,10 +444,19 @@ defmodule EpochtalkServer.Models.Thread do
       |> Keyword.put(:sort_order, reversed)
       |> Keyword.put(:offset, offset)
 
-    %{
-      sticky: sticky_by_board_id(board_id, page, opts),
-      normal: normal_by_board_id(board_id, page, opts)
-    }
+    normal_threads = normal_by_board_id(board_id, page, opts)
+
+    if normal_threads == {:has_threads, false} do
+      %{
+        sticky: [],
+        normal: []
+      }
+    else
+      %{
+        sticky: sticky_by_board_id(board_id, page, opts),
+        normal: normal_threads
+      }
+    end
   end
 
   @doc """
@@ -689,7 +698,7 @@ defmodule EpochtalkServer.Models.Thread do
 
   defp sticky_by_board_id(_board_id, page, _opts) when page != 1, do: []
 
-  defp normal_by_board_id(board_id, _page, opts) do
+  defp normal_by_board_id(board_id, page, opts) do
     normal_count_query = from b in Board, where: b.id == ^board_id, select: b.thread_count
 
     sticky_count_query =
@@ -700,33 +709,38 @@ defmodule EpochtalkServer.Models.Thread do
 
     thread_count = if normal_thread_count, do: normal_thread_count - sticky_thread_count
 
-    # determine wheter to start from front or back
-    opts =
-      if not is_nil(thread_count) and opts[:offset] > floor(thread_count / 2) do
-        # invert reverse
-        reversed = !opts[:reversed]
-        opts = Keyword.put(opts, :reversed, reversed)
+    # check if supplied page is outside range of threads
+    if page > ceil(thread_count / opts[:per_page]) do
+      {:has_threads, false}
+    else
+      # determine wheter to start from front or back
+      opts =
+        if not is_nil(thread_count) and opts[:offset] > floor(thread_count / 2) do
+          # invert reverse
+          reversed = !opts[:reversed]
+          opts = Keyword.put(opts, :reversed, reversed)
 
-        # calculate new per_page
-        per_page =
-          if thread_count <= opts[:offset] + opts[:per_page],
-            do: abs(thread_count - opts[:offset]),
-            else: opts[:per_page]
+          # calculate new per_page
+          per_page =
+            if thread_count <= opts[:offset] + opts[:per_page],
+              do: abs(thread_count - opts[:offset]),
+              else: opts[:per_page]
 
-        opts = Keyword.put(opts, :per_page, per_page)
+          opts = Keyword.put(opts, :per_page, per_page)
 
-        # calculate new offset after modifying per_page
-        offset =
-          if thread_count <= opts[:offset] + opts[:per_page],
-            do: 0,
-            else: thread_count - opts[:offset] - opts[:per_page]
+          # calculate new offset after modifying per_page
+          offset =
+            if thread_count <= opts[:offset] + opts[:per_page],
+              do: 0,
+              else: thread_count - opts[:offset] - opts[:per_page]
 
-        Keyword.put(opts, :offset, offset)
-      else
-        opts
-      end
+          Keyword.put(opts, :offset, offset)
+        else
+          opts
+        end
 
-    generate_thread_query(board_id, false, opts) |> Repo.all()
+      generate_thread_query(board_id, false, opts) |> Repo.all()
+    end
   end
 
   defp generate_thread_query(board_id, sticky, opts) do

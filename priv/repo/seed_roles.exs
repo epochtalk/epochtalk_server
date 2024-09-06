@@ -9,8 +9,8 @@ roles = [
     priority: 0,
     highlight_color: "#FF7442",
     permissions: %{},
-    created_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second),
-    updated_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
+    created_at: NaiveDateTime.utc_now(),
+    updated_at: NaiveDateTime.utc_now()
   },
   %{
     id: 2,
@@ -20,8 +20,8 @@ roles = [
     priority: 1,
     highlight_color: "#FF4C4C",
     permissions: %{},
-    created_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second),
-    updated_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
+    created_at: NaiveDateTime.utc_now(),
+    updated_at: NaiveDateTime.utc_now()
   },
   %{
     id: 3,
@@ -31,8 +31,8 @@ roles = [
     priority: 2,
     highlight_color: "#32A56E",
     permissions: %{},
-    created_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second),
-    updated_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
+    created_at: NaiveDateTime.utc_now(),
+    updated_at: NaiveDateTime.utc_now()
   },
   %{
     id: 4,
@@ -42,8 +42,8 @@ roles = [
     priority: 3,
     highlight_color: "#508DD0",
     permissions: %{},
-    created_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second),
-    updated_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
+    created_at: NaiveDateTime.utc_now(),
+    updated_at: NaiveDateTime.utc_now()
   },
   %{
     id: 5,
@@ -52,8 +52,8 @@ roles = [
     description: "Standard account with access to create threads and post",
     priority: 4,
     permissions: %{},
-    created_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second),
-    updated_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
+    created_at: NaiveDateTime.utc_now(),
+    updated_at: NaiveDateTime.utc_now()
   },
   %{
     id: 6,
@@ -62,8 +62,8 @@ roles = [
     description: "Moderates Newbies only, otherwise mirrors User role unless modified",
     priority: 5,
     permissions: %{},
-    created_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second),
-    updated_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
+    created_at: NaiveDateTime.utc_now(),
+    updated_at: NaiveDateTime.utc_now()
   },
   %{
     id: 7,
@@ -72,8 +72,8 @@ roles = [
     description: "Brand new users",
     priority: 6,
     permissions: %{},
-    created_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second),
-    updated_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
+    created_at: NaiveDateTime.utc_now(),
+    updated_at: NaiveDateTime.utc_now()
   },
   %{
     id: 8,
@@ -83,8 +83,8 @@ roles = [
     priority: 7,
     priority_restrictions: [0, 1, 2, 3],
     permissions: %{},
-    created_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second),
-    updated_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
+    created_at: NaiveDateTime.utc_now(),
+    updated_at: NaiveDateTime.utc_now()
   },
   %{
     id: 9,
@@ -93,8 +93,8 @@ roles = [
     description: "Read only access",
     priority: 8,
     permissions: %{},
-    created_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second),
-    updated_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
+    created_at: NaiveDateTime.utc_now(),
+    updated_at: NaiveDateTime.utc_now()
   },
   %{
     id: 10,
@@ -103,8 +103,8 @@ roles = [
     description: "Role assigned to unauthorized users when public forum is disabled",
     priority: 9,
     permissions: %{},
-    created_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second),
-    updated_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
+    created_at: NaiveDateTime.utc_now(),
+    updated_at: NaiveDateTime.utc_now()
   }
 ]
 

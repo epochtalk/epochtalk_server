@@ -51,9 +51,9 @@ defmodule EpochtalkServer.Models.Board do
     field :viewable_by, :integer
     field :postable_by, :integer
     field :right_to_left, :boolean, default: false
-    field :created_at, :naive_datetime
-    field :imported_at, :naive_datetime
-    field :updated_at, :naive_datetime
+    field :created_at, :naive_datetime_usec
+    field :imported_at, :naive_datetime_usec
+    field :updated_at, :naive_datetime_usec
     field :meta, :map
     many_to_many :category, Category, join_through: BoardMapping
   end
@@ -95,7 +95,7 @@ defmodule EpochtalkServer.Models.Board do
   """
   @spec create_changeset(board :: t(), attrs :: map() | nil) :: Ecto.Changeset.t()
   def create_changeset(board, attrs) do
-    now = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
+    now = NaiveDateTime.utc_now()
 
     attrs =
       attrs

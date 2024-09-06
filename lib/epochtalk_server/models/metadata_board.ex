@@ -48,7 +48,7 @@ defmodule EpochtalkServer.Models.MetadataBoard do
     field :total_post, :integer
     field :total_thread_count, :integer
     field :last_post_username, :string
-    field :last_post_created_at, :naive_datetime
+    field :last_post_created_at, :naive_datetime_usec
     field :last_thread_id, :integer
     field :last_thread_title, :string
     field :last_post_position, :integer

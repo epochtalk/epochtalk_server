@@ -47,8 +47,8 @@ defmodule EpochtalkServer.Models.AutoModeration do
     field :conditions, {:array, :map}
     field :actions, {:array, :string}
     field :options, :map
-    field :created_at, :naive_datetime
-    field :updated_at, :naive_datetime
+    field :created_at, :naive_datetime_usec
+    field :updated_at, :naive_datetime_usec
   end
 
   ## === Changesets Functions ===
@@ -85,7 +85,7 @@ defmodule EpochtalkServer.Models.AutoModeration do
   """
   @spec update_changeset(auto_moderation :: t(), attrs :: map() | nil) :: Ecto.Changeset.t()
   def update_changeset(auto_moderation, attrs \\ %{}) do
-    updated_at = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
+    updated_at = NaiveDateTime.utc_now()
 
     auto_moderation =
       auto_moderation

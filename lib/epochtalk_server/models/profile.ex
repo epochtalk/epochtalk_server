@@ -29,7 +29,7 @@ defmodule EpochtalkServer.Models.Profile do
     field :raw_signature, :string
     field :post_count, :integer, default: 0
     field :fields, :map
-    field :last_active, :naive_datetime
+    field :last_active, :naive_datetime_usec
   end
 
   ## === Changesets Functions ===
@@ -117,13 +117,13 @@ defmodule EpochtalkServer.Models.Profile do
     from(p in Profile, where: p.user_id == ^user_id)
     |> Repo.update_all(
       set: [
-        last_active: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
+        last_active: NaiveDateTime.utc_now()
       ]
     )
   end
 
   defp update_if_more_than_one_minute_has_passed(user_id, last_active) do
-    now = NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
+    now = NaiveDateTime.utc_now()
     last_active_plus_one_minute = NaiveDateTime.add(last_active, 1, :minute)
 
     at_least_one_minute_has_passed =

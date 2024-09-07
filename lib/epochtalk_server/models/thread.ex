@@ -710,12 +710,12 @@ defmodule EpochtalkServer.Models.Thread do
     thread_count = if normal_thread_count, do: normal_thread_count - sticky_thread_count
 
     # check if supplied page is outside range of threads
-    if page > ceil(thread_count / opts[:per_page]) do
+    if is_integer(thread_count) and  page > ceil(thread_count / opts[:per_page]) do
       {:has_threads, false}
     else
       # determine wheter to start from front or back
       opts =
-        if not is_nil(thread_count) and opts[:offset] > floor(thread_count / 2) do
+        if is_integer(thread_count) and opts[:offset] > floor(thread_count / 2) do
           # invert reverse
           reversed = !opts[:reversed]
           opts = Keyword.put(opts, :reversed, reversed)

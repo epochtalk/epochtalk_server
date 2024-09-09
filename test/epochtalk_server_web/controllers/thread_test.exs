@@ -959,7 +959,9 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
 
       # create posts in move board thread
       # and get last post for comparison
-      move_board_factory_posts = build_list(2, :post, user: mod_user, thread: move_board_thread.post.thread)
+      move_board_factory_posts =
+        build_list(2, :post, user: mod_user, thread: move_board_thread.post.thread)
+
       [_, {:ok, new_board_last_post}] = move_board_factory_posts
 
       # create a post on old board that's newer than last post on old board

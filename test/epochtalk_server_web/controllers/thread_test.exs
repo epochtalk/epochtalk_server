@@ -11,7 +11,6 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
   setup %{
     users: %{
       user: user,
-      mod_user: mod_user,
       admin_user: admin_user,
       super_admin_user: super_admin_user
     }
@@ -37,29 +36,19 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     admin_board_thread = build(:thread, board: admin_board, user: admin_user)
     super_admin_board_thread = build(:thread, board: super_admin_board, user: super_admin_user)
 
-    # create thread and replies in move_board to compare last post info in tests below
-    move_board_thread = build(:thread, board: move_board, user: user)
-
-    # create posts in thread created above, this is to get a specific number of thread replies
-    [_, {:ok, move_board_last_post}] =
-      build_list(2, :post, user: mod_user, thread: move_board_thread.post.thread)
-
-    num_thread_replies = 3
-    thread_post_count = num_thread_replies + 1
+    # create a thread for posting on
     thread = build(:thread, board: board, user: user)
+    # create a specific number of posts (thread replies)
+    num_thread_replies = 3
+    build_list(num_thread_replies, :post, user: user, thread: thread.post.thread)
+    # the thread's total post count includes
+    # the original post made when creating the thread
+    thread_post_count = num_thread_replies + 1
 
-    # create posts in thread created above, this is to get a specific number of thread replies
-    [_, _, {:ok, board_last_post}] =
-      build_list(num_thread_replies, :post, user: user, thread: thread.post.thread)
-
-    # NOTE: building additional posts or threads within "thread" or "move_board_thread"
-    # will break move thread tests which tests last post info
     {
       :ok,
       board: board,
       move_board: move_board,
-      board_last_post: board_last_post,
-      move_board_last_post: move_board_last_post,
       admin_board: admin_board,
       super_admin_board: super_admin_board,
       factory_threads: factory_threads,
@@ -953,12 +942,31 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     @tag authenticated: :global_mod
     test "after moving thread, updates last post info of each board", %{
       conn: conn,
-      board: %{id: old_board_id},
-      move_board: %{id: new_board_id},
-      board_last_post: old_board_last_post,
-      admin_priority_thread: old_board_second_to_last_thread,
-      move_board_last_post: new_board_last_post
+      board: %{
+        id: old_board_id
+      },
+      move_board: move_board,
+      users: %{
+        user: user,
+        mod_user: mod_user
+      },
+      thread: thread,
+      admin_priority_thread: old_board_second_to_last_thread
     } do
+      %{id: new_board_id} = move_board
+      # create thread and replies in move_board to compare last post info in tests below
+      move_board_thread = build(:thread, board: move_board, user: user)
+
+      # create posts in move board thread
+      # and get last post for comparison
+      move_board_factory_posts = build_list(2, :post, user: mod_user, thread: move_board_thread.post.thread)
+      [_, {:ok, new_board_last_post}] = move_board_factory_posts
+
+      # create a post on old board that's newer than last post on old board
+      # (this is to test that last post gets updated on the new board)
+      # add post to thread under original post
+      {:ok, old_board_last_post} = build(:post, user: user, thread: thread.post.thread)
+
       all_boards = BoardMapping.all()
       [old_board_before_move] = Enum.filter(all_boards, fn bm -> bm.board_id == old_board_id end)
       [new_board_before_move] = Enum.filter(all_boards, fn bm -> bm.board_id == new_board_id end)

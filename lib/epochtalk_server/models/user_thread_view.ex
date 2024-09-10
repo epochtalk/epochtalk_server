@@ -24,7 +24,7 @@ defmodule EpochtalkServer.Models.UserThreadView do
   schema "thread_views" do
     belongs_to :user, User
     belongs_to :thread, Thread
-    field :time, :naive_datetime
+    field :time, :naive_datetime_usec
   end
 
   ## === Database Functions ===
@@ -36,7 +36,7 @@ defmodule EpochtalkServer.Models.UserThreadView do
   @spec upsert(user_id :: non_neg_integer, thread_id :: non_neg_integer) ::
           {:ok, t()} | {:error, Ecto.Changeset.t()}
   def upsert(user_id, thread_id) when is_integer(user_id) and is_integer(thread_id) do
-    now = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
+    now = NaiveDateTime.utc_now()
 
     Repo.insert(
       %UserThreadView{user_id: user_id, thread_id: thread_id, time: now},

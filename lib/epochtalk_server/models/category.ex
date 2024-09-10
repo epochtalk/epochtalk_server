@@ -61,7 +61,7 @@ defmodule EpochtalkServer.Models.Category do
   """
   @spec create_changeset(category :: t(), attrs :: map() | nil) :: Ecto.Changeset.t()
   def create_changeset(category, attrs) do
-    now = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
+    now = NaiveDateTime.utc_now()
 
     attrs =
       attrs

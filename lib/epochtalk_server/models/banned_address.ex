@@ -37,9 +37,9 @@ defmodule EpochtalkServer.Models.BannedAddress do
     field :ip4, :integer
     field :weight, :decimal
     field :decay, :boolean, default: false
-    field :imported_at, :naive_datetime
-    field :created_at, :naive_datetime
-    field :updates, {:array, :naive_datetime}
+    field :imported_at, :naive_datetime_usec
+    field :created_at, :naive_datetime_usec
+    field :updates, {:array, :naive_datetime_usec}
   end
 
   ## === Changesets Functions ===
@@ -49,7 +49,7 @@ defmodule EpochtalkServer.Models.BannedAddress do
   """
   @spec upsert_changeset(banned_address :: t(), attrs :: map() | nil) :: Ecto.Changeset.t()
   def upsert_changeset(banned_address, attrs \\ %{}) do
-    now = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
+    now = NaiveDateTime.utc_now()
 
     attrs =
       attrs

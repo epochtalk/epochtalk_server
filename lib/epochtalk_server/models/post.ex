@@ -479,8 +479,6 @@ defmodule EpochtalkServer.Models.Post do
 
     # update updated_at field if outside of 10 min grace period,
     # or if a moderator is editing a user's post
-    now = now
-
     attrs =
       if (attrs.metadata != nil && Map.keys(attrs.metadata) != []) || outside_edit_window,
         do: Map.put(attrs, :updated_at, now),

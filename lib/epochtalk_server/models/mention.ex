@@ -32,7 +32,7 @@ defmodule EpochtalkServer.Models.Mention do
     belongs_to :post, Post
     belongs_to :mentioner, User
     belongs_to :mentionee, User
-    field :created_at, :naive_datetime
+    field :created_at, :naive_datetime_usec
     field :viewed, :boolean, virtual: true
     field :notification_id, :integer, virtual: true
   end
@@ -44,7 +44,7 @@ defmodule EpochtalkServer.Models.Mention do
   """
   @spec create_changeset(mention :: t(), attrs :: map() | nil) :: Ecto.Changeset.t()
   def create_changeset(mention, attrs) do
-    now = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
+    now = NaiveDateTime.utc_now()
 
     mention =
       mention

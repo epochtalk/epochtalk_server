@@ -44,7 +44,7 @@ defmodule EpochtalkServer.Models.ModerationLog do
     field :action_api_url, :string
     field :action_api_method, :string
     field :action_obj, :map
-    field :action_taken_at, :naive_datetime
+    field :action_taken_at, :naive_datetime_usec
     field :action_type, :string
     field :action_display_text, :string
     field :action_display_url, :string
@@ -57,7 +57,7 @@ defmodule EpochtalkServer.Models.ModerationLog do
   """
   @spec create_changeset(moderation_log :: t(), attrs :: map() | nil) :: Ecto.Changeset.t()
   def create_changeset(moderation_log, attrs) do
-    now = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
+    now = NaiveDateTime.utc_now()
 
     display_data = ModerationLogHelper.get_display_data(get_in(attrs, [:action, :type]))
 

@@ -18,7 +18,7 @@ defmodule EpochtalkServer.Models.Invitation do
   schema "invitations" do
     field :email, :string
     field :hash, :string
-    field :created_at, :naive_datetime
+    field :created_at, :naive_datetime_usec
   end
 
   ## === Changesets Functions ===
@@ -28,7 +28,7 @@ defmodule EpochtalkServer.Models.Invitation do
   """
   @spec create_changeset(invitation :: t(), attrs :: map() | nil) :: Ecto.Changeset.t()
   def create_changeset(invitation, attrs \\ %{}) do
-    now = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
+    now = NaiveDateTime.utc_now()
 
     attrs =
       attrs

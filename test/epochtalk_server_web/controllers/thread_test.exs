@@ -2,8 +2,11 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
   use Test.Support.ConnCase, async: true
   import Test.Support.Factory
   alias EpochtalkServerWeb.CustomErrors.InvalidPermission
+  alias EpochtalkServer.Repo
   alias EpochtalkServer.Models.User
   alias EpochtalkServer.Models.Board
+  alias EpochtalkServer.Models.Thread
+  alias EpochtalkServer.Models.BoardMapping
 
   setup %{
     users: %{
@@ -13,7 +16,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     }
   } do
     board = build(:board)
-    test_move_board = build(:board)
+    move_board = build(:board)
     admin_board = build(:board, viewable_by: 1)
     super_admin_board = build(:board, viewable_by: 1, postable_by: 0)
     category = build(:category)
@@ -24,27 +27,28 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
         [board: board, category: category, view_order: 1],
         [board: admin_board, category: category, view_order: 2],
         [board: super_admin_board, category: category, view_order: 3],
-        [board: test_move_board, category: category, view_order: 4]
+        [board: move_board, category: category, view_order: 4]
       ]
     )
 
     factory_threads = build_list(3, :thread, board: board, user: user)
-
-    num_thread_replies = 3
-    thread_post_count = num_thread_replies + 1
-    thread = build(:thread, board: board, user: user)
-
-    # create posts in thread created above, this is to get a speciic number of thread replies
-    build_list(num_thread_replies, :post, user: user, thread: thread.post.thread)
-
     admin_priority_thread = build(:thread, board: board, user: admin_user)
     admin_board_thread = build(:thread, board: admin_board, user: admin_user)
     super_admin_board_thread = build(:thread, board: super_admin_board, user: super_admin_user)
 
+    # create a thread for posting on
+    thread = build(:thread, board: board, user: user)
+    # create a specific number of posts (thread replies)
+    num_thread_replies = 3
+    build_list(num_thread_replies, :post, user: user, thread: thread.post.thread)
+    # the thread's total post count includes
+    # the original post made when creating the thread
+    thread_post_count = num_thread_replies + 1
+
     {
       :ok,
       board: board,
-      test_move_board: test_move_board,
+      move_board: move_board,
       admin_board: admin_board,
       super_admin_board: super_admin_board,
       factory_threads: factory_threads,
@@ -765,7 +769,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     test "when unauthenticated, returns Unauthorized error", %{
       conn: conn,
       thread: %{post: %{thread_id: thread_id}},
-      test_move_board: %{id: board_id}
+      move_board: %{id: board_id}
     } do
       response =
         conn
@@ -779,7 +783,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     @tag authenticated: :admin
     test "given nonexistant thread, does not move thread", %{
       conn: conn,
-      test_move_board: %{id: board_id}
+      move_board: %{id: board_id}
     } do
       response =
         conn
@@ -795,7 +799,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
          %{
            conn: conn,
            admin_board_thread: %{post: %{thread_id: thread_id}},
-           test_move_board: %{id: board_id}
+           move_board: %{id: board_id}
          } do
       response =
         conn
@@ -811,7 +815,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
          %{
            conn: conn,
            super_admin_board_thread: %{post: %{thread_id: thread_id}},
-           test_move_board: %{id: board_id}
+           move_board: %{id: board_id}
          } do
       response =
         conn
@@ -826,7 +830,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     test "when authenticated with banned user, throws InvalidPermission forbidden error", %{
       conn: conn,
       thread: %{post: %{thread_id: thread_id}},
-      test_move_board: %{id: board_id}
+      move_board: %{id: board_id}
     } do
       assert_raise InvalidPermission,
                    ~r/^Forbidden, invalid permissions to perform this action/,
@@ -842,7 +846,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
          %{
            conn: conn,
            admin_priority_thread: %{post: %{thread_id: thread_id}},
-           test_move_board: %{id: board_id}
+           move_board: %{id: board_id}
          } do
       response =
         conn
@@ -859,7 +863,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     test "when authenticated, with insufficient permissions, does not move thread", %{
       conn: conn,
       thread: %{post: %{thread_id: thread_id}},
-      test_move_board: %{id: board_id}
+      move_board: %{id: board_id}
     } do
       assert_raise InvalidPermission,
                    ~r/^Forbidden, invalid permissions to perform this action/,
@@ -875,7 +879,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
       conn: conn,
       thread: %{post: %{thread_id: thread_id}},
       board: %{id: old_board_id, name: old_board_name},
-      test_move_board: %{id: new_board_id}
+      move_board: %{id: new_board_id}
     } do
       response =
         conn
@@ -891,7 +895,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
       conn: conn,
       thread: %{post: %{thread_id: thread_id}},
       board: %{id: old_board_id},
-      test_move_board: %{id: new_board_id},
+      move_board: %{id: new_board_id},
       thread_post_count: thread_post_count
     } do
       {:ok, old_board} = Board.find_by_id(old_board_id)
@@ -915,7 +919,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
     test "after moving thread, increases new board's post count and thread count", %{
       conn: conn,
       thread: %{post: %{thread_id: thread_id}},
-      test_move_board: %{id: new_board_id},
+      move_board: %{id: new_board_id},
       thread_post_count: thread_post_count
     } do
       {:ok, new_board} = Board.find_by_id(new_board_id)
@@ -933,6 +937,103 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
       # assuming one post in thread
       assert new_post_count == old_post_count + thread_post_count
       assert new_thread_count == old_thread_count + 1
+    end
+
+    @tag authenticated: :global_mod
+    test "after moving thread, updates last post info of each board", %{
+      conn: conn,
+      board: %{
+        id: old_board_id
+      },
+      move_board: move_board,
+      users: %{
+        user: user,
+        mod_user: mod_user
+      },
+      thread: thread,
+      admin_priority_thread: old_board_second_to_last_thread
+    } do
+      %{id: new_board_id} = move_board
+      # create thread and replies in move_board to compare last post info in tests below
+      move_board_thread = build(:thread, board: move_board, user: user)
+
+      # create posts in move board thread
+      # and get last post for comparison
+      move_board_factory_posts =
+        build_list(2, :post, user: mod_user, thread: move_board_thread.post.thread)
+
+      [_, {:ok, new_board_last_post}] = move_board_factory_posts
+
+      # create a post on old board that's newer than last post on old board
+      # (this is to test that last post gets updated on the new board)
+      # add post to thread under original post
+      {:ok, old_board_last_post} = build(:post, user: user, thread: thread.post.thread)
+
+      all_boards = BoardMapping.all()
+      [old_board_before_move] = Enum.filter(all_boards, fn bm -> bm.board_id == old_board_id end)
+      [new_board_before_move] = Enum.filter(all_boards, fn bm -> bm.board_id == new_board_id end)
+
+      old_board_last_thread = Thread.find(old_board_last_post.thread_id)
+      new_board_last_thread = Thread.find(new_board_last_post.thread_id)
+
+      old_board_last_post = old_board_last_post |> Repo.preload(:user)
+      new_board_last_post = new_board_last_post |> Repo.preload(:user)
+
+      # Check each board's last post info before moving
+      assert old_board_before_move.stats.last_thread_id == old_board_last_post.thread_id
+      assert old_board_before_move.stats.last_post_created_at == old_board_last_post.created_at
+      assert old_board_before_move.stats.last_post_position == old_board_last_post.position
+      assert old_board_before_move.stats.last_post_username == old_board_last_post.user.username
+      assert old_board_before_move.stats.last_thread_title == old_board_last_thread.title
+      assert old_board_before_move.stats.last_thread_id == old_board_last_thread.id
+
+      assert new_board_before_move.stats.last_thread_id == new_board_last_post.thread_id
+      assert new_board_before_move.stats.last_post_created_at == new_board_last_post.created_at
+      assert new_board_before_move.stats.last_post_position == new_board_last_post.position
+      assert new_board_before_move.stats.last_post_username == new_board_last_post.user.username
+      assert new_board_before_move.stats.last_thread_title == new_board_last_thread.title
+      assert new_board_before_move.stats.last_thread_id == new_board_last_thread.id
+
+      thread_id = old_board_before_move.stats.last_thread_id
+
+      conn
+      |> post(Routes.thread_path(conn, :move, thread_id), %{new_board_id: new_board_id})
+      |> json_response(200)
+
+      all_boards = BoardMapping.all()
+      [old_board_after_move] = Enum.filter(all_boards, fn bm -> bm.board_id == old_board_id end)
+      [new_board_after_move] = Enum.filter(all_boards, fn bm -> bm.board_id == new_board_id end)
+
+      old_board_last_thread = Thread.find(old_board_last_post.thread_id)
+      old_board_new_last_thread = Thread.find(old_board_second_to_last_thread.post.thread_id)
+      old_board_new_last_post = old_board_second_to_last_thread.post |> Repo.preload(:user)
+
+      # Check old board's last post info after moving, should not be the same
+      assert old_board_after_move.stats.last_thread_id != old_board_last_post.thread_id
+      assert old_board_after_move.stats.last_post_created_at != old_board_last_post.created_at
+      assert old_board_after_move.stats.last_post_position != old_board_last_post.position
+      assert old_board_after_move.stats.last_post_username != old_board_last_post.user.username
+      assert old_board_after_move.stats.last_thread_title != old_board_last_thread.title
+      assert old_board_after_move.stats.last_thread_id != old_board_last_thread.id
+
+      # Check old board's last post is now the previous second to last post that was in the board
+      assert old_board_after_move.stats.last_thread_id == old_board_new_last_post.thread_id
+      assert old_board_after_move.stats.last_post_created_at == old_board_new_last_post.created_at
+      assert old_board_after_move.stats.last_post_position == old_board_new_last_post.position
+
+      assert old_board_after_move.stats.last_post_username ==
+               old_board_new_last_post.user.username
+
+      assert old_board_after_move.stats.last_thread_title == old_board_new_last_thread.title
+      assert old_board_after_move.stats.last_thread_id == old_board_new_last_thread.id
+
+      # Check new board's last post info after moving, should be the old boards last post
+      assert new_board_after_move.stats.last_thread_id == old_board_last_post.thread_id
+      assert new_board_after_move.stats.last_post_created_at == old_board_last_post.created_at
+      assert new_board_after_move.stats.last_post_position == old_board_last_post.position
+      assert new_board_after_move.stats.last_post_username == old_board_last_post.user.username
+      assert new_board_after_move.stats.last_thread_title == old_board_last_thread.title
+      assert new_board_after_move.stats.last_thread_id == old_board_last_thread.id
     end
   end
 end

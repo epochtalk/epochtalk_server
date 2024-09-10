@@ -26,9 +26,9 @@ defmodule EpochtalkServer.Models.Ban do
   @derive {Jason.Encoder, only: [:user_id, :expiration, :created_at, :updated_at]}
   schema "bans" do
     belongs_to :user, User, primary_key: true
-    field :expiration, :naive_datetime
-    field :created_at, :naive_datetime
-    field :updated_at, :naive_datetime
+    field :expiration, :naive_datetime_usec
+    field :created_at, :naive_datetime_usec
+    field :updated_at, :naive_datetime_usec
   end
 
   ## === Changesets Functions ===
@@ -48,7 +48,7 @@ defmodule EpochtalkServer.Models.Ban do
   """
   @spec ban_changeset(ban :: t(), attrs :: map() | nil) :: Ecto.Changeset.t()
   def ban_changeset(ban, attrs \\ %{}) do
-    now = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
+    now = NaiveDateTime.utc_now()
 
     attrs =
       attrs
@@ -69,7 +69,7 @@ defmodule EpochtalkServer.Models.Ban do
   """
   @spec unban_changeset(ban :: t(), attrs :: map() | nil) :: Ecto.Changeset.t()
   def unban_changeset(ban, attrs \\ %{}) do
-    now = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
+    now = NaiveDateTime.utc_now()
 
     # set ban expiration to now when unbanning
     attrs =

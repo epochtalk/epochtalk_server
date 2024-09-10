@@ -52,9 +52,9 @@ defmodule EpochtalkServer.Models.Thread do
     field :slug, :string
     field :moderated, :boolean
     field :post_count, :integer
-    field :created_at, :naive_datetime
-    field :imported_at, :naive_datetime
-    field :updated_at, :naive_datetime
+    field :created_at, :naive_datetime_usec
+    field :imported_at, :naive_datetime_usec
+    field :updated_at, :naive_datetime_usec
     has_many :posts, Post
     field :poster_ids, {:array, :integer}, virtual: true
     field :user_id, :integer, virtual: true
@@ -92,7 +92,7 @@ defmodule EpochtalkServer.Models.Thread do
   """
   @spec create_changeset(thread :: t(), attrs :: map() | nil) :: Ecto.Changeset.t()
   def create_changeset(thread, attrs) do
-    now = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
+    now = NaiveDateTime.utc_now()
 
     # set default values and timestamps
     thread =

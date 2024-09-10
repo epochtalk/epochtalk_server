@@ -9,7 +9,7 @@ defmodule Test.EpochtalkServer.Session do
   @almost_one_day_in_seconds @one_day_in_seconds - 100
   @four_weeks_in_seconds 4 * 7 * @one_day_in_seconds
   @almost_four_weeks_in_seconds @four_weeks_in_seconds - 100
-  @max_date "9999-12-31 00:00:00"
+  @max_date "9999-12-31 00:00:00.000000"
   alias EpochtalkServer.Session
   alias EpochtalkServer.Models.Profile
   alias EpochtalkServer.Models.User

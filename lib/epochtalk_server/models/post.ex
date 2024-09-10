@@ -49,9 +49,9 @@ defmodule EpochtalkServer.Models.Post do
     field :position, :integer
     field :content, :map
     field :metadata, :map
-    field :created_at, :naive_datetime
-    field :updated_at, :naive_datetime
-    field :imported_at, :naive_datetime
+    field :created_at, :naive_datetime_usec
+    field :updated_at, :naive_datetime_usec
+    field :imported_at, :naive_datetime_usec
     # field :smf_message, :map, virtual: true
   end
 
@@ -62,7 +62,7 @@ defmodule EpochtalkServer.Models.Post do
   """
   @spec create_changeset(post :: t(), attrs :: map() | nil) :: Ecto.Changeset.t()
   def create_changeset(post, attrs) do
-    now = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
+    now = NaiveDateTime.utc_now()
 
     # set default values and timestamps
     post =
@@ -479,8 +479,6 @@ defmodule EpochtalkServer.Models.Post do
 
     # update updated_at field if outside of 10 min grace period,
     # or if a moderator is editing a user's post
-    now = NaiveDateTime.truncate(now, :second)
-
     attrs =
       if (attrs.metadata != nil && Map.keys(attrs.metadata) != []) || outside_edit_window,
         do: Map.put(attrs, :updated_at, now),

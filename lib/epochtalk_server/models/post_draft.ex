@@ -25,7 +25,7 @@ defmodule EpochtalkServer.Models.PostDraft do
   schema "user_drafts" do
     belongs_to :user, User
     field :draft, :string
-    field :updated_at, :naive_datetime
+    field :updated_at, :naive_datetime_usec
   end
 
   ## === Changeset Functions ===
@@ -35,7 +35,7 @@ defmodule EpochtalkServer.Models.PostDraft do
   """
   @spec upsert_changeset(draft :: PostDraft.t(), attrs :: map() | nil) :: Ecto.Changeset.t()
   def upsert_changeset(draft, attrs \\ %{}) do
-    updated_at = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
+    updated_at = NaiveDateTime.utc_now()
 
     draft =
       draft

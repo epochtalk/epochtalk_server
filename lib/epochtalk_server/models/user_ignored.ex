@@ -25,7 +25,7 @@ defmodule EpochtalkServer.Models.UserIgnored do
   schema "ignored" do
     belongs_to :user, User
     belongs_to :ignored_user, User
-    field :created_at, :naive_datetime
+    field :created_at, :naive_datetime_usec
   end
 
   ## === Database Functions ===

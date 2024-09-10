@@ -771,8 +771,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
     } do
       expiration = NaiveDateTime.utc_now() |> NaiveDateTime.add(10)
 
-      expiration_string =
-        NaiveDateTime.to_iso8601(expiration) |> String.split(".") |> List.first()
+      expiration_string = NaiveDateTime.to_iso8601(expiration)
 
       Poll.update(%{"thread_id" => thread_id, "expiration" => expiration})
 
@@ -958,8 +957,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
     } do
       expiration = NaiveDateTime.utc_now() |> NaiveDateTime.add(10)
 
-      expiration_string =
-        NaiveDateTime.to_iso8601(expiration) |> String.split(".") |> List.first()
+      expiration_string = NaiveDateTime.to_iso8601(expiration)
 
       Poll.update(%{"thread_id" => thread_id, "expiration" => expiration})
 

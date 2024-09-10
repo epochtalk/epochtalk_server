@@ -189,7 +189,8 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
              per_page: limit,
              field: field,
              desc: desc
-           ) do
+           ),
+         {:has_threads, true} <- {:has_threads, threads.normal != [] || threads.sticky != []} do
       render(conn, :by_board, %{
         threads: threads,
         write_access: write_access && is_map(user) && !board_banned,
@@ -217,6 +218,9 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
 
       {:board_banned, {:ok, true}} ->
         ErrorHelpers.render_json_error(conn, 403, "Unauthorized, you are banned from this board")
+
+      {:has_threads, false} ->
+        ErrorHelpers.render_json_error(conn, 404, "Error, requested threads not found in board")
 
       _ ->
         ErrorHelpers.render_json_error(conn, 400, "Error, cannot get threads by board")

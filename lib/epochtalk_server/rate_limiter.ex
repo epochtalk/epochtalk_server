@@ -21,29 +21,33 @@ defmodule EpochtalkServer.RateLimiter do
 
   def init() do
     config :epochtalk_server, __MODULE__,
-      get: {
-        @one_second_in_ms,
-        @max_get_per_second
+      http: %{
+        "GET" => {
+          @one_second_in_ms,
+          @max_get_per_second
+        },
+        "POST" => {
+          @one_second_in_ms,
+          @max_post_per_second
+        },
+        "PUT" => {
+          @one_second_in_ms,
+          @max_put_per_second
+        },
+        "PATCH" => {
+          @one_second_in_ms,
+          @max_patch_per_second
+        },
+        "DELETE" => {
+          @one_second_in_ms,
+          @max_delete_per_second
+        }
       },
-      post: {
-        @one_second_in_ms,
-        @max_post_per_second
-      },
-      put: {
-        @one_second_in_ms,
-        @max_put_per_second
-      },
-      patch: {
-        @one_second_in_ms,
-        @max_patch_per_second
-      },
-      delete: {
-        @one_second_in_ms,
-        @max_delete_per_second
-      },
-      s3_hourly: {
-        @one_hour_in_ms,
-        @max_images_per_hour
+      api: %{
+        "POST:/api/images/s3/upload" => {
+          @one_hour_in_ms,
+          @max_images_per_hour
+        }
       }
   end
 

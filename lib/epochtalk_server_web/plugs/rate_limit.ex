@@ -11,7 +11,7 @@ defmodule EpochtalkServerWeb.Plugs.RateLimit do
     RateLimitExceeded
   }
 
-  import EpochtalkServer.RateLimiter, only: [check_rate_limited: 2]
+  import EpochtalkServer.RateLimiter, only: [check_rate_limited: 3]
 
   @method_to_atom_map %{
     "GET" => :get,

@@ -112,7 +112,18 @@ defmodule EpochtalkServer.Models.BoardMapping do
           left_join: s in subquery(sticky_count_subquery),
           on: bm.board_id == s.board_id,
           select_merge: %{
-            stats: mb,
+            stats: %{
+              board_id: mb.board_id,
+              post_count: mb.post_count,
+              thread_count: mb.thread_count,
+              total_post: mb.total_post,
+              total_thread_count: mb.total_thread_count,
+              last_post_username: mb.last_post_username,
+              last_post_created_at: mb.last_post_created_at,
+              last_thread_id: mb.last_thread_id,
+              last_thread_title: mb.last_thread_title,
+              last_post_position: mb.last_post_position
+            },
             thread: %{
               last_thread_slug: t.slug,
               last_thread_post_count: t.post_count,

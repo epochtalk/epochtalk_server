@@ -7,6 +7,7 @@ defmodule EpochtalkServer.Models.Thread do
   alias EpochtalkServer.Models.User
   alias EpochtalkServer.Models.Thread
   alias EpochtalkServer.Models.MetadataThread
+  alias EpochtalkServer.Models.MetadataBoard
   alias EpochtalkServer.Models.Board
   alias EpochtalkServer.Models.Poll
   alias EpochtalkServer.Models.Post
@@ -51,9 +52,9 @@ defmodule EpochtalkServer.Models.Thread do
     field :slug, :string
     field :moderated, :boolean
     field :post_count, :integer
-    field :created_at, :naive_datetime
-    field :imported_at, :naive_datetime
-    field :updated_at, :naive_datetime
+    field :created_at, :naive_datetime_usec
+    field :imported_at, :naive_datetime_usec
+    field :updated_at, :naive_datetime_usec
     has_many :posts, Post
     field :poster_ids, {:array, :integer}, virtual: true
     field :user_id, :integer, virtual: true
@@ -91,7 +92,7 @@ defmodule EpochtalkServer.Models.Thread do
   """
   @spec create_changeset(thread :: t(), attrs :: map() | nil) :: Ecto.Changeset.t()
   def create_changeset(thread, attrs) do
-    now = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
+    now = NaiveDateTime.utc_now()
 
     # set default values and timestamps
     thread =
@@ -244,6 +245,89 @@ defmodule EpochtalkServer.Models.Thread do
   end
 
   @doc """
+  Moves `Thread` to the specified `Board` given a `thread_id` and `board_id`
+  """
+  @spec move(thread_id :: non_neg_integer, board_id :: non_neg_integer) ::
+          {:ok, thread :: t()} | {:error, Ecto.Changeset.t()}
+  def move(thread_id, board_id) do
+    case Repo.transaction(fn ->
+           # query and lock thread for update,
+           thread_lock_query =
+             from t in Thread,
+               where: t.id == ^thread_id,
+               select: t,
+               lock: "FOR UPDATE"
+
+           thread = Repo.one(thread_lock_query)
+
+           # prevent moving board to same board or non existent board
+           if thread.board_id != board_id && Repo.get_by(Board, id: board_id) != nil do
+             # query old board and lock for update
+             old_board_lock_query =
+               from b in Board,
+                 join: mb in MetadataBoard,
+                 on: mb.board_id == b.id,
+                 where: b.id == ^thread.board_id,
+                 select: {b, mb},
+                 lock: "FOR UPDATE"
+
+             # locked old_board, reference this when updating
+             {old_board, old_board_meta} = Repo.one(old_board_lock_query)
+
+             # query new board and lock for update
+             new_board_lock_query =
+               from b in Board,
+                 join: mb in MetadataBoard,
+                 on: mb.board_id == b.id,
+                 where: b.id == ^board_id,
+                 select: {b, mb},
+                 lock: "FOR UPDATE"
+
+             # locked new_board, reference this when updating
+             {new_board, new_board_meta} = Repo.one(new_board_lock_query)
+
+             # update old_board, thread and post count
+             old_board
+             |> change(
+               thread_count: old_board.thread_count - 1,
+               post_count: old_board.post_count - thread.post_count
+             )
+             |> Repo.update!()
+
+             # update new_board, thread and post count
+             new_board
+             |> change(
+               thread_count: new_board.thread_count + 1,
+               post_count: new_board.post_count + thread.post_count
+             )
+             |> Repo.update!()
+
+             # update thread's original board_id with new_board's id
+             thread
+             |> change(board_id: new_board.id)
+             |> Repo.update!()
+
+             # update last post metadata info of both the old board and new board
+             MetadataBoard.update_last_post_info(old_board_meta, old_board.id)
+             MetadataBoard.update_last_post_info(new_board_meta, new_board.id)
+
+             # return old board data for reference
+             %{old_board_name: old_board.name, old_board_id: old_board.id}
+           else
+             Repo.rollback(:invalid_board_id)
+           end
+         end) do
+      # transaction success return purged thread data
+      {:ok, thread_data} ->
+        {:ok, thread_data}
+
+      # some other error
+      {:error, cs} ->
+        {:error, cs}
+    end
+  end
+
+  @doc """
   Sets boolean indicating if the specified `Thread` is sticky given a `Thread` id
   """
   @spec set_sticky(id :: integer, sticky :: boolean) :: {non_neg_integer, nil | [term()]}
@@ -360,10 +444,19 @@ defmodule EpochtalkServer.Models.Thread do
       |> Keyword.put(:sort_order, reversed)
       |> Keyword.put(:offset, offset)
 
-    %{
-      sticky: sticky_by_board_id(board_id, page, opts),
-      normal: normal_by_board_id(board_id, page, opts)
-    }
+    normal_threads = normal_by_board_id(board_id, page, opts)
+
+    if normal_threads == {:has_threads, false} do
+      %{
+        sticky: [],
+        normal: []
+      }
+    else
+      %{
+        sticky: sticky_by_board_id(board_id, page, opts),
+        normal: normal_threads
+      }
+    end
   end
 
   @doc """
@@ -605,7 +698,7 @@ defmodule EpochtalkServer.Models.Thread do
 
   defp sticky_by_board_id(_board_id, page, _opts) when page != 1, do: []
 
-  defp normal_by_board_id(board_id, _page, opts) do
+  defp normal_by_board_id(board_id, page, opts) do
     normal_count_query = from b in Board, where: b.id == ^board_id, select: b.thread_count
 
     sticky_count_query =
@@ -616,33 +709,38 @@ defmodule EpochtalkServer.Models.Thread do
 
     thread_count = if normal_thread_count, do: normal_thread_count - sticky_thread_count
 
-    # determine wheter to start from front or back
-    opts =
-      if not is_nil(thread_count) and opts[:offset] > floor(thread_count / 2) do
-        # invert reverse
-        reversed = !opts[:reversed]
-        opts = Keyword.put(opts, :reversed, reversed)
+    # check if supplied page is outside range of threads
+    if is_integer(thread_count) and page > ceil(thread_count / opts[:per_page]) do
+      {:has_threads, false}
+    else
+      # determine wheter to start from front or back
+      opts =
+        if is_integer(thread_count) and opts[:offset] > floor(thread_count / 2) do
+          # invert reverse
+          reversed = !opts[:reversed]
+          opts = Keyword.put(opts, :reversed, reversed)
 
-        # calculate new per_page
-        per_page =
-          if thread_count <= opts[:offset] + opts[:per_page],
-            do: abs(thread_count - opts[:offset]),
-            else: opts[:per_page]
+          # calculate new per_page
+          per_page =
+            if thread_count <= opts[:offset] + opts[:per_page],
+              do: abs(thread_count - opts[:offset]),
+              else: opts[:per_page]
 
-        opts = Keyword.put(opts, :per_page, per_page)
+          opts = Keyword.put(opts, :per_page, per_page)
 
-        # calculate new offset after modifying per_page
-        offset =
-          if thread_count <= opts[:offset] + opts[:per_page],
-            do: 0,
-            else: thread_count - opts[:offset] - opts[:per_page]
+          # calculate new offset after modifying per_page
+          offset =
+            if thread_count <= opts[:offset] + opts[:per_page],
+              do: 0,
+              else: thread_count - opts[:offset] - opts[:per_page]
 
-        Keyword.put(opts, :offset, offset)
-      else
-        opts
-      end
+          Keyword.put(opts, :offset, offset)
+        else
+          opts
+        end
 
-    generate_thread_query(board_id, false, opts) |> Repo.all()
+      generate_thread_query(board_id, false, opts) |> Repo.all()
+    end
   end
 
   defp generate_thread_query(board_id, sticky, opts) do

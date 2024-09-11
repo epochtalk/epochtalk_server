@@ -4,11 +4,11 @@ defmodule Test.EpochtalkServerWeb.Controllers.Board do
   alias EpochtalkServerWeb.CustomErrors.InvalidPermission
 
   setup %{conn: conn} do
-    category = insert(:category)
-    parent_board = insert(:board)
-    child_board = insert(:board)
-    admin_board = insert(:board, viewable_by: 1)
-    super_admin_board = insert(:board, viewable_by: 0)
+    category = build(:category)
+    parent_board = build(:board)
+    child_board = build(:board)
+    admin_board = build(:board, viewable_by: 1)
+    super_admin_board = build(:board, viewable_by: 0)
 
     build(:board_mapping,
       attributes: [

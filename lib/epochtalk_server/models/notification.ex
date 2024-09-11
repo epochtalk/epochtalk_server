@@ -29,7 +29,7 @@ defmodule EpochtalkServer.Models.Notification do
     field :data, :map
     field :viewed, :boolean
     field :type, :string
-    field :created_at, :naive_datetime
+    field :created_at, :naive_datetime_usec
   end
 
   ## === Changesets Functions ===

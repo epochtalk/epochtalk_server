@@ -49,8 +49,8 @@ defmodule EpochtalkServer.Models.Role do
     field :permissions, :map
     field :priority_restrictions, {:array, :integer}
 
-    field :created_at, :naive_datetime
-    field :updated_at, :naive_datetime
+    field :created_at, :naive_datetime_usec
+    field :updated_at, :naive_datetime_usec
   end
 
   ## === Changesets Functions ===
@@ -71,7 +71,7 @@ defmodule EpochtalkServer.Models.Role do
   """
   @spec update_changeset(role :: Role.t(), attrs :: map() | nil) :: Ecto.Changeset.t()
   def update_changeset(role, attrs \\ %{}) do
-    updated_at = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
+    updated_at = NaiveDateTime.utc_now()
 
     role =
       role

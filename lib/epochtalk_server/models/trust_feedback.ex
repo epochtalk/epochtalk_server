@@ -39,7 +39,7 @@ defmodule EpochtalkServer.Models.TrustFeedback do
     field :scammer, :boolean
     field :reference, :string
     field :comments, :string
-    field :created_at, :naive_datetime
+    field :created_at, :naive_datetime_usec
   end
 
   ## === Changesets Functions ===

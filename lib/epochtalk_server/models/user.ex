@@ -61,9 +61,9 @@ defmodule EpochtalkServer.Models.User do
     field :confirmation_token, :string
     field :reset_token, :string
     field :reset_expiration, :string
-    field :created_at, :naive_datetime
-    field :imported_at, :naive_datetime
-    field :updated_at, :naive_datetime
+    field :created_at, :naive_datetime_usec
+    field :imported_at, :naive_datetime_usec
+    field :updated_at, :naive_datetime_usec
     field :deleted, :boolean, default: false
     field :malicious_score, :decimal
     field :smf_member, :map, virtual: true
@@ -84,7 +84,7 @@ defmodule EpochtalkServer.Models.User do
   """
   @spec registration_changeset(user :: t(), attrs :: map() | nil) :: Ecto.Changeset.t()
   def registration_changeset(user, attrs) do
-    now = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
+    now = NaiveDateTime.utc_now()
 
     # set timestamps
     user =

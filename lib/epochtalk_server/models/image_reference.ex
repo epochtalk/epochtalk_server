@@ -34,8 +34,8 @@ defmodule EpochtalkServer.Models.ImageReference do
     field :length, :integer
     field :type, :string
     field :checksum, :string
-    field :expiration, :naive_datetime
-    field :created_at, :naive_datetime
+    field :expiration, :naive_datetime_usec
+    field :created_at, :naive_datetime_usec
     many_to_many :posts, Post, join_through: PostImageReference
     # many_to_many :messages, Message, join_through: MessageImageReference
     many_to_many :profiles, Profile, join_through: ProfileImageReference
@@ -76,7 +76,7 @@ defmodule EpochtalkServer.Models.ImageReference do
   """
   @spec create_changeset(image_reference :: t(), attrs :: map() | nil) :: Ecto.Changeset.t()
   def create_changeset(image_reference, attrs) do
-    now = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
+    now = NaiveDateTime.utc_now()
     uuid = Ecto.UUID.generate()
 
     attrs =
@@ -174,7 +174,7 @@ defmodule EpochtalkServer.Models.ImageReference do
   end
 
   defp query_expired() do
-    now = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
+    now = NaiveDateTime.utc_now()
 
     from i in ImageReference,
       where: i.expiration < ^now and i.posts == [] and i.messages == [] and i.profiles == []

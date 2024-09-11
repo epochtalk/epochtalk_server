@@ -40,7 +40,7 @@ defmodule EpochtalkServer.Models.Poll do
     field :question, :string
     field :locked, :boolean
     field :max_answers, :integer
-    field :expiration, :naive_datetime
+    field :expiration, :naive_datetime_usec
     field :change_vote, :boolean
     field :display_mode, Ecto.Enum, values: [:always, :voted, :expired]
     field :has_voted, :boolean, virtual: true

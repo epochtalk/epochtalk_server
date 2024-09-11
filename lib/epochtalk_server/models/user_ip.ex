@@ -23,7 +23,7 @@ defmodule EpochtalkServer.Models.UserIp do
   schema "ips" do
     belongs_to :user, User
     field :user_ip, :string
-    field :created_at, :naive_datetime
+    field :created_at, :naive_datetime_usec
   end
 
   ## === Database Functions ===
@@ -40,7 +40,7 @@ defmodule EpochtalkServer.Models.UserIp do
       %UserIp{
         user_id: user_id,
         user_ip: user_ip,
-        created_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
+        created_at: NaiveDateTime.utc_now()
       },
       on_conflict: :nothing,
       conflict_target: [:user_id, :user_ip]

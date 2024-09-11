@@ -7,11 +7,11 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
   alias EpochtalkServerWeb.CustomErrors.InvalidPermission
 
   setup %{users: %{user: user, admin_user: admin_user, super_admin_user: super_admin_user}} do
-    board = insert(:board)
-    admin_board = insert(:board, viewable_by: 1)
+    board = build(:board)
+    admin_board = build(:board, viewable_by: 1)
     # readable by admins but only writeable by super admins
-    super_admin_board = insert(:board, viewable_by: 1, postable_by: 0)
-    category = insert(:category)
+    super_admin_board = build(:board, viewable_by: 1, postable_by: 0)
+    category = build(:category)
 
     build(:board_mapping,
       attributes: [
@@ -771,8 +771,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
     } do
       expiration = NaiveDateTime.utc_now() |> NaiveDateTime.add(10)
 
-      expiration_string =
-        NaiveDateTime.to_iso8601(expiration) |> String.split(".") |> List.first()
+      expiration_string = NaiveDateTime.to_iso8601(expiration)
 
       Poll.update(%{"thread_id" => thread_id, "expiration" => expiration})
 
@@ -958,8 +957,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Poll do
     } do
       expiration = NaiveDateTime.utc_now() |> NaiveDateTime.add(10)
 
-      expiration_string =
-        NaiveDateTime.to_iso8601(expiration) |> String.split(".") |> List.first()
+      expiration_string = NaiveDateTime.to_iso8601(expiration)
 
       Poll.update(%{"thread_id" => thread_id, "expiration" => expiration})
 

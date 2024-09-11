@@ -96,8 +96,8 @@ defmodule Test.EpochtalkServerWeb.Controllers.User do
 
       {:ok, registered_user} = User.by_username(register_attrs.username)
       assert response["id"] == registered_user.id
-      assert registered_user.created_at == mocked_date |> NaiveDateTime.truncate(:second)
-      assert registered_user.updated_at == mocked_date |> NaiveDateTime.truncate(:second)
+      assert registered_user.created_at == mocked_date
+      assert registered_user.updated_at == mocked_date
     end
 
     test "when email is already taken, errors", %{

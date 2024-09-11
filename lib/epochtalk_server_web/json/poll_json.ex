@@ -49,7 +49,7 @@ defmodule EpochtalkServerWeb.Controllers.PollJSON do
       )
 
     # hide votes if poll is not expired and display mode is set to display votes when expired
-    now = NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
+    now = NaiveDateTime.utc_now()
 
     hide_votes =
       (poll.display_mode === :voted && !has_voted) ||

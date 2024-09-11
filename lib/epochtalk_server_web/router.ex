@@ -52,6 +52,7 @@ defmodule EpochtalkServerWeb.Router do
     post "/threads", Thread, :create
     post "/threads/:thread_id/lock", Thread, :lock
     post "/threads/:thread_id/sticky", Thread, :sticky
+    post "/threads/:thread_id/move", Thread, :move
     delete "/threads/:thread_id", Thread, :purge
     post "/threads/:thread_id/polls/vote", Poll, :vote
     delete "/threads/:thread_id/polls/vote", Poll, :delete_vote

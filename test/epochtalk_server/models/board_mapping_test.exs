@@ -9,11 +9,11 @@ defmodule Test.EpochtalkServer.Models.BoardMapping do
     end
 
     test "gets board mappings" do
-      category = insert(:category)
-      category_board1 = insert(:board)
-      category_board2 = insert(:board)
-      child_board1 = insert(:board)
-      child_board2 = insert(:board)
+      category = build(:category)
+      category_board1 = build(:board)
+      category_board2 = build(:board)
+      child_board1 = build(:board)
+      child_board2 = build(:board)
 
       build(:board_mapping,
         attributes: [
@@ -66,8 +66,8 @@ defmodule Test.EpochtalkServer.Models.BoardMapping do
 
   describe "update/1" do
     test "updates a board mapping" do
-      category = insert(:category)
-      board = insert(:board)
+      category = build(:category)
+      board = build(:board)
 
       result =
         build(:board_mapping,
@@ -87,8 +87,8 @@ defmodule Test.EpochtalkServer.Models.BoardMapping do
     test "deletes a board mapping" do
       assert BoardMapping.all() |> Enum.count() == 0
 
-      category = insert(:category)
-      board = insert(:board)
+      category = build(:category)
+      board = build(:board)
 
       build(:board_mapping,
         attributes: [

@@ -102,7 +102,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       users: %{user: user, admin_user: admin_user}
     } do
       mod_address = "127.0.0.2"
-      board = insert(:board)
+      board = build(:board)
 
       attrs = %{
         mod: %{username: admin_user.username, id: 1, ip: mod_address},
@@ -148,7 +148,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       conn: conn,
       users: %{user: user}
     } do
-      board = insert(:board)
+      board = build(:board)
 
       factory_moderation_log =
         build(:moderation_log, %{
@@ -174,7 +174,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       conn: conn,
       users: %{user: user}
     } do
-      board = insert(:board)
+      board = build(:board)
 
       factory_moderation_log =
         build(:moderation_log, %{
@@ -832,7 +832,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       conn: conn,
       users: %{user: user}
     } do
-      board = insert(:board)
+      board = build(:board)
 
       factory_moderation_log =
         build(:moderation_log, %{
@@ -857,7 +857,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       conn: conn,
       users: %{user: user}
     } do
-      board = insert(:board)
+      board = build(:board)
 
       factory_moderation_log =
         build(:moderation_log, %{
@@ -879,7 +879,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
 
     @tag authenticated: :admin
     test "when action_type is 'boards.create', gets page", %{conn: conn} do
-      board = insert(:board)
+      board = build(:board)
 
       factory_moderation_log =
         build(:moderation_log, %{
@@ -901,7 +901,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
 
     @tag authenticated: :admin
     test "when action_type is 'boards.update', gets page", %{conn: conn} do
-      board = insert(:board)
+      board = build(:board)
 
       factory_moderation_log =
         build(:moderation_log, %{
@@ -923,7 +923,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
 
     @tag authenticated: :admin
     test "when action_type is 'boards.delete', gets page", %{conn: conn} do
-      board = insert(:board)
+      board = build(:board)
 
       factory_moderation_log =
         build(:moderation_log, %{
@@ -945,7 +945,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
 
     @tag authenticated: :admin
     test "when action_type is 'threads.title', gets page", %{conn: conn, users: %{user: user}} do
-      board = insert(:board)
+      board = build(:board)
       thread = build(:thread, board: board, user: user)
       thread_id = thread.post.thread_id
       thread_slug = thread.attributes["slug"]
@@ -972,7 +972,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
 
     @tag authenticated: :admin
     test "when action_type is 'threads.lock', gets page", %{conn: conn, users: %{user: user}} do
-      board = insert(:board)
+      board = build(:board)
       thread = build(:thread, board: board, user: user)
       thread_id = thread.post.thread_id
       thread_title = thread.post.content["title"]
@@ -999,7 +999,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
 
     @tag authenticated: :admin
     test "when action_type is 'threads.sticky', gets page", %{conn: conn, users: %{user: user}} do
-      board = insert(:board)
+      board = build(:board)
       thread = build(:thread, board: board, user: user)
       thread_id = thread.post.thread_id
       thread_title = thread.post.content["title"]
@@ -1026,7 +1026,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
 
     @tag authenticated: :admin
     test "when action_type is 'threads.move', gets page", %{conn: conn, users: %{user: user}} do
-      board = insert(:board)
+      board = build(:board)
       thread = build(:thread, board: board, user: user)
       thread_id = thread.post.thread_id
       thread_title = thread.post.content["title"]
@@ -1060,7 +1060,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
 
     @tag authenticated: :admin
     test "when action_type is 'threads.purge', gets page", %{conn: conn, users: %{user: user}} do
-      board = insert(:board)
+      board = build(:board)
       thread = build(:thread, board: board, user: user)
       thread_title = thread.post.content["title"]
 
@@ -1088,7 +1088,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
 
     @tag authenticated: :admin
     test "when action_type is 'threads.editPoll', gets page", %{conn: conn, users: %{user: user}} do
-      board = insert(:board)
+      board = build(:board)
       thread = build(:thread, board: board, user: user)
       thread_id = thread.post.thread_id
       thread_title = thread.post.content["title"]
@@ -1118,7 +1118,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       conn: conn,
       users: %{user: user}
     } do
-      board = insert(:board)
+      board = build(:board)
       thread = build(:thread, board: board, user: user)
       thread_id = thread.post.thread_id
       thread_title = thread.post.content["title"]
@@ -1145,7 +1145,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
 
     @tag authenticated: :admin
     test "when action_type is 'threads.lockPoll', gets page", %{conn: conn, users: %{user: user}} do
-      board = insert(:board)
+      board = build(:board)
       thread = build(:thread, board: board, user: user)
       thread_id = thread.post.thread_id
       thread_title = thread.post.content["title"]
@@ -1172,7 +1172,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
 
     @tag authenticated: :admin
     test "when action_type is 'posts.update', gets page", %{conn: conn, users: %{user: user}} do
-      board = insert(:board)
+      board = build(:board)
       thread = build(:thread, board: board, user: user)
       thread_title = thread.post.content["title"]
       thread_slug = thread.attributes["slug"]
@@ -1199,7 +1199,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
 
     @tag authenticated: :admin
     test "when action_type is 'posts.delete', gets page", %{conn: conn, users: %{user: user}} do
-      board = insert(:board)
+      board = build(:board)
       thread = build(:thread, board: board, user: user)
       thread_title = thread.post.content["title"]
       thread_slug = thread.attributes["slug"]
@@ -1226,7 +1226,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
 
     @tag authenticated: :admin
     test "when action_type is 'posts.undelete', gets page", %{conn: conn, users: %{user: user}} do
-      board = insert(:board)
+      board = build(:board)
       thread = build(:thread, board: board, user: user)
       thread_title = thread.post.content["title"]
       thread_slug = thread.attributes["slug"]
@@ -1253,7 +1253,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
 
     @tag authenticated: :admin
     test "when action_type is 'posts.purge', gets page", %{conn: conn, users: %{user: user}} do
-      board = insert(:board)
+      board = build(:board)
       thread = build(:thread, board: board, user: user)
       thread_id = thread.post.thread_id
       thread_title = thread.post.content["title"]
@@ -1467,7 +1467,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.ModerationLog do
       conn: conn,
       users: %{user: user}
     } do
-      board = insert(:board)
+      board = build(:board)
 
       factory_moderation_log =
         build(:moderation_log, %{

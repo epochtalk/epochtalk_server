@@ -80,6 +80,8 @@ defmodule EpochtalkServer.RateLimiter do
     {class, action_type}
     |> get_configs()
     |> case do
+      {:bypass, message} ->
+        {:allow, message}
       {:error, message} ->
         raise message
 

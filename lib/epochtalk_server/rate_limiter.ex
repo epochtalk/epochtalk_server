@@ -56,23 +56,24 @@ defmodule EpochtalkServer.RateLimiter do
 
   Returns action_type and error message if action is denied
   """
-  @spec check_rate_limited(action_type :: atom, user_id :: String.t()) ::
+  @spec check_rate_limited(class :: atom, action_type :: atom, user_id :: String.t()) ::
           {:allow, count :: non_neg_integer}
-          | {action_type :: atom, count :: non_neg_integer}
+          | {class :: atom, action_type :: atom, count :: non_neg_integer}
           | {:error, message :: String.t()}
-  def check_rate_limited(action_type, user_id),
-    do: check_rate_limited(action_type, user_id, @default_count)
+  def check_rate_limited(class, action_type, user_id),
+    do: check_rate_limited(class, action_type, user_id, @default_count)
 
   @spec check_rate_limited(
+          class :: atom,
           action_type :: atom,
           user_id :: String.t(),
           count :: non_neg_integer
         ) ::
           {:allow, count :: non_neg_integer}
-          | {action_type :: atom, count :: non_neg_integer}
+          | {class :: atom, action_type :: atom, count :: non_neg_integer}
           | {:error, message :: String.t()}
-  def check_rate_limited(action_type, user_id, count) do
-    action_type
+  def check_rate_limited(class, action_type, user_id, count) do
+    {class, action_type}
     |> get_configs()
     |> case do
       {:error, message} ->
@@ -101,12 +102,18 @@ defmodule EpochtalkServer.RateLimiter do
   end
 
   # get configs and handle case when config action_type is missing
-  defp get_configs(action_type) do
+  defp get_configs({class, action_type}) do
     Application.get_env(:epochtalk_server, __MODULE__)
-    |> Keyword.get(action_type)
+    |> Keyword.get(class)
+    |> Map.get(action_type)
     |> case do
       # return error if config not found in map
-      nil -> {:error, "Could not get rate limit configs for action_type #{action_type}"}
+      nil ->
+        if class == :api do
+          {:bypass, "No configuration for this api route, bypassing"}
+        else
+          {:error, "Could not get rate limit configs for action_type #{action_type}"}
+        end
       result -> result
     end
   end

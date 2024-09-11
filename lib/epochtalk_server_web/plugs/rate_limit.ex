@@ -13,14 +13,13 @@ defmodule EpochtalkServerWeb.Plugs.RateLimit do
 
   import EpochtalkServer.RateLimiter, only: [check_rate_limited: 3]
 
-  @method_to_atom_map %{
-    "GET" => :get,
-    "POST" => :post,
-    "PUT" => :put,
-    "PATCH" => :patch,
-    "DELETE" => :delete
-  }
-  @methods @method_to_atom_map |> Map.keys()
+  @methods [
+    "GET",
+    "POST",
+    "PUT",
+    "PATCH",
+    "DELETE"
+  ]
 
   plug(:rate_limit_request)
 
@@ -30,10 +29,10 @@ defmodule EpochtalkServerWeb.Plugs.RateLimit do
   def rate_limit_request(conn, _opts) do
     with :ok <- check_env(conn),
          %{method: method} <- conn,
-         {:ok, method} <- atomize_method(method),
+         {:ok, method} <- validate_method(method),
          conn_id <- get_conn_id(conn),
-         # ensure rate limit not exceeded
-         {:allow, allow_count} <- check_rate_limited(method, conn_id) do
+         # ensure rate limit not exceeded for http
+         {:allow, http_count} <- check_rate_limited(:http, method, conn_id),
       Logger.debug("#{method} count for conn #{conn_id}: #{allow_count}")
       conn
     else
@@ -67,9 +66,9 @@ defmodule EpochtalkServerWeb.Plugs.RateLimit do
     end
   end
 
-  defp atomize_method(method) do
+  defp validate_method(method) do
     if method in @methods do
-      {:ok, @method_to_atom_map[method]}
+      {:ok, method}
     else
       # bypass rate limiter if http request method is not supported
       {:bypass, nil}

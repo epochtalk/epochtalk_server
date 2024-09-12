@@ -28,12 +28,18 @@ defmodule EpochtalkServerWeb.Plugs.RateLimit do
   """
   def rate_limit_request(conn, _opts) do
     with :ok <- check_env(conn),
-         %{method: method} <- conn,
+         %{method: method, request_path: path} <- conn,
          {:ok, method} <- validate_method(method),
          conn_id <- get_conn_id(conn),
          # ensure rate limit not exceeded for http
          {:allow, http_count} <- check_rate_limited(:http, method, conn_id),
-      Logger.debug("#{method} count for conn #{conn_id}: #{allow_count}")
+         # ensure rate limit not exceeded for api
+         api_path <- "#{method}:#{path}",
+         {:allow, api_count} <- check_rate_limited(:api, api_path, conn_id) do
+      Logger.debug("""
+        #{method} http count for conn #{conn_id}: #{http_count}
+        #{api_path} api count for conn #{conn_id}: #{api_count}
+        """)
       conn
     else
       # bypass rate limits
@@ -55,6 +61,9 @@ defmodule EpochtalkServerWeb.Plugs.RateLimit do
 
       {:delete, count} ->
         raise RateLimitExceeded, message: "DELETE rate limit exceeded (#{count})"
+
+      {api_path, count} ->
+        raise RateLimitExceeded, message: "#{api_path} rate limit exceeded (#{count})"
     end
   end
 

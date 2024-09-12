@@ -9,7 +9,7 @@ defmodule EpochtalkServerWeb.Controllers.ImageReference do
   alias EpochtalkServerWeb.ErrorHelpers
   alias EpochtalkServerWeb.Helpers.Validate
   alias EpochtalkServerWeb.Helpers.ACL
-  import EpochtalkServer.RateLimiter, only: [check_rate_limited: 3]
+  import EpochtalkServer.RateLimiter, only: [check_rate_limited: 4]
 
   # TODO(boka): move to config
   @max_images_per_request 10
@@ -24,7 +24,7 @@ defmodule EpochtalkServerWeb.Controllers.ImageReference do
          # ensure list does not exceed max length
          :ok <- validate_max_length(attrs_length, @max_images_per_request),
          # ensure hourly rate limit not exceeded
-         {:allow, hourly_count} <- check_rate_limited(:s3_hourly, user.id, attrs_length),
+         {:allow, hourly_count} <- check_rate_limited(:api, :s3_hourly, user.id, attrs_length),
          casted_attrs_list <- Enum.map(attrs_list, &cast_upload_attrs/1),
          {:ok, presigned_posts} <- ImageReference.create(casted_attrs_list) do
       Logger.debug("Hourly count for user #{user.username}: #{hourly_count}")

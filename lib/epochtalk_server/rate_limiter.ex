@@ -131,19 +131,28 @@ defmodule EpochtalkServer.RateLimiter do
   end
 
   # get configs and handle case when config action_type is missing
-  defp get_configs({class, action_type}) do
-    Application.get_env(:epochtalk_server, __MODULE__)
-    |> Keyword.get(class)
-    |> Map.get(action_type)
-    |> case do
-      # return error if config not found in map
-      nil ->
+  defp get_configs({class, action_type, priority}) do
+    with configs <- Application.get_env(:epochtalk_server, __MODULE__),
+         {period, limit} <- get_period_and_limit(configs, class, action_type),
+         {:ok, priority_multiplier} <- get_priority_multiplier(configs, priority)
+    do
+      {period * priority_multiplier, limit}
+    else
+      {:error, :class_invalid} ->
+          # return error if class is not valid
+          {:error, "Could not get rate limit configs for class #{class}"}
+      {:error, :no_multiplier_for_priority} ->
+          # return error if class is not valid
+          {:error, "Could not get rate limit configs for user priority #{priority}"}
+      {:error, :no_configs} ->
+        # configs were not found in map
         if class == :api do
+          # bypass if for api route
           {:bypass, "No configuration for this api route, bypassing"}
         else
+          # return error if for http action
           {:error, "Could not get rate limit configs for action_type #{action_type}"}
         end
-      result -> result
     end
   end
 

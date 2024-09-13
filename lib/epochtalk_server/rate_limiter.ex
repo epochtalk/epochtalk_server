@@ -94,7 +94,7 @@ defmodule EpochtalkServer.RateLimiter do
 
   Returns action_type and error message if action is denied
   """
-  @type option :: {:count, non_neg_integer}
+  @type option :: {:count, non_neg_integer} | {:priority, non_neg_integer}
   @spec check_rate_limited(
           class :: atom,
           action_type :: atom,
@@ -106,7 +106,8 @@ defmodule EpochtalkServer.RateLimiter do
           | {:error, message :: String.t()}
   def check_rate_limited(class, action_type, user_id, options \\ []) do
     with count <- Keyword.get(options, :count),
-         {:ok, {period, limit}} <- {class, action_type} |> get_configs(),
+         priority <- Keyword.get(options, :priority),
+         {:ok, {period, limit}} <- {class, action_type, priority} |> get_configs(),
          key <- build_key(action_type, user_id),
          # use Hammer to check rate limit
          {:allow, count} <- check_rate_inc(key, period, limit, count)

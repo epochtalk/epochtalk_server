@@ -147,6 +147,22 @@ defmodule EpochtalkServer.RateLimiter do
     end
   end
 
+  # get period and limit from configs for class and action type
+  defp get_period_and_limit(configs, class, action_type) do
+    with {:ok, class} <- class |> class_valid?(),
+         {period, limit} <- configs |> Keyword.get(class) |> Map.get(action_type)
+    do
+      {:ok, period, limit}
+    else
+      # class is invalid, bubble up
+      {:error, :class_invalid} -> {:error, :class_invalid}
+      # period and limit not found
+      nil -> {:error, :no_configs}
+      # something went really wrong
+      _ -> {:error, "oops"}
+    end
+  end
+
   ## get priority multiplier from configs for priority number
   # if priority is nil, return minimum priority multiplier
   defp get_priority_multiplier(_configs, nil), do: @minimum_priority_multiplier

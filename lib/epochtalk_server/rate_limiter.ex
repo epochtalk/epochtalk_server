@@ -147,6 +147,23 @@ defmodule EpochtalkServer.RateLimiter do
     end
   end
 
+  ## get priority multiplier from configs for priority number
+  # if priority is nil, return minimum priority multiplier
+  defp get_priority_multiplier(_configs, nil), do: @minimum_priority_multiplier
+  defp get_priority_multiplier(configs, priority) do
+    priority_string = priority |> Integer.to_string()
+    configs
+    |> Keyword.get(:priority_multipliers)
+    |> Map.get(priority_string)
+    |> case do
+      nil -> {:error, :no_multiplier_for_priority}
+      priority_multiplier ->
+        # return priority_multiplier or @minimum_priority_multiplier
+        # if priority_multiplier is lower for some reason
+        max(priority_multiplier, @minimum_priority_multiplier)
+    end
+  end
+
   # check if class is valid
   defp class_valid?(class) do
     if class in @valid_classes do

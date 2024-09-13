@@ -105,7 +105,7 @@ defmodule EpochtalkServer.RateLimiter do
           | {class :: atom, action_type :: atom, max_count :: non_neg_integer}
           | {:error, message :: String.t()}
   def check_rate_limited(class, action_type, user_id, options \\ []) do
-    with count <- Keyword.get(options, :count),
+    with count <- Keyword.get(options, :count, @default_count),
          priority <- Keyword.get(options, :priority),
          {:ok, {period, limit}} <- {class, action_type, priority} |> get_configs(),
          key <- build_key(action_type, user_id),

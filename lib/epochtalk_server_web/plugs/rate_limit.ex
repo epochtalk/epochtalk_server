@@ -47,22 +47,10 @@ defmodule EpochtalkServerWeb.Plugs.RateLimit do
       {:bypass, _} ->
         conn
 
-      {:get, count} ->
-        raise RateLimitExceeded, message: "GET rate limit exceeded (#{count})"
+      {:http, method, count} ->
+        raise RateLimitExceeded, message: "#{method} rate limit exceeded (#{count})"
 
-      {:post, count} ->
-        raise RateLimitExceeded, message: "POST rate limit exceeded (#{count})"
-
-      {:put, count} ->
-        raise RateLimitExceeded, message: "PUT rate limit exceeded (#{count})"
-
-      {:patch, count} ->
-        raise RateLimitExceeded, message: "PATCH rate limit exceeded (#{count})"
-
-      {:delete, count} ->
-        raise RateLimitExceeded, message: "DELETE rate limit exceeded (#{count})"
-
-      {api_path, count} ->
+      {:api, api_path, count} ->
         raise RateLimitExceeded, message: "#{api_path} rate limit exceeded (#{count})"
     end
   end

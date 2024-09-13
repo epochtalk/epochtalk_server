@@ -134,10 +134,10 @@ defmodule EpochtalkServer.RateLimiter do
   # get configs and handle case when config action_type is missing
   defp get_configs({class, action_type, priority}) do
     with configs <- Application.get_env(:epochtalk_server, __MODULE__),
-         {period, limit} <- get_period_and_limit(configs, class, action_type),
+         {:ok, {period, limit}} <- get_period_and_limit(configs, class, action_type),
          {:ok, priority_multiplier} <- get_priority_multiplier(configs, priority)
     do
-      {period * priority_multiplier, limit}
+      {:ok, {period * priority_multiplier, limit}}
     else
       {:error, :class_invalid} ->
           # return error if class is not valid
@@ -162,7 +162,7 @@ defmodule EpochtalkServer.RateLimiter do
     with {:ok, class} <- class |> class_valid?(),
          {period, limit} <- configs |> Keyword.get(class) |> Map.get(action_type)
     do
-      {:ok, period, limit}
+      {:ok, {period, limit}}
     else
       # class is invalid, bubble up
       {:error, :class_invalid} -> {:error, :class_invalid}
@@ -186,7 +186,7 @@ defmodule EpochtalkServer.RateLimiter do
       priority_multiplier ->
         # return priority_multiplier or @minimum_priority_multiplier
         # if priority_multiplier is lower for some reason
-        max(priority_multiplier, @minimum_priority_multiplier)
+        {:ok, max(priority_multiplier, @minimum_priority_multiplier)}
     end
   end
 

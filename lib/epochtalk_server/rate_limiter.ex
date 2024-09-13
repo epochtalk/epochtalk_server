@@ -13,6 +13,8 @@ defmodule EpochtalkServer.RateLimiter do
   @max_patch_per_second 2
   @max_delete_per_second 2
 
+  @valid_classes [:http, :api]
+
   import Hammer,
     only: [
       check_rate_inc: 4,
@@ -121,6 +123,15 @@ defmodule EpochtalkServer.RateLimiter do
           {:error, "Could not get rate limit configs for action_type #{action_type}"}
         end
       result -> result
+    end
+  end
+
+  # check if class is valid
+  defp class_valid?(class) do
+    if class in @valid_classes do
+      {:ok, class}
+    else
+      {:error, :class_invalid}
     end
   end
 

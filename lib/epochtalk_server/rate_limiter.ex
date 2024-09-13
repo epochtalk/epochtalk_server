@@ -175,7 +175,7 @@ defmodule EpochtalkServer.RateLimiter do
 
   ## get priority multiplier from configs for priority number
   # if priority is nil, return minimum priority multiplier
-  defp get_priority_multiplier(_configs, nil), do: @minimum_priority_multiplier
+  defp get_priority_multiplier(_configs, nil), do: {:ok, @minimum_priority_multiplier}
   defp get_priority_multiplier(configs, priority) do
     priority_string = priority |> Integer.to_string()
     configs

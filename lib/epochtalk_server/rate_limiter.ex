@@ -15,6 +15,21 @@ defmodule EpochtalkServer.RateLimiter do
 
   @valid_classes [:http, :api]
 
+  # do not use a rate limit lower base rate limits
+  @minimum_priority_multiplier 1.0
+
+  # priority multipliers
+  @super_admin_priority_multiplier @minimum_priority_multiplier
+  @admin_priority_multiplier @minimum_priority_multiplier
+  @global_moderator_priority_multiplier @minimum_priority_multiplier
+  @moderator_priority_multiplier @minimum_priority_multiplier
+  @user_priority_multiplier @minimum_priority_multiplier
+  @patroller_priority_multiplier @minimum_priority_multiplier
+  @newbie_priority_multiplier 5.0
+  @anonymous_priority_multiplier 5.0
+  @banned_priority_multiplier 10.0
+  @private_priority_multiplier 5.0
+
   import Hammer,
     only: [
       check_rate_inc: 4,
@@ -50,6 +65,23 @@ defmodule EpochtalkServer.RateLimiter do
           @one_hour_in_ms,
           @max_images_per_hour
         }
+      },
+      priority_multipliers: %{
+        # admins
+        "0" => @super_admin_priority_multiplier,
+        "1" => @admin_priority_multiplier,
+        # moderators
+        "2" => @global_moderator_priority_multiplier,
+        "3" => @moderator_priority_multiplier,
+        # user and patroller
+        "4" => @user_priority_multiplier,
+        "5" => @patroller_priority_multiplier,
+        # newbie
+        "6" => @newbie_priority_multiplier,
+        # banned, anonymous, private
+        "7" => @banned_priority_multiplier,
+        "8" => @anonymous_priority_multiplier,
+        "9" => @private_priority_multiplier
       }
   end
 

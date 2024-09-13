@@ -62,39 +62,28 @@ defmodule EpochtalkServer.RateLimiter do
 
   Returns action_type and error message if action is denied
   """
-  @spec check_rate_limited(class :: atom, action_type :: atom, user_id :: String.t()) ::
-          {:allow, count :: non_neg_integer}
-          | {class :: atom, action_type :: atom, count :: non_neg_integer}
-          | {:error, message :: String.t()}
-  def check_rate_limited(class, action_type, user_id),
-    do: check_rate_limited(class, action_type, user_id, @default_count)
-
+  @type option :: {:count, non_neg_integer}
   @spec check_rate_limited(
           class :: atom,
           action_type :: atom,
           user_id :: String.t(),
-          count :: non_neg_integer
+          options :: [option]
         ) ::
           {:allow, count :: non_neg_integer}
-          | {class :: atom, action_type :: atom, count :: non_neg_integer}
+          | {class :: atom, action_type :: atom, max_count :: non_neg_integer}
           | {:error, message :: String.t()}
-  def check_rate_limited(class, action_type, user_id, count) do
-    {class, action_type}
-    |> get_configs()
-    |> case do
-      {:bypass, message} ->
-        {:allow, message}
-      {:error, message} ->
-        raise message
-
-      {period, limit} ->
-        # use Hammer to check rate limit
-        build_key(action_type, user_id)
-        |> check_rate_inc(period, limit, count)
-        |> case do
-          {:allow, count} -> {:allow, count}
-          {:deny, count} -> {action_type, count}
-        end
+  def check_rate_limited(class, action_type, user_id, options \\ []) do
+    with count <- Keyword.get(options, :count),
+         {:ok, {period, limit}} <- {class, action_type} |> get_configs(),
+         key <- build_key(action_type, user_id),
+         # use Hammer to check rate limit
+         {:allow, count} <- check_rate_inc(key, period, limit, count)
+    do
+      {:allow, count}
+    else
+      {:deny, max_count} -> {class, action_type, max_count}
+      {:bypass, message} -> {:allow, message}
+      {:error, message} -> raise message
     end
   end
 

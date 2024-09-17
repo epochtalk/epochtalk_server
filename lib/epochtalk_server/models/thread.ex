@@ -411,19 +411,24 @@ defmodule EpochtalkServer.Models.Thread do
     user_id = if user, do: user.id
     limit = 5
     offset = 0
-    ignore_boards = if user,
-      do: """
-        AND NOT (b.id::text = ANY(SELECT jsonb_array_elements_text(up.ignored_boards->'boards') FROM users.preferences up WHERE up.user_id = #{user_id}))
-      """,
-      else: ""
 
-    thread_view_time = if user,
-      do: "( SELECT time FROM users.thread_views WHERE thread_id = tlist.id AND user_id = #{user_id} ) AS time,",
-      else: ""
+    ignore_boards =
+      if user,
+        do: """
+          AND NOT (b.id::text = ANY(SELECT jsonb_array_elements_text(up.ignored_boards->'boards') FROM users.preferences up WHERE up.user_id = #{user_id}))
+        """,
+        else: ""
 
-    latest_user_time = if user,
-      do: "AND created_at >= t.time",
-      else: ""
+    thread_view_time =
+      if user,
+        do:
+          "( SELECT time FROM users.thread_views WHERE thread_id = tlist.id AND user_id = #{user_id} ) AS time,",
+        else: ""
+
+    latest_user_time =
+      if user,
+        do: "AND created_at >= t.time",
+        else: ""
 
     query = """
       SELECT
@@ -510,7 +515,20 @@ defmodule EpochtalkServer.Models.Thread do
         LIMIT 1
       ) pl ON true
     """
-    Ecto.Adapters.SQL.query!(Repo, query)
+
+    raw_data = Ecto.Adapters.SQL.query!(Repo, query)
+
+    # convert raw sql query results into list of recent thread maps
+    Enum.reduce(raw_data.rows, [], fn row, recent_threads ->
+      recent_thread =
+        raw_data.columns
+        |> Enum.with_index()
+        |> Enum.reduce(%{}, fn {key, row_index}, recent_thread_map ->
+          Map.put(recent_thread_map, String.to_atom(key), Enum.at(row, row_index))
+        end)
+
+      recent_threads ++ [recent_thread]
+    end)
   end
 
   @doc """

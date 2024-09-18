@@ -110,8 +110,7 @@ defmodule EpochtalkServer.RateLimiter do
          {:ok, {period, limit}} <- {class, action_type, priority} |> get_configs(),
          key <- build_key(action_type, user_id),
          # use Hammer to check rate limit
-         {:allow, count} <- check_rate_inc(key, period, limit, count)
-    do
+         {:allow, count} <- check_rate_inc(key, period, limit, count) do
       {:allow, count}
     else
       {:deny, max_count} -> {class, action_type, max_count}
@@ -135,16 +134,17 @@ defmodule EpochtalkServer.RateLimiter do
   defp get_configs({class, action_type, priority}) do
     with configs <- Application.get_env(:epochtalk_server, __MODULE__),
          {:ok, {period, limit}} <- get_period_and_limit(configs, class, action_type),
-         {:ok, priority_multiplier} <- get_priority_multiplier(configs, priority)
-    do
+         {:ok, priority_multiplier} <- get_priority_multiplier(configs, priority) do
       {:ok, {period * priority_multiplier, limit}}
     else
       {:error, :class_invalid} ->
-          # return error if class is not valid
-          {:error, "Could not get rate limit configs for class #{class}"}
+        # return error if class is not valid
+        {:error, "Could not get rate limit configs for class #{class}"}
+
       {:error, :no_multiplier_for_priority} ->
-          # return error if class is not valid
-          {:error, "Could not get rate limit configs for user priority #{priority}"}
+        # return error if class is not valid
+        {:error, "Could not get rate limit configs for user priority #{priority}"}
+
       {:error, :no_configs} ->
         # configs were not found in map
         if class == :api do
@@ -160,8 +160,7 @@ defmodule EpochtalkServer.RateLimiter do
   # get period and limit from configs for class and action type
   defp get_period_and_limit(configs, class, action_type) do
     with {:ok, class} <- class |> class_valid?(),
-         {period, limit} <- configs |> Keyword.get(class) |> Map.get(action_type)
-    do
+         {period, limit} <- configs |> Keyword.get(class) |> Map.get(action_type) do
       {:ok, {period, limit}}
     else
       # class is invalid, bubble up
@@ -176,13 +175,17 @@ defmodule EpochtalkServer.RateLimiter do
   ## get priority multiplier from configs for priority number
   # if priority is nil, return minimum priority multiplier
   defp get_priority_multiplier(_configs, nil), do: {:ok, @minimum_priority_multiplier}
+
   defp get_priority_multiplier(configs, priority) do
     priority_string = priority |> Integer.to_string()
+
     configs
     |> Keyword.get(:priority_multipliers)
     |> Map.get(priority_string)
     |> case do
-      nil -> {:error, :no_multiplier_for_priority}
+      nil ->
+        {:error, :no_multiplier_for_priority}
+
       priority_multiplier ->
         # return priority_multiplier or @minimum_priority_multiplier
         # if priority_multiplier is lower for some reason

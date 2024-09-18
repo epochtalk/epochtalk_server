@@ -61,7 +61,7 @@ defmodule EpochtalkServer.RateLimiter do
         }
       },
       api: %{
-        "POST:/api/images/s3/upload" => {
+        :s3_hourly => {
           @one_hour_in_ms,
           @max_images_per_hour
         }

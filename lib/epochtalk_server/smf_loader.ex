@@ -5,11 +5,18 @@ defmodule EpochtalkServer.SMFLoader do
       {:ok, file} <- File.open(path),
       headers <-
         IO.read(file, :line)
-        |> String.split("\t")
-        |> Enum.map(&(&1 |> String.trim)),
+        # clean line
+        |> String.trim()
+        |> String.split("\t"),
+        # |> Enum.map(&(&1 |> String.trim)),
       file_stream <-
         IO.stream(file, :line)
-        |> Stream.map(&(&1 |> String.split("\t")))
+        |> Stream.map(&(
+          &1
+          # clean line
+          |> String.trim()
+          |> String.split("\t")
+        ))
         |> Stream.map(fn line ->
           # map each line to headers
           Enum.zip(headers, line)

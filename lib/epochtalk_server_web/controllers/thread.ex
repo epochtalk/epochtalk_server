@@ -30,8 +30,7 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
   @doc """
   Used to retrieve recent threads
   """
-  # TODO(akinsey): come back to this after implementing thread and post create
-  def recent(conn, attrs) do
+  def recent(conn, _attrs) do
     with user <- Guardian.Plug.current_resource(conn),
          user_priority <- ACL.get_user_priority(conn),
          threads <- Thread.recent(user, user_priority) do

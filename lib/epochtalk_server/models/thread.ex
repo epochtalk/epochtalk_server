@@ -428,7 +428,7 @@ defmodule EpochtalkServer.Models.Thread do
     latest_user_time =
       if user,
         do: "AND created_at >= t.time",
-        else: ""
+        else: "AND FALSE"
 
     query = """
       SELECT

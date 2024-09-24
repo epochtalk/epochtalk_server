@@ -107,4 +107,12 @@ defmodule EpochtalkServer.SMFLoader do
     ] |> Enum.join("\t")
     [ header | data ]
   end
+  def write_to_tsv_file(data, path) do
+    with false <- if(File.exists?(path), do: "ファイルがもうある", else: false),
+      file <- File.stream!(path) do
+        data |> Enum.into(file, fn line -> line <> "\n" end)
+    else
+      problem -> IO.puts("問題がある： #{inspect(problem)}")
+    end
+  end
 end

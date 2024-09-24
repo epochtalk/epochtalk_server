@@ -65,6 +65,7 @@ defmodule EpochtalkServer.MixProject do
       {:plug_cowboy, "~> 2.5"},
       {:poison, "~> 3.0"},
       {:postgrex, "~> 0.17.1"},
+      {:recase, "~> 0.8.1", only: [:dev]},
       {:redix, "~> 1.2.2"},
       {:remote_ip, "~> 1.1.0"},
       {:sweet_xml, "~> 0.7"},

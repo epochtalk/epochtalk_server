@@ -68,4 +68,43 @@ defmodule EpochtalkServer.SMFLoader do
       end)
     boards_stream
   end
+  def tabulate_boards_map(boards_map) do
+    data =
+      boards_map
+      |> Enum.map(fn board ->
+        [
+          board[:id],
+          board[:name],
+          board[:description],
+          board[:post_count],
+          board[:thread_count],
+          board[:viewable_by],
+          board[:postable_by],
+          board[:created_at],
+          board[:imported_at],
+          board[:updated_at],
+          board[:meta],
+          board[:right_to_left],
+          board[:slug]
+        ]
+        |> Enum.join("\t")
+      end)
+
+    header = [
+      "id",
+      "name",
+      "description",
+      "post_count",
+      "thread_count",
+      "viewable_by",
+      "postable_by",
+      "created_at",
+      "imported_at",
+      "updated_at",
+      "meta",
+      "right_to_left",
+      "slug"
+    ] |> Enum.join("\t")
+    [ header | data ]
+  end
 end

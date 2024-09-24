@@ -405,7 +405,6 @@ defmodule EpochtalkServer.Models.Thread do
   @doc """
   Returns recent threads accounting for user priority and user's ignored boards
   """
-  # TODO(akinsey): complete implementation for main view
   @spec recent(user :: User.t() | nil, user_priority :: non_neg_integer) :: [t()]
   def recent(user \\ nil, user_priority) do
     user_id = if user, do: user.id

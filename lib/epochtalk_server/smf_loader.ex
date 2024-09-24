@@ -1,4 +1,11 @@
 defmodule EpochtalkServer.SMFLoader do
+  # converts smf_boards tsv file to epochtalk boards tsv file
+  def convert_smf_boards_tsv_file(path) do
+    load_from_tsv_file(path)
+    |> map_boards_stream()
+    |> tabulate_boards_map()
+    |> write_to_tsv_file("boards.tsv")
+  end
   # loads smf data from a tsv file
   def load_from_tsv_file(path) do
     with true <- if(File.exists?(path), do: true, else: "ファイルがない"),

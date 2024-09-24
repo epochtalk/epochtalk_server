@@ -12,8 +12,46 @@ defmodule EpochtalkServerWeb.Controllers.ThreadJSON do
         threads: threads
       }) do
     threads
-    |> Enum.map(fn thread ->
-      %{id: thread.id, slug: thread.slug, updated_at: thread.updated_at}
+    |> Enum.map(fn t ->
+      %{
+        id: t.id,
+        slug: t.slug,
+        locked: t.locked,
+        sticky: t.sticky,
+        moderated: t.moderated,
+        poll: t.poll,
+        title: t.title,
+        updated_at: t.updated_at,
+        view_count: t.view_count,
+        board: %{
+          id: t.board_id,
+          name: t.board_name,
+          slug: t.board_slug
+        },
+        post: %{
+          id: t.last_post_id,
+          position: t.last_post_position,
+          created_at: t.last_post_created_at,
+          deleted: t.last_post_deleted
+        },
+        user:
+          if(t.last_post_user_deleted || t.last_post_deleted,
+            do: %{
+              id: "",
+              username: "",
+              deleted: true
+            },
+            else: %{
+              id: t.last_post_user_id,
+              username: t.last_post_username,
+              deleted: t.last_post_user_deleted
+            }
+          ),
+        lastest:
+          if(t.new_post_id || t.new_post_position,
+            do: %{id: t.new_post_id, position: t.new_post_position || 1}
+          )
+      }
     end)
   end
 

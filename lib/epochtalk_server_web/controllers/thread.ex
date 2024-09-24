@@ -30,12 +30,10 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
   @doc """
   Used to retrieve recent threads
   """
-  # TODO(akinsey): come back to this after implementing thread and post create
-  def recent(conn, attrs) do
-    with limit <- Validate.cast(attrs, "limit", :integer, default: 5),
-         user <- Guardian.Plug.current_resource(conn),
+  def recent(conn, _attrs) do
+    with user <- Guardian.Plug.current_resource(conn),
          user_priority <- ACL.get_user_priority(conn),
-         threads <- Thread.recent(user, user_priority, limit: limit) do
+         threads <- Thread.recent(user, user_priority) do
       render(conn, :recent, %{threads: threads})
     else
       _ -> ErrorHelpers.render_json_error(conn, 400, "Error, cannot fetch recent threads")

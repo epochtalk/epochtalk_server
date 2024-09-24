@@ -405,17 +405,129 @@ defmodule EpochtalkServer.Models.Thread do
   @doc """
   Returns recent threads accounting for user priority and user's ignored boards
   """
-  # TODO(akinsey): complete implementation for main view
-  @spec recent(user :: User.t(), user_priority :: non_neg_integer, opts :: list() | nil) :: [t()]
-  def recent(_user, _user_priority, opts \\ []) do
-    limit = Keyword.get(opts, :limit, 5)
+  @spec recent(user :: User.t() | nil, user_priority :: non_neg_integer) :: [t()]
+  def recent(user \\ nil, user_priority) do
+    user_id = if user, do: user.id
+    limit = 5
+    offset = 0
 
-    query =
-      from Thread,
-        order_by: [desc: :updated_at],
-        limit: ^limit
+    ignore_boards =
+      if user,
+        do: """
+          AND NOT (b.id::text = ANY(SELECT jsonb_array_elements_text(up.ignored_boards->'boards') FROM users.preferences up WHERE up.user_id = #{user_id}))
+        """,
+        else: ""
 
-    Repo.all(query)
+    thread_view_time =
+      if user,
+        do:
+          "( SELECT time FROM users.thread_views WHERE thread_id = tlist.id AND user_id = #{user_id} ) AS time,",
+        else: ""
+
+    latest_user_time =
+      if user,
+        do: "AND created_at >= t.time",
+        else: "AND FALSE"
+
+    query = """
+      SELECT
+        tlist.id,
+        tlist.slug,
+        t.locked,
+        t.sticky,
+        t.moderated,
+        t.poll,
+        t.updated_at,
+        t.views AS view_count,
+        t.board_name,
+        t.board_slug,
+        t.board_id,
+        pf.title,
+        tv.id AS new_post_id,
+        tv.position AS new_post_position,
+        pl.last_post_id,
+        pl.position AS last_post_position,
+        pl.created_at AS last_post_created_at,
+        pl.deleted AS last_post_deleted,
+        pl.id AS last_post_user_id,
+        pl.username AS last_post_username,
+        pl.user_deleted AS last_post_user_deleted
+      FROM (
+        SELECT t.id, t.slug
+        FROM threads t
+        WHERE EXISTS (
+          SELECT 1
+          FROM boards b
+          WHERE b.id = t.board_id
+          #{ignore_boards}
+          AND ( b.viewable_by IS NULL OR b.viewable_by >= #{user_priority} )
+          AND ( SELECT EXISTS ( SELECT 1 FROM board_mapping WHERE board_id = t.board_id ))
+        )
+        AND t.updated_at IS NOT NULL
+        ORDER BY t.updated_at DESC
+        LIMIT #{limit} OFFSET #{offset}
+      ) tlist
+      LEFT JOIN LATERAL (
+        SELECT
+          t1.locked,
+          t1.sticky,
+          t1.moderated,
+          t1.updated_at,
+          mt.views,
+          ( SELECT EXISTS ( SELECT 1 FROM polls WHERE thread_id = tlist.id )) AS poll,
+          #{thread_view_time}
+          ( SELECT b.name FROM boards b WHERE b.id = t1.board_id ) AS board_name,
+          ( SELECT b.slug FROM boards b WHERE b.id = t1.board_id ) AS board_slug,
+          ( SELECT b.id FROM boards b WHERE b.id = t1.board_id ) AS board_id
+        FROM threads t1
+        LEFT JOIN metadata.threads mt ON tlist.id = mt.thread_id
+        WHERE t1.id = tlist.id
+      ) t ON true
+      LEFT JOIN LATERAL (
+        SELECT content ->> 'title' as title
+        FROM posts
+        WHERE thread_id = tlist.id
+        ORDER BY created_at
+        LIMIT 1
+      ) pf ON true
+      LEFT JOIN LATERAL (
+        SELECT id, position
+        FROM posts
+        WHERE thread_id = tlist.id
+        #{latest_user_time}
+        ORDER BY created_at
+        LIMIT 1
+      ) tv ON true
+      LEFT JOIN LATERAL (
+        SELECT
+          p.id AS last_post_id,
+          p.position,
+          p.created_at,
+          p.deleted,
+          u.id,
+          u.username,
+          u.deleted as user_deleted
+        FROM posts p
+        LEFT JOIN users u ON p.user_id = u.id
+        WHERE p.thread_id = tlist.id
+        ORDER BY p.created_at DESC
+        LIMIT 1
+      ) pl ON true
+    """
+
+    raw_data = Ecto.Adapters.SQL.query!(Repo, query)
+
+    # convert raw sql query results into list of recent thread maps
+    Enum.reduce(raw_data.rows, [], fn row, recent_threads ->
+      recent_thread =
+        raw_data.columns
+        |> Enum.with_index()
+        |> Enum.reduce(%{}, fn {key, row_index}, recent_thread_map ->
+          Map.put(recent_thread_map, String.to_atom(key), Enum.at(row, row_index))
+        end)
+
+      recent_threads ++ [recent_thread]
+    end)
   end
 
   @doc """

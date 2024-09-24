@@ -1,10 +1,23 @@
 defmodule EpochtalkServer.SMFLoader do
+  alias EpochtalkServer.Models.BoardMapping
+
   # converts smf_boards tsv file to epochtalk boards tsv file
   def convert_smf_boards_tsv_file(path) do
-    load_from_tsv_file(path)
+    {boards, board_mappings} = load_from_tsv_file(path)
     |> map_boards_stream()
+
+    # write boards to file for import
+    boards
     |> tabulate_boards_map()
     |> write_to_tsv_file("boards.tsv")
+
+    # return board mappings for later insertion
+    board_mappings
+  end
+  def insert_board_mappings(board_mappings) do
+    # board mappings
+    board_mappings
+    |> BoardMapping.update()
   end
   # loads smf data from a tsv file
   def load_from_tsv_file(path) do
@@ -36,7 +49,7 @@ defmodule EpochtalkServer.SMFLoader do
   end
   def map_boards_stream(boards_stream) do
     now = NaiveDateTime.utc_now() |> NaiveDateTime.to_string()
-    {boards_stream, _slug_duplicate_index} =
+    {board_mapping_pairs, _slug_duplicate_index} =
       boards_stream
       |> Enum.map_reduce(%{}, fn smf_board, slugs ->
         slug =
@@ -56,6 +69,7 @@ defmodule EpochtalkServer.SMFLoader do
             # increment used slugs, return new slug
             {Map.put(slugs, slug, slug_duplicate_index + 1), new_slug}
           end
+        # build board
         board =
           %{}
           |> Map.put(:id, smf_board["ID_BOARD"])
@@ -71,9 +85,31 @@ defmodule EpochtalkServer.SMFLoader do
           |> Map.put(:meta, "\"{\"\"disable_self_mod\"\": false, \"\"disable_post_edit\"\": null, \"\"disable_signature\"\": false}\"")
           |> Map.put(:right_to_left, "f")
           |> Map.put(:slug, slug)
-        {board, slugs}
+
+        # build board mapping
+        board_mapping =
+          case {smf_board["childLevel"], smf_board["ID_PARENT"]} do
+            # top level board, map under category
+            {"0", "0"} ->
+              %{
+                type: "board",
+                id: smf_board["ID_BOARD"] |> String.to_integer(),
+                name: smf_board["name"],
+                category_id: smf_board["ID_CAT"] |> String.to_integer(),
+                view_order: smf_board["boardOrder"] |> String.to_integer()
+              }
+            _ ->
+              %{
+                type: "board",
+                id: smf_board["ID_BOARD"] |> String.to_integer(),
+                name: smf_board["name"],
+                parent_id: smf_board["ID_PARENT"] |> String.to_integer(),
+                view_order: smf_board["boardOrder"] |> String.to_integer()
+              }
+          end
+        {{board, board_mapping}, slugs}
       end)
-    boards_stream
+    Enum.unzip(board_mapping_pairs)
   end
   def tabulate_boards_map(boards_map) do
     data =

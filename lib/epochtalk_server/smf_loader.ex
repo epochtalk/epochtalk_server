@@ -14,6 +14,20 @@ defmodule EpochtalkServer.SMFLoader do
     # return board mappings for later insertion
     board_mappings
   end
+  def load_categories_mappings_from_tsv_file(path) do
+    # load categories (in postgres format)
+    # and return category mappings for later insertion
+    load_from_tsv_file(path)
+    |> Enum.map(fn category ->
+      # generate category mapping
+      %{
+        type: "category",
+        id: category["id"] |> String.to_integer(),
+        name: category["name"],
+        view_order: category["view_order"] |> String.to_integer()
+      }
+    end)
+  end
   def insert_board_mappings(board_mappings) do
     # board mappings
     board_mappings

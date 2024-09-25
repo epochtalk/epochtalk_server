@@ -55,6 +55,7 @@ defmodule EpochtalkServer.SMFLoader do
       |> Enum.map_reduce(%{}, fn smf_board, slugs ->
         slug =
           smf_board["name"]
+          |> HtmlEntities.decode()
           |> String.replace(~r{ }, "-")
           |> String.slice(0..99)
         # handle duplicate slugs
@@ -74,8 +75,8 @@ defmodule EpochtalkServer.SMFLoader do
         board =
           %{}
           |> Map.put(:id, smf_board["ID_BOARD"])
-          |> Map.put(:name, smf_board["name"])
-          |> Map.put(:description, smf_board["description"])
+          |> Map.put(:name, smf_board["name"] |> HtmlEntities.decode())
+          |> Map.put(:description, smf_board["description"] |> HtmlEntities.decode())
           |> Map.put(:post_count, smf_board["numPosts"])
           |> Map.put(:thread_count, smf_board["numTopics"])
           |> Map.put(:viewable_by, "")
@@ -95,7 +96,7 @@ defmodule EpochtalkServer.SMFLoader do
               %{
                 type: "board",
                 id: smf_board["ID_BOARD"] |> String.to_integer(),
-                name: smf_board["name"],
+                name: smf_board["name"] |> HtmlEntities.decode(),
                 category_id: smf_board["ID_CAT"] |> String.to_integer(),
                 view_order: smf_board["boardOrder"] |> String.to_integer()
               }
@@ -103,7 +104,7 @@ defmodule EpochtalkServer.SMFLoader do
               %{
                 type: "board",
                 id: smf_board["ID_BOARD"] |> String.to_integer(),
-                name: smf_board["name"],
+                name: smf_board["name"] |> HtmlEntities.decode(),
                 parent_id: smf_board["ID_PARENT"] |> String.to_integer(),
                 view_order: smf_board["boardOrder"] |> String.to_integer()
               }

@@ -110,9 +110,13 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
       where: t.id_board == ^id and t.id_board not in ^id_board_blacklist,
       order_by: [desc: t.id_last_msg]
     )
-    |> join(:left, [t], m in "smf_messages", on: t.id_first_msg == m.id_msg)
-    |> join(:left, [t], m in "smf_messages", on: t.id_last_msg == m.id_msg)
-    |> select([t, f, l], %{
+    |> join(:left, [t], f in "smf_messages", on: t.id_first_msg == f.id_msg)
+    |> join(:left, [t], l in "smf_messages", on: t.id_last_msg == l.id_msg)
+    |> join(:left, [t, f, l], m in "smf_members", on: l.id_member == m.id_member)
+    |> join(:left, [t, f, l, m], a in "smf_attachments",
+      on: m.id_member == a.id_member and a.attachmentType == 1
+    )
+    |> select([t, f, l, m, a], %{
       id: t.id_topic,
       slug: t.id_topic,
       board_id: t.id_board,
@@ -135,6 +139,13 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
       last_post_user_id: l.id_member,
       last_post_username: l.posterName,
       last_post_user_deleted: false,
+      last_post_avatar:
+        fragment(
+          "if(? <>'',concat('/avatars/',?),ifnull(concat('/useravatars/',?),''))",
+          m.avatar,
+          m.avatar,
+          a.filename
+        ),
       last_viewed: nil,
       is_proxy: true
     })
@@ -220,23 +231,34 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
       from m in "smf_messages", where: m.id_topic == ^id and m.id_board not in ^id_board_blacklist, select: %{count: count(m.id_topic)}
 
     from(m in "smf_messages",
-      limit: 15,
+      limit: ^per_page,
       where: m.id_topic == ^id and m.id_board not in ^id_board_blacklist,
-      order_by: [asc: m.posterTime],
-      select: %{
-        id: m.id_msg,
-        thread_id: m.id_topic,
-        board_id: m.id_board,
-        user_id: m.id_member,
-        title: m.subject,
-        body: m.body,
-        updated_at: m.modifiedTime,
-        username: m.posterName,
-        poster_time: m.posterTime,
-        poster_name: m.posterName,
-        modified_time: m.modifiedTime
-      }
+      order_by: [asc: m.posterTime]
     )
+    |> join(:left, [m], u in "smf_members", on: m.id_member == u.id_member)
+    |> join(:left, [m, u], a in "smf_attachments",
+      on: u.id_member == a.id_member and a.attachmentType == 1
+    )
+    |> select([m, u, a], %{
+      id: m.id_msg,
+      thread_id: m.id_topic,
+      board_id: m.id_board,
+      user_id: m.id_member,
+      title: m.subject,
+      body: m.body,
+      updated_at: m.modifiedTime,
+      username: m.posterName,
+      poster_time: m.posterTime,
+      poster_name: m.posterName,
+      modified_time: m.modifiedTime,
+      avatar:
+        fragment(
+          "if(? <>'',concat('/avatars/',?),ifnull(concat('/useravatars/',?),''))",
+          u.avatar,
+          u.avatar,
+          a.filename
+        )
+    })
     |> ProxyPagination.page_simple(count_query, page, per_page: per_page)
     |> case do
       {:ok, [], _} ->
@@ -270,33 +292,6 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
       {:ok, object, data}
     else
       {:ok, List.first(object), data}
-    end
-  end
-
-  defp get_post(id) do
-    %{id_board_blacklist: id_board_blacklist} = Application.get_env(:epochtalk_server, :proxy_config)
-    from(m in "smf_messages",
-      limit: 1,
-      where: m.id_msg == ^id and m.id_board not in ^id_board_blacklist,
-      select: %{
-        id: m.id_msg,
-        thread_id: m.id_topic,
-        board_id: m.id_board,
-        user_id: m.id_member,
-        title: m.subject,
-        body: m.body,
-        username: m.posterName,
-        created_at: m.posterTime,
-        modified_time: m.modifiedTime
-      }
-    )
-    |> SmfRepo.one()
-    |> case do
-      nil ->
-        {:error, "Post not found for id: #{id}"}
-
-      post ->
-        post
     end
   end
 end

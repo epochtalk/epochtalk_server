@@ -14,7 +14,8 @@ config :epochtalk_server, ecto_repos: [EpochtalkServer.Repo]
 config :epochtalk_server,
   proxy_config: %{
     threads_seq: System.get_env("THREADS_SEQ") || "6000000",
-    boards_seq: System.get_env("BOARDS_SEQ") || "500"
+    boards_seq: System.get_env("BOARDS_SEQ") || "500",
+    id_board_blacklist: []
   }
 
 # Configure Porcelain

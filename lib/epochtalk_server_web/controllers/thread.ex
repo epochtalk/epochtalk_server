@@ -28,7 +28,7 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
   alias EpochtalkServer.Models.Mention
   alias EpochtalkServerWeb.Helpers.ProxyConversion
 
-  plug :check_proxy when action in [:by_board, :slug_to_id, :viewed]
+  plug :check_proxy when action in [:by_board, :slug_to_id, :viewed, :recent]
 
   @doc """
   Used to retrieve recent threads
@@ -744,6 +744,11 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
           |> send_resp(200, [])
           |> halt()
 
+        :recent ->
+          conn
+          |> proxy_recent(conn.params)
+          |> halt()
+
         _ ->
           conn
       end
@@ -769,6 +774,16 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
     else
       _ ->
         ErrorHelpers.render_json_error(conn, 400, "Error, cannot get threads by board")
+    end
+  end
+
+  defp proxy_recent(conn, _attrs) do
+    with user <- Guardian.Plug.current_resource(conn),
+         user_priority <- ACL.get_user_priority(conn),
+         threads <- ProxyConversion.build_model("threads.recent") do
+      render(conn, :recent, %{threads: threads})
+    else
+      _ -> ErrorHelpers.render_json_error(conn, 400, "Error, cannot fetch recent threads")
     end
   end
 

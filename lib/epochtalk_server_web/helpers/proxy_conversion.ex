@@ -47,6 +47,60 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
     end
   end
 
+  def build_model(model_type) do
+    case model_type do
+      "threads.recent" ->
+        build_recent_threads()
+
+      _ ->
+        build_model(nil, nil, nil, nil)
+    end
+  end
+
+  def build_recent_threads() do
+    %{id_board_blacklist: id_board_blacklist} = Application.get_env(:epochtalk_server, :proxy_config)
+    from(t in "smf_topics",
+      limit: 5,
+      where: t.id_board not in ^id_board_blacklist,
+      order_by: [desc: t.id_last_msg]
+    )
+    |> join(:left, [t], m in "smf_messages", on: t.id_first_msg == m.id_msg)
+    |> join(:left, [t], m in "smf_messages", on: t.id_last_msg == m.id_msg)
+    |> join(:left, [t], b in "smf_boards", on: t.id_board == b.id_board)
+    |> select([t, f, l, b], %{
+      id: t.id_topic,
+      slug: t.id_topic,
+      board_id: t.id_board,
+      board_name: b.name,
+      board_slug: t.id_board,
+      sticky: t.isSticky,
+      locked: t.locked,
+      poll: t.id_poll > 0,
+      moderated: t.selfModerated,
+      first_post_id: t.id_first_msg,
+      last_post_id: t.id_last_msg,
+      title: f.subject,
+      updated_at: l.posterTime * 1000,
+      last_post_created_at: l.posterTime * 1000,
+      last_post_user_id: l.id_member,
+      last_post_username: l.posterName,
+      view_count: t.numViews,
+      last_post_position: nil,
+      last_post_deleted: false,
+      last_post_user_deleted: false,
+      new_post_id: nil,
+      new_post_position: nil,
+      is_proxy: true
+    })
+    |> SmfRepo.all()
+    |> case do
+      [] ->
+        {:error, "Recent threads not found"}
+
+      threads -> threads
+    end
+  end
+
   def build_categories(ids) do
     from(c in "smf_categories",
       limit: ^length(ids),

@@ -778,9 +778,7 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
   end
 
   defp proxy_recent(conn, _attrs) do
-    with user <- Guardian.Plug.current_resource(conn),
-         user_priority <- ACL.get_user_priority(conn),
-         threads <- ProxyConversion.build_model("threads.recent") do
+    with threads <- ProxyConversion.build_model("threads.recent") do
       render(conn, :recent, %{threads: threads})
     else
       _ -> ErrorHelpers.render_json_error(conn, 400, "Error, cannot fetch recent threads")

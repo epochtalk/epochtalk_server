@@ -70,7 +70,7 @@ defmodule EpochtalkServer.SMFLoader do
         slug =
           smf_board["name"]
           |> HtmlEntities.decode()
-          |> String.replace(~r{ }, "-")
+          |> String.replace(~r{[ /]}, "-")
           |> String.slice(0..99)
         # handle duplicate slugs
         slug_duplicate_index = Map.get(slugs, slug)

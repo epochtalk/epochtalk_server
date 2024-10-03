@@ -287,7 +287,7 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
     from(m in "smf_messages",
       limit: ^per_page,
       where: m.id_topic == ^id and m.id_board not in ^id_board_blacklist,
-      order_by: [asc: m.posterTime]
+      order_by: [asc: m.id_msg]
     )
     |> join(:left, [m], u in "smf_members", on: m.id_member == u.id_member)
     |> join(:left, [m, u], a in "smf_attachments",

@@ -484,9 +484,11 @@ defmodule EpochtalkServerWeb.Controllers.Post do
          user <- Guardian.Plug.current_resource(conn),
          :ok <- ACL.allow!(conn, "posts.byThread"),
          {:ok, posts, data} <-
-           ProxyConversion.build_model("posts.by_thread", thread_id, page, limit) do
+           ProxyConversion.build_model("posts.by_thread", thread_id, page, limit),
+         poll <- ProxyConversion.build_model("poll.by_thread", thread_id) do
       render(conn, :by_thread_proxy, %{
         posts: posts,
+        poll: poll,
         user: user,
         page: page,
         limit: limit,

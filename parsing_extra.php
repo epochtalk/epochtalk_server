@@ -11,6 +11,9 @@ function setReasonableValues()
         $context['browser']['is_konqueror'] = false;
         $context['browser']['is_opera'] = false;
         $context['browser']['is_ie'] = false;
+        $context['browser']['is_ie4'] = false;
+        $context['browser']['is_ie5'] = false;
+        $context['browser']['is_ie5.5'] = false;
 
         $txt['lang_character_set'] = 'ISO-8859-1';
         $txt['smf238'] = 'Code';

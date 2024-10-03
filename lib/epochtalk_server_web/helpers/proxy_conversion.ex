@@ -87,7 +87,7 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
       [] ->
         {:error, "Poll for thread not found"}
 
-      thread ->
+      poll ->
         from(t in "smf_topics",
           where: t.id_topic == ^thread_id
         )
@@ -104,7 +104,7 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
             {:error, "Poll for thread not found"}
 
           answers ->
-            if thread.id > 0, do: Map.put(thread, :answers, answers), else: nil
+            if poll.id > 0, do: Map.put(poll, :answers, answers), else: nil
         end
     end
   end

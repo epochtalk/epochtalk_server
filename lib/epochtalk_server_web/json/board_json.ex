@@ -18,12 +18,7 @@ defmodule EpochtalkServerWeb.Controllers.BoardJSON do
     user_priority: user_priority,
     board_counts: board_counts
   }) do
-    board_counts =
-      board_counts
-      |> Enum.reduce(%{}, fn b, acc ->
-        acc
-        |> Map.put(b.id, %{post_count: b.post_count, thread_count: b.thread_count})
-      end)
+    board_counts = map_to_id(board_counts)
     data = by_category(%{
         categories: categories,
         board_moderators: board_moderators,
@@ -34,6 +29,7 @@ defmodule EpochtalkServerWeb.Controllers.BoardJSON do
 
     data
   end
+  defp map_to_id(data), do: Enum.reduce(data, %{}, &(&2 |> Map.put(&1.id, Map.delete(&1, :id))))
 
   @doc """
   Renders `Board` data by `Category`.

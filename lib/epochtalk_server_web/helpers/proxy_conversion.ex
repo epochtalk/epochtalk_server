@@ -47,6 +47,16 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
     end
   end
 
+  def build_model(model_type, id) do
+    case model_type do
+      "poll.by_thread" ->
+        build_poll(id)
+
+      _ ->
+        build_model(nil, nil, nil, nil)
+    end
+  end
+
   def build_model(model_type) do
     case model_type do
       "threads.recent" ->
@@ -54,6 +64,48 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
 
       _ ->
         build_model(nil, nil, nil, nil)
+    end
+  end
+
+  def build_poll(thread_id) do
+    from(t in "smf_topics",
+      where: t.id_topic == ^thread_id
+    )
+    |> join(:left, [t], p in "smf_polls", on: t.id_poll == p.id_poll)
+    |> select([t, p], %{
+      id: t.id_poll,
+      change_vote: p.changeVote,
+      display_mode: "always",
+      expiration: p.expireTime * 1000,
+      has_voted: false,
+      locked: (p.votingLocked == 1),
+      max_answers: p.maxVotes,
+      question: p.question
+    })
+    |> SmfRepo.one()
+    |> case do
+      [] ->
+        {:error, "Poll for thread not found"}
+
+      poll ->
+        from(t in "smf_topics",
+          where: t.id_topic == ^thread_id
+        )
+        |> join(:left, [t], pc in "smf_poll_choices", on: t.id_poll == pc.id_poll)
+        |> select([t, pc], %{
+          id: pc.id_choice,
+          selected: false,
+          votes: pc.votes,
+          answer: pc.label
+        })
+        |> SmfRepo.all()
+        |> case do
+          [] ->
+            {:error, "Poll for thread not found"}
+
+          answers ->
+            if poll.id > 0, do: Map.put(poll, :answers, answers), else: nil
+        end
     end
   end
 

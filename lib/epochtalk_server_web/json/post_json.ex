@@ -117,6 +117,7 @@ defmodule EpochtalkServerWeb.Controllers.PostJSON do
   def by_thread_proxy(%{
         posts: posts,
         page: page,
+        poll: poll,
         limit: limit
       }) do
     {:ok, thread} =
@@ -125,6 +126,8 @@ defmodule EpochtalkServerWeb.Controllers.PostJSON do
       else
         ProxyConversion.build_model("thread", [List.first(posts).thread_id], page, limit)
       end
+
+    thread = Map.put(thread, :poll, poll)
 
     # format board data
     {:ok, board} = ProxyConversion.build_model("board", [thread.board_id], 1, 1)

@@ -59,6 +59,12 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
 
   def build_model(model_type) do
     case model_type do
+      "boards.counts" ->
+        build_board_counts()
+
+      "boards.last_post_info" ->
+        build_board_last_post_info()
+
       "threads.recent" ->
         build_recent_threads()
 
@@ -173,6 +179,52 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
     end
   end
 
+  def build_board_counts() do
+    %{id_board_blacklist: id_board_blacklist} = Application.get_env(:epochtalk_server, :proxy_config)
+    from(b in "smf_boards",
+      where: b.id_board not in ^id_board_blacklist,
+      select: %{
+        id: b.id_board,
+        thread_count: b.numTopics,
+        post_count: b.numPosts
+      }
+    )
+    |> SmfRepo.all()
+    |> case do
+      [] ->
+        {:error, "Boards not found"}
+
+      boards -> return_tuple(boards)
+    end
+  end
+
+  def build_board_last_post_info() do
+    %{id_board_blacklist: id_board_blacklist} = Application.get_env(:epochtalk_server, :proxy_config)
+    from(b in "smf_boards",
+      where: b.id_board not in ^id_board_blacklist
+    )
+    |> join(:left, [b], m in "smf_messages", on: b.id_last_msg == m.id_msg)
+    |> join(:left, [b, m], t in "smf_topics", on: m.id_topic == t.id_topic)
+    |> select([b, m, t], %{
+      id: b.id_board,
+      last_post_created_at: m.posterTime * 1000,
+      last_post_position: t.numReplies,
+      last_post_username: m.posterName,
+      last_thread_created_at: t.id_member_started,
+      last_thread_id: t.id_topic,
+      last_thread_post_count: t.numReplies,
+      last_thread_slug: t.id_topic,
+      last_thread_title: m.subject,
+      last_thread_updated_at: m.posterTime * 1000
+    })
+    |> SmfRepo.all()
+    |> case do
+      [] ->
+        {:error, "Boards not found"}
+
+      boards -> return_tuple(boards)
+    end
+  end
   def build_boards(ids) do
     %{id_board_blacklist: id_board_blacklist} = Application.get_env(:epochtalk_server, :proxy_config)
     from(b in "smf_boards",

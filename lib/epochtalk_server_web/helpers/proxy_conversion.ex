@@ -49,6 +49,9 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
 
   def build_model(model_type) do
     case model_type do
+      "boards.counts" ->
+        build_board_counts()
+
       "threads.recent" ->
         build_recent_threads()
 
@@ -121,6 +124,24 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
     end
   end
 
+  def build_board_counts() do
+    %{id_board_blacklist: id_board_blacklist} = Application.get_env(:epochtalk_server, :proxy_config)
+    from(b in "smf_boards",
+      where: b.id_board not in ^id_board_blacklist,
+      select: %{
+        id: b.id_board,
+        thread_count: b.numTopics,
+        post_count: b.numPosts
+      }
+    )
+    |> SmfRepo.all()
+    |> case do
+      [] ->
+        {:error, "Boards not found"}
+
+      boards -> return_tuple(boards)
+    end
+  end
   def build_boards(ids) do
     %{id_board_blacklist: id_board_blacklist} = Application.get_env(:epochtalk_server, :proxy_config)
     from(b in "smf_boards",

@@ -9,13 +9,42 @@ defmodule EpochtalkServerWeb.Controllers.BoardJSON do
   def slug_to_id(%{id: id}), do: %{id: id}
 
   @doc """
+  Renders proxy version of `Board` data by `Category`.
+  """
+  def proxy_by_category(%{
+    categories: categories,
+    board_moderators: board_moderators,
+    board_mapping: board_mapping,
+    user_priority: user_priority,
+    board_counts: board_counts
+  }) do
+    board_counts =
+      board_counts
+      |> Enum.reduce(%{}, fn b, acc ->
+        acc
+        |> Map.put(b.id, %{post_count: b.post_count, thread_count: b.thread_count})
+      end)
+    data = by_category(%{
+        categories: categories,
+        board_moderators: board_moderators,
+        board_mapping: board_mapping,
+        user_priority: user_priority,
+        board_counts: board_counts
+      })
+
+    data
+  end
+
+  @doc """
   Renders `Board` data by `Category`.
   """
   def by_category(%{
         categories: categories,
         board_moderators: board_moderators,
         board_mapping: board_mapping,
-        user_priority: user_priority
+        user_priority: user_priority,
+        # board counts for proxy version
+        board_counts: board_counts
       }) do
     # append board moderators to each board in board mapping
     board_mapping =
@@ -45,7 +74,9 @@ defmodule EpochtalkServerWeb.Controllers.BoardJSON do
             board_mapping,
             :boards,
             category,
-            user_priority
+            user_priority,
+            # board counts for proxy version
+            board_counts
           )
 
         acc ++ [category]
@@ -134,7 +165,9 @@ defmodule EpochtalkServerWeb.Controllers.BoardJSON do
          board_mapping,
          child_key,
          parent,
-         user_priority
+         user_priority,
+         # board counts for proxy version
+         board_counts \\ nil
        ) do
     # get id of parent object could be board or category
     parent_id = if is_integer(Map.get(parent, :board_id)), do: parent.board_id, else: parent.id
@@ -160,6 +193,15 @@ defmodule EpochtalkServerWeb.Controllers.BoardJSON do
           |> Map.merge(remove_nil(board.board))
           |> Map.merge(remove_nil(board.stats))
           |> Map.merge(board.thread)
+
+        # add board counts for proxy version
+        board = if board_counts != nil do
+          board
+          |> Map.put(:post_count, board_counts[board.id][:post_count])
+          |> Map.put(:thread_count, board_counts[board.id][:thread_count])
+        else
+          board
+        end
 
         # delete unneeded properties
         board =
@@ -190,7 +232,8 @@ defmodule EpochtalkServerWeb.Controllers.BoardJSON do
             board_mapping,
             :children,
             board,
-            user_priority
+            user_priority,
+            board_counts
           )
 
         acc ++ [board]

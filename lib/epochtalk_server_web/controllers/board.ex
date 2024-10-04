@@ -11,8 +11,9 @@ defmodule EpochtalkServerWeb.Controllers.Board do
   alias EpochtalkServerWeb.ErrorHelpers
   alias EpochtalkServerWeb.Helpers.Validate
   alias EpochtalkServerWeb.Helpers.ACL
+  alias EpochtalkServerWeb.Helpers.ProxyConversion
 
-  plug :check_proxy when action in [:slug_to_id]
+  plug :check_proxy when action in [:slug_to_id, :by_category]
 
   @doc """
   Used to retrieve categorized boards
@@ -130,10 +131,35 @@ defmodule EpochtalkServerWeb.Controllers.Board do
               conn
           end
 
+        :by_category ->
+          conn
+          |> proxy_by_category(conn.params)
+          |> halt()
+
         _ ->
           conn
       end
 
     conn
+  end
+
+  defp proxy_by_category(conn, attrs) do
+    with :ok <- ACL.allow!(conn, "boards.allCategories"),
+         stripped <- Validate.cast(attrs, "stripped", :boolean, default: false),
+         user_priority <- ACL.get_user_priority(conn),
+         board_mapping <- BoardMapping.all(stripped: stripped),
+         board_moderators <- BoardModerator.all(),
+         {:ok, board_counts} <- ProxyConversion.build_model("boards.counts"),
+         categories <- Category.all() do
+      render(conn, :proxy_by_category, %{
+        categories: categories,
+        board_moderators: board_moderators,
+        board_mapping: board_mapping,
+        user_priority: user_priority,
+        board_counts: board_counts
+      })
+    else
+      _ -> ErrorHelpers.render_json_error(conn, 400, "Error, cannot fetch boards")
+    end
   end
 end

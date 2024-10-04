@@ -48,7 +48,7 @@ defmodule EpochtalkServerWeb.Controllers.ThreadJSON do
               deleted: t.last_post_user_deleted
             }
           ),
-        lastest:
+        latest:
           if(t.new_post_id || t.new_post_position,
             do: %{id: t.new_post_id, position: t.new_post_position || 1}
           )

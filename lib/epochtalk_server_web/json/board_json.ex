@@ -191,13 +191,9 @@ defmodule EpochtalkServerWeb.Controllers.BoardJSON do
           |> Map.merge(board.thread)
 
         # add board counts for proxy version
-        board = if board_counts != nil do
-          board
-          |> Map.put(:post_count, board_counts[board.id][:post_count])
-          |> Map.put(:thread_count, board_counts[board.id][:thread_count])
-        else
-          board
-        end
+        board = if board_counts != nil,
+          do: Map.merge(board, board_counts[board.id]),
+          else: board
 
         # delete unneeded properties
         board =

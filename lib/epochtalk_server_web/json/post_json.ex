@@ -377,30 +377,20 @@ defmodule EpochtalkServerWeb.Controllers.PostJSON do
   defp format_proxy_post_data_for_by_thread(post) do
     body = String.replace(post.body || post.body_html, "'", "\'")
 
-    %Porcelain.Result{out: parsed_body, status: status} = Porcelain.shell("php -r \"require 'parsing.php'; ECHO parse_bbc('" <> body <> "');\"")
-    IO.inspect "'#{body}'"
-    IO.inspect parsed_body
-    IO.inspect status
+    %Porcelain.Result{out: parsed_body, status: _status} = Porcelain.shell("php -r \"require 'parsing.php'; ECHO parse_bbc('" <> body <> "');\"")
 
-    post
-    |> Map.put(:body_html, parsed_body)
-    |> Map.put(:user, %{
-      id: post.user_id,
-      username: post.poster_name
-      # original_poster: post.original_poster,
-      # username: post.username,
-      # priority: if(is_nil(post.priority), do: post.default_priority, else: post.priority)
-      # deleted: post.user_deleted,
-      # signature: post.signature,
-      # post_count: post.post_count,
-      # highlight_color: post.highlight_color,
-      # role_name: post.role_name,
-      # stats: Map.get(post, :user_trust_stats),
-      # ignored: Map.get(post, :user_ignored),
-      # _ignored: Map.get(post, :user_ignored),
-      # activity: Map.get(post, :user_activity)
-    })
-    |> Map.delete(:user_id)
-    |> Map.delete(:poster_name)
+    signature = if post.user.signature,
+      do: String.replace(post.user.signature, "'", "\'"),
+      else: nil
+
+    parsed_signature = if signature do
+      %Porcelain.Result{out: parsed_sig, status: _status} = Porcelain.shell("php -r \"require 'parsing.php'; ECHO parse_bbc('" <> signature <> "');\"")
+      parsed_sig
+    else
+      nil
+    end
+
+    user = post.user |> Map.put(:signature, parsed_signature)
+    post |> Map.put(:body_html, parsed_body) |> Map.put(:user, user)
   end
 end

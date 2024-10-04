@@ -346,42 +346,39 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
       on: u.id_member == a.id_member and a.attachmentType == 1
     )
     |> select([m, u, a], %{
-      id: m.id_msg,
-      thread_id: m.id_topic,
-      board_id: m.id_board,
-      user_id: m.id_member,
-      title: m.subject,
-      body: m.body,
-      updated_at: m.modifiedTime,
-      username: m.posterName,
-      poster_time: m.posterTime,
-      poster_name: m.posterName,
-      modified_time: m.modifiedTime,
-      avatar:
-        fragment(
-          "if(? <>'',concat('/avatars/',?),ifnull(concat('/useravatars/',?),''))",
-          u.avatar,
-          u.avatar,
-          a.filename
-        )
-    })
+        id: m.id_msg,
+        thread_id: m.id_topic,
+        board_id: m.id_board,
+        title: m.subject,
+        body: m.body,
+        updated_at: m.modifiedTime,
+        username: m.posterName,
+        created_at: m.posterTime * 1000,
+        modified_time: m.modifiedTime,
+        avatar:
+          fragment(
+            "if(? <>'',concat('https://bitcointalk.org/avatars/',?),ifnull(concat('https://bitcointalk.org/useravatars/',?),''))",
+            u.avatar,
+            u.avatar,
+            a.filename
+          ),
+        user: %{
+          id: m.id_member,
+          username: m.posterName,
+          signature: u.signature,
+          activity: u.activity,
+          merit: u.merit,
+          title: u.usertitle
+        }
+      }
+    )
     |> ProxyPagination.page_simple(count_query, page, per_page: per_page)
     |> case do
       {:ok, [], _} ->
         {:error, "Posts not found for thread_id: #{id}"}
 
       {:ok, posts, data} ->
-        posts =
-          Enum.reduce(posts, [], fn post, acc ->
-            post =
-              post
-              |> Map.put(:created_at, post.poster_time * 1000)
-              |> Map.delete(:poster_time)
-
-            [post | acc]
-          end)
-
-        return_tuple(Enum.reverse(posts), data)
+        return_tuple(posts, data)
     end
   end
 

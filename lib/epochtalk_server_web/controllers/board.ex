@@ -150,13 +150,15 @@ defmodule EpochtalkServerWeb.Controllers.Board do
          board_mapping <- BoardMapping.all(stripped: stripped),
          board_moderators <- BoardModerator.all(),
          {:ok, board_counts} <- ProxyConversion.build_model("boards.counts"),
+         {:ok, board_last_post_info} <- ProxyConversion.build_model("boards.last_post_info"),
          categories <- Category.all() do
       render(conn, :proxy_by_category, %{
         categories: categories,
         board_moderators: board_moderators,
         board_mapping: board_mapping,
         user_priority: user_priority,
-        board_counts: board_counts
+        board_counts: board_counts,
+        board_last_post_info: board_last_post_info
       })
     else
       _ -> ErrorHelpers.render_json_error(conn, 400, "Error, cannot fetch boards")

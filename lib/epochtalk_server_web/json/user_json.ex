@@ -14,6 +14,37 @@ defmodule EpochtalkServerWeb.Controllers.UserJSON do
   def user(%{user: user, token: token}), do: format_user_reply(user, token)
 
   @doc """
+  Renders formatted user JSON for find
+  """
+  def find(%{user: user, activity: activity}) do
+    highest_role = user.roles |> Enum.sort_by(&(&1.priority)) |> List.first()
+    %{
+      id: user.id,
+      username:  user.username,
+      email: user.email,
+      created_at: user.created_at,
+      updated_at: user.updated_at,
+      avatar: user.profile.avatar,
+      post_count: user.profile.post_count,
+      last_active: user.profile.last_active,
+      threads_per_page: user.preferences.threads_per_page,
+      posts_per_page: user.preferences.posts_per_page,
+      dob: (if user.profile.fields, do: user.profile.fields[:dob]),
+      name: (if user.profile.fields, do: user.profile.fields[:name]),
+      gender: (if user.profile.fields, do: user.profile.fields[:gender]),
+      website: (if user.profile.fields, do: user.profile.fields[:website]),
+      language: (if user.profile.fields, do: user.profile.fields[:language]),
+      location: (if user.profile.fields, do: user.profile.fields[:location]),
+      role_name: Map.get(highest_role, :name),
+      role_highlight_color: Map.get(highest_role, :highlight_color),
+      roles: Enum.map(user.roles, &(&1.lookup)),
+      priority: Map.get(highest_role, :priority),
+      metadata:  %{}, # TODO(akinsey): implement metric rank map db functions
+      activity:  activity
+   }
+  end
+
+  @doc """
   Renders formatted JSON response for registration confirmation.
   ## Example
     iex> EpochtalkServerWeb.Controllers.UserJSON.register_with_verify(%{user: %User{ username: "Test" }})

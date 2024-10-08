@@ -5,6 +5,7 @@ defmodule EpochtalkServerWeb.Controllers.User do
   Controller For `User` related API requests
   """
   alias EpochtalkServer.Models.User
+  alias EpochtalkServer.Models.UserActivity
   alias EpochtalkServer.Models.Ban
   alias EpochtalkServer.Models.Invitation
   alias EpochtalkServer.Auth.Guardian
@@ -145,6 +146,28 @@ defmodule EpochtalkServerWeb.Controllers.User do
   end
 
   def confirm(_conn, _attrs), do: raise(InvalidPayload)
+
+  @doc """
+  Finds a `User`.
+  """
+  def find(conn, %{"username" => username}) do
+    # create user
+    with {:ok, user} <- User.by_username(username),
+    activity <- UserActivity.get_by_user_id(user.id) do
+      render(conn, :find, %{user: user, activity: activity})
+    else
+      {:error, :user_not_found} ->
+        ErrorHelpers.render_json_error(conn, 400, "Account not found")
+
+      {:error, data} ->
+        ErrorHelpers.render_json_error(conn, 400, data)
+
+      _ ->
+        ErrorHelpers.render_json_error(conn, 500, "There was an issue finding user")
+    end
+  end
+
+  def find(_conn, _attrs), do: raise(InvalidPayload)
 
   @doc """
   Authenticates currently logged in `User`

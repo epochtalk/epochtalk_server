@@ -73,6 +73,7 @@ defmodule EpochtalkServerWeb.Router do
     get "/boards/:id", Board, :find
     get "/boards/:slug/id", Board, :slug_to_id
     get "/breadcrumbs", Breadcrumb, :breadcrumbs
+    get "/users/:username", User, :find
     get "/posts", Post, :by_thread
     get "/threads", Thread, :by_board
     get "/threads/:slug/id", Thread, :slug_to_id

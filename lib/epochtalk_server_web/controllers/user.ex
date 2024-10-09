@@ -7,6 +7,8 @@ defmodule EpochtalkServerWeb.Controllers.User do
   alias EpochtalkServer.Models.User
   alias EpochtalkServer.Models.UserActivity
   alias EpochtalkServer.Models.Ban
+  alias EpochtalkServer.Models.MetricRankMap
+  alias EpochtalkServer.Models.Rank
   alias EpochtalkServer.Models.Invitation
   alias EpochtalkServer.Auth.Guardian
   alias EpochtalkServer.Session
@@ -153,8 +155,15 @@ defmodule EpochtalkServerWeb.Controllers.User do
   def find(conn, %{"username" => username}) do
     # create user
     with {:ok, user} <- User.by_username(username),
-    activity <- UserActivity.get_by_user_id(user.id) do
-      render(conn, :find, %{user: user, activity: activity})
+         activity <- UserActivity.get_by_user_id(user.id),
+         metric_rank_maps <- MetricRankMap.all_merged(),
+         ranks <- Rank.all() do
+      render(conn, :find, %{
+        user: user,
+        activity: activity,
+        metric_rank_maps: metric_rank_maps,
+        ranks: ranks
+      })
     else
       {:error, :user_not_found} ->
         ErrorHelpers.render_json_error(conn, 400, "Account not found")

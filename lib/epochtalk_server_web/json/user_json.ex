@@ -16,11 +16,12 @@ defmodule EpochtalkServerWeb.Controllers.UserJSON do
   @doc """
   Renders formatted user JSON for find
   """
-  def find(%{user: user, activity: activity}) do
-    highest_role = user.roles |> Enum.sort_by(&(&1.priority)) |> List.first()
+  def find(%{user: user, activity: activity, metric_rank_maps: metric_rank_maps, ranks: ranks}) do
+    highest_role = user.roles |> Enum.sort_by(& &1.priority) |> List.first()
+
     %{
       id: user.id,
-      username:  user.username,
+      username: user.username,
       email: user.email,
       created_at: user.created_at,
       updated_at: user.updated_at,
@@ -29,19 +30,22 @@ defmodule EpochtalkServerWeb.Controllers.UserJSON do
       last_active: user.profile.last_active,
       threads_per_page: user.preferences.threads_per_page,
       posts_per_page: user.preferences.posts_per_page,
-      dob: (if user.profile.fields, do: user.profile.fields[:dob]),
-      name: (if user.profile.fields, do: user.profile.fields[:name]),
-      gender: (if user.profile.fields, do: user.profile.fields[:gender]),
-      website: (if user.profile.fields, do: user.profile.fields[:website]),
-      language: (if user.profile.fields, do: user.profile.fields[:language]),
-      location: (if user.profile.fields, do: user.profile.fields[:location]),
+      dob: if(user.profile.fields, do: user.profile.fields[:dob]),
+      name: if(user.profile.fields, do: user.profile.fields[:name]),
+      gender: if(user.profile.fields, do: user.profile.fields[:gender]),
+      website: if(user.profile.fields, do: user.profile.fields[:website]),
+      language: if(user.profile.fields, do: user.profile.fields[:language]),
+      location: if(user.profile.fields, do: user.profile.fields[:location]),
       role_name: Map.get(highest_role, :name),
       role_highlight_color: Map.get(highest_role, :highlight_color),
-      roles: Enum.map(user.roles, &(&1.lookup)),
+      roles: Enum.map(user.roles, & &1.lookup),
       priority: Map.get(highest_role, :priority),
-      metadata:  %{}, # TODO(akinsey): implement metric rank map db functions
-      activity:  activity
-   }
+      metadata: %{
+        rank_metric_maps: metric_rank_maps,
+        ranks: ranks
+      },
+      activity: activity
+    }
   end
 
   @doc """

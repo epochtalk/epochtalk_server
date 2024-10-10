@@ -16,36 +16,53 @@ defmodule EpochtalkServerWeb.Controllers.UserJSON do
   @doc """
   Renders formatted user JSON for find
   """
-  def find(%{user: user, activity: activity, metric_rank_maps: metric_rank_maps, ranks: ranks}) do
+  def find(%{
+        user: user,
+        activity: activity,
+        metric_rank_maps: metric_rank_maps,
+        ranks: ranks,
+        show_hidden: show_hidden
+      }) do
     highest_role = user.roles |> Enum.sort_by(& &1.priority) |> List.first()
+    [post_count | _] = metric_rank_maps
 
-    %{
+    # handle missing profile/preferences row
+    user = user |> Map.put(:profile, user.profile || %{})
+    user = user |> Map.put(:preferences, user.preferences || %{})
+
+    ret = %{
       id: user.id,
       username: user.username,
-      email: user.email,
       created_at: user.created_at,
       updated_at: user.updated_at,
-      avatar: user.profile.avatar,
-      post_count: user.profile.post_count,
-      last_active: user.profile.last_active,
-      threads_per_page: user.preferences.threads_per_page,
-      posts_per_page: user.preferences.posts_per_page,
-      dob: if(user.profile.fields, do: user.profile.fields[:dob]),
-      name: if(user.profile.fields, do: user.profile.fields[:name]),
-      gender: if(user.profile.fields, do: user.profile.fields[:gender]),
-      website: if(user.profile.fields, do: user.profile.fields[:website]),
-      language: if(user.profile.fields, do: user.profile.fields[:language]),
-      location: if(user.profile.fields, do: user.profile.fields[:location]),
+      avatar: Map.get(user.profile, :avatar),
+      post_count:  Map.get(user.profile, :post_count),
+      last_active:  Map.get(user.profile, :last_active),
+      dob: (if Map.get(user.profile, :fields), do: user.profile.fields["dob"]),
+      name: (if Map.get(user.profile, :fields), do: user.profile.fields["name"]),
+      gender: (if Map.get(user.profile, :fields), do: user.profile.fields["gender"]),
+      website: (if Map.get(user.profile, :fields), do: user.profile.fields["website"]),
+      language: (if Map.get(user.profile, :fields), do: user.profile.fields["language"]),
+      location: (if Map.get(user.profile, :fields), do: user.profile.fields["location"]),
       role_name: Map.get(highest_role, :name),
       role_highlight_color: Map.get(highest_role, :highlight_color),
       roles: Enum.map(user.roles, & &1.lookup),
       priority: Map.get(highest_role, :priority),
       metadata: %{
-        rank_metric_maps: metric_rank_maps,
+        rank_metric_maps: post_count.maps,
         ranks: ranks
       },
       activity: activity
     }
+
+    if show_hidden,
+      do: ret
+        |> Map.put(:email, user.email)
+        |> Map.put(:threads_per_page, Map.get(user.preferences, :threads_per_page) || 25)
+        |> Map.put(:posts_per_page, Map.get(user.preferences, :posts_per_page) || 25)
+        |> Map.put(:ignored_boards, Map.get(user.preferences, :ignored_boards) || [])
+        |> Map.put(:collapsed_categories, Map.get(user.preferences, :collapsed_categories) || []),
+    else: ret
   end
 
   @doc """

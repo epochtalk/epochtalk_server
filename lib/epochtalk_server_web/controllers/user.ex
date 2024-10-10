@@ -15,6 +15,7 @@ defmodule EpochtalkServerWeb.Controllers.User do
   alias EpochtalkServer.Mailer
   alias EpochtalkServerWeb.ErrorHelpers
   alias EpochtalkServerWeb.CustomErrors.InvalidPayload
+  alias EpochtalkServerWeb.Helpers.ACL
   alias EpochtalkServerWeb.Helpers.Validate
 
   @doc """
@@ -157,12 +158,25 @@ defmodule EpochtalkServerWeb.Controllers.User do
     with {:ok, user} <- User.by_username(username),
          activity <- UserActivity.get_by_user_id(user.id),
          metric_rank_maps <- MetricRankMap.all_merged(),
-         ranks <- Rank.all() do
+         ranks <- Rank.all(),
+         authed_user <- Guardian.Plug.current_resource(conn),
+         # Authorizations Checks
+         :ok <- ACL.allow!(conn, "users.find"),
+         {:user_not_deleted, user_not_deleted} <-
+           {:user_not_deleted, (if user.id || !user.deleted, do: true, else: false)},
+         {:has_deleted_override, has_deleted_override} <-
+           {:has_deleted_override, ACL.has_permission(conn, "users.find.bypass.viewDeleted")},
+         {:view_deleted, true} <- {:view_deleted, user_not_deleted || has_deleted_override},
+         {:view_as_self, view_as_self} <- {:view_as_self, authed_user && authed_user.id == user.id},
+         {:view_as_admin, view_as_admin} <-
+           {:view_as_admin, ACL.has_permission(conn, "users.find.bypass.viewMoreInfo")},
+         {:show_hidden, show_hidden} <- {:show_hidden, view_as_self || view_as_admin} do
       render(conn, :find, %{
         user: user,
         activity: activity,
         metric_rank_maps: metric_rank_maps,
-        ranks: ranks
+        ranks: ranks,
+        show_hidden: show_hidden
       })
     else
       {:error, :user_not_found} ->
@@ -170,6 +184,9 @@ defmodule EpochtalkServerWeb.Controllers.User do
 
       {:error, data} ->
         ErrorHelpers.render_json_error(conn, 400, data)
+
+      {:view_deleted, false} ->
+        ErrorHelpers.render_json_error(conn, 400, "Account not found")
 
       _ ->
         ErrorHelpers.render_json_error(conn, 500, "There was an issue finding user")

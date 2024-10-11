@@ -3,6 +3,7 @@ defmodule EpochtalkServer.Models.Post do
   import Ecto.Changeset
   import Ecto.Query
   alias EpochtalkServer.Repo
+  alias EpochtalkServer.Models.Board
   alias EpochtalkServer.Models.Post
   alias EpochtalkServer.Models.Thread
   alias EpochtalkServer.Models.User
@@ -410,6 +411,46 @@ defmodule EpochtalkServer.Models.Post do
     if preload_user_roles,
       do: results |> Repo.preload(user: :roles),
       else: results
+  end
+
+  @doc """
+  Used to page `Post` by a specific `User` given a `username`
+  """
+  @spec page_by_username(username :: String.t(),
+            priority :: non_neg_integer,
+            page :: non_neg_integer | nil,
+            opts :: list() | nil
+          ) :: [map()] | []
+  def page_by_username(username, priority, page \\ 1, opts \\ []) when is_binary(username) do
+    per_page = Keyword.get(opts, :per_page, 25)
+    offset = page * per_page - per_page
+    desc = Keyword.get(opts, :desc, true) == true
+    direction = if desc, do: :desc, else: :asc
+
+    Post
+    |> join(:left, [p], t in Thread, on: t.id == p.thread_id)
+    |> join(:left, [p], u in User, on: u.id == p.user_id)
+    |> join(:left, [p, t], b in Board, on: b.id == t.board_id)
+    |> where([p, t, u], u.username == ^username and p.user_id == u.id)
+    |> order_by([p], [{^direction, p.id}])
+    |> limit(^per_page)
+    |> offset(^offset)
+    |> select([p, t, u, b], %{
+      id: p.id,
+      position: p.position,
+      thread_id: p.thread_id,
+      thread_slug: t.slug,
+      thread_title: fragment("SELECT content->>'title' as title FROM posts WHERE thread_id = ? ORDER BY id LIMIT 1", p.thread_id),
+      user: %{id: p.user_id, deleted: u.deleted},
+      body: p.content["body"],
+      deleted: p.deleted,
+      created_at: p.created_at,
+      updated_at: p.updated_at,
+      imported_at: p.imported_at,
+      board_id: b.id,
+      board_visible: fragment("EXISTS(SELECT 1 FROM boards WHERE board_id = ? AND (viewable_by >= ? OR viewable_by IS NULL))", b.id, ^priority)
+    })
+    |> Repo.all()
   end
 
   @doc """

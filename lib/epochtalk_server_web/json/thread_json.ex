@@ -1,6 +1,5 @@
 defmodule EpochtalkServerWeb.Controllers.ThreadJSON do
   alias EpochtalkServerWeb.Controllers.BoardJSON
-  alias EpochtalkServerWeb.Helpers.ProxyConversion
 
   @moduledoc """
   Renders and formats `Thread` data, in JSON format for frontend
@@ -131,16 +130,21 @@ defmodule EpochtalkServerWeb.Controllers.ThreadJSON do
   def by_board_proxy(%{
         threads: threads,
         user: user,
+        user_priority: user_priority,
+        board_id: board_id,
+        board_mapping: board_mapping,
+        board_moderators: board_moderators,
         page: page,
         limit: limit
       }) do
     # format board data
-    {:ok, board} =
-      if is_map(threads) do
-        ProxyConversion.build_model("board", [threads.board_id], 1, 1)
-      else
-        ProxyConversion.build_model("board", [List.first(threads).board_id], 1, 1)
-      end
+    board =
+      BoardJSON.format_board_data_for_find(
+        board_moderators,
+        board_mapping,
+        board_id,
+        user_priority
+      )
 
     # format thread data
     user_id = if is_nil(user), do: nil, else: user.id

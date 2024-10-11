@@ -24,31 +24,24 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
         build_posts_by_thread(id, page, per_page)
 
       _ ->
-        build_model(model_type, [id], nil, nil)
-    end
-  end
-
-  def build_model(model_type, ids, _, _) do
-    case model_type do
-      "category" ->
-        build_categories(ids)
-
-      "board" ->
-        build_boards(ids)
-
-      "thread" ->
-        build_threads(ids)
-
-      "post" ->
-        build_posts(ids)
-
-      _ ->
         build_model(nil, nil, nil, nil)
     end
   end
 
   def build_model(model_type, id) do
     case model_type do
+      "category" ->
+        build_category(id)
+
+      "board" ->
+        build_board(id)
+
+      "thread" ->
+        build_thread(id)
+
+      "post" ->
+        build_post(id)
+
       "poll.by_thread" ->
         build_poll(id)
 
@@ -159,23 +152,22 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
     end
   end
 
-  def build_categories(ids) do
+  def build_category(id) do
     from(c in "smf_categories",
-      limit: ^length(ids),
-      where: c.id_cat in ^ids,
+      where: c.id_cat == ^id,
       select: %{
         id: c.id_cat,
         name: c.name,
         view_order: c.catOrder
       }
     )
-    |> SmfRepo.all()
+    |> SmfRepo.one()
     |> case do
       [] ->
-        {:error, "Categories not found for ids: #{ids}"}
+        {:error, "Category not found for id: #{id}"}
 
-      categories ->
-        return_tuple(categories)
+      category ->
+        category
     end
   end
 
@@ -225,11 +217,10 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
       boards -> return_tuple(boards)
     end
   end
-  def build_boards(ids) do
+  def build_board(id) do
     %{id_board_blacklist: id_board_blacklist} = Application.get_env(:epochtalk_server, :proxy_config)
     from(b in "smf_boards",
-      limit: ^length(ids),
-      where: b.id_board in ^ids and b.id_board not in ^id_board_blacklist,
+      where: b.id_board == ^id and b.id_board not in ^id_board_blacklist,
       select: %{
         id: b.id_board,
         slug: b.id_board,
@@ -240,22 +231,13 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
         post_count: b.numPosts
       }
     )
-    |> SmfRepo.all()
+    |> SmfRepo.one()
     |> case do
       [] ->
-        {:error, "Boards not found for ids: #{ids}"}
+        {:error, "Board not found for id: #{id}"}
 
-      boards ->
-        boards =
-          Enum.map(boards, fn board ->
-            board =
-              board
-              |> Map.put(:children, [])
-
-            board
-          end)
-
-        return_tuple(boards)
+      board ->
+        board
     end
   end
 
@@ -310,11 +292,10 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
     |> ProxyPagination.page_simple(count_query, page, per_page: per_page)
   end
 
-  def build_threads(ids) do
+  def build_thread(id) do
     %{id_board_blacklist: id_board_blacklist} = Application.get_env(:epochtalk_server, :proxy_config)
     from(t in "smf_topics",
-      limit: ^length(ids),
-      where: t.id_topic in ^ids and t.id_board not in ^id_board_blacklist
+      where: t.id_topic == ^id and t.id_board not in ^id_board_blacklist
     )
     # get first and last message for thread
     |> join(:left, [t], m in "smf_messages", on: t.id_first_msg == m.id_msg)
@@ -344,15 +325,20 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
       last_post_user_deleted: false,
       last_viewed: nil
     })
-    |> SmfRepo.all()
-    |> return_tuple()
+    |> SmfRepo.one()
+    |> case do
+      [] ->
+        {:error, "Thread not found for id: #{id}"}
+
+      thread ->
+        thread
+    end
   end
 
-  def build_posts(ids) do
+  def build_post(id) do
     %{id_board_blacklist: id_board_blacklist} = Application.get_env(:epochtalk_server, :proxy_config)
     from(m in "smf_messages",
-      limit: ^length(ids),
-      where: m.id_msg in ^ids and m.id_board not in ^id_board_blacklist,
+      where: m.id_msg == ^id and m.id_board not in ^id_board_blacklist,
       select: %{
         id: m.id_msg,
         thread_id: m.id_topic,
@@ -363,23 +349,13 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
         updated_at: m.modifiedTime
       }
     )
-    |> SmfRepo.all()
+    |> SmfRepo.one()
     |> case do
       [] ->
-        {:error, "Posts not found for ids: #{ids}"}
+        {:error, "Post not found for id: #{id}"}
 
-      posts ->
-        posts =
-          Enum.reduce(posts, [], fn post, acc ->
-            post =
-              post
-              |> Map.put(:created_at, post.poster_time * 1000)
-              |> Map.delete(:poster_time)
-
-            [post | acc]
-          end)
-
-        return_tuple(posts)
+      post ->
+        post
     end
   end
 

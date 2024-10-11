@@ -2,7 +2,6 @@ defmodule EpochtalkServerWeb.Controllers.PostJSON do
   alias EpochtalkServerWeb.Controllers.BoardJSON
   alias EpochtalkServerWeb.Controllers.ThreadJSON
   alias EpochtalkServerWeb.Helpers.ACL
-  alias EpochtalkServerWeb.Helpers.ProxyConversion
 
   @moduledoc """
   Renders and formats `Post` data, in JSON format for frontend
@@ -116,25 +115,24 @@ defmodule EpochtalkServerWeb.Controllers.PostJSON do
 
   def by_thread_proxy(%{
         posts: posts,
-        page: page,
         poll: poll,
+        thread: thread,
+        user_priority: user_priority,
+        board_mapping: board_mapping,
+        board_moderators: board_moderators,
+        page: page,
         limit: limit
       }) do
-    {:ok, thread} =
-      if is_map(posts) do
-        ProxyConversion.build_model("thread", [posts.thread_id], page, limit)
-      else
-        ProxyConversion.build_model("thread", [List.first(posts).thread_id], page, limit)
-      end
+    # format board data
+    board =
+      BoardJSON.format_board_data_for_find(
+        board_moderators,
+        board_mapping,
+        thread.board_id,
+        user_priority
+      )
 
     thread = Map.put(thread, :poll, poll)
-
-    # format board data
-    {:ok, board} = ProxyConversion.build_model("board", [thread.board_id], 1, 1)
-
-    board =
-      board
-      |> Map.put(:moderators, [])
 
     # convert singular post to list
     posts = if is_map(posts), do: [posts], else: posts
@@ -380,15 +378,15 @@ defmodule EpochtalkServerWeb.Controllers.PostJSON do
     %Porcelain.Result{out: parsed_body, status: _status} = Porcelain.shell("php -r \"require 'parsing.php'; ECHO parse_bbc('" <> body <> "');\"")
 
     signature = if post.user.signature,
-      do: String.replace(post.user.signature, "'", "\'"),
-      else: nil
+        do: String.replace(post.user.signature, "'", "\'"),
+        else: nil
 
     parsed_signature = if signature do
       %Porcelain.Result{out: parsed_sig, status: _status} = Porcelain.shell("php -r \"require 'parsing.php'; ECHO parse_bbc('" <> signature <> "');\"")
-      parsed_sig
-    else
-      nil
-    end
+        parsed_sig
+      else
+        nil
+      end
 
     user = post.user |> Map.put(:signature, parsed_signature)
     post |> Map.put(:body_html, parsed_body) |> Map.put(:user, user)

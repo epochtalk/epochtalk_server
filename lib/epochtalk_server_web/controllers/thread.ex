@@ -756,12 +756,19 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
          page <- Validate.cast(attrs, "page", :integer, default: 1),
          limit <- Validate.cast(attrs, "limit", :integer, default: 5),
          user <- Guardian.Plug.current_resource(conn),
+         user_priority <- ACL.get_user_priority(conn),
          :ok <- ACL.allow!(conn, "threads.byBoard"),
+         board_mapping <- BoardMapping.all(),
+         board_moderators <- BoardModerator.all(),
          {:ok, threads, data} <-
            ProxyConversion.build_model("threads.by_board", board_id, page, limit) do
       render(conn, :by_board_proxy, %{
         threads: threads,
         user: user,
+        user_priority: user_priority,
+        board_id: board_id,
+        board_mapping: board_mapping,
+        board_moderators: board_moderators,
         page: page,
         limit: limit,
         pagination_data: data

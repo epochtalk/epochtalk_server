@@ -76,7 +76,7 @@ defmodule EpochtalkServerWeb.Helpers.Breadcrumbs do
     thread =
       cond do
         is_integer(id) && id < threads_seq ->
-          ProxyConversion.build_model("thread", [id], 1, 1)
+          ProxyConversion.build_model("thread", id)
 
         is_binary(id) ->
           Thread.find(id)
@@ -86,7 +86,7 @@ defmodule EpochtalkServerWeb.Helpers.Breadcrumbs do
       end
 
     case thread do
-      {:ok, thread} ->
+      thread ->
         crumbs = [
           %{
             label: thread.title,

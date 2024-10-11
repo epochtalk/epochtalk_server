@@ -299,7 +299,7 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
       last_post_user_deleted: false,
       last_post_avatar:
         fragment(
-          "if(? <>'',concat('/avatars/',?),ifnull(concat('/useravatars/',?),''))",
+          "if(? <>'',concat('https://bitcointalk.org/avatars/',?),ifnull(concat('https://bitcointalk.org/useravatars/',?),''))",
           m.avatar,
           m.avatar,
           a.filename

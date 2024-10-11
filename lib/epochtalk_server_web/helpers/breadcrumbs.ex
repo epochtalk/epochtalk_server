@@ -82,26 +82,20 @@ defmodule EpochtalkServerWeb.Helpers.Breadcrumbs do
           Thread.find(id)
 
         true ->
-          {:error, :thread_does_not_exist}
+          build_crumbs(nil, nil, crumbs)
       end
 
-    case thread do
-      thread ->
-        crumbs = [
-          %{
-            label: thread.title,
-            routeName: "Posts",
-            opts: %{slug: id, locked: thread.locked}
-          }
-          | crumbs
-        ]
+    crumbs = [
+      %{
+        label: thread.title,
+        routeName: "Posts",
+        opts: %{slug: id, locked: thread.locked}
+      }
+      | crumbs
+    ]
 
-        next_data = get_next_data(thread, "thread")
-        build_crumbs(next_data[:id], next_data[:type], crumbs)
-
-      {:error, :thread_does_not_exist} ->
-        build_crumbs(nil, nil, crumbs)
-    end
+    next_data = get_next_data(thread, "thread")
+    build_crumbs(next_data[:id], next_data[:type], crumbs)
   end
 
   defp get_next_data(object, type) do

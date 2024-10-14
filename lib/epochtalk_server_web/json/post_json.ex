@@ -99,6 +99,15 @@ defmodule EpochtalkServerWeb.Controllers.PostJSON do
     }
   end
 
+  @doc """
+  Renders all `Post` for a particular `User`.
+  """
+  def by_username(%{posts: posts, user: user, priority: priority, view_deleted_posts: view_deleted_posts}) do
+    posts
+    |> Enum.map(&(Map.put(&1, :body_html, &1.body) |> Map.delete(:body)))
+    |> handle_deleted_posts(nil, user, priority, view_deleted_posts)
+  end
+
   ## === Private Helper Functions ===
 
   defp handle_deleted_posts(posts, thread, user, authed_user_priority, view_deleted_posts) do
@@ -145,13 +154,12 @@ defmodule EpochtalkServerWeb.Controllers.PostJSON do
          viewable_in_board_with_id
        ) do
     # check if metadata map exists
-    metadata_map_exists = !!post.metadata and Map.keys(post.metadata) != []
+    metadata_map_exists = !!Map.get(post, :metadata) and Map.keys(post.metadata) != []
 
     # get information about how current post was hidden
     post_hidden_by_priority =
       if metadata_map_exists && post.metadata["hidden_by_priority"] != nil,
-        do: post.metadata["hidden_by_priority"],
-        else: post.user.priority
+        do: post.metadata["hidden_by_priority"]
 
     post_hidden_by_id =
       if metadata_map_exists && post.metadata["hidden_by_id"] != nil,
@@ -160,7 +168,9 @@ defmodule EpochtalkServerWeb.Controllers.PostJSON do
 
     # check if user has priority to view hidden post,
     # or if the user was the one who hid the post
-    authed_user_has_priority = authed_user_priority <= post_hidden_by_priority
+    authed_user_has_priority = if is_nil(post_hidden_by_priority),
+      do: false,
+      else: authed_user_priority <= post_hidden_by_priority
     authed_user_hid_post = post_hidden_by_id == authed_user_id
 
     post_is_viewable =

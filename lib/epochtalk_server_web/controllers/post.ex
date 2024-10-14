@@ -359,6 +359,51 @@ defmodule EpochtalkServerWeb.Controllers.Post do
   end
 
   @doc """
+  Used to retrieve `Posts` for a `User` by username
+  """
+  def by_username(conn, attrs) do
+    # Parameter Validation
+    with username <- attrs["username"],
+         page <- Validate.cast(attrs, "page", :integer, default: 1, min: 1),
+         limit <- Validate.cast(attrs, "limit", :integer, default: 25, min: 1, max: 100),
+         desc <- Validate.cast(attrs, "desc", :boolean, default: true),
+         user <- Guardian.Plug.current_resource(conn),
+         priority <- ACL.get_user_priority(conn),
+         [lookup_user] <- User.ids_from_usernames([username]),
+
+         # Authorizations Checks
+         :ok <- ACL.allow!(conn, "posts.pageByUser"),
+         {:user_not_deleted, user_not_deleted} <-
+           {:user_not_deleted, User.is_active?(lookup_user.id)},
+         {:has_deleted_override, has_deleted_override} <-
+           {:has_deleted_override, ACL.has_permission(conn, "posts.pageByUser.bypass.viewDeletedUsers")},
+         {:view_deleted_users, true} <- {:view_deleted_users, user_not_deleted || has_deleted_override},
+         view_deleted_posts <- can_authed_user_view_deleted_posts_by_username(user),
+         posts <-
+           Post.page_by_username(username, priority, page,
+             per_page: limit,
+             desc: desc
+           ),
+         {:has_posts, true} <- {:has_posts, posts != []} do
+      render(conn, :by_username, %{
+        posts: posts,
+        user: user,
+        priority: priority,
+        view_deleted_posts: view_deleted_posts
+      })
+    else
+      {:has_posts, false} ->
+        ErrorHelpers.render_json_error(conn, 404, "Error, requested posts not found")
+
+      {:view_deleted_users, false} ->
+        ErrorHelpers.render_json_error(conn, 400, "Account not found")
+
+      _ ->
+        ErrorHelpers.render_json_error(conn, 400, "Error, cannot get posts by username")
+    end
+  end
+
+  @doc """
   Get `Post` preview by running content through parser
   """
   def preview(conn, attrs) do
@@ -396,6 +441,27 @@ defmodule EpochtalkServerWeb.Controllers.Post do
 
       view_self_mod and moderated_boards == [] ->
         Thread.self_moderated_by_user?(thread_id, user_id)
+
+      true ->
+        false
+    end
+  end
+
+  defp can_authed_user_view_deleted_posts_by_username(nil), do: false
+
+  defp can_authed_user_view_deleted_posts_by_username(user) do
+    view_all = ACL.has_permission(user, "posts.byUsername.bypass.viewDeletedPosts.admin")
+    view_some = ACL.has_permission(user, "posts.byUsername.bypass.viewDeletedPosts.mod")
+
+    user_id = Map.get(user, :id)
+    moderated_boards = BoardModerator.get_user_moderated_boards(user_id)
+
+    cond do
+      view_all ->
+        true
+
+      view_some and moderated_boards != [] ->
+        moderated_boards
 
       true ->
         false

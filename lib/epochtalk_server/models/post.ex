@@ -440,7 +440,11 @@ defmodule EpochtalkServer.Models.Post do
       position: p.position,
       thread_id: p.thread_id,
       thread_slug: t.slug,
-      thread_title: fragment("SELECT content->>'title' as title FROM posts WHERE thread_id = ? ORDER BY id LIMIT 1", p.thread_id),
+      thread_title:
+        fragment(
+          "SELECT content->>'title' as title FROM posts WHERE thread_id = ? ORDER BY id LIMIT 1",
+          p.thread_id
+        ),
       user: %{id: p.user_id, deleted: u.deleted},
       body: p.content["body"],
       deleted: p.deleted,
@@ -448,7 +452,12 @@ defmodule EpochtalkServer.Models.Post do
       updated_at: p.updated_at,
       imported_at: p.imported_at,
       board_id: b.id,
-      board_visible: fragment("EXISTS(SELECT 1 FROM boards WHERE board_id = ? AND (viewable_by >= ? OR viewable_by IS NULL))", b.id, ^priority)
+      board_visible:
+        fragment(
+          "EXISTS(SELECT 1 FROM boards WHERE board_id = ? AND (viewable_by >= ? OR viewable_by IS NULL))",
+          b.id,
+          ^priority
+        )
     })
     |> Repo.all()
   end

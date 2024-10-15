@@ -154,7 +154,6 @@ defmodule EpochtalkServerWeb.Controllers.User do
   Finds a `User`.
   """
   def find(conn, %{"username" => username}) do
-    # create user
     with {:ok, user} <- User.by_username(username),
          activity <- UserActivity.get_by_user_id(user.id),
          metric_rank_maps <- MetricRankMap.all_merged(),
@@ -163,11 +162,12 @@ defmodule EpochtalkServerWeb.Controllers.User do
          # Authorizations Checks
          :ok <- ACL.allow!(conn, "users.find"),
          {:user_not_deleted, user_not_deleted} <-
-           {:user_not_deleted, (if user.id || !user.deleted, do: true, else: false)},
+           {:user_not_deleted, if(user.id || !user.deleted, do: true, else: false)},
          {:has_deleted_override, has_deleted_override} <-
            {:has_deleted_override, ACL.has_permission(conn, "users.find.bypass.viewDeleted")},
          {:view_deleted, true} <- {:view_deleted, user_not_deleted || has_deleted_override},
-         {:view_as_self, view_as_self} <- {:view_as_self, authed_user && authed_user.id == user.id},
+         {:view_as_self, view_as_self} <-
+           {:view_as_self, authed_user && authed_user.id == user.id},
          {:view_as_admin, view_as_admin} <-
            {:view_as_admin, ACL.has_permission(conn, "users.find.bypass.viewMoreInfo")},
          {:show_hidden, show_hidden} <- {:show_hidden, view_as_self || view_as_admin} do

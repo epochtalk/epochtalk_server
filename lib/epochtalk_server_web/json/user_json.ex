@@ -30,20 +30,23 @@ defmodule EpochtalkServerWeb.Controllers.UserJSON do
     user = user |> Map.put(:profile, user.profile || %{})
     user = user |> Map.put(:preferences, user.preferences || %{})
 
+    # fetch potentially nested fields
+    fields = Map.get(user.profile, :fields, %{})
+
     ret = %{
       id: user.id,
       username: user.username,
       created_at: user.created_at,
       updated_at: user.updated_at,
       avatar: Map.get(user.profile, :avatar),
-      post_count:  Map.get(user.profile, :post_count),
-      last_active:  Map.get(user.profile, :last_active),
-      dob: (if Map.get(user.profile, :fields), do: user.profile.fields["dob"]),
-      name: (if Map.get(user.profile, :fields), do: user.profile.fields["name"]),
-      gender: (if Map.get(user.profile, :fields), do: user.profile.fields["gender"]),
-      website: (if Map.get(user.profile, :fields), do: user.profile.fields["website"]),
-      language: (if Map.get(user.profile, :fields), do: user.profile.fields["language"]),
-      location: (if Map.get(user.profile, :fields), do: user.profile.fields["location"]),
+      post_count: Map.get(user.profile, :post_count),
+      last_active: Map.get(user.profile, :last_active),
+      dob: fields["dob"],
+      name: fields["name"],
+      gender: fields["gender"],
+      website: fields["website"],
+      language: fields["language"],
+      location: fields["location"],
       role_name: Map.get(highest_role, :name),
       role_highlight_color: Map.get(highest_role, :highlight_color),
       roles: Enum.map(user.roles, & &1.lookup),
@@ -56,13 +59,14 @@ defmodule EpochtalkServerWeb.Controllers.UserJSON do
     }
 
     if show_hidden,
-      do: ret
+      do:
+        ret
         |> Map.put(:email, user.email)
         |> Map.put(:threads_per_page, Map.get(user.preferences, :threads_per_page) || 25)
         |> Map.put(:posts_per_page, Map.get(user.preferences, :posts_per_page) || 25)
         |> Map.put(:ignored_boards, Map.get(user.preferences, :ignored_boards) || [])
         |> Map.put(:collapsed_categories, Map.get(user.preferences, :collapsed_categories) || []),
-    else: ret
+      else: ret
   end
 
   @doc """

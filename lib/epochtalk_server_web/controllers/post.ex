@@ -377,15 +377,17 @@ defmodule EpochtalkServerWeb.Controllers.Post do
          {:user_not_deleted, user_not_deleted} <-
            {:user_not_deleted, User.is_active?(lookup_user.id)},
          {:has_deleted_override, has_deleted_override} <-
-           {:has_deleted_override, ACL.has_permission(conn, "posts.pageByUser.bypass.viewDeletedUsers")},
-         {:view_deleted_users, true} <- {:view_deleted_users, user_not_deleted || has_deleted_override},
+           {:has_deleted_override,
+            ACL.has_permission(conn, "posts.pageByUser.bypass.viewDeletedUsers")},
+         {:view_deleted_users, true} <-
+           {:view_deleted_users, user_not_deleted || has_deleted_override},
          view_deleted_posts <- can_authed_user_view_deleted_posts_by_username(user),
          posts <-
            Post.page_by_username(username, priority, page,
              per_page: limit,
              desc: desc
            ),
-          count <- Profile.post_count_by_username(username),
+         count <- Profile.post_count_by_username(username),
          {:has_posts, true} <- {:has_posts, posts != []} do
       render(conn, :by_username, %{
         posts: posts,

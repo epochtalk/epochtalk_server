@@ -58,11 +58,12 @@ defmodule EpochtalkServer.Models.Profile do
   """
   @spec post_count_by_username(username :: String.t()) :: non_neg_integer() | nil
   def post_count_by_username(username) do
-    query = from p in Profile,
-      join: u in User,
-      on: p.user_id == u.id,
-      where: u.username == ^username,
-      select: p.post_count
+    query =
+      from p in Profile,
+        join: u in User,
+        on: p.user_id == u.id,
+        where: u.username == ^username,
+        select: p.post_count
 
     Repo.one(query)
   end

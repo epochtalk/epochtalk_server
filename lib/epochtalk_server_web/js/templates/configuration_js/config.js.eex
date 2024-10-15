@@ -1,5 +1,6 @@
 window.title = '<%= @config[:website][:title] %>'
 window.description = '<%= @config[:website][:description] %>'
+window.revision = '<%= @config[:revision] %>'
 window.keywords = '<%= @config[:website][:keywords] %>'
 window.logo = '<%= @config[:website][:logo] %>'
 window.default_avatar = '<%= @config[:website][:default_avatar] %>'

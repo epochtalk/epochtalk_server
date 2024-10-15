@@ -10,6 +10,7 @@ defmodule EpochtalkServerWeb.Controllers.Post do
   alias EpochtalkServerWeb.Helpers.ACL
   alias EpochtalkServerWeb.Helpers.Sanitize
   alias EpochtalkServerWeb.Helpers.Parse
+  alias EpochtalkServer.Models.Profile
   alias EpochtalkServer.Models.Post
   alias EpochtalkServer.Models.Poll
   alias EpochtalkServer.Models.Thread
@@ -384,12 +385,17 @@ defmodule EpochtalkServerWeb.Controllers.Post do
              per_page: limit,
              desc: desc
            ),
+          count <- Profile.post_count_by_username(username),
          {:has_posts, true} <- {:has_posts, posts != []} do
       render(conn, :by_username, %{
         posts: posts,
         user: user,
         priority: priority,
-        view_deleted_posts: view_deleted_posts
+        view_deleted_posts: view_deleted_posts,
+        count: count,
+        limit: limit,
+        page: page,
+        desc: desc
       })
     else
       {:has_posts, false} ->

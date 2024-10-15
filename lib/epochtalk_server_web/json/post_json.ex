@@ -102,10 +102,18 @@ defmodule EpochtalkServerWeb.Controllers.PostJSON do
   @doc """
   Renders all `Post` for a particular `User`.
   """
-  def by_username(%{posts: posts, user: user, priority: priority, view_deleted_posts: view_deleted_posts}) do
-    posts
+  def by_username(%{posts: posts, user: user, priority: priority, view_deleted_posts: view_deleted_posts, count: count, limit: limit, page: page, desc: desc}) do
+    posts = posts
     |> Enum.map(&(Map.put(&1, :body_html, &1.body) |> Map.delete(:body)))
     |> handle_deleted_posts(nil, user, priority, view_deleted_posts)
+
+    %{
+      posts: posts,
+      page: page,
+      desc: desc,
+      limit: limit,
+      count: count
+    }
   end
 
   ## === Private Helper Functions ===

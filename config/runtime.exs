@@ -460,7 +460,7 @@ if config_env() == :prod do
   id_board_blacklist =
     id_board_blacklist
     |> String.split()
-    |> Enum.map(&(String.to_integer(&1)))
+    |> Enum.map(&String.to_integer(&1))
 
   # Configure proxy
   config :epochtalk_server,

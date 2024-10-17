@@ -116,6 +116,7 @@ defmodule EpochtalkServerWeb.Helpers.Breadcrumbs do
       "thread" ->
         {:ok, board} = Board.find_by_id(object.board_id)
         %{id: board.slug, type: "board"}
+
       _ ->
         nil
     end

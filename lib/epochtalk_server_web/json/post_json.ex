@@ -375,14 +375,21 @@ defmodule EpochtalkServerWeb.Controllers.PostJSON do
   defp format_proxy_post_data_for_by_thread(post) do
     body = String.replace(post.body || post.body_html, "'", "\'")
 
-    %Porcelain.Result{out: parsed_body, status: _status} = Porcelain.shell("php -r \"require 'parsing.php'; ECHO parse_bbc('" <> body <> "');\"")
+    %Porcelain.Result{out: parsed_body, status: _status} =
+      Porcelain.shell("php -r \"require 'parsing.php'; ECHO parse_bbc('" <> body <> "');\"")
 
-    signature = if post.user.signature,
+    signature =
+      if post.user.signature,
         do: String.replace(post.user.signature, "'", "\'"),
         else: nil
 
-    parsed_signature = if signature do
-      %Porcelain.Result{out: parsed_sig, status: _status} = Porcelain.shell("php -r \"require 'parsing.php'; ECHO parse_bbc('" <> signature <> "');\"")
+    parsed_signature =
+      if signature do
+        %Porcelain.Result{out: parsed_sig, status: _status} =
+          Porcelain.shell(
+            "php -r \"require 'parsing.php'; ECHO parse_bbc('" <> signature <> "');\""
+          )
+
         parsed_sig
       else
         nil

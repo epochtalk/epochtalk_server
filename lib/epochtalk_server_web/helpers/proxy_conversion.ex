@@ -77,7 +77,7 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
       display_mode: "always",
       expiration: p.expireTime * 1000,
       has_voted: false,
-      locked: (p.votingLocked == 1),
+      locked: p.votingLocked == 1,
       max_answers: p.maxVotes,
       question: p.question
     })
@@ -109,7 +109,9 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
   end
 
   def build_recent_threads() do
-    %{id_board_blacklist: id_board_blacklist} = Application.get_env(:epochtalk_server, :proxy_config)
+    %{id_board_blacklist: id_board_blacklist} =
+      Application.get_env(:epochtalk_server, :proxy_config)
+
     from(t in "smf_topics",
       limit: 5,
       where: t.id_board not in ^id_board_blacklist,
@@ -148,7 +150,8 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
       [] ->
         {:error, "Recent threads not found"}
 
-      threads -> threads
+      threads ->
+        threads
     end
   end
 
@@ -172,7 +175,9 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
   end
 
   def build_board_counts() do
-    %{id_board_blacklist: id_board_blacklist} = Application.get_env(:epochtalk_server, :proxy_config)
+    %{id_board_blacklist: id_board_blacklist} =
+      Application.get_env(:epochtalk_server, :proxy_config)
+
     from(b in "smf_boards",
       where: b.id_board not in ^id_board_blacklist,
       select: %{
@@ -186,12 +191,15 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
       [] ->
         {:error, "Boards not found"}
 
-      boards -> return_tuple(boards)
+      boards ->
+        return_tuple(boards)
     end
   end
 
   def build_board_last_post_info() do
-    %{id_board_blacklist: id_board_blacklist} = Application.get_env(:epochtalk_server, :proxy_config)
+    %{id_board_blacklist: id_board_blacklist} =
+      Application.get_env(:epochtalk_server, :proxy_config)
+
     from(b in "smf_boards",
       where: b.id_board not in ^id_board_blacklist
     )
@@ -214,11 +222,15 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
       [] ->
         {:error, "Boards not found"}
 
-      boards -> return_tuple(boards)
+      boards ->
+        return_tuple(boards)
     end
   end
+
   def build_board(id) do
-    %{id_board_blacklist: id_board_blacklist} = Application.get_env(:epochtalk_server, :proxy_config)
+    %{id_board_blacklist: id_board_blacklist} =
+      Application.get_env(:epochtalk_server, :proxy_config)
+
     from(b in "smf_boards",
       where: b.id_board == ^id and b.id_board not in ^id_board_blacklist,
       select: %{
@@ -242,9 +254,13 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
   end
 
   def build_threads_by_board(id, page, per_page) do
-    %{id_board_blacklist: id_board_blacklist} = Application.get_env(:epochtalk_server, :proxy_config)
+    %{id_board_blacklist: id_board_blacklist} =
+      Application.get_env(:epochtalk_server, :proxy_config)
+
     count_query =
-      from t in "smf_topics", where: t.id_board == ^id and t.id_board not in ^id_board_blacklist, select: %{count: count(t.id_topic)}
+      from t in "smf_topics",
+        where: t.id_board == ^id and t.id_board not in ^id_board_blacklist,
+        select: %{count: count(t.id_topic)}
 
     from(t in "smf_topics",
       where: t.id_board == ^id and t.id_board not in ^id_board_blacklist,
@@ -293,7 +309,9 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
   end
 
   def build_thread(id) do
-    %{id_board_blacklist: id_board_blacklist} = Application.get_env(:epochtalk_server, :proxy_config)
+    %{id_board_blacklist: id_board_blacklist} =
+      Application.get_env(:epochtalk_server, :proxy_config)
+
     from(t in "smf_topics",
       where: t.id_topic == ^id and t.id_board not in ^id_board_blacklist
     )
@@ -336,7 +354,9 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
   end
 
   def build_post(id) do
-    %{id_board_blacklist: id_board_blacklist} = Application.get_env(:epochtalk_server, :proxy_config)
+    %{id_board_blacklist: id_board_blacklist} =
+      Application.get_env(:epochtalk_server, :proxy_config)
+
     from(m in "smf_messages",
       where: m.id_msg == ^id and m.id_board not in ^id_board_blacklist,
       select: %{
@@ -360,9 +380,13 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
   end
 
   def build_posts_by_thread(id, page, per_page) do
-    %{id_board_blacklist: id_board_blacklist} = Application.get_env(:epochtalk_server, :proxy_config)
+    %{id_board_blacklist: id_board_blacklist} =
+      Application.get_env(:epochtalk_server, :proxy_config)
+
     count_query =
-      from m in "smf_messages", where: m.id_topic == ^id and m.id_board not in ^id_board_blacklist, select: %{count: count(m.id_topic)}
+      from m in "smf_messages",
+        where: m.id_topic == ^id and m.id_board not in ^id_board_blacklist,
+        select: %{count: count(m.id_topic)}
 
     from(m in "smf_messages",
       limit: ^per_page,
@@ -374,32 +398,31 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
       on: u.id_member == a.id_member and a.attachmentType == 1
     )
     |> select([m, u, a], %{
-        id: m.id_msg,
-        thread_id: m.id_topic,
-        board_id: m.id_board,
-        title: m.subject,
-        body: m.body,
-        updated_at: m.modifiedTime,
+      id: m.id_msg,
+      thread_id: m.id_topic,
+      board_id: m.id_board,
+      title: m.subject,
+      body: m.body,
+      updated_at: m.modifiedTime,
+      username: m.posterName,
+      created_at: m.posterTime * 1000,
+      modified_time: m.modifiedTime,
+      avatar:
+        fragment(
+          "if(? <>'',concat('https://bitcointalk.org/avatars/',?),ifnull(concat('https://bitcointalk.org/useravatars/',?),''))",
+          u.avatar,
+          u.avatar,
+          a.filename
+        ),
+      user: %{
+        id: m.id_member,
         username: m.posterName,
-        created_at: m.posterTime * 1000,
-        modified_time: m.modifiedTime,
-        avatar:
-          fragment(
-            "if(? <>'',concat('https://bitcointalk.org/avatars/',?),ifnull(concat('https://bitcointalk.org/useravatars/',?),''))",
-            u.avatar,
-            u.avatar,
-            a.filename
-          ),
-        user: %{
-          id: m.id_member,
-          username: m.posterName,
-          signature: u.signature,
-          activity: u.activity,
-          merit: u.merit,
-          title: u.usertitle
-        }
+        signature: u.signature,
+        activity: u.activity,
+        merit: u.merit,
+        title: u.usertitle
       }
-    )
+    })
     |> ProxyPagination.page_simple(count_query, page, per_page: per_page)
     |> case do
       {:ok, [], _} ->

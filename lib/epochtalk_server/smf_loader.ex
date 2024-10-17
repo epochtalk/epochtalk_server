@@ -1,4 +1,8 @@
 defmodule EpochtalkServer.SMFLoader do
+  @moduledoc """
+  Load data from smf mysql output, format for import
+  and create/insert mappings for categories and boards
+  """
   alias EpochtalkServer.Models.BoardMapping
 
   # converts smf_boards tsv file to epochtalk boards tsv file

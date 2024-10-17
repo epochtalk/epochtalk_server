@@ -715,6 +715,7 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
       conn
     end
   end
+
   # check proxy for :slug_to_id action
   defp check_proxy(%{private: %{phoenix_action: :slug_to_id}} = conn, _) do
     case Integer.parse(conn.params["slug"]) do
@@ -736,18 +737,21 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
         conn
     end
   end
+
   # check proxy for :viewed action
   defp check_proxy(%{private: %{phoenix_action: :viewed}} = conn, _) do
     conn
     |> send_resp(200, [])
     |> halt()
   end
+
   # check proxy for :recent action
   defp check_proxy(%{private: %{phoenix_action: :recent}} = conn, _) do
     conn
     |> proxy_recent(conn.params)
     |> halt()
   end
+
   # check proxy default
   defp check_proxy(%{private: %{phoenix_action: _}} = conn, _) do
     conn

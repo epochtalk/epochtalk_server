@@ -45,9 +45,7 @@ defmodule EpochtalkServer.Application do
       if Application.get_env(:epochtalk_server, :env) == :test do
         children
         # don't run config warmer during tests
-        |> List.delete(
-          {Task, &EpochtalkServer.Models.Configuration.warm_frontend_config/0}
-        )
+        |> List.delete({Task, &EpochtalkServer.Models.Configuration.warm_frontend_config/0})
         # don't run SmfRepo during tests
         |> List.delete(EpochtalkServer.SmfRepo)
       else

@@ -420,38 +420,41 @@ if config_env() == :prod do
 end
 
 # Configure proxy sequences and boards blacklist
-proxy_config = case config_env() do
-  :prod ->
-    id_board_blacklist =
-      System.get_env("ID_BOARD_BLACKLIST") ||
-        raise """
-        environment variable ID_BOARD_BLACKLIST is missing.
-        """
+proxy_config =
+  case config_env() do
+    :prod ->
+      id_board_blacklist =
+        System.get_env("ID_BOARD_BLACKLIST") ||
+          raise """
+          environment variable ID_BOARD_BLACKLIST is missing.
+          """
 
-    id_board_blacklist =
-      id_board_blacklist
-      |> String.split()
-      |> Enum.map(&String.to_integer(&1))
+      id_board_blacklist =
+        id_board_blacklist
+        |> String.split()
+        |> Enum.map(&String.to_integer(&1))
 
-    %{
-      threads_seq: System.get_env("THREADS_SEQ") || "6000000",
-      boards_seq: System.get_env("BOARDS_SEQ") || "500",
-      id_board_blacklist: id_board_blacklist
-    }
-  :dev ->
-    %{
-      threads_seq: "6000000",
-      boards_seq: "500",
-      id_board_blacklist: []
-    }
-  # default thread/board seq and empty blacklist
-  _ ->
-    %{
-      threads_seq: "0",
-      boards_seq: "0",
-      id_board_blacklist: []
-    }
-end
+      %{
+        threads_seq: System.get_env("THREADS_SEQ") || "6000000",
+        boards_seq: System.get_env("BOARDS_SEQ") || "500",
+        id_board_blacklist: id_board_blacklist
+      }
+
+    :dev ->
+      %{
+        threads_seq: "6000000",
+        boards_seq: "500",
+        id_board_blacklist: []
+      }
+
+    # default thread/board seq and empty blacklist
+    _ ->
+      %{
+        threads_seq: "0",
+        boards_seq: "0",
+        id_board_blacklist: []
+      }
+  end
 
 config :epochtalk_server, proxy_config: proxy_config
 
@@ -482,31 +485,33 @@ if config_env() != :test do
       environment variable SMF_REPO_DATABASE is missing.
       """
 
-  proxy_repo_config = case config_env() do
-    :prod ->
-      [
-        username: smf_repo_username,
-        password: smf_repo_password,
-        hostname: smf_repo_hostname,
-        database: smf_repo_database,
-        port: String.to_integer(System.get_env("SMF_REPO_PORT") || "3306"),
-        stacktrace: System.get_env("SMF_REPO_STACKTRACE") == "TRUE" || true,
-        show_sensitive_data_on_connection_error:
-          System.get_env("SMF_REPO_SENSITIVE_DATA_ON_ERROR") == "TRUE" || false,
-        pool_size: String.to_integer(System.get_env("SMF_REPO_POOL_SIZE") || "10")
-      ]
-    _ ->
-      [
-        username: smf_repo_username,
-        password: smf_repo_password,
-        hostname: smf_repo_hostname,
-        database: smf_repo_database,
-        port: String.to_integer(System.get_env("SMF_REPO_PORT") || "3306"),
-        stacktrace: true,
-        show_sensitive_data_on_connection_error: true,
-        pool_size: String.to_integer(System.get_env("SMF_REPO_POOL_SIZE") || "10")
-      ]
-  end
+  proxy_repo_config =
+    case config_env() do
+      :prod ->
+        [
+          username: smf_repo_username,
+          password: smf_repo_password,
+          hostname: smf_repo_hostname,
+          database: smf_repo_database,
+          port: String.to_integer(System.get_env("SMF_REPO_PORT") || "3306"),
+          stacktrace: System.get_env("SMF_REPO_STACKTRACE") == "TRUE" || true,
+          show_sensitive_data_on_connection_error:
+            System.get_env("SMF_REPO_SENSITIVE_DATA_ON_ERROR") == "TRUE" || false,
+          pool_size: String.to_integer(System.get_env("SMF_REPO_POOL_SIZE") || "10")
+        ]
+
+      _ ->
+        [
+          username: smf_repo_username,
+          password: smf_repo_password,
+          hostname: smf_repo_hostname,
+          database: smf_repo_database,
+          port: String.to_integer(System.get_env("SMF_REPO_PORT") || "3306"),
+          stacktrace: true,
+          show_sensitive_data_on_connection_error: true,
+          pool_size: String.to_integer(System.get_env("SMF_REPO_POOL_SIZE") || "10")
+        ]
+    end
 
   config :epochtalk_server, EpochtalkServer.SmfRepo, proxy_repo_config
 end

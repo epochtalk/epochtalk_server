@@ -702,53 +702,55 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
   defp update_user_thread_view_count(user, thread_id),
     do: UserThreadView.upsert(user.id, thread_id)
 
-  defp check_proxy(conn, _) do
-    case conn.private.phoenix_action do
-      :by_board ->
-        %{boards_seq: boards_seq} = Application.get_env(:epochtalk_server, :proxy_config)
-        boards_seq = boards_seq |> String.to_integer()
+  # check proxy for :by_board action
+  defp check_proxy(%{private: %{phoenix_action: :by_board}} = conn, _) do
+    %{boards_seq: boards_seq} = Application.get_env(:epochtalk_server, :proxy_config)
+    boards_seq = boards_seq |> String.to_integer()
 
-        if Validate.cast(conn.params, "board_id", :integer, required: true) < boards_seq do
+    if Validate.cast(conn.params, "board_id", :integer, required: true) < boards_seq do
+      conn
+      |> proxy_by_board(conn.params)
+      |> halt()
+    else
+      conn
+    end
+  end
+  # check proxy for :slug_to_id action
+  defp check_proxy(%{private: %{phoenix_action: :slug_to_id}} = conn, _) do
+    case Integer.parse(conn.params["slug"]) do
+      {_, ""} ->
+        slug_as_id = Validate.cast(conn.params, "slug", :integer, required: true)
+
+        %{threads_seq: threads_seq} = Application.get_env(:epochtalk_server, :proxy_config)
+        threads_seq = threads_seq |> String.to_integer()
+
+        if slug_as_id < threads_seq do
           conn
-          |> proxy_by_board(conn.params)
+          |> render(:slug_to_id, id: slug_as_id)
           |> halt()
         else
           conn
         end
 
-      :slug_to_id ->
-        case Integer.parse(conn.params["slug"]) do
-          {_, ""} ->
-            slug_as_id = Validate.cast(conn.params, "slug", :integer, required: true)
-
-            %{threads_seq: threads_seq} = Application.get_env(:epochtalk_server, :proxy_config)
-            threads_seq = threads_seq |> String.to_integer()
-
-            if slug_as_id < threads_seq do
-              conn
-              |> render(:slug_to_id, id: slug_as_id)
-              |> halt()
-            else
-              conn
-            end
-
-          _ ->
-            conn
-        end
-
-      :viewed ->
-        conn
-        |> send_resp(200, [])
-        |> halt()
-
-      :recent ->
-        conn
-        |> proxy_recent(conn.params)
-        |> halt()
-
       _ ->
         conn
     end
+  end
+  # check proxy for :viewed action
+  defp check_proxy(%{private: %{phoenix_action: :viewed}} = conn, _) do
+    conn
+    |> send_resp(200, [])
+    |> halt()
+  end
+  # check proxy for :recent action
+  defp check_proxy(%{private: %{phoenix_action: :recent}} = conn, _) do
+    conn
+    |> proxy_recent(conn.params)
+    |> halt()
+  end
+  # check proxy default
+  defp check_proxy(%{private: %{phoenix_action: _}} = conn, _) do
+    conn
   end
 
   defp proxy_by_board(conn, attrs) do

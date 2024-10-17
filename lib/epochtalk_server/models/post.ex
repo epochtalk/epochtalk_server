@@ -416,11 +416,12 @@ defmodule EpochtalkServer.Models.Post do
   @doc """
   Used to page `Post` by a specific `User` given a `username`
   """
-  @spec page_by_username(username :: String.t(),
-            priority :: non_neg_integer,
-            page :: non_neg_integer | nil,
-            opts :: list() | nil
-          ) :: [map()] | []
+  @spec page_by_username(
+          username :: String.t(),
+          priority :: non_neg_integer,
+          page :: non_neg_integer | nil,
+          opts :: list() | nil
+        ) :: [map()] | []
   def page_by_username(username, priority, page \\ 1, opts \\ []) when is_binary(username) do
     per_page = Keyword.get(opts, :per_page, 25)
     offset = page * per_page - per_page

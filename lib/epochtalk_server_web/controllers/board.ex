@@ -110,14 +110,15 @@ defmodule EpochtalkServerWeb.Controllers.Board do
   end
 
   defp check_proxy(conn, _) do
+    %{boards_seq: boards_seq} = Application.get_env(:epochtalk_server, :proxy_config)
+    boards_seq = boards_seq |> String.to_integer()
+
     conn =
       case conn.private.phoenix_action do
         :slug_to_id ->
           case Integer.parse(conn.params["slug"]) do
             {_, ""} ->
               slug_as_id = Validate.cast(conn.params, "slug", :integer, required: true)
-              %{boards_seq: boards_seq} = Application.get_env(:epochtalk_server, :proxy_config)
-              boards_seq = boards_seq |> String.to_integer()
 
               if slug_as_id < boards_seq do
                 conn
@@ -132,9 +133,13 @@ defmodule EpochtalkServerWeb.Controllers.Board do
           end
 
         :by_category ->
-          conn
-          |> proxy_by_category(conn.params)
-          |> halt()
+          if boards_seq > 0 do
+            conn
+            |> proxy_by_category(conn.params)
+            |> halt()
+          else
+            conn
+          end
 
         _ ->
           conn

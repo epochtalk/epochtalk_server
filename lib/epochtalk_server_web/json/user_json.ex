@@ -14,6 +14,62 @@ defmodule EpochtalkServerWeb.Controllers.UserJSON do
   def user(%{user: user, token: token}), do: format_user_reply(user, token)
 
   @doc """
+  Renders formatted user JSON for find
+  """
+  def find(%{
+        user: user,
+        activity: activity,
+        metric_rank_maps: metric_rank_maps,
+        ranks: ranks,
+        show_hidden: show_hidden
+      }) do
+    highest_role = user.roles |> Enum.sort_by(& &1.priority) |> List.first()
+    [post_count | _] = metric_rank_maps
+
+    # handle missing profile/preferences row
+    user = user |> Map.put(:profile, user.profile || %{})
+    user = user |> Map.put(:preferences, user.preferences || %{})
+
+    # fetch potentially nested fields
+    fields = Map.get(user.profile, :fields, %{})
+
+    ret = %{
+      id: user.id,
+      username: user.username,
+      created_at: user.created_at,
+      updated_at: user.updated_at,
+      avatar: Map.get(user.profile, :avatar),
+      post_count: Map.get(user.profile, :post_count),
+      last_active: Map.get(user.profile, :last_active),
+      dob: fields["dob"],
+      name: fields["name"],
+      gender: fields["gender"],
+      website: fields["website"],
+      language: fields["language"],
+      location: fields["location"],
+      role_name: Map.get(highest_role, :name),
+      role_highlight_color: Map.get(highest_role, :highlight_color),
+      roles: Enum.map(user.roles, & &1.lookup),
+      priority: Map.get(highest_role, :priority),
+      metadata: %{
+        rank_metric_maps: post_count.maps,
+        ranks: ranks
+      },
+      activity: activity
+    }
+
+    if show_hidden,
+      do:
+        ret
+        |> Map.put(:email, user.email)
+        |> Map.put(:threads_per_page, Map.get(user.preferences, :threads_per_page) || 25)
+        |> Map.put(:posts_per_page, Map.get(user.preferences, :posts_per_page) || 25)
+        |> Map.put(:ignored_boards, Map.get(user.preferences, :ignored_boards) || [])
+        |> Map.put(:collapsed_categories, Map.get(user.preferences, :collapsed_categories) || []),
+      else: ret
+  end
+
+  @doc """
   Renders formatted JSON response for registration confirmation.
   ## Example
     iex> EpochtalkServerWeb.Controllers.UserJSON.register_with_verify(%{user: %User{ username: "Test" }})

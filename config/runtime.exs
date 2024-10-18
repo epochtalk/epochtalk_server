@@ -450,8 +450,8 @@ proxy_config =
     # default thread/board seq and empty blacklist
     _ ->
       %{
-        threads_seq: "0",
-        boards_seq: "0",
+        threads_seq: "-10",
+        boards_seq: "-10",
         id_board_blacklist: []
       }
   end

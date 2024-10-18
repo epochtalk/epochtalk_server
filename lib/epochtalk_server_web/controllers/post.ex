@@ -427,6 +427,29 @@ defmodule EpochtalkServerWeb.Controllers.Post do
     end
   end
 
+  ## === Public Authorization Helper Functions ===
+
+  def can_authed_user_view_deleted_posts_by_username(nil), do: false
+
+  def can_authed_user_view_deleted_posts_by_username(user) do
+    view_all = ACL.has_permission(user, "posts.pageByUser.bypass.viewDeletedPosts.admin")
+    view_some = ACL.has_permission(user, "posts.pageByUser.bypass.viewDeletedPosts.mod")
+
+    user_id = Map.get(user, :id)
+    moderated_boards = BoardModerator.get_user_moderated_boards(user_id)
+
+    cond do
+      view_all ->
+        true
+
+      view_some and moderated_boards != [] ->
+        moderated_boards
+
+      true ->
+        false
+    end
+  end
+
   ## === Private Authorization Helper Functions ===
 
   defp can_authed_user_view_deleted_posts(nil, _thread_id), do: false
@@ -449,27 +472,6 @@ defmodule EpochtalkServerWeb.Controllers.Post do
 
       view_self_mod and moderated_boards == [] ->
         Thread.self_moderated_by_user?(thread_id, user_id)
-
-      true ->
-        false
-    end
-  end
-
-  defp can_authed_user_view_deleted_posts_by_username(nil), do: false
-
-  defp can_authed_user_view_deleted_posts_by_username(user) do
-    view_all = ACL.has_permission(user, "posts.byUsername.bypass.viewDeletedPosts.admin")
-    view_some = ACL.has_permission(user, "posts.byUsername.bypass.viewDeletedPosts.mod")
-
-    user_id = Map.get(user, :id)
-    moderated_boards = BoardModerator.get_user_moderated_boards(user_id)
-
-    cond do
-      view_all ->
-        true
-
-      view_some and moderated_boards != [] ->
-        moderated_boards
 
       true ->
         false

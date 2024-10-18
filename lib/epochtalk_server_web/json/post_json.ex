@@ -126,9 +126,9 @@ defmodule EpochtalkServerWeb.Controllers.PostJSON do
     }
   end
 
-  ## === Private Helper Functions ===
+  ## === Public Helper Functions ===
 
-  defp handle_deleted_posts(posts, thread, user, authed_user_priority, view_deleted_posts) do
+  def handle_deleted_posts(posts, thread, user, authed_user_priority, view_deleted_posts) do
     authed_user_id = if is_nil(user), do: nil, else: user.id
 
     has_self_mod_bypass =
@@ -163,6 +163,8 @@ defmodule EpochtalkServerWeb.Controllers.PostJSON do
     cleaned_posts
   end
 
+  ## === Private Helper Functions ===
+
   defp handle_deleted_post(
          post,
          authed_user_id,
@@ -186,9 +188,11 @@ defmodule EpochtalkServerWeb.Controllers.PostJSON do
 
     # check if user has priority to view hidden post,
     # or if the user was the one who hid the post
-    authed_user_has_priority = if is_nil(post_hidden_by_priority),
-      do: false,
-      else: authed_user_priority <= post_hidden_by_priority
+    authed_user_has_priority =
+      if is_nil(post_hidden_by_priority),
+        do: false,
+        else: authed_user_priority <= post_hidden_by_priority
+
     authed_user_hid_post = post_hidden_by_id == authed_user_id
 
     post_is_viewable =

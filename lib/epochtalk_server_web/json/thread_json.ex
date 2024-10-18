@@ -1,5 +1,6 @@
 defmodule EpochtalkServerWeb.Controllers.ThreadJSON do
   alias EpochtalkServerWeb.Controllers.BoardJSON
+  alias EpochtalkServerWeb.Controllers.PostJSON
 
   @moduledoc """
   Renders and formats `Thread` data, in JSON format for frontend
@@ -125,6 +126,40 @@ defmodule EpochtalkServerWeb.Controllers.ThreadJSON do
 
     # return results and append board_banned only if user is banned
     if board_banned, do: Map.put(result, :board_banned, board_banned), else: result
+  end
+
+  @doc """
+  Renders paged `Threads` for a particular `User`.
+  """
+  def by_username(%{
+        threads: threads,
+        user: user,
+        priority: priority,
+        view_deleted_threads: view_deleted_threads,
+        limit: limit,
+        desc: desc,
+        page: page
+      }) do
+    next = length(threads) > limit
+
+    threads =
+      if next,
+        do: threads |> Enum.reverse() |> tl() |> Enum.reverse(),
+        else: threads
+
+    threads =
+      threads
+      |> Enum.map(&(Map.put(&1, :body_html, &1.body) |> Map.delete(:body)))
+      |> PostJSON.handle_deleted_posts(nil, user, priority, view_deleted_threads)
+
+    %{
+      posts: threads,
+      desc: desc,
+      limit: limit,
+      page: page,
+      next: next,
+      prev: page > 1
+    }
   end
 
   @doc """

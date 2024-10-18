@@ -54,6 +54,21 @@ defmodule EpochtalkServer.Models.Profile do
   ## === Database Functions ===
 
   @doc """
+  Gets the `post_count` field given a `User` username
+  """
+  @spec post_count_by_username(username :: String.t()) :: non_neg_integer() | nil
+  def post_count_by_username(username) do
+    query =
+      from p in Profile,
+        join: u in User,
+        on: p.user_id == u.id,
+        where: u.username == ^username,
+        select: p.post_count
+
+    Repo.one(query)
+  end
+
+  @doc """
   Increments the `post_count` field given a `User` id
   """
   @spec increment_post_count(user_id :: non_neg_integer) :: {non_neg_integer(), nil}

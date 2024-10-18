@@ -424,10 +424,10 @@ proxy_config =
   case config_env() do
     :prod ->
       id_board_blacklist =
-        System.get_env("ID_BOARD_BLACKLIST") ||
-          raise """
-          environment variable ID_BOARD_BLACKLIST is missing.
-          """
+        get_env_or_raise_with_message.(
+          "ID_BOARD_BLACKLIST",
+          "environment variable ID_BOARD_BLACKLIST is missing."
+        )
 
       id_board_blacklist =
         id_board_blacklist
@@ -462,28 +462,28 @@ config :epochtalk_server, proxy_config: proxy_config
 # - do not configure for testing
 if config_env() != :test do
   smf_repo_username =
-    System.get_env("SMF_REPO_USERNAME") ||
-      raise """
-      environment variable SMF_REPO_USERNAME is missing.
-      """
+    get_env_or_raise_with_message.(
+      "SMF_REPO_USERNAME",
+      "environment variable SMF_REPO_USERNAME is missing."
+    )
 
   smf_repo_password =
-    System.get_env("SMF_REPO_PASSWORD") ||
-      raise """
-      environment variable SMF_REPO_PASSWORD is missing.
-      """
+    get_env_or_raise_with_message.(
+      "SMF_REPO_PASSWORD",
+      "environment variable SMF_REPO_PASSWORD is missing."
+    )
 
   smf_repo_hostname =
-    System.get_env("SMF_REPO_HOSTNAME") ||
-      raise """
-      environment variable SMF_REPO_HOSTNAME is missing.
-      """
+    get_env_or_raise_with_message.(
+      "SMF_REPO_HOSTNAME",
+      "environment variable SMF_REPO_HOSTNAME is missing."
+    )
 
   smf_repo_database =
-    System.get_env("SMF_REPO_DATABASE") ||
-      raise """
-      environment variable SMF_REPO_DATABASE is missing.
-      """
+    get_env_or_raise_with_message.(
+      "SMF_REPO_DATABASE",
+      "environment variable SMF_REPO_DATABASE is missing."
+    )
 
   proxy_repo_config =
     case config_env() do
@@ -493,11 +493,11 @@ if config_env() != :test do
           password: smf_repo_password,
           hostname: smf_repo_hostname,
           database: smf_repo_database,
-          port: String.to_integer(System.get_env("SMF_REPO_PORT") || "3306"),
-          stacktrace: System.get_env("SMF_REPO_STACKTRACE") == "TRUE" || true,
+          port: get_env_cast_integer_with_default.("SMF_REPO_PORT", "3306"),
+          stacktrace: get_env_cast_bool_with_default.("SMF_REPO_STACKTRACE", "TRUE"),
           show_sensitive_data_on_connection_error:
-            System.get_env("SMF_REPO_SENSITIVE_DATA_ON_ERROR") == "TRUE" || false,
-          pool_size: String.to_integer(System.get_env("SMF_REPO_POOL_SIZE") || "10")
+            get_env_cast_bool_with_default.("SMF_REPO_SENSITIVE_DATA_ON_ERROR", "FALSE"),
+          pool_size: get_env_cast_integer_with_default.("SMF_REPO_POOL_SIZE", "10")
         ]
 
       _ ->
@@ -506,10 +506,10 @@ if config_env() != :test do
           password: smf_repo_password,
           hostname: smf_repo_hostname,
           database: smf_repo_database,
-          port: String.to_integer(System.get_env("SMF_REPO_PORT") || "3306"),
+          port: get_env_cast_integer_with_default.("SMF_REPO_PORT", "3306"),
           stacktrace: true,
           show_sensitive_data_on_connection_error: true,
-          pool_size: String.to_integer(System.get_env("SMF_REPO_POOL_SIZE") || "10")
+          pool_size: get_env_cast_integer_with_default.("SMF_REPO_POOL_SIZE", "10")
         ]
     end
 

@@ -390,8 +390,7 @@ defmodule EpochtalkServerWeb.Controllers.Post do
              per_page: limit,
              desc: desc
            ),
-         count <- Profile.post_count_by_username(username),
-         {:has_posts, true} <- {:has_posts, posts != []} do
+         count <- Profile.post_count_by_username(username) do
       render(conn, :by_username, %{
         posts: posts,
         user: user,
@@ -403,9 +402,6 @@ defmodule EpochtalkServerWeb.Controllers.Post do
         desc: desc
       })
     else
-      {:has_posts, false} ->
-        ErrorHelpers.render_json_error(conn, 404, "Error, requested posts not found")
-
       {:view_deleted_users, false} ->
         ErrorHelpers.render_json_error(conn, 400, "Account not found")
 

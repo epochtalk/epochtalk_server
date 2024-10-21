@@ -255,8 +255,7 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
            Thread.page_by_username(username, priority, page,
              per_page: limit + 1,
              desc: desc
-           ),
-         {:has_threads, true} <- {:has_threads, threads != []} do
+           ) do
       render(conn, :by_username, %{
         threads: threads,
         user: user,
@@ -267,9 +266,6 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
         page: page
       })
     else
-      {:has_threads, false} ->
-        ErrorHelpers.render_json_error(conn, 404, "Error, requested threads not found")
-
       {:view_deleted_users, false} ->
         ErrorHelpers.render_json_error(conn, 400, "Account not found")
 

@@ -12,16 +12,18 @@ defmodule EpochtalkServerWeb.Controllers.BoardJSON do
   Renders proxy version of `Board` data by `Category`.
   """
   def proxy_by_category(%{
-    categories: categories,
-    board_moderators: board_moderators,
-    board_mapping: board_mapping,
-    user_priority: user_priority,
-    board_counts: board_counts,
-    board_last_post_info: board_last_post_info
-  }) do
+        categories: categories,
+        board_moderators: board_moderators,
+        board_mapping: board_mapping,
+        user_priority: user_priority,
+        board_counts: board_counts,
+        board_last_post_info: board_last_post_info
+      }) do
     board_counts = map_to_id(board_counts)
     board_last_post_info = map_to_id(board_last_post_info)
-    data = by_category(%{
+
+    data =
+      by_category(%{
         categories: categories,
         board_moderators: board_moderators,
         board_mapping: board_mapping,
@@ -32,6 +34,7 @@ defmodule EpochtalkServerWeb.Controllers.BoardJSON do
 
     data
   end
+
   defp map_to_id(data), do: Enum.reduce(data, %{}, &(&2 |> Map.put(&1.id, Map.delete(&1, :id))))
 
   @doc """
@@ -197,13 +200,16 @@ defmodule EpochtalkServerWeb.Controllers.BoardJSON do
           |> Map.merge(board.thread)
 
         # add board counts for proxy version
-        board = if board_counts != nil,
-          do: Map.merge(board, board_counts[board.id]),
-          else: board
+        board =
+          if board_counts != nil,
+            do: Map.merge(board, board_counts[board.id]),
+            else: board
+
         # add board last post info for proxy version
-        board = if board_last_post_info != nil,
-          do: Map.merge(board, board_last_post_info[board.id]),
-          else: board
+        board =
+          if board_last_post_info != nil,
+            do: Map.merge(board, board_last_post_info[board.id]),
+            else: board
 
         # delete unneeded properties
         board =

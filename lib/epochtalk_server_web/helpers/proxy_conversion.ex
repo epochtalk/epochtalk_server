@@ -45,6 +45,9 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
       "poll.by_thread" ->
         build_poll(id)
 
+      "user.find" ->
+        build_user(id)
+
       _ ->
         build_model(nil, nil, nil, nil)
     end
@@ -64,6 +67,31 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
       _ ->
         build_model(nil, nil, nil, nil)
     end
+  end
+
+  def build_user(user_id) do
+    from(u in "smf_members", where: u.id_member == ^user_id)
+    |> select([u], %{
+      activity: u.activity,
+      avatar: u.avatar,
+      created_at: u.dateRegistered * 1000,
+      dob: u.birthdate,
+      gender: u.gender,
+      id: u.id_member,
+      language: nil,
+      last_active: nil,
+      location: u.location,
+      merit: u.merit,
+      id_group: u.id_group,
+      id_post_group: u.id_post_group,
+      signature: u.signature,
+      posts: u.posts,
+      name: u.realName,
+      username: u.realName,
+      title: u.usertitle,
+      website: u.websiteUrl
+    })
+    |> SmfRepo.one()
   end
 
   def build_poll(thread_id) do

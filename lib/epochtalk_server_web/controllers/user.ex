@@ -17,6 +17,9 @@ defmodule EpochtalkServerWeb.Controllers.User do
   alias EpochtalkServerWeb.CustomErrors.InvalidPayload
   alias EpochtalkServerWeb.Helpers.ACL
   alias EpochtalkServerWeb.Helpers.Validate
+  alias EpochtalkServerWeb.Helpers.ProxyConversion
+
+  plug :check_proxy when action in [:find]
 
   @doc """
   Used to check if a username has already been taken
@@ -269,4 +272,27 @@ defmodule EpochtalkServerWeb.Controllers.User do
   end
 
   def login(_conn, _attrs), do: raise(InvalidPayload)
+
+  ## === Private Helper Functions ===
+
+  defp check_proxy(conn, _) do
+    case conn.private.phoenix_action do
+      :find ->
+        conn
+        |> proxy_find(conn.params)
+        |> halt()
+
+      _ ->
+        conn
+    end
+  end
+
+  defp proxy_find(conn, attrs) do
+    with user <- ProxyConversion.build_model("user.find", attrs["id"]) do
+      render(conn, :find_proxy, %{user: user})
+    else
+      _ -> ErrorHelpers.render_json_error(conn, 400, "Error, cannot find specified user")
+    end
+  end
+
 end

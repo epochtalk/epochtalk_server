@@ -14,6 +14,13 @@ defmodule EpochtalkServerWeb.Controllers.UserJSON do
   def user(%{user: user, token: token}), do: format_user_reply(user, token)
 
   @doc """
+  Renders formatted user JSON for find proxy
+  """
+  def find_proxy(%{user: user}) do
+    user
+  end
+
+  @doc """
   Renders formatted user JSON for find
   """
   def find(%{

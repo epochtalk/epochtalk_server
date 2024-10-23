@@ -7,6 +7,12 @@ on:
     branches:
       - main
 
+# env settings for github releases
+# docker image push
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
 jobs:
   dependencies:
     runs-on: ubuntu-latest
@@ -203,3 +209,41 @@ jobs:
   #         external_repository: epochtalk/server.epochtalk.github.io
   #         publish_dir: ./doc
   #         publish_branch: gh-pages
+
+  # build and push image to github container registry
+  build-and-push-image:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4.2.1
+      - name: Log in to the Container registry
+        uses: docker/login-action@3.3.0
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@5.5.1
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+      - name: Build and push Docker image
+        id: push
+        uses: docker/build-push-action@6.9.0
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+      # https://docs.github.com/en/actions/security-guides/using-artifact-attestations-to-establish-provenance-for-builds
+      - name: Generate artifact attestation
+        uses: actions/attest-build-provenance@v1.4.3
+        with:
+          subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME}}
+          subject-digest: ${{ steps.push.outputs.digest }}
+          push-to-registry: true

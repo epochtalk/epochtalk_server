@@ -212,6 +212,7 @@ jobs:
 
   # build and push image to github container registry
   build-and-push-image:
+    needs: [static_code_analysis]
     runs-on: ubuntu-latest
     permissions:
       contents: read

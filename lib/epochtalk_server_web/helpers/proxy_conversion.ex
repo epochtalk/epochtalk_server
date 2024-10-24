@@ -238,6 +238,7 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
       last_post_created_at: m.posterTime * 1000,
       last_post_position: t.numReplies,
       last_post_username: m.posterName,
+      last_post_user_id: m.id_member,
       last_thread_created_at: t.id_member_started,
       last_thread_id: t.id_topic,
       last_thread_post_count: t.numReplies,

@@ -73,29 +73,29 @@ defmodule EpochtalkServerWeb.Helpers.Breadcrumbs do
     %{threads_seq: threads_seq} = Application.get_env(:epochtalk_server, :proxy_config)
     threads_seq = threads_seq |> String.to_integer()
 
-    thread =
-      cond do
-        is_integer(id) && id < threads_seq ->
-          ProxyConversion.build_model("thread", id)
+    thread = cond do
+      is_integer(id) && id < threads_seq ->
+        ProxyConversion.build_model("thread", id)
+      is_binary(id) ->
+        Thread.find(id)
+      true -> nil
+    end
 
-        is_binary(id) ->
-          Thread.find(id)
+    if is_nil(thread) do
+      build_crumbs(nil, nil, crumbs)
+    else
+      crumbs = [
+        %{
+          label: thread.title,
+          routeName: "Posts",
+          opts: %{slug: id, locked: thread.locked}
+        }
+        | crumbs
+      ]
 
-        true ->
-          build_crumbs(nil, nil, crumbs)
-      end
-
-    crumbs = [
-      %{
-        label: thread.title,
-        routeName: "Posts",
-        opts: %{slug: id, locked: thread.locked}
-      }
-      | crumbs
-    ]
-
-    next_data = get_next_data(thread, "thread")
-    build_crumbs(next_data[:id], next_data[:type], crumbs)
+      next_data = get_next_data(thread, "thread")
+      build_crumbs(next_data[:id], next_data[:type], crumbs)
+    end
   end
 
   defp get_next_data(object, type) do

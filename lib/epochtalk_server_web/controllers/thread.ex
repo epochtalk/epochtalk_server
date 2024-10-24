@@ -754,10 +754,36 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
   defp check_proxy(conn, _) do
     case conn.private.phoenix_action do
       :by_board ->
-        maybe_proxy_by_board(conn, conn.params)
+        %{boards_seq: boards_seq} = Application.get_env(:epochtalk_server, :proxy_config)
+        boards_seq = boards_seq |> String.to_integer()
+
+        if Validate.cast(conn.params, "board_id", :integer, required: true) < boards_seq do
+          conn
+          |> proxy_by_board(conn.params)
+          |> halt()
+        else
+          conn
+        end
 
       :slug_to_id ->
-        maybe_proxy_slug_to_id(conn, conn.params)
+        case Integer.parse(conn.params["slug"]) do
+          {_, ""} ->
+            slug_as_id = Validate.cast(conn.params, "slug", :integer, required: true)
+
+            %{threads_seq: threads_seq} = Application.get_env(:epochtalk_server, :proxy_config)
+            threads_seq = threads_seq |> String.to_integer()
+
+            if slug_as_id < threads_seq do
+              conn
+              |> render(:slug_to_id, id: slug_as_id)
+              |> halt()
+            else
+              conn
+            end
+
+          _ ->
+            conn
+        end
 
       :viewed ->
         conn
@@ -768,40 +794,6 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
         conn
         |> proxy_recent(conn.params)
         |> halt()
-
-      _ ->
-        conn
-    end
-  end
-
-  defp maybe_proxy_by_board(conn, attrs) do
-    %{boards_seq: boards_seq} = Application.get_env(:epochtalk_server, :proxy_config)
-    boards_seq = boards_seq |> String.to_integer()
-
-    if Validate.cast(attrs, "board_id", :integer, required: true) < boards_seq do
-      conn
-      |> proxy_by_board(attrs)
-      |> halt()
-    else
-      conn
-    end
-  end
-
-  defp maybe_proxy_slug_to_id(conn, attrs) do
-    case Integer.parse(attrs["slug"]) do
-      {_, ""} ->
-        slug_as_id = Validate.cast(attrs, "slug", :integer, required: true)
-
-        %{threads_seq: threads_seq} = Application.get_env(:epochtalk_server, :proxy_config)
-        threads_seq = threads_seq |> String.to_integer()
-
-        if slug_as_id < threads_seq do
-          conn
-          |> render(:slug_to_id, id: slug_as_id)
-          |> halt()
-        else
-          conn
-        end
 
       _ ->
         conn

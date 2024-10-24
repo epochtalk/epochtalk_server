@@ -229,6 +229,55 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
   end
 
   @doc """
+  Used to retrieve `Threads` for a `User` by username
+  """
+  def by_username(conn, attrs) do
+    # Parameter Validation
+    with username <- attrs["username"],
+         page <- Validate.cast(attrs, "page", :integer, default: 1, min: 1),
+         limit <- Validate.cast(attrs, "limit", :integer, default: 25, min: 1, max: 100),
+         desc <- Validate.cast(attrs, "desc", :boolean, default: true),
+         user <- Guardian.Plug.current_resource(conn),
+         priority <- ACL.get_user_priority(conn),
+         [lookup_user] <- User.ids_from_usernames([username]),
+
+         # Authorizations Checks (Same permission as post page by user)
+         :ok <- ACL.allow!(conn, "posts.pageByUser"),
+         {:user_not_deleted, user_not_deleted} <-
+           {:user_not_deleted, User.is_active?(lookup_user.id)},
+         {:has_deleted_override, has_deleted_override} <-
+           {:has_deleted_override,
+            ACL.has_permission(conn, "posts.pageFirstPostByUser.bypass.viewDeletedUsers")},
+         {:view_deleted_users, true} <-
+           {:view_deleted_users, user_not_deleted || has_deleted_override},
+         view_deleted_threads <-
+           EpochtalkServerWeb.Controllers.Post.can_authed_user_view_deleted_posts_by_username(
+             user
+           ),
+         threads <-
+           Thread.page_by_username(username, priority, page,
+             per_page: limit + 1,
+             desc: desc
+           ) do
+      render(conn, :by_username, %{
+        threads: threads,
+        user: user,
+        priority: priority,
+        view_deleted_threads: view_deleted_threads,
+        limit: limit,
+        desc: desc,
+        page: page
+      })
+    else
+      {:view_deleted_users, false} ->
+        ErrorHelpers.render_json_error(conn, 400, "Account not found")
+
+      _ ->
+        ErrorHelpers.render_json_error(conn, 400, "Error, cannot get threads by username")
+    end
+  end
+
+  @doc """
   Used to watch `Thread`
   """
   def watch(conn, attrs) do

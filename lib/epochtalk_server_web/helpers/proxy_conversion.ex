@@ -23,6 +23,9 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
       "posts.by_thread" ->
         build_posts_by_thread(id, page, per_page)
 
+      "posts.by_user" ->
+        build_posts_by_user(id, page, per_page)
+
       _ ->
         build_model(nil, nil, nil, nil)
     end
@@ -456,6 +459,44 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
     |> case do
       {:ok, [], _} ->
         {:error, "Posts not found for thread_id: #{id}"}
+
+      {:ok, posts, data} ->
+        return_tuple(posts, data)
+    end
+  end
+
+  def build_posts_by_user(id, page, per_page) do
+    %{id_board_blacklist: id_board_blacklist} =
+      Application.get_env(:epochtalk_server, :proxy_config)
+
+    count_query =
+      from u in "smf_members",
+        where: u.id_member == ^id,
+        select: %{count: u.posts}
+
+    from(m in "smf_messages",
+      limit: ^per_page,
+      where: m.id_member == ^id and m.id_board not in ^id_board_blacklist,
+      order_by: [desc: m.id_msg]
+    )
+    |> select([m], %{
+      id: m.id_msg,
+      thread_id: m.id_topic,
+      board_id: m.id_board,
+      thread_title: m.subject,
+      thread_slug: m.id_topic,
+      position: 0,
+      body_html: m.body,
+      updated_at: m.modifiedTime,
+      created_at: m.posterTime * 1000,
+      user: %{
+        id: m.id_member,
+      }
+    })
+    |> ProxyPagination.page_simple(count_query, page, per_page: per_page)
+    |> case do
+      {:ok, [], _} ->
+        {:error, "Posts not found for user_id: #{id}"}
 
       {:ok, posts, data} ->
         return_tuple(posts, data)

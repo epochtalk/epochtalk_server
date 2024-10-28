@@ -32,7 +32,7 @@ defmodule EpochtalkServerWeb.Controllers.Post do
 
   @max_post_title_length 255
 
-  plug :check_proxy when action in [:by_thread]
+  plug :check_proxy when action in [:by_thread, :by_username]
 
   @doc """
   Used to create posts
@@ -542,11 +542,38 @@ defmodule EpochtalkServerWeb.Controllers.Post do
             conn
           end
 
+        :by_username ->
+          conn
+          |> proxy_by_username(conn.params)
+          |> halt()
+
         _ ->
           conn
       end
 
     conn
+  end
+
+  defp proxy_by_username(conn, attrs) do
+    # Parameter Validation
+    with user_id <- Validate.cast(attrs, "id", :integer, required: true),
+         page <- Validate.cast(attrs, "page", :integer, default: 1, min: 1),
+         limit <- Validate.cast(attrs, "limit", :integer, default: 25, min: 1, max: 100),
+         {:ok, posts, data} <- ProxyConversion.build_model("posts.by_user", user_id, page, limit) do
+      render(conn, :proxy_by_username, %{
+        posts: posts,
+        count: data.total_records,
+        limit: data.per_page,
+        page: data.page,
+        desc: true
+      })
+    else
+      {:view_deleted_users, false} ->
+        ErrorHelpers.render_json_error(conn, 400, "Account not found")
+
+      _ ->
+        ErrorHelpers.render_json_error(conn, 400, "Error, cannot get posts by username")
+    end
   end
 
   defp proxy_by_thread(conn, attrs) do

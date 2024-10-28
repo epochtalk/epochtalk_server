@@ -88,7 +88,7 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
       id_group: u.id_group,
       id_post_group: u.id_post_group,
       signature: u.signature,
-      posts: u.posts,
+      post_count: u.posts,
       name: u.realName,
       username: u.realName,
       title: u.usertitle,

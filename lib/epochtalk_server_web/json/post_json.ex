@@ -152,8 +152,6 @@ defmodule EpochtalkServerWeb.Controllers.PostJSON do
     }
   end
 
-  ## === Private Helper Functions ===
-
   @doc """
   Renders all `Post` for a particular `User`.
   """
@@ -179,6 +177,25 @@ defmodule EpochtalkServerWeb.Controllers.PostJSON do
       limit: limit,
       count: count
     }
+  end
+
+  @doc """
+  Renders all `Post` for a particular `User`.
+  """
+  def proxy_by_username(%{
+        posts: posts,
+        count: count,
+        limit: limit,
+        page: page,
+        desc: desc
+      }) do
+    %{
+        posts: posts,
+        count: count,
+        limit: limit,
+        page: page,
+        desc: desc
+      }
   end
 
   ## === Public Helper Functions ===

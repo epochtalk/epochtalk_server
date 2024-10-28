@@ -403,9 +403,12 @@ if config_env() == :prod do
       password: System.get_env("EMAILER_SMTP_PASSWORD", "password"),
       port: get_env_cast_integer_with_default.("EMAILER_SMTP_PORT", "465")
   end
+end
 
-  ##### ALL CONFIGURATIONS BELOW ARE PROXY REPO CONFIGURATIONS #####
+##### PROXY REPO CONFIGURATIONS #####
 
+# conditionally show debug logs in prod
+if config_env() == :prod do
   logger_level =
     System.get_env("LOGGER_LEVEL")
     |> case do
@@ -414,59 +417,101 @@ if config_env() == :prod do
     end
 
   config :logger, level: logger_level
+end
 
-  # Configure SmfRepo for proxy
+# Configure proxy sequences and boards blacklist
+proxy_config =
+  case config_env() do
+    :prod ->
+      id_board_blacklist =
+        get_env_or_raise_with_message.(
+          "ID_BOARD_BLACKLIST",
+          "environment variable ID_BOARD_BLACKLIST is missing."
+        )
+
+      id_board_blacklist =
+        id_board_blacklist
+        |> String.split()
+        |> Enum.map(&String.to_integer(&1))
+
+      %{
+        threads_seq: System.get_env("THREADS_SEQ") || "6000000",
+        boards_seq: System.get_env("BOARDS_SEQ") || "500",
+        id_board_blacklist: id_board_blacklist
+      }
+
+    :dev ->
+      %{
+        threads_seq: "6000000",
+        boards_seq: "500",
+        id_board_blacklist: []
+      }
+
+    # default thread/board seq and empty blacklist
+    _ ->
+      %{
+        threads_seq: "-10",
+        boards_seq: "-10",
+        id_board_blacklist: []
+      }
+  end
+
+config :epochtalk_server, proxy_config: proxy_config
+
+# Configure SmfRepo for proxy
+# - do not configure for testing
+if config_env() != :test do
   smf_repo_username =
-    System.get_env("SMF_REPO_USERNAME") ||
-      raise """
-      environment variable SMF_REPO_USERNAME is missing.
-      """
+    get_env_or_raise_with_message.(
+      "SMF_REPO_USERNAME",
+      "environment variable SMF_REPO_USERNAME is missing."
+    )
 
   smf_repo_password =
-    System.get_env("SMF_REPO_PASSWORD") ||
-      raise """
-      environment variable SMF_REPO_PASSWORD is missing.
-      """
+    get_env_or_raise_with_message.(
+      "SMF_REPO_PASSWORD",
+      "environment variable SMF_REPO_PASSWORD is missing."
+    )
 
   smf_repo_hostname =
-    System.get_env("SMF_REPO_HOSTNAME") ||
-      raise """
-      environment variable SMF_REPO_HOSTNAME is missing.
-      """
+    get_env_or_raise_with_message.(
+      "SMF_REPO_HOSTNAME",
+      "environment variable SMF_REPO_HOSTNAME is missing."
+    )
 
   smf_repo_database =
-    System.get_env("SMF_REPO_DATABASE") ||
-      raise """
-      environment variable SMF_REPO_DATABASE is missing.
-      """
+    get_env_or_raise_with_message.(
+      "SMF_REPO_DATABASE",
+      "environment variable SMF_REPO_DATABASE is missing."
+    )
 
-  config :epochtalk_server, EpochtalkServer.SmfRepo,
-    username: smf_repo_username,
-    password: smf_repo_password,
-    hostname: smf_repo_hostname,
-    database: smf_repo_database,
-    port: String.to_integer(System.get_env("SMF_REPO_PORT") || "3306"),
-    stacktrace: System.get_env("SMF_REPO_STACKTRACE") == "TRUE" || true,
-    show_sensitive_data_on_connection_error:
-      System.get_env("SMF_REPO_SENSITIVE_DATA_ON_ERROR") == "TRUE" || false,
-    pool_size: String.to_integer(System.get_env("SMF_REPO_POOL_SIZE") || "10")
+  proxy_repo_config =
+    case config_env() do
+      :prod ->
+        [
+          username: smf_repo_username,
+          password: smf_repo_password,
+          hostname: smf_repo_hostname,
+          database: smf_repo_database,
+          port: get_env_cast_integer_with_default.("SMF_REPO_PORT", "3306"),
+          stacktrace: get_env_cast_bool_with_default.("SMF_REPO_STACKTRACE", "TRUE"),
+          show_sensitive_data_on_connection_error:
+            get_env_cast_bool_with_default.("SMF_REPO_SENSITIVE_DATA_ON_ERROR", "FALSE"),
+          pool_size: get_env_cast_integer_with_default.("SMF_REPO_POOL_SIZE", "10")
+        ]
 
-  id_board_blacklist =
-    System.get_env("ID_BOARD_BLACKLIST") ||
-      raise """
-      environment variable ID_BOARD_BLACKLIST is missing.
-      """
+      _ ->
+        [
+          username: smf_repo_username,
+          password: smf_repo_password,
+          hostname: smf_repo_hostname,
+          database: smf_repo_database,
+          port: get_env_cast_integer_with_default.("SMF_REPO_PORT", "3306"),
+          stacktrace: true,
+          show_sensitive_data_on_connection_error: true,
+          pool_size: get_env_cast_integer_with_default.("SMF_REPO_POOL_SIZE", "10")
+        ]
+    end
 
-  id_board_blacklist =
-    id_board_blacklist
-    |> String.split()
-    |> Enum.map(&String.to_integer(&1))
-
-  # Configure proxy
-  config :epochtalk_server,
-    proxy_config: %{
-      threads_seq: System.get_env("THREADS_SEQ") || "6000000",
-      boards_seq: System.get_env("BOARDS_SEQ") || "500",
-      id_board_blacklist: id_board_blacklist
-    }
+  config :epochtalk_server, EpochtalkServer.SmfRepo, proxy_repo_config
 end

@@ -82,20 +82,24 @@ defmodule EpochtalkServerWeb.Helpers.Breadcrumbs do
           Thread.find(id)
 
         true ->
-          build_crumbs(nil, nil, crumbs)
+          nil
       end
 
-    crumbs = [
-      %{
-        label: thread.title,
-        routeName: "Posts",
-        opts: %{slug: id, locked: thread.locked}
-      }
-      | crumbs
-    ]
+    if is_nil(thread) do
+      build_crumbs(nil, nil, crumbs)
+    else
+      crumbs = [
+        %{
+          label: thread.title,
+          routeName: "Posts",
+          opts: %{slug: id, locked: thread.locked}
+        }
+        | crumbs
+      ]
 
-    next_data = get_next_data(thread, "thread")
-    build_crumbs(next_data[:id], next_data[:type], crumbs)
+      next_data = get_next_data(thread, "thread")
+      build_crumbs(next_data[:id], next_data[:type], crumbs)
+    end
   end
 
   defp get_next_data(object, type) do

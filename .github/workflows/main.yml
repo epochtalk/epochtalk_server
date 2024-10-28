@@ -7,6 +7,12 @@ on:
     branches:
       - main
 
+# env settings for github releases
+# docker image push
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
 jobs:
   dependencies:
     runs-on: ubuntu-latest
@@ -162,44 +168,83 @@ jobs:
           AWS_REGION: ${{ secrets.AWS_REGION }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  release:
-    needs: [test, static_code_analysis]
-    name: Release
+  # release:
+  #   needs: [test, static_code_analysis]
+  #   name: Release
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v3.6.0
+  #     - name: Semantic Release
+  #       uses: cycjimmy/semantic-release-action@v4.0.0
+  #       with:
+  #         branches: |
+  #           [
+  #             'main',
+  #             {
+  #               name: 'prerelease',
+  #               prerelease: true
+  #             },
+  #           ]
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  # elixir_docs:
+  #   if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/elixir-docs' }}
+  #   name: Generate project documentation
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v3.6.0
+  #     - name: Sets up an Erlang/OTP environment
+  #       uses: erlef/setup-beam@v1
+  #       with:
+  #         version-file: .tool-versions
+  #         version-type: strict
+  #     - name: Build docs
+  #       uses: lee-dohm/generate-elixir-docs@v1.0.1
+  #     - name: Publish to Pages
+  #       uses: peaceiris/actions-gh-pages@v3.9.3
+  #       with:
+  #         deploy_key: ${{ secrets.DOCS_DEPLOY_KEY }}
+  #         external_repository: epochtalk/server.epochtalk.github.io
+  #         publish_dir: ./doc
+  #         publish_branch: gh-pages
+
+  # build and push image to github container registry
+  build-and-push-image:
+    needs: [static_code_analysis, test]
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3.6.0
-      - name: Semantic Release
-        uses: cycjimmy/semantic-release-action@v4.0.0
+      - name: Checkout repository
+        uses: actions/checkout@v4.2.1
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3.3.0
         with:
-          branches: |
-            [
-              'main',
-              {
-                name: 'prerelease',
-                prerelease: true
-              },
-            ]
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  elixir_docs:
-    if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/elixir-docs' }}
-    name: Generate project documentation
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3.6.0
-      - name: Sets up an Erlang/OTP environment
-        uses: erlef/setup-beam@v1
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v5.5.1
         with:
-          version-file: .tool-versions
-          version-type: strict
-      - name: Build docs
-        uses: lee-dohm/generate-elixir-docs@v1.0.1
-      - name: Publish to Pages
-        uses: peaceiris/actions-gh-pages@v3.9.3
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+      - name: Build and push Docker image
+        id: push
+        uses: docker/build-push-action@v6.9.0
         with:
-          deploy_key: ${{ secrets.DOCS_DEPLOY_KEY }}
-          external_repository: epochtalk/server.epochtalk.github.io
-          publish_dir: ./doc
-          publish_branch: gh-pages
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+      # https://docs.github.com/en/actions/security-guides/using-artifact-attestations-to-establish-provenance-for-builds
+      - name: Generate artifact attestation
+        uses: actions/attest-build-provenance@v1.4.3
+        with:
+          subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME}}
+          subject-digest: ${{ steps.push.outputs.digest }}
+          push-to-registry: true

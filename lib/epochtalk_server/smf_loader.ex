@@ -1,9 +1,9 @@
 defmodule EpochtalkServer.SMFLoader do
-  alias EpochtalkServer.Models.BoardMapping
-
   @moduledoc """
-  SMFLoader, for pulling bitcointalk boards and categories
+  Load data from smf mysql output, format for import
+  and create/insert mappings for categories and boards
   """
+  alias EpochtalkServer.Models.BoardMapping
 
   # converts smf_boards tsv file to epochtalk boards tsv file
   def convert_smf_boards_tsv_file(path) do

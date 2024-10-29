@@ -90,6 +90,22 @@ defmodule EpochtalkServerWeb.Controllers.BoardJSON do
     %{boards: categories}
   end
 
+  def by_category(%{
+        categories: categories,
+        board_moderators: board_moderators,
+        board_mapping: board_mapping,
+        user_priority: user_priority
+      }) do
+    by_category(%{
+      categories: categories,
+      board_moderators: board_moderators,
+      board_mapping: board_mapping,
+      user_priority: user_priority,
+      board_counts: nil,
+      board_last_post_info: nil
+    })
+  end
+
   @doc """
   Renders `Board` for find query.
   """

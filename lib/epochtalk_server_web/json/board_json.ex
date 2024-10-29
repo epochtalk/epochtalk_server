@@ -44,8 +44,10 @@ defmodule EpochtalkServerWeb.Controllers.BoardJSON do
         categories: categories,
         board_moderators: board_moderators,
         board_mapping: board_mapping,
-        user_priority: user_priority
+        user_priority: user_priority,
         # board counts and last post info for proxy version
+        board_counts: board_counts,
+        board_last_post_info: board_last_post_info
       }) do
     # append board moderators to each board in board mapping
     board_mapping =
@@ -75,8 +77,10 @@ defmodule EpochtalkServerWeb.Controllers.BoardJSON do
             board_mapping,
             :boards,
             category,
-            user_priority
+            user_priority,
             # board counts and last post info for proxy version
+            board_counts,
+            board_last_post_info
           )
 
         acc ++ [category]
@@ -84,6 +88,22 @@ defmodule EpochtalkServerWeb.Controllers.BoardJSON do
 
     # return boards nested within categories
     %{boards: categories}
+  end
+
+  def by_category(%{
+        categories: categories,
+        board_moderators: board_moderators,
+        board_mapping: board_mapping,
+        user_priority: user_priority
+      }) do
+    by_category(%{
+      categories: categories,
+      board_moderators: board_moderators,
+      board_mapping: board_mapping,
+      user_priority: user_priority,
+      board_counts: nil,
+      board_last_post_info: nil
+    })
   end
 
   @doc """

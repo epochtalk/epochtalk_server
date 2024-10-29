@@ -568,9 +568,6 @@ defmodule EpochtalkServerWeb.Controllers.Post do
         desc: true
       })
     else
-      {:view_deleted_users, false} ->
-        ErrorHelpers.render_json_error(conn, 400, "Account not found")
-
       _ ->
         ErrorHelpers.render_json_error(conn, 400, "Error, cannot get posts by username")
     end

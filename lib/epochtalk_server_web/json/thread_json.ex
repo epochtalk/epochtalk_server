@@ -196,6 +196,28 @@ defmodule EpochtalkServerWeb.Controllers.ThreadJSON do
   end
 
   @doc """
+  Renders all `Post` for a particular `User`.
+  """
+  def proxy_by_username(%{
+        threads: threads,
+        next: next,
+        prev: prev,
+        limit: limit,
+        page: page,
+        desc: desc
+      }) do
+    %{
+        posts: threads,
+        next: next,
+        prev: prev,
+        limit: limit,
+        page: page,
+        desc: desc
+      }
+  end
+
+
+  @doc """
   Renders sticky `Thread`.
 
     iex> thread = %{

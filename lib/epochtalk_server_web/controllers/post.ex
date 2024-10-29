@@ -559,7 +559,8 @@ defmodule EpochtalkServerWeb.Controllers.Post do
     with user_id <- Validate.cast(attrs, "id", :integer, required: true),
          page <- Validate.cast(attrs, "page", :integer, default: 1, min: 1),
          limit <- Validate.cast(attrs, "limit", :integer, default: 25, min: 1, max: 100),
-         {:ok, posts, data} <- ProxyConversion.build_model("posts.by_user", user_id, page, limit) do
+         desc <- Validate.cast(attrs, "desc", :boolean, default: true),
+         {:ok, posts, data} <- ProxyConversion.build_model("posts.by_user", user_id, page, limit, desc) do
       render(conn, :proxy_by_username, %{
         posts: posts,
         count: data.total_records,

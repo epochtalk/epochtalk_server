@@ -566,7 +566,7 @@ defmodule EpochtalkServerWeb.Controllers.Post do
         count: data.total_records,
         limit: data.per_page,
         page: data.page,
-        desc: true
+        desc: desc
       })
     else
       _ ->

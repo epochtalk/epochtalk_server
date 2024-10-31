@@ -14,13 +14,17 @@ defmodule EpochtalkServer.BBCParser do
 
   @impl true
   def handle_call({:parse, bbcode_data}, _from, {proc, pid}) do
-    Proc.send_input(proc, "echo parse_bbc('#{bbcode_data}');\n")
-    Logger.debug("FUCKFUCKFUCK PID: #{inspect(pid)}")
-    parsed = receive do
-      {^pid, :data, :out, data} -> data
-    end
+    if bbcode_data == "" do
+      {:reply, "", {proc, pid}}
+    else
+      Proc.send_input(proc, "echo parse_bbc('#{bbcode_data}');\n")
+      Logger.debug("FUCKFUCKFUCK PID: #{inspect(pid)}")
+      parsed = receive do
+        {^pid, :data, :out, data} -> data
+      end
 
-    {:reply, parsed, {proc, pid}}
+      {:reply, parsed, {proc, pid}}
+    end
   end
 
   ## === parser api functions ====

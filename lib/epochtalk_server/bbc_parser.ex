@@ -2,6 +2,7 @@ defmodule EpochtalkServer.BBCParser do
   use GenServer
   require Logger
   alias Porcelain.Process, as: Proc
+  @timeout 10000
 
   @moduledoc """
   `BBCParser` genserver, runs interactive php shell to call bbcode parser
@@ -13,18 +14,17 @@ defmodule EpochtalkServer.BBCParser do
   def init(:ok), do: {:ok, load()}
 
   @impl true
-  def handle_call({:parse, bbcode_data}, _from, {proc, pid}) do
-    if bbcode_data == "" do
-      {:reply, "", {proc, pid}}
-    else
-      Proc.send_input(proc, "echo parse_bbc('#{bbcode_data}');\n")
-      Logger.debug("FUCKFUCKFUCK PID: #{inspect(pid)}")
-      parsed = receive do
-        {^pid, :data, :out, data} -> data
-      end
+  def handle_call({:parse, ""}, _from, {proc, pid}),
+    do: {:reply, "", {proc, pid}}
 
-      {:reply, parsed, {proc, pid}}
+  def handle_call({:parse, bbcode_data}, _from, {proc, pid}) when is_binary(bbcode_data) do
+    Proc.send_input(proc, "echo parse_bbc('#{bbcode_data}');\n")
+    parsed = receive do
+      {^pid, :data, :out, data} ->
+        Logger.debug data
+        data
     end
+    {:reply, parsed, {proc, pid}}
   end
 
   ## === parser api functions ====
@@ -32,17 +32,7 @@ defmodule EpochtalkServer.BBCParser do
   @doc """
   Start genserver and create a reference for supervision tree
   """
-  def start_link(_opts) do
-    GenServer.start_link(__MODULE__, :ok)
-  end
-
-  @doc """
-  Returns parsed bbcode input
-  """
-  @spec parse(bbcodea_data :: any) :: String.t()
-  def parse(bbcode_data) do
-    GenServer.call(__MODULE__, {:parse, bbcode_data})
-  end
+  def start_link(_opts), do: GenServer.start_link(__MODULE__, :ok)
 
   @doc """
   Uses poolboy to call parser
@@ -51,18 +41,15 @@ defmodule EpochtalkServer.BBCParser do
     :poolboy.transaction(
       :bbc_parser,
       fn pid ->
-        # Let's wrap the genserver call in a try - catch block. This allows us to trap any exceptions
-        # that might be thrown and return the worker back to poolboy in a clean manner. It also allows
-        # the programmer to retrieve the error and potentially fix it.
         try do
           Logger.debug "#{__MODULE__}(ASYNC PARSE): #{inspect(pid)}"
-          GenServer.call(pid, {:parse, bbcode_data}, 10000) |> IO.inspect
+          GenServer.call(pid, {:parse, bbcode_data}, @timeout)
         catch
           e, r -> IO.inspect("poolboy transaction caught error: #{inspect(e)}, #{inspect(r)}")
           :ok
         end
       end,
-      50000
+      @timeout
     )
   end
 
@@ -73,7 +60,7 @@ defmodule EpochtalkServer.BBCParser do
     proc = %Proc{pid: pid} = Porcelain.spawn_shell("php -a",in: :receive, out: {:send, self()})
     Proc.send_input(proc, "require 'parsing.php';\n")
     Logger.debug "#{__MODULE__}(LOAD): #{inspect(pid)}"
-    # clear initial message
+    # clear initial php interactive shell message
     receive do
       {^pid, :data, :out, data} -> Logger.debug "#{__MODULE__}: #{inspect(data)}"
     end

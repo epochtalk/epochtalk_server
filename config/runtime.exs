@@ -414,6 +414,7 @@ poolboy_config = [
   max_overflow: 2,
   strategy: :fifo
 ]
+
 config :epochtalk_server, poolboy_config: poolboy_config
 
 # conditionally show debug logs in prod

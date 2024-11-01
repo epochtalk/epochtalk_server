@@ -188,17 +188,19 @@ defmodule EpochtalkServerWeb.Controllers.PostJSON do
         limit: limit,
         page: page,
         desc: desc
-      }) when is_list(posts) do
+      })
+      when is_list(posts) do
     posts =
       posts
       |> Enum.map(&format_proxy_post_data_for_by_thread(&1))
+
     %{
-        posts: posts,
-        count: count,
-        limit: limit,
-        page: page,
-        desc: desc
-      }
+      posts: posts,
+      count: count,
+      limit: limit,
+      page: page,
+      desc: desc
+    }
   end
 
   def proxy_by_username(%{
@@ -208,13 +210,14 @@ defmodule EpochtalkServerWeb.Controllers.PostJSON do
         page: page,
         desc: desc
       }),
-  do: proxy_by_username(%{
-        posts: [posts],
-        count: count,
-        limit: limit,
-        page: page,
-        desc: desc
-      })
+      do:
+        proxy_by_username(%{
+          posts: [posts],
+          count: count,
+          limit: limit,
+          page: page,
+          desc: desc
+        })
 
   ## === Public Helper Functions ===
 

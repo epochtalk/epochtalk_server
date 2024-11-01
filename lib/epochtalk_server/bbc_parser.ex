@@ -19,11 +19,14 @@ defmodule EpochtalkServer.BBCParser do
 
   def handle_call({:parse, bbcode_data}, _from, {proc, pid}) when is_binary(bbcode_data) do
     Proc.send_input(proc, "echo parse_bbc('#{bbcode_data}');\n")
-    parsed = receive do
-      {^pid, :data, :out, data} ->
-        Logger.debug data
-        data
-    end
+
+    parsed =
+      receive do
+        {^pid, :data, :out, data} ->
+          Logger.debug(data)
+          data
+      end
+
     {:reply, parsed, {proc, pid}}
   end
 
@@ -42,11 +45,12 @@ defmodule EpochtalkServer.BBCParser do
       :bbc_parser,
       fn pid ->
         try do
-          Logger.debug "#{__MODULE__}(ASYNC PARSE): #{inspect(pid)}"
+          Logger.debug("#{__MODULE__}(ASYNC PARSE): #{inspect(pid)}")
           GenServer.call(pid, {:parse, bbcode_data}, @timeout)
         catch
-          e, r -> IO.inspect("poolboy transaction caught error: #{inspect(e)}, #{inspect(r)}")
-          :ok
+          e, r ->
+            IO.inspect("poolboy transaction caught error: #{inspect(e)}, #{inspect(r)}")
+            :ok
         end
       end,
       @timeout
@@ -57,13 +61,14 @@ defmodule EpochtalkServer.BBCParser do
 
   # returns loaded interactive php shell
   defp load() do
-    proc = %Proc{pid: pid} = Porcelain.spawn_shell("php -a",in: :receive, out: {:send, self()})
+    proc = %Proc{pid: pid} = Porcelain.spawn_shell("php -a", in: :receive, out: {:send, self()})
     Proc.send_input(proc, "require 'parsing.php';\n")
-    Logger.debug "#{__MODULE__}(LOAD): #{inspect(pid)}"
+    Logger.debug("#{__MODULE__}(LOAD): #{inspect(pid)}")
     # clear initial php interactive shell message
     receive do
-      {^pid, :data, :out, data} -> Logger.debug "#{__MODULE__}: #{inspect(data)}"
+      {^pid, :data, :out, data} -> Logger.debug("#{__MODULE__}: #{inspect(data)}")
     end
+
     {proc, pid}
   end
 end

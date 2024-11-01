@@ -292,5 +292,4 @@ defmodule EpochtalkServerWeb.Controllers.User do
       render(conn, :find_proxy, %{user: user})
     end
   end
-
 end

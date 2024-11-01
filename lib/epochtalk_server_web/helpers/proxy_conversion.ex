@@ -502,7 +502,7 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
       updated_at: m.modifiedTime,
       created_at: m.posterTime * 1000,
       user: %{
-        id: m.id_member,
+        id: m.id_member
       }
     })
     |> ProxyPagination.page_simple(count_query, page, per_page: per_page, desc: desc)
@@ -533,7 +533,7 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
       board_id: t.id_board,
       sticky: t.isSticky,
       locked: t.locked,
-      user: %{id: t.id_member_started, deleted: false },
+      user: %{id: t.id_member_started, deleted: false},
       moderated: t.selfModerated,
       post_count: t.numReplies,
       thread_title: f.subject,

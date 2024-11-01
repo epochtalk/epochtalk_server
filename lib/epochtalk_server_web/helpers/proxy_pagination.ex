@@ -45,27 +45,31 @@ defmodule EpochtalkServerWeb.Helpers.ProxyPagination do
   def page_simple(query, count_query, page, per_page: nil, desc: desc) when is_integer(page),
     do: page_simple(query, count_query, page, per_page: 15, desc: desc)
 
-  def page_simple(query, count_query, nil, per_page: per_page, desc: desc) when is_integer(per_page),
-    do: page_simple(query, count_query, 1, per_page: per_page, desc: desc)
+  def page_simple(query, count_query, nil, per_page: per_page, desc: desc)
+      when is_integer(per_page),
+      do: page_simple(query, count_query, 1, per_page: per_page, desc: desc)
 
-  def page_simple(query, count_query, nil, per_page: per_page, desc: desc) when is_binary(per_page),
-    do:
-      page_simple(query, count_query, 1,
-        per_page: Validate.cast_str(per_page, :integer, key: "limit", min: 1),
-        desc: desc
-      )
+  def page_simple(query, count_query, nil, per_page: per_page, desc: desc)
+      when is_binary(per_page),
+      do:
+        page_simple(query, count_query, 1,
+          per_page: Validate.cast_str(per_page, :integer, key: "limit", min: 1),
+          desc: desc
+        )
 
   def page_simple(query, count_query, page, per_page: nil, desc: desc) when is_binary(page),
     do:
       page_simple(query, count_query, Validate.cast_str(page, :integer, key: "page", min: 1),
-        per_page: 15, desc: desc
+        per_page: 15,
+        desc: desc
       )
 
   def page_simple(query, count_query, page, per_page: per_page, desc: desc)
       when is_binary(page) and is_binary(per_page),
       do:
         page_simple(query, count_query, Validate.cast_str(page, :integer, key: "page", min: 1),
-          per_page: Validate.cast_str(per_page, :integer, key: "limit", min: 1), desc: desc
+          per_page: Validate.cast_str(per_page, :integer, key: "limit", min: 1),
+          desc: desc
         )
 
   def page_simple(query, count_query, page, per_page: per_page, desc: desc) do

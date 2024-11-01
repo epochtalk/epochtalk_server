@@ -97,10 +97,6 @@ defmodule EpochtalkServerWeb.Controllers.User do
          {:ok, _email} <- Mailer.send_confirm_account(user) do
       render(conn, :register_with_verify, user: user)
     else
-      # error in user.create
-      {:error, data} ->
-        ErrorHelpers.render_json_error(conn, 400, data)
-
       # error email failed to send
       {:error, :not_delivered} ->
         ErrorHelpers.render_json_error(
@@ -108,6 +104,10 @@ defmodule EpochtalkServerWeb.Controllers.User do
           500,
           "Sending of account confirmation email failed, mailer is not properly configured."
         )
+
+      # error in user.create
+      {:error, data} ->
+        ErrorHelpers.render_json_error(conn, 400, data)
 
       # Catch all for any other errors
       _ ->
@@ -290,8 +290,6 @@ defmodule EpochtalkServerWeb.Controllers.User do
   defp proxy_find(conn, attrs) do
     with user <- ProxyConversion.build_model("user.find", attrs["id"]) do
       render(conn, :find_proxy, %{user: user})
-    else
-      _ -> ErrorHelpers.render_json_error(conn, 400, "Error, cannot find specified user")
     end
   end
 

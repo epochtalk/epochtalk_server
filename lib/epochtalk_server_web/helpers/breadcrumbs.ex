@@ -2,6 +2,7 @@ defmodule EpochtalkServerWeb.Helpers.Breadcrumbs do
   @moduledoc """
   Helper for creating breadcrumbs
   """
+  alias EpochtalkServerWeb.Helpers.ProxyConversion
   alias EpochtalkServer.Models.Category
   alias EpochtalkServer.Models.Board
   alias EpochtalkServer.Models.Thread
@@ -69,24 +70,35 @@ defmodule EpochtalkServerWeb.Helpers.Breadcrumbs do
   end
 
   defp build_thread_crumbs(id, crumbs) do
-    case Thread.breadcrumb(id) do
-      {:ok, thread} ->
-        post = Enum.at(thread.posts, 0)
+    %{threads_seq: threads_seq} = Application.get_env(:epochtalk_server, :proxy_config)
+    threads_seq = threads_seq |> String.to_integer()
 
-        crumbs = [
-          %{
-            label: post.content["title"],
-            routeName: "Posts",
-            opts: %{slug: id, locked: post.locked}
-          }
-          | crumbs
-        ]
+    thread =
+      cond do
+        is_integer(id) && id < threads_seq ->
+          ProxyConversion.build_model("thread", id)
 
-        next_data = get_next_data(thread, "thread")
-        build_crumbs(next_data[:id], next_data[:type], crumbs)
+        is_binary(id) ->
+          Thread.find(id)
 
-      {:error, :thread_does_not_exist} ->
-        build_crumbs(nil, nil, crumbs)
+        true ->
+          nil
+      end
+
+    if is_nil(thread) do
+      build_crumbs(nil, nil, crumbs)
+    else
+      crumbs = [
+        %{
+          label: thread.title,
+          routeName: "Posts",
+          opts: %{slug: id, locked: thread.locked}
+        }
+        | crumbs
+      ]
+
+      next_data = get_next_data(thread, "thread")
+      build_crumbs(next_data[:id], next_data[:type], crumbs)
     end
   end
 
@@ -106,7 +118,8 @@ defmodule EpochtalkServerWeb.Helpers.Breadcrumbs do
         end
 
       "thread" ->
-        %{id: object.board.slug, type: "board"}
+        {:ok, board} = Board.find_by_id(object.board_id)
+        %{id: board.slug, type: "board"}
 
       _ ->
         nil

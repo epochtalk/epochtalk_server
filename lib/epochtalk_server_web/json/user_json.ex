@@ -14,6 +14,25 @@ defmodule EpochtalkServerWeb.Controllers.UserJSON do
   def user(%{user: user, token: token}), do: format_user_reply(user, token)
 
   @doc """
+  Renders formatted user JSON for find proxy
+  """
+  def find_proxy(%{user: user}) do
+    parsed_signature =
+      if user.signature do
+        %Porcelain.Result{out: parsed_sig, status: _status} =
+          Porcelain.shell(
+            "php -r \"require 'parsing.php'; ECHO parse_bbc('" <> user.signature <> "');\""
+          )
+
+        parsed_sig
+      else
+        nil
+      end
+
+    user |> Map.put(:signature, parsed_signature)
+  end
+
+  @doc """
   Renders formatted user JSON for find
   """
   def find(%{

@@ -11,6 +11,9 @@ defmodule EpochtalkServerWeb.Controllers.Board do
   alias EpochtalkServerWeb.ErrorHelpers
   alias EpochtalkServerWeb.Helpers.Validate
   alias EpochtalkServerWeb.Helpers.ACL
+  alias EpochtalkServerWeb.Helpers.ProxyConversion
+
+  plug :check_proxy when action in [:slug_to_id, :by_category]
 
   @doc """
   Used to retrieve categorized boards
@@ -103,6 +106,67 @@ defmodule EpochtalkServerWeb.Controllers.Board do
 
       _ ->
         ErrorHelpers.render_json_error(conn, 400, "Error, cannot convert board slug to id")
+    end
+  end
+
+  defp check_proxy(conn, _) do
+    %{boards_seq: boards_seq} = Application.get_env(:epochtalk_server, :proxy_config)
+    boards_seq = boards_seq |> String.to_integer()
+
+    conn =
+      case conn.private.phoenix_action do
+        :slug_to_id ->
+          case Integer.parse(conn.params["slug"]) do
+            {_, ""} ->
+              slug_as_id = Validate.cast(conn.params, "slug", :integer, required: true)
+
+              if slug_as_id < boards_seq do
+                conn
+                |> render(:slug_to_id, id: slug_as_id)
+                |> halt()
+              else
+                conn
+              end
+
+            _ ->
+              conn
+          end
+
+        :by_category ->
+          if boards_seq > 0 do
+            conn
+            |> proxy_by_category(conn.params)
+            |> halt()
+          else
+            conn
+          end
+
+        _ ->
+          conn
+      end
+
+    conn
+  end
+
+  defp proxy_by_category(conn, attrs) do
+    with :ok <- ACL.allow!(conn, "boards.allCategories"),
+         stripped <- Validate.cast(attrs, "stripped", :boolean, default: false),
+         user_priority <- ACL.get_user_priority(conn),
+         board_mapping <- BoardMapping.all(stripped: stripped),
+         board_moderators <- BoardModerator.all(),
+         {:ok, board_counts} <- ProxyConversion.build_model("boards.counts"),
+         {:ok, board_last_post_info} <- ProxyConversion.build_model("boards.last_post_info"),
+         categories <- Category.all() do
+      render(conn, :proxy_by_category, %{
+        categories: categories,
+        board_moderators: board_moderators,
+        board_mapping: board_mapping,
+        user_priority: user_priority,
+        board_counts: board_counts,
+        board_last_post_info: board_last_post_info
+      })
+    else
+      _ -> ErrorHelpers.render_json_error(conn, 400, "Error, cannot fetch boards")
     end
   end
 end

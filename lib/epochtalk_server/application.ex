@@ -19,6 +19,10 @@ defmodule EpochtalkServer.Application do
       {Redix, host: redix_config()[:host], name: redix_config()[:name]},
       # Start the Ecto repository
       EpochtalkServer.Repo,
+      # Start the Smf repository
+      EpochtalkServer.SmfRepo,
+      # Start the BBC Parser
+      :poolboy.child_spec(:bbc_parser, poolboy_config()),
       # Start Role Cache
       EpochtalkServer.Cache.Role,
       # Warm frontend_config variable (referenced by api controllers)
@@ -38,15 +42,17 @@ defmodule EpochtalkServer.Application do
       # {EpochtalkServer.Worker, arg}
     ]
 
-    # don't run config_warmer during tests
+    # adjust supervised processes for testing
     children =
-      if Application.get_env(:epochtalk_server, :env) == :test,
-        do:
-          List.delete(
-            children,
-            {Task, &EpochtalkServer.Models.Configuration.warm_frontend_config/0}
-          ),
-        else: children
+      if Application.get_env(:epochtalk_server, :env) == :test do
+        children
+        # don't run config warmer during tests
+        |> List.delete({Task, &EpochtalkServer.Models.Configuration.warm_frontend_config/0})
+        # don't run SmfRepo during tests
+        |> List.delete(EpochtalkServer.SmfRepo)
+      else
+        children
+      end
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
@@ -64,4 +70,6 @@ defmodule EpochtalkServer.Application do
 
   # fetch redix config
   defp redix_config(), do: Application.get_env(:epochtalk_server, :redix)
+
+  defp poolboy_config, do: Application.get_env(:epochtalk_server, :poolboy_config)
 end

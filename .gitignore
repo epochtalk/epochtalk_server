@@ -27,3 +27,6 @@ priv/repo/seeds/permissions.json
 
 # Ignore secret config files
 config/*.secret.exs
+
+#Ignore env file
+/.env

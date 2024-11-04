@@ -26,6 +26,9 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
   alias EpochtalkServer.Models.UserActivity
   alias EpochtalkServer.Models.ThreadSubscription
   alias EpochtalkServer.Models.Mention
+  alias EpochtalkServerWeb.Helpers.ProxyConversion
+
+  plug :check_proxy when action in [:by_board, :by_username, :slug_to_id, :viewed, :recent]
 
   @doc """
   Used to retrieve recent threads
@@ -35,8 +38,6 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
          user_priority <- ACL.get_user_priority(conn),
          threads <- Thread.recent(user, user_priority) do
       render(conn, :recent, %{threads: threads})
-    else
-      _ -> ErrorHelpers.render_json_error(conn, 400, "Error, cannot fetch recent threads")
     end
   end
 
@@ -255,8 +256,7 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
            Thread.page_by_username(username, priority, page,
              per_page: limit + 1,
              desc: desc
-           ),
-         {:has_threads, true} <- {:has_threads, threads != []} do
+           ) do
       render(conn, :by_username, %{
         threads: threads,
         user: user,
@@ -267,9 +267,6 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
         page: page
       })
     else
-      {:has_threads, false} ->
-        ErrorHelpers.render_json_error(conn, 404, "Error, requested threads not found")
-
       {:view_deleted_users, false} ->
         ErrorHelpers.render_json_error(conn, 400, "Account not found")
 
@@ -751,6 +748,124 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
 
   defp update_user_thread_view_count(user, thread_id),
     do: UserThreadView.upsert(user.id, thread_id)
+
+  # check proxy for :by_board action
+  defp check_proxy(%{private: %{phoenix_action: :by_board}} = conn, _) do
+    %{boards_seq: boards_seq} = Application.get_env(:epochtalk_server, :proxy_config)
+    boards_seq = boards_seq |> String.to_integer()
+
+    if Validate.cast(conn.params, "board_id", :integer, required: true) < boards_seq do
+      conn
+      |> proxy_by_board(conn.params)
+      |> halt()
+    else
+      conn
+    end
+  end
+
+  # check proxy for :slug_to_id action
+  defp check_proxy(%{private: %{phoenix_action: :slug_to_id}} = conn, _) do
+    case Integer.parse(conn.params["slug"]) do
+      {_, ""} ->
+        slug_as_id = Validate.cast(conn.params, "slug", :integer, required: true)
+
+        %{threads_seq: threads_seq} = Application.get_env(:epochtalk_server, :proxy_config)
+        threads_seq = threads_seq |> String.to_integer()
+
+        if slug_as_id < threads_seq do
+          conn
+          |> render(:slug_to_id, id: slug_as_id)
+          |> halt()
+        else
+          conn
+        end
+
+      _ ->
+        conn
+    end
+  end
+
+  # check proxy for :viewed action
+  defp check_proxy(%{private: %{phoenix_action: :viewed}} = conn, _) do
+    conn
+    |> send_resp(200, [])
+    |> halt()
+  end
+
+  # check proxy for :recent action
+  defp check_proxy(%{private: %{phoenix_action: :recent}} = conn, _) do
+    conn
+    |> proxy_recent(conn.params)
+    |> halt()
+  end
+
+  # check proxy for :recent action
+  defp check_proxy(%{private: %{phoenix_action: :by_username}} = conn, _) do
+    conn
+    |> proxy_by_username(conn.params)
+    |> halt()
+  end
+
+  # check proxy default
+  defp check_proxy(%{private: %{phoenix_action: _}} = conn, _) do
+    conn
+  end
+
+  defp proxy_by_username(conn, attrs) do
+    # Parameter Validation
+    with user_id <- Validate.cast(attrs, "id", :integer, required: true),
+         page <- Validate.cast(attrs, "page", :integer, default: 1, min: 1),
+         limit <- Validate.cast(attrs, "limit", :integer, default: 25, min: 1, max: 100),
+         desc <- Validate.cast(attrs, "desc", :boolean, default: true),
+         {:ok, threads, data} <-
+           ProxyConversion.build_model("threads.by_user", user_id, page, limit, desc) do
+      render(conn, :proxy_by_username, %{
+        threads: threads,
+        next: data.next,
+        prev: data.prev,
+        limit: data.per_page,
+        page: data.page,
+        desc: desc
+      })
+    else
+      _ ->
+        ErrorHelpers.render_json_error(conn, 400, "Error, cannot get threads by username")
+    end
+  end
+
+  defp proxy_by_board(conn, attrs) do
+    with board_id <- Validate.cast(attrs, "board_id", :integer, required: true),
+         page <- Validate.cast(attrs, "page", :integer, default: 1),
+         limit <- Validate.cast(attrs, "limit", :integer, default: 5),
+         user <- Guardian.Plug.current_resource(conn),
+         user_priority <- ACL.get_user_priority(conn),
+         :ok <- ACL.allow!(conn, "threads.byBoard"),
+         board_mapping <- BoardMapping.all(),
+         board_moderators <- BoardModerator.all(),
+         {:ok, threads, data} <-
+           ProxyConversion.build_model("threads.by_board", board_id, page, limit) do
+      render(conn, :by_board_proxy, %{
+        threads: threads,
+        user: user,
+        user_priority: user_priority,
+        board_id: board_id,
+        board_mapping: board_mapping,
+        board_moderators: board_moderators,
+        page: page,
+        limit: limit,
+        pagination_data: data
+      })
+    else
+      _ ->
+        ErrorHelpers.render_json_error(conn, 400, "Error, cannot get threads by board")
+    end
+  end
+
+  defp proxy_recent(conn, _attrs) do
+    with threads <- ProxyConversion.build_model("threads.recent") do
+      render(conn, :recent, %{threads: threads})
+    end
+  end
 
   # === Private Authorization Helpers Functions ===
 

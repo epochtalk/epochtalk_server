@@ -725,29 +725,6 @@ defmodule EpochtalkServer.Models.Thread do
   end
 
   @doc """
-  Used to obtain breadcrumb data for a specific `Thread` given it's `slug`
-  """
-  @spec breadcrumb(slug :: String.t()) ::
-          {:ok, thread :: t()} | {:error, :thread_does_not_exist}
-  def breadcrumb(slug) when is_binary(slug) do
-    post_query =
-      from p in Post,
-        order_by: p.created_at,
-        limit: 1
-
-    thread_query =
-      from t in Thread,
-        where: t.slug == ^slug,
-        preload: [:board, posts: ^post_query]
-
-    thread = Repo.one(thread_query)
-
-    if thread,
-      do: {:ok, thread},
-      else: {:error, :thread_does_not_exist}
-  end
-
-  @doc """
   Used to get first `Post` data given a `Thread` id
   """
   @spec get_first_post_data_by_id(id :: non_neg_integer) ::

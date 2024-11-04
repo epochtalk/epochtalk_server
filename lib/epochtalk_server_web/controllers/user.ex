@@ -17,6 +17,9 @@ defmodule EpochtalkServerWeb.Controllers.User do
   alias EpochtalkServerWeb.CustomErrors.InvalidPayload
   alias EpochtalkServerWeb.Helpers.ACL
   alias EpochtalkServerWeb.Helpers.Validate
+  alias EpochtalkServerWeb.Helpers.ProxyConversion
+
+  plug :check_proxy when action in [:find]
 
   @doc """
   Used to check if a username has already been taken
@@ -94,10 +97,6 @@ defmodule EpochtalkServerWeb.Controllers.User do
          {:ok, _email} <- Mailer.send_confirm_account(user) do
       render(conn, :register_with_verify, user: user)
     else
-      # error in user.create
-      {:error, data} ->
-        ErrorHelpers.render_json_error(conn, 400, data)
-
       # error email failed to send
       {:error, :not_delivered} ->
         ErrorHelpers.render_json_error(
@@ -105,6 +104,10 @@ defmodule EpochtalkServerWeb.Controllers.User do
           500,
           "Sending of account confirmation email failed, mailer is not properly configured."
         )
+
+      # error in user.create
+      {:error, data} ->
+        ErrorHelpers.render_json_error(conn, 400, data)
 
       # Catch all for any other errors
       _ ->
@@ -269,4 +272,24 @@ defmodule EpochtalkServerWeb.Controllers.User do
   end
 
   def login(_conn, _attrs), do: raise(InvalidPayload)
+
+  ## === Private Helper Functions ===
+
+  defp check_proxy(conn, _) do
+    case conn.private.phoenix_action do
+      :find ->
+        conn
+        |> proxy_find(conn.params)
+        |> halt()
+
+      _ ->
+        conn
+    end
+  end
+
+  defp proxy_find(conn, attrs) do
+    with user <- ProxyConversion.build_model("user.find", attrs["id"]) do
+      render(conn, :find_proxy, %{user: user})
+    end
+  end
 end

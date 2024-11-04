@@ -10,6 +10,7 @@ defmodule EpochtalkServerWeb.Controllers.Post do
   alias EpochtalkServerWeb.Helpers.ACL
   alias EpochtalkServerWeb.Helpers.Sanitize
   alias EpochtalkServerWeb.Helpers.Parse
+  alias EpochtalkServerWeb.Helpers.ProxyConversion
   alias EpochtalkServer.Models.Profile
   alias EpochtalkServer.Models.Post
   alias EpochtalkServer.Models.Poll
@@ -30,6 +31,8 @@ defmodule EpochtalkServerWeb.Controllers.Post do
   alias EpochtalkServer.Models.Mention
 
   @max_post_title_length 255
+
+  plug :check_proxy when action in [:by_thread, :by_username]
 
   @doc """
   Used to create posts
@@ -387,8 +390,7 @@ defmodule EpochtalkServerWeb.Controllers.Post do
              per_page: limit,
              desc: desc
            ),
-         count <- Profile.post_count_by_username(username),
-         {:has_posts, true} <- {:has_posts, posts != []} do
+         count <- Profile.post_count_by_username(username) do
       render(conn, :by_username, %{
         posts: posts,
         user: user,
@@ -400,9 +402,6 @@ defmodule EpochtalkServerWeb.Controllers.Post do
         desc: desc
       })
     else
-      {:has_posts, false} ->
-        ErrorHelpers.render_json_error(conn, 404, "Error, requested posts not found")
-
       {:view_deleted_users, false} ->
         ErrorHelpers.render_json_error(conn, 400, "Account not found")
 
@@ -421,9 +420,6 @@ defmodule EpochtalkServerWeb.Controllers.Post do
            Validate.cast(attrs, "body", :string, required: true, max: post_max_length, min: 1),
          parsed_body <- Parse.markdown(body) do
       render(conn, :preview, %{parsed_body: parsed_body})
-    else
-      _ ->
-        ErrorHelpers.render_json_error(conn, 400, "Error, cannot generate preview")
     end
   end
 
@@ -527,4 +523,83 @@ defmodule EpochtalkServerWeb.Controllers.Post do
         !Board.is_post_edit_disabled_by_thread_id(post.thread_id, post.created_at),
         true
       )
+
+  defp check_proxy(conn, _) do
+    conn =
+      case conn.private.phoenix_action do
+        :by_thread ->
+          %{threads_seq: threads_seq} = Application.get_env(:epochtalk_server, :proxy_config)
+          threads_seq = threads_seq |> String.to_integer()
+
+          if Validate.cast(conn.params, "thread_id", :integer, required: true) < threads_seq do
+            conn
+            |> proxy_by_thread(conn.params)
+            |> halt()
+          else
+            conn
+          end
+
+        :by_username ->
+          conn
+          |> proxy_by_username(conn.params)
+          |> halt()
+
+        _ ->
+          conn
+      end
+
+    conn
+  end
+
+  defp proxy_by_username(conn, attrs) do
+    # Parameter Validation
+    with user_id <- Validate.cast(attrs, "id", :integer, required: true),
+         page <- Validate.cast(attrs, "page", :integer, default: 1, min: 1),
+         limit <- Validate.cast(attrs, "limit", :integer, default: 25, min: 1, max: 100),
+         desc <- Validate.cast(attrs, "desc", :boolean, default: true),
+         {:ok, posts, data} <-
+           ProxyConversion.build_model("posts.by_user", user_id, page, limit, desc) do
+      render(conn, :proxy_by_username, %{
+        posts: posts,
+        count: data.total_records,
+        limit: data.per_page,
+        page: data.page,
+        desc: desc
+      })
+    else
+      _ ->
+        ErrorHelpers.render_json_error(conn, 400, "Error, cannot get posts by username")
+    end
+  end
+
+  defp proxy_by_thread(conn, attrs) do
+    with thread_id <- Validate.cast(attrs, "thread_id", :integer, required: true),
+         page <- Validate.cast(attrs, "page", :integer, default: 1),
+         limit <- Validate.cast(attrs, "limit", :integer, default: 5),
+         user <- Guardian.Plug.current_resource(conn),
+         user_priority <- ACL.get_user_priority(conn),
+         :ok <- ACL.allow!(conn, "posts.byThread"),
+         board_mapping <- BoardMapping.all(),
+         board_moderators <- BoardModerator.all(),
+         thread <- ProxyConversion.build_model("thread", thread_id),
+         poll <- ProxyConversion.build_model("poll.by_thread", thread_id),
+         {:ok, posts, data} <-
+           ProxyConversion.build_model("posts.by_thread", thread_id, page, limit) do
+      render(conn, :by_thread_proxy, %{
+        posts: posts,
+        poll: poll,
+        thread: thread,
+        user: user,
+        user_priority: user_priority,
+        board_mapping: board_mapping,
+        board_moderators: board_moderators,
+        page: page,
+        limit: limit,
+        pagination_data: data
+      })
+    else
+      _ ->
+        ErrorHelpers.render_json_error(conn, 400, "Error, cannot get posts by thread")
+    end
+  end
 end

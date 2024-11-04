@@ -40,6 +40,20 @@ defmodule EpochtalkServerWeb.Controllers.PostJSON do
   end
 
   @doc """
+  Renders `Post` data for parsed legacy `Post` data
+
+    ## Example
+    iex> parsed_body = %{parsed_body: "<p><strong>Hello World</strong><p>"}
+    iex> EpochtalkServerWeb.Controllers.PostJSON.preview(parsed_body)
+    parsed_body
+  """
+  def parse_legacy(%{
+        parsed_body: parsed_body
+      }) do
+    %{parsed_body: parsed_body}
+  end
+
+  @doc """
   Renders all `Post` for a particular `Thread`.
   """
   def by_thread(%{
@@ -99,6 +113,45 @@ defmodule EpochtalkServerWeb.Controllers.PostJSON do
     }
   end
 
+  def by_thread_proxy(%{
+        posts: posts,
+        poll: poll,
+        thread: thread,
+        user_priority: user_priority,
+        board_mapping: board_mapping,
+        board_moderators: board_moderators,
+        page: page,
+        limit: limit
+      }) do
+    # format board data
+    board =
+      BoardJSON.format_board_data_for_find(
+        board_moderators,
+        board_mapping,
+        thread.board_id,
+        user_priority
+      )
+
+    thread = Map.put(thread, :poll, poll)
+
+    # convert singular post to list
+    posts = if is_map(posts), do: [posts], else: posts
+
+    # format post data
+    posts =
+      posts
+      |> Enum.map(&format_proxy_post_data_for_by_thread(&1))
+
+    # build by_thread results
+    %{
+      posts: posts,
+      thread: thread,
+      board: board,
+      page: page,
+      limit: limit
+    }
+  end
+
   @doc """
   Renders all `Post` for a particular `User`.
   """
@@ -125,6 +178,46 @@ defmodule EpochtalkServerWeb.Controllers.PostJSON do
       count: count
     }
   end
+
+  @doc """
+  Renders all `Post` for a particular `User`.
+  """
+  def proxy_by_username(%{
+        posts: posts,
+        count: count,
+        limit: limit,
+        page: page,
+        desc: desc
+      })
+      when is_list(posts) do
+    posts =
+      posts
+      |> Enum.map(&format_proxy_post_data_for_by_thread(&1))
+
+    %{
+      posts: posts,
+      count: count,
+      limit: limit,
+      page: page,
+      desc: desc
+    }
+  end
+
+  def proxy_by_username(%{
+        posts: posts,
+        count: count,
+        limit: limit,
+        page: page,
+        desc: desc
+      }),
+      do:
+        proxy_by_username(%{
+          posts: [posts],
+          count: count,
+          limit: limit,
+          page: page,
+          desc: desc
+        })
 
   ## === Public Helper Functions ===
 
@@ -349,5 +442,24 @@ defmodule EpochtalkServerWeb.Controllers.PostJSON do
     |> Map.delete(:signature)
     |> Map.delete(:highlight_color)
     |> Map.delete(:role_name)
+  end
+
+  defp format_proxy_post_data_for_by_thread(post) do
+    body = String.replace(Map.get(post, :body) || Map.get(post, :body_html), "'", "\'")
+
+    parsed_body = EpochtalkServer.BBCParser.async_parse(body)
+
+    signature =
+      if Map.get(post.user, :signature),
+        do: String.replace(post.user.signature, "'", "\'"),
+        else: nil
+
+    parsed_signature =
+      if signature,
+        do: EpochtalkServer.BBCParser.async_parse(signature),
+        else: nil
+
+    user = post.user |> Map.put(:signature, parsed_signature)
+    post |> Map.put(:body_html, parsed_body) |> Map.put(:user, user)
   end
 end

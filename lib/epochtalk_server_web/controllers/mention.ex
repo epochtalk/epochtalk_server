@@ -27,8 +27,7 @@ defmodule EpochtalkServerWeb.Controllers.Mention do
              pagination_data: data,
              extended: extended
            }),
-         else:
-           ({:auth, nil} ->
-              ErrorHelpers.render_json_error(conn, 400, "Not logged in, cannot page mentions"))
+         else: ({:auth, nil} ->
+                  ErrorHelpers.render_json_error(conn, 400, "Not logged in, cannot page mentions"))
   end
 end

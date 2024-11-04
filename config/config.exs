@@ -10,6 +10,9 @@ import Config
 # Set ecto repos
 config :epochtalk_server, ecto_repos: [EpochtalkServer.Repo]
 
+# Configure Porcelain
+config :porcelain, driver: Porcelain.Driver.Basic
+
 # Set Guardian.DB to GuardianRedis
 config :guardian, Guardian.DB, repo: GuardianRedis.Repo
 

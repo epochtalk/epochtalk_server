@@ -48,7 +48,7 @@ defmodule EpochtalkServerWeb.Controllers.ThreadJSON do
               deleted: t.last_post_user_deleted
             }
           ),
-        lastest:
+        latest:
           if(t.new_post_id || t.new_post_position,
             do: %{id: t.new_post_id, position: t.new_post_position || 1}
           )
@@ -128,6 +128,39 @@ defmodule EpochtalkServerWeb.Controllers.ThreadJSON do
     if board_banned, do: Map.put(result, :board_banned, board_banned), else: result
   end
 
+  def by_board_proxy(%{
+        threads: threads,
+        user: user,
+        user_priority: user_priority,
+        board_id: board_id,
+        board_mapping: board_mapping,
+        board_moderators: board_moderators,
+        page: page,
+        limit: limit
+      }) do
+    # format board data
+    board =
+      BoardJSON.format_board_data_for_find(
+        board_moderators,
+        board_mapping,
+        board_id,
+        user_priority
+      )
+
+    # format thread data
+    user_id = if is_nil(user), do: nil, else: user.id
+    normal = threads |> Enum.map(&format_thread_data(&1, user_id))
+    # sticky = threads.sticky |> Enum.map(&format_thread_data(&1, user_id))
+
+    # build by_board results
+    %{
+      normal: normal,
+      board: board,
+      page: page,
+      limit: limit
+    }
+  end
+
   @doc """
   Renders paged `Threads` for a particular `User`.
   """
@@ -159,6 +192,27 @@ defmodule EpochtalkServerWeb.Controllers.ThreadJSON do
       page: page,
       next: next,
       prev: page > 1
+    }
+  end
+
+  @doc """
+  Renders all `Post` for a particular `User`.
+  """
+  def proxy_by_username(%{
+        threads: threads,
+        next: next,
+        prev: prev,
+        limit: limit,
+        page: page,
+        desc: desc
+      }) do
+    %{
+      posts: threads,
+      next: next,
+      prev: prev,
+      limit: limit,
+      page: page,
+      desc: desc
     }
   end
 
@@ -240,7 +294,7 @@ defmodule EpochtalkServerWeb.Controllers.ThreadJSON do
     # handle deleted user
     thread =
       if thread.user_deleted,
-        do: thread |> Map.put(:user_id, '') |> Map.put(:username, ''),
+        do: thread |> Map.put(:user_id, "") |> Map.put(:username, ""),
         else: thread
 
     # format user output
@@ -308,6 +362,5 @@ defmodule EpochtalkServerWeb.Controllers.ThreadJSON do
     thread
     |> Map.delete(:last_post_deleted)
     |> Map.delete(:last_post_user_deleted)
-    |> Map.delete(:last_post_user_id)
   end
 end

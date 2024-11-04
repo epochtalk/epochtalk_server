@@ -84,9 +84,11 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
 
   def build_user(user_id) do
     from(u in "smf_members", where: u.id_member == ^user_id)
-    |> select([u], %{
+    |> join(:left, [u], a in "smf_attachments",
+      on: u.id_member == a.id_member and a.attachmentType == 1
+    )
+    |> select([u, a], %{
       activity: u.activity,
-      avatar: u.avatar,
       created_at: u.dateRegistered * 1000,
       dob: u.birthdate,
       gender: u.gender,
@@ -102,7 +104,14 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
       name: u.realName,
       username: u.realName,
       title: u.usertitle,
-      website: u.websiteUrl
+      website: u.websiteUrl,
+      avatar:
+        fragment(
+          "if(? <>'',concat('https://bitcointalk.org/avatars/',?),ifnull(concat('https://bitcointalk.org/useravatars/',?),''))",
+          u.avatar,
+          u.avatar,
+          a.filename
+        )
     })
     |> SmfRepo.one()
   end

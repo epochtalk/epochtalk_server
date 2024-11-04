@@ -447,13 +447,7 @@ defmodule EpochtalkServerWeb.Controllers.PostJSON do
   defp format_proxy_post_data_for_by_thread(post) do
     body = String.replace(Map.get(post, :body) || Map.get(post, :body_html), "'", "\'")
 
-    # %Porcelain.Result{out: parsed_body, status: _status} =
-    #   Porcelain.shell("php -r \"require 'parsing.php'; ECHO parse_bbc('" <> body <> "');\"")
-
     parsed_body = EpochtalkServer.BBCParser.async_parse(body)
-
-    parsed_body = Enum.join(for <<c::utf8 <- parsed_body>>, do: <<c::utf8>>)
-    # IO.inspect parsed_body
 
     signature =
       if Map.get(post.user, :signature),
@@ -461,58 +455,11 @@ defmodule EpochtalkServerWeb.Controllers.PostJSON do
         else: nil
 
     parsed_signature =
-      if signature do
-        # %Porcelain.Result{out: parsed_sig, status: _status} =
-        #   Porcelain.shell(
-        #     "php -r \"require 'parsing.php'; ECHO parse_bbc('" <> signature <> "');\""
-        #   )
-        # parsed_sig
-        EpochtalkServer.BBCParser.async_parse(signature)
-      else
-        nil
-      end
+      if signature,
+        do: EpochtalkServer.BBCParser.async_parse(signature),
+        else: nil
 
     user = post.user |> Map.put(:signature, parsed_signature)
     post |> Map.put(:body_html, parsed_body) |> Map.put(:user, user)
-  end
-
-  alias Porcelain.Process, as: Proc
-  alias Porcelain.Result
-
-  def test() do
-    body = File.read!("./broken_ouput.txt")
-
-    # %Porcelain.Result{out: parsed_body, status: _status} =
-    #   Porcelain.shell("php -r \"require 'parsing.php'; ECHO parse_bbc('" <> body <> "');\"")
-    # parsed_body
-
-   proc = %Proc{out: outstream} = Porcelain.spawn("php", ["-a"], [in: :receive, out: :stream])
-   Proc.send_input(proc, "require 'parsing.php';\n")     ;
-   Proc.send_input(proc, "echo parse_bbc('[b]hello[/b]');\n")
-   Proc.send_input(proc, "exit\n");
-   Enum.into(proc.out, "")
-  end
-
-  def test2() do
-    body = File.read!("./broken_ouput.txt")
-
-    # %Porcelain.Result{out: parsed_body, status: _status} =
-    #   Porcelain.shell("php -r \"require 'parsing.php'; ECHO parse_bbc('" <> body <> "');\"")
-    # parsed_body
-
-
-    proc = %Proc{pid: pid} =
-    Porcelain.spawn_shell("php -a",in: :receive, out: {:send, self()})
-    Proc.send_input(proc, "require 'parsing.php';\n")     ;
-    Proc.send_input(proc, "echo parse_bbc('[b]hello[/b]');\n")
-
-    receive do
-      {^pid, :data, :out, data} -> data
-    end
-    test = receive do
-      {^pid, :data, :out, data} -> data
-    end
-    IO.inspect test
-    IO.inspect test
   end
 end

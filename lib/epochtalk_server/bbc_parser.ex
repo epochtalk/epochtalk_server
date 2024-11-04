@@ -2,7 +2,7 @@ defmodule EpochtalkServer.BBCParser do
   use GenServer
   require Logger
   alias Porcelain.Process, as: Proc
-  @timeout 10000
+  @timeout 10_000
 
   @moduledoc """
   `BBCParser` genserver, runs interactive php shell to call bbcode parser
@@ -49,7 +49,7 @@ defmodule EpochtalkServer.BBCParser do
           GenServer.call(pid, {:parse, bbcode_data}, @timeout)
         catch
           e, r ->
-            IO.inspect("poolboy transaction caught error: #{inspect(e)}, #{inspect(r)}")
+            Logger.debug("poolboy transaction caught error: #{inspect(e)}, #{inspect(r)}")
             :ok
         end
       end,

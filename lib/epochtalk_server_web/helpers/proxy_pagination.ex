@@ -101,8 +101,10 @@ defmodule EpochtalkServerWeb.Helpers.ProxyPagination do
     # query one more page to calculate if next page exists
     result = records(query, page, nil, per_page + 1)
 
+    next = length(result) > per_page
+
     pagination_data = %{
-      next: length(result) == per_page + 1,
+      next: next,
       prev: page > 1,
       page: page,
       per_page: per_page,
@@ -110,7 +112,11 @@ defmodule EpochtalkServerWeb.Helpers.ProxyPagination do
     }
 
     # remove extra element
-    result = result |> Enum.reverse() |> tl() |> Enum.reverse()
+    result =
+      if next,
+        do: result |> Enum.reverse() |> tl() |> Enum.reverse(),
+        else: result
+
     {:ok, result, pagination_data}
   end
 

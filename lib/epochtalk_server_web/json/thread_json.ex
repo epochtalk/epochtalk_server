@@ -207,15 +207,14 @@ defmodule EpochtalkServerWeb.Controllers.ThreadJSON do
         desc: desc
       }) do
     %{
-        posts: threads,
-        next: next,
-        prev: prev,
-        limit: limit,
-        page: page,
-        desc: desc
-      }
+      posts: threads,
+      next: next,
+      prev: prev,
+      limit: limit,
+      page: page,
+      desc: desc
+    }
   end
-
 
   @doc """
   Renders sticky `Thread`.

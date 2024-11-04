@@ -363,6 +363,5 @@ defmodule EpochtalkServerWeb.Controllers.ThreadJSON do
     thread
     |> Map.delete(:last_post_deleted)
     |> Map.delete(:last_post_user_deleted)
-    |> Map.delete(:last_post_user_id)
   end
 end

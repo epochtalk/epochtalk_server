@@ -333,7 +333,7 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
       first_post_id: t.id_first_msg,
       last_post_id: t.id_last_msg,
       started_user_id: t.id_member_started,
-      updated_user_id: t.id_member_updated,
+      last_post_user_id: t.id_member_updated,
       moderated: t.selfModerated,
       post_count: t.numReplies,
       title: f.subject,

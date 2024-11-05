@@ -83,7 +83,14 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
   end
 
   def build_user(user_id) do
-    from(u in "smf_members", where: u.id_member == ^user_id)
+    last_active =
+      from m in "smf_messages",
+        where: m.id_member == ^user_id,
+        order_by: [desc: m.posterTime],
+        limit: 1,
+        select: %{last_active: m.posterTime * 1000}
+
+    user = from(u in "smf_members", where: u.id_member == ^user_id)
     |> join(:left, [u], a in "smf_attachments",
       on: u.id_member == a.id_member and a.attachmentType == 1
     )
@@ -94,7 +101,6 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
       gender: u.gender,
       id: u.id_member,
       language: nil,
-      last_active: nil,
       location: u.location,
       merit: u.merit,
       id_group: u.id_group,
@@ -114,6 +120,10 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
         )
     })
     |> SmfRepo.one()
+
+    if user.post_count > 0,
+      do: Map.merge(user, SmfRepo.one(last_active)),
+      else: Map.put(user, :last_active, user.created_at)
   end
 
   def build_poll(thread_id) do

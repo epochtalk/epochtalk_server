@@ -28,9 +28,15 @@ defmodule EpochtalkServerWeb.Controllers.UserJSON do
       _ -> nil
     end
 
+    dob = case d = Map.get(user, :dob) do
+      ~D[0001-01-01] -> nil
+      _ -> d
+    end
+
     user
     |> Map.put(:signature, parsed_signature)
     |> Map.put(:gender, gender)
+    |> Map.put(:dob, dob)
   end
 
   @doc """

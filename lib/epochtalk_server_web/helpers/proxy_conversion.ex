@@ -90,36 +90,37 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
         limit: 1,
         select: %{last_active: m.posterTime * 1000}
 
-    user = from(u in "smf_members", where: u.id_member == ^user_id)
-    |> join(:left, [u], a in "smf_attachments",
-      on: u.id_member == a.id_member and a.attachmentType == 1
-    )
-    |> select([u, a], %{
-      activity: u.activity,
-      created_at: u.dateRegistered * 1000,
-      dob: u.birthdate,
-      gender: u.gender,
-      id: u.id_member,
-      language: nil,
-      location: u.location,
-      merit: u.merit,
-      id_group: u.id_group,
-      id_post_group: u.id_post_group,
-      signature: u.signature,
-      post_count: u.posts,
-      name: u.realName,
-      username: u.realName,
-      title: u.usertitle,
-      website: u.websiteUrl,
-      avatar:
-        fragment(
-          "if(? <>'',concat('https://bitcointalk.org/avatars/',?),ifnull(concat('https://bitcointalk.org/useravatars/',?),''))",
-          u.avatar,
-          u.avatar,
-          a.filename
-        )
-    })
-    |> SmfRepo.one()
+    user =
+      from(u in "smf_members", where: u.id_member == ^user_id)
+      |> join(:left, [u], a in "smf_attachments",
+        on: u.id_member == a.id_member and a.attachmentType == 1
+      )
+      |> select([u, a], %{
+        activity: u.activity,
+        created_at: u.dateRegistered * 1000,
+        dob: u.birthdate,
+        gender: u.gender,
+        id: u.id_member,
+        language: nil,
+        location: u.location,
+        merit: u.merit,
+        id_group: u.id_group,
+        id_post_group: u.id_post_group,
+        signature: u.signature,
+        post_count: u.posts,
+        name: u.realName,
+        username: u.realName,
+        title: u.usertitle,
+        website: u.websiteUrl,
+        avatar:
+          fragment(
+            "if(? <>'',concat('https://bitcointalk.org/avatars/',?),ifnull(concat('https://bitcointalk.org/useravatars/',?),''))",
+            u.avatar,
+            u.avatar,
+            a.filename
+          )
+      })
+      |> SmfRepo.one()
 
     if user.post_count > 0,
       do: Map.merge(user, SmfRepo.one(last_active)),
@@ -525,13 +526,6 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
       }
     })
     |> ProxyPagination.page_simple(count_query, page, per_page: per_page, desc: desc)
-    |> case do
-      {:ok, [], _} ->
-        {:error, "Posts not found for user_id: #{id}"}
-
-      {:ok, posts, data} ->
-        return_tuple(posts, data)
-    end
   end
 
   def build_threads_by_user(id, page, per_page, desc) do

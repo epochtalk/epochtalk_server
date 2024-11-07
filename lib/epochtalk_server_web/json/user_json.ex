@@ -22,7 +22,15 @@ defmodule EpochtalkServerWeb.Controllers.UserJSON do
         do: EpochtalkServer.BBCParser.async_parse(user.signature),
         else: nil
 
-    user |> Map.put(:signature, parsed_signature)
+    gender = case Map.get(user, :gender) do
+      1 -> "Male"
+      2 -> "Female"
+      _ -> nil
+    end
+
+    user
+    |> Map.put(:signature, parsed_signature)
+    |> Map.put(:gender, gender)
   end
 
   @doc """

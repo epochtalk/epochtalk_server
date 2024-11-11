@@ -136,7 +136,9 @@ defmodule EpochtalkServerWeb.Controllers.ThreadJSON do
         board_mapping: board_mapping,
         board_moderators: board_moderators,
         page: page,
-        limit: limit
+        limit: limit,
+        board_counts: board_counts,
+        board_last_post_info: board_last_post_info
       }) do
     # format board data
     board =
@@ -144,7 +146,9 @@ defmodule EpochtalkServerWeb.Controllers.ThreadJSON do
         board_moderators,
         board_mapping,
         board_id,
-        user_priority
+        user_priority,
+        board_counts,
+        board_last_post_info
       )
 
     # format thread data

@@ -142,7 +142,7 @@ defmodule EpochtalkServerWeb.Controllers.ThreadJSON do
       }) do
     # format board data
     board =
-      BoardJSON.format_board_data_for_find(
+      BoardJSON.proxy_format_board_data_for_find(
         board_moderators,
         board_mapping,
         board_id,

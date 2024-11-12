@@ -314,10 +314,10 @@ defmodule Test.EpochtalkServerWeb.Controllers.User do
       response =
         conn
         |> delete(Routes.user_path(conn, :logout))
-        |> json_response(400)
+        |> json_response(401)
 
-      assert response["error"] == "Bad Request"
-      assert response["message"] == "Not logged in"
+      assert response["error"] == "Unauthorized"
+      assert response["message"] == "No resource found"
     end
   end
 

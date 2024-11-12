@@ -16,13 +16,14 @@ defmodule EpochtalkServerWeb.Helpers.ProxyPagination do
       iex> alias EpochtalkServerWeb.Helpers.Pagination
       iex> Mention
       ...> |> order_by(asc: :id)
-      ...> |> Pagination.page_simple(1, per_page: 25)
+      ...> |> Pagination.page_simple(1, per_page: 25, desc: true)
       {:ok, [], %{next: false,
                page: 1,
                per_page: 25,
                prev: false,
                total_pages: 1,
-               total_records: 0}}
+               total_records: 0,
+               desc: true}}
       iex> Invitation
       ...> |> order_by(desc: :email)
       ...> |> Pagination.page_simple(1, per_page: 10)
@@ -31,14 +32,16 @@ defmodule EpochtalkServerWeb.Helpers.ProxyPagination do
                per_page: 10,
                prev: false,
                total_pages: 1,
-               total_records: 0}}
+               total_records: 0,
+               desc: true}}
   """
   @spec page_simple(
           query :: Ecto.Queryable.t(),
           count_query :: Ecto.Queryable.t(),
           page :: integer | String.t() | nil,
-          per_page: integer | String.t() | nil
-        ) :: {:ok, list :: [term()] | [], pagination_data :: map()}
+          per_page: integer | String.t() | nil,
+          desc: boolean
+        ) :: {:ok, list :: [term()] | [], pagination_data :: map()} | {:error, data :: any()}
   def page_simple(query, count_query, nil, per_page: nil, desc: desc),
     do: page_simple(query, count_query, 1, per_page: 15, desc: desc)
 

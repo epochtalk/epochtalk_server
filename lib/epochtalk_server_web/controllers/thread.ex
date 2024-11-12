@@ -215,14 +215,8 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
       {:can_read, {:error, :board_does_not_exist}} ->
         ErrorHelpers.render_json_error(conn, 400, "Read error, board does not exist")
 
-      {:board_banned, {:ok, true}} ->
-        ErrorHelpers.render_json_error(conn, 403, "Unauthorized, you are banned from this board")
-
       {:has_threads, false} ->
         ErrorHelpers.render_json_error(conn, 404, "Error, requested threads not found in board")
-
-      _ ->
-        ErrorHelpers.render_json_error(conn, 400, "Error, cannot get threads by board")
     end
   end
 
@@ -341,9 +335,6 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
           "Account must be active to unwatch thread"
         )
 
-      {:error, data} ->
-        ErrorHelpers.render_json_error(conn, 400, data)
-
       _ ->
         ErrorHelpers.render_json_error(conn, 400, "Error, cannot unwatch thread")
     end
@@ -402,9 +393,6 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
           "Account must be active to modify lock on thread"
         )
 
-      {:error, data} ->
-        ErrorHelpers.render_json_error(conn, 400, data)
-
       _ ->
         ErrorHelpers.render_json_error(conn, 400, "Error, cannot lock thread")
     end
@@ -462,9 +450,6 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
           400,
           "Account must be active to modify sticky on thread"
         )
-
-      {:error, data} ->
-        ErrorHelpers.render_json_error(conn, 400, data)
 
       _ ->
         ErrorHelpers.render_json_error(conn, 400, "Error, cannot sticky thread")
@@ -639,9 +624,6 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
           400,
           "Error, cannot convert slug, thread does not exist"
         )
-
-      _ ->
-        ErrorHelpers.render_json_error(conn, 400, "Error, cannot convert thread slug to id")
     end
   end
 
@@ -664,7 +646,7 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
       |> send_resp(200, [])
       |> halt()
     else
-      {:error, :board_does_not_exist} ->
+      {:can_read, {:error, :board_does_not_exist}} ->
         ErrorHelpers.render_json_error(
           conn,
           400,

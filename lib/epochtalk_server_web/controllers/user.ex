@@ -142,12 +142,6 @@ defmodule EpochtalkServerWeb.Controllers.User do
           500,
           "There was an error banning malicious user, upon confirming account"
         )
-
-      {:error, data} ->
-        ErrorHelpers.render_json_error(conn, 400, data)
-
-      _ ->
-        ErrorHelpers.render_json_error(conn, 500, "There was an issue registering")
     end
   end
 
@@ -182,17 +176,11 @@ defmodule EpochtalkServerWeb.Controllers.User do
         show_hidden: show_hidden
       })
     else
-      {:error, :user_not_found} ->
-        ErrorHelpers.render_json_error(conn, 400, "Account not found")
-
-      {:error, data} ->
-        ErrorHelpers.render_json_error(conn, 400, data)
-
       {:view_deleted, false} ->
         ErrorHelpers.render_json_error(conn, 400, "Account not found")
 
-      _ ->
-        ErrorHelpers.render_json_error(conn, 500, "There was an issue finding user")
+      {:error, _} ->
+        ErrorHelpers.render_json_error(conn, 400, "Account not found")
     end
   end
 
@@ -211,16 +199,13 @@ defmodule EpochtalkServerWeb.Controllers.User do
   Logs out the logged in `User`
   """
   def logout(conn, _attrs) do
-    with {:auth, true} <- {:auth, Guardian.Plug.authenticated?(conn)},
-         user <- Guardian.Plug.current_resource(conn),
+    with user <- Guardian.Plug.current_resource(conn),
          token <- Guardian.Plug.current_token(conn),
          {:ok, conn} <- Session.delete(conn) do
       EpochtalkServerWeb.Endpoint.broadcast("user:#{user.id}", "logout", %{token: token})
       render(conn, :data, data: %{success: true})
     else
-      {:auth, false} -> ErrorHelpers.render_json_error(conn, 400, "Not logged in")
-      {:error, error} -> ErrorHelpers.render_json_error(conn, 500, error)
-      _ -> ErrorHelpers.render_json_error(conn, 500, "There was an issue signing out")
+      {:error, data} -> ErrorHelpers.render_json_error(conn, 500, data)
     end
   end
 
@@ -265,9 +250,6 @@ defmodule EpochtalkServerWeb.Controllers.User do
 
       {:error, :unban_error} ->
         ErrorHelpers.render_json_error(conn, 500, "There was an issue unbanning user, upon login")
-
-      _ ->
-        ErrorHelpers.render_json_error(conn, 500, "There was an issue while attempting to login")
     end
   end
 

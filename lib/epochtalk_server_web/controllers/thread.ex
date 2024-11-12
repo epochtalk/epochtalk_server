@@ -815,6 +815,8 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
          :ok <- ACL.allow!(conn, "threads.byBoard"),
          board_mapping <- BoardMapping.all(),
          board_moderators <- BoardModerator.all(),
+         {:ok, board_counts} <- ProxyConversion.build_model("boards.counts"),
+         {:ok, board_last_post_info} <- ProxyConversion.build_model("boards.last_post_info"),
          {:ok, threads, data} <-
            ProxyConversion.build_model("threads.by_board", board_id, page, limit) do
       render(conn, :by_board_proxy, %{
@@ -826,7 +828,9 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
         board_moderators: board_moderators,
         page: page,
         limit: limit,
-        pagination_data: data
+        pagination_data: data,
+        board_counts: board_counts,
+        board_last_post_info: board_last_post_info
       })
     else
       _ ->

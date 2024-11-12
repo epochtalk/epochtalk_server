@@ -124,6 +124,76 @@ defmodule EpochtalkServerWeb.Controllers.BoardJSON do
   def movelist(%{movelist: movelist}), do: movelist
 
   @doc """
+  Proxy version
+  Board view helper method for mapping childboards and other metadata to board using board mapping and user priority
+  """
+  def proxy_format_board_data_for_find(
+        board_moderators,
+        board_mapping,
+        board_id,
+        user_priority,
+        board_counts \\ nil,
+        board_last_post_info \\ nil
+      ) do
+    board_counts = map_to_id(board_counts)
+    board_last_post_info = map_to_id(board_last_post_info)
+    # filter out board by id
+    [board] = Enum.filter(board_mapping, fn bm -> bm.board_id == board_id end)
+
+    # append board moderators to board
+    moderators =
+      board_moderators
+      |> Enum.filter(fn mod -> Map.get(mod, :board_id) == Map.get(board, :board_id) end)
+      |> Enum.map(fn mod -> %{id: mod.user_id, username: mod.user.username} end)
+
+    board = Map.put(board, :moderators, moderators)
+
+    # flatten needed boards data
+    board =
+      board
+      |> Map.merge(remove_nil(board.board))
+      |> Map.merge(
+        remove_nil(board.stats)
+        |> Map.delete(:id)
+      )
+      |> Map.merge(board.thread)
+      |> Map.merge(board.board.meta || board.stats)
+      |> Map.delete(:meta)
+
+    # delete unneeded properties
+    board =
+      board
+      |> Map.delete(:board)
+      |> Map.delete(:stats)
+      |> Map.delete(:thread)
+      |> Map.delete(:parent)
+      |> Map.delete(:category)
+      |> Map.delete(:__meta__)
+      |> Map.delete(:__struct__)
+
+    # handle deleted last post data
+    if !!Map.get(board, :post_deleted) or !!Map.get(board, :user_deleted),
+      do: board |> Map.put(:last_post_username, "deleted"),
+      else: board
+
+    # iterate each child board, attempt to map nested children from board mapping
+    board =
+      process_children_from_board_mapping(
+        :parent_id,
+        board_mapping,
+        :children,
+        board,
+        user_priority,
+        # board counts and last post info for proxy version
+        board_counts,
+        board_last_post_info
+      )
+
+    # return flattened board data with children, mod and last post data
+    board
+  end
+
+  @doc """
   Board view helper method for mapping childboards and other metadata to board using board mapping and user priority
   """
   def format_board_data_for_find(board_moderators, board_mapping, board_id, user_priority) do

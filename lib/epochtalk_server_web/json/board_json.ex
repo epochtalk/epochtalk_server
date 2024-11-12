@@ -128,13 +128,13 @@ defmodule EpochtalkServerWeb.Controllers.BoardJSON do
   Board view helper method for mapping childboards and other metadata to board using board mapping and user priority
   """
   def proxy_format_board_data_for_find(
-    board_moderators,
-    board_mapping,
-    board_id,
-    user_priority,
-    board_counts \\ nil,
-    board_last_post_info \\ nil
-  ) do
+        board_moderators,
+        board_mapping,
+        board_id,
+        user_priority,
+        board_counts \\ nil,
+        board_last_post_info \\ nil
+      ) do
     board_counts = map_to_id(board_counts)
     board_last_post_info = map_to_id(board_last_post_info)
     # filter out board by id

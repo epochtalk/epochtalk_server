@@ -55,7 +55,7 @@ defmodule EpochtalkServer.MixProject do
       {:hackney, "~> 1.9"},
       {:hammer, "~> 6.2"},
       {:hammer_backend_redis, "~> 6.1"},
-      {:html_entities, "~> 0.5.2", only: [:dev]},
+      {:html_entities, "~> 0.5.2", only: [:dev, :test]},
       {:html_sanitize_ex, "~> 1.4"},
       {:iteraptor, git: "https://github.com/epochtalk/elixir-iteraptor.git", tag: "1.13.1"},
       {:jason, "~> 1.4.0"},

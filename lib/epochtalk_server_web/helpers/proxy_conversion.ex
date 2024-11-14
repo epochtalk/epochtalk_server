@@ -3,6 +3,8 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
   alias EpochtalkServer.SmfRepo
   alias EpochtalkServerWeb.Helpers.ProxyPagination
 
+  @ms_per_sec 1000
+
   @moduledoc """
   Helper for pulling and formatting data from SmfRepo
   """
@@ -75,7 +77,7 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
       id: t.id_poll,
       change_vote: p.changeVote,
       display_mode: "always",
-      expiration: p.expireTime * 1000,
+      expiration: p.expireTime * @ms_per_sec,
       has_voted: false,
       locked: p.votingLocked == 1,
       max_answers: p.maxVotes,
@@ -133,8 +135,8 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
       first_post_id: t.id_first_msg,
       last_post_id: t.id_last_msg,
       title: f.subject,
-      updated_at: l.posterTime * 1000,
-      last_post_created_at: l.posterTime * 1000,
+      updated_at: l.posterTime * @ms_per_sec,
+      last_post_created_at: l.posterTime * @ms_per_sec,
       last_post_user_id: l.id_member,
       last_post_username: l.posterName,
       view_count: t.numViews,
@@ -207,7 +209,7 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
     |> join(:left, [b, m], t in "smf_topics", on: m.id_topic == t.id_topic)
     |> select([b, m, t], %{
       id: b.id_board,
-      last_post_created_at: m.posterTime * 1000,
+      last_post_created_at: m.posterTime * @ms_per_sec,
       last_post_position: t.numReplies,
       last_post_username: m.posterName,
       last_thread_created_at: t.id_member_started,
@@ -215,7 +217,7 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
       last_thread_post_count: t.numReplies,
       last_thread_slug: t.id_topic,
       last_thread_title: m.subject,
-      last_thread_updated_at: m.posterTime * 1000
+      last_thread_updated_at: m.posterTime * @ms_per_sec
     })
     |> SmfRepo.all()
     |> case do
@@ -288,9 +290,9 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
       title: f.subject,
       user_id: f.id_member,
       username: f.posterName,
-      created_at: f.posterTime * 1000,
+      created_at: f.posterTime * @ms_per_sec,
       user_deleted: false,
-      last_post_created_at: l.posterTime * 1000,
+      last_post_created_at: l.posterTime * @ms_per_sec,
       last_post_deleted: false,
       last_post_user_id: l.id_member,
       last_post_username: l.posterName,
@@ -334,9 +336,9 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
       title: f.subject,
       user_id: f.id_member,
       username: f.posterName,
-      created_at: f.posterTime * 1000,
+      created_at: f.posterTime * @ms_per_sec,
       user_deleted: false,
-      last_post_created_at: l.posterTime * 1000,
+      last_post_created_at: l.posterTime * @ms_per_sec,
       last_post_deleted: false,
       last_post_user_id: l.id_member,
       last_post_username: l.posterName,
@@ -405,7 +407,7 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
       body: m.body,
       updated_at: m.modifiedTime,
       username: m.posterName,
-      created_at: m.posterTime * 1000,
+      created_at: m.posterTime * @ms_per_sec,
       modified_time: m.modifiedTime,
       avatar:
         fragment(

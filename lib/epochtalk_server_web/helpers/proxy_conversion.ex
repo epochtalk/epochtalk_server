@@ -83,19 +83,18 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
   end
 
   def build_user(user_id) do
-    last_active =
-      from m in "smf_messages",
-        where: m.id_member == ^user_id,
-        order_by: [desc: m.posterTime],
-        limit: 1,
-        select: %{last_active: m.posterTime * 1000}
-
     user =
       from(u in "smf_members", where: u.id_member == ^user_id)
       |> join(:left, [u], a in "smf_attachments",
         on: u.id_member == a.id_member and a.attachmentType == 1
       )
-      |> select([u, a], %{
+      |> join(:left, [u], m in "smf_membergroups",
+        on: u.id_group != 0 and u.id_group == m.id_group
+      )
+      |> join(:left, [u], g in "smf_membergroups",
+        on: u.id_post_group == g.id_group
+      )
+      |> select([u, a, m, g], %{
         activity: u.activity,
         created_at: u.dateRegistered * 1000,
         dob: u.birthdate,
@@ -112,6 +111,12 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
         username: u.realName,
         title: u.usertitle,
         website: u.websiteUrl,
+        last_login: u.lastLogin * 1000,
+        show_online: u.showOnline,
+        group_name: m.groupName,
+        group_name_2: g.groupName,
+        group_color: m.onlineColor,
+        group_color_2: g.onlineColor,
         avatar:
           fragment(
             "if(? <>'',concat('https://bitcointalk.org/avatars/',?),ifnull(concat('https://bitcointalk.org/useravatars/',?),''))",
@@ -122,9 +127,13 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
       })
       |> SmfRepo.one()
 
-    if user.post_count > 0,
-      do: Map.merge(user, SmfRepo.one(last_active)),
-      else: Map.put(user, :last_active, user.created_at)
+      user
+      |> Map.put(:position, user.group_name || user.group_name_2)
+      |> Map.put(:position_color, user.group_color || user.group_color_2)
+      |> Map.delete(:group_name)
+      |> Map.delete(:group_name_2)
+      |> Map.delete(:group_color)
+      |> Map.delete(:group_color_2)
   end
 
   def build_poll(thread_id) do

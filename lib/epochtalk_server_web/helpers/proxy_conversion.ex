@@ -3,6 +3,7 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
   alias EpochtalkServer.SmfRepo
   alias EpochtalkServerWeb.Helpers.ProxyPagination
 
+  @limit_exceeded_error {:error, "Limit too large, please try again"}
   @ms_per_sec 1000
 
   @moduledoc """
@@ -14,7 +15,7 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
   end
 
   def build_model(_, ids, _, _) when length(ids) > 25 do
-    {:error, "Limit too large, please try again"}
+    @limit_exceeded_error
   end
 
   def build_model(model_type, id, page, per_page) when is_integer(id) do

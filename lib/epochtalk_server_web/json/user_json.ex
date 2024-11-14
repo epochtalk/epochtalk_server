@@ -36,19 +36,26 @@ defmodule EpochtalkServerWeb.Controllers.UserJSON do
       end
 
     {:ok, last_login} = DateTime.from_unix(user.last_login, :millisecond)
-    last_login_past_72_hours = DateTime.diff(DateTime.utc_now, last_login, :hour) > 72
+    last_login_past_72_hours = DateTime.diff(DateTime.utc_now(), last_login, :hour) > 72
 
-    last_active = if user.show_online == 1 or last_login_past_72_hours,
-      do: user.last_login,
-      else: nil
+    last_active =
+      if user.show_online == 1 or last_login_past_72_hours,
+        do: user.last_login,
+        else: nil
 
     user
     |> Map.put(:signature, parsed_signature)
     |> Map.put(:gender, gender)
     |> Map.put(:dob, dob)
     |> Map.put(:last_active, last_active)
+    |> Map.put(:position, user.group_name || user.group_name_2)
+    |> Map.put(:position_color, user.group_color || user.group_color_2)
     |> Map.delete(:last_login)
     |> Map.delete(:show_online)
+    |> Map.delete(:group_name)
+    |> Map.delete(:group_name_2)
+    |> Map.delete(:group_color)
+    |> Map.delete(:group_color_2)
   end
 
   @doc """

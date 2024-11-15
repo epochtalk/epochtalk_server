@@ -262,12 +262,23 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
     )
     |> join(:left, [b], m in "smf_messages", on: b.id_last_msg == m.id_msg)
     |> join(:left, [b, m], t in "smf_topics", on: m.id_topic == t.id_topic)
-    |> select([b, m, t], %{
+    |> join(:left, [b, m, t], u in "smf_members", on: m.id_member == u.id_member)
+    |> join(:left, [b, m, t, u], a in "smf_attachments",
+      on: m.id_member == a.id_member and a.attachmentType == 1
+    )
+    |> select([b, m, t, u, a], %{
       id: b.id_board,
       last_post_created_at: m.posterTime * 1000,
       last_post_position: t.numReplies,
       last_post_username: m.posterName,
       last_post_user_id: m.id_member,
+      last_post_avatar:
+        fragment(
+          "if(? <>'',concat('https://bitcointalk.org/avatars/',?),ifnull(concat('https://bitcointalk.org/useravatars/',?),''))",
+          u.avatar,
+          u.avatar,
+          a.filename
+        ),
       last_thread_created_at: t.id_member_started,
       last_thread_id: t.id_topic,
       last_thread_post_count: t.numReplies,

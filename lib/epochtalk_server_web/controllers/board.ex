@@ -103,9 +103,6 @@ defmodule EpochtalkServerWeb.Controllers.Board do
           400,
           "Error, cannot convert slug: board does not exist"
         )
-
-      _ ->
-        ErrorHelpers.render_json_error(conn, 400, "Error, cannot convert board slug to id")
     end
   end
 

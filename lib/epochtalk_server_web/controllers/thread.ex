@@ -28,7 +28,7 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
   alias EpochtalkServer.Models.Mention
   alias EpochtalkServerWeb.Helpers.ProxyConversion
 
-  plug :check_proxy when action in [:by_board, :slug_to_id, :viewed, :recent]
+  plug :check_proxy when action in [:by_board, :by_username, :slug_to_id, :viewed, :recent]
 
   @doc """
   Used to retrieve recent threads
@@ -38,8 +38,6 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
          user_priority <- ACL.get_user_priority(conn),
          threads <- Thread.recent(user, user_priority) do
       render(conn, :recent, %{threads: threads})
-    else
-      _ -> ErrorHelpers.render_json_error(conn, 400, "Error, cannot fetch recent threads")
     end
   end
 
@@ -217,14 +215,8 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
       {:can_read, {:error, :board_does_not_exist}} ->
         ErrorHelpers.render_json_error(conn, 400, "Read error, board does not exist")
 
-      {:board_banned, {:ok, true}} ->
-        ErrorHelpers.render_json_error(conn, 403, "Unauthorized, you are banned from this board")
-
       {:has_threads, false} ->
         ErrorHelpers.render_json_error(conn, 404, "Error, requested threads not found in board")
-
-      _ ->
-        ErrorHelpers.render_json_error(conn, 400, "Error, cannot get threads by board")
     end
   end
 
@@ -343,9 +335,6 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
           "Account must be active to unwatch thread"
         )
 
-      {:error, data} ->
-        ErrorHelpers.render_json_error(conn, 400, data)
-
       _ ->
         ErrorHelpers.render_json_error(conn, 400, "Error, cannot unwatch thread")
     end
@@ -404,9 +393,6 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
           "Account must be active to modify lock on thread"
         )
 
-      {:error, data} ->
-        ErrorHelpers.render_json_error(conn, 400, data)
-
       _ ->
         ErrorHelpers.render_json_error(conn, 400, "Error, cannot lock thread")
     end
@@ -464,9 +450,6 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
           400,
           "Account must be active to modify sticky on thread"
         )
-
-      {:error, data} ->
-        ErrorHelpers.render_json_error(conn, 400, data)
 
       _ ->
         ErrorHelpers.render_json_error(conn, 400, "Error, cannot sticky thread")
@@ -641,9 +624,6 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
           400,
           "Error, cannot convert slug, thread does not exist"
         )
-
-      _ ->
-        ErrorHelpers.render_json_error(conn, 400, "Error, cannot convert thread slug to id")
     end
   end
 
@@ -666,7 +646,7 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
       |> send_resp(200, [])
       |> halt()
     else
-      {:error, :board_does_not_exist} ->
+      {:can_read, {:error, :board_does_not_exist}} ->
         ErrorHelpers.render_json_error(
           conn,
           400,
@@ -801,9 +781,38 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
     |> halt()
   end
 
+  # check proxy for :recent action
+  defp check_proxy(%{private: %{phoenix_action: :by_username}} = conn, _) do
+    conn
+    |> proxy_by_username(conn.params)
+    |> halt()
+  end
+
   # check proxy default
   defp check_proxy(%{private: %{phoenix_action: _}} = conn, _) do
     conn
+  end
+
+  defp proxy_by_username(conn, attrs) do
+    # Parameter Validation
+    with user_id <- Validate.cast(attrs, "id", :integer, required: true),
+         page <- Validate.cast(attrs, "page", :integer, default: 1, min: 1),
+         limit <- Validate.cast(attrs, "limit", :integer, default: 25, min: 1, max: 100),
+         desc <- Validate.cast(attrs, "desc", :boolean, default: true),
+         {:ok, threads, data} <-
+           ProxyConversion.build_model("threads.by_user", user_id, page, limit, desc) do
+      render(conn, :proxy_by_username, %{
+        threads: threads,
+        next: data.next,
+        prev: data.prev,
+        limit: data.per_page,
+        page: data.page,
+        desc: desc
+      })
+    else
+      _ ->
+        ErrorHelpers.render_json_error(conn, 400, "Error, cannot get threads by username")
+    end
   end
 
   defp proxy_by_board(conn, attrs) do
@@ -841,8 +850,6 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
   defp proxy_recent(conn, _attrs) do
     with threads <- ProxyConversion.build_model("threads.recent") do
       render(conn, :recent, %{threads: threads})
-    else
-      _ -> ErrorHelpers.render_json_error(conn, 400, "Error, cannot fetch recent threads")
     end
   end
 

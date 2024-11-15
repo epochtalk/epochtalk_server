@@ -200,6 +200,27 @@ defmodule EpochtalkServerWeb.Controllers.ThreadJSON do
   end
 
   @doc """
+  Renders all `Post` for a particular `User`.
+  """
+  def proxy_by_username(%{
+        threads: threads,
+        next: next,
+        prev: prev,
+        limit: limit,
+        page: page,
+        desc: desc
+      }) do
+    %{
+      posts: threads,
+      next: next,
+      prev: prev,
+      limit: limit,
+      page: page,
+      desc: desc
+    }
+  end
+
+  @doc """
   Renders sticky `Thread`.
 
     iex> thread = %{
@@ -277,7 +298,7 @@ defmodule EpochtalkServerWeb.Controllers.ThreadJSON do
     # handle deleted user
     thread =
       if thread.user_deleted,
-        do: thread |> Map.put(:user_id, '') |> Map.put(:username, ''),
+        do: thread |> Map.put(:user_id, "") |> Map.put(:username, ""),
         else: thread
 
     # format user output
@@ -345,6 +366,5 @@ defmodule EpochtalkServerWeb.Controllers.ThreadJSON do
     thread
     |> Map.delete(:last_post_deleted)
     |> Map.delete(:last_post_user_deleted)
-    |> Map.delete(:last_post_user_id)
   end
 end

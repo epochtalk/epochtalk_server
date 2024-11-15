@@ -15,6 +15,10 @@ function setReasonableValues()
         $context['browser']['is_ie5'] = false;
         $context['browser']['is_ie5.5'] = false;
 
+        // Fix for portuguese characters (test: http://localhost:8000/threads/5515847)
+        $context['utf8'] = true;
+        $context['server']['complex_preg_chars'] = true;
+
         $txt['lang_character_set'] = 'ISO-8859-1';
         $txt['smf238'] = 'Code';
         $txt['smf240'] = 'Quote';

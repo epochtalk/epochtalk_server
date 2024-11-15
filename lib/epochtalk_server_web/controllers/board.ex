@@ -150,7 +150,7 @@ defmodule EpochtalkServerWeb.Controllers.Board do
          stripped <- Validate.cast(attrs, "stripped", :boolean, default: false),
          user_priority <- ACL.get_user_priority(conn),
          board_mapping <- BoardMapping.all(stripped: stripped),
-         board_moderators <- BoardModerator.all(),
+         {:ok, board_moderators} <- ProxyConversion.build_model("boards.moderators"),
          {:ok, board_counts} <- ProxyConversion.build_model("boards.counts"),
          {:ok, board_last_post_info} <- ProxyConversion.build_model("boards.last_post_info"),
          categories <- Category.all() do

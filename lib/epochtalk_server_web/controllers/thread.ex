@@ -823,7 +823,7 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
          user_priority <- ACL.get_user_priority(conn),
          :ok <- ACL.allow!(conn, "threads.byBoard"),
          board_mapping <- BoardMapping.all(),
-         board_moderators <- BoardModerator.all(),
+         {:ok, board_moderators} <- ProxyConversion.build_model("boards.moderators"),
          {:ok, board_counts} <- ProxyConversion.build_model("boards.counts"),
          {:ok, board_last_post_info} <- ProxyConversion.build_model("boards.last_post_info"),
          {:ok, threads, data} <-

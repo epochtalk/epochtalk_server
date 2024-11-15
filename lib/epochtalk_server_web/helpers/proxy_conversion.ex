@@ -58,6 +58,9 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
       "boards.last_post_info" ->
         build_board_last_post_info()
 
+      "boards.moderators" ->
+        build_board_moderators()
+
       "threads.recent" ->
         build_recent_threads()
 
@@ -224,6 +227,32 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
 
       boards ->
         return_tuple(boards)
+    end
+  end
+
+  def build_board_moderators() do
+    %{id_board_blacklist: id_board_blacklist} =
+      Application.get_env(:epochtalk_server, :proxy_config)
+
+    from(b in "smf_boards",
+      where: b.id_board not in ^id_board_blacklist
+    )
+    |> join(:left, [b], mod in "smf_moderators", on: b.id_board == mod.id_board)
+    |> join(:left, [b, mod], m in "smf_members", on: mod.id_member == m.id_member)
+    |> select([b, mod, m], %{
+      board_id: b.id_board,
+      user_id: m.id_member,
+      user: %{
+        username: m.realname
+      }
+    })
+    |> SmfRepo.all()
+    |> case do
+      [] ->
+        {:error, "Board Moderators not found"}
+
+      moderators ->
+        return_tuple(moderators)
     end
   end
 

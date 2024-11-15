@@ -306,8 +306,8 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
     from(b in "smf_boards",
       where: b.id_board not in ^id_board_blacklist
     )
-    |> join(:left, [b], mod in "smf_moderators", on: b.id_board == mod.id_board)
-    |> join(:left, [b, mod], m in "smf_members", on: mod.id_member == m.id_member)
+    |> join(:inner, [b], mod in "smf_moderators", on: b.id_board == mod.id_board)
+    |> join(:inner, [b, mod], m in "smf_members", on: mod.id_member == m.id_member)
     |> select([b, mod, m], %{
       board_id: b.id_board,
       user_id: m.id_member,

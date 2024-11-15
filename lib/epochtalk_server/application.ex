@@ -71,5 +71,6 @@ defmodule EpochtalkServer.Application do
   # fetch redix config
   defp redix_config(), do: Application.get_env(:epochtalk_server, :redix)
 
-  defp bbc_parser_poolboy_config, do: Application.get_env(:epochtalk_server, :bbc_parser_poolboy_config)
+  defp bbc_parser_poolboy_config,
+    do: Application.get_env(:epochtalk_server, :bbc_parser_poolboy_config)
 end

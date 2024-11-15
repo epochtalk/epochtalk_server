@@ -407,7 +407,7 @@ end
 
 ##### PROXY REPO CONFIGURATIONS #####
 
-poolboy_config = [
+bbc_parser_poolboy_config = [
   name: {:local, :bbc_parser},
   worker_module: EpochtalkServer.BBCParser,
   size: 5,
@@ -415,7 +415,7 @@ poolboy_config = [
   strategy: :fifo
 ]
 
-config :epochtalk_server, poolboy_config: poolboy_config
+config :epochtalk_server, bbc_parser_poolboy_config: bbc_parser_poolboy_config
 
 # conditionally show debug logs in prod
 if config_env() == :prod do

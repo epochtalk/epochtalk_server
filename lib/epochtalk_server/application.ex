@@ -22,7 +22,7 @@ defmodule EpochtalkServer.Application do
       # Start the Smf repository
       EpochtalkServer.SmfRepo,
       # Start the BBC Parser
-      :poolboy.child_spec(:bbc_parser, poolboy_config()),
+      :poolboy.child_spec(:bbc_parser, bbc_parser_poolboy_config()),
       # Start Role Cache
       EpochtalkServer.Cache.Role,
       # Warm frontend_config variable (referenced by api controllers)
@@ -71,5 +71,5 @@ defmodule EpochtalkServer.Application do
   # fetch redix config
   defp redix_config(), do: Application.get_env(:epochtalk_server, :redix)
 
-  defp poolboy_config, do: Application.get_env(:epochtalk_server, :poolboy_config)
+  defp bbc_parser_poolboy_config, do: Application.get_env(:epochtalk_server, :bbc_parser_poolboy_config)
 end

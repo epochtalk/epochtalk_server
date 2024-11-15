@@ -2,7 +2,7 @@ defmodule EpochtalkServer.BBCParser do
   use GenServer
   require Logger
   alias Porcelain.Process, as: Proc
-  @timeout 10_000
+  @timeout 1_000
 
   @moduledoc """
   `BBCParser` genserver, runs interactive php shell to call bbcode parser

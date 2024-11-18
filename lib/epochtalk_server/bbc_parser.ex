@@ -20,7 +20,7 @@ defmodule EpochtalkServer.BBCParser do
 
   @impl true
   def handle_call({:parse, ""}, _from, {proc, pid}),
-    do: {:reply, "", {proc, pid}}
+    do: {:reply, {:ok, ""}, {proc, pid}}
 
   def handle_call({:parse, bbcode_data}, _from, {proc, pid}) when is_binary(bbcode_data) do
     Proc.send_input(proc, "echo parse_bbc('#{bbcode_data}');\n")

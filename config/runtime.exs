@@ -410,7 +410,7 @@ end
 bbc_parser_poolboy_config = [
   name: {:local, :bbc_parser},
   worker_module: EpochtalkServer.BBCParser,
-  size: 5,
+  size: 50,
   max_overflow: 2,
   strategy: :fifo
 ]

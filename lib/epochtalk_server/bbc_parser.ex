@@ -2,7 +2,12 @@ defmodule EpochtalkServer.BBCParser do
   use GenServer
   require Logger
   alias Porcelain.Process, as: Proc
-  @timeout 1_000
+
+  # poolboy genserver call timeout (ms)
+  # should be greater than internal porcelain php call
+  @call_timeout 500
+  # porcelain php parser call timeout (ms)
+  @receive_timeout 400
 
   @moduledoc """
   `BBCParser` genserver, runs interactive php shell to call bbcode parser
@@ -22,9 +27,10 @@ defmodule EpochtalkServer.BBCParser do
 
     parsed =
       receive do
-        {^pid, :data, :out, data} ->
-          Logger.debug(data)
-          data
+        {^pid, :data, :out, data} -> {:ok, data}
+      after
+        # time out after not receiving any data
+        @receive_timeout -> {:timeout, bbcode_data}
       end
 
     {:reply, parsed, {proc, pid}}
@@ -46,7 +52,15 @@ defmodule EpochtalkServer.BBCParser do
       fn pid ->
         try do
           Logger.debug("#{__MODULE__}(parse): #{inspect(pid)}")
-          GenServer.call(pid, {:parse, bbcode_data}, @timeout)
+          GenServer.call(pid, {:parse, bbcode_data}, @call_timeout)
+          |> case do
+            # on success, return parsed data
+            {:ok, parsed} -> parsed
+            # on parse timeout, log and return unparsed data
+            {:timeout, unparsed} ->
+              Logger.error("#{__MODULE__}(parse timeout): #{inspect(pid)}, #{inspect(unparsed)}")
+              "<p style=\"color:red;font-weight:bold\">((bbcode parse timeout))</p></br>" <> unparsed
+          end
         catch
           e, r ->
             # something went wrong, log the error
@@ -54,7 +68,7 @@ defmodule EpochtalkServer.BBCParser do
             bbcode_data
         end
       end,
-      @timeout
+      @call_timeout
     )
   end
 

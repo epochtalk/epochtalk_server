@@ -447,7 +447,7 @@ defmodule EpochtalkServerWeb.Controllers.PostJSON do
   defp format_proxy_post_data_for_by_thread(post) do
     body = String.replace(Map.get(post, :body) || Map.get(post, :body_html), "'", "\'")
 
-    parsed_body = EpochtalkServer.BBCParser.async_parse(body)
+    parsed_body = EpochtalkServer.BBCParser.parse(body)
 
     signature =
       if Map.get(post.user, :signature),
@@ -456,7 +456,7 @@ defmodule EpochtalkServerWeb.Controllers.PostJSON do
 
     parsed_signature =
       if signature,
-        do: EpochtalkServer.BBCParser.async_parse(signature),
+        do: EpochtalkServer.BBCParser.parse(signature),
         else: nil
 
     user = post.user |> Map.put(:signature, parsed_signature)

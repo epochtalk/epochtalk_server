@@ -19,7 +19,7 @@ defmodule EpochtalkServerWeb.Controllers.UserJSON do
   def find_proxy(%{user: user}) do
     parsed_signature =
       if user.signature,
-        do: EpochtalkServer.BBCParser.async_parse(user.signature),
+        do: EpochtalkServer.BBCParser.parse(user.signature),
         else: nil
 
     gender =

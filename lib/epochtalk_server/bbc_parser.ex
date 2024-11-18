@@ -40,7 +40,7 @@ defmodule EpochtalkServer.BBCParser do
   @doc """
   Uses poolboy to call parser
   """
-  def async_parse(bbcode_data) do
+  def parse(bbcode_data) do
     :poolboy.transaction(
       :bbc_parser,
       fn pid ->

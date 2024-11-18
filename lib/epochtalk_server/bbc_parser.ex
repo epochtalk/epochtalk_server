@@ -52,19 +52,27 @@ defmodule EpochtalkServer.BBCParser do
       fn pid ->
         try do
           Logger.debug("#{__MODULE__}(parse): #{inspect(pid)}")
+
           GenServer.call(pid, {:parse, bbcode_data}, @call_timeout)
           |> case do
             # on success, return parsed data
-            {:ok, parsed} -> parsed
+            {:ok, parsed} ->
+              parsed
+
             # on parse timeout, log and return unparsed data
             {:timeout, unparsed} ->
               Logger.error("#{__MODULE__}(parse timeout): #{inspect(pid)}, #{inspect(unparsed)}")
-              "<p style=\"color:red;font-weight:bold\">((bbcode parse timeout))</p></br>" <> unparsed
+
+              "<p style=\"color:red;font-weight:bold\">((bbcode parse timeout))</p></br>" <>
+                unparsed
           end
         catch
           e, r ->
             # something went wrong, log the error
-            Logger.error("#{__MODULE__}(parse poolboy): #{inspect(pid)}, #{inspect(e)}, #{inspect(r)}")
+            Logger.error(
+              "#{__MODULE__}(parse poolboy): #{inspect(pid)}, #{inspect(e)}, #{inspect(r)}"
+            )
+
             bbcode_data
         end
       end,

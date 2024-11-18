@@ -45,12 +45,13 @@ defmodule EpochtalkServer.BBCParser do
       :bbc_parser,
       fn pid ->
         try do
-          Logger.debug("#{__MODULE__}(ASYNC PARSE): #{inspect(pid)}")
+          Logger.debug("#{__MODULE__}(parse): #{inspect(pid)}")
           GenServer.call(pid, {:parse, bbcode_data}, @timeout)
         catch
           e, r ->
-            Logger.debug("poolboy transaction caught error: #{inspect(e)}, #{inspect(r)}")
-            :ok
+            # something went wrong, log the error
+            Logger.error("#{__MODULE__}(parse poolboy): #{inspect(pid)}, #{inspect(e)}, #{inspect(r)}")
+            bbcode_data
         end
       end,
       @timeout

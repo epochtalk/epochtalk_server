@@ -447,6 +447,11 @@ defmodule EpochtalkServerWeb.Controllers.PostJSON do
   defp format_proxy_post_data_for_by_thread(post) do
     body = String.replace(Map.get(post, :body) || Map.get(post, :body_html), "'", "\'")
 
+    # add space to end if the last character is a backslash (fix for parser)
+    body_len = String.length(body)
+    last_char = String.slice(body, body_len - 1..body_len)
+    body = if last_char == "\\", do: body <> " ", else: body
+
     parsed_body = EpochtalkServer.BBCParser.parse(body)
 
     signature =

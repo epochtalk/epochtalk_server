@@ -27,11 +27,13 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
       per_page: @default_per_page,
       desc: false
     }
+
     %{
       page: page,
       per_page: per_page,
       desc: desc
     } = Enum.into(opts, default_opts)
+
     case model_type do
       "boards.counts" ->
         build_board_counts()
@@ -74,6 +76,7 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
 
       "posts.by_user" ->
         build_posts_by_user(id, page, per_page, desc)
+
       _ ->
         build_model(nil, nil, nil)
     end

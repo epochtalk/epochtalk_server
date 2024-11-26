@@ -3,6 +3,9 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
   alias EpochtalkServer.SmfRepo
   alias EpochtalkServerWeb.Helpers.ProxyPagination
 
+  @default_page 1
+  @default_per_page 25
+  @max_ids 25
   @limit_exceeded_error {:error, "Limit too large, please try again"}
   @ms_per_sec 1000
 
@@ -10,42 +13,38 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
   Helper for pulling and formatting data from SmfRepo
   """
 
-  def build_model(model_type, ids, _, _) when is_nil(model_type) or is_nil(ids) do
+  def build_model(model_type, ids, _opts) when is_nil(model_type) or is_nil(ids) do
     {:ok, %{}, %{}}
   end
 
-  def build_model(_, ids, _, _) when length(ids) > 25 do
+  def build_model(_, ids, _opts) when length(ids) > @max_ids do
     @limit_exceeded_error
   end
 
-  def build_model(model_type, id, page, per_page) when is_integer(id) do
+  def build_model(model_type, id, opts) when is_integer(id) do
+    default_opts = %{
+      page: @default_page,
+      per_page: @default_per_page,
+      desc: false
+    }
+    %{
+      page: page,
+      per_page: per_page,
+      desc: desc
+    } = Enum.into(opts, default_opts)
     case model_type do
-      "threads.by_board" ->
-        build_threads_by_board(id, page, per_page)
+      "boards.counts" ->
+        build_board_counts()
 
-      "posts.by_thread" ->
-        build_posts_by_thread(id, page, per_page)
+      "boards.last_post_info" ->
+        build_board_last_post_info()
 
-      _ ->
-        build_model(nil, nil, nil, nil)
-    end
-  end
+      "boards.moderators" ->
+        build_board_moderators()
 
-  def build_model(model_type, id, page, per_page, desc) when is_integer(id) do
-    case model_type do
-      "threads.by_user" ->
-        build_threads_by_user(id, page, per_page, desc)
+      "threads.recent" ->
+        build_recent_threads()
 
-      "posts.by_user" ->
-        build_posts_by_user(id, page, per_page, desc)
-
-      _ ->
-        build_model(nil, nil, nil, nil)
-    end
-  end
-
-  def build_model(model_type, id) do
-    case model_type do
       "category" ->
         build_category(id)
 
@@ -64,27 +63,19 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
       "user.find" ->
         build_user(id)
 
+      "threads.by_board" ->
+        build_threads_by_board(id, page, per_page)
+
+      "posts.by_thread" ->
+        build_posts_by_thread(id, page, per_page)
+
+      "threads.by_user" ->
+        build_threads_by_user(id, page, per_page, desc)
+
+      "posts.by_user" ->
+        build_posts_by_user(id, page, per_page, desc)
       _ ->
-        build_model(nil, nil, nil, nil)
-    end
-  end
-
-  def build_model(model_type) do
-    case model_type do
-      "boards.counts" ->
-        build_board_counts()
-
-      "boards.last_post_info" ->
-        build_board_last_post_info()
-
-      "boards.moderators" ->
-        build_board_moderators()
-
-      "threads.recent" ->
-        build_recent_threads()
-
-      _ ->
-        build_model(nil, nil, nil, nil)
+        build_model(nil, nil, nil)
     end
   end
 

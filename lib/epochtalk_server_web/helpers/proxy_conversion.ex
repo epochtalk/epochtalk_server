@@ -5,19 +5,15 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
 
   @default_page 1
   @default_per_page 25
-  @max_ids 25
-  @limit_exceeded_error {:error, "Limit too large, please try again"}
   @ms_per_sec 1000
 
   @moduledoc """
   Helper for pulling and formatting data from SmfRepo
   """
 
-  def build_model(_, ids, _opts) when length(ids) > @max_ids do
-    @limit_exceeded_error
-  end
-
-  def build_model(model_type, id, opts) when is_integer(id) do
+  def build_model(model_type), do: build_model(model_type, nil, nil)
+  def build_model(model_type, id), do: build_model(model_type, id, nil)
+  def build_model(model_type, id, opts) do
     default_opts = %{
       page: @default_page,
       per_page: @default_per_page,

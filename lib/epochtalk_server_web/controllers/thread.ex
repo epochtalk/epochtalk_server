@@ -800,7 +800,7 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
          limit <- Validate.cast(attrs, "limit", :integer, default: 25, min: 1, max: 100),
          desc <- Validate.cast(attrs, "desc", :boolean, default: true),
          {:ok, threads, data} <-
-           ProxyConversion.build_model("threads.by_user", user_id, page, limit, desc) do
+             ProxyConversion.build_model("threads.by_user", user_id, %{page: page, limit: limit, desc: desc}) do
       render(conn, :proxy_by_username, %{
         threads: threads,
         next: data.next,
@@ -827,7 +827,7 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
          {:ok, board_counts} <- ProxyConversion.build_model("boards.counts"),
          {:ok, board_last_post_info} <- ProxyConversion.build_model("boards.last_post_info"),
          {:ok, threads, data} <-
-           ProxyConversion.build_model("threads.by_board", board_id, page, limit) do
+           ProxyConversion.build_model("threads.by_board", board_id, %{page: page, limit: limit}) do
       render(conn, :by_board_proxy, %{
         threads: threads,
         user: user,

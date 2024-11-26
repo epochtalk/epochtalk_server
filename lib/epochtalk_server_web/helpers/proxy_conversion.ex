@@ -13,10 +13,6 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
   Helper for pulling and formatting data from SmfRepo
   """
 
-  def build_model(model_type, ids, _opts) when is_nil(model_type) or is_nil(ids) do
-    {:ok, %{}, %{}}
-  end
-
   def build_model(_, ids, _opts) when length(ids) > @max_ids do
     @limit_exceeded_error
   end
@@ -78,7 +74,7 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
         build_posts_by_user(id, page, per_page, desc)
 
       _ ->
-        build_model(nil, nil, nil)
+        {:ok, %{}, %{}}
     end
   end
 

@@ -42,7 +42,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Post do
                    fn ->
                      post(conn, Routes.post_path(conn, :preview), %{
                        "body" =>
-                         for(_ <- 1..10_001, into: "", do: <<Enum.random('0123456789abcdef')>>)
+                         for(_ <- 1..10_001, into: "", do: <<Enum.random(~c"0123456789abcdef")>>)
                      })
                    end
     end

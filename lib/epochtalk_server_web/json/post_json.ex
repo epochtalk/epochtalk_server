@@ -152,8 +152,6 @@ defmodule EpochtalkServerWeb.Controllers.PostJSON do
     }
   end
 
-  ## === Private Helper Functions ===
-
   @doc """
   Renders all `Post` for a particular `User`.
   """
@@ -180,6 +178,46 @@ defmodule EpochtalkServerWeb.Controllers.PostJSON do
       count: count
     }
   end
+
+  @doc """
+  Renders all `Post` for a particular `User`.
+  """
+  def proxy_by_username(%{
+        posts: posts,
+        count: count,
+        limit: limit,
+        page: page,
+        desc: desc
+      })
+      when is_list(posts) do
+    posts =
+      posts
+      |> Enum.map(&format_proxy_post_data_for_by_thread(&1))
+
+    %{
+      posts: posts,
+      count: count,
+      limit: limit,
+      page: page,
+      desc: desc
+    }
+  end
+
+  def proxy_by_username(%{
+        posts: posts,
+        count: count,
+        limit: limit,
+        page: page,
+        desc: desc
+      }),
+      do:
+        proxy_by_username(%{
+          posts: [posts],
+          count: count,
+          limit: limit,
+          page: page,
+          desc: desc
+        })
 
   ## === Public Helper Functions ===
 
@@ -407,27 +445,24 @@ defmodule EpochtalkServerWeb.Controllers.PostJSON do
   end
 
   defp format_proxy_post_data_for_by_thread(post) do
-    body = String.replace(post.body || post.body_html, "'", "\'")
+    body = String.replace(Map.get(post, :body) || Map.get(post, :body_html), "'", "\'")
 
-    %Porcelain.Result{out: parsed_body, status: _status} =
-      Porcelain.shell("php -r \"require 'parsing.php'; ECHO parse_bbc('" <> body <> "');\"")
+    # add space to end if the last character is a backslash (fix for parser)
+    body_len = String.length(body)
+    last_char = String.slice(body, (body_len - 1)..body_len)
+    body = if last_char == "\\", do: body <> " ", else: body
+
+    parsed_body = EpochtalkServer.BBCParser.parse(body)
 
     signature =
-      if post.user.signature,
+      if Map.get(post.user, :signature),
         do: String.replace(post.user.signature, "'", "\'"),
         else: nil
 
     parsed_signature =
-      if signature do
-        %Porcelain.Result{out: parsed_sig, status: _status} =
-          Porcelain.shell(
-            "php -r \"require 'parsing.php'; ECHO parse_bbc('" <> signature <> "');\""
-          )
-
-        parsed_sig
-      else
-        nil
-      end
+      if signature,
+        do: EpochtalkServer.BBCParser.parse(signature),
+        else: nil
 
     user = post.user |> Map.put(:signature, parsed_signature)
     post |> Map.put(:body_html, parsed_body) |> Map.put(:user, user)

@@ -63,8 +63,6 @@ defmodule EpochtalkServerWeb.Controllers.ImageReference do
          # checksum <- Validate.cast(attrs, "checksum", :string, required: true),
          file_type <- Validate.cast(attrs, "file_type", :string, required: true) do
       %{length: length, type: file_type}
-    else
-      _ -> %{error: "Invalid attrs"}
     end
   end
 end

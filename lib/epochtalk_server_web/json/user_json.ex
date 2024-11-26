@@ -14,6 +14,48 @@ defmodule EpochtalkServerWeb.Controllers.UserJSON do
   def user(%{user: user, token: token}), do: format_user_reply(user, token)
 
   @doc """
+  Renders formatted user JSON for find proxy
+  """
+  def find_proxy(%{user: user}) do
+    parsed_signature =
+      if user.signature,
+        do: EpochtalkServer.BBCParser.parse(user.signature),
+        else: nil
+
+    gender =
+      case Map.get(user, :gender) do
+        1 -> "Male"
+        2 -> "Female"
+        _ -> nil
+      end
+
+    dob =
+      case d = Map.get(user, :dob) do
+        ~D[0001-01-01] -> nil
+        _ -> d
+      end
+
+    last_active = calculate_last_active(user)
+
+    position = user.group_name || user.group_name_2
+    position_color = user.group_color || user.group_color_2
+
+    user
+    |> Map.put(:signature, parsed_signature)
+    |> Map.put(:gender, gender)
+    |> Map.put(:dob, dob)
+    |> Map.put(:last_active, last_active)
+    |> Map.put(:position, position)
+    |> Map.put(:position_color, position_color)
+    |> Map.delete(:last_login)
+    |> Map.delete(:show_online)
+    |> Map.delete(:group_name)
+    |> Map.delete(:group_name_2)
+    |> Map.delete(:group_color)
+    |> Map.delete(:group_color_2)
+  end
+
+  @doc """
   Renders formatted user JSON for find
   """
   def find(%{
@@ -141,5 +183,12 @@ defmodule EpochtalkServerWeb.Controllers.UserJSON do
     reply = if ban_expiration, do: Map.put(reply, :ban_expiration, ban_expiration), else: reply
     reply = if malicious_score, do: Map.put(reply, :malicious_score, malicious_score), else: reply
     reply
+  end
+
+  defp calculate_last_active(user) when is_map(user) do
+    {:ok, last_login} = DateTime.from_unix(user.last_login, :millisecond)
+    last_login_past_72_hours = DateTime.diff(DateTime.utc_now(), last_login, :hour) > 72
+
+    if user.show_online == 1 or last_login_past_72_hours, do: user.last_login
   end
 end

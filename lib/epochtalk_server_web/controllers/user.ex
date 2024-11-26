@@ -17,6 +17,9 @@ defmodule EpochtalkServerWeb.Controllers.User do
   alias EpochtalkServerWeb.CustomErrors.InvalidPayload
   alias EpochtalkServerWeb.Helpers.ACL
   alias EpochtalkServerWeb.Helpers.Validate
+  alias EpochtalkServerWeb.Helpers.ProxyConversion
+
+  plug :check_proxy when action in [:find]
 
   @doc """
   Used to check if a username has already been taken
@@ -94,10 +97,6 @@ defmodule EpochtalkServerWeb.Controllers.User do
          {:ok, _email} <- Mailer.send_confirm_account(user) do
       render(conn, :register_with_verify, user: user)
     else
-      # error in user.create
-      {:error, data} ->
-        ErrorHelpers.render_json_error(conn, 400, data)
-
       # error email failed to send
       {:error, :not_delivered} ->
         ErrorHelpers.render_json_error(
@@ -105,6 +104,10 @@ defmodule EpochtalkServerWeb.Controllers.User do
           500,
           "Sending of account confirmation email failed, mailer is not properly configured."
         )
+
+      # error in user.create
+      {:error, data} ->
+        ErrorHelpers.render_json_error(conn, 400, data)
 
       # Catch all for any other errors
       _ ->
@@ -139,12 +142,6 @@ defmodule EpochtalkServerWeb.Controllers.User do
           500,
           "There was an error banning malicious user, upon confirming account"
         )
-
-      {:error, data} ->
-        ErrorHelpers.render_json_error(conn, 400, data)
-
-      _ ->
-        ErrorHelpers.render_json_error(conn, 500, "There was an issue registering")
     end
   end
 
@@ -179,17 +176,11 @@ defmodule EpochtalkServerWeb.Controllers.User do
         show_hidden: show_hidden
       })
     else
-      {:error, :user_not_found} ->
-        ErrorHelpers.render_json_error(conn, 400, "Account not found")
-
-      {:error, data} ->
-        ErrorHelpers.render_json_error(conn, 400, data)
-
       {:view_deleted, false} ->
         ErrorHelpers.render_json_error(conn, 400, "Account not found")
 
-      _ ->
-        ErrorHelpers.render_json_error(conn, 500, "There was an issue finding user")
+      {:error, _} ->
+        ErrorHelpers.render_json_error(conn, 400, "Account not found")
     end
   end
 
@@ -208,16 +199,13 @@ defmodule EpochtalkServerWeb.Controllers.User do
   Logs out the logged in `User`
   """
   def logout(conn, _attrs) do
-    with {:auth, true} <- {:auth, Guardian.Plug.authenticated?(conn)},
-         user <- Guardian.Plug.current_resource(conn),
+    with user <- Guardian.Plug.current_resource(conn),
          token <- Guardian.Plug.current_token(conn),
          {:ok, conn} <- Session.delete(conn) do
       EpochtalkServerWeb.Endpoint.broadcast("user:#{user.id}", "logout", %{token: token})
       render(conn, :data, data: %{success: true})
     else
-      {:auth, false} -> ErrorHelpers.render_json_error(conn, 400, "Not logged in")
-      {:error, error} -> ErrorHelpers.render_json_error(conn, 500, error)
-      _ -> ErrorHelpers.render_json_error(conn, 500, "There was an issue signing out")
+      {:error, data} -> ErrorHelpers.render_json_error(conn, 500, data)
     end
   end
 
@@ -262,11 +250,28 @@ defmodule EpochtalkServerWeb.Controllers.User do
 
       {:error, :unban_error} ->
         ErrorHelpers.render_json_error(conn, 500, "There was an issue unbanning user, upon login")
-
-      _ ->
-        ErrorHelpers.render_json_error(conn, 500, "There was an issue while attempting to login")
     end
   end
 
   def login(_conn, _attrs), do: raise(InvalidPayload)
+
+  ## === Private Helper Functions ===
+
+  defp check_proxy(conn, _) do
+    case conn.private.phoenix_action do
+      :find ->
+        conn
+        |> proxy_find(conn.params)
+        |> halt()
+
+      _ ->
+        conn
+    end
+  end
+
+  defp proxy_find(conn, attrs) do
+    with user <- ProxyConversion.build_model("user.find", attrs["id"]) do
+      render(conn, :find_proxy, %{user: user})
+    end
+  end
 end

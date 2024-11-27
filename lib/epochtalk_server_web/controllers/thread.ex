@@ -35,8 +35,6 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
          user_priority <- ACL.get_user_priority(conn),
          threads <- Thread.recent(user, user_priority) do
       render(conn, :recent, %{threads: threads})
-    else
-      _ -> ErrorHelpers.render_json_error(conn, 400, "Error, cannot fetch recent threads")
     end
   end
 

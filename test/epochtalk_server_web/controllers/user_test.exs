@@ -56,16 +56,16 @@ defmodule Test.EpochtalkServerWeb.Controllers.User do
     end
   end
 
-  @tag :banned
   describe "unban/1" do
+    @tag :banned
     test "unbans banned user", %{users: %{user: user}} do
       {:ok, unbanned_user_changeset} = Ban.unban(user)
       assert unbanned_user_changeset.ban_info == nil
     end
   end
 
-  @tag :malicious
   describe "handle_malicious_user/2" do
+    @tag :malicious
     test "populates ban_info and malicious_score if user is malicious", %{
       users: %{user: user},
       malicious_user_changeset: malicious_user_changeset

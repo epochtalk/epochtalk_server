@@ -29,9 +29,6 @@ defmodule EpochtalkServer.SmfQuery do
     } = extract_opts(opts)
 
     case model_type do
-      "category" ->
-        build_category(id)
-
       "board" ->
         build_board(id)
 
@@ -194,7 +191,7 @@ defmodule EpochtalkServer.SmfQuery do
     end
   end
 
-  def build_category(id) do
+  def category(id) do
     from(c in "smf_categories",
       where: c.id_cat == ^id,
       select: %{

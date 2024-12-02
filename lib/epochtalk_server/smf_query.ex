@@ -11,8 +11,8 @@ defmodule EpochtalkServer.SmfQuery do
   Helper for pulling and formatting data from SmfRepo
   """
 
-  def build_model(model_type), do: build_model(model_type, nil, nil)
-  def build_model(model_type, id), do: build_model(model_type, id, nil)
+  def build_model(model_type), do: build_model(model_type, nil, %{})
+  def build_model(model_type, id), do: build_model(model_type, id, %{})
   def build_model(model_type, id, opts) do
     default_opts = %{
       page: @default_page,

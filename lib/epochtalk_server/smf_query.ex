@@ -11,20 +11,23 @@ defmodule EpochtalkServer.SmfQuery do
   Helper for pulling and formatting data from SmfRepo
   """
 
-  def build_model(model_type), do: build_model(model_type, nil, %{})
-  def build_model(model_type, id), do: build_model(model_type, id, %{})
-  def build_model(model_type, id, opts) do
+  defp extract_opts(opts) do
     default_opts = %{
       page: @default_page,
       per_page: @default_per_page,
       desc: false
     }
 
+    Enum.into(opts, default_opts)
+  end
+  def build_model(model_type), do: build_model(model_type, nil, %{})
+  def build_model(model_type, id), do: build_model(model_type, id, %{})
+  def build_model(model_type, id, opts) do
     %{
       page: page,
       per_page: per_page,
       desc: desc
-    } = Enum.into(opts, default_opts)
+    } = extract_opts(opts)
 
     case model_type do
       "boards.counts" ->

@@ -152,7 +152,7 @@ defmodule EpochtalkServerWeb.Controllers.Board do
          board_mapping <- BoardMapping.all(stripped: stripped),
          {:ok, board_moderators} <- SmfQuery.build_model("boards.moderators"),
          {:ok, board_counts} <- SmfQuery.board_counts(),
-         {:ok, board_last_post_info} <- SmfQuery.build_model("boards.last_post_info"),
+         {:ok, board_last_post_info} <- SmfQuery.board_last_post_info(),
          categories <- Category.all() do
       render(conn, :proxy_by_category, %{
         categories: categories,

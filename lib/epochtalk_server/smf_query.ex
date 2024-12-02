@@ -29,9 +29,6 @@ defmodule EpochtalkServer.SmfQuery do
     } = extract_opts(opts)
 
     case model_type do
-      "post" ->
-        build_post(id)
-
       "poll.by_thread" ->
         build_poll(id)
 
@@ -421,7 +418,7 @@ defmodule EpochtalkServer.SmfQuery do
     end
   end
 
-  def build_post(id) do
+  def post(id) do
     %{id_board_blacklist: id_board_blacklist} =
       Application.get_env(:epochtalk_server, :proxy_config)
 

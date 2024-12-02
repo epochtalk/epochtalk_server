@@ -29,9 +29,6 @@ defmodule EpochtalkServer.SmfQuery do
     } = extract_opts(opts)
 
     case model_type do
-      "user.find" ->
-        build_user(id)
-
       "threads.by_board" ->
         build_threads_by_board(id, page, per_page)
 
@@ -49,7 +46,7 @@ defmodule EpochtalkServer.SmfQuery do
     end
   end
 
-  def build_user(user_id) do
+  def find_user(user_id) do
     from(u in "smf_members", where: u.id_member == ^user_id)
     |> join(:left, [u], a in "smf_attachments",
       on: u.id_member == a.id_member and a.attachmentType == 1

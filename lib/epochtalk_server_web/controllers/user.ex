@@ -270,7 +270,7 @@ defmodule EpochtalkServerWeb.Controllers.User do
   end
 
   defp proxy_find(conn, attrs) do
-    with user <- SmfQuery.build_model("user.find", attrs["id"]) do
+    with user <- SmfQuery.find_user(attrs["id"]) do
       render(conn, :find_proxy, %{user: user})
     end
   end

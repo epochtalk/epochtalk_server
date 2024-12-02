@@ -150,7 +150,7 @@ defmodule EpochtalkServerWeb.Controllers.Board do
          stripped <- Validate.cast(attrs, "stripped", :boolean, default: false),
          user_priority <- ACL.get_user_priority(conn),
          board_mapping <- BoardMapping.all(stripped: stripped),
-         {:ok, board_moderators} <- SmfQuery.build_model("boards.moderators"),
+         {:ok, board_moderators} <- SmfQuery.board_moderators(),
          {:ok, board_counts} <- SmfQuery.board_counts(),
          {:ok, board_last_post_info} <- SmfQuery.board_last_post_info(),
          categories <- Category.all() do

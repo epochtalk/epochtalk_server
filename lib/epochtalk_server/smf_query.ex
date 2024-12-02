@@ -30,9 +30,6 @@ defmodule EpochtalkServer.SmfQuery do
     } = extract_opts(opts)
 
     case model_type do
-      "boards.moderators" ->
-        build_board_moderators()
-
       "threads.recent" ->
         build_recent_threads()
 
@@ -285,7 +282,7 @@ defmodule EpochtalkServer.SmfQuery do
     end
   end
 
-  def build_board_moderators() do
+  def board_moderators() do
     %{id_board_blacklist: id_board_blacklist} =
       Application.get_env(:epochtalk_server, :proxy_config)
 

@@ -828,7 +828,7 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
          :ok <- ACL.allow!(conn, "threads.byBoard"),
          board_mapping <- BoardMapping.all(),
          {:ok, board_moderators} <- SmfQuery.build_model("boards.moderators"),
-         {:ok, board_counts} <- SmfQuery.build_model("boards.counts"),
+         {:ok, board_counts} <- SmfQuery.board_counts(),
          {:ok, board_last_post_info} <- SmfQuery.build_model("boards.last_post_info"),
          {:ok, threads, data} <-
            SmfQuery.build_model("threads.by_board", board_id, %{page: page, limit: limit}) do

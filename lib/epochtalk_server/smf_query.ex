@@ -30,9 +30,6 @@ defmodule EpochtalkServer.SmfQuery do
     } = extract_opts(opts)
 
     case model_type do
-      "threads.recent" ->
-        build_recent_threads()
-
       "category" ->
         build_category(id)
 
@@ -151,7 +148,7 @@ defmodule EpochtalkServer.SmfQuery do
     end
   end
 
-  def build_recent_threads() do
+  def recent_threads() do
     %{id_board_blacklist: id_board_blacklist} =
       Application.get_env(:epochtalk_server, :proxy_config)
 

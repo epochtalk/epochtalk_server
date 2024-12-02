@@ -852,7 +852,7 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
   end
 
   defp proxy_recent(conn, _attrs) do
-    with threads <- SmfQuery.build_model("threads.recent") do
+    with threads <- SmfQuery.recent_threads() do
       render(conn, :recent, %{threads: threads})
     end
   end

@@ -29,9 +29,6 @@ defmodule EpochtalkServer.SmfQuery do
     } = extract_opts(opts)
 
     case model_type do
-      "poll.by_thread" ->
-        build_poll(id)
-
       "user.find" ->
         build_user(id)
 
@@ -93,7 +90,7 @@ defmodule EpochtalkServer.SmfQuery do
     |> SmfRepo.one()
   end
 
-  def build_poll(thread_id) do
+  def poll_by_thread(thread_id) do
     from(t in "smf_topics",
       where: t.id_topic == ^thread_id
     )

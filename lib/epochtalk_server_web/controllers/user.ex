@@ -94,10 +94,6 @@ defmodule EpochtalkServerWeb.Controllers.User do
          {:ok, _email} <- Mailer.send_confirm_account(user) do
       render(conn, :register_with_verify, user: user)
     else
-      # error in user.create
-      {:error, data} ->
-        ErrorHelpers.render_json_error(conn, 400, data)
-
       # error email failed to send
       {:error, :not_delivered} ->
         ErrorHelpers.render_json_error(
@@ -105,6 +101,10 @@ defmodule EpochtalkServerWeb.Controllers.User do
           500,
           "Sending of account confirmation email failed, mailer is not properly configured."
         )
+
+      # error in user.create
+      {:error, data} ->
+        ErrorHelpers.render_json_error(conn, 400, data)
 
       # Catch all for any other errors
       _ ->
@@ -139,12 +139,6 @@ defmodule EpochtalkServerWeb.Controllers.User do
           500,
           "There was an error banning malicious user, upon confirming account"
         )
-
-      {:error, data} ->
-        ErrorHelpers.render_json_error(conn, 400, data)
-
-      _ ->
-        ErrorHelpers.render_json_error(conn, 500, "There was an issue registering")
     end
   end
 
@@ -182,14 +176,8 @@ defmodule EpochtalkServerWeb.Controllers.User do
       {:error, :user_not_found} ->
         ErrorHelpers.render_json_error(conn, 400, "Account not found")
 
-      {:error, data} ->
-        ErrorHelpers.render_json_error(conn, 400, data)
-
       {:view_deleted, false} ->
         ErrorHelpers.render_json_error(conn, 400, "Account not found")
-
-      _ ->
-        ErrorHelpers.render_json_error(conn, 500, "There was an issue finding user")
     end
   end
 
@@ -217,7 +205,6 @@ defmodule EpochtalkServerWeb.Controllers.User do
     else
       {:auth, false} -> ErrorHelpers.render_json_error(conn, 400, "Not logged in")
       {:error, error} -> ErrorHelpers.render_json_error(conn, 500, error)
-      _ -> ErrorHelpers.render_json_error(conn, 500, "There was an issue signing out")
     end
   end
 
@@ -262,9 +249,6 @@ defmodule EpochtalkServerWeb.Controllers.User do
 
       {:error, :unban_error} ->
         ErrorHelpers.render_json_error(conn, 500, "There was an issue unbanning user, upon login")
-
-      _ ->
-        ErrorHelpers.render_json_error(conn, 500, "There was an issue while attempting to login")
     end
   end
 

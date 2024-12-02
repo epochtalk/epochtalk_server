@@ -76,7 +76,7 @@ defmodule EpochtalkServerWeb.Helpers.Breadcrumbs do
     thread =
       cond do
         is_integer(id) && id < threads_seq ->
-          SmfQuery.build_model("thread", id)
+          SmfQuery.thread(id)
 
         is_binary(id) ->
           Thread.find(id)

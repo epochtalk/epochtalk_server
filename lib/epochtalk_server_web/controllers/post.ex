@@ -585,7 +585,7 @@ defmodule EpochtalkServerWeb.Controllers.Post do
          :ok <- ACL.allow!(conn, "posts.byThread"),
          board_mapping <- BoardMapping.all(),
          board_moderators <- BoardModerator.all(),
-         thread <- SmfQuery.build_model("thread", thread_id),
+         thread <- SmfQuery.thread(thread_id),
          poll <- SmfQuery.build_model("poll.by_thread", thread_id),
          {:ok, posts, data} <-
            SmfQuery.build_model("posts.by_thread", thread_id, %{page: page, limit: limit}) do

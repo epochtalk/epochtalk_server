@@ -29,9 +29,6 @@ defmodule EpochtalkServer.SmfQuery do
     } = extract_opts(opts)
 
     case model_type do
-      "thread" ->
-        build_thread(id)
-
       "post" ->
         build_post(id)
 
@@ -379,7 +376,7 @@ defmodule EpochtalkServer.SmfQuery do
     |> ProxyPagination.page_simple(count_query, page, per_page: per_page, desc: true)
   end
 
-  def build_thread(id) do
+  def thread(id) do
     %{id_board_blacklist: id_board_blacklist} =
       Application.get_env(:epochtalk_server, :proxy_config)
 

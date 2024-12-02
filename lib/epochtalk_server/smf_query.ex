@@ -20,7 +20,6 @@ defmodule EpochtalkServer.SmfQuery do
 
     Enum.into(opts, default_opts)
   end
-  def build_model(model_type), do: build_model(model_type, nil, %{})
   def build_model(model_type, id), do: build_model(model_type, id, %{})
   def build_model(model_type, id, opts) do
     %{

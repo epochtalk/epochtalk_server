@@ -26,7 +26,7 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
   alias EpochtalkServer.Models.UserActivity
   alias EpochtalkServer.Models.ThreadSubscription
   alias EpochtalkServer.Models.Mention
-  alias EpochtalkServerWeb.Helpers.ProxyConversion
+  alias EpochtalkServer.SmfQuery
 
   plug :check_proxy when action in [:by_board, :by_username, :slug_to_id, :viewed, :recent]
 
@@ -800,7 +800,7 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
          limit <- Validate.cast(attrs, "limit", :integer, default: 25, min: 1, max: 100),
          desc <- Validate.cast(attrs, "desc", :boolean, default: true),
          {:ok, threads, data} <-
-           ProxyConversion.build_model("threads.by_user", user_id, %{
+           SmfQuery.build_model("threads.by_user", user_id, %{
              page: page,
              limit: limit,
              desc: desc
@@ -827,11 +827,11 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
          user_priority <- ACL.get_user_priority(conn),
          :ok <- ACL.allow!(conn, "threads.byBoard"),
          board_mapping <- BoardMapping.all(),
-         {:ok, board_moderators} <- ProxyConversion.build_model("boards.moderators"),
-         {:ok, board_counts} <- ProxyConversion.build_model("boards.counts"),
-         {:ok, board_last_post_info} <- ProxyConversion.build_model("boards.last_post_info"),
+         {:ok, board_moderators} <- SmfQuery.build_model("boards.moderators"),
+         {:ok, board_counts} <- SmfQuery.build_model("boards.counts"),
+         {:ok, board_last_post_info} <- SmfQuery.build_model("boards.last_post_info"),
          {:ok, threads, data} <-
-           ProxyConversion.build_model("threads.by_board", board_id, %{page: page, limit: limit}) do
+           SmfQuery.build_model("threads.by_board", board_id, %{page: page, limit: limit}) do
       render(conn, :by_board_proxy, %{
         threads: threads,
         user: user,
@@ -852,7 +852,7 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
   end
 
   defp proxy_recent(conn, _attrs) do
-    with threads <- ProxyConversion.build_model("threads.recent") do
+    with threads <- SmfQuery.build_model("threads.recent") do
       render(conn, :recent, %{threads: threads})
     end
   end

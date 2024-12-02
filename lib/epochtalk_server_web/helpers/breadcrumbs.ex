@@ -2,7 +2,7 @@ defmodule EpochtalkServerWeb.Helpers.Breadcrumbs do
   @moduledoc """
   Helper for creating breadcrumbs
   """
-  alias EpochtalkServerWeb.Helpers.ProxyConversion
+  alias EpochtalkServer.SmfQuery
   alias EpochtalkServer.Models.Category
   alias EpochtalkServer.Models.Board
   alias EpochtalkServer.Models.Thread
@@ -76,7 +76,7 @@ defmodule EpochtalkServerWeb.Helpers.Breadcrumbs do
     thread =
       cond do
         is_integer(id) && id < threads_seq ->
-          ProxyConversion.build_model("thread", id)
+          SmfQuery.build_model("thread", id)
 
         is_binary(id) ->
           Thread.find(id)

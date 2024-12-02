@@ -1,4 +1,4 @@
-defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
+defmodule EpochtalkServer.SmfQuery do
   import Ecto.Query
   alias EpochtalkServer.SmfRepo
   alias EpochtalkServerWeb.Helpers.ProxyPagination

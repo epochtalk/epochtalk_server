@@ -11,7 +11,7 @@ defmodule EpochtalkServerWeb.Controllers.Board do
   alias EpochtalkServerWeb.ErrorHelpers
   alias EpochtalkServerWeb.Helpers.Validate
   alias EpochtalkServerWeb.Helpers.ACL
-  alias EpochtalkServerWeb.Helpers.ProxyConversion
+  alias EpochtalkServer.SmfQuery
 
   plug :check_proxy when action in [:slug_to_id, :by_category]
 
@@ -150,9 +150,9 @@ defmodule EpochtalkServerWeb.Controllers.Board do
          stripped <- Validate.cast(attrs, "stripped", :boolean, default: false),
          user_priority <- ACL.get_user_priority(conn),
          board_mapping <- BoardMapping.all(stripped: stripped),
-         {:ok, board_moderators} <- ProxyConversion.build_model("boards.moderators"),
-         {:ok, board_counts} <- ProxyConversion.build_model("boards.counts"),
-         {:ok, board_last_post_info} <- ProxyConversion.build_model("boards.last_post_info"),
+         {:ok, board_moderators} <- SmfQuery.build_model("boards.moderators"),
+         {:ok, board_counts} <- SmfQuery.build_model("boards.counts"),
+         {:ok, board_last_post_info} <- SmfQuery.build_model("boards.last_post_info"),
          categories <- Category.all() do
       render(conn, :proxy_by_category, %{
         categories: categories,

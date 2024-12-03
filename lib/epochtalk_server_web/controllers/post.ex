@@ -588,7 +588,7 @@ defmodule EpochtalkServerWeb.Controllers.Post do
          thread <- SmfQuery.thread(thread_id),
          poll <- SmfQuery.poll_by_thread(thread_id),
          {:ok, posts, data} <-
-           SmfQuery.build_model("posts.by_thread", thread_id, %{page: page, limit: limit}) do
+           SmfQuery.posts_by_thread(thread_id, %{page: page, limit: limit}) do
       render(conn, :by_thread_proxy, %{
         posts: posts,
         poll: poll,

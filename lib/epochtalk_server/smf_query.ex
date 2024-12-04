@@ -20,18 +20,6 @@ defmodule EpochtalkServer.SmfQuery do
 
     Enum.into(opts, default_opts)
   end
-  def build_model(model_type, id, opts) do
-    %{
-      page: page,
-      per_page: per_page,
-      desc: desc
-    } = extract_opts(opts)
-
-    case model_type do
-      _ ->
-        {:ok, %{}, %{}}
-    end
-  end
 
   def find_user(user_id) do
     from(u in "smf_members", where: u.id_member == ^user_id)

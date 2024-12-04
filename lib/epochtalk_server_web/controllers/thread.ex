@@ -800,7 +800,7 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
          limit <- Validate.cast(attrs, "limit", :integer, default: 25, min: 1, max: 100),
          desc <- Validate.cast(attrs, "desc", :boolean, default: true),
          {:ok, threads, data} <-
-           SmfQuery.build_model("threads.by_user", user_id, %{
+           SmfQuery.threads_by_user(user_id, %{
              page: page,
              limit: limit,
              desc: desc

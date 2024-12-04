@@ -28,9 +28,6 @@ defmodule EpochtalkServer.SmfQuery do
     } = extract_opts(opts)
 
     case model_type do
-      "posts.by_user" ->
-        build_posts_by_user(id, page, per_page, desc)
-
       _ ->
         {:ok, %{}, %{}}
     end
@@ -492,7 +489,13 @@ defmodule EpochtalkServer.SmfQuery do
     end
   end
 
-  def build_posts_by_user(id, page, per_page, desc) do
+  def posts_by_user(id, opts) do
+    %{
+      page: page,
+      per_page: per_page,
+      desc: desc
+    } = extract_opts(opts)
+
     %{id_board_blacklist: id_board_blacklist} =
       Application.get_env(:epochtalk_server, :proxy_config)
 

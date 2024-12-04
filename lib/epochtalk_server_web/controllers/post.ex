@@ -558,7 +558,7 @@ defmodule EpochtalkServerWeb.Controllers.Post do
          limit <- Validate.cast(attrs, "limit", :integer, default: 25, min: 1, max: 100),
          desc <- Validate.cast(attrs, "desc", :boolean, default: true),
          {:ok, posts, data} <-
-           SmfQuery.build_model("posts.by_user", user_id, %{
+           SmfQuery.posts_by_user(user_id, %{
              page: page,
              limit: limit,
              desc: desc

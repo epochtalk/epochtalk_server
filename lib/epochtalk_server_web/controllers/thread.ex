@@ -802,7 +802,7 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
          {:ok, threads, data} <-
            SmfQuery.threads_by_user(user_id, %{
              page: page,
-             per_page: per_page,
+             per_page: limit,
              desc: desc
            }) do
       render(conn, :proxy_by_username, %{
@@ -831,7 +831,7 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
          {:ok, board_counts} <- SmfQuery.board_counts(),
          {:ok, board_last_post_info} <- SmfQuery.board_last_post_info(),
          {:ok, threads, data} <-
-           SmfQuery.threads_by_board(board_id, %{page: page, per_page: per_page}) do
+           SmfQuery.threads_by_board(board_id, %{page: page, per_page: limit}) do
       render(conn, :by_board_proxy, %{
         threads: threads,
         user: user,

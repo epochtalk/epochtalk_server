@@ -560,7 +560,7 @@ defmodule EpochtalkServerWeb.Controllers.Post do
          {:ok, posts, data} <-
            SmfQuery.posts_by_user(user_id, %{
              page: page,
-             per_page: per_page,
+             per_page: limit,
              desc: desc
            }) do
       render(conn, :proxy_by_username, %{
@@ -588,7 +588,7 @@ defmodule EpochtalkServerWeb.Controllers.Post do
          thread <- SmfQuery.thread(thread_id),
          poll <- SmfQuery.poll_by_thread(thread_id),
          {:ok, posts, data} <-
-           SmfQuery.posts_by_thread(thread_id, %{page: page, per_page: per_page}) do
+           SmfQuery.posts_by_thread(thread_id, %{page: page, per_page: limit}) do
       render(conn, :by_thread_proxy, %{
         posts: posts,
         poll: poll,

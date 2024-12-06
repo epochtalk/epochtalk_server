@@ -175,10 +175,11 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
          user <- Guardian.Plug.current_resource(conn),
          user_priority <- ACL.get_user_priority(conn),
          :ok <- ACL.allow!(conn, "threads.byBoard"),
-         {:can_read, {:ok, true}} <-
-           {:can_read, Board.get_read_access_by_id(board_id, user_priority)},
-         {:ok, write_access} <- Board.get_write_access_by_id(board_id, user_priority),
+         {:ok, can_read} <- Board.get_read_access_by_id(board_id, user_priority),
+         {:can_read, true} <- {:can_read, can_read},
          {:ok, board_banned} <- BoardBan.banned_from_board?(user, board_id: board_id),
+         {:board_banned, false} <- {:board_banned, board_banned},
+         {:ok, write_access} <- Board.get_write_access_by_id(board_id, user_priority),
          {:ok, watching_board} <- WatchBoard.user_is_watching(user, board_id),
          board_mapping <- BoardMapping.all(),
          board_moderators <- BoardModerator.all(),
@@ -209,11 +210,11 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
       {:error, :board_does_not_exist} ->
         ErrorHelpers.render_json_error(conn, 400, "Error, board does not exist")
 
-      {:can_read, {:ok, false}} ->
+      {:can_read, false} ->
         ErrorHelpers.render_json_error(conn, 403, "Unauthorized, you do not have permission")
 
-      {:can_read, {:error, :board_does_not_exist}} ->
-        ErrorHelpers.render_json_error(conn, 400, "Read error, board does not exist")
+      {:board_banned, true} ->
+        ErrorHelpers.render_json_error(conn, 403, "Unauthorized, you are banned from this board")
 
       {:has_threads, false} ->
         ErrorHelpers.render_json_error(conn, 404, "Error, requested threads not found in board")

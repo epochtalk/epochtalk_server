@@ -205,7 +205,6 @@ defmodule EpochtalkServerWeb.Controllers.User do
       EpochtalkServerWeb.Endpoint.broadcast("user:#{user.id}", "logout", %{token: token})
       render(conn, :data, data: %{success: true})
     else
-      {:auth, false} -> ErrorHelpers.render_json_error(conn, 400, "Not logged in")
       {:error, error} -> ErrorHelpers.render_json_error(conn, 500, error)
     end
   end

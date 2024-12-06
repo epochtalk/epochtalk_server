@@ -65,6 +65,7 @@ defmodule EpochtalkServerWeb.Router do
     get "/admin/modlog", ModerationLog, :page
     get "/boards/movelist", Board, :movelist
     post "/images/s3/upload", ImageReference, :s3_request_upload
+    delete "/logout", User, :logout
   end
 
   scope "/api", EpochtalkServerWeb.Controllers do
@@ -86,7 +87,6 @@ defmodule EpochtalkServerWeb.Router do
     post "/register", User, :register
     post "/login", User, :login
     post "/confirm", User, :confirm
-    delete "/logout", User, :logout
   end
 
   scope "/", EpochtalkServerWeb.Controllers do

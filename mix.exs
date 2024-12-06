@@ -36,7 +36,7 @@ defmodule EpochtalkServer.MixProject do
       {:argon2_elixir, "~> 3.1.0"},
       {:configparser_ex, "~> 4.0"},
       {:corsica, "~> 1.3.0"},
-      {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
+      {:credo, "~> 1.7.9", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.2", only: [:dev], runtime: false},
       {:dotenv_parser, "~> 2.0"},
       {:earmark, "~> 1.4"},

@@ -193,9 +193,6 @@ defmodule EpochtalkServerWeb.Controllers.Poll do
           "Account must be active to modify lock on poll"
         )
 
-      {:error, data} ->
-        ErrorHelpers.render_json_error(conn, 400, data)
-
       _ ->
         ErrorHelpers.render_json_error(conn, 400, "Error, cannot lock poll")
     end
@@ -316,9 +313,6 @@ defmodule EpochtalkServerWeb.Controllers.Poll do
          poll <- Poll.by_thread(thread_id) do
       render(conn, :poll, %{poll: poll, has_voted: false})
     else
-      {:valid_answers_list, false} ->
-        ErrorHelpers.render_json_error(conn, 400, "Error, 'answer_ids' must be a list")
-
       {:can_read, {:ok, false}} ->
         ErrorHelpers.render_json_error(
           conn,
@@ -354,12 +348,6 @@ defmodule EpochtalkServerWeb.Controllers.Poll do
 
       {:board_banned, {:ok, true}} ->
         ErrorHelpers.render_json_error(conn, 403, "Unauthorized, you are banned from this board")
-
-      {:error, :board_does_not_exist} ->
-        ErrorHelpers.render_json_error(conn, 400, "Error, board does not exist")
-
-      {:error, data} ->
-        ErrorHelpers.render_json_error(conn, 400, data)
 
       _ ->
         ErrorHelpers.render_json_error(conn, 400, "Error, cannot cast vote")

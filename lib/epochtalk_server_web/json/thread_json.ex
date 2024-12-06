@@ -240,7 +240,7 @@ defmodule EpochtalkServerWeb.Controllers.ThreadJSON do
     # handle deleted user
     thread =
       if thread.user_deleted,
-        do: thread |> Map.put(:user_id, '') |> Map.put(:username, ''),
+        do: thread |> Map.put(:user_id, "") |> Map.put(:username, ""),
         else: thread
 
     # format user output

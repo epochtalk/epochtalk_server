@@ -25,13 +25,6 @@ defmodule EpochtalkServerWeb.Controllers.Notification do
           400,
           "Not logged in, cannot fetch notification counts"
         )
-
-      {:access, false} ->
-        ErrorHelpers.render_json_error(
-          conn,
-          400,
-          "Not logged in, cannot fetch notification counts"
-        )
     end
   end
 

@@ -417,9 +417,6 @@ defmodule EpochtalkServerWeb.Controllers.Post do
            Validate.cast(attrs, "body", :string, required: true, max: post_max_length, min: 1),
          parsed_body <- Parse.markdown(body) do
       render(conn, :preview, %{parsed_body: parsed_body})
-    else
-      _ ->
-        ErrorHelpers.render_json_error(conn, 400, "Error, cannot generate preview")
     end
   end
 

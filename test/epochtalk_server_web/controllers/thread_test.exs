@@ -68,7 +68,7 @@ defmodule Test.EpochtalkServerWeb.Controllers.Thread do
         |> json_response(400)
 
       assert response["error"] == "Bad Request"
-      assert response["message"] == "Read error, board does not exist"
+      assert response["message"] == "Error, board does not exist"
     end
 
     test "given an id for existing board, gets threads", %{

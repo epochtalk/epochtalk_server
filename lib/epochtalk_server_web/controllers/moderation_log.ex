@@ -19,11 +19,8 @@ defmodule EpochtalkServerWeb.Controllers.ModerationLog do
          {:ok, moderation_logs, data} <- ModerationLog.page(attrs, page, per_page: limit) do
       render(conn, :page, %{moderation_logs: moderation_logs, pagination_data: data})
     else
-      {:error, data} ->
-        ErrorHelpers.render_json_error(conn, 400, data)
-
       _ ->
-        ErrorHelpers.render_json_error(conn, 500, "There was an issue getting the moderation log")
+        ErrorHelpers.render_json_error(conn, 500, "There was an issue paging the moderation log")
     end
   end
 end

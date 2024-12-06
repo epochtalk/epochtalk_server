@@ -22,8 +22,8 @@ defmodule EpochtalkServerWeb.Controllers.Notification do
       _ ->
         ErrorHelpers.render_json_error(
           conn,
-          500,
-          "Something went wrong, cannot fetch notification counts"
+          400,
+          "Not logged in, cannot fetch notification counts"
         )
     end
   end

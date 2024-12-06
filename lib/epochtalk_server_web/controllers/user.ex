@@ -176,10 +176,10 @@ defmodule EpochtalkServerWeb.Controllers.User do
         show_hidden: show_hidden
       })
     else
-      {:view_deleted, false} ->
+      {:error, :user_not_found} ->
         ErrorHelpers.render_json_error(conn, 400, "Account not found")
 
-      {:error, _} ->
+      {:view_deleted, false} ->
         ErrorHelpers.render_json_error(conn, 400, "Account not found")
     end
   end
@@ -205,7 +205,7 @@ defmodule EpochtalkServerWeb.Controllers.User do
       EpochtalkServerWeb.Endpoint.broadcast("user:#{user.id}", "logout", %{token: token})
       render(conn, :data, data: %{success: true})
     else
-      {:error, data} -> ErrorHelpers.render_json_error(conn, 500, data)
+      {:error, error} -> ErrorHelpers.render_json_error(conn, 500, error)
     end
   end
 

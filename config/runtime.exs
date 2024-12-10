@@ -415,12 +415,14 @@ bbc_config =
         size: get_env_cast_integer_with_default.("BBC_PARSER_WORKERS", "50"),
         max_overflow: get_env_cast_integer_with_default.("BBC_PARSER_OVERFLOW", "20")
       }
+
     _ ->
       %{
         size: 5,
         max_overflow: 2
       }
   end
+
 bbc_parser_poolboy_config = [
   name: {:local, :bbc_parser},
   worker_module: EpochtalkServer.BBCParser,

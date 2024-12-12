@@ -467,6 +467,17 @@ defmodule EpochtalkServerWeb.Controllers.PostJSON do
 
     # reverse body/signature lists
     {body_list, signature_list} = {Enum.reverse(body_list), Enum.reverse(signature_list)}
+
+    # parse body/signature lists
+    {parsed_body_list, parsed_signature_list} =
+      {body_list, signature_list}
+      |> EpochtalkServer.BBCParser.parse_list_tuple()
+      |> case do
+        {:ok, parsed_tuple} -> parsed_tuple
+        {:error, unparsed_tuple} ->
+          Logger.error("#{__MODULE__}(tuple parse): #{inspect(posts)}")
+          unparsed_tuple
+      end
   end
 
   defp format_proxy_post_data_for_by_thread(post) do

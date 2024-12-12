@@ -474,7 +474,9 @@ defmodule EpochtalkServerWeb.Controllers.PostJSON do
       {body_list, signature_list}
       |> EpochtalkServer.BBCParser.parse_list_tuple()
       |> case do
-        {:ok, parsed_tuple} -> parsed_tuple
+        {:ok, parsed_tuple} ->
+          parsed_tuple
+
         {:error, unparsed_tuple} ->
           Logger.error("#{__MODULE__}(tuple parse): #{inspect(posts)}")
           unparsed_tuple
@@ -484,26 +486,33 @@ defmodule EpochtalkServerWeb.Controllers.PostJSON do
     Enum.zip_with(
       [posts, parsed_body_list, parsed_signature_list],
       fn [post, parsed_body, parsed_signature] ->
-        parsed_body = case parsed_body do
-          {:ok, parsed_body} ->
-            Logger.debug("#{__MODULE__}(body): post_id #{inspect(post.id)}")
-            parsed_body
-          {:timeout, unparsed_body} ->
-            Logger.error("#{__MODULE__}(body timeout): post_id #{inspect(post.id)}")
-            unparsed_body
-        end
-        parsed_signature = case parsed_signature do
-          {:ok, parsed_signature} ->
-            Logger.debug("#{__MODULE__}(signature): user_id #{inspect(post.user.id)}")
-            parsed_signature
-          {:timeout, unparsed_signature} ->
-            Logger.error("#{__MODULE__}(signature timeout): user_id #{inspect(post.user.id)}")
-            unparsed_signature
-        end
+        parsed_body =
+          case parsed_body do
+            {:ok, parsed_body} ->
+              Logger.debug("#{__MODULE__}(body): post_id #{inspect(post.id)}")
+              parsed_body
+
+            {:timeout, unparsed_body} ->
+              Logger.error("#{__MODULE__}(body timeout): post_id #{inspect(post.id)}")
+              unparsed_body
+          end
+
+        parsed_signature =
+          case parsed_signature do
+            {:ok, parsed_signature} ->
+              Logger.debug("#{__MODULE__}(signature): user_id #{inspect(post.user.id)}")
+              parsed_signature
+
+            {:timeout, unparsed_signature} ->
+              Logger.error("#{__MODULE__}(signature timeout): user_id #{inspect(post.user.id)}")
+              unparsed_signature
+          end
+
         user = post.user |> Map.put(:signature, parsed_signature)
+
         post
-          |> Map.put(:body_html, parsed_body)
-          |> Map.put(:user, user)
+        |> Map.put(:body_html, parsed_body)
+        |> Map.put(:user, user)
       end
     )
   end

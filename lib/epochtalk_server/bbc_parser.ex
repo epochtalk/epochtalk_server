@@ -29,9 +29,16 @@ defmodule EpochtalkServer.BBCParser do
     do: {:reply, {:ok, ""}, {proc, pid}}
 
   def handle_call({:parse, bbcode_data}, _from, {proc, pid}) when is_binary(bbcode_data) do
-    Logger.debug("#{__MODULE__}(start parse): #{String.first(bbcode_data)} #{NaiveDateTime.utc_now()}")
+    Logger.debug(
+      "#{__MODULE__}(start parse): #{String.first(bbcode_data)} #{NaiveDateTime.utc_now()}"
+    )
+
     parsed = parse_with_proc(bbcode_data, {proc, pid})
-    Logger.debug("#{__MODULE__}(finish parse): #{String.first(bbcode_data)} #{NaiveDateTime.utc_now()}")
+
+    Logger.debug(
+      "#{__MODULE__}(finish parse): #{String.first(bbcode_data)} #{NaiveDateTime.utc_now()}"
+    )
+
     {:reply, parsed, {proc, pid}}
   end
 
@@ -50,11 +57,12 @@ defmodule EpochtalkServer.BBCParser do
 
   defp parse_list_with_proc(bbcode_data_list, {proc, pid}) do
     bbcode_data_list
-    |> Enum.map(&(parse_with_proc(&1, {proc, pid})))
+    |> Enum.map(&parse_with_proc(&1, {proc, pid}))
   end
 
   defp parse_with_proc(nil, {_proc, _pid}), do: {:ok, nil}
   defp parse_with_proc("", {_proc, _pid}), do: {:ok, ""}
+
   defp parse_with_proc(bbcode_data, {proc, pid}) do
     Proc.send_input(proc, "echo parse_bbc('#{bbcode_data}');\n")
 
@@ -65,9 +73,11 @@ defmodule EpochtalkServer.BBCParser do
       # time out after not receiving any data
       @receive_timeout ->
         Logger.error("#{__MODULE__}(parse timeout): #{inspect(pid)}, #{inspect(bbcode_data)}")
+
         bbcode_data =
           "<p style=\"color:red;font-weight:bold\">((bbcode parse timeout))</p></br>" <>
             bbcode_data
+
         {:timeout, bbcode_data}
     end
   end
@@ -103,6 +113,7 @@ defmodule EpochtalkServer.BBCParser do
       @call_timeout
     )
   end
+
   def parse(bbcode_data) do
     :poolboy.transaction(
       :bbc_parser,

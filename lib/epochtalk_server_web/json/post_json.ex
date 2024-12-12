@@ -444,6 +444,31 @@ defmodule EpochtalkServerWeb.Controllers.PostJSON do
     |> Map.delete(:role_name)
   end
 
+  defp format_proxy_posts_for_by_thread(posts) do
+    # extract body/signature lists from posts
+    {body_list, signature_list} =
+      posts
+      |> Enum.reduce({[], []}, fn post, {body_list, signature_list} ->
+        body = String.replace(Map.get(post, :body) || Map.get(post, :body_html), "'", "\'")
+
+        # add space to end if the last character is a backslash (fix for parser)
+        body_len = String.length(body)
+        last_char = String.slice(body, (body_len - 1)..body_len)
+        body = if last_char == "\\", do: body <> " ", else: body
+
+        signature =
+          if Map.get(post.user, :signature),
+            do: String.replace(post.user.signature, "'", "\'"),
+            else: nil
+
+        # return body/signature lists in reverse order
+        {[body | body_list], [signature | signature_list]}
+      end)
+
+    # reverse body/signature lists
+    {body_list, signature_list} = {Enum.reverse(body_list), Enum.reverse(signature_list)}
+  end
+
   defp format_proxy_post_data_for_by_thread(post) do
     body = String.replace(Map.get(post, :body) || Map.get(post, :body_html), "'", "\'")
 

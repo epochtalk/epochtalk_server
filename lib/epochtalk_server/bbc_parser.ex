@@ -35,6 +35,17 @@ defmodule EpochtalkServer.BBCParser do
     {:reply, parsed, {proc, pid}}
   end
 
+  defp parse_list_tuple_with_proc({left, right}, {proc, pid}) do
+    left = parse_list_with_proc(left, {proc, pid})
+    right = parse_list_with_proc(right, {proc, pid})
+    {left, right}
+  end
+
+  defp parse_list_with_proc(bbcode_data_list, {proc, pid}) do
+    bbcode_data_list
+    |> Enum.map(&(parse_with_proc(&1, {proc, pid})))
+  end
+
   defp parse_with_proc(nil, {_proc, _pid}), do: {:ok, nil}
   defp parse_with_proc("", {_proc, _pid}), do: {:ok, ""}
   defp parse_with_proc(bbcode_data, {proc, pid}) do

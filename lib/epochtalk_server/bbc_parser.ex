@@ -3,11 +3,15 @@ defmodule EpochtalkServer.BBCParser do
   require Logger
   alias Porcelain.Process, as: Proc
 
-  # poolboy genserver call timeout (ms)
-  # should be greater than internal porcelain php call
-  @call_timeout 500
+  # genserver call timeouts (ms)
+  @genserver_parse_timeout 5000
+  @genserver_parse_tuple_timeout 5000
+
+  # poolboy timeout (ms)
+  @poolboy_transaction_timeout 200
+
   # porcelain php parser call timeout (ms)
-  @receive_timeout 400
+  @receive_timeout 20
 
   @moduledoc """
   `BBCParser` genserver, runs interactive php shell to call bbcode parser
@@ -99,7 +103,7 @@ defmodule EpochtalkServer.BBCParser do
         try do
           Logger.debug("#{__MODULE__}(parse): #{inspect(pid)}")
 
-          GenServer.call(pid, {:parse_list_tuple, {left_bbcode_data, right_bbcode_data}})
+          GenServer.call(pid, {:parse_list_tuple, {left_bbcode_data, right_bbcode_data}}, @genserver_parse_tuple_timeout)
         catch
           e, r ->
             # something went wrong, log the error
@@ -110,7 +114,7 @@ defmodule EpochtalkServer.BBCParser do
             {:error, {left_bbcode_data, right_bbcode_data}}
         end
       end,
-      @call_timeout
+      @poolboy_transaction_timeout
     )
   end
 
@@ -121,7 +125,7 @@ defmodule EpochtalkServer.BBCParser do
         try do
           Logger.debug("#{__MODULE__}(parse): #{inspect(pid)}")
 
-          GenServer.call(pid, {:parse, bbcode_data}, @call_timeout)
+          GenServer.call(pid, {:parse, bbcode_data}, @genserver_parse_timeout)
           |> case do
             # on success, return parsed data
             {:ok, parsed} ->
@@ -141,7 +145,7 @@ defmodule EpochtalkServer.BBCParser do
             bbcode_data
         end
       end,
-      @call_timeout
+      @poolboy_transaction_timeout
     )
   end
 

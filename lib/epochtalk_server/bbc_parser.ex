@@ -19,6 +19,12 @@ defmodule EpochtalkServer.BBCParser do
   def init(:ok), do: {:ok, load()}
 
   @impl true
+  def handle_info({_pid, :data, :out, data}, state) do
+    Logger.debug("#{__MODULE__}(info): #{inspect(data)}")
+    {:noreply, state}
+  end
+
+  @impl true
   def handle_call({:parse, ""}, _from, {proc, pid}),
     do: {:reply, {:ok, ""}, {proc, pid}}
 
@@ -88,9 +94,6 @@ defmodule EpochtalkServer.BBCParser do
     Proc.send_input(proc, "require 'parsing.php';\n")
     Logger.debug("#{__MODULE__}(LOAD): #{inspect(pid)}")
     # clear initial php interactive shell message
-    receive do
-      {^pid, :data, :out, data} -> Logger.debug("#{__MODULE__}: #{inspect(data)}")
-    end
 
     {proc, pid}
   end

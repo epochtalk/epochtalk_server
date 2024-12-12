@@ -478,6 +478,29 @@ defmodule EpochtalkServerWeb.Controllers.PostJSON do
           Logger.error("#{__MODULE__}(tuple parse): #{inspect(posts)}")
           unparsed_tuple
       end
+
+    # zip posts with body/signature lists
+    Enum.zip_with(
+      [posts, parsed_body_list, parsed_signature_list],
+      fn [post, parsed_body, parsed_signature] ->
+        parsed_body = case parsed_body do
+          {:ok, parsed_body} ->
+            parsed_body
+          {:timeout, unparsed_body} ->
+            unparsed_body
+        end
+        parsed_signature = case parsed_signature do
+          {:ok, parsed_signature} ->
+            parsed_signature
+          {:timeout, unparsed_signature} ->
+            unparsed_signature
+        end
+        user = post.user |> Map.put(:signature, parsed_signature)
+        post
+          |> Map.put(:body_html, parsed_body)
+          |> Map.put(:user, user)
+      end
+    )
   end
 
   defp format_proxy_post_data_for_by_thread(post) do

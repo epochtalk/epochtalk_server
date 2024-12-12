@@ -141,7 +141,7 @@ defmodule EpochtalkServerWeb.Controllers.PostJSON do
     # format post data
     posts =
       posts
-      |> Enum.map(&format_proxy_post_data_for_by_thread(&1))
+      |> format_proxy_posts_for_by_thread()
 
     # build by_thread results
     %{
@@ -193,7 +193,7 @@ defmodule EpochtalkServerWeb.Controllers.PostJSON do
       when is_list(posts) do
     posts =
       posts
-      |> Enum.map(&format_proxy_post_data_for_by_thread(&1))
+      |> format_proxy_posts_for_by_thread()
 
     %{
       posts: posts,

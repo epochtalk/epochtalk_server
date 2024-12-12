@@ -90,10 +90,7 @@ defmodule EpochtalkServer.BBCParser do
 
             # on parse timeout, log and return unparsed data
             {:timeout, unparsed} ->
-              Logger.error("#{__MODULE__}(parse timeout): #{inspect(pid)}, #{inspect(unparsed)}")
-
-              "<p style=\"color:red;font-weight:bold\">((bbcode parse timeout))</p></br>" <>
-                unparsed
+              unparsed
           end
         catch
           e, r ->

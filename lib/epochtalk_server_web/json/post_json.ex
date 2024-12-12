@@ -2,6 +2,7 @@ defmodule EpochtalkServerWeb.Controllers.PostJSON do
   alias EpochtalkServerWeb.Controllers.BoardJSON
   alias EpochtalkServerWeb.Controllers.ThreadJSON
   alias EpochtalkServerWeb.Helpers.ACL
+  require Logger
 
   @moduledoc """
   Renders and formats `Post` data, in JSON format for frontend
@@ -485,14 +486,18 @@ defmodule EpochtalkServerWeb.Controllers.PostJSON do
       fn [post, parsed_body, parsed_signature] ->
         parsed_body = case parsed_body do
           {:ok, parsed_body} ->
+            Logger.debug("#{__MODULE__}(body): post_id #{inspect(post.id)}")
             parsed_body
           {:timeout, unparsed_body} ->
+            Logger.error("#{__MODULE__}(body timeout): post_id #{inspect(post.id)}")
             unparsed_body
         end
         parsed_signature = case parsed_signature do
           {:ok, parsed_signature} ->
+            Logger.debug("#{__MODULE__}(signature): user_id #{inspect(post.user.id)}")
             parsed_signature
           {:timeout, unparsed_signature} ->
+            Logger.error("#{__MODULE__}(signature timeout): user_id #{inspect(post.user.id)}")
             unparsed_signature
         end
         user = post.user |> Map.put(:signature, parsed_signature)

@@ -478,7 +478,7 @@ defmodule EpochtalkServerWeb.Controllers.PostJSON do
           parsed_tuple
 
         {:error, unparsed_tuple} ->
-          Logger.error("#{__MODULE__}(tuple parse): #{inspect(posts)}")
+          Logger.error("#{__MODULE__}(tuple parse): #{inspect(unparsed_tuple)}")
           unparsed_tuple
       end
 

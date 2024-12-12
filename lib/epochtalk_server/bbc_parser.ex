@@ -82,6 +82,27 @@ defmodule EpochtalkServer.BBCParser do
   @doc """
   Uses poolboy to call parser
   """
+  def parse_list_tuple({left_bbcode_data, right_bbcode_data}) do
+    :poolboy.transaction(
+      :bbc_parser,
+      fn pid ->
+        try do
+          Logger.debug("#{__MODULE__}(parse): #{inspect(pid)}")
+
+          GenServer.call(pid, {:parse_list_tuple, {left_bbcode_data, right_bbcode_data}})
+        catch
+          e, r ->
+            # something went wrong, log the error
+            Logger.error(
+              "#{__MODULE__}(parse poolboy): #{inspect(pid)}, #{inspect(e)}, #{inspect(r)}"
+            )
+
+            {:error, {left_bbcode_data, right_bbcode_data}}
+        end
+      end,
+      @call_timeout
+    )
+  end
   def parse(bbcode_data) do
     :poolboy.transaction(
       :bbc_parser,

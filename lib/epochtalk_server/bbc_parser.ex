@@ -111,6 +111,8 @@ defmodule EpochtalkServer.BBCParser do
               "#{__MODULE__}(parse poolboy): #{inspect(pid)}, #{inspect(e)}, #{inspect(r)}"
             )
 
+            left_bbcode_data = left_bbcode_data |> Enum.map(&({:timeout, &1}))
+            right_bbcode_data = right_bbcode_data |> Enum.map(&({:timeout, &1}))
             {:error, {left_bbcode_data, right_bbcode_data}}
         end
       end,

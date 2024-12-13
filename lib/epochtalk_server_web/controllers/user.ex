@@ -17,7 +17,7 @@ defmodule EpochtalkServerWeb.Controllers.User do
   alias EpochtalkServerWeb.CustomErrors.InvalidPayload
   alias EpochtalkServerWeb.Helpers.ACL
   alias EpochtalkServerWeb.Helpers.Validate
-  alias EpochtalkServerWeb.Helpers.ProxyConversion
+  alias EpochtalkServer.SmfQuery
 
   plug :check_proxy when action in [:find]
 
@@ -270,7 +270,7 @@ defmodule EpochtalkServerWeb.Controllers.User do
   end
 
   defp proxy_find(conn, attrs) do
-    with user <- ProxyConversion.build_model("user.find", attrs["id"]) do
+    with user <- SmfQuery.find_user(attrs["id"]) do
       render(conn, :find_proxy, %{user: user})
     end
   end

@@ -1,91 +1,27 @@
-defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
+defmodule EpochtalkServer.SmfQuery do
   import Ecto.Query
   alias EpochtalkServer.SmfRepo
   alias EpochtalkServerWeb.Helpers.ProxyPagination
+
+  @default_page 1
+  @default_per_page 25
+  @ms_per_sec 1000
 
   @moduledoc """
   Helper for pulling and formatting data from SmfRepo
   """
 
-  def build_model(model_type, ids, _, _) when is_nil(model_type) or is_nil(ids) do
-    {:ok, %{}, %{}}
+  defp extract_opts(opts) do
+    default_opts = %{
+      page: @default_page,
+      per_page: @default_per_page,
+      desc: false
+    }
+
+    Enum.into(opts, default_opts)
   end
 
-  def build_model(_, ids, _, _) when length(ids) > 25 do
-    {:error, "Limit too large, please try again"}
-  end
-
-  def build_model(model_type, id, page, per_page) when is_integer(id) do
-    case model_type do
-      "threads.by_board" ->
-        build_threads_by_board(id, page, per_page)
-
-      "posts.by_thread" ->
-        build_posts_by_thread(id, page, per_page)
-
-      _ ->
-        build_model(nil, nil, nil, nil)
-    end
-  end
-
-  def build_model(model_type, id, page, per_page, desc) when is_integer(id) do
-    case model_type do
-      "threads.by_user" ->
-        build_threads_by_user(id, page, per_page, desc)
-
-      "posts.by_user" ->
-        build_posts_by_user(id, page, per_page, desc)
-
-      _ ->
-        build_model(nil, nil, nil, nil)
-    end
-  end
-
-  def build_model(model_type, id) do
-    case model_type do
-      "category" ->
-        build_category(id)
-
-      "board" ->
-        build_board(id)
-
-      "thread" ->
-        build_thread(id)
-
-      "post" ->
-        build_post(id)
-
-      "poll.by_thread" ->
-        build_poll(id)
-
-      "user.find" ->
-        build_user(id)
-
-      _ ->
-        build_model(nil, nil, nil, nil)
-    end
-  end
-
-  def build_model(model_type) do
-    case model_type do
-      "boards.counts" ->
-        build_board_counts()
-
-      "boards.last_post_info" ->
-        build_board_last_post_info()
-
-      "boards.moderators" ->
-        build_board_moderators()
-
-      "threads.recent" ->
-        build_recent_threads()
-
-      _ ->
-        build_model(nil, nil, nil, nil)
-    end
-  end
-
-  def build_user(user_id) do
+  def find_user(user_id) do
     from(u in "smf_members", where: u.id_member == ^user_id)
     |> join(:left, [u], a in "smf_attachments",
       on: u.id_member == a.id_member and a.attachmentType == 1
@@ -126,7 +62,7 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
     |> SmfRepo.one()
   end
 
-  def build_poll(thread_id) do
+  def poll_by_thread(thread_id) do
     from(t in "smf_topics",
       where: t.id_topic == ^thread_id
     )
@@ -135,7 +71,7 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
       id: t.id_poll,
       change_vote: p.changeVote,
       display_mode: "always",
-      expiration: p.expireTime * 1000,
+      expiration: p.expireTime * @ms_per_sec,
       has_voted: false,
       locked: p.votingLocked == 1,
       max_answers: p.maxVotes,
@@ -168,7 +104,7 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
     end
   end
 
-  def build_recent_threads() do
+  def recent_threads() do
     %{id_board_blacklist: id_board_blacklist} =
       Application.get_env(:epochtalk_server, :proxy_config)
 
@@ -193,8 +129,8 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
       first_post_id: t.id_first_msg,
       last_post_id: t.id_last_msg,
       title: f.subject,
-      updated_at: l.posterTime * 1000,
-      last_post_created_at: l.posterTime * 1000,
+      updated_at: l.posterTime * @ms_per_sec,
+      last_post_created_at: l.posterTime * @ms_per_sec,
       last_post_user_id: l.id_member,
       last_post_username: l.posterName,
       view_count: t.numViews,
@@ -215,7 +151,7 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
     end
   end
 
-  def build_category(id) do
+  def category(id) do
     from(c in "smf_categories",
       where: c.id_cat == ^id,
       select: %{
@@ -234,7 +170,7 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
     end
   end
 
-  def build_board_counts() do
+  def board_counts() do
     %{id_board_blacklist: id_board_blacklist} =
       Application.get_env(:epochtalk_server, :proxy_config)
 
@@ -256,7 +192,7 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
     end
   end
 
-  def build_board_last_post_info() do
+  def board_last_post_info() do
     %{id_board_blacklist: id_board_blacklist} =
       Application.get_env(:epochtalk_server, :proxy_config)
 
@@ -271,7 +207,7 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
     )
     |> select([b, m, t, u, a], %{
       id: b.id_board,
-      last_post_created_at: m.posterTime * 1000,
+      last_post_created_at: m.posterTime * @ms_per_sec,
       last_post_position: t.numReplies,
       last_post_username: m.posterName,
       last_post_user_id: m.id_member,
@@ -287,7 +223,7 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
       last_thread_post_count: t.numReplies,
       last_thread_slug: t.id_topic,
       last_thread_title: m.subject,
-      last_thread_updated_at: m.posterTime * 1000
+      last_thread_updated_at: m.posterTime * @ms_per_sec
     })
     |> SmfRepo.all()
     |> case do
@@ -299,7 +235,7 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
     end
   end
 
-  def build_board_moderators() do
+  def board_moderators() do
     %{id_board_blacklist: id_board_blacklist} =
       Application.get_env(:epochtalk_server, :proxy_config)
 
@@ -325,7 +261,7 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
     end
   end
 
-  def build_board(id) do
+  def board(id) do
     %{id_board_blacklist: id_board_blacklist} =
       Application.get_env(:epochtalk_server, :proxy_config)
 
@@ -351,7 +287,12 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
     end
   end
 
-  def build_threads_by_board(id, page, per_page) do
+  def threads_by_board(id, opts) do
+    %{
+      page: page,
+      per_page: per_page
+    } = extract_opts(opts)
+
     %{id_board_blacklist: id_board_blacklist} =
       Application.get_env(:epochtalk_server, :proxy_config)
 
@@ -386,9 +327,9 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
       title: f.subject,
       user_id: f.id_member,
       username: f.posterName,
-      created_at: f.posterTime * 1000,
+      created_at: f.posterTime * @ms_per_sec,
       user_deleted: false,
-      last_post_created_at: l.posterTime * 1000,
+      last_post_created_at: l.posterTime * @ms_per_sec,
       last_post_deleted: false,
       last_post_user_id: l.id_member,
       last_post_username: l.posterName,
@@ -406,7 +347,7 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
     |> ProxyPagination.page_simple(count_query, page, per_page: per_page, desc: true)
   end
 
-  def build_thread(id) do
+  def thread(id) do
     %{id_board_blacklist: id_board_blacklist} =
       Application.get_env(:epochtalk_server, :proxy_config)
 
@@ -432,9 +373,9 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
       title: f.subject,
       user_id: f.id_member,
       username: f.posterName,
-      created_at: f.posterTime * 1000,
+      created_at: f.posterTime * @ms_per_sec,
       user_deleted: false,
-      last_post_created_at: l.posterTime * 1000,
+      last_post_created_at: l.posterTime * @ms_per_sec,
       last_post_deleted: false,
       last_post_user_id: l.id_member,
       last_post_username: l.posterName,
@@ -451,7 +392,7 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
     end
   end
 
-  def build_post(id) do
+  def post(id) do
     %{id_board_blacklist: id_board_blacklist} =
       Application.get_env(:epochtalk_server, :proxy_config)
 
@@ -477,7 +418,12 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
     end
   end
 
-  def build_posts_by_thread(id, page, per_page) do
+  def posts_by_thread(id, opts) do
+    %{
+      page: page,
+      per_page: per_page
+    } = extract_opts(opts)
+
     %{id_board_blacklist: id_board_blacklist} =
       Application.get_env(:epochtalk_server, :proxy_config)
 
@@ -503,7 +449,7 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
       body: m.body,
       updated_at: m.modifiedTime,
       username: m.posterName,
-      created_at: m.posterTime * 1000,
+      created_at: m.posterTime * @ms_per_sec,
       modified_time: m.modifiedTime,
       avatar:
         fragment(
@@ -531,7 +477,13 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
     end
   end
 
-  def build_posts_by_user(id, page, per_page, desc) do
+  def posts_by_user(id, opts) do
+    %{
+      page: page,
+      per_page: per_page,
+      desc: desc
+    } = extract_opts(opts)
+
     %{id_board_blacklist: id_board_blacklist} =
       Application.get_env(:epochtalk_server, :proxy_config)
 
@@ -564,7 +516,13 @@ defmodule EpochtalkServerWeb.Helpers.ProxyConversion do
     |> ProxyPagination.page_simple(count_query, page, per_page: per_page, desc: desc)
   end
 
-  def build_threads_by_user(id, page, per_page, desc) do
+  def threads_by_user(id, opts) do
+    %{
+      page: page,
+      per_page: per_page,
+      desc: desc
+    } = extract_opts(opts)
+
     %{id_board_blacklist: id_board_blacklist} =
       Application.get_env(:epochtalk_server, :proxy_config)
 

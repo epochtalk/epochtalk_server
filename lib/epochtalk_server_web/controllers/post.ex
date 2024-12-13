@@ -10,7 +10,7 @@ defmodule EpochtalkServerWeb.Controllers.Post do
   alias EpochtalkServerWeb.Helpers.ACL
   alias EpochtalkServerWeb.Helpers.Sanitize
   alias EpochtalkServerWeb.Helpers.Parse
-  alias EpochtalkServerWeb.Helpers.ProxyConversion
+  alias EpochtalkServer.SmfQuery
   alias EpochtalkServer.Models.Profile
   alias EpochtalkServer.Models.Post
   alias EpochtalkServer.Models.Poll
@@ -558,7 +558,11 @@ defmodule EpochtalkServerWeb.Controllers.Post do
          limit <- Validate.cast(attrs, "limit", :integer, default: 25, min: 1, max: 100),
          desc <- Validate.cast(attrs, "desc", :boolean, default: true),
          {:ok, posts, data} <-
-           ProxyConversion.build_model("posts.by_user", user_id, page, limit, desc) do
+           SmfQuery.posts_by_user(user_id, %{
+             page: page,
+             per_page: limit,
+             desc: desc
+           }) do
       render(conn, :proxy_by_username, %{
         posts: posts,
         count: data.total_records,
@@ -581,10 +585,10 @@ defmodule EpochtalkServerWeb.Controllers.Post do
          :ok <- ACL.allow!(conn, "posts.byThread"),
          board_mapping <- BoardMapping.all(),
          board_moderators <- BoardModerator.all(),
-         thread <- ProxyConversion.build_model("thread", thread_id),
-         poll <- ProxyConversion.build_model("poll.by_thread", thread_id),
+         thread <- SmfQuery.thread(thread_id),
+         poll <- SmfQuery.poll_by_thread(thread_id),
          {:ok, posts, data} <-
-           ProxyConversion.build_model("posts.by_thread", thread_id, page, limit) do
+           SmfQuery.posts_by_thread(thread_id, %{page: page, per_page: limit}) do
       render(conn, :by_thread_proxy, %{
         posts: posts,
         poll: poll,

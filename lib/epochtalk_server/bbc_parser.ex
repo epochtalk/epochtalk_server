@@ -103,7 +103,11 @@ defmodule EpochtalkServer.BBCParser do
         try do
           Logger.debug("#{__MODULE__}(parse): #{inspect(pid)}")
 
-          GenServer.call(pid, {:parse_list_tuple, {left_bbcode_data, right_bbcode_data}}, @genserver_parse_tuple_timeout)
+          GenServer.call(
+            pid,
+            {:parse_list_tuple, {left_bbcode_data, right_bbcode_data}},
+            @genserver_parse_tuple_timeout
+          )
         catch
           e, r ->
             # something went wrong, log the error
@@ -111,8 +115,8 @@ defmodule EpochtalkServer.BBCParser do
               "#{__MODULE__}(parse poolboy): #{inspect(pid)}, #{inspect(e)}, #{inspect(r)}"
             )
 
-            left_bbcode_data = left_bbcode_data |> Enum.map(&({:timeout, &1}))
-            right_bbcode_data = right_bbcode_data |> Enum.map(&({:timeout, &1}))
+            left_bbcode_data = left_bbcode_data |> Enum.map(&{:timeout, &1})
+            right_bbcode_data = right_bbcode_data |> Enum.map(&{:timeout, &1})
             {:error, {left_bbcode_data, right_bbcode_data}}
         end
       end,

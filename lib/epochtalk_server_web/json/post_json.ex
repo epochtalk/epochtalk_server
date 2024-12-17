@@ -2,6 +2,7 @@ defmodule EpochtalkServerWeb.Controllers.PostJSON do
   alias EpochtalkServerWeb.Controllers.BoardJSON
   alias EpochtalkServerWeb.Controllers.ThreadJSON
   alias EpochtalkServerWeb.Helpers.ACL
+  require Logger
 
   @moduledoc """
   Renders and formats `Post` data, in JSON format for frontend
@@ -140,7 +141,7 @@ defmodule EpochtalkServerWeb.Controllers.PostJSON do
     # format post data
     posts =
       posts
-      |> Enum.map(&format_proxy_post_data_for_by_thread(&1))
+      |> format_proxy_posts_for_by_thread()
 
     # build by_thread results
     %{
@@ -192,7 +193,7 @@ defmodule EpochtalkServerWeb.Controllers.PostJSON do
       when is_list(posts) do
     posts =
       posts
-      |> Enum.map(&format_proxy_post_data_for_by_thread(&1))
+      |> format_proxy_posts_for_by_thread()
 
     %{
       posts: posts,
@@ -444,27 +445,79 @@ defmodule EpochtalkServerWeb.Controllers.PostJSON do
     |> Map.delete(:role_name)
   end
 
-  defp format_proxy_post_data_for_by_thread(post) do
-    body = String.replace(Map.get(post, :body) || Map.get(post, :body_html), "'", "\'")
+  defp format_proxy_posts_for_by_thread(posts) do
+    # extract body/signature lists from posts
+    {body_list, signature_list} =
+      posts
+      |> Enum.reduce({[], []}, fn post, {body_list, signature_list} ->
+        body = String.replace(Map.get(post, :body) || Map.get(post, :body_html), "'", "\'")
 
-    # add space to end if the last character is a backslash (fix for parser)
-    body_len = String.length(body)
-    last_char = String.slice(body, (body_len - 1)..body_len)
-    body = if last_char == "\\", do: body <> " ", else: body
+        # add space to end if the last character is a backslash (fix for parser)
+        body_len = String.length(body)
+        last_char = String.slice(body, (body_len - 1)..body_len)
+        body = if last_char == "\\", do: body <> " ", else: body
 
-    parsed_body = EpochtalkServer.BBCParser.parse(body)
+        signature =
+          if Map.get(post.user, :signature),
+            do: String.replace(post.user.signature, "'", "\'"),
+            else: nil
 
-    signature =
-      if Map.get(post.user, :signature),
-        do: String.replace(post.user.signature, "'", "\'"),
-        else: nil
+        # return body/signature lists in reverse order
+        {[body | body_list], [signature | signature_list]}
+      end)
 
-    parsed_signature =
-      if signature,
-        do: EpochtalkServer.BBCParser.parse(signature),
-        else: nil
+    # reverse body/signature lists
+    {body_list, signature_list} = {Enum.reverse(body_list), Enum.reverse(signature_list)}
 
-    user = post.user |> Map.put(:signature, parsed_signature)
-    post |> Map.put(:body_html, parsed_body) |> Map.put(:user, user)
+    # parse body/signature lists
+    {parsed_body_list, parsed_signature_list} =
+      {body_list, signature_list}
+      |> EpochtalkServer.BBCParser.parse_list_tuple()
+      |> case do
+        {:ok, parsed_tuple} ->
+          parsed_tuple
+
+        {:error, unparsed_tuple} ->
+          Logger.error("#{__MODULE__}(tuple parse): #{inspect(unparsed_tuple)}")
+          unparsed_tuple
+      end
+
+    zip_posts(posts, parsed_body_list, parsed_signature_list)
+  end
+
+  defp zip_posts(posts, parsed_body_list, parsed_signature_list) do
+    # zip posts with body/signature lists
+    Enum.zip_with(
+      [posts, parsed_body_list, parsed_signature_list],
+      fn [post, parsed_body, parsed_signature] ->
+        parsed_body =
+          case parsed_body do
+            {:ok, parsed_body} ->
+              Logger.debug("#{__MODULE__}(body): post_id #{inspect(post.id)}")
+              parsed_body
+
+            {:timeout, unparsed_body} ->
+              Logger.error("#{__MODULE__}(body timeout): post_id #{inspect(post.id)}")
+              unparsed_body
+          end
+
+        parsed_signature =
+          case parsed_signature do
+            {:ok, parsed_signature} ->
+              Logger.debug("#{__MODULE__}(signature): user_id #{inspect(post.user.id)}")
+              parsed_signature
+
+            {:timeout, unparsed_signature} ->
+              Logger.error("#{__MODULE__}(signature timeout): user_id #{inspect(post.user.id)}")
+              unparsed_signature
+          end
+
+        user = post.user |> Map.put(:signature, parsed_signature)
+
+        post
+        |> Map.put(:body_html, parsed_body)
+        |> Map.put(:user, user)
+      end
+    )
   end
 end

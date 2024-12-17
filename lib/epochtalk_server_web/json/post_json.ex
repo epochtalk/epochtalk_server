@@ -484,6 +484,7 @@ defmodule EpochtalkServerWeb.Controllers.PostJSON do
 
     zip_posts(posts, parsed_body_list, parsed_signature_list)
   end
+
   defp zip_posts(posts, parsed_body_list, parsed_signature_list) do
     # zip posts with body/signature lists
     Enum.zip_with(

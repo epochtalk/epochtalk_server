@@ -407,27 +407,32 @@ end
 
 ##### PROXY REPO CONFIGURATIONS #####
 
-# configure poolboy for bbcode parser
-bbc_config =
+# configurations for bbcode parser
+bbc_parser_config =
   case config_env() do
     :prod ->
       %{
-        size: get_env_cast_integer_with_default.("BBC_PARSER_WORKERS", "50"),
-        max_overflow: get_env_cast_integer_with_default.("BBC_PARSER_OVERFLOW", "20")
+        poolboy: %{
+          size: get_env_cast_integer_with_default.("BBC_PARSER_WORKERS", "50"),
+          max_overflow: get_env_cast_integer_with_default.("BBC_PARSER_OVERFLOW", "20")
+        }
       }
 
     _ ->
       %{
-        size: 5,
-        max_overflow: 2
+        poolboy: %{
+          size: 5,
+          max_overflow: 2
+        }
       }
   end
 
+# configure poolboy for bbcode parser
 bbc_parser_poolboy_config = [
   name: {:local, :bbc_parser},
   worker_module: EpochtalkServer.BBCParser,
-  size: bbc_config.size,
-  max_overflow: bbc_config.max_overflow,
+  size: bbc_parser_config.poolboy.size,
+  max_overflow: bbc_parser_config.poolboy.max_overflow,
   strategy: :fifo
 ]
 

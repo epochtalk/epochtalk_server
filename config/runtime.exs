@@ -417,7 +417,8 @@ bbc_parser_config =
           max_overflow: get_env_cast_integer_with_default.("BBC_PARSER_OVERFLOW", "20")
         },
         parser: %{
-          porcelain_receive_timeout: get_env_cast_integer_with_default.("BBC_PARSER_PORCELAIN_TIMEOUT", "100")
+          porcelain_receive_timeout:
+            get_env_cast_integer_with_default.("BBC_PARSER_PORCELAIN_TIMEOUT", "100")
         }
       }
 

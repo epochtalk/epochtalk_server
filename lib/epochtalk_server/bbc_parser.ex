@@ -10,9 +10,6 @@ defmodule EpochtalkServer.BBCParser do
   # poolboy timeout (ms)
   @poolboy_transaction_timeout 5000
 
-  # porcelain php parser call timeout (ms)
-  @receive_timeout 20
-
   @moduledoc """
   `BBCParser` genserver, runs interactive php shell to call bbcode parser
   """
@@ -68,6 +65,10 @@ defmodule EpochtalkServer.BBCParser do
   defp parse_with_proc("", {_proc, _pid}), do: {:ok, ""}
 
   defp parse_with_proc(bbcode_data, {proc, pid}) do
+    config = Application.get_env(:epochtalk_server, :bbc_parser_config)
+    # porcelain php parser call timeout (ms)
+    receive_timeout = config.porcelain_receive_timeout
+
     Proc.send_input(proc, "echo parse_bbc('#{bbcode_data}');\n")
 
     receive do
@@ -75,7 +76,7 @@ defmodule EpochtalkServer.BBCParser do
         {:ok, data}
     after
       # time out after not receiving any data
-      @receive_timeout ->
+      receive_timeout ->
         Logger.error("#{__MODULE__}(parse timeout): #{inspect(pid)}, #{inspect(bbcode_data)}")
 
         bbcode_data =

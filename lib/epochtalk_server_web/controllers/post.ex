@@ -579,7 +579,7 @@ defmodule EpochtalkServerWeb.Controllers.Post do
   defp proxy_by_thread(conn, attrs) do
     with thread_id <- Validate.cast(attrs, "thread_id", :integer, required: true),
          page <- Validate.cast(attrs, "page", :integer, default: 1),
-         limit <- Validate.cast(attrs, "limit", :integer, default: 5),
+         limit <- Validate.cast(attrs, "limit", :integer, default: 25),
          user <- Guardian.Plug.current_resource(conn),
          user_priority <- ACL.get_user_priority(conn),
          :ok <- ACL.allow!(conn, "posts.byThread"),
@@ -602,6 +602,9 @@ defmodule EpochtalkServerWeb.Controllers.Post do
         pagination_data: data
       })
     else
+      {:error, :page_does_not_exist} ->
+        ErrorHelpers.render_json_error(conn, 400, "Error, page does not exist")
+
       _ ->
         ErrorHelpers.render_json_error(conn, 400, "Error, cannot get posts by thread")
     end

@@ -85,19 +85,23 @@ defmodule EpochtalkServerWeb.Helpers.ProxyPagination do
 
     total_pages = total_pages(total_records, per_page)
 
-    result = records(query, page, total_pages, per_page)
+    if page > total_pages do
+      {:error, :page_does_not_exist}
+    else
+      result = records(query, page, total_pages, per_page)
 
-    pagination_data = %{
-      next: page < total_pages,
-      prev: page > 1,
-      page: page,
-      per_page: per_page,
-      total_records: total_records,
-      total_pages: total_pages,
-      desc: desc
-    }
+      pagination_data = %{
+        next: page < total_pages,
+        prev: page > 1,
+        page: page,
+        per_page: per_page,
+        total_records: total_records,
+        total_pages: total_pages,
+        desc: desc
+      }
 
-    {:ok, result, pagination_data}
+      {:ok, result, pagination_data}
+    end
   end
 
   def page_next_prev(query, page, per_page: per_page, desc: desc) do

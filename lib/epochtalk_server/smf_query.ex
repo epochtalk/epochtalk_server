@@ -472,6 +472,9 @@ defmodule EpochtalkServer.SmfQuery do
       {:ok, [], _} ->
         {:error, "Posts not found for thread_id: #{id}"}
 
+      {:error, :page_does_not_exist} ->
+        {:error, :page_does_not_exist}
+
       {:ok, posts, data} ->
         return_tuple(posts, data)
     end

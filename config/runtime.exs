@@ -415,6 +415,9 @@ bbc_parser_config =
         poolboy: %{
           size: get_env_cast_integer_with_default.("BBC_PARSER_WORKERS", "50"),
           max_overflow: get_env_cast_integer_with_default.("BBC_PARSER_OVERFLOW", "20")
+        },
+        parser: %{
+          porcelain_receive_timeout: get_env_cast_integer_with_default.("BBC_PARSER_PORCELAIN_TIMEOUT", "100")
         }
       }
 
@@ -423,6 +426,9 @@ bbc_parser_config =
         poolboy: %{
           size: 5,
           max_overflow: 2
+        },
+        parser: %{
+          porcelain_receive_timeout: 100
         }
       }
   end
@@ -437,6 +443,9 @@ bbc_parser_poolboy_config = [
 ]
 
 config :epochtalk_server, bbc_parser_poolboy_config: bbc_parser_poolboy_config
+
+# configure bbcode parser
+config :epochtalk_server, bbc_parser_config: bbc_parser_config.parser
 
 # conditionally show debug logs in prod
 if config_env() == :prod do

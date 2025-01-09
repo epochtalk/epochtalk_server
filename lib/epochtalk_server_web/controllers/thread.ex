@@ -823,7 +823,7 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
   defp proxy_by_board(conn, attrs) do
     with board_id <- Validate.cast(attrs, "board_id", :integer, required: true),
          page <- Validate.cast(attrs, "page", :integer, default: 1),
-         limit <- Validate.cast(attrs, "limit", :integer, default: 5),
+         limit <- Validate.cast(attrs, "limit", :integer, default: 25, min: 1, max: 100),
          user <- Guardian.Plug.current_resource(conn),
          user_priority <- ACL.get_user_priority(conn),
          :ok <- ACL.allow!(conn, "threads.byBoard"),

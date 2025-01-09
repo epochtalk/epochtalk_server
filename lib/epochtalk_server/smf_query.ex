@@ -113,10 +113,11 @@ defmodule EpochtalkServer.SmfQuery do
       where: t.id_board not in ^id_board_blacklist,
       order_by: [desc: t.id_last_msg]
     )
-    |> join(:left, [t], m in "smf_messages", on: t.id_first_msg == m.id_msg)
-    |> join(:left, [t], m in "smf_messages", on: t.id_last_msg == m.id_msg)
-    |> join(:left, [t], b in "smf_boards", on: t.id_board == b.id_board)
-    |> select([t, f, l, b], %{
+    |> join(:left, [t], f in "smf_messages", on: t.id_first_msg == f.id_msg)
+    |> join(:left, [t, f], l in "smf_messages", on: t.id_last_msg == l.id_msg)
+    |> join(:left, [t, f, l], m in "smf_members", on: l.id_member == m.id_member)
+    |> join(:left, [t, f, l, m], b in "smf_boards", on: t.id_board == b.id_board)
+    |> select([t, f, l, m, b], %{
       id: t.id_topic,
       slug: t.id_topic,
       board_id: t.id_board,
@@ -132,7 +133,7 @@ defmodule EpochtalkServer.SmfQuery do
       updated_at: l.posterTime * @ms_per_sec,
       last_post_created_at: l.posterTime * @ms_per_sec,
       last_post_user_id: l.id_member,
-      last_post_username: l.posterName,
+      last_post_username: m.realName,
       view_count: t.numViews,
       last_post_position: nil,
       last_post_deleted: false,
@@ -209,7 +210,7 @@ defmodule EpochtalkServer.SmfQuery do
       id: b.id_board,
       last_post_created_at: m.posterTime * @ms_per_sec,
       last_post_position: t.numReplies,
-      last_post_username: m.posterName,
+      last_post_username: u.realName,
       last_post_user_id: m.id_member,
       last_post_avatar:
         fragment(
@@ -306,12 +307,13 @@ defmodule EpochtalkServer.SmfQuery do
       order_by: [desc: t.id_last_msg]
     )
     |> join(:left, [t], f in "smf_messages", on: t.id_first_msg == f.id_msg)
-    |> join(:left, [t], l in "smf_messages", on: t.id_last_msg == l.id_msg)
-    |> join(:left, [t, f, l], m in "smf_members", on: l.id_member == m.id_member)
-    |> join(:left, [t, f, l, m], a in "smf_attachments",
-      on: m.id_member == a.id_member and a.attachmentType == 1
+    |> join(:left, [t, f], fm in "smf_members", on: f.id_member == fm.id_member)
+    |> join(:left, [t, f, fm], l in "smf_messages", on: t.id_last_msg == l.id_msg)
+    |> join(:left, [t, f, fm, l], lm in "smf_members", on: l.id_member == lm.id_member)
+    |> join(:left, [t, f, fm, l, lm], a in "smf_attachments",
+      on: lm.id_member == a.id_member and a.attachmentType == 1
     )
-    |> select([t, f, l, m, a], %{
+    |> select([t, f, fm, l, lm, a], %{
       id: t.id_topic,
       slug: t.id_topic,
       board_id: t.id_board,
@@ -326,19 +328,19 @@ defmodule EpochtalkServer.SmfQuery do
       post_count: t.numReplies,
       title: f.subject,
       user_id: f.id_member,
-      username: f.posterName,
+      username: fm.realName,
       created_at: f.posterTime * @ms_per_sec,
       user_deleted: false,
       last_post_created_at: l.posterTime * @ms_per_sec,
       last_post_deleted: false,
       last_post_user_id: l.id_member,
-      last_post_username: l.posterName,
+      last_post_username: lm.realName,
       last_post_user_deleted: false,
       last_post_avatar:
         fragment(
           "if(? <>'',concat('https://bitcointalk.org/avatars/',?),ifnull(concat('https://bitcointalk.org/useravatars/',?),''))",
-          m.avatar,
-          m.avatar,
+          lm.avatar,
+          lm.avatar,
           a.filename
         ),
       last_viewed: nil,
@@ -355,9 +357,11 @@ defmodule EpochtalkServer.SmfQuery do
       where: t.id_topic == ^id and t.id_board not in ^id_board_blacklist
     )
     # get first and last message for thread
-    |> join(:left, [t], m in "smf_messages", on: t.id_first_msg == m.id_msg)
-    |> join(:left, [t], m in "smf_messages", on: t.id_last_msg == m.id_msg)
-    |> select([t, f, l], %{
+    |> join(:left, [t], f in "smf_messages", on: t.id_first_msg == f.id_msg)
+    |> join(:left, [t, f], fm in "smf_members", on: f.id_member == fm.id_member)
+    |> join(:left, [t, f, fm], l in "smf_messages", on: t.id_last_msg == l.id_msg)
+    |> join(:left, [t, f, fm, l], lm in "smf_members", on: l.id_member == lm.id_member)
+    |> select([t, f, fm, l, lm], %{
       id: t.id_topic,
       slug: t.id_topic,
       board_id: t.id_board,
@@ -372,13 +376,13 @@ defmodule EpochtalkServer.SmfQuery do
       post_count: t.numReplies,
       title: f.subject,
       user_id: f.id_member,
-      username: f.posterName,
+      username: fm.realName,
       created_at: f.posterTime * @ms_per_sec,
       user_deleted: false,
       last_post_created_at: l.posterTime * @ms_per_sec,
       last_post_deleted: false,
       last_post_user_id: l.id_member,
-      last_post_username: l.posterName,
+      last_post_username: lm.realName,
       last_post_user_deleted: false,
       last_viewed: nil
     })
@@ -448,7 +452,7 @@ defmodule EpochtalkServer.SmfQuery do
       title: m.subject,
       body: m.body,
       updated_at: m.modifiedTime,
-      username: m.posterName,
+      username: m.realName,
       created_at: m.posterTime * @ms_per_sec,
       modified_time: m.modifiedTime,
       avatar:
@@ -460,7 +464,7 @@ defmodule EpochtalkServer.SmfQuery do
         ),
       user: %{
         id: m.id_member,
-        username: m.posterName,
+        username: m.realName,
         signature: u.signature,
         activity: u.activity,
         merit: u.merit,

@@ -115,9 +115,9 @@ defmodule EpochtalkServer.SmfQuery do
     )
     |> join(:left, [t], f in "smf_messages", on: t.id_first_msg == f.id_msg)
     |> join(:left, [t, f], l in "smf_messages", on: t.id_last_msg == l.id_msg)
-    |> join(:left, [t, f, l], m in "smf_members", on: l.id_member == m.id_member)
-    |> join(:left, [t, f, l, m], b in "smf_boards", on: t.id_board == b.id_board)
-    |> select([t, f, l, m, b], %{
+    |> join(:left, [t, f, l], lm in "smf_members", on: l.id_member == lm.id_member)
+    |> join(:left, [t, f, l, lm], b in "smf_boards", on: t.id_board == b.id_board)
+    |> select([t, f, l, lm, b], %{
       id: t.id_topic,
       slug: t.id_topic,
       board_id: t.id_board,
@@ -133,7 +133,7 @@ defmodule EpochtalkServer.SmfQuery do
       updated_at: l.posterTime * @ms_per_sec,
       last_post_created_at: l.posterTime * @ms_per_sec,
       last_post_user_id: l.id_member,
-      last_post_username: m.realName,
+      last_post_username: lm.realName,
       view_count: t.numViews,
       last_post_position: nil,
       last_post_deleted: false,
@@ -452,7 +452,7 @@ defmodule EpochtalkServer.SmfQuery do
       title: m.subject,
       body: m.body,
       updated_at: m.modifiedTime,
-      username: m.realName,
+      username: u.realName,
       created_at: m.posterTime * @ms_per_sec,
       modified_time: m.modifiedTime,
       avatar:
@@ -464,7 +464,7 @@ defmodule EpochtalkServer.SmfQuery do
         ),
       user: %{
         id: m.id_member,
-        username: m.realName,
+        username: u.realName,
         signature: u.signature,
         activity: u.activity,
         merit: u.merit,

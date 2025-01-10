@@ -71,7 +71,7 @@ defmodule EpochtalkServerWeb.Controllers.ErrorJSON do
   defp format_error(status, message) when is_integer(status) and is_binary(message) do
     %{
       status: status,
-      message: message,
+      message: if(Mix.env() == :prod, do: "Something went wrong", else: message),
       error: Phoenix.Controller.status_message_from_template(to_string(status))
     }
   end

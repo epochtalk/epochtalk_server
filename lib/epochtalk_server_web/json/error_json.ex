@@ -72,7 +72,7 @@ defmodule EpochtalkServerWeb.Controllers.ErrorJSON do
     %{
       status: status,
       message:
-        if(Application.get_env(:epochtalk_server, :env) == :dev,
+        if(Application.get_env(:epochtalk_server, :env) == :prod,
           do: "Something went wrong",
           else: message
         ),

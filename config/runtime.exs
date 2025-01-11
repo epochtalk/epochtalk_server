@@ -84,7 +84,7 @@ config :epochtalk_server, :frontend_config, %{
   ga_key: System.get_env("GA_KEY", "UA-XXXXX-Y"),
   revision: nil,
   website: %{
-    title: System.get_env("WEBSITE_TITLE", "Epochtalk Forums"),
+    title: System.get_env("WEBSITE_TITLE", "Bitcoin Forum"),
     description: System.get_env("WEBSITE_DESCRIPTION", "Open source forum software"),
     keywords:
       System.get_env("WEBSITE_KEYWORDS", "open source, free forum, forum software, forum"),

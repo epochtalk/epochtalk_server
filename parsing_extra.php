@@ -62,7 +62,8 @@ function setReasonableValues()
         // Need these from theymos
         $user_info['smiley_set'] = 'default';
         $user_info['time_offset'] = 0;
-        $user_info['time_format'] = '%I:%M:%S %p';
+        $user_info['time_format'] = '%B %d, %Y, %I:%M:%S %p';
+        // $user_info['time_format'] = '%I:%M:%S %p';
 }
 
 //the cache functions are highly implementation-dependant, so here they are just no-ops
@@ -153,9 +154,11 @@ function timeformat($logTime, $show_today = true)
 
         if (setlocale(LC_TIME, $txt['lang_locale']))
         {
-                foreach (array('%a', '%A', '%b', '%B') as $token)
-                        if (strpos($str, $token) !== false)
-                                $str = str_replace($token, $func['ucwords'](strftime_updated($token, (int)$time)), $str);
+                foreach (array('%a', '%A') as $token) {
+                  if (strpos($str, $token) !== false)
+                          $str = str_replace($token, $func['ucwords'](strftime_updated($token, (int)$time)), $str);
+                }
+
         }
         else
         {

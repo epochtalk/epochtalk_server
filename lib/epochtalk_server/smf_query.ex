@@ -498,7 +498,7 @@ defmodule EpochtalkServer.SmfQuery do
 
     count_query =
       from m in "smf_messages",
-      where: m.id_member == ^id and m.id_board not in ^id_board_blacklist,
+        where: m.id_member == ^id and m.id_board not in ^id_board_blacklist,
         select: %{count: count(m.id_msg)}
 
     from(m in "smf_messages",

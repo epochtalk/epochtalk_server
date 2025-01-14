@@ -497,9 +497,9 @@ defmodule EpochtalkServer.SmfQuery do
     direction = if desc, do: :desc, else: :asc
 
     count_query =
-      from u in "smf_members",
-        where: u.id_member == ^id,
-        select: %{count: u.posts}
+      from m in "smf_messages",
+      where: m.id_member == ^id and m.id_board not in ^id_board_blacklist,
+        select: %{count: count(m.id_msg)}
 
     from(m in "smf_messages",
       limit: ^per_page,

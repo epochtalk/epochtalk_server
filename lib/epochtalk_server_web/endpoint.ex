@@ -7,7 +7,8 @@ defmodule EpochtalkServerWeb.Endpoint do
 
   # cors configuration
   plug Corsica,
-    origins: [~r{^https?://localhost:8000}, ~r{^https?://(.*\.)?epochtalk\.com$}],
+    # origins: "*",
+    origins: ~r{^https?://(.*\.)?epochtalk\.com$},
     allow_headers: :all,
     expose_headers: ["epoch-viewer"]
 

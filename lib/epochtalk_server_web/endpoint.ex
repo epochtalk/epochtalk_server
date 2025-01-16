@@ -6,7 +6,10 @@ defmodule EpochtalkServerWeb.Endpoint do
   plug RemoteIp
 
   # cors configuration
-  plug Corsica, origins: "*", allow_headers: :all, expose_headers: ["epoch-viewer"]
+  plug Corsica,
+    origins: [~r{^https?://localhost:8000}, ~r{^https?://(.*\.)?epochtalk\.com$}],
+    allow_headers: :all,
+    expose_headers: ["epoch-viewer"]
 
   socket "/socket", EpochtalkServerWeb.UserSocket,
     websocket: true,

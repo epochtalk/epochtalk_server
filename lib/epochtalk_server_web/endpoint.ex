@@ -10,7 +10,9 @@ defmodule EpochtalkServerWeb.Endpoint do
     # origins: "*",
     origins: ~r{^https?://(.*\.)?epochtalk\.com$},
     allow_headers: :all,
-    expose_headers: ["epoch-viewer", "api-key"]
+    allow_credentials: true,
+    allow_private_network: true,
+    expose_headers: ["epoch-viewer", "api-key", "x-api-key"]
 
   socket "/socket", EpochtalkServerWeb.UserSocket,
     websocket: true,

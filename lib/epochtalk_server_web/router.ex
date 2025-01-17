@@ -20,6 +20,7 @@ defmodule EpochtalkServerWeb.Router do
     plug EpochtalkServerWeb.Plugs.TrackIp
     # Track user last active
     plug EpochtalkServerWeb.Plugs.UserLastActive
+    plug EpochtalkServerWeb.Plugs.CheckAPIKey
   end
 
   pipeline :enforce_auth do

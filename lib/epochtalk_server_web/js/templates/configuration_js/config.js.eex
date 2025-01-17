@@ -13,6 +13,7 @@ window.max_image_size = '<%= @config[:max_image_size] %>'
 window.max_avatar_size = '<%= @config[:max_avatar_size] %>'
 window.frontend_url = '<%= @config[:frontend_url] %>'
 window.backend_url = '<%= @config[:backend_url] %>'
+window.api_key = '<%= @config[:api_key] %>'
 window.portal = {
   enabled: <%= if portal_enabled = @config[:portal][:enabled], do: portal_enabled, else: false %>,
   board_id: <%= if board_id = @config[:portal][:board_id], do: board_id, else: "null" %>

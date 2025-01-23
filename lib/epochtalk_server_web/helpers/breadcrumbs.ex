@@ -25,6 +25,9 @@ defmodule EpochtalkServerWeb.Helpers.Breadcrumbs do
       "thread" ->
         build_thread_crumbs(id, crumbs)
 
+      "profile" ->
+        build_profile_crumbs(id)
+
       _ ->
         build_crumbs(nil, nil, crumbs)
     end
@@ -123,6 +126,17 @@ defmodule EpochtalkServerWeb.Helpers.Breadcrumbs do
 
       _ ->
         nil
+    end
+  end
+
+  defp build_profile_crumbs(id) do
+    with user <- SmfQuery.find_user(id) do
+      crumbs = [
+        %{label: "profile", routeName: "Profile"},
+        %{label: user.name, routeName: "Profile", opts: %{id: id}}
+      ]
+
+      build_crumbs(nil, nil, crumbs)
     end
   end
 end

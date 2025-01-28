@@ -1542,7 +1542,8 @@ function parse_bbc($message, $smileys = true, $cache_id = '', $local_disable = a
   if (isset($cache_key, $cache_t) && array_sum(explode(' ', microtime())) - array_sum(explode(' ', $cache_t)) > 0.05)
     cache_put_data($cache_key, $message, 600);
 
-  return $message;
+  return $message . $context['end_delimiter'];
+;
 }
 
 // Parse smileys in the passed message.

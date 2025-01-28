@@ -7,6 +7,10 @@ function setReasonableValues()
         define('WIRELESS', false);
         
         $context = array('browser'=>array());
+
+        // Fix for BBC_PARSER returning parsed posts out of order
+        $context['end_delimiter'] = chr(1);
+
         $context['browser']['is_gecko'] = true;
         $context['browser']['is_konqueror'] = false;
         $context['browser']['is_opera'] = false;

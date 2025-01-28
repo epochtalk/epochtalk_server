@@ -69,7 +69,7 @@ defmodule EpochtalkServer.BBCParser do
   defp parse_with_proc("", {_proc, _pid}), do: {:ok, ""}
 
   defp parse_with_proc(bbcode_data, {proc, pid}) do
-    Proc.send_input(proc, "echo parse_bbc('#{bbcode_data <> @input_delimiter}');\n")
+    Proc.send_input(proc, "echo parse_bbc('#{bbcode_data}');\n")
     receive_until_timeout_or_delimiter(pid)
     |> case do
       {:ok, data} -> {:ok, data}
@@ -84,10 +84,6 @@ defmodule EpochtalkServer.BBCParser do
     end
   end
 
-def print_last_chars(string, x) do
-  String.slice(string, -x, String.length(string))
-end
-
   defp receive_until_timeout_or_delimiter(pid), do: receive_until_timeout_or_delimiter(pid, "")
 
   defp receive_until_timeout_or_delimiter(pid, str) do
@@ -97,8 +93,6 @@ end
 
     receive do
       {^pid, :data, :out, data} ->
-        IO.inspect "receive"
-        IO.inspect data |> String.reverse
         # if last character the delimiter, return {:ok, full_str}
         if String.ends_with?(data, @receive_delimiter) do
           trimmed = data

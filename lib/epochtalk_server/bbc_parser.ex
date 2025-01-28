@@ -10,6 +10,10 @@ defmodule EpochtalkServer.BBCParser do
   # poolboy timeout (ms)
   @poolboy_transaction_timeout 5000
 
+  @input_delimiter <<1>>
+  @receive_delimiter <<1, 10>>
+  @newline <<10>>
+
   @moduledoc """
   `BBCParser` genserver, runs interactive php shell to call bbcode parser
   """
@@ -65,18 +69,11 @@ defmodule EpochtalkServer.BBCParser do
   defp parse_with_proc("", {_proc, _pid}), do: {:ok, ""}
 
   defp parse_with_proc(bbcode_data, {proc, pid}) do
-    config = Application.get_env(:epochtalk_server, :bbc_parser_config)
-    # porcelain php parser call timeout (ms)
-    receive_timeout = config.porcelain_receive_timeout
-
-    Proc.send_input(proc, "echo parse_bbc('#{bbcode_data}');\n")
-
-    receive do
-      {^pid, :data, :out, data} ->
-        {:ok, data}
-    after
-      # time out after not receiving any data
-      receive_timeout ->
+    Proc.send_input(proc, "echo parse_bbc('#{bbcode_data <> @input_delimiter}');\n")
+    receive_until_timeout_or_delimiter(pid)
+    |> case do
+      {:ok, data} -> {:ok, data}
+      {:timeout} ->
         Logger.error("#{__MODULE__}(parse timeout): #{inspect(pid)}, #{inspect(bbcode_data)}")
 
         bbcode_data =
@@ -84,6 +81,37 @@ defmodule EpochtalkServer.BBCParser do
             bbcode_data
 
         {:timeout, bbcode_data}
+    end
+  end
+
+def print_last_chars(string, x) do
+  String.slice(string, -x, String.length(string))
+end
+
+  defp receive_until_timeout_or_delimiter(pid), do: receive_until_timeout_or_delimiter(pid, "")
+
+  defp receive_until_timeout_or_delimiter(pid, str) do
+    config = Application.get_env(:epochtalk_server, :bbc_parser_config)
+    # porcelain php parser call timeout (ms)
+    receive_timeout = config.porcelain_receive_timeout
+
+    receive do
+      {^pid, :data, :out, data} ->
+        IO.inspect "receive"
+        IO.inspect data |> String.reverse
+        # if last character the delimiter, return {:ok, full_str}
+        if String.ends_with?(data, @receive_delimiter) do
+          trimmed = data
+            |> String.trim_trailing(@newline)
+            |> String.trim_trailing(@input_delimiter)
+          {:ok, str <> trimmed}
+        # else append to str and keep receiving
+        else
+          receive_until_timeout_or_delimiter(pid, str <> data)
+        end
+      after
+      # time out after not receiving any data
+      receive_timeout -> {:timeout}
     end
   end
 

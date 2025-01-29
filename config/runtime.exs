@@ -366,6 +366,23 @@ config :epochtalk_server,
        EpochtalkServerWeb.Endpoint,
        Keyword.merge(base_endpoint_config, endpoint_config)
 
+## Configure corsica
+corsica_config =
+  case config_env() do
+    :prod ->
+      get_env_or_raise_with_message.(
+        "CORS_ORIGINS",
+        """
+        For example:
+        ~r{^https?://(.*\.)?epochtalk\.com$}
+        """
+      )
+    _ -> "*"
+  end
+
+config :epochtalk_server, :corsica, corsica_config
+
+
 ## Configure mailer in prod
 #  (Other envs are hardcoded into their respective config/ files)
 if config_env() == :prod do

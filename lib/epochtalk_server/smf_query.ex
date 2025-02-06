@@ -422,6 +422,28 @@ defmodule EpochtalkServer.SmfQuery do
     end
   end
 
+  def post_page(id, thread_id) do
+    %{id_board_blacklist: id_board_blacklist} =
+      Application.get_env(:epochtalk_server, :proxy_config)
+
+    from(m in "smf_messages",
+      where: m.id_topic == ^thread_id and m.id_msg < ^id and m.id_board not in ^id_board_blacklist
+    )
+    |> join(:left, [m], t in "smf_topics", on: m.id_topic == t.id_topic)
+    |> select([m, t], %{
+      count: count(m.id_msg),
+      numReplies: t.numReplies
+    })
+    |> SmfRepo.one()
+    |> case do
+      [] ->
+        {:error, "Post not found for id: #{id}"}
+
+      post ->
+        post
+    end
+  end
+
   def posts_by_thread(id, opts) do
     %{
       page: page,

@@ -428,9 +428,10 @@ defmodule EpochtalkServer.SmfQuery do
 
     # count how many post there are with ids less than or equal to the post were trying to locate
     from(m in "smf_messages",
-      where: m.id_topic == ^thread_id and m.id_msg <= ^id and m.id_board not in ^id_board_blacklist,
+      where:
+        m.id_topic == ^thread_id and m.id_msg <= ^id and m.id_board not in ^id_board_blacklist,
       select: %{
-        position: count(m.id_msg),
+        position: count(m.id_msg)
       }
     )
     |> SmfRepo.one()
@@ -439,7 +440,8 @@ defmodule EpochtalkServer.SmfQuery do
         {:error, "Post not found for id: #{id}"}
 
       # page = ceil ( postPos / limit )
-      post -> ceil(post.position / limit)
+      post ->
+        ceil(post.position / limit)
     end
   end
 

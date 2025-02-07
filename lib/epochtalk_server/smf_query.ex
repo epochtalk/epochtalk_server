@@ -422,25 +422,24 @@ defmodule EpochtalkServer.SmfQuery do
     end
   end
 
-  def post_page(id, thread_id) do
+  def post_page(id, thread_id, limit) do
     %{id_board_blacklist: id_board_blacklist} =
       Application.get_env(:epochtalk_server, :proxy_config)
 
+    # count how many post there are with ids less than or equal to the post were trying to locate
     from(m in "smf_messages",
-      where: m.id_topic == ^thread_id and m.id_msg < ^id and m.id_board not in ^id_board_blacklist
+      where: m.id_topic == ^thread_id and m.id_msg <= ^id and m.id_board not in ^id_board_blacklist,
+      select: %{
+        position: count(m.id_msg),
+      }
     )
-    |> join(:left, [m], t in "smf_topics", on: m.id_topic == t.id_topic)
-    |> select([m, t], %{
-      count: count(m.id_msg),
-      numReplies: t.numReplies
-    })
     |> SmfRepo.one()
     |> case do
       [] ->
         {:error, "Post not found for id: #{id}"}
 
-      post ->
-        post
+      # page = ceil ( postPos / limit )
+      post -> ceil(post.position / limit)
     end
   end
 

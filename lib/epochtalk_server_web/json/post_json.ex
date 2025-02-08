@@ -450,39 +450,57 @@ defmodule EpochtalkServerWeb.Controllers.PostJSON do
     {body_list, signature_list} =
       posts
       |> Enum.reduce({[], []}, fn post, {body_list, signature_list} ->
-        body = String.replace(Map.get(post, :body) || Map.get(post, :body_html), "'", "\'")
+        if not EpochtalkServer.Cache.ParsedPosts.exists_and_is_newer(post.id, post) do
+          body = String.replace(Map.get(post, :body) || Map.get(post, :body_html), "'", "\'")
 
-        # add space to end if the last character is a backslash (fix for parser)
-        body_len = String.length(body)
-        last_char = String.slice(body, (body_len - 1)..body_len)
-        body = if last_char == "\\", do: body <> " ", else: body
+          # add space to end if the last character is a backslash (fix for parser)
+          body_len = String.length(body)
+          last_char = String.slice(body, (body_len - 1)..body_len)
+          body = if last_char == "\\", do: body <> " ", else: body
 
-        signature =
-          if Map.get(post.user, :signature),
-            do: String.replace(post.user.signature, "'", "\'"),
-            else: nil
+          signature =
+            if Map.get(post.user, :signature),
+              do: String.replace(post.user.signature, "'", "\'"),
+              else: nil
 
-        # return body/signature lists in reverse order
-        {[body | body_list], [signature | signature_list]}
+          # return body/signature lists in reverse order
+          {[body | body_list], [signature | signature_list]}
+        else
+          {[], []}
+        end
       end)
 
-    # reverse body/signature lists
-    {body_list, signature_list} = {Enum.reverse(body_list), Enum.reverse(signature_list)}
+    if body_list != [] or signature_list != [] do
+      # reverse body/signature lists
+      {body_list, signature_list} = {Enum.reverse(body_list), Enum.reverse(signature_list)}
 
-    # parse body/signature lists
-    {parsed_body_list, parsed_signature_list} =
-      {body_list, signature_list}
-      |> EpochtalkServer.BBCParser.parse_list_tuple()
-      |> case do
-        {:ok, parsed_tuple} ->
-          parsed_tuple
+      # parse body/signature lists
+      {parsed_body_list, parsed_signature_list} =
+        {body_list, signature_list}
+        |> EpochtalkServer.BBCParser.parse_list_tuple()
+        |> case do
+          {:ok, parsed_tuple} ->
+            parsed_tuple
 
-        {:error, unparsed_tuple} ->
-          Logger.error("#{__MODULE__}(tuple parse): #{inspect(unparsed_tuple)}")
-          unparsed_tuple
-      end
+          {:error, unparsed_tuple} ->
+            Logger.error("#{__MODULE__}(tuple parse): #{inspect(unparsed_tuple)}")
+            unparsed_tuple
+        end
 
-    zip_posts(posts, parsed_body_list, parsed_signature_list)
+      zip_posts(posts, parsed_body_list, parsed_signature_list)
+    else
+      Enum.map(posts, fn post ->
+        case EpochtalkServer.Cache.ParsedPosts.get(post.id) do
+          {:ok, cached_post} ->
+             post =
+              post
+              |> Map.put(:body_html, cached_post.body_html)
+            post
+          {:error, _} ->
+            nil
+        end
+      end)
+    end
   end
 
   defp zip_posts(posts, parsed_body_list, parsed_signature_list) do
@@ -514,9 +532,13 @@ defmodule EpochtalkServerWeb.Controllers.PostJSON do
 
         user = post.user |> Map.put(:signature, parsed_signature)
 
-        post
+        post =
+          post
         |> Map.put(:body_html, parsed_body)
         |> Map.put(:user, user)
+
+        EpochtalkServer.Cache.ParsedPosts.insert(post.id, post)
+        post
       end
     )
   end

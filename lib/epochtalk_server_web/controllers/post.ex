@@ -423,6 +423,18 @@ defmodule EpochtalkServerWeb.Controllers.Post do
     end
   end
 
+  @doc """
+  Get `Post` page by parsing topic query parameter, bct specific
+  """
+  def page(conn, attrs) do
+    with topic <- Validate.cast(attrs, "topic", :string, required: true),
+         limit <- Validate.cast(attrs, "limit", :integer, default: 25, min: 1, max: 100),
+         [thread_id, post_id] <- String.split(topic, ".msg"),
+         page <- SmfQuery.post_page(post_id, thread_id, limit) do
+      render(conn, :page, %{page: page, post_id: post_id})
+    end
+  end
+
   ## === Public Authorization Helper Functions ===
 
   def can_authed_user_view_deleted_posts_by_username(nil), do: false

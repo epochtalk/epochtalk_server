@@ -41,6 +41,16 @@ defmodule EpochtalkServerWeb.Controllers.PostJSON do
   end
 
   @doc """
+  Renders `Post` page data for posts linked from quote headers
+  """
+  def page(%{
+        page: page,
+        post_id: post_id
+      }) do
+    %{page: page, post_id: post_id}
+  end
+
+  @doc """
   Renders `Post` data for parsed legacy `Post` data
 
     ## Example

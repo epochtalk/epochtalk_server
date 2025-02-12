@@ -1,0 +1,33 @@
+#mysql
+mysql> SELECT ID_BOARD, lang FROM smf_boards WHERE lang IN ('ar', 'az', 'dv', 'ff', 'he', 'ku', 'fa', 'ur');
++----------+------+
+| ID_BOARD | lang |
++----------+------+
+|      241 | ar   |
+|      242 | ar   |
+|      265 | ar   |
+|      253 | ar   |
+|      266 | ar   |
+|      267 | ar   |
+|      271 | ar   |
+|       95 | he   |
++----------+------+
+8 rows in set (0.19 sec)
+
+# postgres
+241, 242, 265, 253, 266, 267, 271, 95
+SELECT name FROM boards WHERE id IN (241, 242, 265, 253, 266, 267, 271, 95);
+
+            name             
+-----------------------------
+ العربية (Arabic)
+ العملات البديلة (Altcoins)
+ النقاشات
+ إستفسارات و أسئلة المبتدئين
+ التعدين
+ النقاشات الأخرى
+ منصات التبادل
+ עברית (Hebrew)
+(8 rows)
+
+UPDATE boards SET right_to_left = TRUE WHERE id IN (241, 242, 265, 253, 266, 267, 271, 95);

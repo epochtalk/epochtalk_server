@@ -450,7 +450,7 @@ defmodule EpochtalkServerWeb.Controllers.PostJSON do
     {body_list, signature_list} =
       posts
       |> Enum.reduce({[], []}, fn post, {body_list, signature_list} ->
-        if not EpochtalkServer.Cache.ParsedPosts.exists_and_is_newer(post.id, post) do
+        if EpochtalkServer.Cache.ParsedPosts.need_update(post.id, post) do
           body = String.replace(Map.get(post, :body) || Map.get(post, :body_html), "'", "\'")
 
           # add space to end if the last character is a backslash (fix for parser)
@@ -466,80 +466,91 @@ defmodule EpochtalkServerWeb.Controllers.PostJSON do
           # return body/signature lists in reverse order
           {[body | body_list], [signature | signature_list]}
         else
-          {[], []}
+          {[nil | body_list], [nil | signature_list]}
         end
       end)
 
-    if body_list != [] or signature_list != [] do
-      # reverse body/signature lists
-      {body_list, signature_list} = {Enum.reverse(body_list), Enum.reverse(signature_list)}
+    # reverse body/signature lists
+    {body_list, signature_list} = {Enum.reverse(body_list), Enum.reverse(signature_list)}
 
-      # parse body/signature lists
-      {parsed_body_list, parsed_signature_list} =
-        {body_list, signature_list}
-        |> EpochtalkServer.BBCParser.parse_list_tuple()
-        |> case do
-          {:ok, parsed_tuple} ->
-            parsed_tuple
+    # parse body/signature lists
+    {parsed_body_list, parsed_signature_list} =
+      {body_list, signature_list}
+      |> EpochtalkServer.BBCParser.parse_list_tuple()
+      |> case do
+        {:ok, parsed_tuple} ->
+          parsed_tuple
 
-          {:error, unparsed_tuple} ->
-            Logger.error("#{__MODULE__}(tuple parse): #{inspect(unparsed_tuple)}")
-            unparsed_tuple
-        end
+        {:error, unparsed_tuple} ->
+          Logger.error("#{__MODULE__}(tuple parse): #{inspect(unparsed_tuple)}")
+          unparsed_tuple
+      end
 
-      zip_posts(posts, parsed_body_list, parsed_signature_list)
-    else
-      Enum.map(posts, fn post ->
-        case EpochtalkServer.Cache.ParsedPosts.get(post.id) do
-          {:ok, cached_post} ->
-             post =
-              post
-              |> Map.put(:body_html, cached_post.body_html)
-            post
-          {:error, _} ->
-            nil
-        end
-      end)
-    end
+    zip_posts(posts, parsed_body_list, parsed_signature_list)
   end
 
   defp zip_posts(posts, parsed_body_list, parsed_signature_list) do
     # zip posts with body/signature lists
-    Enum.zip_with(
-      [posts, parsed_body_list, parsed_signature_list],
-      fn [post, parsed_body, parsed_signature] ->
-        parsed_body =
-          case parsed_body do
-            {:ok, parsed_body} ->
-              Logger.debug("#{__MODULE__}(body): post_id #{inspect(post.id)}")
-              parsed_body
+    zipped_posts =
+      Enum.zip_with(
+        [posts, parsed_body_list, parsed_signature_list],
+        fn [post, parsed_body, parsed_signature] ->
+          parsed_body =
+            case parsed_body do
+              {:ok, parsed_body} ->
+                Logger.debug("#{__MODULE__}(body): post_id #{inspect(post.id)}")
+                parsed_body
 
-            {:timeout, unparsed_body} ->
-              Logger.error("#{__MODULE__}(body timeout): post_id #{inspect(post.id)}")
-              unparsed_body
-          end
+              {:timeout, unparsed_body} ->
+                Logger.error("#{__MODULE__}(body timeout): post_id #{inspect(post.id)}")
+                unparsed_body
+            end
 
-        parsed_signature =
-          case parsed_signature do
-            {:ok, parsed_signature} ->
-              Logger.debug("#{__MODULE__}(signature): user_id #{inspect(post.user.id)}")
-              parsed_signature
+          parsed_signature =
+            case parsed_signature do
+              {:ok, parsed_signature} ->
+                Logger.debug("#{__MODULE__}(signature): user_id #{inspect(post.user.id)}")
+                parsed_signature
 
-            {:timeout, unparsed_signature} ->
-              Logger.error("#{__MODULE__}(signature timeout): user_id #{inspect(post.user.id)}")
-              unparsed_signature
-          end
+              {:timeout, unparsed_signature} ->
+                Logger.error("#{__MODULE__}(signature timeout): user_id #{inspect(post.user.id)}")
+                unparsed_signature
+            end
 
-        user = post.user |> Map.put(:signature, parsed_signature)
+          user = post.user |> Map.put(:signature, parsed_signature)
 
-        post =
+          post =
+            if parsed_body do
+              # post was parsed, store it in cache
+              EpochtalkServer.Cache.ParsedPosts.put(post.id, %{
+                body_html: parsed_body,
+                updated_at: post.updated_at
+              })
+
+              post
+              |> Map.put(:body_html, parsed_body)
+              |> Map.put(:user, user)
+            else
+              # post was not parsed, get value from cache
+              post =
+                case EpochtalkServer.Cache.ParsedPosts.get(post.id) do
+                  {:ok, cached_post} ->
+                    post
+                    |> Map.put(:body_html, cached_post.body_html)
+                    |> Map.put(:user, user)
+
+                  {:error, _} ->
+                    nil
+                end
+
+              post
+            end
+
           post
-        |> Map.put(:body_html, parsed_body)
-        |> Map.put(:user, user)
+        end
+      )
 
-        EpochtalkServer.Cache.ParsedPosts.insert(post.id, post)
-        post
-      end
-    )
+    EpochtalkServer.Cache.ParsedPosts.lookup_and_purge()
+    zipped_posts
   end
 end

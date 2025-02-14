@@ -41,6 +41,7 @@ defmodule EpochtalkServer.MixProject do
       {:dotenv_parser, "~> 2.0"},
       {:earmark, "~> 1.4"},
       {:ecto_sql, "~> 3.6"},
+      {:ex2ms, "~> 1.0"},
       {:ex_aws, "~> 2.5"},
       {:ex_aws_s3, "~> 2.5"},
       {:ex_doc, "~> 0.29.4"},

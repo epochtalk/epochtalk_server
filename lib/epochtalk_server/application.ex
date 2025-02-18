@@ -25,6 +25,8 @@ defmodule EpochtalkServer.Application do
       :poolboy.child_spec(:bbc_parser, bbc_parser_poolboy_config()),
       # Start Role Cache
       EpochtalkServer.Cache.Role,
+      # Start the ETS Cache
+      EpochtalkServer.Cache.ParsedPosts,
       # Warm frontend_config variable (referenced by api controllers)
       # This task starts, does its thing and dies
       {Task, &EpochtalkServer.Models.Configuration.warm_frontend_config/0},

@@ -120,13 +120,13 @@ function timeformat($logTime, $show_today = true)
 
         // Offset the time.
         $time = $logTime + ($user_info['time_offset'] + $modSettings['time_offset']) * 3600;
-        return $time;
 
         // We can't have a negative date (on Windows, at least.)
         if ($time < 0)
-        $time = 0;
-      
-       return "unix_timestamp=" . $time;
+                $time = 0;
+        
+        return "unix_timestamp=" . $time;
+
         // // Today and Yesterday?
         // if ($modSettings['todayMod'] >= 1 && $show_today === true)
         // {

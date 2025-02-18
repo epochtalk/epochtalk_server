@@ -120,62 +120,63 @@ function timeformat($logTime, $show_today = true)
 
         // Offset the time.
         $time = $logTime + ($user_info['time_offset'] + $modSettings['time_offset']) * 3600;
+        return $time;
 
-        // We can't have a negative date (on Windows, at least.)
-        if ($time < 0)
-                $time = 0;
+        // // We can't have a negative date (on Windows, at least.)
+        // if ($time < 0)
+        //         $time = 0;
 
-        // Today and Yesterday?
-        if ($modSettings['todayMod'] >= 1 && $show_today === true)
-        {
-                // Get the current time.
-                $nowtime = forum_time();
+        // // Today and Yesterday?
+        // if ($modSettings['todayMod'] >= 1 && $show_today === true)
+        // {
+        //         // Get the current time.
+        //         $nowtime = forum_time();
 
-                $then = @getdate($time);
-                $now = @getdate($nowtime);
-                if(!$then)
-                        $then = @getdate(0);
-                if(!$now)
-                        $now = @getdate(0);
+        //         $then = @getdate($time);
+        //         $now = @getdate($nowtime);
+        //         if(!$then)
+        //                 $then = @getdate(0);
+        //         if(!$now)
+        //                 $now = @getdate(0);
 
-                // Try to make something of a time format string...
-                $s = strpos($user_info['time_format'], '%S') === false ? '' : ':%S';
-                if (strpos($user_info['time_format'], '%H') === false && strpos($user_info['time_format'], '%T') === false)
-                        $today_fmt = '%I:%M' . $s . ' %p';
-                else
-                        $today_fmt = '%H:%M' . $s;
+        //         // Try to make something of a time format string...
+        //         $s = strpos($user_info['time_format'], '%S') === false ? '' : ':%S';
+        //         if (strpos($user_info['time_format'], '%H') === false && strpos($user_info['time_format'], '%T') === false)
+        //                 $today_fmt = '%I:%M' . $s . ' %p';
+        //         else
+        //                 $today_fmt = '%H:%M' . $s;
 
-                // Same day of the year, same year.... Today!
-                if ($then['yday'] == $now['yday'] && $then['year'] == $now['year'])
-                        return $txt['smf10'] . timeformat($logTime, $today_fmt);
+        //         // Same day of the year, same year.... Today!
+        //         if ($then['yday'] == $now['yday'] && $then['year'] == $now['year'])
+        //                 return $txt['smf10'] . timeformat($logTime, $today_fmt);
 
-                // Day-of-year is one less and same year, or it's the first of the year and that's the last of the year...
-                if ($modSettings['todayMod'] == '2' && (($then['yday'] == $now['yday'] - 1 && $then['year'] == $now['year']) || ($now['yday'] == 0 && $then['year'] == $now['year'] - 1) && $then['mon'] == 12 && $then['mday'] == 31))
-                        return $txt['smf10b'] . timeformat($logTime, $today_fmt);
-        }
+        //         // Day-of-year is one less and same year, or it's the first of the year and that's the last of the year...
+        //         if ($modSettings['todayMod'] == '2' && (($then['yday'] == $now['yday'] - 1 && $then['year'] == $now['year']) || ($now['yday'] == 0 && $then['year'] == $now['year'] - 1) && $then['mon'] == 12 && $then['mday'] == 31))
+        //                 return $txt['smf10b'] . timeformat($logTime, $today_fmt);
+        // }
 
-        $str = !is_bool($show_today) ? $show_today : $user_info['time_format'];
+        // $str = !is_bool($show_today) ? $show_today : $user_info['time_format'];
 
-        if (setlocale(LC_TIME, $txt['lang_locale']))
-        {
-                foreach (array('%a', '%A') as $token) {
-                  if (strpos($str, $token) !== false)
-                          $str = str_replace($token, $func['ucwords'](strftime_updated($token, (int)$time)), $str);
-                }
+        // if (setlocale(LC_TIME, $txt['lang_locale']))
+        // {
+        //         foreach (array('%a', '%A') as $token) {
+        //           if (strpos($str, $token) !== false)
+        //                   $str = str_replace($token, $func['ucwords'](strftime_updated($token, (int)$time)), $str);
+        //         }
 
-        }
-        else
-        {
-                // Do-it-yourself time localization.  Fun.
-                foreach (array('%a' => 'days_short', '%A' => 'days', '%b' => 'months_short', '%B' => 'months') as $token => $text_label)
-                        if (strpos($str, $token) !== false)
-                                $str = str_replace($token, $txt[$text_label][(int) strftime_updated($token === '%a' || $token === '%A' ? '%w' : '%m', $time)], $str);
-                if (strpos($str, '%p'))
-                        $str = str_replace('%p', (strftime_updated('%H', $time) < 12 ? 'am' : 'pm'), $str);
-        }
+        // }
+        // else
+        // {
+        //         // Do-it-yourself time localization.  Fun.
+        //         foreach (array('%a' => 'days_short', '%A' => 'days', '%b' => 'months_short', '%B' => 'months') as $token => $text_label)
+        //                 if (strpos($str, $token) !== false)
+        //                         $str = str_replace($token, $txt[$text_label][(int) strftime_updated($token === '%a' || $token === '%A' ? '%w' : '%m', $time)], $str);
+        //         if (strpos($str, '%p'))
+        //                 $str = str_replace('%p', (strftime_updated('%H', $time) < 12 ? 'am' : 'pm'), $str);
+        // }
 
-        // Format any other characters..
-        return strftime_updated($str, (int)$time);
+        // // Format any other characters..
+        // return strftime_updated($str, (int)$time);
 }
 
 function forum_time($use_user_offset = true, $timestamp = null)

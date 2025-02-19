@@ -377,14 +377,16 @@ corsica_config_origins =
         ~r{^https?://(.*\.)?epochtalk\.com$}
         """
       )
-    _ -> "*"
+
+    _ ->
+      "*"
   end
+
 corsica_config = %{
   origins: corsica_config_origins
 }
 
 config :epochtalk_server, :corsica, corsica_config
-
 
 ## Configure mailer in prod
 #  (Other envs are hardcoded into their respective config/ files)

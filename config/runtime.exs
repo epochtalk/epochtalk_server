@@ -367,7 +367,7 @@ config :epochtalk_server,
        Keyword.merge(base_endpoint_config, endpoint_config)
 
 ## Configure corsica
-corsica_config =
+corsica_config_origins =
   case config_env() do
     :prod ->
       get_env_or_raise_with_message.(
@@ -379,6 +379,9 @@ corsica_config =
       )
     _ -> "*"
   end
+corsica_config = %{
+  origins: corsica_config_origins
+}
 
 config :epochtalk_server, :corsica, corsica_config
 

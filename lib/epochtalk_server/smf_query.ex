@@ -291,8 +291,19 @@ defmodule EpochtalkServer.SmfQuery do
   def threads_by_board(id, opts) do
     %{
       page: page,
-      per_page: per_page
+      per_page: per_page,
+      desc: desc,
+      field: field
     } = extract_opts(opts)
+
+    # map field
+    field_map = %{
+      "updated_at" => "id_last_msg",
+      "post_count" => "numReplies",
+      "views" => "numViews"
+    }
+    sort_field = field_map[field]
+    direction = if desc, do: :desc, else: :asc
 
     %{id_board_blacklist: id_board_blacklist} =
       Application.get_env(:epochtalk_server, :proxy_config)
@@ -304,7 +315,7 @@ defmodule EpochtalkServer.SmfQuery do
 
     from(t in "smf_topics",
       where: t.id_board == ^id and t.id_board not in ^id_board_blacklist,
-      order_by: [desc: t.id_last_msg]
+      order_by: [{^direction, field(t, ^:"#{sort_field}")}]
     )
     |> join(:left, [t], f in "smf_messages", on: t.id_first_msg == f.id_msg)
     |> join(:left, [t, f], fm in "smf_members", on: f.id_member == fm.id_member)
@@ -346,7 +357,7 @@ defmodule EpochtalkServer.SmfQuery do
       last_viewed: nil,
       is_proxy: true
     })
-    |> ProxyPagination.page_simple(count_query, page, per_page: per_page, desc: true)
+    |> ProxyPagination.page_simple(count_query, page, per_page: per_page, desc: desc)
   end
 
   def thread(id) do

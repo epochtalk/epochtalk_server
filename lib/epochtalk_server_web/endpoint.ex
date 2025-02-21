@@ -7,12 +7,17 @@ defmodule EpochtalkServerWeb.Endpoint do
 
   # cors configuration
   plug Corsica,
-    # origins: "*",
-    origins: ~r{^https?://(.*\.)?epochtalk\.com$},
+    origins: {__MODULE__, :valid_origin?, []},
     allow_headers: :all,
-    allow_credentials: true,
+    allow_credentials: false,
     allow_private_network: true,
     expose_headers: ["epoch-viewer", "api-key", "x-api-key"]
+
+  def valid_origin?(conn, _origin) do
+    origins = Application.get_env(:epochtalk_server, :corsica).origins
+    options = %Corsica.Options{origins: origins}
+    Corsica.allowed_origin?(conn, options)
+  end
 
   socket "/socket", EpochtalkServerWeb.UserSocket,
     websocket: true,

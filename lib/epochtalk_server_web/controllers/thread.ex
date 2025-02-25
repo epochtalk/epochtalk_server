@@ -824,6 +824,8 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
     with board_id <- Validate.cast(attrs, "board_id", :integer, required: true),
          page <- Validate.cast(attrs, "page", :integer, default: 1),
          limit <- Validate.cast(attrs, "limit", :integer, default: 25, min: 1, max: 100),
+         field <- Validate.cast(attrs, "field", :string, default: "updated_at", required: false),
+         desc <- Validate.cast(attrs, "desc", :boolean, default: true, required: false),
          user <- Guardian.Plug.current_resource(conn),
          user_priority <- ACL.get_user_priority(conn),
          :ok <- ACL.allow!(conn, "threads.byBoard"),
@@ -832,7 +834,12 @@ defmodule EpochtalkServerWeb.Controllers.Thread do
          {:ok, board_counts} <- SmfQuery.board_counts(),
          {:ok, board_last_post_info} <- SmfQuery.board_last_post_info(),
          {:ok, threads, data} <-
-           SmfQuery.threads_by_board(board_id, %{page: page, per_page: limit}) do
+           SmfQuery.threads_by_board(board_id, %{
+             page: page,
+             per_page: limit,
+             field: field,
+             desc: desc
+           }) do
       render(conn, :by_board_proxy, %{
         threads: threads,
         user: user,

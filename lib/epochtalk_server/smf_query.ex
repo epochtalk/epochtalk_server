@@ -302,6 +302,7 @@ defmodule EpochtalkServer.SmfQuery do
       "post_count" => "numReplies",
       "views" => "numViews"
     }
+
     sort_field = field_map[field]
     direction = if desc, do: :desc, else: :asc
 

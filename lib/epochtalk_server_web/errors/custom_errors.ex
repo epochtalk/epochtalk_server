@@ -1,4 +1,7 @@
 defmodule EpochtalkServerWeb.CustomErrors do
+  @moduledoc """
+  Custom error handling for Auto Moderator
+  """
   # Auto Moderator Error Handling
   # credo:disable-for-next-line
   defmodule AutoModeratorReject do

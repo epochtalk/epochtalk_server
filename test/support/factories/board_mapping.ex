@@ -29,7 +29,11 @@ defmodule Test.Support.Factories.BoardMapping do
       end
 
       # generate attributes for board under parent board
-      def board_mapping_attributes_factory(%{board: board, view_order: view_order, parent: parent}) do
+      def board_mapping_attributes_factory(%{
+            board: board,
+            view_order: view_order,
+            parent: parent
+          }) do
         %{
           id: board.id,
           name: board.name,

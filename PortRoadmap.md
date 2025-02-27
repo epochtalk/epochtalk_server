@@ -22,8 +22,8 @@
 | mentions       | ignored                | :white_check_mark:|
 | messages       | ignored                | :x: |
 | users          | ignored                | :white_check_mark: |
-| public         | image_expirations      | :x: |
-| public         | images_posts           | :x: |
+| public         | image_expirations      | :construction_worker: |
+| public         | images_posts           | :construction_worker: |
 | public         | invitations            | :white_check_mark: |
 | users          | ips                    | :white_check_mark: |
 | mentions       | mentions               | :white_check_mark: |
@@ -37,8 +37,8 @@
 | public         | polls                  | :white_check_mark: |
 | public         | posts                  | :white_check_mark: |
 | users          | preferences            | :white_check_mark: |
-| messages       | private_conversations  | :x: |
-| messages       | private_messages       | :x: |
+| messages       | private_conversations  | :construction_worker: |
+| messages       | private_messages       | :construction_worker: |
 | users          | profiles               | :white_check_mark: |
 | public         | ranks                  | :white_check_mark: |
 | mod            | reports                | :x: |
@@ -64,7 +64,7 @@
 | ads            | unique_ip              | :x: |
 | public         | user_activity          | :white_check_mark: |
 | messages       | user_drafts            | :x: |
-| posts          | user_drafts            | :x: |
+| posts          | user_drafts            | :white_check_mark: |
 | public         | user_notes             | :x: |
 | public         | users                  | :white_check_mark: |
 | users          | watch_boards           | :white_check_mark: |

@@ -1,4 +1,5 @@
 import Config
+import Logger
 
 # config/runtime.exs is executed for all environments, including
 # during releases. It is executed after compilation and before the
@@ -203,7 +204,7 @@ database_config =
         username: "postgres",
         password: "postgres",
         hostname: "localhost",
-        database: "epochtalk_server_dev",
+        database: System.get_env("DATABASE_NAME", "epochtalk_server_dev"),
         stacktrace: true,
         show_sensitive_data_on_connection_error: true,
         pool_size: 10
@@ -237,6 +238,8 @@ database_config =
         socket_options: maybe_ipv6
       ]
   end
+
+Logger.info("database_config: #{inspect(database_config)}")
 
 config :epochtalk_server, EpochtalkServer.Repo, database_config
 

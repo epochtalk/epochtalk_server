@@ -11,7 +11,7 @@ import Config
 config :epochtalk_server, ecto_repos: [EpochtalkServer.Repo]
 
 # Set Guardian.DB to GuardianRedis
-config :guardian, Guardian.DB, repo: GuardianRedis.Repo
+config :guardian, Guardian.DB, repo: EpochtalkServer.Repo, adapter: GuardianRedis.Adapter
 
 # Swoosh API client is needed for adapters other than SMTP.
 config :swoosh, :api_client, false

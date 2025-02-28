@@ -29,7 +29,7 @@ defmodule Test.EpochtalkServer.Models.Mention do
       assert_raise FunctionClauseError,
                    ~r/no function clause matching/,
                    fn ->
-                     Mention.username_to_user_id(%{}, attrs)
+                     Mention.username_to_user_id(%{id: nil, roles: nil}, attrs)
                    end
     end
 

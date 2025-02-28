@@ -30,7 +30,7 @@ defmodule Test.EpochtalkServer.Models.Mention do
                    ~r/no function clause matching/,
                    fn ->
                      Mention.username_to_user_id(%{id: nil, roles: nil}, attrs)
-                  end
+                   end
     end
 
     test "given an invalid thread id, succeeds", %{users: %{user: user}} do
